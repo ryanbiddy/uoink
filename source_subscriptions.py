@@ -914,9 +914,11 @@ class CaptureOutcome:
 class PublicationEvidence:
     """What durable inspection found for one corpus identity (AS-01, AS-06).
 
-    ``complete`` is true only when the corpus row, its files, the full
-    provenance identity, timed citations, derived clips and the publisher's
-    own completion record all agree with ``video_id``. ``conflict`` marks a
+    ``complete`` is true only when the corpus row, its readable files, the
+    full provenance identity, validly timed citations, clips derived from
+    every timed evidence set (missing only where no timed evidence exists)
+    and the publisher's own completion record all agree with ``video_id``
+    (run AT-3: validity, not presence). ``conflict`` marks a
     full-identity mismatch: the row at this (possibly shortened) corpus id
     belongs to another feed/entry and must never be linked, resumed or
     overwritten. ``row`` is the corpus row when one exists.
@@ -940,16 +942,114 @@ class CompletionProof:
     backend_kind: str
     evidence: str
 
+    def binds(self, start: dict, backend_kind: str) -> bool:
+        """AS-02: the proof names this backend kind and exactly this start
+        and owner token. Binding alone never certifies termination."""
+        return (self.backend_kind == backend_kind and self.start_id == start.get("start_id")
+                and self.owner_token == start.get("owner_token"))
+
+
+class CaptureOwnershipUnavailable(RuntimeError):
+    """AS-03: the shared capture-identity lock could not be taken (an OS
+    error or a bounded wait that ran out). The caller must not run; a
+    process-local lock is never a substitute for the shared lock."""
+
+
+# AS-03: a manual dispatcher waits for the shared capture lock at most this
+# long before returning a retryable failure (run AT-3).
+MANUAL_CAPTURE_LOCK_TIMEOUT_S = 900.0
+# AS-01: share of a clip's words that its overlapping transcript citations
+# must carry for the clip to count as derived from that evidence.
+CLIP_DERIVATION_MIN_RATIO = 0.9
+
 
 def _backend_call(backend, name: str, *args):
     """Call ``backend.<name>`` or, for a duck-typed backend that predates the run AT
     additions (acquire/release/verify_proof/inspect_publication/recover_publication), the
     ``CaptureBackend`` base rule with the same semantics. The base rules only use methods
-    every backend has (``published_video_id``, ``kind``)."""
+    every backend has (``published_video_id``, ``kind``). AS-02 (Astra's ruling, run
+    AT-3): the base ``verify_proof`` establishes nothing about an executor and returns
+    False, so a duck-typed backend's proofs are decided by its ``probe``."""
     method = getattr(backend, name, None)
     if method is None:
         method = getattr(CaptureBackend, name).__get__(backend, type(backend))
     return method(*args)
+
+
+def _same_podcast_feed(left: Any, right: Any) -> bool:
+    if not isinstance(left, str) or not isinstance(right, str):
+        return False
+    try:
+        return normalize_podcast_feed_url(left) == normalize_podcast_feed_url(right)
+    except ServiceError:
+        return left.strip() == right.strip()
+
+
+def podcast_identity_conflict(conn, row: dict, feed_key: str, guid: str, capture_key: str,
+                              episode_id: int | None = None) -> str | None:
+    """AS-06: the one full-identity check for a corpus row that sits at a
+    shortened podcast corpus id. Shared by the service (linking, completion,
+    restart recovery) and ``podcasts.episode_to_corpus`` so no path can
+    overwrite or link a row whose identity disagrees.
+
+    Every available binding is compared with ``(feed_key, guid, capture_key,
+    episode_id)``: the row's persisted feed URL and GUID, its capture key, its
+    ``episode_id`` provenance, and every ``podcast_episodes`` row that already
+    links to it through ``yoink_video_id`` (the reverse legacy link). Any
+    disagreement is a conflict. A row with no binding at all cannot establish
+    its identity; that is reported as a conflict too, never as a match, because
+    the shortened id is not proof. Returns the reason or ``None`` when at least
+    one binding exists and every binding agrees."""
+    video_id = row.get("video_id")
+    try:
+        meta = json.loads(row.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        meta = {}
+    if type(meta) is not dict:
+        meta = {}
+    bindings = 0
+    stored_feed, stored_guid = meta.get("feed_url"), meta.get("guid")
+    if isinstance(stored_feed, str) and isinstance(stored_guid, str):
+        bindings += 1
+        if stored_guid != guid or not _same_podcast_feed(stored_feed, feed_key):
+            return "identity_conflict:provenance"
+    stored_key = meta.get("capture_key")
+    if isinstance(stored_key, str) and stored_key:
+        bindings += 1
+        if stored_key != capture_key:
+            return "identity_conflict:capture_key"
+    linked_episode = meta.get("episode_id")
+    if type(linked_episode) is int:
+        if episode_id is not None and linked_episode == int(episode_id):
+            bindings += 1
+        else:
+            try:
+                linked = conn.execute(
+                    "SELECT f.feed_url, e.guid FROM podcast_episodes e "
+                    "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.id=?",
+                    (linked_episode,)).fetchone()
+            except sqlite3.Error:
+                linked = None
+            if linked is not None:
+                bindings += 1
+                if str(linked[1] or "") != guid or not _same_podcast_feed(str(linked[0] or ""), feed_key):
+                    return "identity_conflict:episode_provenance"
+    try:
+        reverse = conn.execute(
+            "SELECT e.id, f.feed_url, e.guid FROM podcast_episodes e "
+            "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.yoink_video_id=?",
+            (video_id,)).fetchall()
+    except sqlite3.Error:
+        reverse = []
+    for linked in reverse:
+        bindings += 1
+        if episode_id is not None and int(linked[0]) == int(episode_id):
+            continue
+        if str(linked[2] or "") != guid or not _same_podcast_feed(str(linked[1] or ""), feed_key):
+            return "identity_conflict:episode_link"
+    if not bindings:
+        return "identity_conflict:unverifiable"
+    return None
 
 
 class CaptureBackend:
@@ -998,10 +1098,12 @@ class CaptureBackend:
         return "unknown"
 
     def verify_proof(self, start: dict, proof: CompletionProof) -> bool:
-        """Base rule: the proof must name this backend kind and this exact
-        start; backends with real workers also check their executor state."""
-        return (proof.backend_kind == self.kind and proof.start_id == start["start_id"]
-                and proof.owner_token == start["owner_token"])
+        """AS-02 (Astra's ruling, run AT-3): the base rule knows nothing about
+        an executor, so it never establishes completion and returns False;
+        the service's ``stopped`` probe decides. A backend that can observe
+        its executor (thread, job, incarnation) overrides this with an
+        explicit check of the proof's evidence against that state."""
+        return False
 
     def published_video_id(self, conn, item: dict, source: dict) -> str | None:
         return None
@@ -1449,6 +1551,10 @@ class SourceSubscriptionService:
         self.backend = backend or CaptureBackend()
         self.instance_id = instance_id or f"{socket.gethostname()}:{secrets.token_hex(4)}"
         self.jitter = jitter or (lambda: 0)
+        # AS-02: start ids this service instance has already handed to its
+        # backend; a replayed or delayed started payload never dispatches twice.
+        self._dispatched: set[str] = set()
+        self._dispatch_lock = threading.Lock()
         # Test-only crash/barrier injection; never configured by a transport.
         self._test_fault_hook = _test_fault_hook
 
@@ -1558,53 +1664,176 @@ class SourceSubscriptionService:
         candidate = None
         if host in ("www.youtube.com", "youtube.com", "m.youtube.com"):
             candidate = _single_param(_split_query(parsed.query), "v")
+            if candidate is None:
+                # Manual captures may carry the shorts/embed/live form of the
+                # same identity (AS-01 provenance agreement for linking).
+                parts = parsed.path.strip("/").split("/")
+                if len(parts) >= 2 and parts[0] in ("shorts", "embed", "live", "v"):
+                    candidate = parts[1] or None
         elif host == "youtu.be":
             candidate = parsed.path.strip("/").split("/", 1)[0] or None
         return candidate if candidate and _VIDEO_ID_RE.match(candidate) else None
 
-    def _identity_conflict(self, conn, source: dict, item: dict, row: dict) -> str | None:
-        """AS-06: compare the full identity persisted with a corpus row (feed
-        URL plus entry id for podcasts, watch URL for YouTube) with this
-        source/entry. A shortened corpus id never stands in for the identity."""
-        entry_id = item["entry_id"]
+    @staticmethod
+    def _row_metadata(row: dict) -> dict:
         try:
             meta = json.loads(row.get("metadata_json") or "{}")
-        except ValueError:
+        except (TypeError, ValueError):
             meta = {}
-        if type(meta) is not dict:
-            meta = {}
+        return meta if type(meta) is dict else {}
+
+    def _identity_conflict(self, conn, source: dict, item: dict, row: dict) -> str | None:
+        """AS-06: compare the full identity persisted with a corpus row with
+        this source/entry. Podcasts use the one shared full-identity check
+        (``podcast_identity_conflict``: provenance, capture key, episode
+        provenance and reverse episode links, all before any write); a
+        shortened corpus id never stands in for the identity. YouTube rows are
+        keyed by the video id itself, so only a persisted watch URL naming
+        another video conflicts (a missing URL is missing provenance, below)."""
+        entry_id = item["entry_id"]
+        meta = self._row_metadata(row)
         if source["kind"] == "podcast_rss":
-            feed_url, guid = meta.get("feed_url"), meta.get("guid")
-            if isinstance(feed_url, str) and isinstance(guid, str):
-                if guid != entry_id or not self._same_feed_url(feed_url, source["source_key"]):
-                    return "identity_conflict:provenance"
-                return None
-            capture_key = meta.get("capture_key")
-            if isinstance(capture_key, str) and capture_key:
-                return None if capture_key == item["capture_key"] else "identity_conflict:capture_key"
-            try:
-                linked = conn.execute(
-                    "SELECT f.feed_url, e.guid FROM podcast_episodes e "
-                    "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.yoink_video_id=? LIMIT 1",
-                    (row["video_id"],)).fetchone()
-            except sqlite3.OperationalError:
-                linked = None
-            if linked is not None and (linked[1] != entry_id
-                                       or not self._same_feed_url(linked[0], source["source_key"])):
-                return "identity_conflict:episode_link"
-            return None
+            episode_id = item.get("legacy_episode_id")
+            return podcast_identity_conflict(
+                conn, row, source["source_key"], entry_id, item["capture_key"],
+                episode_id=int(episode_id) if type(episode_id) is int else None)
         watch = self._youtube_id_from_url(meta.get("url"))
         if watch is not None and watch != entry_id:
             return "identity_conflict:url"
         return None
 
+    def _provenance_defect(self, source: dict, item: dict, row: dict) -> str | None:
+        """AS-01: the corpus row must carry the provenance the pipeline writes
+        for this kind of source; presence of a row is not validity."""
+        meta = self._row_metadata(row)
+        if source["kind"] == "podcast_rss":
+            if row.get("platform") != "podcast" or row.get("source_type") != "episode":
+                return "provenance_kind_mismatch"
+            return None
+        if row.get("platform") != "youtube" or row.get("source_type") not in ("video", "short_video"):
+            return "provenance_kind_mismatch"
+        if self._youtube_id_from_url(meta.get("url")) != item["entry_id"]:
+            return "provenance_url_missing"
+        return None
+
+    @staticmethod
+    def _read_artifact(path: Any) -> str | None:
+        if not isinstance(path, str) or not path or not os.path.isfile(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as handle:
+                return handle.read()
+        except OSError:
+            return None
+
+    def _sidecar_defect(self, source: dict, item: dict, video_id: str, text: str) -> str | None:
+        """AS-01: the sidecar must parse and, where it names an identity or a
+        provenance, agree with the corpus id, the source and the entry."""
+        try:
+            sidecar = json.loads(text)
+        except ValueError:
+            return "sidecar_unreadable"
+        if type(sidecar) is not dict:
+            return "sidecar_unreadable"
+        declared = sidecar.get("video_id")
+        if declared is not None and declared != video_id:
+            return "sidecar_identity_mismatch"
+        if source["kind"] == "podcast_rss":
+            feed_url, guid, capture_key = (sidecar.get("feed_url"), sidecar.get("guid"),
+                                           sidecar.get("capture_key"))
+            if isinstance(feed_url, str) and not self._same_feed_url(feed_url, source["source_key"]):
+                return "sidecar_identity_mismatch"
+            if isinstance(guid, str) and guid != item["entry_id"]:
+                return "sidecar_identity_mismatch"
+            if isinstance(capture_key, str) and capture_key and capture_key != item["capture_key"]:
+                return "sidecar_identity_mismatch"
+            if sidecar.get("platform") not in (None, "podcast"):
+                return "sidecar_identity_mismatch"
+            return None
+        watch = self._youtube_id_from_url(sidecar.get("url"))
+        if sidecar.get("url") is not None and watch != item["entry_id"]:
+            return "sidecar_identity_mismatch"
+        if sidecar.get("platform") not in (None, "youtube"):
+            return "sidecar_identity_mismatch"
+        return None
+
+    @staticmethod
+    def _timing_value(value: Any) -> float | None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None
+        number = float(value)
+        return number if math.isfinite(number) else None
+
+    @staticmethod
+    def _evidence_words(text: Any) -> set[str]:
+        return {word.casefold() for word in str(text or "").split() if word}
+
+    def _evidence_defect(self, conn, video_id: str) -> str | None:
+        """AS-01: citations carry finite, nonnegative, ordered source timing;
+        clips are required exactly when timed evidence exists (contract:
+        missing clips are legitimate only where there is no timed evidence,
+        and a timestamped screenshot is timed evidence); every clip derives
+        from the transcript citations it overlaps in time and text."""
+        try:
+            citations = [dict(r) for r in conn.execute(
+                "SELECT kind, seq, timestamp_start, timestamp_end, text FROM citations "
+                "WHERE video_id=? ORDER BY kind, seq", (video_id,)).fetchall()]
+            clips = [dict(r) for r in conn.execute(
+                "SELECT seq, start, \"end\", text FROM clips WHERE video_id=? ORDER BY seq",
+                (video_id,)).fetchall()]
+        except sqlite3.OperationalError:
+            return "citations_missing"
+        timed = []
+        for citation in citations:
+            if citation.get("timestamp_start") is None:
+                continue
+            start = self._timing_value(citation.get("timestamp_start"))
+            if start is None or start < 0:
+                return "citation_timing_invalid"
+            end = start
+            if citation.get("timestamp_end") is not None:
+                end = self._timing_value(citation.get("timestamp_end"))
+                if end is None or end < start:
+                    return "citation_timing_invalid"
+            timed.append((start, end, citation.get("kind"), citation.get("text")))
+        if not timed:
+            # Contract exception: no timed evidence, so no clips are owed.
+            return None
+        if not clips:
+            return "clips_missing"
+        transcript = [entry for entry in timed if entry[2] == "transcript_chunk"]
+        for clip in clips:
+            start = self._timing_value(clip.get("start"))
+            end = self._timing_value(clip.get("end"))
+            if start is None or end is None or start < 0 or end < start:
+                return "clip_timing_invalid"
+            overlapping = [entry for entry in transcript
+                           if entry[0] <= end and entry[1] >= start]
+            if not overlapping:
+                return "clip_not_derived"
+            words = self._evidence_words(clip.get("text"))
+            if not words:
+                return "clip_not_derived"
+            cited: set[str] = set()
+            for entry in overlapping:
+                cited |= self._evidence_words(entry[3])
+            # clips.py slices only whitespace and, for an over-long single
+            # word, one character boundary; anything below this share of
+            # cited words is text the citations never carried.
+            if len(words & cited) < CLIP_DERIVATION_MIN_RATIO * len(words):
+                return "clip_not_derived"
+        return None
+
     def _publication_evidence(self, conn, source: dict, item: dict, video_id: str,
                               start: dict | None = None) -> PublicationEvidence:
         """AS-01: the one completeness rule used by completion, restart
-        reconciliation and linking. Complete means: corpus row present and not
-        deleted, full identity agrees (AS-06), corpus and sidecar files exist,
-        at least one timed citation, clips derived for every transcript
-        citation set, and the publisher recorded completion for this id."""
+        reconciliation and linking; validity, not presence. Complete means:
+        corpus row present and not deleted, full identity agrees (AS-06), the
+        row carries this kind's provenance, the corpus file is readable and
+        non-empty, the sidecar parses and agrees with the identity, citation
+        timing is finite, nonnegative and ordered, clips exist whenever timed
+        evidence exists and derive from it, and the publisher recorded
+        completion for this id."""
         row = self._corpus_row(conn, video_id)
         if row is None:
             return PublicationEvidence(video_id, False, "corpus_row_missing")
@@ -1613,26 +1842,21 @@ class SourceSubscriptionService:
         conflict = self._identity_conflict(conn, source, item, row)
         if conflict:
             return PublicationEvidence(video_id, False, conflict, conflict=True, row=row)
-        for column in ("corpus_path", "sidecar_path"):
-            path = row.get(column)
-            if not isinstance(path, str) or not path or not os.path.isfile(path):
-                return PublicationEvidence(video_id, False, "corpus_files_missing", row=row)
-        try:
-            timed = conn.execute(
-                "SELECT COUNT(*) FROM citations WHERE video_id=? AND timestamp_start IS NOT NULL",
-                (video_id,)).fetchone()[0]
-            transcript = conn.execute(
-                "SELECT COUNT(*) FROM citations WHERE video_id=? AND kind='transcript_chunk'",
-                (video_id,)).fetchone()[0]
-            clips = conn.execute(
-                "SELECT COUNT(*) FROM clips WHERE video_id=? AND start IS NOT NULL AND \"end\" IS NOT NULL",
-                (video_id,)).fetchone()[0]
-        except sqlite3.OperationalError:
-            return PublicationEvidence(video_id, False, "citations_missing", row=row)
-        if not timed:
-            return PublicationEvidence(video_id, False, "citations_missing", row=row)
-        if transcript and not clips:
-            return PublicationEvidence(video_id, False, "clips_missing", row=row)
+        defect = self._provenance_defect(source, item, row)
+        if defect:
+            return PublicationEvidence(video_id, False, defect, row=row)
+        corpus = self._read_artifact(row.get("corpus_path"))
+        sidecar = self._read_artifact(row.get("sidecar_path"))
+        if corpus is None or sidecar is None:
+            return PublicationEvidence(video_id, False, "corpus_files_missing", row=row)
+        if not corpus.strip():
+            return PublicationEvidence(video_id, False, "corpus_unreadable", row=row)
+        defect = self._sidecar_defect(source, item, video_id, sidecar)
+        if defect:
+            return PublicationEvidence(video_id, False, defect, row=row)
+        defect = self._evidence_defect(conn, video_id)
+        if defect:
+            return PublicationEvidence(video_id, False, defect, row=row)
         try:
             published = _backend_call(self.backend, "inspect_publication", conn, start, dict(item), dict(source), video_id)
         except Exception:
@@ -2891,10 +3115,13 @@ class SourceSubscriptionService:
             if type(backend_id) is not str or not backend_id:
                 self._release(conn, start, now, "backend_bind_failed")
                 return {"outcome": "released", "code": "backend_bind_failed", **base}
+            # AS-02: the executing owner is the incarnation that starts the
+            # row (a reservation may have been made by a predecessor), so a
+            # later probe of ``owner_instance`` asks about the real executor.
             conn.execute(
                 "UPDATE source_capture_starts SET state='started', started_at_ms=?, backend_kind=?, "
-                "backend_id=? WHERE start_id=?",
-                (now, self.backend.kind, backend_id, start_id))
+                "backend_id=?, owner_instance=? WHERE start_id=?",
+                (now, self.backend.kind, backend_id, self.instance_id, start_id))
             conn.execute(
                 "UPDATE source_items SET state='started', actual_starts=actual_starts+1, "
                 "retry_at_ms=NULL, blocked_reason=NULL WHERE item_id=?", (item["item_id"],))
@@ -2912,9 +3139,51 @@ class SourceSubscriptionService:
         self._test_boundary("after_started_commit")
         return result
 
+    def claim_execution(self, start_id: str, *, owner_token: str | None = None,
+                        backend_id: str | None = None) -> dict:
+        """AS-02: an executor re-reads the ledger before it runs, after it
+        waited for the capture lock, and before it resumes a restored job.
+        ``active`` is returned only while the row is ``started``/``uncertain``
+        and the caller's binding agrees: the owner token, or (trusted server
+        recovery of a job that lost its in-memory token) the backend identity
+        persisted at the started transition. The current row, including the
+        owner token the executor must honor on publication, comes back with
+        ``active``; anything else is ``not_owner``/``not_started``."""
+        with self.store.read() as conn:
+            start = self._start(conn, start_id)
+        if start is None:
+            return {"outcome": "not_owner", "start_id": start_id}
+        if owner_token is not None and start["owner_token"] != owner_token:
+            return {"outcome": "not_owner", "start_id": start_id}
+        if owner_token is None and (backend_id is None or start["backend_id"] != backend_id
+                                    or start["backend_kind"] != self.backend.kind):
+            return {"outcome": "not_owner", "start_id": start_id}
+        if start["state"] not in ("started", "uncertain") or start["started_at_ms"] is None:
+            return {"outcome": "not_started", "state": start["state"], "start_id": start_id}
+        return {"outcome": "active", "start_id": start_id, "state": start["state"],
+                "owner_token": start["owner_token"], "start": start}
+
     def execute_started(self, started: dict) -> dict:
         start, item, source = started["start"], started["item"], started["source"]
         token = started["owner_token"]
+        start_id = start["start_id"]
+        # AS-02: a started payload is not authority. Re-read ownership and
+        # state before the backend runs: a delayed dispatcher whose attempt
+        # has since failed, succeeded or been replaced dispatches nothing,
+        # and one start id is handed to the backend at most once here.
+        with self._dispatch_lock:
+            if start_id in self._dispatched:
+                return {"outcome": "already_dispatched", "start_id": start_id}
+            current = self.claim_execution(start_id, owner_token=token)
+            if current.get("outcome") != "active":
+                return {"outcome": current.get("outcome", "not_started"),
+                        "state": current.get("state"), "start_id": start_id}
+            if current.get("state") != "started":
+                # An uncertain row is reconciliation's to settle, never a
+                # fresh dispatch under the old payload.
+                return {"outcome": "not_started", "state": current["state"], "start_id": start_id}
+            self._dispatched.add(start_id)
+        start = current["start"]
         try:
             outcome = self.backend.run(dict(start), dict(item), dict(source))
         except Exception as exc:
@@ -2981,7 +3250,12 @@ class SourceSubscriptionService:
         A callback's ``video_id`` is checked against the attempt's own corpus
         identity (AS-06); incomplete evidence never succeeds: with verified
         terminal execution it is a partial-publication failure, otherwise the
-        attempt stays in flight as ``uncertain``."""
+        attempt stays in flight as ``uncertain``. AS-02: complete evidence
+        alone does not release active ownership either; without terminal
+        executor evidence (a verified proof or a ``stopped`` probe) the row
+        stays in flight as ``uncertain`` while the publication stays visible
+        in the corpus, and reconciliation finishes it once the executor is
+        proven stopped."""
         now = self._now() if now is None else int(now)
         if type(video_id) is not str or not video_id.strip():
             return self.fail_capture(start_id, owner_token, "publication_without_identity",
@@ -3005,6 +3279,14 @@ class SourceSubscriptionService:
                 evidence = self._publication_evidence(conn, source, item, video_id, start=start)
             if not evidence.complete:
                 return self._settle_incomplete(conn, start, item, evidence, proof, now)
+            # AS-02: terminal executor evidence before success releases the
+            # source's active ownership; an unknown executor keeps the
+            # attempt in flight with the complete publication visible.
+            if not self._worker_terminal(start, proof):
+                state = self._hold_uncertain(conn, start)
+                return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
+                        "item_id": start["item_id"], "source_id": start["source_id"],
+                        "video_id": video_id, "publication": "complete"}
             conn.execute(
                 "UPDATE source_capture_starts SET state='succeeded', finished_at_ms=?, video_id=? "
                 "WHERE start_id=?", (now, video_id, start_id))
@@ -3192,19 +3474,21 @@ class SourceSubscriptionService:
             # Unknown or surviving execution stays in flight (contract step 3).
             self.mark_uncertain(start["start_id"], start["owner_token"], now=now)
             return "uncertain"
-        if evidence.row is not None and not evidence.conflict and evidence.reason != "corpus_deleted":
-            try:
-                recovered = _backend_call(self.backend, "recover_publication", dict(start), dict(item), dict(source))
-            except Exception:
-                log.exception("publication recovery raised for %s", start["start_id"])
-                recovered = False
-            if recovered:
-                with self.store.read() as conn:
-                    evidence = self._publication_evidence(conn, source, item, expected, start=start)
-                if evidence.complete:
-                    done = self.complete_capture(start["start_id"], start["owner_token"], expected, now=now)
-                    if done.get("outcome") == "succeeded":
-                        return "succeeded"
+        if not evidence.complete and not evidence.conflict and evidence.reason != "corpus_deleted":
+            # AS-01: recoverable local stages (files, a finished transcript)
+            # can exist before any corpus row, so recovery is inspected even
+            # without one. With the executor proven stopped, take the capture
+            # lock, let the backend finish valid local publication under the
+            # original start, and re-verify before completing; a busy lock
+            # defers recovery rather than failing or replacing the attempt.
+            recovered = self._recover_under_lock(start, item, source, expected, now)
+            if recovered == "succeeded":
+                return "succeeded"
+            if recovered == "busy":
+                self.mark_uncertain(start["start_id"], start["owner_token"], now=now)
+                return "uncertain"
+            with self.store.read() as conn:
+                evidence = self._publication_evidence(conn, source, item, expected, start=start)
         if evidence.conflict:
             code, terminal = evidence.reason or "identity_conflict", True
         elif evidence.row is None:
@@ -3217,6 +3501,47 @@ class SourceSubscriptionService:
             return "failed"
         self.mark_uncertain(start["start_id"], start["owner_token"], now=now)
         return "uncertain"
+
+    def _recover_under_lock(self, start: dict, item: dict, source: dict, expected: str,
+                            now: int) -> str:
+        """AS-01/AS-03: recovery of a stopped attempt's local publication runs
+        only as the verified owner of the capture identity: acquire the
+        shared lock (``busy`` defers), run the backend's idempotent local
+        publisher, re-inspect with the full validity rule and complete the
+        original start while the lock is still held. Returns ``succeeded``,
+        ``busy`` or ``unrecovered``."""
+        lock_start = {"start_id": start["start_id"], "owner_token": start["owner_token"],
+                      "capture_key": start["capture_key"], "source_id": start["source_id"],
+                      "item_id": start["item_id"]}
+        try:
+            busy = _backend_call(self.backend, "acquire", lock_start, dict(item), dict(source))
+        except Exception:
+            log.exception("capture lock acquisition raised during recovery of %s", start["start_id"])
+            return "busy"
+        if busy is not None:
+            log.info("publication recovery for %s deferred: capture identity busy (%s)",
+                     start["start_id"], getattr(busy, "code", None))
+            return "busy"
+        try:
+            try:
+                recovered = _backend_call(self.backend, "recover_publication", dict(start),
+                                          dict(item), dict(source))
+            except Exception:
+                log.exception("publication recovery raised for %s", start["start_id"])
+                recovered = False
+            if not recovered:
+                return "unrecovered"
+            with self.store.read() as conn:
+                evidence = self._publication_evidence(conn, source, item, expected, start=start)
+            if not evidence.complete:
+                return "unrecovered"
+            done = self.complete_capture(start["start_id"], start["owner_token"], expected, now=now)
+            return "succeeded" if done.get("outcome") == "succeeded" else "unrecovered"
+        finally:
+            try:
+                _backend_call(self.backend, "release", lock_start)
+            except Exception:
+                log.exception("capture lock release raised after recovery of %s", start["start_id"])
 
     def reconcile_start(self, start_id: str, now: int | None = None) -> dict:
         """Trusted recovery for one ledger row (a resumed job that lost its

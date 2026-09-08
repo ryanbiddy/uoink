@@ -89,7 +89,16 @@ def test_s16_partial_publication_never_gets_premature_work(tmp_path):
     assert rows(service, "SELECT state FROM source_capture_starts")[0]["state"] == "uncertain"
     # Complete evidence (files, provenance, timed citations, derived clips and
     # the publisher's completion record) finishes the original attempt once.
+    # Run AT-3 (AS-02): complete evidence alone does not release the
+    # executor's ownership; while the worker is still unknown the attempt
+    # stays in flight with the publication visible, and it succeeds once the
+    # executor is proven stopped.
     _publish(idx, entry, backend=backend)
+    assert service.reconcile_on_startup()["succeeded"] == 0
+    assert rows(service, "SELECT state FROM source_capture_starts")[0]["state"] == "uncertain"
+    assert _outbox(service) == []
+    assert rows(service, "SELECT COUNT(*) AS n FROM yoinks WHERE video_id=?", (entry,))[0]["n"] == 1
+    backend.probe_result = "stopped"
     assert service.reconcile_on_startup()["succeeded"] == 1
     assert [r["state"] for r in _outbox(service)] == ["pending"]
     assert rows(service, "SELECT state FROM source_capture_starts")[0]["state"] == "succeeded"

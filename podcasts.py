@@ -981,53 +981,25 @@ def _episode_full_identity(row: dict) -> tuple[str, str, str]:
     return feed_key, guid, _subscriptions().capture_key_for("podcast_rss", feed_key, guid)
 
 
-def _same_feed_url(left: str, right: str) -> bool:
-    try:
-        normalize = _subscriptions().normalize_podcast_feed_url
-        return normalize(left) == normalize(right)
-    except Exception:
-        return left.strip() == right.strip()
-
-
 def _check_corpus_identity(idx, existing: dict | None, row: dict, video_id: str) -> None:
-    """AS-06: before writing at a shortened corpus id, compare the full
-    identity already persisted there (provenance, capture key, or the linked
-    episode row) with this episode's. A mismatch raises; a legacy row without
-    any provenance is compatible and gains provenance on this write."""
+    """AS-06: before writing at a shortened corpus id, run the one full-identity
+    check shared with the standing-capture service
+    (``source_subscriptions.podcast_identity_conflict``): the row's persisted
+    feed URL/GUID, its capture key, its ``episode_id`` provenance and every
+    episode already linked to it by ``yoink_video_id`` (the reverse legacy
+    link) must all agree with this episode. Any disagreement, or a row whose
+    identity cannot be established at all, raises before anything is
+    overwritten; existing content and tombstones are left untouched."""
     if not existing:
         return
-    try:
-        meta = json.loads(existing.get("metadata_json") or "{}")
-    except (TypeError, ValueError):
-        meta = {}
-    if not isinstance(meta, dict):
-        meta = {}
     feed_key, guid, capture_key = _episode_full_identity(row)
-    stored_feed, stored_guid = meta.get("feed_url"), meta.get("guid")
-    if isinstance(stored_feed, str) and isinstance(stored_guid, str):
-        if stored_guid != guid or not _same_feed_url(stored_feed, feed_key):
-            raise CorpusIdentityConflict(
-                f"corpus id {video_id} belongs to another feed/entry; refusing to overwrite")
-        return
-    stored_key = meta.get("capture_key")
-    if isinstance(stored_key, str) and stored_key:
-        if stored_key != capture_key:
-            raise CorpusIdentityConflict(
-                f"corpus id {video_id} belongs to another capture identity; refusing to overwrite")
-        return
-    linked_episode = meta.get("episode_id")
-    if isinstance(linked_episode, int) and linked_episode != int(row.get("id") or -1):
-        try:
-            linked = idx._conn.execute(
-                "SELECT f.feed_url, e.guid FROM podcast_episodes e "
-                "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.id=?",
-                (linked_episode,)).fetchone()
-        except sqlite3.Error:
-            linked = None
-        if linked is not None and (str(linked["guid"] or "") != guid
-                                   or not _same_feed_url(str(linked["feed_url"] or ""), feed_key)):
-            raise CorpusIdentityConflict(
-                f"corpus id {video_id} is linked to another episode's identity; refusing to overwrite")
+    episode_id = row.get("id")
+    reason = _subscriptions().podcast_identity_conflict(
+        idx._conn, dict(existing), feed_key, guid, capture_key,
+        episode_id=int(episode_id) if isinstance(episode_id, int) else None)
+    if reason:
+        raise CorpusIdentityConflict(
+            f"corpus id {video_id}: {reason}; refusing to overwrite or link")
 
 
 def _timestamp_label(seconds: float) -> str:

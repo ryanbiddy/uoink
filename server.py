@@ -6850,13 +6850,30 @@ def _podcast_transcription_worker() -> None:
                 # AS-03: a manual job shares the cross-process capture-identity
                 # lock with the standing dispatcher for the whole pipeline, so a
                 # standing start for the same episode waits without a charge.
+                # A failed acquisition (OS error or an exhausted bounded wait)
+                # is unavailable ownership: the job fails retryably and never
+                # proceeds under the process queue alone.
                 key = _podcast_capture_key(episode_id)
                 if key:
+                    unavailable = None
                     try:
-                        manual_lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, key)
-                    except OSError:
-                        log.exception("capture identity lock unavailable; podcast job %s "
-                                      "proceeds under the process queue only", job_id)
+                        manual_lock = source_subscriptions.CaptureLock.acquire(
+                            DATA_ROOT, key,
+                            timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+                    except OSError as exc:
+                        log.exception("capture identity lock unavailable for podcast job %s",
+                                      job_id)
+                        unavailable = f"capture identity lock unavailable ({type(exc).__name__})"
+                    if manual_lock is None and unavailable is None:
+                        unavailable = ("another capture of this episode is still running; "
+                                       "queue it again later")
+                    if unavailable:
+                        _fail_podcast_job_retryable(job_id, episode_id, job, unavailable)
+                        continue
+            elif not _ensure_standing_podcast_ownership(job_id, job, episode_id):
+                # AS-02/AS-03: a standing job (including one restored from
+                # disk) resumes only as the verified owner of its start.
+                continue
             model = whisper_runner.normalize_model(job.get("model"))
             audio_path = Path(job["audio_path"])
             reusable = None
@@ -6991,6 +7008,82 @@ def _podcast_capture_key(episode_id: int) -> str | None:
     return source_subscriptions.capture_key_for("podcast_rss", feed_key, str(row["guid"]))
 
 
+def _fail_podcast_job_retryable(job_id: str, episode_id: int, job: dict, reason: str) -> None:
+    """AS-03: a manual podcast job that could not take the shared capture
+    lock fails without running anything; the user may queue it again."""
+    try:
+        whisper_runner.update_episode_transcript_state(
+            _get_index(), int(episode_id), status=whisper_runner.STATUS_FAILED,
+            model_used=(job or {}).get("model"), error=reason)
+    except Exception:
+        log.exception("podcast transcript failure state write failed")
+    _update_job(
+        job_id, state="failed", current_video_phase=None, current_video=None,
+        videos_failed=1, completed_at=_now_iso(), error=reason,
+        error_detail=f"capture ownership unavailable: {reason}",
+        message="Podcast transcription did not start; try again in a moment.")
+
+
+def _ensure_standing_podcast_ownership(job_id: str, job: dict, episode_id: int) -> bool:
+    """AS-02/AS-03: a standing capture's transcription job runs only as the
+    verified owner of its ledger start. A job dispatched in this process
+    already holds the capture-identity lock its start acquired and carries
+    the in-memory owner token. A job restored from disk (or one whose lease
+    is gone) must re-establish that ownership before it resumes: the ledger
+    row is re-read through its persisted backend binding, the shared lock is
+    taken within the manual bound, the row is re-read again after the wait,
+    and only then does the job adopt the owner token it must honor on
+    publication. Anything else settles the job without running it."""
+    start_id = job.get("source_start_id")
+    service = _source_service()
+    backend = service.backend
+    current = service.claim_execution(start_id, backend_id=start_id)
+    if current.get("outcome") != "active":
+        _update_job(job_id, state="cancelled", current_video_phase=None, current_video=None,
+                    completed_at=_now_iso(),
+                    message="Standing capture was already settled; nothing to resume.")
+        return False
+    key = current["start"]["capture_key"]
+    with _jobs_lock:
+        token = (_jobs.get(job_id) or {}).get("_source_owner_token")
+    if token == current["owner_token"] and backend.owns(key):
+        return True
+    lock_start = {"start_id": start_id, "owner_token": current["owner_token"],
+                  "capture_key": key, "source_id": current["start"]["source_id"],
+                  "item_id": current["start"]["item_id"]}
+    deadline = time.monotonic() + source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S
+    while True:
+        try:
+            busy = backend.acquire(lock_start, {"legacy_episode_id": episode_id},
+                                   {"kind": "podcast_rss"})
+        except Exception:
+            log.exception("standing capture %s: lock acquisition raised", start_id)
+            busy = source_subscriptions.CaptureOutcome("busy", code="lock_error")
+        if busy is None:
+            break
+        if time.monotonic() >= deadline:
+            _update_job(job_id, state="failed", current_video_phase=None, current_video=None,
+                        videos_failed=1, completed_at=_now_iso(),
+                        error=f"capture ownership unavailable ({busy.code or 'busy'})",
+                        message="Standing capture could not take its capture lock.")
+            _settle_source_capture(job_id, video_id=None,
+                                   failure_code="capture_ownership_unavailable")
+            return False
+        time.sleep(1.0)
+    # Recheck after waiting for the lock: the row may have been settled.
+    current = service.claim_execution(start_id, backend_id=start_id)
+    if current.get("outcome") != "active":
+        backend.release(lock_start)
+        _update_job(job_id, state="cancelled", current_video_phase=None, current_video=None,
+                    completed_at=_now_iso(),
+                    message="Standing capture was settled while waiting; nothing to resume.")
+        return False
+    with _jobs_lock:
+        if job_id in _jobs:
+            _jobs[job_id]["_source_owner_token"] = current["owner_token"]
+    return True
+
+
 def _manual_capture_key(url: str) -> str:
     """Capture identity a manual extraction locks on: the standing key for a
     YouTube watch URL, otherwise a URL-derived key that never collides with a
@@ -7001,23 +7094,70 @@ def _manual_capture_key(url: str) -> str:
     return "url:" + source_subscriptions.sha256_text(str(url).strip())
 
 
+class _ManualOwnership:
+    """What a manual dispatcher holds while it extracts (AS-03). ``error`` is
+    set when the shared capture-identity lock could not be taken; the caller
+    must then return a retryable failure instead of extracting.
+    ``already_captured`` is the live corpus id found for this identity after
+    the lock was acquired (the common-dispatcher corpus recheck)."""
+    __slots__ = ("lock", "error", "already_captured")
+
+    def __init__(self):
+        self.lock = None
+        self.error = None
+        self.already_captured = None
+
+    @property
+    def ok(self) -> bool:
+        return self.error is None
+
+    def raise_if_unavailable(self) -> None:
+        if self.error is not None:
+            raise source_subscriptions.CaptureOwnershipUnavailable(self.error)
+
+
 @contextlib.contextmanager
 def _manual_extraction_ownership(url: str):
     """The common dispatcher lock for manual extraction: the process-local
     extraction lock plus the cross-process capture-identity file lock, held
     through extraction and publication (AS-03). A standing start for the
-    same identity finds it busy and waits without a charge."""
+    same identity finds it busy and waits without a charge.
+
+    AS-03 (run AT-3): the wait for the shared lock is bounded and a failed
+    acquisition (OS error or an exhausted wait) is unavailable ownership,
+    reported through ``ownership.error``; the process lock is never used as
+    a substitute. After the lock is held the canonical corpus identity is
+    rechecked, so a caller can see that the standing dispatcher (or another
+    manual one) already published this video while it waited."""
     with _extract_lock:
-        lock = None
+        ownership = _ManualOwnership()
+        key = _manual_capture_key(url)
         try:
-            lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, _manual_capture_key(url))
-        except OSError:
-            log.exception("capture identity lock unavailable; extraction proceeds under the process lock")
+            ownership.lock = source_subscriptions.CaptureLock.acquire(
+                DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+        except OSError as exc:
+            log.exception("capture identity lock unavailable for manual extraction")
+            ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
+                               "try again in a moment")
+        if ownership.lock is None and ownership.error is None:
+            ownership.error = ("another capture of this video is still running; "
+                               "try again in a moment")
+        if ownership.lock is not None:
+            video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+            if video_id:
+                try:
+                    row = _get_index().get_yoink(video_id)
+                except Exception:
+                    row = None
+                if row and not row.get("deleted_at"):
+                    ownership.already_captured = video_id
+                    log.info("manual extraction of %s: corpus already holds this video; "
+                             "the request re-extracts it deliberately", video_id)
         try:
-            yield
+            yield ownership
         finally:
-            if lock is not None:
-                lock.release()
+            if ownership.lock is not None:
+                ownership.lock.release()
 
 
 def _settle_source_capture(job_id: str, *, video_id: str | None,
@@ -7272,19 +7412,27 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             holds_extract = True
         try:
             lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
-            busy = lock is None
+            code = "capture_identity_locked"
         except OSError:
-            # The lock directory is unusable: keep process-local ownership
-            # rather than stalling every standing start behind a phantom owner.
+            # AS-03: a failed shared-lock acquisition is unavailable ownership,
+            # never process-local ownership. The reservation is released
+            # without a charge and the observation stays eligible.
             log.exception("capture identity lock unavailable for %s", start["start_id"])
-            lock, busy = None, False
-        if busy:
+            lock, code = None, "capture_lock_unavailable"
+        if lock is None:
             if holds_extract:
                 _extract_lock.release()
-            return source_subscriptions.CaptureOutcome("busy", code="capture_identity_locked")
+            return source_subscriptions.CaptureOutcome("busy", code=code)
         with _source_capture_threads_lock:
             self._leases[key] = (lock, holds_extract)
         return None
+
+    def owns(self, capture_key) -> bool:
+        """Whether this backend currently holds the capture-identity lock
+        (a lease taken by ``acquire``/``_ensure_ownership`` in this process)."""
+        with _source_capture_threads_lock:
+            lease = self._leases.get(capture_key)
+        return lease is not None and lease[0] is not None and lease[0].held
 
     def release(self, start):
         with _source_capture_threads_lock:
@@ -7302,18 +7450,28 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
 
     def _ensure_ownership(self, start):
         """A worker reached without ``acquire`` (direct ``execute_started``)
-        still runs under the shared dispatcher lock: block until owned."""
+        still runs under the shared dispatcher lock: wait for it within the
+        manual bound. AS-03: an OS-lock error or an exhausted wait is
+        unavailable ownership (``CaptureOwnershipUnavailable``); the process
+        lock is never substituted for the shared lock."""
         with _source_capture_threads_lock:
             owned = start["capture_key"] in self._leases
         if owned:
             return
         _extract_lock.acquire()
         try:
-            lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, start["capture_key"])
-        except OSError:
-            log.exception("capture identity lock unavailable for %s; extraction proceeds "
-                          "under the process lock", start["start_id"])
-            lock = None
+            lock = source_subscriptions.CaptureLock.acquire(
+                DATA_ROOT, start["capture_key"],
+                timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+        except OSError as exc:
+            _extract_lock.release()
+            log.exception("capture identity lock unavailable for %s", start["start_id"])
+            raise source_subscriptions.CaptureOwnershipUnavailable(
+                f"capture identity lock unavailable: {type(exc).__name__}") from exc
+        if lock is None:
+            _extract_lock.release()
+            raise source_subscriptions.CaptureOwnershipUnavailable(
+                "capture identity lock held by another dispatcher")
         with _source_capture_threads_lock:
             self._leases[start["capture_key"]] = (lock, True)
 
@@ -7399,8 +7557,24 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             try:
                 # AS-03: acquire() already holds the dispatcher lock and the
                 # capture-identity lock through publication; a worker reached
-                # without acquire() blocks for them here.
-                self._ensure_ownership(start)
+                # without acquire() waits for them here (bounded) and never
+                # runs without them.
+                try:
+                    self._ensure_ownership(start)
+                except source_subscriptions.CaptureOwnershipUnavailable as exc:
+                    log.warning("standing capture %s: %s", start_id, exc)
+                    _source_service().fail_capture(start_id, owner_token,
+                                                   "capture_ownership_unavailable",
+                                                   terminal=False, proof=proof)
+                    return
+                # AS-02: re-read ownership and state after waiting for the
+                # lock; an attempt that was failed, replaced or settled while
+                # this worker waited fetches and publishes nothing.
+                current = _source_service().claim_execution(start_id, owner_token=owner_token)
+                if current.get("outcome") != "active":
+                    log.warning("standing capture %s no longer owns its start (%s); not run",
+                                start_id, current.get("outcome"))
+                    return
                 metadata = _fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
@@ -7410,6 +7584,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                                          open_explorer=False)
                 _record_single_extract_job(url, _now_iso(), result=result)
                 published = (metadata.get("id") or video_id)
+                # AS-02: publication is fenced by the owner token, the ledger
+                # state and this proof (verified against this very thread).
                 outcome = _source_service().complete_capture(
                     start_id, owner_token, published, proof=proof)
                 if outcome.get("outcome") == "succeeded":
@@ -7459,28 +7635,38 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         return "unknown"
 
     def verify_proof(self, start, proof):
-        """AS-02: a callback proof is checked against real executor state, not
-        taken on the strength of the owner token."""
-        if not super().verify_proof(start, proof):
+        """AS-02: a callback proof is checked against the executor itself, not
+        taken on the strength of the owner token: the proof must bind this
+        backend kind, start and owner token; the start must belong to this
+        process incarnation (thread and job registries are per process); and
+        the named terminal evidence must be observable here. An absent
+        thread or an empty registry is never death evidence, so an
+        unverifiable proof leaves the decision to ``probe``."""
+        if not proof.binds(start, self.kind):
+            return False
+        if start.get("owner_instance") != _source_instance_id():
             return False
         start_id = start["start_id"]
         with _source_capture_threads_lock:
             thread = _source_capture_threads.get(start_id)
         current = getattr(threading, "current_thread", None)
+        on_worker = (thread is not None and current is not None and thread is current())
         if proof.evidence == "worker_finished":
-            # The worker reports from its own thread on the way out, or has
-            # already left the registry.
-            if thread is None or not thread.is_alive():
-                return True
-            return current is not None and thread is current()
+            # Only the registered worker itself, reporting from its own thread
+            # on the way out, can vouch that it finished.
+            return on_worker
         if proof.evidence == "job_terminal":
             job = _find_job_for_start(start_id)
-            return job is not None and job.get("state") in _JOB_TERMINAL_STATES
+            return (job is not None and job.get("source_start_id") == start_id
+                    and job.get("state") in _JOB_TERMINAL_STATES)
         if proof.evidence == "executor_returned":
-            # run() returned synchronously: nothing may still execute for it.
-            still_running = thread is not None and thread.is_alive() and not (
-                current is not None and thread is current())
-            return not still_running and _find_job_for_start(start_id) is None
+            # run() returned synchronously on the dispatcher's thread: nothing
+            # else may execute for the start here (no other live worker
+            # thread, no queued or running job bound to it).
+            if thread is not None and thread.is_alive() and not on_worker:
+                return False
+            job = _find_job_for_start(start_id)
+            return job is None or job.get("state") in _JOB_TERMINAL_STATES
         return False
 
     # ---- durable publication inspection and recovery (AS-01) --------------
@@ -7498,11 +7684,14 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         """The publisher's own completion record. Podcast: the episode row is
         linked to this corpus id (``_link_episode_to_yoink`` is the last
         durable step of ``episode_to_corpus``). YouTube: ``_index_yoink`` ends
-        with the citation write, so a live row with citations is the record.
+        with the citation write derived from the sidecar, so the record is a
+        citation set that matches the sidecar's transcript and screenshot
+        entries kind by kind (AS-01: tied to the artifacts, not any row).
         The service separately validates files, identity, timing and clips."""
         try:
             row = conn.execute(
-                "SELECT deleted_at FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+                "SELECT deleted_at, sidecar_path FROM yoinks WHERE video_id=?",
+                (video_id,)).fetchone()
             if row is None or row["deleted_at"]:
                 return None
             if source["kind"] == "podcast_rss":
@@ -7510,18 +7699,50 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     "SELECT 1 FROM podcast_episodes WHERE yoink_video_id=? "
                     "AND transcript_status='done' LIMIT 1", (video_id,)).fetchone()
                 return video_id if linked is not None else None
-            cited = conn.execute(
-                "SELECT 1 FROM citations WHERE video_id=? LIMIT 1", (video_id,)).fetchone()
-            return video_id if cited is not None else None
+            sidecar = self._read_sidecar(row["sidecar_path"])
+            if sidecar is None:
+                return None
+            counts = {kind: int(count) for kind, count in conn.execute(
+                "SELECT kind, COUNT(*) FROM citations WHERE video_id=? GROUP BY kind",
+                (video_id,)).fetchall()}
+            expected = {}
+            for key, kind in (("transcript", "transcript_chunk"), ("screenshots", "screenshot")):
+                entries = sidecar.get(key)
+                if isinstance(entries, list):
+                    expected[kind] = sum(1 for entry in entries if isinstance(entry, dict))
+            if not expected:
+                # A sidecar without evidence arrays: the citation write is the
+                # only completion step there is.
+                return video_id if sum(counts.values()) else None
+            for kind, count in expected.items():
+                if counts.get(kind, 0) != count:
+                    return None
+            return video_id
         except Exception:  # a missing table is "no completion record", not a crash
             return None
 
+    @staticmethod
+    def _read_sidecar(path):
+        if not isinstance(path, str) or not path:
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                sidecar = json.load(handle)
+        except (OSError, ValueError):
+            return None
+        return sidecar if isinstance(sidecar, dict) else None
+
     def recover_publication(self, start, item, source):
-        """Once the owner is verifiably stopped, finish a podcast publication
-        from its already completed transcript under the original attempt (the
-        publisher is idempotent). YouTube output has no reusable stage: a
-        renewed capture needs a new reservation."""
-        if source["kind"] != "podcast_rss" or item.get("legacy_episode_id") is None:
+        """Once the owner is verifiably stopped and the service holds the
+        capture lock, finish valid local publication under the original
+        attempt from the stages that already exist on disk (AS-01): a
+        podcast's completed transcript through the idempotent publisher, or
+        a YouTube folder whose corpus and sidecar were written before the
+        index step through ``_index_yoink``. Nothing here acquires media;
+        a renewed capture needs a new reservation."""
+        if source["kind"] != "podcast_rss":
+            return self._recover_youtube_publication(start, item)
+        if item.get("legacy_episode_id") is None:
             return False
         episode_id = int(item["legacy_episode_id"])
         episode = podcasts.get_episode(_get_index(), episode_id)
@@ -7539,6 +7760,27 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                         start["start_id"], _sanitize_error(str(exc)))
             return False
         return True
+
+    def _recover_youtube_publication(self, start, item):
+        """AS-01: the extraction writes the corpus folder and sidecar before
+        ``_index_yoink``; a crash between them leaves a recoverable local
+        stage with no corpus row. Find that folder by the sidecar's video id
+        (the same walk the startup backfill performs) and run the idempotent
+        index step. Returns True when the publisher ran."""
+        video_id = item.get("entry_id")
+        if not isinstance(video_id, str) or not video_id:
+            return False
+        try:
+            for folder, corpus in _iter_corpus_folders():
+                sidecar_path = folder / f"{folder.name}.json"
+                sidecar = self._read_sidecar(str(sidecar_path))
+                if sidecar is None or (sidecar.get("video_id") or "").strip() != video_id:
+                    continue
+                return bool(_index_yoink(folder, sidecar, corpus, sidecar_path))
+        except Exception as exc:
+            log.warning("standing capture %s: local publication recovery failed: %s",
+                        start["start_id"], _sanitize_error(str(exc)))
+        return False
 
 
 def _find_job_for_start(start_id: str) -> dict | None:
@@ -8758,7 +9000,8 @@ def _playlist_worker(job_id: str):
                     current_phase = phase
                     _update_job(_job_id, current_video_phase=phase)
 
-                with _manual_extraction_ownership(v["url"]):  # AS-03 shared dispatcher lock
+                with _manual_extraction_ownership(v["url"]) as ownership:  # AS-03 shared dispatcher lock
+                    ownership.raise_if_unavailable()  # AS-03: this video fails retryably
                     _raise_if_cancelled(cancel_event)
                     result = _run_extraction(
                         v["url"],
@@ -9057,7 +9300,21 @@ def _retry_pending_one() -> bool:
     title = None
     folder = None
     current_phase = "metadata"
-    with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
+    with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+        if not ownership.ok:
+            # AS-03: unavailable ownership is a retryable failure; re-queue
+            # with backoff, never extract under the process lock alone.
+            attempts = attempts_before + 1
+            delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
+            retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                "%Y-%m-%dT%H:%M:%S")
+            try:
+                idx.mark_pending_failed(pending_id, "capture_ownership_unavailable", retry_at)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            log.warning("retry worker: pending #%d could not take the capture lock (%s); "
+                        "retry at %s", pending_id, ownership.error, retry_at)
+            return True
         try:
             metadata = _fetch_metadata(url)
             title = metadata.get("title") or "Untitled"
@@ -14955,7 +15212,12 @@ class Handler(BaseHTTPRequestHandler):
         title = None
         folder = None
         current_phase = "metadata"
-        with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure.
+                log.info("POST /extract -> 503 (%s)", ownership.error)
+                return self._send_json(503, {"ok": False, "error": ownership.error,
+                                             "retryable": True})
             try:
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
@@ -15098,7 +15360,12 @@ class Handler(BaseHTTPRequestHandler):
         sess_folder = _session_folder(session_id)
         # Disambiguate the per-video subfolder by title — fetch metadata once
         # and re-use it inside _run_extraction.
-        with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure.
+                log.info("POST /session/add -> 503 (%s)", ownership.error)
+                return self._send_json(503, {"ok": False, "error": ownership.error,
+                                             "retryable": True})
             try:
                 metadata = _fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
