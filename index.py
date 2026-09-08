@@ -511,7 +511,13 @@ class Index:
         service = getattr(self, "_library_work_service", None)
         if service is None:
             from library_work import LibraryWorkService
-            service = LibraryWorkService(self)
+            event_hook = None
+            try:
+                import server as _server
+                event_hook = getattr(_server, "_mirror_event", None)
+            except Exception:
+                event_hook = None
+            service = LibraryWorkService(self, event_hook=event_hook)
         return service
 
     def rebuild_library_state(self) -> dict:

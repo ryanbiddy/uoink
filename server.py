@@ -598,6 +598,41 @@ LIBRARY_INTENT_ROUTE = "/library/intent"
 # Phase 3 (run AM): dashboard-only capability route for source consent
 # (contract phase3-v1-2026-09-07, "Registry and dashboard contract").
 SOURCES_INTENT_ROUTE = "/sources/consent-intent"
+# Phase 4 (AV-2s): dashboard-only capability for the opt-in corpus mirror.
+LIBRARY_MIRROR_INTENT_ROUTE = "/library/mirror-intent"
+LIBRARY_MIRROR_ROUTE = "/library/mirror"
+LIBRARY_MIRROR_SCOPE_ALL = "all_current_and_future_items"
+LIBRARY_MIRROR_SCOPE_ALLOWLIST = "allowlist"
+LIBRARY_MIRROR_SCOPES = frozenset({
+    LIBRARY_MIRROR_SCOPE_ALL, LIBRARY_MIRROR_SCOPE_ALLOWLIST,
+})
+LIBRARY_MIRROR_INTENT_TTL_MS = 5 * 60 * 1000
+LIBRARY_MIRROR_PREVIEW_TTL_MS = 30 * 60 * 1000
+LIBRARY_MIRROR_INDEXING_NOTICE = (
+    "Other software with access to this vault can index its contents. "
+    "Uoink does not register the vault with Basic Memory/Hermes, start "
+    "another indexer, edit its configuration, turn on sync, or infer "
+    "consent from an installed application. Existing third-party indexing "
+    "is outside Uoink's deletion control."
+)
+# Named event seams that call _mirror_event (kinds in parentheses):
+#   capture_commit (capture)  - _index_yoink after upsert
+#   source_refresh            - _refresh_source_via_service /
+#                               Handler._handle_sources_service_route
+#   restore                   - Handler._handle_memory_restore
+#   soft_delete               - Handler._handle_memory_delete
+#   hard_purge                - _purge_trash after delete_yoink
+#   apply / undo / pin        - library_work.LibraryWorkService via event_hook
+LIBRARY_MIRROR_SEAMS = (
+    "capture_commit",
+    "source_refresh",
+    "restore",
+    "soft_delete",
+    "hard_purge",
+    "apply",
+    "undo",
+    "pin",
+)
 
 
 def _reject_json_constant(name: str):
@@ -614,7 +649,12 @@ def _reject_duplicate_json_keys(pairs):
 
 
 def _strict_json_route(bare: str) -> bool:
-    return bare == LIBRARY_INTENT_ROUTE or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
+    return (
+        bare == LIBRARY_INTENT_ROUTE
+        or bare == LIBRARY_MIRROR_INTENT_ROUTE
+        or bare == LIBRARY_MIRROR_ROUTE
+        or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
+    )
 
 
 def _library_session_hash() -> str:
@@ -877,8 +917,106 @@ def _default_settings() -> dict:
         # settings.json, not a dashboard toggle. Preview, claim and submit
         # work regardless. Clean default-off, no grandfathering.
         "librarian_apply_enabled": False,
+        # Phase 4 opt-in corpus mirror. Separate from obsidian_vault_path
+        # (taste TASTE.md/USER.md only). Default off; enabling or broadening
+        # scope requires a preview plus a dashboard-minted user intent.
+        "library_mirror_enabled": False,
+        "library_mirror_consent": None,
         "updated_at": None,
     }
+
+
+def _normalize_mirror_consent(value) -> dict | None:
+    """Canonical consent record or None. Invalid shapes become None."""
+    if value is None or value == "":
+        return None
+    if not isinstance(value, dict):
+        return None
+    dest = value.get("destination")
+    if not isinstance(dest, str) or not dest.strip():
+        return None
+    scope = value.get("scope")
+    if scope not in LIBRARY_MIRROR_SCOPES:
+        return None
+    raw_allow = value.get("allowlist")
+    if raw_allow is None:
+        raw_allow = []
+    if not isinstance(raw_allow, (list, tuple)):
+        return None
+    allowlist = []
+    for item in raw_allow:
+        if not isinstance(item, str) or not item:
+            return None
+        if len(item.encode("utf-8")) > 512 or any(ord(ch) < 32 for ch in item):
+            return None
+        allowlist.append(item)
+    if scope == LIBRARY_MIRROR_SCOPE_ALLOWLIST and not allowlist:
+        return None
+    if scope == LIBRARY_MIRROR_SCOPE_ALL:
+        allowlist = []
+    try:
+        consented_at_ms = int(value.get("consented_at_ms") or 0)
+    except (TypeError, ValueError):
+        consented_at_ms = 0
+    if consented_at_ms < 0:
+        consented_at_ms = 0
+    marker = value.get("marker")
+    if marker is None:
+        marker = ""
+    if not isinstance(marker, str):
+        return None
+    return {
+        "destination": dest.strip(),
+        "scope": scope,
+        "allowlist": allowlist,
+        "consented_at_ms": consented_at_ms,
+        "marker": marker,
+    }
+
+
+def _canonical_mirror_destination(value: str) -> str:
+    cand = Path(value).expanduser()
+    try:
+        if cand.exists():
+            return str(cand.resolve())
+    except OSError:
+        pass
+    return str(cand)
+
+
+def _destinations_differ(left: str | None, right: str | None) -> bool:
+    if not left or not right:
+        return bool(left or right)
+    return os.path.normcase(_canonical_mirror_destination(left)) != os.path.normcase(
+        _canonical_mirror_destination(right))
+
+
+def _mirror_scope_broadens(old: dict | None, new: dict | None) -> bool:
+    """True when new consent covers items old consent did not."""
+    if new is None:
+        return False
+    if old is None:
+        return True
+    if old.get("scope") == LIBRARY_MIRROR_SCOPE_ALL:
+        return False
+    if new.get("scope") == LIBRARY_MIRROR_SCOPE_ALL:
+        return True
+    return not set(new.get("allowlist") or ()).issubset(set(old.get("allowlist") or ()))
+
+
+def _validate_mirror_destination_path(value) -> tuple[str | None, str | None]:
+    """Obsidian-style vault path check: existing writable directory."""
+    if not isinstance(value, str) or not value.strip():
+        return None, "library_mirror destination must be a non-empty string"
+    try:
+        cand = Path(value).expanduser()
+        if not cand.exists() or not cand.is_dir():
+            raise OSError("vault path missing or not a directory")
+        if not _is_writable_dir(cand):
+            raise OSError("vault path not writable")
+        return str(cand.resolve()), None
+    except OSError as e:
+        return None, f"library_mirror destination invalid: {e}"
 
 
 def _normalize_settings(data: dict) -> dict:
@@ -938,6 +1076,12 @@ def _normalize_settings(data: dict) -> dict:
     clean["keep_media"] = bool(clean.get("keep_media"))
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
+    # Strict JSON true only; "true"/1 stay off, matching librarian_apply.
+    clean["library_mirror_enabled"] = clean.get("library_mirror_enabled") is True
+    clean["library_mirror_consent"] = _normalize_mirror_consent(
+        clean.get("library_mirror_consent"))
+    if clean["library_mirror_consent"] is None:
+        clean["library_mirror_enabled"] = False
     return clean
 
 
@@ -1232,7 +1376,187 @@ def _public_settings(data: dict | None = None) -> dict:
         "keep_media": bool(data.get("keep_media")),
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
+        # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
+        "library_mirror_enabled": data.get("library_mirror_enabled") is True,
+        "library_mirror_consent": _normalize_mirror_consent(
+            data.get("library_mirror_consent")),
     }
+
+
+_mirror_intents_lock = threading.Lock()
+_mirror_intents: dict[str, dict] = {}
+_mirror_previews_lock = threading.Lock()
+_mirror_previews: dict[str, dict] = {}
+
+
+def _mirror_now_ms() -> int:
+    return int(time.time() * 1000)
+
+
+def _mirror_token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _mirror_op_payload(destination: str, scope: str, allowlist) -> dict:
+    return {
+        "destination": _canonical_mirror_destination(destination),
+        "scope": scope,
+        "allowlist": list(allowlist or []),
+    }
+
+
+def _mirror_op_hash(payload: dict) -> str:
+    blob = json.dumps(
+        {
+            "destination": payload.get("destination") or "",
+            "scope": payload.get("scope") or "",
+            "allowlist": list(payload.get("allowlist") or []),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _remember_mirror_preview(payload: dict) -> None:
+    record = {
+        "op_hash": _mirror_op_hash(payload),
+        "expires_ms": _mirror_now_ms() + LIBRARY_MIRROR_PREVIEW_TTL_MS,
+        "session_hash": _library_session_hash(),
+        "payload": payload,
+    }
+    with _mirror_previews_lock:
+        _mirror_previews[record["op_hash"]] = record
+
+
+def _mirror_preview_matches(payload: dict) -> bool:
+    op_hash = _mirror_op_hash(payload)
+    now = _mirror_now_ms()
+    session = _library_session_hash()
+    with _mirror_previews_lock:
+        record = _mirror_previews.get(op_hash)
+        if record is None:
+            return False
+        if now >= int(record.get("expires_ms") or 0):
+            _mirror_previews.pop(op_hash, None)
+            return False
+        return record.get("session_hash") == session
+
+
+def _purge_expired_mirror_intents(now: int | None = None) -> None:
+    now = _mirror_now_ms() if now is None else now
+    stale = [key for key, rec in _mirror_intents.items()
+             if int(rec.get("expires_ms") or 0) <= now and rec.get("consumed_by") is None]
+    for key in stale:
+        _mirror_intents.pop(key, None)
+
+
+def _consent_to_dataclass(consent: dict | None):
+    if not consent:
+        return None
+    try:
+        import library_mirror
+    except ImportError:
+        return None
+    return library_mirror.MirrorConsent(
+        destination=str(consent["destination"]),
+        scope=str(consent["scope"]),
+        allowlist=tuple(consent.get("allowlist") or ()),
+        consented_at_ms=int(consent.get("consented_at_ms") or 0),
+        marker=str(consent.get("marker") or ""),
+    )
+
+
+def _library_mirror(*, enabled: bool | None = None, consent: dict | None = None):
+    """Construct library_mirror.Mirror from current settings. None if missing."""
+    try:
+        import library_mirror
+        from library_resources import LibraryReader
+    except ImportError:
+        return None
+    settings = _read_settings()
+    if enabled is None:
+        enabled = settings.get("library_mirror_enabled") is True
+    if consent is None:
+        consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
+    try:
+        idx = _get_index()
+    except Exception:
+        return None
+    reader = LibraryReader(idx, data_root=DATA_ROOT)
+    brief_store = None
+    try:
+        import library_briefs
+        brief_store = library_briefs.BriefStore(
+            idx, idx.library_service(), data_root=DATA_ROOT)
+    except Exception:
+        brief_store = None
+    return library_mirror.Mirror(
+        idx,
+        reader,
+        brief_store,
+        data_root=DATA_ROOT,
+        consent=_consent_to_dataclass(consent),
+        enabled=bool(enabled),
+    )
+
+
+def _mirror_event(kind, *, video_id=None, shelf_id=None, brief_hash=None):
+    """Guarded corpus-mirror ledger update.
+
+    No-op when the mirror is disabled or library_mirror.py cannot be imported.
+    Named seams: capture_commit, source_refresh, restore, soft_delete,
+    hard_purge (server.py); apply, undo, pin (library_work.py event_hook).
+    """
+    try:
+        settings = _read_settings()
+        if settings.get("library_mirror_enabled") is not True:
+            return
+        mirror = _library_mirror()
+        if mirror is None:
+            return
+        mirror.on_committed_event(
+            kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    except Exception:
+        log.debug("library mirror event ignored", exc_info=True)
+
+
+def _read_volume_marker(destination: str) -> str:
+    dest = Path(destination)
+    for path in (dest / ".uoink-volume-marker", dest / "Uoink" / ".uoink-volume-marker"):
+        try:
+            if path.is_file():
+                text = path.read_text(encoding="utf-8").strip()
+                if text:
+                    return text
+        except OSError:
+            continue
+    return "uoink-vol-" + secrets.token_hex(12)
+
+
+def _parse_mirror_scope_args(body: dict) -> tuple[dict | None, str | None]:
+    destination = body.get("destination")
+    scope = body.get("scope")
+    allowlist = body.get("allowlist")
+    if destination is not None and not isinstance(destination, str):
+        return None, "destination must be a string"
+    if scope is not None and scope not in LIBRARY_MIRROR_SCOPES:
+        return None, "scope must be all_current_and_future_items or allowlist"
+    if allowlist is None:
+        allowlist = []
+    if not isinstance(allowlist, list) or any(not isinstance(x, str) for x in allowlist):
+        return None, "allowlist must be an array of strings"
+    if scope == LIBRARY_MIRROR_SCOPE_ALLOWLIST and not allowlist:
+        return None, "allowlist scope requires a non-empty allowlist"
+    if scope == LIBRARY_MIRROR_SCOPE_ALL:
+        allowlist = []
+    payload = {
+        "destination": (destination or "").strip(),
+        "scope": scope or LIBRARY_MIRROR_SCOPE_ALL,
+        "allowlist": allowlist,
+    }
+    return payload, None
 
 
 def _anthropic_estimated_cost(input_tokens: int, output_tokens: int) -> float:
@@ -2337,6 +2661,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
     idx.insert_citations(video_id, _citations_from_sidecar(sidecar, folder))
+    _mirror_event("capture", video_id=video_id)  # seam: capture_commit
     return True
 
 
@@ -7896,7 +8221,11 @@ def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
 
 
 def _refresh_source_via_service(source_id: str) -> dict:
-    return _source_service().refresh_source(_source_operator_context(), {"source_id": source_id})
+    result = _source_service().refresh_source(
+        _source_operator_context(), {"source_id": source_id})
+    if isinstance(result, dict) and result.get("ok") is True:
+        _mirror_event("source_refresh")  # seam: source_refresh
+    return result
 
 
 def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
@@ -9226,6 +9555,7 @@ def _purge_trash() -> int:
             if trash.exists():
                 shutil.rmtree(trash, ignore_errors=True)
             idx.delete_yoink(video_id)
+            _mirror_event("hard_purge", video_id=video_id)  # seam: hard_purge
             purged += 1
         except Exception:
             log.exception("trash purge: failed to purge %s", video_id)
@@ -12925,7 +13255,9 @@ class Handler(BaseHTTPRequestHandler):
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
                          "live_stream_behavior",  # v3.1 live
-                         "whisper_model")         # v3.1 A1/podcast
+                         "whisper_model",         # v3.1 A1/podcast
+                         "library_mirror_enabled",
+                         "library_mirror_consent")
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -13025,6 +13357,63 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {
                     "ok": False,
                     "error": "obsidian_vault_path must be a string or null"})
+        if "library_mirror_consent" in body:
+            val = body.get("library_mirror_consent")
+            if val is None:
+                data["library_mirror_consent"] = None
+                data["library_mirror_enabled"] = False
+            elif isinstance(val, dict):
+                parsed = _normalize_mirror_consent(val)
+                if parsed is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": "library_mirror_consent is invalid",
+                    })
+                dest, dest_err = _validate_mirror_destination_path(
+                    parsed["destination"])
+                if dest_err or dest is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": dest_err,
+                    })
+                parsed["destination"] = dest
+                old = _normalize_mirror_consent(data.get("library_mirror_consent"))
+                if old and _destinations_differ(old.get("destination"), dest):
+                    # Destination change disables until scope is reselected.
+                    data["library_mirror_enabled"] = False
+                if (data.get("library_mirror_enabled") is True
+                        and _mirror_scope_broadens(old, parsed)):
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": ("library_mirror enable or broader scope "
+                                  "requires /library/mirror with a dashboard intent"),
+                    })
+                data["library_mirror_consent"] = parsed
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "library_mirror_consent must be an object or null",
+                })
+        if "library_mirror_enabled" in body:
+            val = body.get("library_mirror_enabled")
+            if not isinstance(val, bool):
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "library_mirror_enabled must be boolean",
+                })
+            if val is True:
+                current_on = data.get("library_mirror_enabled") is True
+                consent = _normalize_mirror_consent(
+                    data.get("library_mirror_consent"))
+                if not current_on or consent is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": ("library_mirror enable or broader scope "
+                                  "requires /library/mirror with a dashboard intent"),
+                    })
+                data["library_mirror_enabled"] = True
+            else:
+                data["library_mirror_enabled"] = False
         if "role" in body:
             raw_role = body.get("role")
             if raw_role is None or raw_role == "":
@@ -13884,6 +14273,8 @@ class Handler(BaseHTTPRequestHandler):
             log.exception("/sources %s failed", method)
             return self._send_json(500, source_subscriptions.error_envelope(
                 "internal_error", "The source registry raised; see the helper log."))
+        if method == "refresh_source" and isinstance(result, dict) and result.get("ok") is True:
+            _mirror_event("source_refresh")  # seam: source_refresh
         return self._send_json(self._sources_http_status(result), result)
 
     def _handle_sources_consent_intent(self, body: dict):
@@ -13907,6 +14298,268 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, source_subscriptions.error_envelope(
                 "internal_error", "Consent intent minting failed; see the helper log."))
         return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_library_mirror_intent(self, body: dict):
+        """POST /library/mirror-intent -- dashboard opt-in confirmation mints
+        a five-minute, single-operation capability bound to destination,
+        scope, allowlist, and this dashboard session. Same posture as
+        /sources/consent-intent: origin/CSRF gate here; no registry tool
+        can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     LIBRARY_MIRROR_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        if not isinstance(body, dict) or set(body) - {"operation", "confirmed"}:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "Expected {operation, confirmed}",
+            })
+        if body.get("confirmed") is not True:
+            return self._send_json(403, {
+                "ok": False,
+                "error": "Local confirmation is required",
+            })
+        operation = body.get("operation")
+        if not isinstance(operation, dict):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "operation must be an object",
+            })
+        if "user_intent_token" in operation:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "Operation must exclude its capability token",
+            })
+        parsed, err = _parse_mirror_scope_args(operation)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        dest, dest_err = _validate_mirror_destination_path(parsed["destination"])
+        if dest_err or dest is None:
+            return self._send_json(400, {"ok": False, "error": dest_err})
+        parsed["destination"] = dest
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        now = _mirror_now_ms()
+        token = secrets.token_urlsafe(32)
+        expires = now + LIBRARY_MIRROR_INTENT_TTL_MS
+        record = {
+            "token_hash": _mirror_token_hash(token),
+            "op_hash": _mirror_op_hash(payload),
+            "session_hash": _library_session_hash(),
+            "payload": payload,
+            "expires_ms": expires,
+            "consumed_by": None,
+            "response": None,
+        }
+        with _mirror_intents_lock:
+            _purge_expired_mirror_intents(now)
+            _mirror_intents[record["token_hash"]] = record
+        return self._send_json(200, {
+            "ok": True,
+            "user_intent_token": token,
+            "expires_ms": expires,
+            "operation": payload,
+            "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+        })
+
+    def _handle_library_mirror(self, body: dict):
+        """POST /library/mirror {op: preview|enable|disable|resync|status, ...}.
+        Token-gated by do_POST. Enable/broaden consume a dashboard-minted
+        user_intent_token and require a matching preview."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {
+                "ok": False, "error": "arguments must be an object"})
+        op = body.get("op")
+        if op not in ("preview", "enable", "disable", "resync", "status"):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "op must be preview, enable, disable, resync, or status",
+            })
+        if op == "preview":
+            return self._library_mirror_preview(body)
+        if op == "status":
+            return self._library_mirror_status()
+        if op == "resync":
+            return self._library_mirror_resync()
+        if op == "disable":
+            return self._library_mirror_disable()
+        return self._library_mirror_enable(body)
+
+    def _library_mirror_preview(self, body: dict):
+        parsed, err = _parse_mirror_scope_args(body)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        mirror = _library_mirror(enabled=False, consent=None)
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": False,
+                "error": "library mirror is unavailable",
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+            })
+        result = mirror.preview(
+            payload["destination"], payload["scope"], payload["allowlist"])
+        if isinstance(result, dict) and result.get("ok") is True:
+            _remember_mirror_preview(payload)
+            result.setdefault("notice", LIBRARY_MIRROR_INDEXING_NOTICE)
+            result.setdefault("third_party_indexing", LIBRARY_MIRROR_INDEXING_NOTICE)
+        return self._send_json(200, result if isinstance(result, dict) else {
+            "ok": False, "error": "preview failed",
+        })
+
+    def _library_mirror_status(self):
+        settings = _read_settings()
+        consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
+        enabled = settings.get("library_mirror_enabled") is True
+        mirror = _library_mirror()
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": True,
+                "enabled": enabled,
+                "consent": consent,
+                "pending": 0,
+                "synced": 0,
+                "stale": 0,
+                "conflicts": {},
+                "deletion_pending": 0,
+                "destination": (consent or {}).get("destination"),
+                "scope": (consent or {}).get("scope"),
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+                "state": "disabled" if not enabled else "unavailable",
+            })
+        result = mirror.status()
+        if not isinstance(result, dict):
+            result = {"ok": False, "error": "status failed"}
+        result.setdefault("consent", consent)
+        result.setdefault("notice", LIBRARY_MIRROR_INDEXING_NOTICE)
+        if consent:
+            result.setdefault("destination", consent.get("destination"))
+            result.setdefault("scope", consent.get("scope"))
+        return self._send_json(200, result)
+
+    def _library_mirror_resync(self):
+        mirror = _library_mirror()
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": True, "enabled": False, "synced": 0, "state": "disabled",
+            })
+        result = mirror.resync()
+        return self._send_json(200, result if isinstance(result, dict) else {
+            "ok": False, "error": "resync failed",
+        })
+
+    def _library_mirror_disable(self):
+        data = _read_settings()
+        data["library_mirror_enabled"] = False
+        data["updated_at"] = _now_iso()
+        try:
+            _write_settings(data)
+        except OSError as e:
+            log.warning("library mirror disable write failed: %s", e)
+            return self._send_json(200, {
+                "ok": False, "error": "settings write failed"})
+        return self._send_json(200, {
+            "ok": True,
+            "enabled": False,
+            "consent": _normalize_mirror_consent(data.get("library_mirror_consent")),
+            "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+            "settings": _public_settings(data),
+        })
+
+    def _library_mirror_enable(self, body: dict):
+        token = body.get("user_intent_token")
+        if not isinstance(token, str) or not token:
+            return self._send_json(403, {
+                "ok": False, "error": "user_intent_token required"})
+        parsed, err = _parse_mirror_scope_args(body)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        dest, dest_err = _validate_mirror_destination_path(parsed["destination"])
+        if dest_err or dest is None:
+            return self._send_json(400, {"ok": False, "error": dest_err})
+        parsed["destination"] = dest
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        if not _mirror_preview_matches(payload):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "preview required before enabling the library mirror",
+            })
+        now = _mirror_now_ms()
+        op_hash = _mirror_op_hash(payload)
+        session = _library_session_hash()
+        token_hash = _mirror_token_hash(token)
+        with _mirror_intents_lock:
+            _purge_expired_mirror_intents(now)
+            record = _mirror_intents.get(token_hash)
+            if record is None:
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if record.get("session_hash") != session or record.get("op_hash") != op_hash:
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if record.get("consumed_by") is not None:
+                if record.get("response"):
+                    return self._send_json(200, record["response"])
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if now >= int(record.get("expires_ms") or 0):
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            data = _read_settings()
+            old = _normalize_mirror_consent(data.get("library_mirror_consent"))
+            if old and _destinations_differ(old.get("destination"), dest):
+                data["library_mirror_enabled"] = False
+            marker = (old or {}).get("marker") if old and not _destinations_differ(
+                (old or {}).get("destination"), dest) else ""
+            if not marker:
+                marker = _read_volume_marker(dest)
+            consent = {
+                "destination": dest,
+                "scope": payload["scope"],
+                "allowlist": list(payload["allowlist"]),
+                "consented_at_ms": now,
+                "marker": marker,
+            }
+            data["library_mirror_consent"] = consent
+            data["library_mirror_enabled"] = True
+            data["updated_at"] = _now_iso()
+            try:
+                _write_settings(data)
+            except OSError as e:
+                log.warning("library mirror enable write failed: %s", e)
+                return self._send_json(200, {
+                    "ok": False, "error": "settings write failed"})
+            record["consumed_by"] = op_hash
+            status = {"ok": True, "enabled": True}
+            mirror = _library_mirror()
+            if mirror is not None:
+                try:
+                    status = mirror.status()
+                except Exception:
+                    log.debug("library mirror status after enable failed",
+                              exc_info=True)
+            response = {
+                "ok": True,
+                "enabled": True,
+                "consent": consent,
+                "status": status,
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+                "settings": _public_settings(data),
+            }
+            record["response"] = response
+        return self._send_json(200, response)
 
     def _handle_sources_manifest(self):
         return self._send_json(
@@ -14218,6 +14871,10 @@ class Handler(BaseHTTPRequestHandler):
 
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
+        if bare == LIBRARY_MIRROR_INTENT_ROUTE:
+            return self._handle_library_mirror_intent(body)
+        if bare == LIBRARY_MIRROR_ROUTE:
+            return self._handle_library_mirror(body)
         if bare == SOURCES_INTENT_ROUTE:
             return self._handle_sources_consent_intent(body)
         if bare == "/sources":
@@ -14810,6 +15467,7 @@ class Handler(BaseHTTPRequestHandler):
             _source_service().note_corpus_deleted([video_id])
         except Exception:
             log.exception("standing capture: deletion tombstone failed for %s", video_id)
+        _mirror_event("soft_delete", video_id=video_id)  # seam: soft_delete
         self._send_json(200, {
             "ok": True,
             "restored_at": None,
@@ -14847,6 +15505,7 @@ class Handler(BaseHTTPRequestHandler):
                 500, {"ok": False, "error": "could not restore folder"})
         idx.restore_yoink(video_id)
         log.info("memory restore: %s <- %s", video_id, trash)
+        _mirror_event("restore", video_id=video_id)  # seam: restore
         self._send_json(200, {"ok": True, "restored_at": _now_iso()})
 
     # ---- /queue/status ----

@@ -218,12 +218,13 @@ _STORE_LOCKS_GUARD = threading.Lock()
 
 class LibraryWorkService:
     def __init__(self, index, store_root=None, *, clock=None,
-                 librarian_apply_enabled=False, crash_hook=None):
+                 librarian_apply_enabled=False, crash_hook=None, event_hook=None):
         self.index = index
         self.store_root = Path(store_root) if store_root is not None else index._path.parent / "library"
         self.clock = clock or (lambda: int(time.time() * 1000))
         self.librarian_apply_enabled = librarian_apply_enabled is True
         self.crash_hook = crash_hook or (lambda boundary: None)
+        self.event_hook = event_hook or (lambda kind, **kwargs: None)
         self._pending_record = None
         with _STORE_LOCKS_GUARD:
             self._store_lock = _STORE_LOCKS.setdefault(str(self.store_root.resolve()), threading.RLock())
@@ -236,6 +237,13 @@ class LibraryWorkService:
 
     def _now(self):
         return int(self.clock())
+
+    def _emit_mirror_event(self, kind, **kwargs):
+        """One-line corpus-mirror seam. Default event_hook is a no-op."""
+        try:
+            self.event_hook(kind, **kwargs)
+        except Exception:
+            return
 
     def _stamp(self):
         return str(self._now())
@@ -1042,7 +1050,9 @@ class LibraryWorkService:
                 if ceiling is None or 100 * summary["changed_items"] > ceiling * summary["baseline_items"]:
                     fail("churn_limit", "Delta exceeds local approval ceiling")
                 record = self._publish_operation(conn, args, "apply", forward, inverse)
-            return self._project_published(record)
+            receipt = self._project_published(record)
+            self._emit_mirror_event("apply")  # seam: apply
+            return receipt
 
     @endpoint
     def mint_user_intent(self, context, args):
@@ -1148,7 +1158,10 @@ class LibraryWorkService:
                 forward, inverse = self._pin_delta(conn, args)
                 record = self._publish_operation(conn, args, "pin", forward, inverse,
                     intent=dict(token_hash=token_hash, session_hash=digest(context.session_id)))
-            return self._project_published(record)
+            receipt = self._project_published(record)
+            self._emit_mirror_event(  # seam: pin
+                "pin", video_id=args.get("video_id"), shelf_id=args.get("shelf_id"))
+            return receipt
 
     def _undo_delta(self, conn, args):
         current = self._revision(conn, args["expected_projection_revision"])
@@ -1176,7 +1189,9 @@ class LibraryWorkService:
                 forward, inverse = self._undo_delta(conn, args)
                 record = self._publish_operation(conn, args, "undo", forward, inverse, undo_of=args["apply_id"],
                     intent=dict(token_hash=token_hash, session_hash=digest(context.session_id)))
-            return self._project_published(record)
+            receipt = self._project_published(record)
+            self._emit_mirror_event("undo")  # seam: undo
+            return receipt
 
     def _retry_session(self, conn, context, args):
         # Session hashes survive total DB loss in the authoritative record.

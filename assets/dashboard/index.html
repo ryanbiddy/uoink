@@ -4862,6 +4862,29 @@
               </details>
             </div>
 
+            <div class="setting-block" id="library-mirror">
+              <h2>Library Mirror</h2>
+              <p class="setting-copy">Optional one-way export of evidence cards, shelf pages, and accepted briefs into <code>&lt;vault&gt;/Uoink/</code>. Off by default. Enabling or broadening scope needs a preview and a confirmation from this page.</p>
+              <p class="setting-copy" id="libraryMirrorIndexingNotice">Other software with access to that vault can index its contents. Uoink does not register the vault with Basic Memory/Hermes, start another indexer, edit its configuration, turn on sync, or infer consent from an installed application. Existing third-party indexing is outside Uoink's deletion control.</p>
+              <p class="setting-copy" id="libraryMirrorStatus">Checking library mirror...</p>
+              <p class="setting-copy" id="libraryMirrorCounts"></p>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:240px" id="libraryMirrorDestination" type="text" placeholder="Vault folder path" aria-label="Library mirror destination">
+                <select class="field" id="libraryMirrorScope" aria-label="Library mirror scope">
+                  <option value="all_current_and_future_items">All current and future items</option>
+                  <option value="allowlist">Allowlist only</option>
+                </select>
+              </div>
+              <input class="field" id="libraryMirrorAllowlist" type="text" placeholder="Item IDs, comma-separated" aria-label="Library mirror allowlist">
+              <div class="inline-row">
+                <button class="button" type="button" id="libraryMirrorPreview">Preview</button>
+                <button class="button" type="button" id="libraryMirrorEnable">Enable</button>
+                <button class="button ghost" type="button" id="libraryMirrorDisable">Disable</button>
+                <button class="button ghost" type="button" id="libraryMirrorResync">Resync</button>
+              </div>
+              <p class="setting-copy" id="libraryMirrorPreviewOut"></p>
+            </div>
+
             <div class="setting-block">
               <h2>Topics</h2>
               <p class="setting-copy">Edit topic names and keywords. Remove a topic, undo it if needed, then save when the list looks right.</p>
@@ -5448,6 +5471,17 @@
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
+      libraryMirrorStatus: document.getElementById("libraryMirrorStatus"),
+      libraryMirrorCounts: document.getElementById("libraryMirrorCounts"),
+      libraryMirrorDestination: document.getElementById("libraryMirrorDestination"),
+      libraryMirrorScope: document.getElementById("libraryMirrorScope"),
+      libraryMirrorAllowlist: document.getElementById("libraryMirrorAllowlist"),
+      libraryMirrorPreview: document.getElementById("libraryMirrorPreview"),
+      libraryMirrorEnable: document.getElementById("libraryMirrorEnable"),
+      libraryMirrorDisable: document.getElementById("libraryMirrorDisable"),
+      libraryMirrorResync: document.getElementById("libraryMirrorResync"),
+      libraryMirrorPreviewOut: document.getElementById("libraryMirrorPreviewOut"),
+      libraryMirrorIndexingNotice: document.getElementById("libraryMirrorIndexingNotice"),
       runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
@@ -10777,6 +10811,7 @@
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
         if (els.autoUoinkToggle) els.autoUoinkToggle.checked = Boolean(state.settings.auto_uoink_enabled);
         renderAutoUoinkStatus();
+        renderLibraryMirrorFromSettings();
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
         els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
@@ -12631,6 +12666,129 @@
       }
     }
 
+    function libraryMirrorArgs() {
+      const destination = ((els.libraryMirrorDestination && els.libraryMirrorDestination.value) || "").trim();
+      const scope = (els.libraryMirrorScope && els.libraryMirrorScope.value) || "all_current_and_future_items";
+      const raw = ((els.libraryMirrorAllowlist && els.libraryMirrorAllowlist.value) || "").trim();
+      const allowlist = raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      return { destination, scope, allowlist };
+    }
+
+    function renderLibraryMirrorFromSettings() {
+      if (!els.libraryMirrorStatus) return;
+      const settings = state.settings || {};
+      const enabled = Boolean(settings.library_mirror_enabled);
+      const consent = settings.library_mirror_consent || null;
+      if (consent && els.libraryMirrorDestination && !els.libraryMirrorDestination.value) {
+        els.libraryMirrorDestination.value = consent.destination || "";
+      }
+      if (consent && els.libraryMirrorScope) {
+        els.libraryMirrorScope.value = consent.scope || "all_current_and_future_items";
+      }
+      if (consent && els.libraryMirrorAllowlist && Array.isArray(consent.allowlist) && !els.libraryMirrorAllowlist.value) {
+        els.libraryMirrorAllowlist.value = consent.allowlist.join(", ");
+      }
+      els.libraryMirrorStatus.textContent = enabled
+        ? `On. Destination ${consent && consent.destination ? consent.destination : "(set)"}; scope ${consent && consent.scope ? consent.scope : "all current and future items"}.`
+        : "Off. Preview a vault folder, then enable. A destination change turns the mirror off until you select scope again.";
+      if (els.libraryMirrorDisable) els.libraryMirrorDisable.disabled = !enabled;
+      if (els.libraryMirrorResync) els.libraryMirrorResync.disabled = !enabled;
+      if (enabled) refreshLibraryMirrorStatus();
+      else if (els.libraryMirrorCounts) els.libraryMirrorCounts.textContent = "";
+    }
+
+    async function refreshLibraryMirrorStatus() {
+      if (!els.libraryMirrorCounts) return;
+      try {
+        const data = await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "status" }) });
+        const pending = data.pending ?? 0;
+        const synced = data.synced ?? 0;
+        const stale = data.stale ?? 0;
+        const deletionPending = data.deletion_pending ?? 0;
+        els.libraryMirrorCounts.textContent = `Pending ${pending} · synced ${synced} · stale ${stale} · deletion pending ${deletionPending}.`;
+        if (data.destination && els.libraryMirrorDestination && !els.libraryMirrorDestination.value) {
+          els.libraryMirrorDestination.value = data.destination;
+        }
+        if (data.notice && els.libraryMirrorIndexingNotice) {
+          els.libraryMirrorIndexingNotice.textContent = data.notice;
+        }
+      } catch (_) {
+        els.libraryMirrorCounts.textContent = "Mirror status needs another moment.";
+      }
+    }
+
+    async function previewLibraryMirror() {
+      const args = libraryMirrorArgs();
+      if (!args.destination) return showToast("Choose a vault folder first.");
+      try {
+        const data = await authFetch("/library/mirror", {
+          method: "POST",
+          body: JSON.stringify({ op: "preview", ...args }),
+        });
+        state.libraryMirrorPreview = data;
+        const counts = data.counts || {};
+        const notice = data.notice || data.third_party_indexing || "";
+        if (els.libraryMirrorPreviewOut) {
+          els.libraryMirrorPreviewOut.textContent = `Preview: ${counts.items || 0} items, ${counts.shelves || 0} shelves, ${counts.briefs || 0} briefs. ${notice}`;
+        }
+        showToast("Mirror preview ready. Enable to confirm.");
+      } catch (err) {
+        showToast((err && err.data && (err.data.error || (err.data.error && err.data.error.message))) || "Couldn't preview that vault.");
+      }
+    }
+
+    async function enableLibraryMirror() {
+      const args = libraryMirrorArgs();
+      if (!args.destination) return showToast("Choose a vault folder first.");
+      try {
+        if (!state.libraryMirrorPreview) {
+          await previewLibraryMirror();
+        }
+        const intentRes = await authFetch("/library/mirror-intent", {
+          method: "POST",
+          body: JSON.stringify({ operation: args, confirmed: true }),
+        });
+        if (!intentRes || !intentRes.user_intent_token) {
+          throw new Error("Couldn't mint a confirmation token.");
+        }
+        const data = await authFetch("/library/mirror", {
+          method: "POST",
+          body: JSON.stringify({
+            op: "enable",
+            ...args,
+            user_intent_token: intentRes.user_intent_token,
+          }),
+        });
+        state.settings = data.settings || state.settings || {};
+        showToast("Library mirror is on.");
+        renderLibraryMirrorFromSettings();
+      } catch (err) {
+        const msg = (err && err.data && (typeof err.data.error === "string" ? err.data.error : err.message)) || "Couldn't enable the library mirror.";
+        showToast(msg);
+      }
+    }
+
+    async function disableLibraryMirror() {
+      try {
+        const data = await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "disable" }) });
+        state.settings = data.settings || state.settings || {};
+        showToast("Library mirror is off. Pending deletions stay recorded.");
+        renderLibraryMirrorFromSettings();
+      } catch (err) {
+        showToast("Couldn't disable the library mirror.");
+      }
+    }
+
+    async function resyncLibraryMirror() {
+      try {
+        await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "resync" }) });
+        showToast("Mirror resync finished.");
+        refreshLibraryMirrorStatus();
+      } catch (err) {
+        showToast("Couldn't resync the library mirror.");
+      }
+    }
+
     async function saveSettingsPatch(patch, successMessage) {
       try {
         const data = await authFetch("/settings", { method: "POST", body: JSON.stringify(patch) });
@@ -13127,6 +13285,10 @@
         els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
       }
       if (els.autoUoinkScan) els.autoUoinkScan.addEventListener("click", runAutoUoinkScan);
+      if (els.libraryMirrorPreview) els.libraryMirrorPreview.addEventListener("click", previewLibraryMirror);
+      if (els.libraryMirrorEnable) els.libraryMirrorEnable.addEventListener("click", enableLibraryMirror);
+      if (els.libraryMirrorDisable) els.libraryMirrorDisable.addEventListener("click", disableLibraryMirror);
+      if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.asrFallbackEnabled.addEventListener("change", () => saveSettingsPatch({ asr_fallback_enabled: els.asrFallbackEnabled.checked }, els.asrFallbackEnabled.checked ? "Caption-less video transcription is on." : "Caption-less video transcription is off."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
