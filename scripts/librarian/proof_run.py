@@ -58,6 +58,34 @@ from tests.validate_proof_receipts import call_accounting, redact_http, V2_RECEI
 CONTRACT = "phase2-v1.2-2026-09-04"
 NAMED_COPY_HASH = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
 FORBIDDEN_PORT = 5179
+# Guard rule v2 + AO-G1. Integer comparison: abort iff N >= 20 and 10 * numerator > N.
+# Equality (exact 10%) is allowed. Anonymous transport events (attempt_id is None) count
+# once per unique event_id. Events on unfinished attempts do not join the numerator until
+# that attempt is in the completed set. A rejection and its linked transport event are one
+# failed completion.
+GUARD_RULE_V2 = dict(
+    identifier="distinct-failed-completions-v2",
+    version=2,
+    amendment="AO-G1",
+    n_min=20,
+    numerator=(
+        "union of rejected/errored completed attempt ids and completed ids with a "
+        "transport event by that timestamp, plus unique anonymous transport events "
+        "(attempt_id is None) by that timestamp"
+    ),
+    abort_when="N >= n_min and 10 * numerator > N",
+    comparison="integer",
+    unique_event_ids=True,
+    timestamp_field="occurred_monotonic_ns",
+)
+EXECUTION_CODE_PATHS = {
+    "runner": Path("scripts") / "librarian" / "proof_run.py",
+    "scorer": Path("scripts") / "librarian" / "proof_score.py",
+    "validator": Path("tests") / "validate_proof_receipts.py",
+    "service": Path("library_work.py"),
+    "prompt": Path("scripts") / "librarian" / "prompts" / "assign.md",
+    "card_builder": Path("library_cards.py"),
+}
 
 HASH_KEYS = [
     "manifest_hash",
@@ -289,6 +317,12 @@ class ProofHarness:
         self.wall_budget_ms = 7200000
         self.error_rate_limit = 0.10
         self.error_rate_min_attempts = 20
+        self.guard_rule = copy.deepcopy(GUARD_RULE_V2)
+        self.selection_version: Optional[str] = None
+        self.card_schema = 1
+        self.launch_identity: Optional[Dict[str, Any]] = None
+        self.finish_identity: Optional[Dict[str, Any]] = None
+        self._transport_event_seq = 0
 
         # Paths
         self.manifest_path = Path(manifest).resolve() if manifest else ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
@@ -483,6 +517,7 @@ class ProofHarness:
         if not self.prompt_path.is_file():
             raise ProofRunError(f"Prompt template missing: {self.prompt_path}")
         self.prompt_template = self.prompt_path.read_text(encoding="utf-8")
+        self._bind_frozen_profile()
 
         # Gold labels feed only the mock fixture generator. A real run never reads them:
         # the sealed labels stay sealed from the execution client.
@@ -1011,8 +1046,100 @@ class ProofHarness:
             canonical(heads_map).encode("utf-8")
         )
 
+    def _bind_frozen_profile(self) -> None:
+        """Read card profile, selection version and execution limits from the frozen manifest."""
+        profile = self.manifest.get("card_profile") or {}
+        selection = profile.get("selection_version")
+        if not isinstance(selection, str) or not selection.strip():
+            raise ProofRunError(
+                "Frozen manifest is missing card_profile.selection_version; "
+                "the runner must not hard-code spread-longest-v1"
+            )
+        self.selection_version = selection
+        self.card_schema = int(profile.get("schema_version") or 1)
+        exec_cfg = self.manifest.get("execution") or {}
+        if exec_cfg.get("wall_budget_ms") is not None:
+            self.wall_budget_ms = int(exec_cfg["wall_budget_ms"])
+        if exec_cfg.get("error_rate_min_attempts") is not None:
+            self.error_rate_min_attempts = int(exec_cfg["error_rate_min_attempts"])
+        self.guard_rule = copy.deepcopy(GUARD_RULE_V2)
+        self.guard_rule["n_min"] = self.error_rate_min_attempts
+
+    def _card_policy(self) -> dict:
+        """Packet policy from the frozen manifest profile, not a hard-coded selection version."""
+        selection = self.selection_version
+        if not selection:
+            selection = (self.manifest.get("card_profile") or {}).get("selection_version")
+        if not selection:
+            raise ProofRunError("Frozen manifest is missing card_profile.selection_version")
+        schema = self.card_schema or (self.manifest.get("card_profile") or {}).get("schema_version") or 1
+        return dict(
+            min_confidence=0.60,
+            max_memberships=3,
+            max_churn_percent=15,
+            prompt_hash=self.manifest["hashes"]["prompt_sha256"],
+            selection_version=selection,
+            card_schema=int(schema),
+        )
+
+    def _capture_execution_identity(self) -> dict:
+        """Git SHA, dirty status and execution-code fingerprints at one instant."""
+        git_sha = "0" * 40
+        dirty_entries: List[str] = []
+        try:
+            out = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT)).decode("utf-8").strip()
+            if len(out) == 40 and all(c in "0123456789abcdef" for c in out):
+                git_sha = out
+            dirty = subprocess.check_output(
+                ["git", "status", "--porcelain"], cwd=str(ROOT)
+            ).decode("utf-8")
+            dirty_entries = [line for line in dirty.splitlines() if line.strip()]
+        except Exception:
+            pass
+        fingerprints = {}
+        for name, rel in EXECUTION_CODE_PATHS.items():
+            raw = (ROOT / rel).read_bytes()
+            fingerprints[name] = {"path": rel.as_posix(), "sha256": sha(raw), "bytes": len(raw)}
+        return dict(
+            git_sha=git_sha,
+            working_tree_clean=(dirty_entries == []),
+            dirty_entries=dirty_entries,
+            code_fingerprints=fingerprints,
+        )
+
+    def _record_completed_attempt(self, attempt_record: dict, call_end_ns: int) -> None:
+        """Retain every completed attempt with its completion_order row, including in-flight work."""
+        with self._lock:
+            if any(a["attempt_id"] == attempt_record["attempt_id"] for a in self.attempts):
+                return
+            completed_ns = max(time.monotonic_ns(), call_end_ns, self._last_completed_ns + 1)
+            self._last_completed_ns = completed_ns
+            self.completion_order.append({
+                "attempt_id": attempt_record["attempt_id"],
+                "completed_monotonic_ns": completed_ns,
+            })
+            self.attempts.append(attempt_record)
+
+    def _append_transport_failure(self, event: dict) -> None:
+        """Record a transport event once; event_id is unique."""
+        with self._lock:
+            existing = {e.get("event_id") for e in self.transport_failures}
+            eid = event.get("event_id")
+            if not eid or eid in existing:
+                self._transport_event_seq += 1
+                event = dict(event)
+                event["event_id"] = f"tf-{self._transport_event_seq:05d}-{secrets.token_hex(4)}"
+            self.transport_failures.append(event)
+
     def _check_error_guard(self) -> None:
-        """Shared coordinator enforcing 2-hour deadline and error rate threshold (> 10% after 20 attempts)."""
+        """Deadline plus guard rule v2 (AO-G1): distinct failed completions plus unique anonymous events.
+
+        Integer threshold: stop when N >= n_min and 10 * numerator > N. Equality is allowed.
+        Timestamp filter uses occurred_monotonic_ns <= the current completion timestamp when
+        completion_order is available (AO probes without it count every current event).
+        Events whose attempt_id is not in the completed set do not join the numerator;
+        anonymous events (attempt_id is None) count once per unique event_id.
+        """
         with self._coordinator_lock:
             if self.abort_event.is_set():
                 return
@@ -1023,25 +1150,52 @@ class ProofHarness:
                 )
                 return
             n = len(self.attempts)
-            if n >= self.error_rate_min_attempts:
-                # One failed completion counts once. A rejected submission is recorded both as
-                # a rejected attempt and as its submit-failure transport event; summing the
-                # two doubled the rate (stage 3 run 1: 3 real failures in 49 completions
-                # reported as 6/49 and aborted). Count distinct attempts that were rejected,
-                # errored, or had any transport event.
-                failed_attempt_ids = {a["attempt_id"] for a in self.attempts if a.get("outcome") in ("rejected", "error")}
-                failed_attempt_ids |= {t.get("attempt_id") for t in self.transport_failures if t.get("attempt_id")}
-                completed_ids = {a["attempt_id"] for a in self.attempts}
-                numerator = len(failed_attempt_ids & completed_ids)
-                rate = numerator / n
-                if rate > self.error_rate_limit:
-                    self._trigger_abort(
-                        f"Error rate limit exceeded: {numerator}/{n} ({rate:.1%}) > {self.error_rate_limit:.1%} "
-                        f"after {n} completed attempts (distinct failed completions)"
-                    )
+            n_min = self.error_rate_min_attempts
+            if n < n_min:
+                return
+            completed_ids = {a["attempt_id"] for a in self.attempts}
+            completed_ns = None
+            order = getattr(self, "completion_order", None) or []
+            if len(order) >= n:
+                completed_ns = order[n - 1].get("completed_monotonic_ns")
+            elif order:
+                completed_ns = order[-1].get("completed_monotonic_ns")
+            failed_ids = {
+                a["attempt_id"]
+                for a in self.attempts
+                if a.get("outcome") in ("rejected", "error")
+            }
+            seen_event_ids: set = set()
+            anonymous = 0
+            for event in self.transport_failures:
+                eid = event.get("event_id")
+                if eid is not None:
+                    if eid in seen_event_ids:
+                        continue
+                    seen_event_ids.add(eid)
+                occurred = event.get("occurred_monotonic_ns")
+                if completed_ns is not None and occurred is not None and occurred > completed_ns:
+                    continue
+                aid = event.get("attempt_id")
+                if aid is None:
+                    anonymous += 1
+                elif aid in completed_ids:
+                    failed_ids.add(aid)
+            numerator = len(failed_ids) + anonymous
+            if 10 * numerator > n:
+                self._trigger_abort(
+                    f"Error rate limit exceeded: {numerator}/{n} "
+                    f"(guard distinct-failed-completions-v2) "
+                    f"after {n} completed attempts (distinct failed completions plus unique anonymous events)"
+                )
 
     def _trigger_abort(self, reason: str) -> None:
-        """Stops launching, terminates owned children, terminates helper, and signals abort."""
+        """Stops launching and terminates owned model children. Does not drop in-flight receipts.
+
+        The helper stays up so already-claimed batches can finish HTTP submit and retain
+        every attempt row (stage 3 run 1: 28 completion rows without attempts). Cleanup
+        stops the helper after workers drain.
+        """
         if self.abort_event.is_set():
             return
         print(f"[proof] ERROR GUARD BREACH: {reason}. Aborting run.", file=sys.stderr, flush=True)
@@ -1053,10 +1207,6 @@ class ProofHarness:
                     proc.terminate()
                 except Exception:
                     pass
-        try:
-            self.stop_server()
-        except Exception:
-            pass
 
     def generate_mock_assignment(self, item: dict) -> Tuple[dict, dict, int]:
         """Generates a deterministic fixture assignment strictly obeying evidence rules."""
@@ -1364,14 +1514,7 @@ class ProofHarness:
         taxonomy_revision = item["taxonomy_revision"]
         card = item["card"]
 
-        policy = dict(
-            min_confidence=0.60,
-            max_memberships=3,
-            max_churn_percent=15,
-            prompt_hash=self.manifest["hashes"]["prompt_sha256"],
-            selection_version="spread-longest-v1",
-            card_schema=1,
-        )
+        policy = self._card_policy()
         packet = {
             "schema_version": 1,
             "video_id": video_id,
@@ -1532,21 +1675,20 @@ class ProofHarness:
             rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
             req_bytes = len(json.dumps(submit_payload, ensure_ascii=False).encode("utf-8"))
             resp_bytes_sub = len(json.dumps(submit_resp, ensure_ascii=False).encode("utf-8"))
-            with self._lock:
-                self.transport_failures.append(
-                    {
-                        "event_id": f"tf-sub-{secrets.token_hex(4)}",
-                        "http_event_id": submit_event_id,
-                        "occurred_monotonic_ns": time.monotonic_ns(),
-                        "attempt_id": attempt_id,
-                        "video_id": video_id,
-                        "stage": "submit",
-                        "reason": rejection_reason,
-                        "request_bytes": req_bytes,
-                        "response_bytes": resp_bytes_sub,
-                        "wall_ms": submit_wall_ms,
-                    }
-                )
+            self._append_transport_failure(
+                {
+                    "event_id": f"tf-sub-{secrets.token_hex(4)}",
+                    "http_event_id": submit_event_id,
+                    "occurred_monotonic_ns": time.monotonic_ns(),
+                    "attempt_id": attempt_id,
+                    "video_id": video_id,
+                    "stage": "submit",
+                    "reason": rejection_reason,
+                    "request_bytes": req_bytes,
+                    "response_bytes": resp_bytes_sub,
+                    "wall_ms": submit_wall_ms,
+                }
+            )
 
         attempt_record = {
             "attempt_id": attempt_id,
@@ -1575,17 +1717,15 @@ class ProofHarness:
             "usage": {"status": "unavailable", "reason": "Process-level accounting"},
             "estimates": {"total_cost_usd": None, "source": "unavailable"},
         }
-        with self._lock:
-            completed_ns = max(time.monotonic_ns(), call_end_ns, self._last_completed_ns + 1)
-            self._last_completed_ns = completed_ns
-            self.completion_order.append({
-                "attempt_id": attempt_id,
-                "completed_monotonic_ns": completed_ns,
-            })
+        self._record_completed_attempt(attempt_record, call_end_ns)
         return attempt_record
 
-    def process_batch(self, items: List[dict], claim_event_ids: Dict[str, str]) -> List[dict]:
-        """Batched reasoning execution for real model runs."""
+    def process_batch(
+        self, items: List[dict], claim_event_ids: Dict[str, str], retried_videos: Optional[set] = None
+    ) -> List[dict]:
+        """Batched reasoning execution for real model runs. Records each item as it completes."""
+        if retried_videos is None:
+            retried_videos = set()
         cards_block = "\n\n".join(library_cards.card_text(it["card"]) for it in items)
         prefix, suffix = self.prompt_template.split("{{CARDS}}")
         prompt = (
@@ -1675,14 +1815,7 @@ class ProofHarness:
             self.calls.append(call_record)
 
         receipts = []
-        policy = dict(
-            min_confidence=0.60,
-            max_memberships=3,
-            max_churn_percent=15,
-            prompt_hash=self.manifest["hashes"]["prompt_sha256"],
-            selection_version="spread-longest-v1",
-            card_schema=1,
-        )
+        policy = self._card_policy()
 
         result_rows = raw_env.get("structured_output", raw_env)
         result_rows = result_rows.get("results", []) if isinstance(result_rows, dict) else []
@@ -1767,21 +1900,20 @@ class ProofHarness:
                 elif err.get("code") in {"invalid_request", "validation_error", "unauthorized", "unknown_tool"}:
                     print(f"[proof] ABORT submit {vid}: {json.dumps(submit_resp)[:400]}", file=sys.stderr, flush=True)
                     raise ProofRunError(f"submit rejected at schema level for {vid}: {rejection_reason[:200]}")
-                with self._lock:
-                    self.transport_failures.append(
-                        {
-                            "event_id": f"tf-sub-{secrets.token_hex(4)}",
-                            "http_event_id": submit_event_id,
-                            "occurred_monotonic_ns": time.monotonic_ns(),
-                            "attempt_id": attempt_id,
-                            "video_id": vid,
-                            "stage": "submit",
-                            "reason": rejection_reason,
-                            "request_bytes": len(json.dumps(submit_payload, ensure_ascii=False).encode("utf-8")),
-                            "response_bytes": len(json.dumps(submit_resp, ensure_ascii=False).encode("utf-8")),
-                            "wall_ms": sub_wall_ms,
-                        }
-                    )
+                self._append_transport_failure(
+                    {
+                        "event_id": f"tf-sub-{secrets.token_hex(4)}",
+                        "http_event_id": submit_event_id,
+                        "occurred_monotonic_ns": time.monotonic_ns(),
+                        "attempt_id": attempt_id,
+                        "video_id": vid,
+                        "stage": "submit",
+                        "reason": rejection_reason,
+                        "request_bytes": len(json.dumps(submit_payload, ensure_ascii=False).encode("utf-8")),
+                        "response_bytes": len(json.dumps(submit_resp, ensure_ascii=False).encode("utf-8")),
+                        "wall_ms": sub_wall_ms,
+                    }
+                )
 
             packet = {
                 "schema_version": 1,
@@ -1819,14 +1951,10 @@ class ProofHarness:
                 "usage": {"status": "unavailable", "reason": "Process-level accounting"},
                 "estimates": {"total_cost_usd": None, "source": "unavailable"},
             }
+            self._record_completed_attempt(receipt_record, t_end_ns)
+            self._handle_retry_policy(receipt_record, retried_videos)
+            self._check_error_guard()
             receipts.append(receipt_record)
-            with self._lock:
-                completed_ns = max(time.monotonic_ns(), t_end_ns, self._last_completed_ns + 1)
-                self._last_completed_ns = completed_ns
-                self.completion_order.append({
-                    "attempt_id": attempt_id,
-                    "completed_monotonic_ns": completed_ns,
-                })
         return receipts
 
     def _batched_worker(self, retried_videos: set[str]) -> None:
@@ -1871,14 +1999,7 @@ class ProofHarness:
             if not work_items:
                 continue
             claim_event_ids = {it["video_id"]: claim_event_id for it in work_items}
-            receipts = self.process_batch(work_items, claim_event_ids)
-            with self._lock:
-                for r in receipts:
-                    self.attempts.append(r)
-                    self._handle_retry_policy(r, retried_videos)
-                    self._check_error_guard()
-                    if self.abort_event.is_set():
-                        break
+            self.process_batch(work_items, claim_event_ids, retried_videos)
             if self.abort_event.is_set():
                 return
 
@@ -1923,15 +2044,13 @@ class ProofHarness:
                 continue
 
             for item in work_items:
-                if self.abort_event.is_set():
-                    break
+                # Already-claimed items are in-flight work: record them even after abort.
                 receipt = self.process_item(item, claim_event_id)
                 with self._lock:
-                    self.attempts.append(receipt)
                     self._handle_retry_policy(receipt, retried_videos)
                 self._check_error_guard()
-                if self.abort_event.is_set():
-                    break
+            if self.abort_event.is_set():
+                break
 
         if not self.abort_event.is_set():
             self._finish_with_preview()
@@ -1952,21 +2071,20 @@ class ProofHarness:
         if not preview_resp.get("ok") or resp_data.get("can_apply") is not False:
             req_bytes = len(json.dumps(preview_payload, ensure_ascii=False).encode("utf-8"))
             resp_bytes = len(json.dumps(preview_resp, ensure_ascii=False).encode("utf-8"))
-            with self._lock:
-                self.transport_failures.append(
-                    {
-                        "event_id": f"tf-preview-{secrets.token_hex(4)}",
-                        "http_event_id": preview_event_id,
-                        "occurred_monotonic_ns": time.monotonic_ns(),
-                        "attempt_id": None,
-                        "video_id": None,
-                        "stage": "preview",
-                        "reason": "Preview failed or can_apply was not False",
-                        "request_bytes": req_bytes,
-                        "response_bytes": resp_bytes,
-                        "wall_ms": wall_ms,
-                    }
-                )
+            self._append_transport_failure(
+                {
+                    "event_id": f"tf-preview-{secrets.token_hex(4)}",
+                    "http_event_id": preview_event_id,
+                    "occurred_monotonic_ns": time.monotonic_ns(),
+                    "attempt_id": None,
+                    "video_id": None,
+                    "stage": "preview",
+                    "reason": "Preview failed or can_apply was not False",
+                    "request_bytes": req_bytes,
+                    "response_bytes": resp_bytes,
+                    "wall_ms": wall_ms,
+                }
+            )
             raise ProofRunError(
                 f"apply_reshelving preview returned can_apply={resp_data.get('can_apply')}; "
                 f"must stay False when librarian_apply_enabled=False."
@@ -2157,18 +2275,26 @@ class ProofHarness:
             "card_builder": {"path": "fingerprints/card_builder.py", "sha256": sha(card_builder_bytes), "bytes": len(card_builder_bytes)},
         }
 
-        # 6. Execution
-        git_sha = "0" * 40
-        try:
-            g_out = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT)).decode("utf-8").strip()
-            if len(g_out) == 40 and all(c in "0123456789abcdef" for c in g_out):
-                git_sha = g_out
-        except Exception:
-            pass
+        # 6. Execution identity: launch SHA is the measurement identity; finish SHA is archive-time.
+        finish_identity = self._capture_execution_identity()
+        self.finish_identity = finish_identity
+        launch_identity = self.launch_identity or finish_identity
+        launch_prints = launch_identity.get("code_fingerprints") or {}
+        finish_prints = finish_identity.get("code_fingerprints") or {}
+        code_drift = launch_prints != finish_prints
+        document_only = []
+        other_dirty = []
+        for line in finish_identity.get("dirty_entries") or []:
+            path = line[3:] if len(line) > 3 else line
+            path = path.split(" -> ")[-1].strip().replace("\\", "/")
+            if path.startswith("docs/"):
+                document_only.append(line)
+            else:
+                other_dirty.append(line)
 
         execution = {
             "checkout_root": str(ROOT),
-            "git_sha": git_sha,
+            "git_sha": launch_identity.get("git_sha") or finish_identity.get("git_sha") or "0" * 40,
             "start_monotonic_ns": self.run_start_monotonic_ns,
             "end_monotonic_ns": self.run_end_monotonic_ns,
             "fingerprints": fingerprints,
@@ -2231,9 +2357,10 @@ class ProofHarness:
                 "tools": [],
                 "concurrency": self.concurrency,
                 "max_retries": 1,
-                "wall_budget_ms": 7200000,
+                "wall_budget_ms": int(self.wall_budget_ms),
                 "error_rate_limit": 0.10,
-                "error_rate_min_attempts": 20,
+                "error_rate_min_attempts": int(self.error_rate_min_attempts),
+                "guard_rule": copy.deepcopy(self.guard_rule),
                 "output_schema_text": self.output_schema_text,
                 "output_schema_sha256": self.output_schema_sha256,
             },
@@ -2261,6 +2388,19 @@ class ProofHarness:
                 "calls": self.calls,
                 "usage_totals": usage_totals,
                 "wall_ms_attribution": "attempt.wall_ms = call wall_ms // batch_size; call totals in calls[]",
+                "guard_rule": copy.deepcopy(self.guard_rule),
+                "card_profile": {
+                    "selection_version": self.selection_version
+                    or (self.manifest.get("card_profile") or {}).get("selection_version"),
+                    "schema_version": self.card_schema,
+                },
+                "execution_identity": {
+                    "launch": launch_identity,
+                    "finish": finish_identity,
+                    "code_drift": code_drift,
+                    "document_only_dirty_entries": document_only,
+                    "non_document_dirty_entries": other_dirty,
+                },
             },
         }
 
@@ -2284,15 +2424,32 @@ class ProofHarness:
         try:
             self.initialize_database_and_freeze(isolated_db)
             self._save_before_state(isolated_db)
+            self.launch_identity = self._capture_execution_identity()
             self.start_server()
             self.run_proof_loop()
-            self.verify_after_state(isolated_db)
-            self._save_after_state(isolated_db)
+            try:
+                self.verify_after_state(isolated_db)
+                self._save_after_state(isolated_db)
+            except Exception as exc:
+                if not self.abort_event.is_set():
+                    raise
+                self.cleanup_errors.append(f"post-abort snapshot: {exc}")
+                try:
+                    if not self.after_state:
+                        idx = index_mod.Index.open(isolated_db)
+                        self.after_state = self._snapshot_state(idx._conn)
+                        idx.close()
+                    self._save_after_state(isolated_db)
+                except Exception as inner:
+                    self.cleanup_errors.append(f"post-abort after-state: {inner}")
             self.run_end_monotonic_ns = max(time.monotonic_ns(), self.run_start_monotonic_ns + 1_000_000)
             receipts_path = self.write_receipts()
             return receipts_path
         finally:
-            self.stop_server()
+            try:
+                self.stop_server()
+            except Exception as exc:
+                self.cleanup_errors.append(f"stop_server: {exc}")
             self.helper_stopped = True
 
 
@@ -2334,7 +2491,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--model",
         type=str,
         default="claude-sonnet-5",
-        help="Subscription model ID for claude -p (default: claude-sonnet-5)",
+        help="Subscription model ID for claude -p (claude-sonnet-5 or claude-opus-5; default: claude-sonnet-5). No silent fallback.",
     )
     parser.add_argument(
         "--concurrency",
