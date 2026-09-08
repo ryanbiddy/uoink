@@ -1,0 +1,21 @@
+{
+  "procedure": "AS5 real child: interruption inside Popen",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "tests/library_work_astra/test_phase3_acceptance5.py",
+    "--execute-launch-probe"
+  ],
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "input_hashes": {
+    "server.py": "4941b29457a4eb80cb343ebf6ed54079fd7858bb75341f8d81f8f494c12c526f",
+    "source_subscriptions.py": "2f16abe90df1a9b30e80b6e465cda9b1aeb4b2e8b0308c4d8d3eb4a2b131be0e",
+    "tests/library_work_astra/test_phase3_acceptance5.py": "dd2345ef2e4a6ca7af53db43f9f889e00861053aa04443914fe707c75177137d"
+  },
+  "interrupt_propagated": true,
+  "child_pid": 62512,
+  "real_child_running": true,
+  "child_status": "unknown",
+  "probe": "unknown",
+  "all_created_children_reaped": true
+}

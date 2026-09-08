@@ -1,0 +1,302 @@
+{
+  "procedure": "S21",
+  "result": "AUTOMATED PASS; browser observation still required",
+  "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2",
+  "fixture_downloads": 1,
+  "fixture_transcripts": 1,
+  "model_calls": 0,
+  "forbidden_attempts": [],
+  "connections": [
+    [
+      "127.0.0.1",
+      60408
+    ],
+    [
+      "127.0.0.1",
+      60408
+    ],
+    [
+      "127.0.0.1",
+      60408
+    ],
+    [
+      "127.0.0.1",
+      60407
+    ],
+    [
+      "127.0.0.1",
+      60407
+    ],
+    [
+      "127.0.0.1",
+      60407
+    ],
+    [
+      "127.0.0.1",
+      60408
+    ],
+    [
+      "127.0.0.1",
+      60407
+    ]
+  ],
+  "prepare_observations": [
+    {
+      "after_commit": true,
+      "video_id": "episode_7fc8c898789"
+    }
+  ],
+  "ownership_observations": [
+    {
+      "boundary": "download",
+      "start_id": "st_91d5cc08f43603156727f63114af1930",
+      "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+      "claim": {
+        "start_id": "st_91d5cc08f43603156727f63114af1930",
+        "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+        "owner_token_hash": "628ddfe3970f3ea8279c36b2e0cd59bf84abe1f19a4554618ba109cf0ecedd5e",
+        "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+        "pid": 59556,
+        "created_ms": 1788898129163,
+        "claimed_ms": 1788898130122
+      },
+      "capture_lock_exclusive": true
+    },
+    {
+      "boundary": "transcription",
+      "start_id": "st_91d5cc08f43603156727f63114af1930",
+      "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+      "claim": {
+        "start_id": "st_91d5cc08f43603156727f63114af1930",
+        "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+        "owner_token_hash": "628ddfe3970f3ea8279c36b2e0cd59bf84abe1f19a4554618ba109cf0ecedd5e",
+        "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+        "pid": 59556,
+        "created_ms": 1788898129163,
+        "claimed_ms": 1788898130122
+      },
+      "capture_lock_exclusive": true
+    },
+    {
+      "boundary": "publication",
+      "start_id": "st_91d5cc08f43603156727f63114af1930",
+      "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+      "claim": {
+        "start_id": "st_91d5cc08f43603156727f63114af1930",
+        "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+        "owner_token_hash": "628ddfe3970f3ea8279c36b2e0cd59bf84abe1f19a4554618ba109cf0ecedd5e",
+        "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+        "pid": 59556,
+        "created_ms": 1788898129163,
+        "claimed_ms": 1788898130122
+      },
+      "capture_lock_exclusive": true
+    },
+    {
+      "boundary": "publication_returned",
+      "start_id": "st_91d5cc08f43603156727f63114af1930",
+      "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+      "claim": {
+        "start_id": "st_91d5cc08f43603156727f63114af1930",
+        "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+        "owner_token_hash": "628ddfe3970f3ea8279c36b2e0cd59bf84abe1f19a4554618ba109cf0ecedd5e",
+        "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+        "pid": 59556,
+        "created_ms": 1788898129163,
+        "claimed_ms": 1788898130122
+      },
+      "capture_lock_exclusive": true
+    },
+    {
+      "boundary": "settled",
+      "start_id": "st_91d5cc08f43603156727f63114af1930",
+      "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+      "claim_released": true,
+      "capture_lock_available": true
+    }
+  ],
+  "candidate_sha": "1830b7aad1515d803b7ac4afaa9b0da037178864",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "tests/library_work_astra/test_phase3_s21.py",
+    "--execute-s21",
+    "--hold-seconds",
+    "5"
+  ],
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "incarnation": {
+    "identity": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2#81ea2cd742d9bc80",
+    "record": {
+      "host": "Ryan-PC",
+      "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2",
+      "token": "81ea2cd742d9bc80",
+      "pid": 59556,
+      "created_ms": 1788898129163,
+      "minted_ms": 1788898129975
+    },
+    "path": "source_instances\\81ea2cd742d9bc80.json"
+  },
+  "input_hashes": {
+    "server.py": "4941b29457a4eb80cb343ebf6ed54079fd7858bb75341f8d81f8f494c12c526f",
+    "source_subscriptions.py": "2f16abe90df1a9b30e80b6e465cda9b1aeb4b2e8b0308c4d8d3eb4a2b131be0e",
+    "podcasts.py": "6e87d026e9f5d1d265c498dbb4109cd1f860a515609f3def79c6e29ecaa1dc8f",
+    "clips.py": "baa646e944a829e0c9fccda93b5215d0ce02c098f16f5eee5c4871303a52b874",
+    "index.py": "8b4d59c687e6e202262a5148fb5cab237b55b52d1baf849f882b246ce620d948",
+    "whisper_runner.py": "747cd99c171f0bfc5e054af94d3a8affd9459a289a9e3565500a3da1ea41f921",
+    "library_work.py": "13b91e3615eeeeb29438b7bd831cc899794797edf0cf54a1f0e925f2d0dd5568",
+    "library_cards.py": "2befe80f5d7dbb23922f0f0f7cbd1886ef718447954387824405fd56907823c2",
+    "migrations\\0028_source_subscriptions.sql": "0aa6d273fd9c1b211eb39d573b7e4eb32766e9e9a12b38828264310d6f528dde",
+    "tests\\library_work_astra\\test_phase3_s21.py": "d17a84c65d126abc60774ccb5fe1b63f6195faca4435f6d2a8e8f116e326b3a7",
+    "docs\\library\\taxonomy-v3-2026-09-07.json": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+    "scripts\\librarian\\prompts\\assign.md": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32"
+  },
+  "helper_url": "http://127.0.0.1:60408",
+  "feed_url": "http://127.0.0.1:60407/feed.xml",
+  "provenance": {
+    "video_id": "episode_7fc8c898789",
+    "episode_id": 1,
+    "feed_url": "http://127.0.0.1:60407/feed.xml",
+    "guid": "s21-entry-1",
+    "capture_key": "podcast:c06ef9bda62af795b412f8b2dadcabb5278a4ccc53496812fd8855d169841b3d",
+    "episode_url": "http://127.0.0.1:60407/episode",
+    "source_type": "episode",
+    "platform": "podcast"
+  },
+  "source_status": {
+    "ok": true,
+    "schema_version": 1,
+    "contract_version": "phase3-v1-2026-09-07",
+    "source": {
+      "source_id": "src_1176759d2affc79bf02026140822ff0e717ca1b99087cfd1ee11fcbce5ecd47a",
+      "kind": "podcast_rss",
+      "canonical_url": "http://127.0.0.1:60407/feed.xml",
+      "display_name": null,
+      "adapter": "podcast_rss_v1",
+      "consent_state": "on",
+      "revision": 1,
+      "consent_epoch": 1,
+      "detection_enabled": true,
+      "archived": false,
+      "poll_interval_min": 15,
+      "boundary": "none",
+      "enrollment": {
+        "cap": 25,
+        "enrolled": 0,
+        "initial_completed": true,
+        "known_candidates": 0,
+        "pending": false,
+        "remaining_initial_slots": 0,
+        "coverage": "complete",
+        "initial_completed_ms": 1788898129848
+      },
+      "allowance": {
+        "utc_day": "2026-09-08",
+        "cap": 10,
+        "reserved": 0,
+        "charged": 1,
+        "remaining": 9,
+        "resets_at_ms": 1788912000000,
+        "capture_not_before_ms": 1788899929848,
+        "hold_reason": null,
+        "hold_until_ms": null
+      },
+      "detection": {
+        "cursor_revision": 2,
+        "enabled": true,
+        "last_poll_attempt_ms": 1788899029848,
+        "last_poll_success_ms": 1788899029848,
+        "next_poll_at_ms": 1788899929848,
+        "observed_count": 1,
+        "coverage": "complete",
+        "truncated": false,
+        "consecutive_failures": 0,
+        "poll_in_progress": false,
+        "error": null
+      },
+      "item_counts": {
+        "observed": 0,
+        "eligible": 0,
+        "reserved": 0,
+        "started": 0,
+        "uncertain": 0,
+        "committed": 1,
+        "failed": 0,
+        "deleted": 0
+      },
+      "in_flight": [],
+      "capture_status": "not_due",
+      "legacy": {
+        "feed_id": 1,
+        "playlist_id": null
+      },
+      "created_at_ms": 1788898129848,
+      "updated_at_ms": 1788899029848
+    },
+    "items": [
+      {
+        "item_id": "si_40ed6ace0725e3f1f004cd3f19d7584f9e84def51a6dcbb7f4cc2ab8b1bd9cad",
+        "entry_id": "s21-entry-1",
+        "title": "S21 controlled capture",
+        "canonical_url": "http://127.0.0.1:60407/episode",
+        "published_at_ms": 1788782400000,
+        "first_seen_ms": 1788899029848,
+        "last_seen_ms": 1788899029848,
+        "eligibility": "future",
+        "capture_state": "committed",
+        "blocked_reason": null,
+        "actual_attempts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "start_id": "st_91d5cc08f43603156727f63114af1930",
+        "start_state": "succeeded",
+        "charged_utc_day": "2026-09-08",
+        "video_id": "episode_7fc8c898789",
+        "committed_at_ms": 1788899029848,
+        "classification": {
+          "state": "waiting_for_client",
+          "work_id": "99obcICsWTGQ5A7vyk-euRIEIHVFH2Vj",
+          "run_id": "ss_bb8e9e94cbe0262f506ab942d78bcce496d75cac2cd71810cb3d4400f02ab9ed"
+        }
+      }
+    ],
+    "next_item_cursor": null,
+    "in_flight": [],
+    "as_of_ms": 1788899029848
+  },
+  "video_id": "episode_7fc8c898789",
+  "clip": {
+    "clip_id": 1,
+    "video_id": "episode_7fc8c898789",
+    "seq": 0,
+    "start": 12.5,
+    "end": 21.75,
+    "text": "S21 fixture: durable capture waits for complete publication.",
+    "speaker": null,
+    "source_deep_link": "http://127.0.0.1:60407/episode#t=12",
+    "cue_count": 1,
+    "media_revision": "d6783cb031df5d6fe787449d8b3e4674b546a25029c88910ee12388d966accd2",
+    "speaker_state": "absent",
+    "speaker_labels_json": "[]",
+    "speaker_spans_json": "[{\"cue_hash\": \"5b680727f9964e5daa7aa4046f54bda1ddf3516897f166a908273314f037395b\", \"cue_seq\": 0, \"end\": 21.75, \"label_index\": null, \"start\": 12.5, \"text_end\": 60, \"text_start\": 0}]",
+    "chapter_seq": null,
+    "chapter_seqs_json": "[]"
+  },
+  "unfiled": true,
+  "evidence_sha256": "eb193f5eec1e3fb963476235f404e0f9b99b8bdd24bd1a78cb5d3f17624b1dc6",
+  "artifact_hashes": {
+    "evidence.db": "eb193f5eec1e3fb963476235f404e0f9b99b8bdd24bd1a78cb5d3f17624b1dc6",
+    "fixture.transcript.json": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+    "helper\\server.log": "1ec3a0d27c9cc2bc434fa9695b09d3c7545a8feed155005de487e90eff7c1573",
+    "source_instances\\81ea2cd742d9bc80.json": "f58fa8a7c74e08eac78f21f0e442dab3d81d26941f40f2e10f2a19197da2f14b",
+    "Podcasts\\untitled-podcast\\s21-controlled-capture-7fc8c898789\\s21-controlled-capture-7fc8c898789.json": "367259673d1a994b209925f1fa5e4d2e3fd35f195626a133a0da5974b7f68f28",
+    "Podcasts\\untitled-podcast\\s21-controlled-capture-7fc8c898789\\s21-controlled-capture-7fc8c898789.md": "4037befed2622ee6dfcac0bb06353fdd919c510ba498dd3949cb235e91ed6c7d",
+    "Podcasts\\untitled-podcast\\s21-controlled-capture-7fc8c898789\\.media-inputs\\93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7.json": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+    "library\\taxonomies\\8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04.json": "f3372d0686d56a4a2adb977e916a5cdcbf32405917bb583da4325ebead116d26"
+  }
+}

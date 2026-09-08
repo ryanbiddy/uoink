@@ -1,0 +1,75 @@
+{
+ "procedure": "AS-02 process recovery",
+ "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g",
+ "steps": [
+  {
+   "label": "1 parent alive, child alive",
+   "claim": {
+    "start_id": "st_procrec",
+    "capture_key": "procrec",
+    "owner_token_hash": "3907791a831e2e5c383fba601a0f08e0bfae87a56c2f45121101976d874ee3d6",
+    "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g#493d600dc23c8219",
+    "pid": 64784,
+    "created_ms": 1788898135797,
+    "claimed_ms": 1788898135956
+   },
+   "children": "alive",
+   "instance_liveness": "alive",
+   "probe": "running"
+  },
+  {
+   "label": "2 parent killed, child surviving",
+   "claim": {
+    "start_id": "st_procrec",
+    "capture_key": "procrec",
+    "owner_token_hash": "3907791a831e2e5c383fba601a0f08e0bfae87a56c2f45121101976d874ee3d6",
+    "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g#493d600dc23c8219",
+    "pid": 64784,
+    "created_ms": 1788898135797,
+    "claimed_ms": 1788898135956
+   },
+   "children": "alive",
+   "instance_liveness": "dead",
+   "probe": "running"
+  },
+  {
+   "label": "3 parent killed, child killed",
+   "claim": {
+    "start_id": "st_procrec",
+    "capture_key": "procrec",
+    "owner_token_hash": "3907791a831e2e5c383fba601a0f08e0bfae87a56c2f45121101976d874ee3d6",
+    "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g#493d600dc23c8219",
+    "pid": 64784,
+    "created_ms": 1788898135797,
+    "claimed_ms": 1788898135956
+   },
+   "children": "dead",
+   "instance_liveness": "dead",
+   "probe": "stopped"
+  }
+ ],
+ "parent": {
+  "parent_pid": 64784,
+  "child_pid": 63548,
+  "claim": "claimed",
+  "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g#493d600dc23c8219",
+  "claim_record": {
+   "start_id": "st_procrec",
+   "capture_key": "procrec",
+   "owner_token_hash": "3907791a831e2e5c383fba601a0f08e0bfae87a56c2f45121101976d874ee3d6",
+   "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g#493d600dc23c8219",
+   "pid": 64784,
+   "created_ms": 1788898135797,
+   "claimed_ms": 1788898135956
+  }
+ },
+ "child_alive_after_parent_kill": "alive",
+ "result": "PASS",
+ "assertions": {
+  "parent alive -> probe running": true,
+  "parent dead + child alive -> children alive": true,
+  "parent dead + child alive -> instance dead": true,
+  "parent dead + child alive -> probe running (not stopped)": true,
+  "parent dead + child dead -> probe stopped": true
+ }
+}
