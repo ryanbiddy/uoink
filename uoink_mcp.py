@@ -22,7 +22,9 @@ making 29 stdio tools.
 
 from __future__ import annotations
 
+import json
 import sys
+import time
 from pathlib import Path
 
 # CRIT-1 (C-01): the installer bundles the embeddable Windows Python, whose
@@ -49,6 +51,26 @@ except ImportError:
         file=sys.stderr,
     )
     raise SystemExit(1)
+
+# Enforce strict JSON decoding (reject duplicate keys) at raw stdio boundary
+_orig_jsonrpc_validate_json = mcp_types.JSONRPCMessage.model_validate_json
+
+
+def _strict_jsonrpc_validate_json(cls, json_data, *args, **kwargs):
+    def _reject_pairs(pairs):
+        seen = set()
+        for k, v in pairs:
+            if k in seen:
+                raise ValueError(f"Duplicate JSON key: {k}")
+            seen.add(k)
+        return dict(pairs)
+
+    if isinstance(json_data, (str, bytes)):
+        json.loads(json_data, object_pairs_hook=_reject_pairs)
+    return _orig_jsonrpc_validate_json(json_data, *args, **kwargs)
+
+
+mcp_types.JSONRPCMessage.model_validate_json = classmethod(_strict_jsonrpc_validate_json)
 
 
 # server.py configures a stdout log handler at import time. MCP stdio uses
@@ -661,15 +683,35 @@ def _register_phase4_stdio() -> None:
 
     def activity_result(arguments):
         args = arguments if arguments is not None else {}
+        start_time = time.monotonic()
         try:
             import library_analysis
             envelope = library_analysis.get_library_activity(args)
+            if envelope.get("ok") is not True:
+                text = library_resources.render_tool_text(envelope)
+                return mcp_types.ServerResult(mcp_types.CallToolResult(
+                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+
+            # Deadline check before rendering
+            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
+                text = library_resources.render_tool_text(envelope)
+                return mcp_types.ServerResult(mcp_types.CallToolResult(
+                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+
             text = library_resources.render_tool_text(envelope)
+
+            # Deadline check after rendering (charged to the same request)
+            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
+                text = library_resources.render_tool_text(envelope)
+                return mcp_types.ServerResult(mcp_types.CallToolResult(
+                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+
             is_error = envelope.get("ok") is not True
             payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
             if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
-                envelope = ResourceError("resource_too_large", details={
-                    "what": "get_library_activity", "next_step": "lower limit or read a smaller interval"}).envelope()
+                envelope = library_analysis.error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
                 text, is_error = library_resources.render_tool_text(envelope), True
             return mcp_types.ServerResult(mcp_types.CallToolResult(
                 content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
@@ -697,6 +739,10 @@ def _register_phase4_stdio() -> None:
                         tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
                         tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
                     if tool.name == "get_library_activity":
+                        if "get_library_activity" in uoink_mcp_tools.TOOL_REGISTRY:
+                            reg_spec = uoink_mcp_tools.TOOL_REGISTRY["get_library_activity"]
+                            tool.inputSchema = reg_spec.input_schema
+                            tool.description = reg_spec.description
                         tool.annotations = mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True)
             except (AttributeError, TypeError, ValueError):  # pragma: no cover
                 pass

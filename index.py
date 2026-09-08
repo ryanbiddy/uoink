@@ -521,6 +521,25 @@ class Index:
                     self._conn.rollback()
                 raise
 
+    @contextmanager
+    def read_snapshot(self):
+        """Hold Index lock and an explicit read transaction across reading."""
+        with self._lock:
+            if self._conn.in_transaction:
+                raise RuntimeError(
+                    "cannot start a read snapshot while another "
+                    "transaction is active"
+                )
+            try:
+                self._conn.execute("BEGIN DEFERRED")
+                yield self._conn
+            finally:
+                if self._conn.in_transaction:
+                    self._conn.rollback()
+
+    snapshot = read_snapshot
+    read_transaction = read_snapshot
+
     def library_service(self):
         """One service seam, shared by transports and corpus lifecycle hooks."""
         service = getattr(self, "_library_work_service", None)
