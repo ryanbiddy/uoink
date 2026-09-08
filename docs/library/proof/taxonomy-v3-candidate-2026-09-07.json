@@ -3,12 +3,12 @@
   "version_id": "taxonomy-v3-2026-09-07",
   "name": "Living Library Taxonomy v3",
   "description": "Taxonomy v2 with boundary cues sharpened from the stage 2 development errors; same shelves, ids and paths.",
-  "status": "approved",
+  "status": "candidate",
   "parent_version_id": "taxonomy-v2-2026-09-05",
   "created_at": "2026-09-07T00:00:00Z",
   "approval": {
-    "approved_by": "Codex / GPT-6 Astra (INDUCTION-AUDIT-16)",
-    "approval_record": "docs/library/INDUCTION-AUDIT-16-2026-09-07.md",
+    "approved_by": null,
+    "approval_record": null,
     "decision_path": "docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json",
     "decision_sha256": "ee16c1426287f3c2271dbe37bb67c7eae9dc091f7fe9eb0bfd7855c5fd575589",
     "modified_shelf_ids": [
