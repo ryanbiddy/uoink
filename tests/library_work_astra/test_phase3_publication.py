@@ -22,15 +22,13 @@ PROMPT_HASH = digest('Astra fixture assignment prompt; never executed.')
 
 def configure(rig):
     library = rig.idx.library_service()
-    approved = library.approve_taxonomy(rig.context, dict(
+    approved = library.approve_taxonomy(rig.library_context, dict(
         version_id='astra-standing-v1', nodes=[dict(
             shelf_id='astra-testing', path=['Testing'], definition='Fixture tests',
             include=['test evidence'], exclude=['unrelated material'])]))
     assert approved['ok'], approved
-    with rig.idx.write_transaction() as conn:
-        conn.execute('''INSERT INTO source_classification_policy
-            (singleton,version_id,prompt_hash,configured_by,configured_at_ms)
-            VALUES(1,?,?,?,?)''', ('astra-standing-v1', PROMPT_HASH, 'fixture-operator', rig.clock()))
+    ok(rig.svc.configure_classification_policy(rig.context, dict(
+        version_id='astra-standing-v1', prompt_hash=PROMPT_HASH)))
     return library
 
 
@@ -91,7 +89,46 @@ def test_s16_each_publication_prefix_waits_for_complete_evidence(rig, boundary):
     assert (citation['timestamp_start'], citation['timestamp_end']) == (12.5, 21.75)
     assert (clip['start'], clip['end']) == (12.5, 21.75)
     status = ok(rig.svc.source_status(rig.context, {'source_id': sid}))
-    assert status['items'][0]['classification_state'] == 'waiting_for_client'
+    assert status['items'][0]['classification']['state'] == 'waiting_for_client'
+
+
+def test_s16_real_podcast_upsert_crash_does_not_enqueue(rig, monkeypatch):
+    """Real publisher, transcript and files; stop before its citation/clip commit."""
+    import podcasts
+    from test_phase3_support import snapshot
+
+    configure(rig)
+    sid = ok(rig.svc.register_source(rig.context, dict(
+        kind='podcast_rss', url='https://show.example/feed.xml')))['source']['source_id']
+    rig.consent(sid, 'on')
+    rig.feed.responses[sid] = snapshot([dict(
+        entry_id='publication-fixture', title='Publication fixture',
+        canonical_url='https://show.example/episode',
+        metadata=dict(identity_method='guid', audio_url='https://show.example/fixture.mp3'))])
+    rig.svc.poll_source(sid)
+    start = rig.start(sid)
+    episode_id = item_rows(rig.idx, sid)[0]['legacy_episode_id']
+    transcript = rig.root / 'synthetic.transcript.json'
+    transcript.write_text(json.dumps(dict(model='synthetic', language='en', segments=[dict(
+        start=12.5, end=21.75, text='Durable publication fixture.')])), encoding='utf-8')
+    with rig.idx.write_transaction() as conn:
+        conn.execute("UPDATE podcast_episodes SET transcript_status='done', transcript_local_path=? WHERE id=?",
+                     (str(transcript), episode_id))
+
+    def stop_before_citations(*args, **kwargs):
+        raise Crash('real_podcast_after_upsert')
+
+    with monkeypatch.context() as patch:
+        patch.setattr(rig.idx, 'insert_citations', stop_before_citations)
+        with pytest.raises(Crash, match='real_podcast_after_upsert'):
+            podcasts.episode_to_corpus(rig.idx, episode_id, data_root=rig.root)
+    assert len(rows(rig.idx, 'yoinks')) == 1
+    assert rows(rig.idx, 'citations') == rows(rig.idx, 'clips') == []
+    rig.backend.workers[start['backend_id']] = 'unknown'
+    rig.restart()
+    rig.svc.dispatch_classification()
+    assert rows(rig.idx, 'source_classification_outbox') == rows(rig.idx, 'library_work') == []
+    assert ledger(rig.idx, sid)[0]['state'] in ('started', 'uncertain')
 
 
 def test_s16_outbox_write_failure_keeps_published_item_visible_and_repairs_once(rig):
@@ -176,7 +213,7 @@ def test_s17_conflicting_deterministic_run_is_blocked_not_adopted(rig, mismatch)
     if mismatch == 'video':
         target = rig.publication.stage(rig.idx, {'capture_key': 'youtube:v0000000999'})
     if mismatch == 'taxonomy':
-        result = library.approve_taxonomy(rig.context, dict(version_id='astra-other-v1', nodes=[dict(
+        result = library.approve_taxonomy(rig.library_context, dict(version_id='astra-other-v1', nodes=[dict(
             shelf_id='other', path=['Other'], definition='Different fixture taxonomy',
             include=['other'], exclude=['tests'])]))
         assert result['ok'], result
@@ -192,7 +229,7 @@ def test_s17_conflicting_deterministic_run_is_blocked_not_adopted(rig, mismatch)
         with rig.idx.write_transaction() as conn:
             conn.execute('UPDATE library_manifest SET source_revision=? WHERE run_id=?', ('f' * 64, run_id))
     else:
-        result = library.prepare_run(rig.context, dict(
+        result = library.prepare_run(rig.library_context, dict(
             run_id=run_id, version_id=version, prompt_hash=prompt, video_ids=[target]))
         assert result['ok'], result
     before = {name: rows(rig.idx, name) for name in ('library_runs', 'library_manifest', 'library_work')}
@@ -207,7 +244,7 @@ def test_s17_conflicting_deterministic_run_is_blocked_not_adopted(rig, mismatch)
 def test_s17_frozen_existing_manifest_is_unchanged_by_new_capture(rig):
     library = configure(rig)
     existing = rig.publication.stage(rig.idx, {'capture_key': 'youtube:v0000000999'})
-    result = library.prepare_run(rig.context, dict(
+    result = library.prepare_run(rig.library_context, dict(
         run_id='fixture-measured-frozen', version_id='astra-standing-v1',
         prompt_hash=PROMPT_HASH, video_ids=[existing]))
     assert result['ok'], result

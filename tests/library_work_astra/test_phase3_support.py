@@ -1,55 +1,18 @@
-"""Independent fixtures for phase3-v1-2026-09-07 (run AM, Astra).
+"""Independent Phase 3 acceptance fixtures, aligned in run AS.
 
-Run only these files, from the project root, in PowerShell:
-  $tests = (Get-ChildItem tests/library_work_astra/test_phase3_*.py).FullName
-  python -m pytest -q -rs -p no:cacheprovider $tests
-Integration MUST also run with $env:PHASE3_REQUIRE_IMPLEMENTATION='1'. Missing
-0028/source_subscriptions then fails instead of skipping. An existing module with
-missing methods or broken imports ALWAYS fails. No contract DDL is substituted
-for a missing implementation. The harness checks are not acceptance evidence.
+Run the PowerShell commands in PHASE3-ACCEPTANCE-2026-09-08.md. The actual
+0028 migration and actual Phase 2 prepare_run are mandatory in strict mode.
+ServiceDriver only translates calls to the real public API; it never repairs
+state, supplies a missing safety check, or catches implementation failures.
+Feed.poll returns AdapterResult/Observation. Backend implements preflight,
+bind, run, probe and published_video_id. Publication is synthetic evidence,
+not a production publication implementation or an injected service dependency.
 
-The contract freezes registry payloads and SQL, but does NOT name the Python
-scheduler, backend, publication, or fault-injection seams. ASSUMPTIONS for Fable:
-* source_subscriptions.SourceSubscriptionService(index, clock=callable UTC ms,
-  adapters={adapter_name: fake}, capture_backend=fake, publication=fake,
-  instance_id=str, crash_hook=callable(boundary)). Construction does local repair
-  only; reconcile() is explicitly callable and never fetches/starts capture.
-* The four named tools are methods(context, args), using library_work.RequestContext.
-  mint_user_intent(context, {operation: args_without_token}) is a trusted LOCAL
-  seam, NOT a fifth registry tool. archive_source(context, {source_id}) archives.
-* poll_source(source_id, manual=False) claims/fetches/commits synchronously;
-  detection_tick() visits due sources. Adapter.fetch(source, cursor) receives SQL
-  row dictionaries and returns snapshot() below. No HTTP parser is mocked here.
-* reserve_capture(source_id, item_id) and dispatch_capture(start_id, owner_token)
-  are separate public scheduler seams. Operational denial can be any result;
-  assertions inspect the frozen ledger, not invented operational result schemas.
-* complete_capture(start_id, owner_token), fail_capture(start_id, owner_token,
-  code='download_failed'), corpus_deleted(video_id), dispatch_classification()
-  perform the named local transitions; fail_capture consults backend.inspect.
-* Backend.preflight(start), enqueue(conn, start), dispatch(backend_id, owner_token),
-  inspect(backend_id), acquire_capture_key(key, owner_token), and
-  release_capture_key(key, owner_token) are injected. enqueue MUST use the caller's
-  transaction. inspect returns {state: unknown|alive|stopped}. Dispatch is a fake
-  side-effect spy and never completes automatically. Manual lock ownership is a
-  fake common-dispatcher input, not proof of a production interprocess lock.
-* Publication.inspect(start) / reconcile(start) return {complete, video_id};
-  files, provenance, citations and clips must all exist for complete=True. Tests
-  stage durable artifact prefixes; they do not execute production extraction.
-* crash_hook names used: before_started_commit, after_started_commit,
-  after_backend_insert_before_binding, after_outbox_commit,
-  after_prepare_run_before_outbox_ack. Hooks bracket the actual transaction named;
-  before_started_commit is inside it. BaseException simulates abrupt unwinding.
-  Reopening ALL connections models service restart, not OS kill or power loss.
-
-Align ONLY these plumbing assumptions to the implemented public interface. Keep
-the behavioral assertions and contract payloads. No private service fields are
-read/patched. Fixture SQL seeds legacy/pre-existing/corrupt-boundary states and
-reads the normative ledger; tested transitions always call the service. Real
-Index migrations and real Phase 2 prepare_run remain in use, with no model client.
-Fable's detector ruling wins: YouTube channel/playlist fakes describe Atom windows;
-the normative adapter label youtube_playlist_flat_v1 is retained in the schema.
-Packaging deferred to AN: source_subscriptions.py, 0028, updated registry/adapters
-and dashboard assets need inclusion. These files do not edit packaging.
+The optional service _test_fault_hook is the sole new production-file seam.
+Its five boundaries bracket real durable steps; Crash(BaseException) rolls back
+open transactions. Reopening all connections models process restart, not power
+loss. Tests block network, child processes and non-fixture database access before
+runtime imports. S21 is separately opt-in and Fable-owned; it is not run here.
 """
 
 from __future__ import annotations
@@ -266,6 +229,15 @@ class Feed:
         return result
 
 
+    def poll(self, source, cursor, *, conditional):
+        from source_subscriptions import AdapterResult, Observation
+        result = self.fetch(source, cursor)
+        return AdapterResult(
+            'snapshot', observations=[Observation(**row) for row in result['observations']],
+            coverage=result['coverage'], truncated=result['truncated'],
+            etag=result['etag'], last_modified=result['last_modified'])
+
+
 class Crash(BaseException):
     pass
 
@@ -293,25 +265,35 @@ class Backend:
     def __init__(self, db_path):
         self.db_path = db_path
         self.launches = []
+        self.publication = None
         self.preflight_ok = True
         self.workers = {}
-        self.keys = {}
         self.lock = threading.Lock()
 
-    def preflight(self, start):
-        return {'ok': self.preflight_ok, 'code': None if self.preflight_ok else 'fixture_preflight'}
+    kind = 'astra_fake'
 
-    def acquire_capture_key(self, key, owner_token):
-        with self.lock:
-            if key in self.keys and self.keys[key] != owner_token:
-                return False
-            self.keys[key] = owner_token
-            return True
+    def preflight(self, item, source):
+        from source_subscriptions import CaptureOutcome
+        return None if self.preflight_ok else CaptureOutcome(
+            'preflight_failed', code='fixture_preflight')
 
-    def release_capture_key(self, key, owner_token):
-        with self.lock:
-            if self.keys.get(key) == owner_token:
-                del self.keys[key]
+    def bind(self, conn, start, item, source):
+        return self.enqueue(conn, start)['backend_id']
+
+    def run(self, start, item, source):
+        from source_subscriptions import CaptureOutcome
+        self.dispatch(start['backend_id'], start['owner_token'])
+        return CaptureOutcome('in_flight')
+
+    def probe(self, start):
+        state = self.inspect(start['backend_id'])['state']
+        return 'running' if state == 'alive' else state
+
+    def published_video_id(self, conn, item, source):
+        if self.publication is not None:
+            result = self.publication.inspect({'capture_key': item['capture_key']})
+            return result['video_id'] if result['complete'] else None
+        return None
 
     def enqueue(self, conn, start):
         assert conn.in_transaction, 'Backend insertion escaped reservation transaction'
@@ -323,7 +305,7 @@ class Backend:
         return {'backend_kind': 'astra_fake', 'backend_id': start['start_id']}
 
     def dispatch(self, backend_id, owner_token):
-        with closing(sqlite3.connect(self.db_path)) as conn:
+        with closing(sqlite3.connect(self.db_path, check_same_thread=False)) as conn:
             conn.row_factory = sqlite3.Row
             start = conn.execute('SELECT * FROM source_capture_starts WHERE backend_id=?',
                                  (backend_id,)).fetchone()
@@ -384,7 +366,7 @@ class Publication:
     def inspect(self, start):
         vid = start['capture_key'].split(':', 1)[1]
         corpus, sidecar, marker = self.paths(vid)
-        with closing(sqlite3.connect(self.db_path)) as conn:
+        with closing(sqlite3.connect(self.db_path, check_same_thread=False)) as conn:
             complete = all(path.is_file() for path in (corpus, sidecar, marker)) and all(
                 conn.execute(f'SELECT 1 FROM {table} WHERE video_id=?', (vid,)).fetchone()
                 for table in ('yoinks', 'citations', 'clips'))
@@ -406,6 +388,50 @@ def race(*calls):
         return [future.result(timeout=10) for future in futures]
 
 
+class ServiceDriver:
+    """Compatibility names for existing gates; all transitions use the service."""
+    def __init__(self, service, context):
+        self.service, self.context = service, context
+
+    def __getattr__(self, name):
+        return getattr(self.service, name)
+
+    def poll_source(self, source_id, manual=False):
+        if manual:
+            return self.service.refresh_source(self.context, {'source_id': source_id})
+        claim = self.service.claim_poll(source_id)
+        return self.service.run_claimed_poll(claim) if claim is not None else None
+
+    def detection_tick(self):
+        return self.service.detection_pass()
+
+    def reserve_capture(self, source_id, item_id):
+        return self.service.claim_start(source_id, item_id=item_id)
+
+    def dispatch_capture(self, start_id, owner_token):
+        result = self.service.mark_started(start_id, owner_token)
+        if result.get('outcome') == 'started':
+            return self.service.execute_started(result)
+        return result
+
+    def reconcile(self):
+        return self.service.reconcile_on_startup()
+
+    def complete_capture(self, start_id, owner_token):
+        # The real callback takes the produced video id. Supply the expected
+        # fixture identity even for incomplete output: no fixture completion guard.
+        with self.service.store.read() as conn:
+            row = conn.execute('SELECT capture_key FROM source_capture_starts WHERE start_id=?',
+                               (start_id,)).fetchone()
+        return self.service.complete_capture(start_id, owner_token, row[0].split(':', 1)[1])
+
+    def corpus_deleted(self, video_id):
+        return self.service.note_corpus_deleted([video_id])
+
+    def dispatch_classification(self):
+        return self.service.dispatch_classification_outbox()
+
+
 class Rig:
     def __init__(self, root, module):
         self.root, self.module = root, module
@@ -413,11 +439,15 @@ class Rig:
         self.clock, self.feed, self.faults = Clock(), Feed(), Faults()
         self.backend = Backend(self.path)
         self.publication = Publication(root, self.path)
+        self.backend.publication = self.publication
         self.connections = []
         self.sequence = 0
-        from library_work import RequestContext
-        self.context = RequestContext(authenticated=True, operator=True,
-                                      local_user_confirmed=True, session_id='astra-local', client_id='fixture')
+        self.context = module.RequestContext(authenticated=True, operator=True,
+                                             local_user_confirmed=True,
+                                             session_id='astra-local', transport='dashboard')
+        from library_work import RequestContext as LibraryContext
+        self.library_context = LibraryContext(authenticated=True, operator=True,
+                                              local_user_confirmed=True, session_id='astra-local')
         self.idx, self.svc = self.open()
 
     def open(self):
@@ -432,9 +462,9 @@ class Rig:
         service = self.module.SourceSubscriptionService(
             idx, clock=self.clock, adapters={name: self.feed for name in (
                 'podcast_rss_v1', 'youtube_channel_rss_v1', 'youtube_playlist_flat_v1')},
-            capture_backend=self.backend, publication=self.publication,
-            instance_id=f'astra-instance-{self.sequence}', crash_hook=self.faults)
-        return idx, service
+            backend=self.backend, jitter=lambda: 0,
+            instance_id=f'astra-instance-{self.sequence}', _test_fault_hook=self.faults)
+        return idx, ServiceDriver(service, self.context)
 
     def close(self):
         for idx in self.connections:
@@ -444,6 +474,7 @@ class Rig:
     def restart(self):
         self.close()
         self.idx, self.svc = self.open()
+        self.svc.import_legacy_registries()
         self.svc.reconcile()
 
     def register(self, number=1, kind='youtube_playlist'):
@@ -463,7 +494,7 @@ class Rig:
                     operation_key=key or f'consent-{self.sequence}')
         if state == 'on':
             args['expected_cursor_revision'] = cur['revision']
-        token = ok(self.svc.mint_user_intent(self.context, {'operation': args}))['user_intent_token']
+        token = ok(self.svc.mint_consent_intent(self.context, {'operation': args}))['user_intent_token']
         return dict(args, user_intent_token=token)
 
     def consent(self, sid, state, key=None):

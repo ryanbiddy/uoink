@@ -2,7 +2,7 @@
 
 Crash injection abandons service calls and reopens every connection. Fake worker
 liveness is deliberately independent of wall time: lease expiry cannot prove death.
-See test_phase3_support.py for the Python seams Fable must align at integration.
+The aligned driver uses the public API described in test_phase3_support.py.
 """
 
 import copy
@@ -239,24 +239,29 @@ def test_s15_preexisting_manual_capture_links_without_charge_or_new_handoff(rig)
     assert linked['state'] == 'committed' and linked['video_id'] == vid
     assert ledger(rig.idx) == rows(rig.idx, 'source_classification_outbox') == []
     status = ok(rig.svc.source_status(rig.context, {'source_id': sid}))
-    assert status['items'][0]['classification_state'] == 'not_requested'
+    assert status['items'][0]['classification']['state'] == 'not_requested'
     assert rig.backend.launches == []
 
 
 def test_s15_concurrent_manual_capture_lock_waits_then_links_without_charge(rig):
+    from test_phase3_integration import server_parts
     sid = rig.enrolled(entries=[observation(7)])
     item = item_rows(rig.idx, sid)[0]
-    key = item['capture_key']
-    assert rig.backend.acquire_capture_key(key, 'manual-fixture-owner')
-    rig.svc.reserve_capture(sid, item['item_id'])
-    for start in ledger(rig.idx, sid):
-        rig.svc.dispatch_capture(start['start_id'], start['owner_token'])
-    assert rig.backend.launches == []
-    assert all(row['started_at_ms'] is None for row in ledger(rig.idx, sid))
-    vid = rig.publication.stage(rig.idx, {'capture_key': key})
-    rig.backend.release_capture_key(key, 'manual-fixture-owner')
-    rig.svc.reconcile()
-    rig.svc.reserve_capture(sid, item['item_id'])
+    ns = server_parts(rig)
+    backend = ns['_ServerCaptureBackend']()
+    service = rig.module.SourceSubscriptionService(
+        rig.idx, clock=rig.clock, adapters=rig.svc.adapters, backend=backend)
+    ns['_source_service'] = lambda: service
+    # The existing manual dispatcher holds this lock through extraction.
+    # A dormant thread records scheduling without running extraction or a model.
+    with ns['_extract_lock']:
+        service.advance_source(sid, item_id=item['item_id'])
+        assert all(row['started_at_ms'] is None for row in ledger(rig.idx, sid)), (
+            'Standing capture charged while manual extraction owns the dispatcher')
+        assert ns['launches'] == []
+        vid = rig.publication.stage(rig.idx, {'capture_key': item['capture_key']})
+    service.reconcile_on_startup()
+    service.claim_start(sid, item_id=item['item_id'])
     linked = item_rows(rig.idx, sid)[0]
     assert linked['state'] == 'committed' and linked['video_id'] == vid
     assert rig.allowance(sid)['charged'] == 0

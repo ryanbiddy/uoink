@@ -1095,7 +1095,8 @@ class SourceSubscriptionService:
     def __init__(self, index=None, *, path=None, clock: Callable[[], int] | None = None,
                  adapters: dict | None = None, backend: CaptureBackend | None = None,
                  instance_id: str | None = None, jitter: Callable[[], int] | None = None,
-                 busy_timeout_ms: int = 5000):
+                 busy_timeout_ms: int = 5000,
+                 _test_fault_hook: Callable[[str], None] | None = None):
         if index is not None:
             self.store = _Store(index._conn, index._lock, index=index)
         elif path is not None:
@@ -1108,6 +1109,12 @@ class SourceSubscriptionService:
         self.backend = backend or CaptureBackend()
         self.instance_id = instance_id or f"{socket.gethostname()}:{secrets.token_hex(4)}"
         self.jitter = jitter or (lambda: 0)
+        # Test-only crash/barrier injection; never configured by a transport.
+        self._test_fault_hook = _test_fault_hook
+
+    def _test_boundary(self, name: str) -> None:
+        if self._test_fault_hook is not None:
+            self._test_fault_hook(name)
 
     # ---- small helpers ---------------------------------------------------
     def _now(self) -> int:
@@ -2331,6 +2338,7 @@ class SourceSubscriptionService:
                 self._release(conn, start, now, "attempts_exhausted")
                 return {"outcome": "released", "code": "attempts_exhausted", **base}
             backend_id = self.backend.bind(conn, dict(start), dict(item), dict(source))
+            self._test_boundary("after_backend_insert_before_binding")
             if type(backend_id) is not str or not backend_id:
                 self._release(conn, start, now, "backend_bind_failed")
                 return {"outcome": "released", "code": "backend_bind_failed", **base}
@@ -2349,8 +2357,11 @@ class SourceSubscriptionService:
                 (now + int(source["poll_interval_min"]) * 60_000, now, source["source_id"]))
             start = self._start(conn, start_id)
             item = self._item(conn, item["item_id"])
-            return {"outcome": "started", "owner_token": owner_token, "start": start,
-                    "item": item, "source": source, **base}
+            self._test_boundary("before_started_commit")
+            result = {"outcome": "started", "owner_token": owner_token, "start": start,
+                      "item": item, "source": source, **base}
+        self._test_boundary("after_started_commit")
+        return result
 
     def execute_started(self, started: dict) -> dict:
         start, item, source = started["start"], started["item"], started["source"]
@@ -2408,8 +2419,10 @@ class SourceSubscriptionService:
                 "INSERT OR IGNORE INTO source_classification_outbox (capture_key, video_id, "
                 "committed_at_ms, state, updated_at_ms) VALUES (?,?,?,'pending',?)",
                 (start["capture_key"], video_id, now, now))
-            return {"outcome": "succeeded", "start_id": start_id, "item_id": start["item_id"],
-                    "source_id": start["source_id"], "video_id": video_id}
+            result = {"outcome": "succeeded", "start_id": start_id, "item_id": start["item_id"],
+                      "source_id": start["source_id"], "video_id": video_id}
+        self._test_boundary("after_outbox_commit")
+        return result
 
     def fail_capture(self, start_id: str, owner_token: str, code: str, *,
                      terminal: bool = False, now: int | None = None) -> dict:
@@ -2813,6 +2826,7 @@ class SourceSubscriptionService:
             return {"outcome": "service_unavailable", **base}
         # Step 3: outside the write transaction, the existing Phase 2 service.
         result = self._prepare_run(frozen, video_id)
+        self._test_boundary("after_prepare_run_before_outbox_ack")
         code = None if result.get("ok") else (result.get("error") or {}).get("code", "service_unavailable")
         if code not in (None, "idempotency_conflict"):
             with self.store.write() as conn:
