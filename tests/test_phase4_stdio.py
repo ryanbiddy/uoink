@@ -76,11 +76,20 @@ NEW_PHASE4_READ_TOOLS = {
     "read_library_resource",
 }
 
+# Phase 4 run AV-2: brief generation belongs to the client. The input tool is a
+# read; publish_library_brief is a local write under DATA_ROOT/reach/briefs.
+NEW_PHASE4_BRIEF_TOOLS = {
+    "get_library_brief_input",
+    "publish_library_brief",
+}
+
 # Phase 5 run AZ (contract phase5-v1) registered one stdio tool in parallel with AV-1;
 # discovery must advertise exactly the implemented set (P4-06), so it is expected here.
 PHASE5_ACTIVITY_TOOLS = {"get_library_activity"}
 
 TOTAL_AV1_TOOLS = CANONICAL_25_TOOLS | NEW_PHASE4_READ_TOOLS | PHASE5_ACTIVITY_TOOLS
+# 31 on stdio after AV-2: 25 canonical + 3 read + 1 activity + 2 brief tools.
+TOTAL_AV2_TOOLS = TOTAL_AV1_TOOLS | NEW_PHASE4_BRIEF_TOOLS
 
 
 class _StdioTestClient:
@@ -256,8 +265,9 @@ class TestP406CapabilitiesAndDiscovery:
         finally:
             client.close()
 
-    def test_stdio_tools_list_carries_28_tools(self, tmp_path: Path):
-        """tools/list contains all 25 canonical tools plus 3 new read tools."""
+    def test_stdio_tools_list_carries_31_tools(self, tmp_path: Path):
+        """tools/list contains all 25 canonical tools, the 3 read tools, the activity tool
+        and the 2 brief tools: exactly 31."""
         client = _StdioTestClient(
             [sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
             cwd=tmp_path,
@@ -277,9 +287,11 @@ class TestP406CapabilitiesAndDiscovery:
 
             # All 25 legacy tools must be preserved
             assert CANONICAL_25_TOOLS.issubset(names)
-            # The 3 new tools must be registered
+            # The 3 read tools and the 2 brief tools must be registered
             assert NEW_PHASE4_READ_TOOLS.issubset(names)
-            assert names == TOTAL_AV1_TOOLS
+            assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
+            assert names == TOTAL_AV2_TOOLS
+            assert len(names) == 31
         finally:
             client.close()
 
@@ -332,7 +344,8 @@ class TestP406CapabilitiesAndDiscovery:
             assert "error" in resp_invalid
             assert resp_invalid["error"]["code"] == -32602
 
-            # Missing resource -> -32002
+            # Cold start (AV-1r D7): the isolated profile has no index.db yet, and a
+            # bounded read never creates one -> -32603 carrying library_unavailable.
             missing_uri = f"{URI_PREFIX}items/{encode_key('nonexistent')}/cards/{'0'*64}/spread-longest-v2/{'0'*64}"
             client.send({
                 "jsonrpc": "2.0",
@@ -340,7 +353,29 @@ class TestP406CapabilitiesAndDiscovery:
                 "method": "resources/read",
                 "params": {"uri": missing_uri},
             })
-            resp_missing = client.wait_for(3)
+            resp_cold = client.wait_for(3)
+            assert "error" in resp_cold
+            assert resp_cold["error"]["code"] == -32603
+            assert resp_cold["error"].get("data", {}).get("error", {}).get("code") == "library_unavailable"
+
+            # A legacy tool still creates the library (preserved behaviour for its
+            # existing callers); once storage exists, a missing item is -32002.
+            client.send({
+                "jsonrpc": "2.0",
+                "id": 4,
+                "method": "tools/call",
+                "params": {"name": "list_recent_uoinks", "arguments": {"limit": 1}},
+            })
+            resp_legacy = client.wait_for(4)
+            assert "result" in resp_legacy
+
+            client.send({
+                "jsonrpc": "2.0",
+                "id": 5,
+                "method": "resources/read",
+                "params": {"uri": missing_uri},
+            })
+            resp_missing = client.wait_for(5)
             assert "error" in resp_missing
             assert resp_missing["error"]["code"] == -32002
         finally:

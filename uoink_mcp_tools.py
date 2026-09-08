@@ -4966,6 +4966,57 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["uri"]),
         handler=lambda args: _library_resources_call("read_library_resource", args),
     ),
+    # ---- Living Library Phase 4 brief tools (run AV-2) ----
+    # Brief generation belongs to the client: get_library_brief_input is a
+    # read (no lease, no mutation); publish_library_brief is a LOCAL WRITE
+    # under DATA_ROOT/reach/briefs (immutable artifact plus receipt). Both
+    # live in library_briefs.py behind library_resources.dispatch_tool.
+    "get_library_brief_input": ToolSpec(
+        name="get_library_brief_input",
+        description=(
+            "Prepare bounded input for a client-run daily brief: for a UTC "
+            "date and a Phase 2 run id, return job_key, input_hash, bound "
+            "queue/run/projection revisions, capture and event counts, "
+            "coverage, up to 20 work-status rows and up to 5 default "
+            "Librarian cards (at most 24,576 bytes). Read only: no lease, no "
+            "mutation. The client tracks its own report job."
+        ),
+        input_schema=_schema({
+            "date": {"type": "string", "description": "UTC day, YYYY-MM-DD; not in the future."},
+            "run_id": {"type": "string", "description": "Phase 2 run id (1-200 characters)."},
+        }, ["date", "run_id"]),
+        handler=lambda args: _library_resources_call("get_library_brief_input", args),
+    ),
+    "publish_library_brief": ToolSpec(
+        name="publish_library_brief",
+        description=(
+            "Local write: persist one client-produced brief for a job "
+            "prepared by get_library_brief_input. Validates the packet "
+            "against current library data (stale_brief on change), binds "
+            "every citation to supplied evidence, is idempotent on "
+            "submission_key, and stores an immutable artifact under the "
+            "local reach/briefs directory. Cannot apply labels or alter the "
+            "assignment queue. Invoke only as part of the user's requested "
+            "brief job."
+        ),
+        input_schema=_schema({
+            "job_key": {"type": "string", "description": "job_key returned by get_library_brief_input."},
+            "input_hash": {"type": "string", "description": "input_hash returned by get_library_brief_input."},
+            "input_packet": {"type": "object",
+                             "description": "The exact packet returned by get_library_brief_input."},
+            "submission_key": {"type": "string",
+                               "description": "Client idempotency key (1-200 characters, no whitespace)."},
+            "document": {"type": "string", "description": "The brief, at most 8,192 UTF-8 bytes."},
+            "citations": {
+                "type": "array", "maxItems": 20, "items": {"type": "object"},
+                "description": ("At most 20 citations: item_id, source_revision, card_hash, "
+                                "excerpt_id, quote (1-500 code points), evidence_kind, start, end."),
+            },
+            "usage": {"type": ["object", "null"],
+                      "description": "Client-reported usage, or null when unavailable (never zero)."},
+        }, ["job_key", "input_hash", "input_packet", "submission_key", "document", "citations"]),
+        handler=lambda args: _library_resources_call("publish_library_brief", args),
+    ),
 }
 
 

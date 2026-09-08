@@ -13,10 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **Living Library reach, activity and standing capture (Phases 3 to 5).** The
-  MCP server now exposes 29 tools over stdio (25 → 29: `search_library`,
-  `get_library_item`, `read_library_resource` and `get_library_activity`),
-  five `uoink://library/v1/` resource templates and four prompts; the
-  HTTP/OpenAPI registry grows to 85 with the four source-subscription tools.
+  MCP server now exposes 31 tools over stdio (25 → 31: `search_library`,
+  `get_library_item`, `read_library_resource`, `get_library_activity`, and the
+  client-run brief pair `get_library_brief_input` / `publish_library_brief`,
+  the latter a local write under `reach/briefs`), five `uoink://library/v1/`
+  resource templates and four prompts; the HTTP/OpenAPI registry grows to 87
+  with the four source-subscription tools and the same additions.
   Contracts `phase3-v1`, `phase4-v1` and `phase5-v1` under `docs/library/`.
 - **`search_clips` and `get_evidence_card` on stdio.** The two Phase 1 clip
   tools join the curated stdio MCP surface (23 → 25 tools); they call the

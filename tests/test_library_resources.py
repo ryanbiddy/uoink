@@ -285,10 +285,11 @@ class TestP401Identity:
         assert parsed.fields["date"] == "2026-09-08"
         assert parsed.fields["brief_hash"] == valid_hash
 
-        # Reading must refuse with feature_unavailable until AV-2 lands
+        # AV-2 landed the brief store: a syntactically valid URI whose hash names no
+        # persisted brief refuses resource_not_found (contract: missing identity).
         with pytest.raises(ResourceError) as exc_info:
             reader.read(brief_uri)
-        assert exc_info.value.code == "feature_unavailable"
+        assert exc_info.value.code == "resource_not_found"
 
 
 # ============================================================================

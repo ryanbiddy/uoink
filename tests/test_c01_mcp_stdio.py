@@ -79,6 +79,9 @@ CANONICAL_STDIO_TOOLS = {
     "search_library",
     "get_library_item",
     "read_library_resource",
+    # Phase 4 run AV-2: client-run daily briefs (input is a read; publish is a local write).
+    "get_library_brief_input",
+    "publish_library_brief",
 }
 
 REMOVED_STDIO_ALIASES = {

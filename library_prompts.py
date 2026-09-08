@@ -38,6 +38,25 @@ from library_resources import (
 )
 
 _DAYS_RE = re.compile(r"^[1-9][0-9]?$")
+
+
+class DeferredService:
+    """A ``work_service`` resolved only after the reader admitted the request.
+
+    The stdio adapter binds storage lazily (AV-1r D1/D7: acquisition inside
+    the admitted deadline, existing storage only), so the Phase 2 service
+    attached to that storage cannot be looked up before ``reader.request()``.
+    """
+
+    def __init__(self, resolve):
+        self._resolve = resolve
+
+    def resolve(self):
+        return self._resolve()
+
+
+def _resolve_service(work_service):
+    return work_service.resolve() if isinstance(work_service, DeferredService) else work_service
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _WIRE_HEADROOM = 256
 
@@ -376,6 +395,7 @@ def _whats_new(reader: LibraryReader, work_service, args: dict[str, str]) -> dic
     end = reader.utc_now().replace(microsecond=0)
     start = end - _dt.timedelta(days=days)
     with reader.request() as scope:
+        work_service = _resolve_service(work_service)
         rows = scope.sql("SELECT video_id, title, yoinked_at FROM yoinks WHERE deleted_at IS NULL")
         captures = []
         for row in rows:
@@ -453,6 +473,10 @@ def _reshelve_review(reader: LibraryReader, work_service, args: dict[str, str]) 
         raise ResourceError("feature_unavailable", details={
             "what": "reshelve-review", "reason": "Phase 2 work service is not attached"})
     with reader.request() as scope:
+        work_service = _resolve_service(work_service)
+        if work_service is None:
+            raise ResourceError("feature_unavailable", details={
+                "what": "reshelve-review", "reason": "Phase 2 work service is not attached"})
         if not scope.has_tables(("library_previews", "library_runs", "library_meta")):
             raise ResourceError("feature_unavailable", details={"what": "reshelve-review"})
         rows = scope.sql("SELECT * FROM library_previews WHERE preview_id=?", (preview_id,))

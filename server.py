@@ -1783,6 +1783,25 @@ def _get_index() -> "index.Index":
         return _index_singleton
 
 
+def _get_existing_index() -> "index.Index":
+    """Phase 4 bounded reads (``library_resources.make_reader``; AV-1r ruling
+    D7, 2026-09-08): bind to storage that already exists. Returns the open
+    process handle when there is one; otherwise opens INDEX_PATH only when it
+    already is a regular file. Never creates a database, never quarantines
+    or recovers one, never switches installations: a missing, corrupt or
+    unreadable index.db raises (FileNotFoundError / sqlite3.DatabaseError /
+    OSError) for the reader to refuse ``library_unavailable``, and the file is
+    left exactly as found. Legacy callers keep ``_get_index`` and its
+    open_or_recover behaviour. Nothing else in the process changes."""
+    global _index_singleton
+    with _index_open_lock:
+        if _index_singleton is None:
+            if not INDEX_PATH.is_file():
+                raise FileNotFoundError(str(INDEX_PATH))
+            _index_singleton = index.Index.open(INDEX_PATH)
+        return _index_singleton
+
+
 def _library_health_payload() -> dict:
     """The `library` block of /health (Phase 2 contract, "Dispatch
     boundaries": no subscribed client running means a visible

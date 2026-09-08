@@ -167,6 +167,14 @@
     {
       "name": "read_library_resource",
       "description": "Read one uoink://library/v1/ resource URI with the same contents and refusals as resources/read."
+    },
+    {
+      "name": "get_library_brief_input",
+      "description": "Prepare bounded, hashed input for a client-run daily brief (read only; no lease, no mutation)."
+    },
+    {
+      "name": "publish_library_brief",
+      "description": "Local write: validate and persist one client-produced brief under reach/briefs; idempotent on submission_key."
     }
   ],
   "compatibility": {

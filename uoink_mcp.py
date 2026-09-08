@@ -466,6 +466,53 @@ def read_library_resource(uri: str):
     return uoink_mcp_tools.call_tool("read_library_resource", {"uri": uri})
 
 
+# Phase 4 second increment (run AV-2): brief generation belongs to the client.
+# get_library_brief_input is a read; publish_library_brief is a local write
+# under DATA_ROOT/reach/briefs. Both are intercepted below like the three read
+# tools, so the domain envelope is the tool text.
+@mcp.tool(
+    name="get_library_brief_input",
+    description=(
+        "Prepare bounded input for a client-run daily brief: for a UTC date "
+        "and a Phase 2 run id, return job_key, input_hash, bound "
+        "queue/run/projection revisions, capture and event counts, coverage, "
+        "up to 20 work-status rows and up to 5 default Librarian cards (at "
+        "most 24,576 bytes). Read only: no lease, no mutation. The client "
+        "tracks its own report job."
+    ),
+)
+def get_library_brief_input(date: str, run_id: str):
+    return uoink_mcp_tools.call_tool("get_library_brief_input", {"date": date, "run_id": run_id})
+
+
+@mcp.tool(
+    name="publish_library_brief",
+    description=(
+        "Local write: persist one client-produced brief for a job prepared by "
+        "get_library_brief_input. Validates the packet against current "
+        "library data (stale_brief on change), binds every citation to "
+        "supplied evidence, is idempotent on submission_key, and stores an "
+        "immutable artifact under the local reach/briefs directory. Cannot "
+        "apply labels or alter the assignment queue. Invoke only as part of "
+        "the user's requested brief job."
+    ),
+)
+def publish_library_brief(
+    job_key: str,
+    input_hash: str,
+    input_packet: dict,
+    submission_key: str,
+    document: str,
+    citations: list,
+    usage: dict | None = None,
+):
+    return uoink_mcp_tools.call_tool("publish_library_brief", {
+        "job_key": job_key, "input_hash": input_hash, "input_packet": input_packet,
+        "submission_key": submission_key, "document": document, "citations": citations,
+        "usage": usage,
+    })
+
+
 def _register_phase4_stdio() -> None:
     """Low-level resource, prompt and tool-execution handlers (see above).
     Any missing piece degrades to FastMCP's defaults with a stderr note
@@ -501,13 +548,18 @@ def _register_phase4_stdio() -> None:
     limits = library_resources.LIMITS
 
     def reader():
-        # Request-scoped: the deadline runs from here (library_resources rule 1).
+        # Request-scoped: storage is bound inside the first admitted operation
+        # (existing storage only, never created or recovered), and the
+        # deadline runs from that admission through serialization (AV-1r D1,
+        # D7). Construction opens nothing.
         return library_resources.make_reader(server)
 
     def work_service(active_reader):
         # Report-only: use the service only if the index already built one;
         # constructing it could run Phase 2 recovery, which is not a read.
-        return getattr(active_reader.index, "_library_work_service", None)
+        # Resolved after admission because the index is bound lazily.
+        return library_prompts.DeferredService(
+            lambda: getattr(active_reader.index, "_library_work_service", None))
 
     def mcp_error(exc) -> McpError:
         if exc.code == "invalid_request":
@@ -525,26 +577,32 @@ def _register_phase4_stdio() -> None:
     @low.list_resources()
     async def _phase4_list_resources():
         try:
-            entries = reader().list_resources()
+            active = reader()
+            entries = active.list_resources()
+            resources = []
+            for entry in entries:
+                fields = {"uri": entry["uri"], "name": entry["name"],
+                          "description": entry.get("description"), "mimeType": entry.get("mimeType")}
+                if isinstance(entry.get("size"), int):
+                    fields["size"] = entry["size"]
+                resources.append(mcp_types.Resource(**fields))
+            # The same request's deadline covers this serialization (D1).
+            active.assert_within_deadline()
         except ResourceError as exc:
             raise mcp_error(exc) from None
-        resources = []
-        for entry in entries:
-            fields = {"uri": entry["uri"], "name": entry["name"],
-                      "description": entry.get("description"), "mimeType": entry.get("mimeType")}
-            if isinstance(entry.get("size"), int):
-                fields["size"] = entry["size"]
-            resources.append(mcp_types.Resource(**fields))
         return resources
 
     @low.read_resource()
     async def _phase4_read_resource(uri):
         try:
-            result = reader().read(str(uri))
+            active = reader()
+            result = active.read(str(uri))
+            contents = [ReadResourceContents(content=item["text"], mime_type=item["mimeType"])
+                        for item in result["contents"]]
+            active.assert_within_deadline()
         except ResourceError as exc:
             raise mcp_error(exc) from None
-        return [ReadResourceContents(content=item["text"], mime_type=item["mimeType"])
-                for item in result["contents"]]
+        return contents
 
     @low.list_prompts()
     async def _phase4_list_prompts():
@@ -558,15 +616,17 @@ def _register_phase4_stdio() -> None:
         try:
             active = reader()
             result = library_prompts.get_prompt(active, work_service(active), name, arguments)
+            rendered = mcp_types.GetPromptResult(
+                description=result["description"],
+                messages=[mcp_types.PromptMessage(
+                    role=message["role"],
+                    content=mcp_types.TextContent(type="text", text=message["content"]["text"]),
+                ) for message in result["messages"]],
+            )
+            active.assert_within_deadline()
         except ResourceError as exc:
             raise mcp_error(exc) from None
-        return mcp_types.GetPromptResult(
-            description=result["description"],
-            messages=[mcp_types.PromptMessage(
-                role=message["role"],
-                content=mcp_types.TextContent(type="text", text=message["content"]["text"]),
-            ) for message in result["messages"]],
-        )
+        return rendered
 
     handlers = getattr(low, "request_handlers", None)
     if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
@@ -577,7 +637,9 @@ def _register_phase4_stdio() -> None:
     fastmcp_list_tools = handlers.get(mcp_types.ListToolsRequest)
 
     def tool_result(name, arguments):
-        envelope = library_resources.dispatch_tool(name, arguments if arguments is not None else {}, server)
+        active = reader()
+        envelope = library_resources.call_tool(name, arguments if arguments is not None else {}, active,
+                                               client_identity="stdio")
         text = library_resources.render_tool_text(envelope)
         is_error = envelope.get("ok") is not True
         payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
@@ -585,6 +647,11 @@ def _register_phase4_stdio() -> None:
             envelope = ResourceError("resource_too_large", details={
                 "what": name, "next_step": "lower limit or read a smaller resource"}).envelope()
             text, is_error = library_resources.render_tool_text(envelope), True
+        try:
+            # Rendering and the wire check are charged to the same request (D1).
+            active.assert_within_deadline()
+        except ResourceError as exc:
+            text, is_error = library_resources.render_tool_text(exc.envelope()), True
         return mcp_types.ServerResult(mcp_types.CallToolResult(
             content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
 

@@ -25,10 +25,11 @@ def _stdio_tools() -> dict[str, object]:
     return {t.name: t for t in asyncio.run(uoink_mcp.mcp.list_tools())}
 
 
-def test_clip_tools_are_on_stdio_and_the_count_is_29():
+def test_clip_tools_are_on_stdio_and_the_count_is_31():
     stdio = _stdio_tools()
     assert CLIP_TOOLS.issubset(stdio)
-    assert len(stdio) == 29  # 25 + three Phase 4 read tools + one Phase 5 activity tool
+    # 25 + three Phase 4 read tools + one Phase 5 activity tool + two Phase 4 brief tools
+    assert len(stdio) == 31
     assert set(stdio) == CANONICAL_STDIO_TOOLS
 
 
@@ -107,7 +108,7 @@ def test_lock_step_inventories_agree():
     decorators = len(re.findall(r"^\s*@mcp\.tool\b", src, re.M))
     doc = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
     headings = re.findall(r"^### ([a-z][a-z_]+)$", doc, re.M)
-    assert decorators == len(headings) == 29
+    assert decorators == len(headings) == 31
     assert set(headings) == CANONICAL_STDIO_TOOLS
     assert "(HTTP/OpenAPI only)" not in doc
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
@@ -119,4 +120,4 @@ def test_lock_step_inventories_agree():
                   re.finditer(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)]
         # The first match is the current statement (README body, newest changelog
         # entry); older changelog entries keep their historical counts.
-        assert counts and counts[0] == 29, counts
+        assert counts and counts[0] == 31, counts

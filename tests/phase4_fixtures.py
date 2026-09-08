@@ -78,7 +78,10 @@ def seed_yoink_item(
     deleted_at: str | None = None,
 ) -> dict[str, Any]:
     """Seed a single item into the index and write its corpus file."""
-    corpus_path = tmp_path / f"{video_id}.md"
+    # The corpus file name is a hash of the identity so that a hostile video_id (path
+    # traversal, reserved names, controls) reaches the code under test rather than the
+    # fixture's own file writer.
+    corpus_path = tmp_path / f"{hashlib.sha256(video_id.encode('utf-8')).hexdigest()[:16]}.md"
     corpus_path.write_text(corpus_text, encoding="utf-8")
 
     meta = {}

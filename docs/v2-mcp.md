@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **29 tools**.
-- Local HTTP/OpenAPI registry: **85 tools**.
+- Supported stdio registry: **31 tools**.
+- Local HTTP/OpenAPI registry: **87 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -917,6 +917,55 @@ Refusals use the Phase 4 domain envelope (`invalid_request`,
 `rate_limited`, ...). Stdio also advertises five resource templates and four
 prompts (`consult-library`, `evidence-brief`, `whats-new`, `reshelve-review`);
 HTTP stays tools-only.
+
+### get_library_brief_input
+
+Prepare bounded input for a client-run daily brief (Phase 4 second increment,
+run AV-2). Brief generation belongs to the client: Uoink never runs a model or
+a scheduler for it. For a UTC `date` (not in the future) and a Phase 2
+`run_id`, the tool returns `job_key`, `input_hash`, the bound queue digest,
+run revision, taxonomy/projection revisions and latest covered operation
+sequence, capture and event counts, coverage, up to 20 work-status rows and up
+to 5 default Librarian cards, at most 24,576 bytes. Read only: no lease, no
+mutation. The client tracks its own job (`prepared`, `running`, `submitted`,
+`stale`, `failed`, `waiting_for_client`) and keeps the packet.
+
+```json
+{ "date": "2026-09-08", "run_id": "run-2026-09-08" }
+```
+
+### publish_library_brief
+
+**Local write.** Persist one client-produced brief for a job prepared by
+`get_library_brief_input`. The server rebuilds the packet against current
+library data (a changed queue, source or deletion is `stale_brief`), requires
+`job_key` and `input_hash` to match the packet, binds each citation (at most
+20; item id, source revision, card hash, excerpt id, a 1-500 code point quote
+that occurs in that excerpt after NFC/whitespace normalisation, evidence kind
+and time bounds) to the supplied cards only, and stores an immutable artifact
+plus receipt under `DATA_ROOT/reach/briefs/`. The document is at most 8,192
+UTF-8 bytes; the whole request at most 65,536 bytes. An identical retry on the
+same `submission_key` returns the recorded receipt; changed content under that
+key is `idempotency_conflict`; a competing artifact for a job that already has
+one is `brief_conflict`. Missing usage is stored as unavailable, never as zero
+tokens or a cost. The brief is readable at
+`uoink://library/v1/briefs/{date}/{brief_hash}` and appears in the curated
+resource list as the latest valid brief; a cited or sampled item that is
+deleted or changes makes it unavailable immediately. It cannot apply labels or
+alter the assignment queue.
+
+```json
+{
+  "job_key": "<64 hex>", "input_hash": "<64 hex>",
+  "input_packet": { "...": "the packet returned by get_library_brief_input" },
+  "submission_key": "brief-2026-09-08-1",
+  "document": "# Daily brief\n...",
+  "citations": [{ "item_id": "...", "source_revision": "<64 hex>", "card_hash": "<64 hex>",
+                  "excerpt_id": "<64 hex>", "quote": "...", "evidence_kind": "timed_clip",
+                  "start": 12.0, "end": 40.0 }],
+  "usage": null
+}
+```
 
 ## Rate limits and abuse mitigations
 
