@@ -1,0 +1,1 @@
+persisted: consent on detection 1 rev 1 epoch 1 | items 0 | receipts 1

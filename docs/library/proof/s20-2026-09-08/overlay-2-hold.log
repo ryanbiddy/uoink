@@ -1,0 +1,57 @@
+2026-09-08 14:04:22,621 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-08 14:04:22,628 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-08 14:04:22,631 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-08 14:04:22,634 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-08 14:04:22,637 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-08 14:04:22,641 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-08 14:04:22,644 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-08 14:04:22,648 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-08 14:04:22,650 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-08 14:04:22,653 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-08 14:04:22,655 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-08 14:04:22,657 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-08 14:04:22,660 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-08 14:04:22,663 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-08 14:04:22,665 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-08 14:04:22,667 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-08 14:04:22,669 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-08 14:04:22,672 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-08 14:04:22,673 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-08 14:04:22,676 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-08 14:04:22,678 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-08 14:04:22,681 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-08 14:04:22,684 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-08 14:04:22,686 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-08 14:04:22,688 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-08 14:04:22,691 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-08 14:04:22,693 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-08 14:04:22,696 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-08 14:04:22,698 INFO applying index migration 0030 (0030_media_depth.sql)
+S20 dashboard: http://127.0.0.1:60909/dashboard
+S20 control: http://127.0.0.1:60910/ctl
+S20 feed: http://127.0.0.1:60908/feed.xml
+2026-09-08 14:04:58,936 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:04:59,001 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-08 14:04:59,029 WARNING topics.json missing at E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\s21-08s_2l2y\helper\topics.json — falling back to 'Uncategorized'
+2026-09-08 14:05:09,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:05:19,915 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:05:29,916 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:05:39,909 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:05:49,918 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:05:59,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:09,916 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:17,847 INFO standing capture st_f3ad58f917839c05da498534c6ebac9f settled: succeeded
+2026-09-08 14:06:19,906 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:29,913 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:39,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:49,914 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:06:59,905 INFO GET /health from 127.0.0.1 -> ok
+S20 dashboard (restarted): http://127.0.0.1:60235/dashboard
+2026-09-08 14:07:13,554 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:07:13,605 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-08 14:07:13,639 WARNING topics.json missing at E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\s21-08s_2l2y\helper\topics.json — falling back to 'Uncategorized'
+2026-09-08 14:07:24,910 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:07:33,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:07:43,910 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:07:53,917 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:08:03,917 INFO GET /health from 127.0.0.1 -> ok
