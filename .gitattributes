@@ -26,3 +26,5 @@ docs/library/proof/taxonomy-v3-*.json -text
 docs/library/proof/holdout-v3-*.json -text
 docs/library/proof/taxonomy-v3-candidate-*.json -text
 docs/library/proof/manifest-stage3-*.json -text
+docs/library/proof/run-stage3-*/** -text
+docs/library/proof/run-stage*/** -text
