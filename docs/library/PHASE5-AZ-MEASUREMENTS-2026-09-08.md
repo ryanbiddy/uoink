@@ -22,7 +22,7 @@ The benchmark fixture evaluates two corpus scales:
 | **Peak Heap Memory (tracemalloc)** | 4,031.1 KiB (~3.94 MiB) | 61,131.7 KiB (~59.70 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only) |
 | **Wire Response Payload** | 59,281 bytes | 59,190 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
 | **Actual Transport Wire Payload (stdio adapter)** | 65,252 bytes | 65,095 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler |
-| **Combined Journal Deltas** | 73.1 KiB | 1,050,054 bytes (~1.00 MiB) | 67,108,864 bytes (64 MiB); 548 journal corrected from 54.8 KiB (74,856 bytes) |
+| **Combined Journal Deltas** | 209.6 KiB (214,596 bytes) | 2,760,054 bytes (~2.63 MiB) | 67,108,864 bytes (64 MiB); AZ-5c (BA-05) re-seeds both fixtures with complete service-schema membership rows (previously 74,856 and 1,050,054 bytes with abbreviated rows); sizes computed from the fixture serialization, to be re-observed by the AZ-5g regeneration |
 | **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (59,281 / 59,190 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
 
 ### Observations on Scaling

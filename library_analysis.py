@@ -19,6 +19,7 @@ import threading
 import time
 import unicodedata
 import uuid
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -351,8 +352,100 @@ def _is_flag01(val: Any) -> bool:
     return type(val) is int and val in (0, 1)
 
 
+def _is_unit_real(val: Any) -> bool:
+    """A JSON number (not bool) inside [0, 1]: the item_shelves.confidence domain."""
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        return False
+    try:
+        return 0.0 <= float(val) <= 1.0 and float(val) == float(val)
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
+def _is_json_text(val: Any) -> bool:
+    if not isinstance(val, str):
+        return False
+    try:
+        json.loads(val)
+    except Exception:
+        return False
+    return True
+
+
+# Service-emitted membership rows are complete item_shelves rows (library_work
+# LibraryWorkService._snapshot selects every column). The reader validates the
+# full typed row rather than the shelf id alone; an abbreviated synthetic row is
+# invalid source data, not a partial membership.
+MEMBERSHIP_ROW_FIELDS = (
+    "shelf_id", "version_id", "source_revision", "source", "locked",
+    "is_primary", "confidence", "evidence_json", "assigned_at",
+)
+MEMBERSHIP_SOURCES = frozenset({"agent", "user"})
+# Fields whose values define the replayed membership state. ``video_id`` is the
+# map key and is checked separately when a row carries it.
+MEMBERSHIP_STATE_FIELDS = MEMBERSHIP_ROW_FIELDS
+
+
+def _validate_membership_row(vid: str, row: Any) -> bool:
+    """One complete typed item_shelves row as emitted by the library service."""
+    if not isinstance(row, dict):
+        return False
+    for field in MEMBERSHIP_ROW_FIELDS:
+        if field not in row:
+            return False
+    for key in row:
+        if not isinstance(key, str) or (key != "video_id" and key not in MEMBERSHIP_ROW_FIELDS):
+            return False
+    for ident in ("shelf_id", "version_id"):
+        val = row[ident]
+        if not isinstance(val, str) or not val:
+            return False
+    for text_field in ("source_revision", "assigned_at"):
+        if not isinstance(row[text_field], str):
+            return False
+    if not isinstance(row["source"], str) or row["source"] not in MEMBERSHIP_SOURCES:
+        return False
+    if not _is_flag01(row["locked"]) or not _is_flag01(row["is_primary"]):
+        return False
+    confidence = row["confidence"]
+    if confidence is not None and not _is_unit_real(confidence):
+        return False
+    evidence = row["evidence_json"]
+    if evidence is not None and not _is_json_text(evidence):
+        return False
+    if "video_id" in row:
+        if not isinstance(row["video_id"], str) or row["video_id"] != vid:
+            return False
+    # item_shelves CHECK constraints: a lock is a user assignment without
+    # confidence; an agent assignment carries confidence and evidence.
+    if row["locked"] == 1 and (row["source"] != "user" or confidence is not None):
+        return False
+    if row["source"] == "agent" and (confidence is None or evidence is None):
+        return False
+    return True
+
+
+def _validate_policy_row(vid: str, policy: Any) -> bool:
+    """One library_item_policy row (or null for a removed policy)."""
+    if policy is None:
+        return True
+    if not isinstance(policy, dict):
+        return False
+    if "exclusive_move" not in policy or not _is_flag01(policy["exclusive_move"]):
+        return False
+    if "video_id" in policy:
+        if not isinstance(policy["video_id"], str) or policy["video_id"] != vid:
+            return False
+    for key, val in policy.items():
+        if not isinstance(key, str):
+            return False
+        if key not in ("video_id", "exclusive_move"):
+            return False
+    return True
+
+
 def _validate_delta_structure(delta: Any) -> bool:
-    """BA-05: typed forward/inverse maps; nested shelf/primary/policy values must be valid."""
+    """BA-05: typed forward/inverse maps of complete membership/policy rows."""
     if not isinstance(delta, dict):
         return False
     if "items" not in delta or "policies" not in delta:
@@ -360,24 +453,19 @@ def _validate_delta_structure(delta: Any) -> bool:
     if not isinstance(delta["items"], dict) or not isinstance(delta["policies"], dict):
         return False
     for vid, rows in delta["items"].items():
-        if not isinstance(vid, str) or not isinstance(rows, list):
+        if not isinstance(vid, str) or not vid or not isinstance(rows, list):
             return False
+        seen_shelves: Set[str] = set()
         for r in rows:
-            if not isinstance(r, dict) or "shelf_id" not in r:
+            if not _validate_membership_row(vid, r):
                 return False
-            shelf_id = r.get("shelf_id")
-            if not isinstance(shelf_id, str) or not shelf_id:
+            if r["shelf_id"] in seen_shelves:
                 return False
-            if "is_primary" in r and not _is_flag01(r["is_primary"]):
-                return False
-            if "locked" in r and not _is_flag01(r["locked"]):
-                return False
-            if "version_id" in r and r["version_id"] is not None and not isinstance(r["version_id"], str):
-                return False
+            seen_shelves.add(r["shelf_id"])
     for k, policy in delta["policies"].items():
-        if not isinstance(k, str):
+        if not isinstance(k, str) or not k:
             return False
-        if policy is not None and not isinstance(policy, dict):
+        if not _validate_policy_row(k, policy):
             return False
     if "active_version_id" in delta:
         active = delta["active_version_id"]
@@ -386,34 +474,64 @@ def _validate_delta_structure(delta: Any) -> bool:
     return True
 
 
-def _receipt_status(receipt_json: Any) -> Optional[str]:
+def _membership_state(rows: Any) -> Dict[str, Tuple[Any, ...]]:
+    """Shelf id -> the full typed membership values used for replay comparison."""
+    state: Dict[str, Tuple[Any, ...]] = {}
+    for r in rows:
+        state[r["shelf_id"]] = tuple(r.get(f) for f in MEMBERSHIP_STATE_FIELDS)
+    return state
+
+
+# Receipt statuses that prove a recorded apply. The library service publishes
+# ``{"ok": true, ..., "no_change": false}`` for an applied operation and
+# ``no_change: true`` for a receipt without an apply row; fixtures spell the
+# same outcomes as ``status``. Anything else (failed, invented, untyped,
+# ok:false) is not a successful receipt and cannot qualify an apply.
+SUCCESSFUL_APPLY_RECEIPT_STATUSES = frozenset({"applied"})
+
+
+def _receipt_data(receipt_json: Any) -> Optional[dict]:
     if receipt_json is None or receipt_json == "":
         return None
     try:
         data = json.loads(receipt_json) if isinstance(receipt_json, str) else receipt_json
     except Exception:
         return None
-    if not isinstance(data, dict):
+    return data if isinstance(data, dict) else None
+
+
+def _receipt_status(receipt_json: Any) -> Optional[str]:
+    data = _receipt_data(receipt_json)
+    if data is None:
         return None
     status = data.get("status")
-    if isinstance(status, str) and status:
+    if status is not None:
+        if not isinstance(status, str) or not status:
+            return None
         return status
-    if data.get("no_change") is True:
-        return "no_change"
     if data.get("ok") is True:
-        return "applied"
+        return "no_change" if data.get("no_change") is True else "applied"
     return None
 
 
 def _is_no_change_receipt(receipt_json: Any) -> bool:
-    status = _receipt_status(receipt_json)
-    if status == "no_change":
-        return True
-    try:
-        data = json.loads(receipt_json) if isinstance(receipt_json, str) else receipt_json
-    except Exception:
+    data = _receipt_data(receipt_json)
+    if data is None or data.get("ok") is False:
         return False
-    return isinstance(data, dict) and data.get("no_change") is True
+    status = data.get("status")
+    if status is not None:
+        return status == "no_change"
+    return data.get("no_change") is True
+
+
+def _receipt_qualifies_apply(receipt_json: Any) -> bool:
+    """Only a successful, non-no-change receipt binds a recorded apply."""
+    data = _receipt_data(receipt_json)
+    if data is None:
+        return False
+    if data.get("ok") is False or data.get("no_change") is True:
+        return False
+    return _receipt_status(receipt_json) in SUCCESSFUL_APPLY_RECEIPT_STATUSES
 
 
 def _creator_hint_key(item: dict) -> Tuple[str, str, str]:
@@ -512,6 +630,89 @@ def _get_db_generation(conn: sqlite3.Connection) -> Dict[str, Any]:
         "total_changes": conn.total_changes,
         "data_version": data_version,
     }
+
+
+def _generation_changed(gen_start: Dict[str, Any], gen_end: Dict[str, Any]) -> bool:
+    return (gen_end["total_changes"] != gen_start["total_changes"]
+            or gen_end["data_version"] != gen_start["data_version"])
+
+
+def _snapshot_owner(conn: sqlite3.Connection, *candidates: Any) -> Any:
+    """The Index (or Index-like object) that owns ``conn`` and exposes read_snapshot."""
+    seen: List[Any] = []
+    for cand in candidates:
+        if cand is None or isinstance(cand, (sqlite3.Connection, str, os.PathLike)):
+            continue
+        seen.append(cand)
+    backend = sys.modules.get("server")
+    if backend is None:
+        try:
+            import uoink_mcp_tools
+            backend = getattr(uoink_mcp_tools, "_backend", None)
+        except Exception:
+            backend = None
+    if backend is not None:
+        seen.append(getattr(backend, "_index_singleton", None))
+    for cand in seen:
+        if cand is None:
+            continue
+        if getattr(cand, "_conn", None) is conn and callable(getattr(cand, "read_snapshot", None)):
+            return cand
+    return None
+
+
+@contextmanager
+def _local_read_snapshot(conn: sqlite3.Connection):
+    """Index.read_snapshot's transaction protocol for a bare connection.
+
+    Used only when no Index owns the connection (injected sqlite3 connections
+    and read-only path connections); the Index lock is handled by the caller.
+    """
+    if conn.in_transaction:
+        raise RuntimeError("cannot start a read snapshot while another transaction is active")
+    try:
+        conn.execute("BEGIN DEFERRED")
+        yield conn
+    finally:
+        if conn.in_transaction:
+            conn.rollback()
+
+
+class _ReadBoundary:
+    """One SQLite snapshot for the activity read (BA-08).
+
+    ``enter`` opens the shared ``Index.read_snapshot`` boundary when the
+    connection belongs to an Index, otherwise the same protocol locally.
+    ``finish`` ends the snapshot (rollback) so a later generation read can see
+    commits made by other connections during construction; the caller keeps
+    the Index lock until it has decided what to return.
+    """
+
+    def __init__(self, conn: sqlite3.Connection, owner: Any):
+        self._conn = conn
+        self._owner = owner
+        self._cm: Any = None
+        self.active = False
+
+    def enter(self) -> sqlite3.Connection:
+        if self._owner is not None:
+            cm = self._owner.read_snapshot()
+        else:
+            cm = _local_read_snapshot(self._conn)
+        entered = cm.__enter__()
+        self._cm = cm
+        self.active = True
+        return entered if isinstance(entered, sqlite3.Connection) else self._conn
+
+    def finish(self) -> None:
+        if not self.active:
+            return
+        self.active = False
+        cm, self._cm = self._cm, None
+        try:
+            cm.__exit__(None, None, None)
+        except sqlite3.Error:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -819,6 +1020,7 @@ def _execute_activity(
     if conn_err is not None:
         return conn_err
     assert conn is not None
+    snapshot_owner = _snapshot_owner(conn, db if db is not None else _analysis_db_override)
 
     try:
         if conn.in_transaction:
@@ -841,7 +1043,7 @@ def _execute_activity(
             lock.__enter__()
             lock_acquired = True
 
-    started_transaction = False
+    boundary = _ReadBoundary(conn, snapshot_owner)
     try:
         try:
             if conn.in_transaction:
@@ -863,15 +1065,19 @@ def _execute_activity(
         except sqlite3.Error:
             pass
 
+        # BA-08: one SQLite snapshot through the shared Index.read_snapshot
+        # boundary (or its local equivalent for a bare connection), opened
+        # under the Index lock acquired above.
         try:
-            conn.execute("BEGIN DEFERRED")
-            started_transaction = True
+            conn = boundary.enter()
         except sqlite3.OperationalError as exc:
             if "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
                 return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}", retryable=False)
             return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}", retryable=False)
         except sqlite3.Error as exc:
             return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
+        except RuntimeError as exc:
+            return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}", retryable=False)
 
         tbl_err = _verify_tables(conn)
         if tbl_err is not None:
@@ -879,6 +1085,19 @@ def _execute_activity(
 
         # Capture generation at read boundary
         gen_start = _get_db_generation(conn)
+
+        def _finish_snapshot_and_revalidate() -> Optional[dict]:
+            """BA-08: end the snapshot, then re-read the generation while the
+            Index lock is still held. A commit by another connection during
+            construction only becomes visible to ``PRAGMA data_version`` once
+            this connection's read transaction has ended, so the check must
+            follow the rollback. A changed generation is stale_report; the
+            caller does not retry."""
+            boundary.finish()
+            gen_end = _get_db_generation(conn)
+            if _generation_changed(gen_start, gen_end):
+                return error_envelope("stale_report", "Database was modified during report construction", retryable=False)
+            return None
 
         # -------------------------------------------------------------------
         # Read raw observations for report_revision and aggregation
@@ -1125,8 +1344,9 @@ def _execute_activity(
                 baseline_proved = False
                 if baseline_reason is None:
                     baseline_reason = "receipt_binding_mismatch"
-            elif rcpt[3] is None or _receipt_status(rcpt[3]) is None or _is_no_change_receipt(rcpt[3]):
-                # BA-05: an apply must be bound to an applied receipt, not a no-change or untyped one.
+            elif not _receipt_qualifies_apply(rcpt[3]):
+                # BA-05: an apply must be bound to a successful applied receipt;
+                # no-change, failed, invented or untyped receipts do not qualify.
                 baseline_proved = False
                 if baseline_reason is None:
                     baseline_reason = "receipt_binding_mismatch"
@@ -1178,16 +1398,19 @@ def _execute_activity(
 
                 i_items = i_delta.get("items", {})
                 f_items = f_delta.get("items", {})
-                # BA-05: forward-changed live items require an inverse binding.
+                # BA-05: every live item touched by the forward delta needs an
+                # inverse row set that equals the replayed before state in full
+                # (shelf, version, revision, source, lock, primary, confidence,
+                # evidence, assigned time), not only shelf ids and primary flags.
                 for vid in set(f_items.keys()) | set(i_items.keys()):
                     if vid not in live_survivor_ids:
                         continue
-                    if vid not in i_items:
+                    if vid not in i_items or vid not in f_items:
                         baseline_proved = False
                         baseline_reason = "mismatched_inverse_projection"
                         break
-                    cur_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
-                    inv_memberships = {r["shelf_id"]: r.get("is_primary", 0) for r in i_items[vid]}
+                    cur_memberships = _membership_state(projected_state[vid].values())
+                    inv_memberships = _membership_state(i_items[vid])
                     if cur_memberships != inv_memberships:
                         baseline_proved = False
                         baseline_reason = "mismatched_inverse_projection"
@@ -1309,14 +1532,19 @@ def _execute_activity(
             if not captured_end:
                 end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
 
-            actual_current_shelves: Dict[str, Dict[str, int]] = {vid: {} for vid in live_survivor_ids}
+            # BA-05: the replayed projection must equal the current item_shelves
+            # rows in full (every typed membership field), not shelf/primary only.
+            actual_current_shelves: Dict[str, Dict[str, Tuple[Any, ...]]] = {vid: {} for vid in live_survivor_ids}
             for r in all_item_shelves:
                 vid = r[0]
                 if vid in live_survivor_ids:
-                    actual_current_shelves[vid][r[1]] = r[6]
+                    row_dict = dict(zip(
+                        ("video_id", "shelf_id", "version_id", "source_revision", "source", "locked",
+                         "is_primary", "confidence", "evidence_json", "assigned_at"), r))
+                    actual_current_shelves[vid][r[1]] = tuple(row_dict.get(f) for f in MEMBERSHIP_STATE_FIELDS)
 
             for vid in live_survivor_ids:
-                p_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
+                p_memberships = _membership_state(projected_state[vid].values())
                 a_memberships = actual_current_shelves[vid]
                 if p_memberships != a_memberships:
                     baseline_proved = False
@@ -2761,10 +2989,10 @@ def _execute_activity(
             if resp_bytes > MAX_RESPONSE_BYTES:
                 return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
 
-            # Verify generation before returning
-            gen_end = _get_db_generation(conn)
-            if gen_end["total_changes"] != gen_start["total_changes"] or gen_end["data_version"] != gen_start["data_version"]:
-                return error_envelope("stale_report", "Database was modified during report construction", retryable=False)
+            # Finish the snapshot, then verify generation before returning
+            stale_err = _finish_snapshot_and_revalidate()
+            if stale_err is not None:
+                return stale_err
 
             # Check service deadline
             if time.monotonic() - start_time > SERVICE_DEADLINE_SEC:
@@ -2894,10 +3122,10 @@ def _execute_activity(
 
             resp_bytes = _calculate_transport_bytes(summary_response)
 
-        # Verify generation before returning
-        gen_end = _get_db_generation(conn)
-        if gen_end["total_changes"] != gen_start["total_changes"] or gen_end["data_version"] != gen_start["data_version"]:
-            return error_envelope("stale_report", "Database was modified during report construction", retryable=False)
+        # Finish the snapshot, then verify generation before returning
+        stale_err = _finish_snapshot_and_revalidate()
+        if stale_err is not None:
+            return stale_err
 
         # Check service deadline
         if time.monotonic() - start_time > SERVICE_DEADLINE_SEC:
@@ -2916,12 +3144,12 @@ def _execute_activity(
             conn.set_progress_handler(None, 0)
         except Exception:
             pass
-        if started_transaction:
-            try:
-                if conn.in_transaction:
-                    conn.rollback()
-            except Exception:
-                pass
+        # Error paths leave the snapshot open until here; it ends before the
+        # Index lock is released, so the boundary is retained through the return.
+        try:
+            boundary.finish()
+        except Exception:
+            pass
         if lock is not None and lock_acquired:
             try:
                 if hasattr(lock, "release"):

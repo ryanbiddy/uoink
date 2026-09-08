@@ -260,6 +260,56 @@ def insert_shelf_version(
         )
 
 
+MEMBERSHIP_COLUMNS = (
+    "video_id", "shelf_id", "version_id", "source_revision", "source", "locked",
+    "is_primary", "confidence", "evidence_json", "assigned_at",
+)
+
+
+def membership_row(
+    video_id: str,
+    shelf_id: str,
+    *,
+    is_primary: int = 1,
+    version_id: str = "v1",
+    source_revision: str = "rev",
+    source: str = "user",
+    locked: int = 0,
+    confidence: Optional[float] = 1.0,
+    evidence_json: Optional[str] = "{}",
+    assigned_at: str = "2026-09-01T10:00:00.000Z",
+) -> dict:
+    """One complete item_shelves row, as the library service journals it (BA-05)."""
+    return {
+        "video_id": video_id,
+        "shelf_id": shelf_id,
+        "version_id": version_id,
+        "source_revision": source_revision,
+        "source": source,
+        "locked": locked,
+        "is_primary": is_primary,
+        "confidence": confidence,
+        "evidence_json": evidence_json,
+        "assigned_at": assigned_at,
+    }
+
+
+def policy_row(video_id: str, exclusive_move: int = 1) -> dict:
+    """One library_item_policy row as the library service journals it."""
+    return {"video_id": video_id, "exclusive_move": exclusive_move}
+
+
+def set_item_shelves(conn: sqlite3.Connection, video_id: str, rows: list) -> None:
+    """Make item_shelves hold exactly ``rows`` (complete membership rows) for ``video_id``."""
+    conn.execute("DELETE FROM item_shelves WHERE video_id=?", (video_id,))
+    for row in rows:
+        conn.execute(
+            "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            tuple(row.get(col, video_id if col == "video_id" else None) for col in MEMBERSHIP_COLUMNS),
+        )
+
+
 def insert_apply(
     conn: sqlite3.Connection,
     apply_id: str,
@@ -514,26 +564,28 @@ def test_gate5_undo_correction_reverts_journal_and_invalidates(tmp_dir):
     insert_shelf_version(conn, "v1")
     conn.commit()
 
+    # Complete journaled rows; each inverse equals the replayed before state exactly.
+    alpha_seed = membership_row("vid_undo_1", "sh_alpha", source_revision="rev1", assigned_at="2026-09-01T10:00:00.000Z")
+    beta_pinned = membership_row("vid_undo_1", "sh_beta", source_revision="rev1", locked=1, confidence=None, assigned_at="2026-09-06T02:00:00.000Z")
+    alpha_restored = membership_row("vid_undo_1", "sh_alpha", source_revision="rev1", assigned_at="2026-09-06T04:00:00.000Z")
+
     # Operation 1 (Seed prior to queried interval): files vid_undo_1 in sh_alpha at 2026-09-01T10:00:00.000Z
-    f_op1 = {"items": {"vid_undo_1": [{"shelf_id": "sh_alpha", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    f_op1 = {"items": {"vid_undo_1": [alpha_seed]}, "policies": {}}
     i_op1 = {"items": {"vid_undo_1": []}, "policies": {}}
     insert_apply(conn, "app_01", 1, 0, 1, created_at="2026-09-01T10:00:00.000Z", forward_delta=f_op1, inverse_delta=i_op1)
 
     # Operation 2 (in interval): pin/move from Alpha to Beta at 2026-09-06T02:00:00.000Z
-    f_op2 = {"items": {"vid_undo_1": [{"shelf_id": "sh_beta", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
-    i_op2 = {"items": {"vid_undo_1": [{"shelf_id": "sh_alpha", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    f_op2 = {"items": {"vid_undo_1": [beta_pinned]}, "policies": {}}
+    i_op2 = {"items": {"vid_undo_1": [alpha_seed]}, "policies": {}}
     insert_apply(conn, "app_02", 2, 1, 2, created_at="2026-09-06T02:00:00.000Z", forward_delta=f_op2, inverse_delta=i_op2)
 
     # Operation 3 (in interval): undo of app_02, returns from Beta to Alpha at 2026-09-06T04:00:00.000Z
-    f_op3 = {"items": {"vid_undo_1": [{"shelf_id": "sh_alpha", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
-    i_op3 = {"items": {"vid_undo_1": [{"shelf_id": "sh_beta", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    f_op3 = {"items": {"vid_undo_1": [alpha_restored]}, "policies": {}}
+    i_op3 = {"items": {"vid_undo_1": [beta_pinned]}, "policies": {}}
     insert_apply(conn, "app_03", 3, 2, 3, kind="undo", undo_of="app_02", created_at="2026-09-06T04:00:00.000Z", forward_delta=f_op3, inverse_delta=i_op3)
 
     # Set current membership in item_shelves to match ending projection (vid_undo_1 in sh_alpha)
-    conn.execute(
-        "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-        "VALUES ('vid_undo_1', 'sh_alpha', 'v1', 'rev1', 'user', 0, 1, 1.0, '{}', '2026-09-06T04:00:00.000Z')"
-    )
+    set_item_shelves(conn, "vid_undo_1", [alpha_restored])
     conn.commit()
 
     # Query full interval [2026-09-06T00:00:00.000Z, 2026-09-06T18:00:00.000Z)
@@ -877,7 +929,7 @@ def test_activity_journal_shapes_and_no_change_receipts(tmp_dir):
     conn.commit()
 
     # 1. Op 1: policy-only change
-    f_pol = {"items": {}, "policies": {"v_shape_1": {"exclusive": 1}}}
+    f_pol = {"items": {}, "policies": {"v_shape_1": policy_row("v_shape_1", 1)}}
     i_pol = {"items": {}, "policies": {"v_shape_1": None}}
     insert_apply(conn, "app_pol", 1, 0, 1, created_at="2026-09-01T10:00:00.000Z", forward_delta=f_pol, inverse_delta=i_pol)
 
@@ -890,8 +942,8 @@ def test_activity_journal_shapes_and_no_change_receipts(tmp_dir):
     )
 
     # 3. Op 2: metadata-only change (evidence_json / confidence changed, shelf set unchanged)
-    f_meta = {"items": {"v_shape_1": [{"shelf_id": "sh_1", "is_primary": 1, "confidence": 0.9, "version_id": "v1"}]}, "policies": {}}
-    i_meta = {"items": {"v_shape_1": [{"shelf_id": "sh_1", "is_primary": 1, "confidence": 0.5, "version_id": "v1"}]}, "policies": {}}
+    f_meta = {"items": {"v_shape_1": [membership_row("v_shape_1", "sh_1", source="agent", confidence=0.9, evidence_json='{"score":0.9}')]}, "policies": {}}
+    i_meta = {"items": {"v_shape_1": [membership_row("v_shape_1", "sh_1", source="agent", confidence=0.5, evidence_json='{"score":0.5}')]}, "policies": {}}
     insert_apply(conn, "app_meta", 3, 1, 2, created_at="2026-09-01T12:00:00.000Z", forward_delta=f_meta, inverse_delta=i_meta)
 
     # 4. Op 3: activation-only delta (active_version_id changes from v1 to v2)
@@ -932,48 +984,32 @@ def test_activity_primary_only_and_initial_filing(tmp_dir):
     insert_shelf_version(conn, "v1")
 
     # Op 1: Prior baseline setup (files v_prim into sh_1 and sh_2, primary=sh_1)
-    f_op1 = {
-        "items": {
-            "v_prim": [
-                {"shelf_id": "sh_1", "is_primary": 1, "version_id": "v1"},
-                {"shelf_id": "sh_2", "is_primary": 0, "version_id": "v1"},
-            ]
-        },
-        "policies": {},
-    }
+    prim_base = [
+        membership_row("v_prim", "sh_1", is_primary=1, source_revision="r1", assigned_at="2026-09-01T10:00:00.000Z"),
+        membership_row("v_prim", "sh_2", is_primary=0, source_revision="r1", assigned_at="2026-09-01T10:00:00.000Z"),
+    ]
+    f_op1 = {"items": {"v_prim": prim_base}, "policies": {}}
     i_op1 = {"items": {"v_prim": []}, "policies": {}}
     insert_apply(conn, "app_base", 1, 0, 1, created_at="2026-09-01T10:00:00.000Z", forward_delta=f_op1, inverse_delta=i_op1)
 
     # Op 2 (in interval): Primary-only change for v_prim (primary becomes sh_2, no add/remove)
-    f_op2 = {
-        "items": {
-            "v_prim": [
-                {"shelf_id": "sh_1", "is_primary": 0, "version_id": "v1"},
-                {"shelf_id": "sh_2", "is_primary": 1, "version_id": "v1"},
-            ]
-        },
-        "policies": {},
-    }
-    i_op2 = {
-        "items": {
-            "v_prim": [
-                {"shelf_id": "sh_1", "is_primary": 1, "version_id": "v1"},
-                {"shelf_id": "sh_2", "is_primary": 0, "version_id": "v1"},
-            ]
-        },
-        "policies": {},
-    }
+    prim_swapped = [
+        membership_row("v_prim", "sh_1", is_primary=0, source_revision="r1", assigned_at="2026-09-05T12:00:00.000Z"),
+        membership_row("v_prim", "sh_2", is_primary=1, source_revision="r1", assigned_at="2026-09-05T12:00:00.000Z"),
+    ]
+    f_op2 = {"items": {"v_prim": prim_swapped}, "policies": {}}
+    i_op2 = {"items": {"v_prim": prim_base}, "policies": {}}
     insert_apply(conn, "app_prim", 2, 1, 2, created_at="2026-09-05T12:00:00.000Z", forward_delta=f_op2, inverse_delta=i_op2)
 
     # Op 3 (in interval): Initial filing for v_init (first time assigned)
-    f_op3 = {"items": {"v_init": [{"shelf_id": "sh_1", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    init_rows = [membership_row("v_init", "sh_1", source_revision="r1", assigned_at="2026-09-05T14:00:00.000Z")]
+    f_op3 = {"items": {"v_init": init_rows}, "policies": {}}
     i_op3 = {"items": {"v_init": []}, "policies": {}}
     insert_apply(conn, "app_init", 3, 2, 3, created_at="2026-09-05T14:00:00.000Z", forward_delta=f_op3, inverse_delta=i_op3)
 
     # Set item_shelves to match ending projection
-    conn.execute("INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) VALUES ('v_prim', 'sh_1', 'v1', 'r1', 'user', 0, 0, 1.0, '{}', '2026-09-05T12:00:00.000Z')")
-    conn.execute("INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) VALUES ('v_prim', 'sh_2', 'v1', 'r1', 'user', 0, 1, 1.0, '{}', '2026-09-05T12:00:00.000Z')")
-    conn.execute("INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) VALUES ('v_init', 'sh_1', 'v1', 'r1', 'user', 0, 1, 1.0, '{}', '2026-09-05T14:00:00.000Z')")
+    set_item_shelves(conn, "v_prim", prim_swapped)
+    set_item_shelves(conn, "v_init", init_rows)
     conn.commit()
 
     req = {
@@ -1030,10 +1066,11 @@ def test_activity_deleted_journal_survivors_and_restore(tmp_dir):
     insert_shelf_version(conn, "v1")
 
     # Op 1: files both v_live and v_deleted
+    live_rows = [membership_row("v_live", "sh_1", source_revision="r1")]
     f_op1 = {
         "items": {
-            "v_live": [{"shelf_id": "sh_1", "is_primary": 1, "version_id": "v1"}],
-            "v_deleted": [{"shelf_id": "sh_1", "is_primary": 1, "version_id": "v1"}],
+            "v_live": live_rows,
+            "v_deleted": [membership_row("v_deleted", "sh_1", source_revision="r1")],
         },
         "policies": {},
     }
@@ -1041,7 +1078,7 @@ def test_activity_deleted_journal_survivors_and_restore(tmp_dir):
     insert_apply(conn, "app_both", 1, 0, 1, created_at="2026-09-01T10:00:00.000Z", forward_delta=f_op1, inverse_delta=i_op1)
 
     # Current item_shelves has v_live only (since v_deleted is tombstoned)
-    conn.execute("INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) VALUES ('v_live', 'sh_1', 'v1', 'r1', 'user', 0, 1, 1.0, '{}', '2026-09-01T10:00:00.000Z')")
+    set_item_shelves(conn, "v_live", live_rows)
     conn.commit()
 
     req = {
@@ -1156,7 +1193,7 @@ def test_activity_provenance_for_every_metric(tmp_dir):
     insert_yoink(conn, "v_prov", yoinked_at="2026-09-05T12:00:00.000Z", source_type="video", author="Prov Author")
     insert_shelf(conn, "sh_prov")
     insert_shelf_version(conn, "v1")
-    f_op = {"items": {"v_prov": [{"shelf_id": "sh_prov", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    f_op = {"items": {"v_prov": [membership_row("v_prov", "sh_prov", assigned_at="2026-09-05T12:00:00.000Z")]}, "policies": {}}
     i_op = {"items": {"v_prov": []}, "policies": {}}
     insert_apply(conn, "app_prov", 1, 0, 1, created_at="2026-09-05T12:00:00.000Z", forward_delta=f_op, inverse_delta=i_op)
     conn.commit()
@@ -1314,7 +1351,7 @@ def test_activity_deadline_and_work_bounds(tmp_dir, monkeypatch):
 
     # 2. Over-64-MiB journal:
     huge_json = json.dumps({"items": {"v_work": [{"data": "x" * (35 * 1024 * 1024)}]}})
-    insert_apply(conn, "app_huge", 1, 0, 1, forward_delta={"items": {}}, inverse_delta={"items": {}})
+    insert_apply(conn, "app_huge", 1, 0, 1, forward_delta={"items": {}, "policies": {}}, inverse_delta={"items": {}, "policies": {}})
     conn.execute("UPDATE library_applies SET forward_json=?, inverse_json=? WHERE apply_id='app_huge'", (huge_json, huge_json))
     conn.commit()
 
@@ -1343,7 +1380,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
         insert_source_item(conn_548, "sub_bulk", f"entry_{i}", video_id=vid, first_seen_ms=stamp("2026-09-01T10:00:00Z"))
         # 1-3 memberships each
         sh_list = ["shelf_alpha"] if (i % 2 == 0) else ["shelf_alpha", "shelf_beta"]
-        f_items_548[vid] = [{"shelf_id": s, "is_primary": 1 if s == "shelf_alpha" else 0, "version_id": "v1"} for s in sh_list]
+        f_items_548[vid] = [membership_row(vid, s, is_primary=1 if s == "shelf_alpha" else 0) for s in sh_list]
 
     insert_apply(
         conn_548,
@@ -1356,12 +1393,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
         inverse_delta={"items": {vid: [] for vid in f_items_548}, "policies": {}},
     )
     for vid, rows in f_items_548.items():
-        for r in rows:
-            conn_548.execute(
-                "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-                "VALUES (?, ?, 'v1', 'rev', 'user', 0, ?, 1.0, '{}', '2026-09-01T10:00:00.000Z')",
-                (vid, r["shelf_id"], r["is_primary"]),
-            )
+        set_item_shelves(conn_548, vid, rows)
     conn_548.commit()
 
     # Query plans
@@ -1404,11 +1436,11 @@ def test_activity_cost_548_and_10000(tmp_dir):
             vid = f"vid_10k_{i:05d}"
             insert_yoink(conn_10k, vid, yoinked_at="2026-09-01T12:00:00.000Z", author=f"Author {i % 50}", channel="Massive 10k Channel")
             insert_source_item(conn_10k, "sub_10k", f"e_10k_{i}", video_id=vid, first_seen_ms=stamp("2026-09-01T10:00:00Z"))
-            f_items_10k[vid] = [{"shelf_id": "shelf_main", "is_primary": 1, "version_id": "v1"}]
+            f_items_10k[vid] = [membership_row(vid, "shelf_main")]
             conn_10k.execute(
                 "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-                "VALUES (?, 'shelf_main', 'v1', 'rev', 'user', 0, 1, 1.0, '{}', '2026-09-01T10:00:00.000Z')",
-                (vid,),
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                tuple(f_items_10k[vid][0][col] for col in MEMBERSHIP_COLUMNS),
             )
 
     insert_apply(
@@ -1477,7 +1509,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
     conn_refusal = create_fixture_db(tmp_dir, "db_refusal.db")
     insert_yoink(conn_refusal, "v_refuse", yoinked_at="2026-09-01T12:00:00.000Z")
     huge_payload = json.dumps({"items": {"v_refuse": [{"data": "x" * (35 * 1024 * 1024)}]}})
-    insert_apply(conn_refusal, "app_huge_refusal", 1, 0, 1, forward_delta={"items": {}}, inverse_delta={"items": {}})
+    insert_apply(conn_refusal, "app_huge_refusal", 1, 0, 1, forward_delta={"items": {}, "policies": {}}, inverse_delta={"items": {}, "policies": {}})
     conn_refusal.execute("UPDATE library_applies SET forward_json=?, inverse_json=? WHERE apply_id='app_huge_refusal'", (huge_payload, huge_payload))
     conn_refusal.commit()
 
@@ -1549,16 +1581,11 @@ def test_activity_cost_548_and_10000(tmp_dir):
         insert_yoink(conn_3mem, vid, yoinked_at="2026-09-01T12:00:00.000Z", author=f"Author {i % 20}", channel="3Mem Channel")
         insert_source_item(conn_3mem, "sub_3mem", f"entry_3_{i}", video_id=vid, first_seen_ms=stamp("2026-09-01T10:00:00Z"))
         f_items_3mem[vid] = [
-            {"shelf_id": "shelf_a", "is_primary": 1, "version_id": "v1"},
-            {"shelf_id": "shelf_b", "is_primary": 0, "version_id": "v1"},
-            {"shelf_id": "shelf_c", "is_primary": 0, "version_id": "v1"},
+            membership_row(vid, "shelf_a", is_primary=1),
+            membership_row(vid, "shelf_b", is_primary=0),
+            membership_row(vid, "shelf_c", is_primary=0),
         ]
-        for s, p in (("shelf_a", 1), ("shelf_b", 0), ("shelf_c", 0)):
-            conn_3mem.execute(
-                "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-                "VALUES (?, ?, 'v1', 'rev', 'user', 0, ?, 1.0, '{}', '2026-09-01T10:00:00.000Z')",
-                (vid, s, p),
-            )
+        set_item_shelves(conn_3mem, vid, f_items_3mem[vid])
     insert_apply(
         conn_3mem,
         "app_full_3mem",
@@ -1586,22 +1613,17 @@ def test_activity_cost_548_and_10000(tmp_dir):
     insert_subscription(conn_multi, "sub_multi", display_name="Multi Channel")
     for i in range(1, 51):
         insert_yoink(conn_multi, f"vid_m_{i:02d}", yoinked_at="2026-09-01T12:00:00.000Z")
+    prev_delta: Dict[str, list] = {f"vid_m_{i:02d}": [] for i in range(1, 51)}
     for op_seq in range(1, 11):
         at_iso = f"2026-09-01T{10 + (op_seq - 1) // 6:02d}:{((op_seq - 1) % 6) * 10:02d}:00.000Z"
         sh_curr = "shelf_alpha" if op_seq % 2 == 1 else "shelf_beta"
-        sh_prev = "shelf_beta" if op_seq % 2 == 1 else "shelf_alpha"
-        f_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_curr, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
-        if op_seq == 1:
-            i_delta = {f"vid_m_{i:02d}": [] for i in range(1, 51)}
-        else:
-            i_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_prev, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
+        # Each inverse is the exact replayed before state: the previous forward rows.
+        f_delta = {vid: [membership_row(vid, sh_curr, assigned_at=at_iso)] for vid in prev_delta}
+        i_delta = prev_delta
         insert_apply(conn_multi, f"app_m_{op_seq}", op_seq, op_seq - 1, op_seq, created_at=at_iso, forward_delta={"items": f_delta, "policies": {}}, inverse_delta={"items": i_delta, "policies": {}})
-    for i in range(1, 51):
-        conn_multi.execute(
-            "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-            "VALUES (?, 'shelf_beta', 'v1', 'rev', 'user', 0, 1, 1.0, '{}', '2026-09-01T11:30:00.000Z')",
-            (f"vid_m_{i:02d}",),
-        )
+        prev_delta = f_delta
+    for vid, rows in prev_delta.items():
+        set_item_shelves(conn_multi, vid, rows)
     conn_multi.commit()
     t0_multi = time.perf_counter()
     res_multi = library_analysis.get_library_activity(req_replay, db=conn_multi, clock=fixed_as_of)
@@ -1695,7 +1717,7 @@ def test_activity_whats_new_semantic_parity(tmp_dir):
     insert_yoink(conn, "v_wn_1", yoinked_at="2026-09-05T12:00:00.000Z")
     insert_shelf(conn, "sh_wn")
     insert_shelf_version(conn, "v1")
-    f_op = {"items": {"v_wn_1": [{"shelf_id": "sh_wn", "is_primary": 1, "version_id": "v1"}]}, "policies": {}}
+    f_op = {"items": {"v_wn_1": [membership_row("v_wn_1", "sh_wn", assigned_at="2026-09-05T12:00:00.000Z")]}, "policies": {}}
     i_op = {"items": {"v_wn_1": []}, "policies": {}}
     insert_apply(conn, "app_wn", 1, 0, 1, created_at="2026-09-05T12:00:00.000Z", forward_delta=f_op, inverse_delta=i_op)
     conn.commit()

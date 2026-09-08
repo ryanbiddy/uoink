@@ -7113,14 +7113,17 @@
       error: null,
       loadGeneration: 0,
       evidenceGeneration: 0,
+      evidenceRequestSeq: 0,
       evidenceMetricId: null,
       evidenceOffset: 0,
       evidenceLimit: 20,
       evidenceRows: [],
       evidenceTotal: 0,
+      evidenceNext: null,
       collectionOffsets: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
       collectionTotals: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
       collectionNext: { creator_hints: null, shelves: null, sources: null, events: null },
+      collectionRequestSeq: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
     };
 
     let libraryActivityTimer = null;
@@ -7197,14 +7200,37 @@
 
     function invalidateActivityEvidence() {
       libraryActivityState.evidenceGeneration = (libraryActivityState.evidenceGeneration || 0) + 1;
+      libraryActivityState.evidenceRequestSeq = (libraryActivityState.evidenceRequestSeq || 0) + 1;
       libraryActivityState.evidenceMetricId = null;
       libraryActivityState.evidenceOffset = 0;
       libraryActivityState.evidenceRows = [];
       libraryActivityState.evidenceTotal = 0;
+      libraryActivityState.evidenceNext = null;
       libraryActivityState.collectionOffsets = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
       libraryActivityState.collectionNext = { creator_hints: null, shelves: null, sources: null, events: null };
+      const collSeq = libraryActivityState.collectionRequestSeq || {};
+      libraryActivityState.collectionRequestSeq = {
+        creator_hints: (collSeq.creator_hints || 0) + 1,
+        shelves: (collSeq.shelves || 0) + 1,
+        sources: (collSeq.sources || 0) + 1,
+        events: (collSeq.events || 0) + 1,
+      };
       disableEvidencePaging();
       disableCollectionPagers();
+    }
+
+    function activityReplyIsCurrent(generation, requestSeq, kind) {
+      if (generation !== libraryActivityState.evidenceGeneration) return false;
+      if (kind === "evidence") {
+        return requestSeq === libraryActivityState.evidenceRequestSeq;
+      }
+      const seqs = libraryActivityState.collectionRequestSeq || {};
+      return requestSeq === seqs[kind];
+    }
+
+    function continuationOffset(next) {
+      if (next && typeof next.offset === "number") return next.offset;
+      return null;
     }
 
     function activityEvidenceCallable() {
@@ -7432,13 +7458,21 @@
       }
       const exclEl = document.getElementById("activityExclusions");
       if (exclEl && p.items) {
-        const unavailRaw = p.items.capture_time_unavailable;
+        const basis = libraryActivityState.date_basis || p.date_basis || "capture_time";
+        const clockUnavailRaw = basis === "publication_time"
+          ? p.items.publication_time_unavailable
+          : p.items.capture_time_unavailable;
+        const clockUnavailFallback = basis === "publication_time"
+          ? "items.publication_time_unavailable"
+          : "items.capture_time_unavailable";
         const excludedRaw = p.items.deleted_items_excluded;
-        const unavail = unavailRaw === undefined ? 0 : activityScalar(unavailRaw);
+        const unavail = clockUnavailRaw === undefined ? 0 : activityScalar(clockUnavailRaw);
         const excluded = excludedRaw === undefined ? 0 : activityScalar(excludedRaw);
         const unavailText = unavail == null ? "Unavailable" : String(unavail);
         const excludedText = excluded == null ? "Unavailable" : String(excluded);
-        exclEl.textContent = `${unavailText} unavail, ${excludedText} tombstones excluded`;
+        const unavailId = activityMetricId(clockUnavailRaw, clockUnavailFallback);
+        const excludedId = activityMetricId(excludedRaw, "items.deleted_items_excluded");
+        exclEl.innerHTML = `${activityEvidenceButton(unavailText, unavailId)} unavail, ${activityEvidenceButton(excludedText, excludedId)} tombstones excluded`;
       }
 
       // Warnings
@@ -7671,8 +7705,10 @@
 
       const p = libraryActivityState.packet;
       const generation = libraryActivityState.evidenceGeneration;
+      const requestSeq = ++libraryActivityState.evidenceRequestSeq;
       libraryActivityState.evidenceMetricId = metricId;
       libraryActivityState.evidenceOffset = offset;
+      libraryActivityState.evidenceNext = null;
 
       const titleLabel = document.getElementById("evidenceMetricIdLabel");
       const container = document.getElementById("evidenceRowsContainer");
@@ -7699,11 +7735,8 @@
 
       try {
         const res = await callRegistryTool("get_library_activity", args);
-        if (
-          generation !== libraryActivityState.evidenceGeneration ||
-          !activityEvidenceCallable() ||
-          libraryActivityState.evidenceMetricId !== metricId
-        ) {
+        if (!activityReplyIsCurrent(generation, requestSeq, "evidence")) return;
+        if (!activityEvidenceCallable()) {
           disableEvidencePaging();
           return;
         }
@@ -7711,6 +7744,8 @@
           const rows = Array.isArray(res.rows) ? res.rows : [];
           libraryActivityState.evidenceRows = rows;
           libraryActivityState.evidenceTotal = res.total_rows || 0;
+          libraryActivityState.evidenceOffset = offset;
+          libraryActivityState.evidenceNext = res.next || null;
           if (scopeInfo) {
             const rev = res.report_revision ? String(res.report_revision).slice(0, 16) : "";
             scopeInfo.textContent = `Revision: ${rev}... | Total evidence rows: ${res.total_rows || 0}`;
@@ -7720,8 +7755,9 @@
           const curPage = Math.floor(offset / libraryActivityState.evidenceLimit) + 1;
           const totalPages = Math.max(1, Math.ceil((res.total_rows || 0) / libraryActivityState.evidenceLimit));
           if (pageInfo) pageInfo.textContent = `Page ${curPage} of ${totalPages}`;
+          const hasNext = continuationOffset(res.next) != null || (offset + rows.length < (res.total_rows || 0));
           if (prevBtn) prevBtn.disabled = offset === 0;
-          if (nextBtn) nextBtn.disabled = offset + rows.length >= (res.total_rows || 0);
+          if (nextBtn) nextBtn.disabled = !hasNext;
         } else if (res && res.error && res.error.code === "stale_report") {
           libraryActivityState.stale = true;
           invalidateActivityEvidence();
@@ -7738,10 +7774,13 @@
           disableEvidencePaging();
         }
       } catch (err) {
+        if (!activityReplyIsCurrent(generation, requestSeq, "evidence")) return;
         if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Error loading evidence: ${escapeHtmlActivity(err.message)}</div>`;
         disableEvidencePaging();
       }
-      focusActivityEvidenceModal();
+      if (activityReplyIsCurrent(generation, requestSeq, "evidence")) {
+        focusActivityEvidenceModal();
+      }
     }
 
     async function fetchActivityCollection(detail, offset) {
@@ -7751,6 +7790,13 @@
       }
       const p = libraryActivityState.packet;
       const generation = libraryActivityState.evidenceGeneration;
+      if (!libraryActivityState.collectionRequestSeq) {
+        libraryActivityState.collectionRequestSeq = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
+      }
+      if (libraryActivityState.collectionRequestSeq[detail] == null) {
+        libraryActivityState.collectionRequestSeq[detail] = 0;
+      }
+      const requestSeq = ++libraryActivityState.collectionRequestSeq[detail];
       const args = {
         interval: p.interval,
         date_basis: libraryActivityState.date_basis,
@@ -7761,7 +7807,8 @@
       };
       try {
         const res = await callRegistryTool("get_library_activity", args);
-        if (generation !== libraryActivityState.evidenceGeneration || !activityEvidenceCallable()) {
+        if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
+        if (!activityEvidenceCallable()) {
           disableCollectionPagers();
           return;
         }
@@ -7783,6 +7830,7 @@
           await refreshLibraryActivitySummary();
         }
       } catch (err) {
+        if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
         disableCollectionPagers();
       }
     }
@@ -7952,6 +8000,13 @@
       if (nextEvBtn) {
         nextEvBtn.addEventListener("click", () => {
           if (!activityEvidenceCallable() || !libraryActivityState.evidenceMetricId) return;
+          const cont = libraryActivityState.evidenceNext;
+          const contOff = continuationOffset(cont);
+          if (contOff != null) {
+            const metricId = (cont && cont.metric_id) || libraryActivityState.evidenceMetricId;
+            fetchActivityEvidence(metricId, contOff);
+            return;
+          }
           const nextOff = libraryActivityState.evidenceOffset + libraryActivityState.evidenceLimit;
           if (nextOff < libraryActivityState.evidenceTotal) {
             fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
