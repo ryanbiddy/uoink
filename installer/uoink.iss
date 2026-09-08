@@ -116,6 +116,7 @@ Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_briefs.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_faithfulness.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
