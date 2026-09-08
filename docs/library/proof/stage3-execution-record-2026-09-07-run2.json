@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "kind": "stage2-execution-record",
+  "written_at": "2026-09-08T03:23:14.690720+00:00",
+  "integrated_candidate": {
+    "git_sha": "15dfb8ef5e2018496f53f3da93e5f642703d662f",
+    "branch": "cc/living-library",
+    "working_tree_clean": true,
+    "dirty_entries": []
+  },
+  "stage": 3,
+  "stage_manifest": {
+    "path": "docs/library/proof/manifest-stage3-2026-09-07.json",
+    "bytes": 398212,
+    "sha256": "3aeec73fc694b97b438a399a0fb2cecbdd8b27665ad6810051124f6e93faa90b",
+    "sha256_lf": "3aeec73fc694b97b438a399a0fb2cecbdd8b27665ad6810051124f6e93faa90b",
+    "manifest_hash": "213ef46f6853ba2512f584dd202227bb86ccc18691dacd0f76fb0ca636ed8d35",
+    "contract_version": "phase2-v1.2-2026-09-04",
+    "targets": 548,
+    "exclusions": 0
+  },
+  "source": {
+    "name": "uoink-index-copy-2026-09-04-upgraded.db",
+    "sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "bytes": 71733248,
+    "schema_version": 25,
+    "upgrade": {
+      "sha256": "302749e4641497c114212aeacc19590feff6cdafb2f3370b3651262ba145cfb9",
+      "schema_version": 27,
+      "hash_note": "Measured duplicate only; migration timestamps make file hashes run-specific"
+    }
+  },
+  "cards_and_heads": {
+    "cards_hash": "b30f4918c51cc7be2c688482d79088d39f69091db02b37024a952b2cc78f6865",
+    "corpus_heads_hash": "1bb2d1c953a93c1597c3e35b64734ee604172033cca794b49a361ae7e76d7af9",
+    "card_profile_hash": "6e265b0b2822ba3db6865cfa4002824d94538d2bfc0b5366e3f210504ac6bd14",
+    "card_builder": {
+      "path": "library_cards.py",
+      "bytes": 9931,
+      "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+      "sha256_lf": "64c9fe900408f709f3d2462979b07e740c9688d0a9244d10f9ff8818fef9d096"
+    }
+  },
+  "evaluation_identity": {
+    "holdout": {
+      "path": "docs/library/proof/holdout-v3-2026-09-07.json",
+      "bytes": 19407,
+      "sha256": "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c",
+      "sha256_lf": "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c"
+    },
+    "holdout_version": "holdout-v3-2026-09-07",
+    "strata": {
+      "timed_evidence": 47,
+      "text_only": 13
+    },
+    "labelling_packet": {
+      "path": "docs/library/proof/holdout-v3-labelling-packet-2026-09-07.json",
+      "bytes": 343011,
+      "sha256": "9bfb7901753377bd18b76ec3927240aa28871594a09784c422ae9416539b5063",
+      "sha256_lf": "9bfb7901753377bd18b76ec3927240aa28871594a09784c422ae9416539b5063"
+    },
+    "labelling_packet_note": "packet built from the frozen hold-out v3 and the taxonomy v3 candidate nodes (identical to the approved nodes; see INDUCTION-AUDIT-16)"
+  },
+  "sealed_labels_and_mapping": {
+    "gold": {
+      "path": "docs/library/proof/labels/holdout-v3-gold-2026-09-07.json",
+      "bytes": 69286,
+      "sha256": "a4d4c293741c1dc22b53cf6af80b9203d73d098b29537b31ba7635c05c62731e",
+      "sha256_lf": "a4d4c293741c1dc22b53cf6af80b9203d73d098b29537b31ba7635c05c62731e"
+    },
+    "mapping": {
+      "path": "docs/library/proof/labels/holdout-v3-mapping-2026-09-07.json",
+      "bytes": 23278,
+      "sha256": "ec55c31c184098ac772efac7de770b6ef27a00c10d6ef34aeb3baed71e036e0c",
+      "sha256_lf": "ec55c31c184098ac772efac7de770b6ef27a00c10d6ef34aeb3baed71e036e0c"
+    },
+    "adjudicated": {
+      "path": "docs/library/proof/labels/holdout-v3-labels-adjudicated-2026-09-07.json",
+      "sha256": "6087f74424252273f8cb40825dac2191ddc37cf296c3ac8e450aed018ee7ba34"
+    },
+    "gold_items": 60,
+    "sealed": true,
+    "scorable": 56,
+    "labellers": [
+      "gemini-3.8-flash-high (blind, run AJ)",
+      "grok-4.6 (blind, run AJ)"
+    ],
+    "labeller_files": {
+      "gemini": {
+        "path": "docs/library/proof/labels/holdout-v3-labels-gemini-2026-09-07.json",
+        "bytes": 40534,
+        "sha256": "5d0dbd7cf6eca98ef3e4ee4b09d4d2dce9b3cb17cdb80e20bb8b8e2fc78d4696",
+        "sha256_lf": "5d0dbd7cf6eca98ef3e4ee4b09d4d2dce9b3cb17cdb80e20bb8b8e2fc78d4696"
+      },
+      "grok": {
+        "path": "docs/library/proof/labels/holdout-v3-labels-grok-2026-09-07.json",
+        "bytes": 38471,
+        "sha256": "3f16f10f149434975d0c3e6874941797d03be291b13b8a9695f5bc088bf34a0b",
+        "sha256_lf": "3f16f10f149434975d0c3e6874941797d03be291b13b8a9695f5bc088bf34a0b"
+      }
+    },
+    "adjudicator": "gpt-6-astra (blind, run AK)",
+    "scoring_version": "strict-mapped-primary-v2",
+    "rule": "NFC + trimmed segments, case preserved, deepest unambiguous approved ancestor, strict primary equality"
+  },
+  "approved_taxonomy": {
+    "path": "docs/library/taxonomy-v3-2026-09-07.json",
+    "bytes": 15470,
+    "sha256": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+    "sha256_lf": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "decision": {
+      "path": "docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json",
+      "sha256": "ee16c1426287f3c2271dbe37bb67c7eae9dc091f7fe9eb0bfd7855c5fd575589"
+    },
+    "service_returned_revision_hash": "pending observation: recorded by the harness in receipts.before.taxonomy_revision_hash on the disposable duplicate",
+    "parent_version_id": "taxonomy-v2-2026-09-05",
+    "parent_revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "nodes": 11,
+    "approval": {
+      "approved_by": "Codex / GPT-6 Astra (INDUCTION-AUDIT-16)",
+      "approval_record": "docs/library/INDUCTION-AUDIT-16-2026-09-07.md",
+      "decision_path": "docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json",
+      "decision_sha256": "ee16c1426287f3c2271dbe37bb67c7eae9dc091f7fe9eb0bfd7855c5fd575589",
+      "modified_shelf_ids": [
+        "ai-and-ml",
+        "ai-industry-and-business",
+        "developer-tools",
+        "education",
+        "frontier-models",
+        "security"
+      ],
+      "preserved_shelf_ids": [
+        "news-and-current-events",
+        "space-and-science",
+        "ai-agents-and-automation",
+        "generative-media",
+        "spaceflight"
+      ]
+    },
+    "approval_record": "docs/library/INDUCTION-AUDIT-16-2026-09-07.md",
+    "lineage": {
+      "parent_taxonomy": {
+        "path": "docs/library/taxonomy-v2-2026-09-05.json",
+        "bytes": 12991,
+        "sha256": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+        "sha256_lf": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6"
+      },
+      "parent_taxonomy_2": {
+        "path": "docs/library/taxonomy-v1-2026-09-04.json",
+        "bytes": 5591,
+        "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+        "sha256_lf": "0ecad26328ea2eb9b03858f672e7b92f9d975d45f8e01b6382c8faa3aa2c4907"
+      }
+    }
+  },
+  "assignment_prompt": {
+    "path": "scripts/librarian/prompts/assign.md",
+    "bytes": 7348,
+    "sha256": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32",
+    "sha256_lf": "e4ff00598d1e58ab436d1ca31796b67776e261535849fb52d70a59d9ca413aa9",
+    "prompt_sha256_text_mode": "e4ff00598d1e58ab436d1ca31796b67776e261535849fb52d70a59d9ca413aa9",
+    "renderer": "proof_run.render_prompt: {{TAXONOMY}} then {{CARDS}}, template read in text mode (universal newlines)"
+  },
+  "installed_client": {
+    "name": "Claude Code CLI (subscription)",
+    "version": "2.1.261 (Claude Code)",
+    "executable": "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+    "executable_sha256": "f2f5d1a155167488aeb32cd263e15436253c7b1681ae147c9e73e4d6bbc3c852",
+    "model": "claude-sonnet-5",
+    "effort": "high",
+    "tools": "disabled (--tools \"\")",
+    "session_persistence": "disabled",
+    "api_key": "ANTHROPIC_API_KEY unset at record time; proof_run.py refuses to start if it is present and records anthropic_api_key_unset in the receipts"
+  },
+  "corpus_egress": {
+    "authorization": "Ryan Biddy, 2026-09-07: 'Do it all and keep it going, don't stop until all phases done' (standing authorization); PHASE2-STAGE3-BRIEF reservation 5; run 2 after the documented guard and prompt repair (commit 169a711)",
+    "permitted": "librarian-profile evidence cards (title, channel, platform, source type, hashes, summary hint, up to six excerpts of 240 characters) rendered into the frozen assignment prompt and sent to the subscription client",
+    "forbidden": "labels, gold, mapping, holdout membership, predictions from earlier runs, corpus files beyond the bounded heads"
+  },
+  "budget_and_isolation": {
+    "budget": "subscription-only (claude -p, ANTHROPIC_API_KEY unset); run 1 aborted at 49 completions by a double-counting guard (repaired); stage 2 reference 71 processes / 44 min; effort high; two-hour wall budget; no paid spend authorized",
+    "wall_budget_ms": 7200000,
+    "concurrency": 4,
+    "batch": 8,
+    "max_retries": 1,
+    "error_rate_limit": 0.1,
+    "error_rate_min_attempts": 20,
+    "port": 5180,
+    "apply_enabled": false,
+    "live_index": "never opened; isolated helper on a disposable duplicate"
+  },
+  "implementation": {
+    "implementation_hash": "d693d590d2f8f0b01260374b33ffbfe918a4b3d1e588dcf4fe3ae1ccb35a19da",
+    "files": {
+      "taxonomy": {
+        "path": "docs/library/taxonomy-v3-2026-09-07.json",
+        "bytes": 15470,
+        "sha256": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+        "sha256_lf": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7"
+      },
+      "parent_taxonomy": {
+        "path": "docs/library/taxonomy-v2-2026-09-05.json",
+        "bytes": 12991,
+        "sha256": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+        "sha256_lf": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6"
+      },
+      "parent_taxonomy_2": {
+        "path": "docs/library/taxonomy-v1-2026-09-04.json",
+        "bytes": 5591,
+        "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+        "sha256_lf": "0ecad26328ea2eb9b03858f672e7b92f9d975d45f8e01b6382c8faa3aa2c4907"
+      },
+      "holdout": {
+        "path": "docs/library/proof/holdout-v3-2026-09-07.json",
+        "bytes": 19407,
+        "sha256": "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c",
+        "sha256_lf": "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c"
+      },
+      "gold": {
+        "path": "docs/library/proof/labels/holdout-v3-gold-2026-09-07.json",
+        "bytes": 69286,
+        "sha256": "a4d4c293741c1dc22b53cf6af80b9203d73d098b29537b31ba7635c05c62731e",
+        "sha256_lf": "a4d4c293741c1dc22b53cf6af80b9203d73d098b29537b31ba7635c05c62731e"
+      },
+      "mapping": {
+        "path": "docs/library/proof/labels/holdout-v3-mapping-2026-09-07.json",
+        "bytes": 23278,
+        "sha256": "ec55c31c184098ac772efac7de770b6ef27a00c10d6ef34aeb3baed71e036e0c",
+        "sha256_lf": "ec55c31c184098ac772efac7de770b6ef27a00c10d6ef34aeb3baed71e036e0c"
+      },
+      "prompt": {
+        "path": "scripts/librarian/prompts/assign.md",
+        "bytes": 7348,
+        "sha256": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32",
+        "sha256_lf": "e4ff00598d1e58ab436d1ca31796b67776e261535849fb52d70a59d9ca413aa9"
+      },
+      "card_builder": {
+        "path": "library_cards.py",
+        "bytes": 9931,
+        "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+        "sha256_lf": "64c9fe900408f709f3d2462979b07e740c9688d0a9244d10f9ff8818fef9d096"
+      },
+      "index": {
+        "path": "index.py",
+        "bytes": 102624,
+        "sha256": "6fca9b084eda4fa2cfe4f3346cefd386b6076aa4f5a72d30f99d6a80bdbecb55",
+        "sha256_lf": "6f51e1d2490fc0a28994f6c717ab2995cfe411673386b18030a065cb30a704f3"
+      },
+      "clips": {
+        "path": "clips.py",
+        "bytes": 14653,
+        "sha256": "e1723fdfd839e44cf7391954a973932f165effa483f55a45050f97e18676049f",
+        "sha256_lf": "89f8f1cc9311ab5e5f0bdf15356ae3f8be2634ce7d4fdc95639c408ccacfc551"
+      },
+      "provenance": {
+        "path": "provenance.py",
+        "bytes": 6284,
+        "sha256": "d05c0d0b78dc0575800f8849c0ae4c5926a47c625dc870d0515c958573dab71a",
+        "sha256_lf": "ded8b80e664d02e5389c91ce97a167f8664596fa1ae3349a1491dfd5de64f7cf"
+      },
+      "service": {
+        "path": "library_work.py",
+        "bytes": 105995,
+        "sha256": "4dcc2122bf6292d46cf6a088fe887fa2d6018d371409e6661ffab1bbbc75ed09",
+        "sha256_lf": "46fea52235f8164d6766a612029646e6fd5b043f342f5d04058ceb23015787eb"
+      },
+      "migration26": {
+        "path": "migrations/0026_provenance_precedence.sql",
+        "bytes": 1374,
+        "sha256": "874d161a02389db5c40511e989bf074afd1adf7c67c0653ddaf4938e59c12af9",
+        "sha256_lf": "254b0905a73ea351c74751b6c83c1db52aca6db17be00e0e86a9567bff573761"
+      },
+      "migration27": {
+        "path": "migrations/0027_library_substrate.sql",
+        "bytes": 9675,
+        "sha256": "49cc76655c08b39a85c4c4bb82487b25d11932671112635cee3d3a9a50a485eb",
+        "sha256_lf": "12118c486c7f00c582ee175753217e9bef3437e5e89b8bd71a98d4a65f45c5bd"
+      }
+    },
+    "runner": {
+      "path": "scripts/librarian/proof_run.py",
+      "bytes": 110443,
+      "sha256": "3a3bda825c8e2d4363421bf0db9b73f718e7e6b9db84199cc602e7daf4656b8d",
+      "sha256_lf": "ced5af5fd5aa38f9d5d6bcbb374f4b9c6e4c915c6db07d4f4d01d228b7138592"
+    },
+    "validator": {
+      "path": "tests/validate_proof_receipts.py",
+      "bytes": 123011,
+      "sha256": "0b4192c99df419cf6c3dd92eb1ebbd94319b4d56fd0bb0d8826502a9660cbfbf",
+      "sha256_lf": "cde4d189aed1894024f4f3a2c8f38eabc4f2d80752c737fd6102da8f70cca3aa"
+    },
+    "scorer": {
+      "path": "scripts/librarian/proof_score.py",
+      "bytes": 37863,
+      "sha256": "09bc5c1a05ca46757db8ef25c74317f92385ea3d9c0ea271a205c93fb681e498",
+      "sha256_lf": "86f100700670566d1f7e50737d2c678d8aed99be7ea02b03a1556c508285f2b8"
+    }
+  }
+}
