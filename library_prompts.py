@@ -3,7 +3,9 @@
 Each prompt returns one fixed, server-authored instruction message and one
 fenced data message. Data comes from :class:`library_resources.LibraryReader`
 under a single admission and deadline; queue and preview state is read with
-plain report-only queries. Nothing here calls ``list_work`` (it reaps leases),
+plain report-only queries. After remaining fan-out work (including later
+metadata reads), previously built cards are rechecked and a changed source
+refuses the complete response. Nothing here calls ``list_work`` (it reaps leases),
 ``apply_reshelving``, a model, capture, settings or the mirror.
 
 ``work_service`` is a ``library_work.LibraryWorkService`` or ``None``. With
@@ -307,6 +309,7 @@ def _consult_library(reader: LibraryReader, work_service, args: dict[str, str]) 
             body["hit_count"] = len(hits)
             body["dropped_for_budget"] = body.get("dropped_for_budget", 0) + 1
             result = _result("consult-library", body)
+        scope.recheck_cards(_unique_items(hits))
         return result
 
 
@@ -357,6 +360,7 @@ def _evidence_brief(reader: LibraryReader, work_service, args: dict[str, str]) -
             card, _error = scope.card(vid)
             cards.append(card)
         shelves = _shelf_metadata(scope, selected)
+        included = list(selected)
         body = _body(
             "evidence-brief",
             topic=topic,
@@ -386,10 +390,14 @@ def _evidence_brief(reader: LibraryReader, work_service, args: dict[str, str]) -
         result = _result("evidence-brief", body)
         while cards and not _fits(result):
             cards.pop()
+            included.pop()
             body["items"].pop()
             body["selection"]["cards_included"] = len(cards)
             body["selection"]["omitted_for_budget"] = body["selection"].get("omitted_for_budget", 0) + 1
             result = _result("evidence-brief", body)
+        # AW-D02: later metadata reads can change a source already in the
+        # packet; revalidate included cards before delivery.
+        scope.recheck_cards(included)
         return result
 
 

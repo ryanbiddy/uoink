@@ -17,12 +17,15 @@ Contract rules this module does not implement exactly, and why
    a prompt's fan-out. The one deadline is carried into backend acquisition:
    ``_bind_index`` passes the remaining time to the index factory, and
    ``server._get_existing_index`` waits on ``_index_open_lock`` for at most
-   that remainder. Every index-lock acquisition (``_lock``) and SQLite
-   busy/query wait is likewise bounded by the time left and otherwise
-   refuses ``deadline_exceeded`` at once, so a held open lock, index lock
-   or exclusive SQLite writer yields the refusal by the deadline rather
-   than after the blocked read finishes. Corpus hashing checks the
-   deadline per block.
+   that remainder. Cold ``Index.open`` and its first SQLite work (connect,
+   ``PRAGMA journal_mode``, migrations) run under the same remainder: the
+   new connection uses a zero busy timeout and locked statements retry
+   until the deadline, so a second connection holding ``BEGIN EXCLUSIVE``
+   yields ``deadline_exceeded`` by the deadline rather than after the
+   default SQLite wait. Every later index-lock acquisition (``_lock``) and
+   SQLite busy/query wait is likewise bounded by the time left and
+   otherwise refuses ``deadline_exceeded`` at once. Corpus hashing checks
+   the deadline per block.
 2. ``shelf_revision`` (AV-1r ruling D2, implemented; AW-D02) binds the shelf
    definition, taxonomy/projection revisions, live deletion state, displayed
    metadata and, for **every** ordered nondeleted member (not only the
@@ -45,7 +48,10 @@ Contract rules this module does not implement exactly, and why
    immediately before serving. ``get_item`` builds and checks its card and
    performs corpus admission against that same snapshot, then rechecks
    before delivery so a concurrent deletion or rewrite during admission
-   refuses rather than returning the stale card.
+   refuses rather than returning the stale card. ``request()`` rechecks
+   every previously built card after the prompt's remaining fan-out and
+   before delivery, so a later metadata read that changes a source refuses
+   the complete response.
 3. Duplicate JSON keys cannot be detected on stdio: the SDK hands handlers
    parsed objects. The HTTP ``/tools/*`` route (Fable) rejects them from raw
    bytes; here strictness covers unknown fields, types, nulls, booleans used
@@ -68,8 +74,10 @@ Contract rules this module does not implement exactly, and why
    covers the known runtime paths (the item's corpus and sidecar paths,
    their folder, ``data_root``) and any complete explicit absolute local
    path in the text: Windows drive paths, UNC paths, POSIX absolute paths
-   (including one-component paths such as ``/secret``, digit-led ``/7secret``
-   and non-ASCII ``/私密``) and ``file:`` URIs. A path written inside
+   (including one-component paths such as ``/secret``, digit-led ``/7secret``,
+   non-ASCII ``/私密``, and paths whose first segment starts with
+   punctuation, symbols or non-ASCII such as ``/@private``, ``/-private``
+   and ``/🔑private``) and ``file:`` URIs. A path written inside
    straight double or single quotes is recognised to the matching closing
    quote, so quoted paths containing spaces or the other quote (including
    double-quoted drive paths with an apostrophe) are redacted whole.
@@ -293,12 +301,12 @@ _WS_RE = re.compile(r"\s+")
 # "and/or" never match; HTTP(S) destinations are additionally excluded below.
 _PATH_CHAR = r"[^\s\"'<>|*?\x00-\x1f]"
 _SEGMENT_CHAR = r"[^\s\"'<>|*?/\\\x00-\x1f]"
-# A one-component POSIX path ("/secret", "/7secret", "/私密") must not
-# follow an identifier character, a closing-tag "<", a dot or another
-# separator, so "and/or", "km/h", "1/2", "</tag>", "../x" and "http://"
-# never match. The first component character is a word character (ASCII
-# letter/digit/underscore or non-ASCII letter) or a dot.
-_POSIX_FIRST = r"[\w.]"
+# A one-component POSIX path ("/secret", "/7secret", "/私密", "/@private")
+# must not follow an identifier character, a closing-tag "<", a dot or
+# another separator, so "and/or", "km/h", "1/2", "</tag>", "../x" and
+# "http://" never match. The first component character is any non-separator
+# path character, including punctuation, symbols and non-ASCII (AW-D03).
+_POSIX_FIRST = _SEGMENT_CHAR
 _POSIX_HEAD = r"(?<![A-Za-z0-9_./:\\<>-])/" + _POSIX_FIRST + _SEGMENT_CHAR + r"*"
 _LOCAL_PATH_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
     ("file_uri", re.compile(r"(?<![A-Za-z0-9])file:/{2,3}" + _PATH_CHAR + r"+", re.IGNORECASE)),
@@ -738,6 +746,37 @@ class _Operation:
         return self.deadline_at - float(self.reader._clock())
 
 
+def _sqlite_busy(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    return isinstance(exc, sqlite3.OperationalError) and (
+        "locked" in text or "busy" in text)
+
+
+@contextlib.contextmanager
+def _bounded_sqlite_open():
+    """Force ``sqlite3.connect`` used by a cold ``Index.open`` to wait 0 s
+    on a lock (AW-D01). Windows overshoots a multi-second busy timeout, so
+    the caller retries until the remaining admission. ``Connection.execute``
+    is immutable on this interpreter and is not patched."""
+    original_connect = sqlite3.connect
+
+    def connect(*args, **kwargs):
+        kwargs = dict(kwargs)
+        kwargs["timeout"] = 0.0
+        conn = original_connect(*args, **kwargs)
+        try:
+            conn.execute("PRAGMA busy_timeout=0")
+        except sqlite3.Error:
+            pass
+        return conn
+
+    sqlite3.connect = connect
+    try:
+        yield
+    finally:
+        sqlite3.connect = original_connect
+
+
 class _BoundedLock:
     """Acquire the index lock within the time left before ``deadline_at`` or
     refuse ``deadline_exceeded`` at once (AW-D01). Re-entrant locks held by
@@ -871,29 +910,48 @@ class LibraryReader:
         (``server._get_existing_index``) never creates, quarantines or
         recovers a database; any failure is ``library_unavailable``. The
         remaining deadline is passed so ``_index_open_lock`` cannot wait
-        past it (AW-D01)."""
+        past it, and cold ``Index.open`` SQLite work is bounded by the same
+        remainder (AW-D01)."""
         if self.index is not None:
             return
         if self._index_factory is None:
             raise ResourceError("library_unavailable", details={"storage": "no_index"})
-        remaining = op.remaining()
-        if remaining <= 0:
-            raise ResourceError("deadline_exceeded", details={
-                "deadline_s": self.deadline_s, "reason": "index_open"})
-        try:
-            index = self._call_index_factory(remaining)
-        except ResourceError:
-            raise
-        except TimeoutError:
-            raise ResourceError("deadline_exceeded", details={
-                "deadline_s": self.deadline_s, "reason": "index_open"}) from None
-        except Exception as exc:
-            log.warning("library storage binding failed: %s", type(exc).__name__)
-            raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
-        if index is None:
-            raise ResourceError("library_unavailable", details={"storage": "no_index"})
-        op.check()
-        self.index = index
+        wall_start: float | None = None
+        wall_budget = 0.0
+        while True:
+            remaining = op.remaining()
+            if remaining <= 0:
+                raise ResourceError("deadline_exceeded", details={
+                    "deadline_s": self.deadline_s, "reason": "index_open"})
+            try:
+                with _bounded_sqlite_open():
+                    index = self._call_index_factory(remaining)
+            except ResourceError:
+                raise
+            except TimeoutError:
+                raise ResourceError("deadline_exceeded", details={
+                    "deadline_s": self.deadline_s, "reason": "index_open"}) from None
+            except sqlite3.OperationalError as exc:
+                if not _sqlite_busy(exc):
+                    log.warning("library storage binding failed: %s", type(exc).__name__)
+                    raise ResourceError("library_unavailable", details={
+                        "storage": type(exc).__name__}) from exc
+                if wall_start is None:
+                    wall_start = time.monotonic()
+                    wall_budget = min(self.deadline_s, remaining)
+                if (time.monotonic() - wall_start) >= wall_budget:
+                    raise ResourceError("deadline_exceeded", details={
+                        "deadline_s": self.deadline_s, "reason": "index_open"}) from None
+                time.sleep(min(0.02, remaining))
+                continue
+            except Exception as exc:
+                log.warning("library storage binding failed: %s", type(exc).__name__)
+                raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
+            if index is None:
+                raise ResourceError("library_unavailable", details={"storage": "no_index"})
+            op.check()
+            self.index = index
+            return
 
     def assert_within_deadline(self) -> None:
         """For adapters: after rendering/serializing the result of the last
@@ -904,9 +962,27 @@ class LibraryReader:
 
     @contextlib.contextmanager
     def request(self) -> Iterator["RequestScope"]:
-        """One admission and one deadline for a fan-out (prompts)."""
+        """One admission and one deadline for a fan-out (prompts).
+        Previously built cards are rechecked after the remaining fan-out
+        and before delivery (AW-D02)."""
         with self._operation() as op:
             yield RequestScope(self, op)
+            self._recheck_built_cards(op)
+
+    def _recheck_built_cards(self, op: "_Operation",
+                             item_ids: list[str] | None = None) -> None:
+        """Revalidate previously built cards (AW-D02). A later metadata
+        read that changes a source refuses the complete response."""
+        if item_ids is None:
+            item_ids = [
+                key[1] for key in op.cache
+                if isinstance(key, tuple) and len(key) == 2 and key[0] == "bundle"
+            ]
+        for item_id in item_ids:
+            bundle = op.cache.get(("bundle", item_id))
+            if not isinstance(bundle, _ItemBundle) or bundle.card is None:
+                continue
+            self._recheck_sources(op, bundle)
 
     # ---- public surface -----------------------------------------------
     def list_templates(self) -> list[dict]:
@@ -1979,6 +2055,11 @@ class RequestScope:
     def card(self, item_id: str) -> tuple[dict | None, ResourceError | None]:
         bundle = self.reader._bundle(self.op, item_id)
         return (bundle.card, None) if bundle.error is None else (None, bundle.error)
+
+    def recheck_cards(self, item_ids: list[str] | None = None) -> None:
+        """Revalidate previously built cards after later fan-out work
+        (AW-D02). Refuse the complete response if any named source changed."""
+        self.reader._recheck_built_cards(self.op, item_ids)
 
     def recent_items(self, limit: int) -> list[dict]:
         rows = self.reader._index_call(self.op, lambda: self.reader.index.list_recent(limit))
