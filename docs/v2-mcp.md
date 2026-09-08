@@ -10,7 +10,7 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 Uoink has two deliberately different tool surfaces:
 
 - Supported stdio registry: **25 tools**.
-- Local HTTP/OpenAPI registry: **77 tools**.
+- Local HTTP/OpenAPI registry: **81 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -31,6 +31,10 @@ HTTP/OpenAPI registry-only and are not on stdio. Their input schemas are the
 frozen `docs/library/phase2-contract/tool-schemas.json`; see `docs/v2-api.md`
 for the envelope, strict decoding and the `POST /library/intent` route that
 mints the user-intent token `pin_shelf` and `undo_library_apply` require.
+The four Phase 3 source-subscription tools (`list_sources`, `register_source`,
+`source_status`, `set_source_consent`; contract `phase3-v1-2026-09-07`, run AM)
+are likewise HTTP/OpenAPI registry-only; consent changes require the
+dashboard-minted intent from `POST /sources/consent-intent`.
 For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
 `/mcp/v1` remains experimental.
 

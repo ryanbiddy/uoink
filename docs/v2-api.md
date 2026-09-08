@@ -1564,7 +1564,7 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-77 tools. `search_clips` and `get_evidence_card` were Phase 1 registry-only
+81 tools. `search_clips` and `get_evidence_card` were Phase 1 registry-only
 additions; since 2026-09-04 (run E) they are also part of the 25-tool stdio
 set, sharing the same handlers.
 
