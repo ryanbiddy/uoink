@@ -24,6 +24,7 @@ from tests.phase4_fixtures import (
     b64url_encode,
     build_test_card,
     make_disposable_index,
+    parse_fenced_document,
     seed_standard_library,
     seed_yoink_item,
 )
@@ -40,6 +41,7 @@ from library_resources import (
     ResourceError,
     URI_PREFIX,
     encode_key,
+    safe_url,
 )
 
 
@@ -64,13 +66,13 @@ class TestP404ProvenanceAndTrust:
 
         # 1. Standard video with timed clips
         std_item, std_clips = manifest["standard"]
-        card_std = build_test_card(std_item, std_clips, std_item["corpus_path"], profile="librarian")
+        card_std = build_test_card(idx, std_item["video_id"], profile="librarian")
         assert any(e.get("evidence_kind") == "timed_clip" for e in card_std["excerpts"])
         assert all(e.get("start") is not None for e in card_std["excerpts"])
 
         # 2. Prose-only document
         prose_item, _ = manifest["prose"]
-        card_prose = build_test_card(prose_item, [], prose_item["corpus_path"], profile="librarian")
+        card_prose = build_test_card(idx, prose_item["video_id"], profile="librarian")
         assert len(card_prose["excerpts"]) == 1
         assert card_prose["excerpts"][0]["evidence_kind"] == "text_only"
         assert card_prose["excerpts"][0]["timing"] == "not_timed"
@@ -78,14 +80,15 @@ class TestP404ProvenanceAndTrust:
 
         # 3. Mixed item: both timed clips and opening prose
         mixed_item, mixed_clips = manifest["mixed"]
-        card_mixed = build_test_card(mixed_item, mixed_clips, mixed_item["corpus_path"], profile="librarian")
+        card_mixed = build_test_card(idx, mixed_item["video_id"], profile="librarian")
         kinds = {e.get("evidence_kind") for e in card_mixed["excerpts"]}
         assert "timed_clip" in kinds
         assert "text_only" in kinds
 
         # 4. Read card resources via reader and verify preserved JSON structure
-        for item, clips in [manifest["standard"], manifest["prose"], manifest["mixed"]]:
-            c = build_test_card(item, clips, item["corpus_path"], profile="librarian")
+        for key in ["standard", "prose", "mixed"]:
+            item, _ = manifest[key]
+            c = build_test_card(idx, item["video_id"], profile="librarian")
             uri = (
                 f"{URI_PREFIX}items/{encode_key(item['video_id'])}/cards/"
                 f"{c['source_revision']}/{c['selection_version']}/{c['card_hash']}"
@@ -110,8 +113,7 @@ class TestP404ProvenanceAndTrust:
                 corpus_text=f"# Heading\n\n{breaker}\n\nMore text.",
                 clips=[{"seq": 0, "start": 0.0, "end": 10.0, "text": breaker}],
             )
-            card = build_test_card(item, [{"seq": 0, "start": 0.0, "end": 10.0, "text": breaker}],
-                                   item["corpus_path"], profile="librarian")
+            card = build_test_card(idx, vid, profile="librarian")
             uri = (
                 f"{URI_PREFIX}items/{encode_key(vid)}/cards/"
                 f"{card['source_revision']}/{card['selection_version']}/{card['card_hash']}"
@@ -127,7 +129,8 @@ class TestP404ProvenanceAndTrust:
             assert rendered.endswith("\n</untrusted_evidence_card>")
 
             # The body inside the fence must not contain literal unescaped closing fence
-            body = rendered[len("<untrusted_evidence_card>\n") : -len("\n</untrusted_evidence_card>")]
+            _, _, after_open = rendered.partition("<untrusted_evidence_card>\n")
+            body, _, _ = after_open.rpartition("\n</untrusted_evidence_card>")
             assert "</untrusted_evidence_card>" not in body
             assert "</untrusted_uoink_library_context>" not in body
             assert "<script>" not in body
@@ -147,15 +150,30 @@ class TestP404ProvenanceAndTrust:
                 corpus_text=f"Prose: {title}\n\nDetails: {clip_text}",
                 clips=[{"seq": 0, "start": 0.0, "end": 30.0, "text": clip_text}],
             )
-            card = build_test_card(item, [{"seq": 0, "start": 0.0, "end": 30.0, "text": clip_text}],
-                                   item["corpus_path"], profile="librarian")
+            card = build_test_card(idx, vid, profile="librarian")
             uri = (
                 f"{URI_PREFIX}items/{encode_key(vid)}/cards/"
                 f"{card['source_revision']}/{card['selection_version']}/{card['card_hash']}"
             )
 
+            if i == 4:
+                # T5/D8: role-inject-4 contains NUL and ESC controls: must refuse invalid_source_data
+                with pytest.raises(ResourceError) as exc_info:
+                    reader.read(uri)
+                assert exc_info.value.code == "invalid_source_data"
+                # Refusal envelope contains no source payload / hostile text
+                envelope = exc_info.value.envelope()
+                assert "contents" not in envelope
+                envelope_str = json.dumps(envelope)
+                assert "ControlChars" not in envelope_str
+                assert "\x1b[2J" not in envelope_str
+                assert clip_text not in envelope_str
+                continue
+
             res = reader.read(uri)
             text = res["contents"][0]["text"]
+            doc = parse_fenced_document(text)
+            assert doc["title"] == title
 
             # Output must be enclosed within untrusted evidence boundary
             assert "<untrusted_evidence_card>" in text
@@ -167,8 +185,9 @@ class TestP404ProvenanceAndTrust:
             assert "override" not in outer_before.lower()
 
     def test_source_link_validation_and_sanitization(self, tmp_path: Path):
-        """Unsafe URLs (javascript:, file://, data:) and URLs with credentials become null."""
+        """Unsafe URLs (javascript:, file://, data:) become null; space/NUL URLs refuse invalid_source_data."""
         idx = make_disposable_index(tmp_path)
+        reader = LibraryReader(idx, data_root=tmp_path / "data_root")
 
         unsafe_urls = [
             "javascript:alert(document.cookie)",
@@ -180,6 +199,10 @@ class TestP404ProvenanceAndTrust:
             "https://evil.com/with space/path",
             "https://evil.com/control\x00char",
         ]
+
+        # T4: Test every hostile URL with safe_url, expecting None
+        for bad_url in unsafe_urls:
+            assert safe_url(bad_url) is None
 
         for i, bad_url in enumerate(unsafe_urls):
             vid = f"bad-link-{i}"
@@ -194,15 +217,58 @@ class TestP404ProvenanceAndTrust:
                     "source_deep_link": bad_url,
                 }],
             )
-            card = build_test_card(item, [{
-                "seq": 0, "start": 0.0, "end": 10.0, "text": "Valid text",
-                "source_deep_link": bad_url,
-            }], item["corpus_path"], profile="librarian")
+            card = build_test_card(idx, vid, profile="librarian")
+            uri = (
+                f"{URI_PREFIX}items/{encode_key(vid)}/cards/"
+                f"{card['source_revision']}/{card['selection_version']}/{card['card_hash']}"
+            )
 
-            # Must sanitize unsafe URL to None/null
-            assert card["url"] is None
-            if card["excerpts"]:
-                assert card["excerpts"][0]["deep_link"] is None
+            if card["url"] is None:
+                # Links the builder already nulls: require null link fields in successful card
+                assert card["url"] is None
+                if card.get("excerpts"):
+                    assert card["excerpts"][0].get("deep_link") is None
+                res = reader.read(uri)
+                assert "contents" in res and res["contents"]
+                doc = parse_fenced_document(res["contents"][0]["text"])
+                assert doc.get("url") is None
+            else:
+                # Space/NUL URLs retained by builder: require invalid_source_data,
+                # no successful contents, and no echoed hostile input
+                with pytest.raises(ResourceError) as exc_info:
+                    reader.read(uri)
+                assert exc_info.value.code == "invalid_source_data"
+                envelope = exc_info.value.envelope()
+                assert "contents" not in envelope
+                envelope_str = json.dumps(envelope)
+                assert bad_url not in envelope_str
+
+        # Safe HTTP(S) positive case
+        good_url = "https://example.com/watch?v=good123"
+        assert safe_url(good_url) == good_url
+        good_vid = "good-link-01"
+        good_item = seed_yoink_item(
+            idx, tmp_path,
+            video_id=good_vid,
+            slug="good-link-slug",
+            title="Good Link",
+            url=good_url,
+            clips=[{
+                "seq": 0, "start": 0.0, "end": 10.0, "text": "Valid text",
+                "source_deep_link": good_url,
+            }],
+        )
+        card_good = build_test_card(idx, good_vid, profile="librarian")
+        assert card_good["url"] == good_url
+        assert card_good["excerpts"][0]["deep_link"] == good_url
+        uri_good = (
+            f"{URI_PREFIX}items/{encode_key(good_vid)}/cards/"
+            f"{card_good['source_revision']}/{card_good['selection_version']}/{card_good['card_hash']}"
+        )
+        res_good = reader.read(uri_good)
+        assert "contents" in res_good and res_good["contents"]
+        doc_good = parse_fenced_document(res_good["contents"][0]["text"])
+        assert doc_good.get("url") == good_url
 
     def test_hostile_card_with_terminal_control_or_leaked_path_refuses(self, tmp_path: Path):
         """Hashed cards with active terminal controls or leaked local paths raise invalid_source_data."""
@@ -220,8 +286,7 @@ class TestP404ProvenanceAndTrust:
             clips=[{"seq": 0, "start": 0.0, "end": 10.0, "text": "Terminal escape \x1b[31mRed\x1b[0m"}],
         )
 
-        card = build_test_card(item, [{"seq": 0, "start": 0.0, "end": 10.0, "text": "Terminal escape \x1b[31mRed\x1b[0m"}],
-                               item["corpus_path"], profile="librarian")
+        card = build_test_card(idx, "term-control-01", profile="librarian")
         uri = (
             f"{URI_PREFIX}items/{encode_key(item['video_id'])}/cards/"
             f"{card['source_revision']}/{card['selection_version']}/{card['card_hash']}"

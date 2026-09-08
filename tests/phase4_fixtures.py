@@ -134,24 +134,85 @@ def seed_yoink_item(
 
 
 def build_test_card(
-    item_row: dict[str, Any],
-    clips: list[dict[str, Any]],
-    corpus_path: Path | str,
+    idx: index.Index,
+    video_id: str,
     profile: str = "librarian",
 ) -> dict[str, Any]:
-    """Build a deterministic card using library_cards with read_corpus_head."""
-    head = library_cards.read_corpus_head(corpus_path)
-    card_clips = [
-        {
-            "seq": c.get("seq", i),
-            "start": c.get("start", c.get("timestamp_start")),
-            "end": c.get("end", c.get("timestamp_end")),
-            "text": c.get("text", ""),
-            "source_deep_link": c.get("source_deep_link"),
-        }
-        for i, c in enumerate(clips)
-    ]
-    return library_cards.build_card(item_row, card_clips, corpus_text=head, profile=profile)
+    """Build a deterministic card by reading item and clips coherently from index."""
+    with idx._lock:
+        item = idx.get_yoink(video_id)
+        if item is None:
+            raise ValueError(f"Item not found: {video_id}")
+        clips = idx.get_clips(video_id)
+    head = library_cards.read_corpus_head(item.get("corpus_path"))
+    return library_cards.build_card(item, clips, corpus_text=head, profile=profile)
+
+
+def parse_fenced_document(text: str) -> dict[str, Any]:
+    """Verify the exact preface/opening/closing fence, then JSON-decode the enclosed body."""
+    import library_resources
+    preface = library_resources.DOCUMENT_PREFACE
+    assert text.startswith(preface), f"Text does not start with expected preface: {text[:100]!r}"
+    rest = text[len(preface):]
+    if rest.startswith("<untrusted_uoink_library_context>\n"):
+        open_fence = "<untrusted_uoink_library_context>\n"
+        close_fence = "\n</untrusted_uoink_library_context>"
+    elif rest.startswith("<untrusted_evidence_card>\n"):
+        open_fence = "<untrusted_evidence_card>\n"
+        close_fence = "\n</untrusted_evidence_card>"
+    else:
+        raise AssertionError(f"Text does not have expected opening fence: {text[:100]!r}")
+    assert text.endswith(close_fence), f"Text does not end with expected fence {close_fence!r}: {text[-100:]!r}"
+    raw_json = text[len(preface) + len(open_fence) : -len(close_fence)]
+    return json.loads(raw_json)
+
+
+def seed_shelf(
+    idx: index.Index,
+    shelf_id: str = "shelf-test-01",
+    name: str = "Test Shelf",
+    version_id: str = "v0000000001",
+    revision_hash: str | None = None,
+    projection_revision: int = 1,
+    member_video_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Seed a valid Phase 2 shelf and assign items to it."""
+    if revision_hash is None:
+        revision_hash = "a" * 64
+    with idx._lock:
+        idx._conn.execute(
+            "INSERT OR REPLACE INTO shelves(shelf_id, created_at) VALUES(?, '2026-09-08T00:00:00Z')",
+            (shelf_id,),
+        )
+        idx._conn.execute(
+            "INSERT OR REPLACE INTO shelf_versions(version_id, revision_hash, status, created_at) VALUES(?, ?, 'active', '2026-09-08T00:00:00Z')",
+            (version_id, revision_hash),
+        )
+        idx._conn.execute(
+            "INSERT OR REPLACE INTO library_meta(singleton, projection_revision, active_version_id) VALUES(1, ?, ?)",
+            (projection_revision, version_id),
+        )
+        idx._conn.execute(
+            "INSERT OR REPLACE INTO shelf_nodes(version_id, shelf_id, parent_shelf_id, name, path_json, definition, include_json, exclude_json, retired) "
+            "VALUES(?, ?, NULL, ?, ?, 'Test definition', '[]', '[]', 0)",
+            (version_id, shelf_id, name, json.dumps([name])),
+        )
+        if member_video_ids:
+            for vid in member_video_ids:
+                card = build_test_card(idx, vid)
+                idx._conn.execute(
+                    "INSERT OR REPLACE INTO item_shelves(video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
+                    "VALUES(?, ?, ?, ?, 'user', 0, 1, NULL, NULL, '2026-09-08T00:00:00Z')",
+                    (vid, shelf_id, version_id, card["source_revision"]),
+                )
+        idx._conn.commit()
+    return {
+        "shelf_id": shelf_id,
+        "name": name,
+        "version_id": version_id,
+        "taxonomy_revision": revision_hash,
+        "projection_revision": projection_revision,
+    }
 
 
 def seed_standard_library(tmp_path: Path) -> tuple[index.Index, dict[str, Any]]:
