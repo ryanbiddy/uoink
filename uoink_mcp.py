@@ -41,6 +41,7 @@ if _APP_DIR not in sys.path:
 
 try:
     from mcp.server.fastmcp import FastMCP
+    from mcp import types as mcp_types
 except ImportError:
     print(
         "Uoink MCP requires the official MCP Python SDK. "
@@ -377,21 +378,20 @@ def episode_to_corpus(episode_id: int) -> dict:
 @mcp.tool(
     name="get_library_activity",
     description="Report deterministic library activity, shelf churn, and source observations.",
+    annotations=mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True),
 )
 def get_library_activity(
     interval: dict,
     date_basis: str = "capture_time",
     detail: str | None = None,
     metric_id: str | None = None,
-    offset: int = 0,
-    limit: int = 20,
+    offset: int | None = None,
+    limit: int | None = None,
     expected_revision: str | None = None,
 ) -> dict:
     payload: dict = {
         "interval": interval,
         "date_basis": date_basis,
-        "offset": offset,
-        "limit": limit,
     }
     if detail is not None:
         payload["detail"] = detail
@@ -399,6 +399,10 @@ def get_library_activity(
         payload["metric_id"] = metric_id
     if expected_revision is not None:
         payload["expected_revision"] = expected_revision
+    if offset is not None:
+        payload["offset"] = offset
+    if limit is not None:
+        payload["limit"] = limit
     return uoink_mcp_tools.call_tool("get_library_activity", payload)
 
 # --------------------------------------------------------------------------
@@ -655,10 +659,31 @@ def _register_phase4_stdio() -> None:
         return mcp_types.ServerResult(mcp_types.CallToolResult(
             content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
 
+    def activity_result(arguments):
+        args = arguments if arguments is not None else {}
+        try:
+            import library_analysis
+            envelope = library_analysis.get_library_activity(args)
+            text = library_resources.render_tool_text(envelope)
+            is_error = envelope.get("ok") is not True
+            payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
+            if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
+                envelope = ResourceError("resource_too_large", details={
+                    "what": "get_library_activity", "next_step": "lower limit or read a smaller interval"}).envelope()
+                text, is_error = library_resources.render_tool_text(envelope), True
+            return mcp_types.ServerResult(mcp_types.CallToolResult(
+                content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+        except ResourceError as exc:
+            text, is_error = library_resources.render_tool_text(exc.envelope()), True
+            return mcp_types.ServerResult(mcp_types.CallToolResult(
+                content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+
     if fastmcp_call_tool is not None:
         async def _phase4_call_tool(req):
             if req.params.name in library_resources.TOOL_NAMES:
                 return tool_result(req.params.name, req.params.arguments)
+            if req.params.name == "get_library_activity":
+                return activity_result(req.params.arguments)
             return await fastmcp_call_tool(req)
         handlers[mcp_types.CallToolRequest] = _phase4_call_tool
 
@@ -671,6 +696,8 @@ def _register_phase4_stdio() -> None:
                         # Same strict schema and text as the HTTP registry.
                         tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
                         tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
+                    if tool.name == "get_library_activity":
+                        tool.annotations = mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True)
             except (AttributeError, TypeError, ValueError):  # pragma: no cover
                 pass
             return result

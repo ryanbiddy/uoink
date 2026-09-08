@@ -17,10 +17,13 @@ import sqlite3
 import sys
 import threading
 import time
+import unicodedata
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
+import library_resources
 
 # ---------------------------------------------------------------------------
 # Canonical budget constants and schema definitions
@@ -67,6 +70,7 @@ REQUIRED_TABLES = frozenset({
     "source_subscriptions",
     "source_items",
     "source_detection_cursors",
+    "podcast_episodes",
 })
 
 # ---------------------------------------------------------------------------
@@ -121,6 +125,11 @@ def reset_rate_limiter() -> None:
     """Reset the rolling rate limiter (for test isolation)."""
     with _rate_limiter._lock:
         _rate_limiter._calls.clear()
+    guard = getattr(library_resources, "_PROCESS_GUARD", None)
+    if guard is not None:
+        with guard._lock:
+            guard._admissions.clear()
+            guard._active = 0
 
 
 # ---------------------------------------------------------------------------
@@ -516,23 +525,19 @@ def get_library_activity(
     clock: Any = None,
 ) -> dict:
     """Entry point for get_library_activity read tool."""
-    start_time = time.monotonic()
-
-    # Rate limiting
+    guard = library_resources.process_guard()
     try:
-        _rate_limiter.check()
-    except RateLimitExceeded as e:
+        guard.admit()
+    except library_resources.ResourceError as e:
+        return error_envelope(e.code, e.message, details=e.details, retryable=True)
+    except Exception as e:
         return error_envelope("rate_limited", str(e), retryable=True)
 
-    # Concurrency limit (2 active reads)
-    acquired = _active_reads_sem.acquire(blocking=False)
-    if not acquired:
-        return error_envelope("rate_limited", "Maximum concurrent active reads exceeded", retryable=True)
-
+    start_time = time.monotonic()
     try:
         return _execute_activity(args, db=db, clock=clock, start_time=start_time)
     finally:
-        _active_reads_sem.release()
+        guard.release()
 
 
 def _execute_activity(
@@ -542,6 +547,11 @@ def _execute_activity(
     clock: Any = None,
     start_time: float,
 ) -> dict:
+    def _check_deadline() -> Optional[dict]:
+        if time.monotonic() - start_time > SERVICE_DEADLINE_SEC:
+            return error_envelope("deadline_exceeded", "Service deadline exceeded", retryable=True)
+        return None
+
     # Validate request size
     try:
         req_bytes = len(json.dumps(args, ensure_ascii=False).encode("utf-8"))
@@ -572,7 +582,9 @@ def _execute_activity(
     as_of_dt = datetime.fromisoformat(as_of_str)
 
     # Validate interval
-    interval_raw = args.get("interval")
+    if "interval" not in args or args["interval"] is None:
+        return error_envelope("validation_error", "interval is required and cannot be null")
+    interval_raw = args["interval"]
     dt_start, dt_end, int_err = parse_interval(interval_raw, as_of_dt)
     if int_err is not None:
         return int_err
@@ -581,34 +593,58 @@ def _execute_activity(
     canonical_end = format_canonical_utc(dt_end)
     canonical_interval = {"start": canonical_start, "end": canonical_end}
 
-    date_basis = args.get("date_basis", "capture_time")
-    if date_basis not in ("capture_time", "publication_time"):
-        return error_envelope("validation_error", f"Invalid date_basis: {date_basis}")
+    date_basis = "capture_time"
+    if "date_basis" in args:
+        db_val = args["date_basis"]
+        if not isinstance(db_val, str) or db_val not in ("capture_time", "publication_time"):
+            return error_envelope("validation_error", f"Invalid date_basis: {db_val}")
+        date_basis = db_val
 
-    detail = args.get("detail")
     valid_details = {"creator_hints", "type_creator_hints", "shelves", "sources", "events", "evidence"}
-    if detail is not None and detail not in valid_details:
-        return error_envelope("validation_error", f"Invalid detail: {detail}")
+    if "detail" in args:
+        det_val = args["detail"]
+        if not isinstance(det_val, str) or det_val not in valid_details:
+            return error_envelope("validation_error", f"Invalid detail: {det_val}")
+    detail = args.get("detail")
 
-    expected_revision = args.get("expected_revision")
-    if detail is not None:
-        if not isinstance(expected_revision, str) or not re.match(r"^[0-9a-f]{64}$", expected_revision):
+    if detail is None:
+        if "offset" in args or "limit" in args:
+            return error_envelope("validation_error", "Pagination offset and limit are permitted only for detail requests")
+        if "expected_revision" in args:
+            return error_envelope("validation_error", "expected_revision is permitted only for detail requests")
+        if "metric_id" in args:
+            return error_envelope("validation_error", "metric_id is permitted only for detail:evidence requests")
+        offset = 0
+        limit = 20
+    else:
+        if "expected_revision" not in args or not isinstance(args["expected_revision"], str) or not re.match(r"^[0-9a-f]{64}$", args["expected_revision"]):
             return error_envelope("validation_error", "expected_revision (64 lowercase hex) is required for detail requests")
+        expected_revision = args["expected_revision"]
 
-    metric_id = args.get("metric_id")
-    if detail == "evidence":
-        if not isinstance(metric_id, str) or not metric_id.strip():
-            return error_envelope("validation_error", "metric_id is required for detail:evidence")
-        if len(metric_id.encode("utf-8")) > MAX_METRIC_ID_BYTES:
-            return error_envelope("validation_error", f"metric_id cannot exceed {MAX_METRIC_ID_BYTES} bytes")
+        if detail == "evidence":
+            if "metric_id" not in args or not isinstance(args["metric_id"], str) or not args["metric_id"].strip():
+                return error_envelope("validation_error", "metric_id is required for detail:evidence")
+            metric_id = args["metric_id"]
+            if len(metric_id.encode("utf-8")) > MAX_METRIC_ID_BYTES:
+                return error_envelope("validation_error", f"metric_id cannot exceed {MAX_METRIC_ID_BYTES} bytes")
+        else:
+            if "metric_id" in args:
+                return error_envelope("validation_error", "metric_id is permitted only for detail:evidence requests")
+            metric_id = None
 
-    offset = args.get("offset", 0)
-    if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0 or offset > 1_000_000:
-        return error_envelope("validation_error", "offset must be integer between 0 and 1,000,000")
+        if "offset" in args:
+            offset = args["offset"]
+            if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0 or offset > 1_000_000:
+                return error_envelope("validation_error", "offset must be integer between 0 and 1,000,000")
+        else:
+            offset = 0
 
-    limit = args.get("limit", 20)
-    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > 20:
-        return error_envelope("validation_error", "limit must be integer between 1 and 20")
+        if "limit" in args:
+            limit = args["limit"]
+            if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > 20:
+                return error_envelope("validation_error", "limit must be integer between 1 and 20")
+        else:
+            limit = 20
 
     # Connect to DB
     if db is not None:
@@ -651,12 +687,39 @@ def _execute_activity(
         )
         all_yoinks = c_yoinks.fetchall()
 
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
+        live_yoinks: List[dict] = []
+        tombstone_yoinks: List[dict] = []
+        for r in all_yoinks:
+            vid, stype, author, channel, platform, y_at, d_at = r
+            row_dict = {
+                "video_id": vid,
+                "source_type": stype or "unknown",
+                "author": author or "",
+                "channel": channel or "",
+                "platform": (platform or "").strip() or "unknown",
+                "raw_yoinked_at": y_at,
+                "raw_deleted_at": d_at,
+            }
+            if d_at is None:
+                live_yoinks.append(row_dict)
+            else:
+                tombstone_yoinks.append(row_dict)
+        live_survivor_ids = {item["video_id"] for item in live_yoinks}
+
         # Q2a podcast episodes
         c_episodes = conn.execute(
             "SELECT id, feed_id, guid, yoink_video_id, published_at, status "
             "FROM podcast_episodes ORDER BY id ASC"
         )
         all_episodes = c_episodes.fetchall()
+
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
 
         # Q2b / Q5 source items
         c_sitems = conn.execute(
@@ -665,6 +728,10 @@ def _execute_activity(
         )
         all_sitems = c_sitems.fetchall()
 
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
         # Q5 source subscriptions & cursors
         c_subs = conn.execute(
             "SELECT source_id, kind, source_key, canonical_url, display_name, revision, created_at_ms, updated_at_ms, archived, consent_state "
@@ -672,25 +739,44 @@ def _execute_activity(
         )
         all_subs = c_subs.fetchall()
 
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
         c_cursors = conn.execute(
             "SELECT source_id, revision, last_poll_attempt_ms, last_poll_success_ms, coverage, observed_count, truncated "
             "FROM source_detection_cursors ORDER BY source_id ASC"
         )
         all_cursors = c_cursors.fetchall()
 
-        # Q3 / Q4 Journal & Receipts
-        c_applies = conn.execute(
-            "SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence, "
-            "authoritative_record_hash, forward_json, inverse_json, undo_of, created_at "
-            "FROM library_applies ORDER BY operation_sequence ASC"
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
+        # Measure UTF-8 journal bytes before materialization
+        c_journal_bytes = conn.execute(
+            "SELECT COALESCE(SUM(LENGTH(CAST(forward_json AS BLOB)) + LENGTH(CAST(inverse_json AS BLOB))), 0) FROM library_applies"
         )
-        all_applies = c_applies.fetchall()
+        total_journal_bytes = c_journal_bytes.fetchone()[0]
+        if total_journal_bytes > MAX_JOURNAL_BYTES:
+            return error_envelope(
+                "resource_too_large",
+                f"Combined journal deltas ({total_journal_bytes} bytes) exceed budget limit of {MAX_JOURNAL_BYTES} bytes",
+            )
+
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
 
         c_receipts = conn.execute(
             "SELECT operation_sequence, operation_key, authoritative_record_hash "
             "FROM library_operation_receipts ORDER BY operation_sequence ASC"
         )
         all_receipts = c_receipts.fetchall()
+
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
 
         c_meta = conn.execute(
             "SELECT singleton, projection_revision, active_version_id, last_operation_sequence, recovery_state "
@@ -708,12 +794,20 @@ def _execute_activity(
         if recovery_state != "ready":
             return error_envelope("recovery_pending", f"Library recovery state is {recovery_state}")
 
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
         # Current memberships
         c_item_shelves = conn.execute(
             "SELECT video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at "
             "FROM item_shelves ORDER BY video_id ASC, shelf_id ASC"
         )
         all_item_shelves = c_item_shelves.fetchall()
+
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
 
         # Shelves definitions
         c_shelves = conn.execute("SELECT shelf_id, created_at FROM shelves ORDER BY shelf_id ASC")
@@ -728,16 +822,253 @@ def _execute_activity(
         c_shelf_nodes = conn.execute("SELECT version_id, shelf_id, name FROM shelf_nodes ORDER BY version_id ASC, shelf_id ASC")
         all_shelf_nodes = c_shelf_nodes.fetchall()
 
-        # Bound check journal JSON size (64 MiB limit)
-        total_journal_bytes = sum(
-            len((r[7] or "").encode("utf-8")) + len((r[8] or "").encode("utf-8"))
-            for r in all_applies
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
+
+        # Streamed journal replay & validation
+        receipt_by_seq = {}
+        for r in all_receipts:
+            receipt_by_seq[r[0]] = (r[1], r[2])
+
+        expected_seqs = list(range(1, last_op_seq + 1))
+        if [r[0] for r in all_receipts] != expected_seqs:
+            baseline_proved = False
+            baseline_reason = "missing_receipt_sequence_gap"
+        else:
+            baseline_proved = True
+            baseline_reason = None
+
+        curr_rev = 0
+        total_applies_count = 0
+        first_apply_dt: Optional[datetime] = None
+        earliest_apply_dt: Optional[datetime] = None
+        latest_apply_dt: Optional[datetime] = None
+        last_apply_dt: Optional[datetime] = None
+        invalid_apply_date_count = 0
+
+        journal_binding = []
+        interval_applies_compact: List[dict] = []
+        applied_ops_count = 0
+        shelf_additions: Dict[str, int] = {}
+        shelf_removals: Dict[str, int] = {}
+        interval_affected_items: Set[str] = set()
+        item_change_events = 0
+        primary_change_events = 0
+        metadata_only_events = 0
+        policy_change_events = 0
+        activation_events = 0
+
+        projected_state: Dict[str, Dict[str, dict]] = {vid: {} for vid in live_survivor_ids}
+        start_state: Dict[str, Dict[str, dict]] = {}
+        end_state: Dict[str, Dict[str, dict]] = {}
+        captured_start = False
+        captured_end = False
+
+        c_applies = conn.execute(
+            "SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence, "
+            "authoritative_record_hash, forward_json, inverse_json, undo_of, created_at "
+            "FROM library_applies ORDER BY operation_sequence ASC"
         )
-        if total_journal_bytes > MAX_JOURNAL_BYTES:
-            return error_envelope(
-                "resource_too_large",
-                f"Combined journal deltas ({total_journal_bytes} bytes) exceed budget limit of {MAX_JOURNAL_BYTES} bytes",
-            )
+
+        for idx, app_row in enumerate(c_applies):
+            dl_err = _check_deadline()
+            if dl_err is not None:
+                return dl_err
+
+            total_applies_count += 1
+            app_id, op_key, a_kind, before_rev, after_rev, op_seq, auth_hash, f_json, i_json, undo_of, c_at = app_row
+
+            f_hash = hashlib.sha256((f_json or "").encode("utf-8")).hexdigest()
+            i_hash = hashlib.sha256((i_json or "").encode("utf-8")).hexdigest()
+            journal_binding.append({
+                "id": app_id,
+                "k": a_kind,
+                "br": before_rev,
+                "ar": after_rev,
+                "seq": op_seq,
+                "rh": auth_hash,
+                "f_hash": f_hash,
+                "i_hash": i_hash,
+                "undo": undo_of,
+                "at": c_at,
+            })
+
+            if before_rev != curr_rev or after_rev != curr_rev + 1:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "revision_sequence_gap"
+            curr_rev = after_rev
+
+            if op_seq != idx + 1:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "operation_sequence_gap"
+
+            rcpt = receipt_by_seq.get(op_seq)
+            if rcpt is None or rcpt[0] != op_key or rcpt[1] != auth_hash:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "receipt_binding_mismatch"
+
+            try:
+                f_delta = json.loads(f_json)
+                i_delta = json.loads(i_json)
+            except Exception:
+                return error_envelope("invalid_source_data", f"Malformed delta JSON in apply {app_id}")
+
+            if not _validate_delta_structure(f_delta) or not _validate_delta_structure(i_delta):
+                return error_envelope("invalid_source_data", f"Malformed delta structure in apply {app_id}")
+
+            dt_apply, _ = parse_iso_utc(c_at)
+            if dt_apply is None and isinstance(c_at, (int, float)):
+                dt_apply, _ = parse_epoch_ms(c_at)
+
+            if dt_apply is None:
+                invalid_apply_date_count += 1
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "invalid_apply_timestamp"
+            elif dt_apply > as_of_dt:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "future_apply_timestamp"
+
+            if earliest_apply_dt is None and dt_apply is not None:
+                earliest_apply_dt = dt_apply
+            if dt_apply is not None:
+                latest_apply_dt = dt_apply
+
+            if idx == 0:
+                first_apply_dt = dt_apply
+
+            if last_apply_dt is not None and dt_apply is not None and dt_apply < last_apply_dt:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "clock_regression"
+            if dt_apply is not None:
+                last_apply_dt = dt_apply
+
+            # Replay if baseline still candidate
+            if baseline_proved and dt_apply is not None:
+                if not captured_start and dt_apply >= dt_start:
+                    start_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
+                    captured_start = True
+                if not captured_end and dt_apply >= dt_end:
+                    end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
+                    captured_end = True
+
+                i_items = i_delta.get("items", {})
+                for vid, rows in i_items.items():
+                    if vid in live_survivor_ids:
+                        cur_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
+                        inv_memberships = {r["shelf_id"]: r.get("is_primary", 0) for r in rows}
+                        if cur_memberships != inv_memberships:
+                            baseline_proved = False
+                            baseline_reason = "mismatched_inverse_projection"
+                            break
+
+                if baseline_proved:
+                    f_items = f_delta.get("items", {})
+                    for vid, rows in f_items.items():
+                        if vid in live_survivor_ids:
+                            projected_state[vid] = {r["shelf_id"]: r for r in rows}
+
+            # Interval applies accounting
+            if dt_apply is not None and dt_start <= dt_apply < dt_end:
+                applied_ops_count += 1
+                f_items = f_delta.get("items", {})
+                i_items = i_delta.get("items", {})
+                all_vids = set(f_items.keys()) | set(i_items.keys())
+                ref_shelves = set()
+
+                for vid in all_vids:
+                    f_rows = f_items.get(vid, [])
+                    i_rows = i_items.get(vid, [])
+                    f_shelves = {r["shelf_id"] for r in f_rows}
+                    i_shelves = {r["shelf_id"] for r in i_rows}
+                    ref_shelves |= f_shelves | i_shelves
+                    f_prim = next((r["shelf_id"] for r in f_rows if r.get("is_primary") == 1), None)
+                    i_prim = next((r["shelf_id"] for r in i_rows if r.get("is_primary") == 1), None)
+
+                    added = f_shelves - i_shelves
+                    removed = i_shelves - f_shelves
+
+                    for s in added:
+                        shelf_additions[s] = shelf_additions.get(s, 0) + 1
+                    for s in removed:
+                        shelf_removals[s] = shelf_removals.get(s, 0) + 1
+
+                    if f_shelves != i_shelves or f_prim != i_prim:
+                        interval_affected_items.add(vid)
+                        item_change_events += 1
+                        if f_prim != i_prim and f_shelves == i_shelves:
+                            primary_change_events += 1
+                    elif f_rows != i_rows:
+                        metadata_only_events += 1
+
+                f_pols = f_delta.get("policies", {})
+                i_pols = i_delta.get("policies", {})
+                for p_k in set(f_pols.keys()) | set(i_pols.keys()):
+                    if f_pols.get(p_k) != i_pols.get(p_k):
+                        policy_change_events += 1
+
+                f_act = f_delta.get("active_version_id")
+                i_act = i_delta.get("active_version_id")
+                if f_act != i_act and (f_act is not None or i_act is not None):
+                    activation_events += 1
+
+                interval_applies_compact.append({
+                    "apply_id": app_id,
+                    "operation_sequence": op_seq,
+                    "kind": a_kind,
+                    "before_revision": before_rev,
+                    "after_revision": after_rev,
+                    "undo_of": undo_of,
+                    "authoritative_record_hash": auth_hash,
+                    "created_at_dt": dt_apply,
+                    "raw_created_at": c_at,
+                    "referenced_shelves": ref_shelves,
+                })
+
+            del f_delta
+            del i_delta
+
+        if total_applies_count == 0:
+            baseline_proved = False
+            baseline_reason = "no_history"
+        elif curr_rev != projection_revision:
+            baseline_proved = False
+            if baseline_reason is None:
+                baseline_reason = "projection_revision_mismatch"
+        elif first_apply_dt is None:
+            baseline_proved = False
+            if baseline_reason is None:
+                baseline_reason = "invalid_apply_timestamp"
+        elif dt_start < first_apply_dt:
+            baseline_proved = False
+            if baseline_reason is None:
+                baseline_reason = "interval_precedes_first_apply"
+
+        if baseline_proved:
+            if not captured_start:
+                start_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
+            if not captured_end:
+                end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
+
+            actual_current_shelves: Dict[str, Dict[str, int]] = {vid: {} for vid in live_survivor_ids}
+            for r in all_item_shelves:
+                vid = r[0]
+                if vid in live_survivor_ids:
+                    actual_current_shelves[vid][r[1]] = r[6]
+
+            for vid in live_survivor_ids:
+                p_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
+                a_memberships = actual_current_shelves[vid]
+                if p_memberships != a_memberships:
+                    baseline_proved = False
+                    baseline_reason = "replay_does_not_reach_current_state"
+                    break
 
         # -------------------------------------------------------------------
         # Build Content-Binding report_revision
@@ -765,21 +1096,6 @@ def _execute_activity(
         memb_binding = [
             {"v": r[0], "s": r[1], "ver": r[2], "rev": r[3], "src": r[4], "l": r[5], "p": r[6], "c": r[7], "at": r[9]}
             for r in all_item_shelves
-        ]
-        journal_binding = [
-            {
-                "id": r[0],
-                "k": r[2],
-                "br": r[3],
-                "ar": r[4],
-                "seq": r[5],
-                "rh": r[6],
-                "f_hash": hashlib.sha256((r[7] or "").encode("utf-8")).hexdigest(),
-                "i_hash": hashlib.sha256((r[8] or "").encode("utf-8")).hexdigest(),
-                "undo": r[9],
-                "at": r[10],
-            }
-            for r in all_applies
         ]
         receipts_binding = [{"seq": r[0], "k": r[1], "h": r[2]} for r in all_receipts]
         revisions_binding = {
@@ -812,6 +1128,10 @@ def _execute_activity(
         # Verify expected_revision for detail requests
         if detail is not None and expected_revision != report_revision:
             return error_envelope("stale_report", "Report revision mismatch; refresh summary before paging detail", retryable=False)
+
+        dl_err = _check_deadline()
+        if dl_err is not None:
+            return dl_err
 
         # -------------------------------------------------------------------
         # Process Items & Publications (Q1 & Q2)
@@ -1143,230 +1463,7 @@ def _execute_activity(
         # -------------------------------------------------------------------
         # Q3 / Q4 Applied Journal, Shelf Sizes and Churn Proof
         # -------------------------------------------------------------------
-        live_survivor_ids = {item["video_id"] for item in live_yoinks}
-
-        # Baseline Proof (Rules 1-4)
-        baseline_proved = True
-        baseline_reason: Optional[str] = None
-
-        # Check receipts 1..last_op_seq
-        receipt_by_seq = {}
-        for r in all_receipts:
-            receipt_by_seq[r[0]] = (r[1], r[2])
-
-        expected_seqs = list(range(1, last_op_seq + 1))
-        if [r[0] for r in all_receipts] != expected_seqs:
-            baseline_proved = False
-            baseline_reason = "missing_receipt_sequence_gap"
-
-        # Check revisions 0..projection_revision
-        # Each apply must increment revision by 1
-        curr_rev = 0
-        applies_parsed: List[dict] = []
-        invalid_apply_date_count = 0
-        for idx, app in enumerate(all_applies):
-            app_id, op_key, a_kind, before_rev, after_rev, op_seq, auth_hash, f_json, i_json, undo_of, c_at = app
-            if before_rev != curr_rev or after_rev != curr_rev + 1:
-                baseline_proved = False
-                baseline_reason = "revision_sequence_gap"
-            curr_rev = after_rev
-
-            if op_seq != idx + 1:
-                baseline_proved = False
-                baseline_reason = "operation_sequence_gap"
-
-            rcpt = receipt_by_seq.get(op_seq)
-            if rcpt is None or rcpt[0] != op_key or rcpt[1] != auth_hash:
-                baseline_proved = False
-                baseline_reason = "receipt_binding_mismatch"
-
-            # Parse JSON
-            try:
-                f_delta = json.loads(f_json)
-                i_delta = json.loads(i_json)
-            except Exception:
-                return error_envelope("invalid_source_data", f"Malformed delta JSON in apply {app_id}")
-
-            if not _validate_delta_structure(f_delta) or not _validate_delta_structure(i_delta):
-                return error_envelope("invalid_source_data", f"Malformed delta structure in apply {app_id}")
-
-            dt_apply, apply_err = parse_iso_utc(c_at)
-            if dt_apply is None and isinstance(c_at, (int, float)):
-                dt_apply, apply_err = parse_epoch_ms(c_at)
-            if dt_apply is None:
-                invalid_apply_date_count += 1
-                baseline_proved = False
-                if baseline_reason is None:
-                    baseline_reason = "invalid_apply_timestamp"
-            elif dt_apply > as_of_dt:
-                baseline_proved = False
-                if baseline_reason is None:
-                    baseline_reason = "future_apply_timestamp"
-
-            applies_parsed.append({
-                "apply_id": app_id,
-                "operation_key": op_key,
-                "kind": a_kind,
-                "before_revision": before_rev,
-                "after_revision": after_rev,
-                "operation_sequence": op_seq,
-                "authoritative_record_hash": auth_hash,
-                "forward": f_delta,
-                "inverse": i_delta,
-                "undo_of": undo_of,
-                "created_at_dt": dt_apply,
-                "raw_created_at": c_at,
-            })
-
-        if curr_rev != projection_revision:
-            baseline_proved = False
-            baseline_reason = "projection_revision_mismatch"
-
-        # Nondecreasing timestamps check
-        for idx in range(1, len(applies_parsed)):
-            prev_dt = applies_parsed[idx - 1]["created_at_dt"]
-            cur_dt = applies_parsed[idx]["created_at_dt"]
-            if prev_dt and cur_dt and cur_dt < prev_dt:
-                baseline_proved = False
-                baseline_reason = "clock_regression"
-
-        # Check floor: start must be >= first applied timestamp
-        if not applies_parsed:
-            baseline_proved = False
-            baseline_reason = "no_history"
-        else:
-            first_apply_dt = applies_parsed[0]["created_at_dt"]
-            if first_apply_dt is None:
-                baseline_proved = False
-                if baseline_reason is None:
-                    baseline_reason = "invalid_apply_timestamp"
-            elif dt_start < first_apply_dt:
-                baseline_proved = False
-                baseline_reason = "interval_precedes_first_apply"
-
-        # Replay deltas for live survivors
-        # State: vid -> dict of shelf_id -> row
-        projected_state: Dict[str, Dict[str, dict]] = {vid: {} for vid in live_survivor_ids}
-        start_state: Dict[str, Dict[str, dict]] = {}
-        end_state: Dict[str, Dict[str, dict]] = {}
-
-        if baseline_proved:
-            captured_start = False
-            captured_end = False
-            for app in applies_parsed:
-                app_dt = app["created_at_dt"]
-                assert app_dt is not None
-
-                if not captured_start and app_dt >= dt_start:
-                    start_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
-                    captured_start = True
-
-                if not captured_end and app_dt >= dt_end:
-                    end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
-                    captured_end = True
-
-                # Check inverse delta matches projected state for live survivors, including primary
-                i_items = app["inverse"].get("items", {})
-                f_items = app["forward"].get("items", {})
-
-                for vid, rows in i_items.items():
-                    if vid in live_survivor_ids:
-                        cur_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
-                        inv_memberships = {r["shelf_id"]: r.get("is_primary", 0) for r in rows}
-                        if cur_memberships != inv_memberships:
-                            baseline_proved = False
-                            baseline_reason = "mismatched_inverse_projection"
-                            break
-                if not baseline_proved:
-                    break
-
-                # Apply forward delta
-                for vid, rows in f_items.items():
-                    if vid in live_survivor_ids:
-                        projected_state[vid] = {r["shelf_id"]: r for r in rows}
-
-            if baseline_proved:
-                if not captured_start:
-                    start_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
-                if not captured_end:
-                    end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
-
-                # Check ending projected state matches current item_shelves for live survivors, including primary
-                actual_current_shelves: Dict[str, Dict[str, int]] = {vid: {} for vid in live_survivor_ids}
-                for r in all_item_shelves:
-                    # r: video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at
-                    vid = r[0]
-                    if vid in live_survivor_ids:
-                        actual_current_shelves[vid][r[1]] = r[6]
-
-                for vid in live_survivor_ids:
-                    p_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
-                    a_memberships = actual_current_shelves[vid]
-                    if p_memberships != a_memberships:
-                        baseline_proved = False
-                        baseline_reason = "replay_does_not_reach_current_state"
-                        break
-
-        # Interval applied events accounting
-        applied_ops_count = 0
-        shelf_additions: Dict[str, int] = {}
-        shelf_removals: Dict[str, int] = {}
-        interval_affected_items: Set[str] = set()
-        item_change_events = 0
-        primary_change_events = 0
-        metadata_only_events = 0
-        policy_change_events = 0
-        activation_events = 0
-
-        interval_applies: List[dict] = []
-
-        for app in applies_parsed:
-            app_dt = app["created_at_dt"]
-            if app_dt is not None and dt_start <= app_dt < dt_end:
-                applied_ops_count += 1
-                interval_applies.append(app)
-
-                f_items = app["forward"].get("items", {})
-                i_items = app["inverse"].get("items", {})
-                all_vids = set(f_items.keys()) | set(i_items.keys())
-
-                for vid in all_vids:
-                    f_rows = f_items.get(vid, [])
-                    i_rows = i_items.get(vid, [])
-                    f_shelves = {r["shelf_id"] for r in f_rows}
-                    i_shelves = {r["shelf_id"] for r in i_rows}
-                    f_prim = next((r["shelf_id"] for r in f_rows if r.get("is_primary") == 1), None)
-                    i_prim = next((r["shelf_id"] for r in i_rows if r.get("is_primary") == 1), None)
-
-                    added = f_shelves - i_shelves
-                    removed = i_shelves - f_shelves
-
-                    for s in added:
-                        shelf_additions[s] = shelf_additions.get(s, 0) + 1
-                    for s in removed:
-                        shelf_removals[s] = shelf_removals.get(s, 0) + 1
-
-                    if f_shelves != i_shelves or f_prim != i_prim:
-                        interval_affected_items.add(vid)
-                        item_change_events += 1
-                        if f_prim != i_prim and f_shelves == i_shelves:
-                            primary_change_events += 1
-                    elif f_rows != i_rows:
-                        # Row data changed without shelf set or primary change
-                        metadata_only_events += 1
-
-                # Policies check
-                f_pols = app["forward"].get("policies", {})
-                i_pols = app["inverse"].get("policies", {})
-                for vid in set(f_pols.keys()) | set(i_pols.keys()):
-                    if f_pols.get(vid) != i_pols.get(vid):
-                        policy_change_events += 1
-
-                # Active version change check
-                f_act = app["forward"].get("active_version_id")
-                i_act = app["inverse"].get("active_version_id")
-                if f_act != i_act and (f_act is not None or i_act is not None):
-                    activation_events += 1
+        interval_applies = interval_applies_compact
 
         total_membership_additions = sum(shelf_additions.values())
         total_membership_removals = sum(shelf_removals.values())
@@ -1963,9 +2060,9 @@ def _execute_activity(
             "cov_shelf_activity": {
                 "clock": "applied_journal_time",
                 "requested_interval": canonical_interval,
-                "coverage_status": "journal_complete" if baseline_proved else ("no_history" if not applies_parsed or (first_apply_dt is not None and dt_end <= first_apply_dt) else "partial"),
-                "earliest_retained_timestamp": format_canonical_utc(applies_parsed[0]["created_at_dt"]) if applies_parsed and applies_parsed[0]["created_at_dt"] else None,
-                "latest_retained_timestamp": format_canonical_utc(applies_parsed[-1]["created_at_dt"]) if applies_parsed and applies_parsed[-1]["created_at_dt"] else None,
+                "coverage_status": "journal_complete" if baseline_proved else ("no_history" if total_applies_count == 0 or (first_apply_dt is not None and dt_end <= first_apply_dt) else "partial"),
+                "earliest_retained_timestamp": format_canonical_utc(earliest_apply_dt) if earliest_apply_dt else None,
+                "latest_retained_timestamp": format_canonical_utc(latest_apply_dt) if latest_apply_dt else None,
                 "reasons": [baseline_reason] if baseline_reason else [],
                 "exclusions": {"invalid_apply_timestamp": invalid_apply_date_count} if invalid_apply_date_count > 0 else {},
             },
@@ -2153,7 +2250,6 @@ def _execute_activity(
                     live_yoinks=live_yoinks,
                     tombstone_yoinks=tombstone_yoinks,
                     interval_applies=interval_applies,
-                    all_applies=all_applies,
                     all_item_shelves=all_item_shelves,
                     daily_buckets_map=daily_buckets_map,
                     vid_to_sources=vid_to_sources,
@@ -2220,6 +2316,22 @@ def _execute_activity(
             if detail == "evidence":
                 detail_response["metric_id"] = metric_id
 
+            # Refuse unfit identity (> 512 bytes or control characters) without truncation
+            for r in detail_rows:
+                ids_to_check = [r.get("row_id"), r.get("source_key")]
+                if isinstance(r.get("details"), dict):
+                    ids_to_check.extend(r["details"].values())
+                for id_val in ids_to_check:
+                    if isinstance(id_val, str):
+                        raw_id = id_val.encode("utf-8")
+                        if len(raw_id) > 512 or any(unicodedata.category(ch) == "Cc" for ch in id_val):
+                            return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
+
+            # Bound serialized response
+            resp_bytes = len(json.dumps(detail_response, ensure_ascii=False).encode("utf-8"))
+            if resp_bytes > MAX_RESPONSE_BYTES:
+                return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
+
             # Verify generation before returning
             gen_end = _get_db_generation(conn)
             if gen_end["total_changes"] != gen_start["total_changes"] or gen_end["data_version"] != gen_start["data_version"]:
@@ -2262,36 +2374,97 @@ def _execute_activity(
         resp_json = json.dumps(summary_response, ensure_ascii=False)
         resp_bytes = len(resp_json.encode("utf-8"))
 
-        if resp_bytes > MAX_RESPONSE_BYTES:
+        while resp_bytes > MAX_RESPONSE_BYTES:
             # Fixed drop order: event rows, joint creator rows, creator rows, source rows, shelf rows
-            # 1. Event rows
-            events_family["rows"] = []
-            events_family["returned_rows"] = 0
-            events_family["omitted_rows"] = events_family["total"]
-            resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
-
-            if resp_bytes > MAX_RESPONSE_BYTES:
-                # 2. Joint creator rows
-                items_family["by_type_creator_hint"] = []
-                resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
-
-            if resp_bytes > MAX_RESPONSE_BYTES:
-                # 3. Creator rows
-                items_family["by_creator_hint"] = []
-                resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
-
-            if resp_bytes > MAX_RESPONSE_BYTES:
-                # 4. Source rows
-                sources_family["details"] = []
-                resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
-
-            if resp_bytes > MAX_RESPONSE_BYTES:
-                # 5. Shelf rows
-                shelf_family["shelves"] = []
-                resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
-
-            if resp_bytes > MAX_RESPONSE_BYTES:
+            if events_family["rows"]:
+                events_family["rows"].pop()
+                ret_len = len(events_family["rows"])
+                events_family["returned_rows"] = ret_len
+                events_family["omitted_rows"] = events_family["total"] - ret_len
+                if ret_len < events_family["total"]:
+                    events_family["next"] = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": "events",
+                        "expected_revision": report_revision,
+                        "offset": ret_len,
+                        "limit": 20,
+                    }
+                else:
+                    events_family["next"] = None
+                pagination_map["events"]["returned_rows"] = ret_len
+                pagination_map["events"]["omitted_rows"] = pagination_map["events"]["total_rows"] - ret_len
+                pagination_map["events"]["next"] = events_family["next"]
+            elif items_family["by_type_creator_hint"]:
+                items_family["by_type_creator_hint"].pop()
+                ret_len = len(items_family["by_type_creator_hint"])
+                pagination_map["type_creator_hints"]["returned_rows"] = ret_len
+                pagination_map["type_creator_hints"]["omitted_rows"] = pagination_map["type_creator_hints"]["total_rows"] - ret_len
+                pagination_map["type_creator_hints"]["other_count"] = sum(r["count"]["value"] for r in by_joint_rows[ret_len:])
+                if ret_len < pagination_map["type_creator_hints"]["total_rows"]:
+                    pagination_map["type_creator_hints"]["next"] = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": "type_creator_hints",
+                        "expected_revision": report_revision,
+                        "offset": ret_len,
+                        "limit": 20,
+                    }
+                else:
+                    pagination_map["type_creator_hints"]["next"] = None
+            elif items_family["by_creator_hint"]:
+                items_family["by_creator_hint"].pop()
+                ret_len = len(items_family["by_creator_hint"])
+                pagination_map["creator_hints"]["returned_rows"] = ret_len
+                pagination_map["creator_hints"]["omitted_rows"] = pagination_map["creator_hints"]["total_rows"] - ret_len
+                pagination_map["creator_hints"]["other_count"] = sum(r["count"]["value"] for r in by_creator_rows[ret_len:])
+                if ret_len < pagination_map["creator_hints"]["total_rows"]:
+                    pagination_map["creator_hints"]["next"] = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": "creator_hints",
+                        "expected_revision": report_revision,
+                        "offset": ret_len,
+                        "limit": 20,
+                    }
+                else:
+                    pagination_map["creator_hints"]["next"] = None
+            elif sources_family["details"]:
+                sources_family["details"].pop()
+                ret_len = len(sources_family["details"])
+                pagination_map["sources"]["returned_rows"] = ret_len
+                pagination_map["sources"]["omitted_rows"] = pagination_map["sources"]["total_rows"] - ret_len
+                if ret_len < pagination_map["sources"]["total_rows"]:
+                    pagination_map["sources"]["next"] = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": "sources",
+                        "expected_revision": report_revision,
+                        "offset": ret_len,
+                        "limit": 20,
+                    }
+                else:
+                    pagination_map["sources"]["next"] = None
+            elif shelf_family["shelves"]:
+                shelf_family["shelves"].pop()
+                ret_len = len(shelf_family["shelves"])
+                pagination_map["shelves"]["returned_rows"] = ret_len
+                pagination_map["shelves"]["omitted_rows"] = pagination_map["shelves"]["total_rows"] - ret_len
+                if ret_len < pagination_map["shelves"]["total_rows"]:
+                    pagination_map["shelves"]["next"] = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": "shelves",
+                        "expected_revision": report_revision,
+                        "offset": ret_len,
+                        "limit": 20,
+                    }
+                else:
+                    pagination_map["shelves"]["next"] = None
+            else:
                 return error_envelope("resource_too_large", "Mandatory response fields exceed 65536-byte wire limit")
+
+            resp_bytes = len(json.dumps(summary_response, ensure_ascii=False).encode("utf-8"))
 
         # Verify generation before returning
         gen_end = _get_db_generation(conn)
@@ -2325,7 +2498,6 @@ def _lookup_evidence(
     live_yoinks: List[dict],
     tombstone_yoinks: List[dict],
     interval_applies: List[dict],
-    all_applies: List[tuple],
     all_item_shelves: List[tuple],
     daily_buckets_map: Dict[str, Tuple[datetime, datetime]],
     vid_to_sources: Dict[str, Set[str]],
@@ -2755,17 +2927,7 @@ def _lookup_evidence(
                 return rows
             elif metric_kind in ("start_size", "end_size", "churn"):
                 for app in interval_applies:
-                    f_delta = app["forward"].get("items", {})
-                    i_delta = app["inverse"].get("items", {})
-                    all_v = set(f_delta.keys()) | set(i_delta.keys())
-                    has_s = False
-                    for v in all_v:
-                        f_s = {r["shelf_id"] for r in f_delta.get(v, [])}
-                        i_s = {r["shelf_id"] for r in i_delta.get(v, [])}
-                        if s_id in f_s or s_id in i_s:
-                            has_s = True
-                            break
-                    if has_s:
+                    if s_id in app.get("referenced_shelves", set()):
                         dt_ev = app["created_at_dt"]
                         assert dt_ev is not None
                         rows.append({

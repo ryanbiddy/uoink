@@ -73,6 +73,7 @@ class ToolSpec:
     input_schema: dict[str, Any]
     handler: Callable[[dict[str, Any]], dict[str, Any]]
     rate_limiter: _RateLimiter | None = None
+    annotations: dict[str, Any] | None = None
 
 
 def _ok(**fields) -> dict[str, Any]:
@@ -4898,14 +4899,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 1000000,
-                "default": 0,
                 "description": "Pagination offset.",
             },
             "limit": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 20,
-                "default": 20,
                 "description": "Pagination limit.",
             },
             "expected_revision": {
@@ -4915,6 +4914,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["interval"]),
         handler=get_library_activity,
         rate_limiter=None,
+        annotations={"readOnlyHint": True, "idempotentHint": True},
     ),
     # ---- Living Library Phase 4 bounded read tools (run AV-1) ----
     # Strictness, the 2 s deadline, the 60/minute and 2-active guard and every
@@ -5021,14 +5021,17 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
 
 
 def list_tools() -> list[dict[str, Any]]:
-    return [
-        {
+    tools = []
+    for spec in TOOL_REGISTRY.values():
+        item: dict[str, Any] = {
             "name": spec.name,
             "description": spec.description,
             "inputSchema": spec.input_schema,
         }
-        for spec in TOOL_REGISTRY.values()
-    ]
+        if spec.annotations is not None:
+            item["annotations"] = spec.annotations
+        tools.append(item)
+    return tools
 
 
 def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
