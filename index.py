@@ -271,6 +271,21 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
     return applied
 
 
+def _citation_label_columns(citation: dict) -> tuple:
+    """Phase 6 (phase6-v1): ``(speaker, speaker_provenance_json)`` for one
+    citation dict. Accepts either a pre-serialized ``speaker_provenance_json``
+    string or a ``speaker_provenance`` object; a label with no provenance
+    object is stored as NULL (never promoted to attributed evidence)."""
+    speaker = citation.get("speaker")
+    raw = citation.get("speaker_provenance_json")
+    if raw is None and isinstance(citation.get("speaker_provenance"), dict):
+        raw = json.dumps(citation["speaker_provenance"], ensure_ascii=False,
+                         sort_keys=True, allow_nan=False)
+    if not isinstance(speaker, str) or not isinstance(raw, str):
+        return (None, None)
+    return (speaker, raw)
+
+
 def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) -> None:
     """Build the derived clip index once for an upgraded library.
 
@@ -1756,14 +1771,30 @@ class Index:
                 max_seq_by_kind[kind] = max(max_seq_by_kind.get(kind, -1), seq)
         import clips as _clips  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
-            self._conn.executemany(
-                "INSERT OR REPLACE INTO citations "
-                "(video_id, kind, seq, timestamp_start, timestamp_end, "
-                " text, file_path, youtube_deep_link, source_url, "
-                " source_deep_link) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                rows,
-            )
+            # Phase 6 (phase6-v1): once migration 0030 exists, each cue's local
+            # label and its provenance object travel in the same write. A
+            # label without provenance is never stored as attributed evidence.
+            labelled = any(r[1] == "speaker" for r in
+                           self._conn.execute("PRAGMA table_info(citations)"))
+            if labelled:
+                self._conn.executemany(
+                    "INSERT OR REPLACE INTO citations "
+                    "(video_id, kind, seq, timestamp_start, timestamp_end, "
+                    " text, file_path, youtube_deep_link, source_url, "
+                    " source_deep_link, speaker, speaker_provenance_json) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [row + _citation_label_columns(c)
+                     for row, c in zip(rows, citations)],
+                )
+            else:
+                self._conn.executemany(
+                    "INSERT OR REPLACE INTO citations "
+                    "(video_id, kind, seq, timestamp_start, timestamp_end, "
+                    " text, file_path, youtube_deep_link, source_url, "
+                    " source_deep_link) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    rows,
+                )
             for kind, max_seq in max_seq_by_kind.items():
                 self._conn.execute(
                     "DELETE FROM citations WHERE video_id=? AND kind=? "
@@ -1777,6 +1808,19 @@ class Index:
             self._conn.commit()
         self._invalidate_library_sources([video_id])
         return len(rows)
+
+    def store_media_snapshot(self, video_id: str, cues: list[dict], block: dict) -> int:
+        """Phase 6 (phase6-v1): persist the validated media block's rows and
+        the annotated clip projection for ``video_id`` after its citations
+        were written. Returns the clip count. Raises
+        ``library_media.MediaError`` on a binding mismatch."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+            if row is None:
+                raise _media.MediaError("resource_not_found")
+            return _media.store_snapshot(self._conn, dict(row), cues, block, commit=True)
 
     def get_citations(self, video_id: str) -> list[dict]:
         """All citations for a video, ordered by kind then seq."""

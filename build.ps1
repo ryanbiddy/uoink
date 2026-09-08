@@ -309,6 +309,7 @@ foreach ($f in @(
     'library_prompts.py',
     'library_briefs.py',
     'library_mirror.py',
+    'library_media.py',
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
@@ -527,6 +528,7 @@ Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_media.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force

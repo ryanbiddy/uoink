@@ -39,8 +39,11 @@ def _names(conn, kind):
 # ---- S01 --------------------------------------------------------------------
 def test_s01_migration_0028_is_latest_and_applies_through_the_runner(tmp_path):
     idx = open_index(tmp_path)
-    assert index_mod.latest_schema_version() == 28
-    assert idx.schema_version() == 28
+    # Phase 6 (contract phase6-v1) shipped 0030 after this contract; 0029 stays reserved
+    # and unused. 0028 is the latest Phase 3 migration and must still be applied by the
+    # runner, which the schema_version row below checks.
+    assert index_mod.latest_schema_version() == 30
+    assert idx.schema_version() == 30
     conn = idx._conn
     assert set(TABLES) <= _names(conn, "table")
     assert set(INDEXES) <= _names(conn, "index")
@@ -92,7 +95,7 @@ def test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold(tmp_path)
     raw = sqlite3.connect(str(tmp_path / "index.db"))
     raw.row_factory = sqlite3.Row
     raw.execute("PRAGMA foreign_keys=ON")
-    assert index_mod._run_migrations(raw) == 28
+    assert index_mod._run_migrations(raw) == 30
     assert raw.execute("SELECT COUNT(*) FROM schema_version WHERE version=28").fetchone()[0] == 1
     raw.close()
     idx.close()

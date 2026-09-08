@@ -2569,6 +2569,12 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             continue
         start = _as_float(seg.get("start"))
         youtube_link, citation_source, deep_link = links(start)
+        # Phase 6 (phase6-v1): a sidecar written by a Phase 6 publisher
+        # carries explicit link fields and the cue's local label with its
+        # provenance object; both survive reconstruction. A label without a
+        # provenance object is never stored as attributed evidence.
+        provenance = seg.get("speaker_provenance")
+        speaker = seg.get("speaker") if isinstance(provenance, dict) else None
         out.append({
             "kind": "transcript_chunk",
             "seq": i,
@@ -2576,9 +2582,13 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "timestamp_end": _as_float(seg.get("end")),
             "text": seg.get("text"),
             "file_path": None,
-            "youtube_deep_link": youtube_link,
-            "source_url": citation_source,
-            "source_deep_link": deep_link,
+            "youtube_deep_link": (
+                seg.get("youtube_deep_link") if "youtube_deep_link" in seg
+                else youtube_link),
+            "source_url": seg.get("source_url") or citation_source,
+            "source_deep_link": seg.get("source_deep_link") or deep_link,
+            "speaker": speaker if isinstance(speaker, str) else None,
+            "speaker_provenance": provenance if isinstance(provenance, dict) else None,
         })
     for i, shot in enumerate(sidecar.get("screenshots") or []):
         if not isinstance(shot, dict):
@@ -12606,9 +12616,17 @@ class Handler(BaseHTTPRequestHandler):
         settings = _read_settings() or {}
         model = whisper_runner.normalize_model(
             body.get("model") or settings.get("whisper_model"))
-        diarize = bool(body.get("diarize")
-                         if body.get("diarize") is not None
-                         else settings.get("diarization_default"))
+        # Phase 6 (phase6-v1): an explicit ``diarize`` must be a JSON boolean
+        # (null, 0/1 and strings are refused); a missing key uses the saved
+        # default, which is False when the setting is absent.
+        if "diarize" in body:
+            if type(body["diarize"]) is not bool:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "diarize must be a boolean when provided"})
+            diarize = body["diarize"]
+        else:
+            diarize = bool(settings.get("diarization_default"))
         consent_given = bool(body.get("consent_given"))
         language = body.get("language")
         result, status = _queue_podcast_transcription(

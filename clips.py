@@ -184,12 +184,22 @@ def _deep_link(cue: dict, item: dict) -> str | None:
 # --------------------------------------------------------------------------
 # Windowing
 # --------------------------------------------------------------------------
-def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
+def merge_cues(cues: list[dict], item: dict | None = None, *,
+               trace: list | None = None) -> list[dict]:
     """Pure function: cue dicts (citations rows, seq order) -> clip dicts.
 
     Each clip carries ``seq``, ``start``, ``end``, ``text``, ``cue_count``
     and ``source_deep_link``. Screenshot rows must not be passed in.
-    Deterministic for a given input."""
+    Deterministic for a given input.
+
+    Phase 6 (additive, contract phase6-v1): when ``trace`` is a list it is
+    filled with one entry per returned clip, in clip order. Each entry is
+    the list of text contributions ``(cue_index, text_start, text_end)``:
+    the index into ``cues`` of the cue whose *fresh* words landed in the
+    clip and the half-open code-point offsets of those words inside the
+    final ``text``. Cues that add no words, dropped echoes, empty cues and
+    the stale tail after a rewind contribute nothing. The clip output is
+    byte-identical whether or not a trace is requested."""
     item = item or {}
     clips: list[dict] = []
     words: list[str] = []
@@ -197,9 +207,19 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
     w_cues = 0
     w_link = None
     prev_start = None
+    # Phase 6 trace state: word-index contributions of the open window.
+    w_contrib: list[tuple[int, int, int]] = []
+
+    def _offsets(word_list: list[str], contrib: list[tuple[int, int, int]]):
+        out = []
+        for cue_index, a, b in contrib:
+            text_start = len(" ".join(word_list[:a])) + (1 if a > 0 else 0)
+            text_end = len(" ".join(word_list[:b]))
+            out.append((cue_index, text_start, text_end))
+        return out
 
     def flush():
-        nonlocal words, w_start, w_end, w_cues, w_link
+        nonlocal words, w_start, w_end, w_cues, w_link, w_contrib
         if words and w_start is not None:
             clips.append({
                 "seq": len(clips),
@@ -210,9 +230,12 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
                 "source_deep_link": w_link,
                 "timing": "source_cues",
             })
+            if trace is not None:
+                trace.append(_offsets(words, w_contrib))
         words, w_start, w_end, w_cues, w_link = [], None, None, 0, None
+        w_contrib = []
 
-    for cue in cues:
+    for cue_index, cue in enumerate(cues):
         try:
             start = float(cue.get("timestamp_start"))
         except (TypeError, ValueError):
@@ -243,12 +266,17 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
                               "text": part, "cue_count": 1,
                               "source_deep_link": _deep_link(cue, item),
                               "timing": "coarse"})
+                if trace is not None:
+                    lead = len(part) - len(part.lstrip(" "))
+                    trace.append([(cue_index, lead, len(part))] if part.strip() else [])
             continue
         if w_start is not None and max(w_end, end) - w_start > MAX_WINDOW_SECONDS:
             flush()
         if w_start is None:
             w_start = start
             w_link = _deep_link(cue, item)
+        if trace is not None and fresh:
+            w_contrib.append((cue_index, len(words), len(words) + len(fresh)))
         words.extend(fresh)
         w_end = max(w_end, end) if w_end is not None else end
         w_cues += 1
@@ -266,6 +294,10 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
         if last["timing"] != "coarse" and prev["timing"] != "coarse" and (
                 last["end"] - last["start"]) < MIN_WINDOW_SECONDS and (
                 last["end"] - prev["start"]) <= MAX_WINDOW_SECONDS:
+            if trace is not None:
+                shift = len(prev["text"]) + 1
+                folded = trace.pop()
+                trace[-1] = trace[-1] + [(ci, a + shift, b + shift) for ci, a, b in folded]
             prev["end"] = last["end"]
             prev["text"] = f"{prev['text']} {last['text']}"
             prev["cue_count"] += last["cue_count"]
@@ -291,6 +323,26 @@ def _item_for(conn: sqlite3.Connection, video_id: str) -> dict:
             "url": url if isinstance(url, str) else ""}
 
 
+def _media_snapshot_current(conn: sqlite3.Connection, video_id: str) -> bool:
+    """True when migration 0030 is applied, a ``media_depth`` row exists for
+    the item and its ``cue_revision`` still binds the current transcript
+    cues. A stale or absent snapshot keeps the legacy clip path, so nothing
+    here ever guesses labels for cues the snapshot never saw."""
+    try:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(clips)")}
+        if "speaker_spans_json" not in columns:
+            return False
+        row = conn.execute(
+            "SELECT cue_revision FROM media_depth WHERE video_id=?",
+            (video_id,)).fetchone()
+    except sqlite3.Error:
+        return False
+    if row is None:
+        return False
+    import library_media  # noqa: WPS433 -- lazy: library_media imports clips
+    return library_media.current_cue_revision(conn, video_id) == row[0]
+
+
 def build_clips_for_video(conn: sqlite3.Connection, video_id: str, *,
                           commit: bool = True) -> int:
     """Delete and re-derive one video's clips from its transcript citations.
@@ -301,6 +353,23 @@ def build_clips_for_video(conn: sqlite3.Connection, video_id: str, *,
         "SELECT seq, timestamp_start, timestamp_end, text, source_deep_link "
         "FROM citations WHERE video_id=? AND kind='transcript_chunk' "
         "ORDER BY seq", (video_id,))]
+    # Phase 6 (phase6-v1): once a coherent media snapshot exists for this
+    # item's current cues, the annotated projection replaces the clips so
+    # labels, spans and chapter overlaps stay bound to the same rows. The
+    # legacy path below is unchanged for every other item.
+    if cues and _media_snapshot_current(conn, video_id):
+        import library_media  # noqa: WPS433 -- lazy: library_media imports clips
+        try:
+            written = library_media.project_clips_for_video(conn, video_id)
+        except library_media.MediaError as exc:
+            # An unusable snapshot never blocks the transcript: fall back to
+            # the unannotated legacy clips and leave the refusal visible.
+            log.warning("clips: media snapshot for %s not usable (%s); "
+                        "writing legacy clips", video_id, exc.code)
+        else:
+            if commit:
+                conn.commit()
+            return written
     conn.execute("DELETE FROM clips WHERE video_id=?", (video_id,))
     clips = merge_cues(cues, _item_for(conn, video_id)) if cues else []
     if clips:

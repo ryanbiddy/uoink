@@ -157,6 +157,33 @@ def parse_srt(srt_path: Path):
     yield from _dedupe_srt_entries(entries)
 
 
+def chapters_from_metadata(info) -> list[dict]:
+    """Phase 6 (phase6-v1): the source chapter list already present in a
+    fetched YouTube metadata blob, as ``{seq, start, end, title,
+    record_locator}`` rows in source order. Pure: no fetch, no CLI call, no
+    sort, clamp, gap fill or invented title. Entries missing any of the
+    three fields are returned with ``None`` so the media validator rejects
+    the whole list visibly (``chapter_state=invalid``) instead of guessing.
+    The caller supplies the artifact digest and recorded time when it builds
+    the producer descriptor (``provider="youtube_metadata"``)."""
+    if not isinstance(info, dict) or not isinstance(info.get("chapters"), list):
+        return []
+    rows: list[dict] = []
+    for index, entry in enumerate(info["chapters"]):
+        if not isinstance(entry, dict):
+            rows.append({"seq": index, "start": None, "end": None, "title": None,
+                         "record_locator": ["chapters", index]})
+            continue
+        rows.append({
+            "seq": index,
+            "start": entry.get("start_time"),
+            "end": entry.get("end_time"),
+            "title": entry.get("title"),
+            "record_locator": ["chapters", index],
+        })
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("url")

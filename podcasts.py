@@ -1120,6 +1120,9 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     if not transcript_path_raw:
         raise FileNotFoundError("episode has no transcript_local_path")
     transcript_raw, segments = _load_transcript(Path(transcript_path_raw))
+    # Phase 6 (phase6-v1): the original transcript bytes are the archived
+    # artifact behind every label's provenance; read them once, unchanged.
+    transcript_bytes = Path(transcript_path_raw).read_bytes()
     source_url = _episode_source_url(row)
     video_id, suffix = _episode_corpus_id(row)
     podcast_title = row.get("podcast_title") or "Untitled podcast"
@@ -1154,6 +1157,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "timestamp_end": segment["end"], "text": segment["text"],
             "file_path": None, "youtube_deep_link": None,
             "source_url": source_url, "source_deep_link": deep_link,
+            "speaker": segment.get("speaker"),
         })
     markdown = "\n".join(markdown_lines).rstrip() + "\n"
 
@@ -1164,6 +1168,64 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     _check_corpus_identity(idx, existing, row, video_id)
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
+    record = {
+        "video_id": video_id, "slug": folder.name,
+        "channel": podcast_title, "author": podcast_title,
+        "title": episode_title, "topic": "Uncategorized",
+        "hook_type": None, "yoinked_at": captured_at,
+        "corpus_path": str(corpus_path), "sidecar_path": str(sidecar_path),
+        "health_score_json": None,
+        "metadata_json": json.dumps({
+            "url": source_url, "platform": "podcast",
+            "content_type": "episode",
+            "duration_seconds": row.get("duration_seconds"),
+            "upload_date": row.get("published_at"),
+            "podcast_title": podcast_title,
+            "episode_id": episode_id,
+            # AS-06: full identity provenance behind the shortened corpus id.
+            "feed_url": feed_key,
+            "guid": guid,
+            "capture_key": capture_key,
+        }, ensure_ascii=False),
+        "schema_version": 2, "source_type": "episode",
+        "platform": "podcast",
+    }
+
+    # Phase 6 (phase6-v1): build the media snapshot from the already-loaded
+    # transcript only (no fetch, no model). The source revision is computed
+    # from the final corpus bytes; the block is never rendered into them. The
+    # podcast adapter supplies no chapters, and no media-fragment player path
+    # is verified, so playback records kind "none".
+    import clips as _clips_mod  # noqa: WPS433 -- lazy: keeps module import graph unchanged
+    import library_cards as _cards_mod  # noqa: WPS433
+    import library_media as _media_mod  # noqa: WPS433
+    import library_resources as _resources_mod  # noqa: WPS433
+    media_item = dict(record, url=source_url)
+    corpus_bytes = markdown.encode("utf-8")
+    corpus_head = corpus_bytes[:_cards_mod.CORPUS_READ_BYTES].decode("utf-8", "replace")
+    source_revision = _cards_mod.build_card(
+        media_item, _clips_mod.merge_cues(transcript_citations, media_item),
+        corpus_text=corpus_head)["source_revision"]
+    media_block, media_artifact = _media_mod.transcript_snapshot(
+        video_id=video_id, source_revision=source_revision, cues=transcript_citations,
+        transcript=transcript_raw, transcript_bytes=transcript_bytes,
+        corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(),
+        playback={"source_url": _resources_mod.safe_url(source_url),
+                  "seek_url": None, "seek_kind": "none"})
+    sidecar_transcript = []
+    for citation, annotation in zip(transcript_citations, media_block["cues"]):
+        citation["speaker"] = annotation["speaker"]
+        citation["speaker_provenance_json"] = (
+            _media_mod.canonical_json(annotation["speaker_provenance"])
+            if annotation["speaker_provenance"] is not None else None)
+        sidecar_transcript.append({
+            "start": citation["timestamp_start"], "end": citation["timestamp_end"],
+            "text": citation["text"], "speaker": annotation["speaker"],
+            "speaker_provenance": annotation["speaker_provenance"],
+            "source_url": citation["source_url"],
+            "source_deep_link": citation["source_deep_link"],
+            "youtube_deep_link": None,
+        })
     sidecar = {
         "schema_version": 2,
         "video_id": video_id,
@@ -1191,39 +1253,25 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "transcript_model": (
             row.get("transcript_model_used") or transcript_raw.get("model")),
         "language": transcript_raw.get("language"),
+        # Phase 6: this OR remains a compatibility projection only; readers
+        # inspect media_depth.diarization_state and the run records instead.
         "diarization_ran": bool(
             row.get("diarization_ran") or transcript_raw.get("diarization_ran")),
         "speakers": speakers,
-        "transcript": segments,
+        "transcript": sidecar_transcript,
+        "media_depth": media_block,
     }
+    # Owned artifacts first, the complete sidecar last (file-side completion
+    # record), then the DB rows. Retry replays the same durable inputs.
+    _media_mod.archive_artifact(folder, media_artifact)
     _atomic_write(corpus_path, markdown)
     _atomic_write(
         sidecar_path, json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n")
 
-    record = {
-        "video_id": video_id, "slug": folder.name,
-        "channel": podcast_title, "author": podcast_title,
-        "title": episode_title, "topic": "Uncategorized",
-        "hook_type": None, "yoinked_at": captured_at,
-        "corpus_path": str(corpus_path), "sidecar_path": str(sidecar_path),
-        "health_score_json": None,
-        "metadata_json": json.dumps({
-            "url": source_url, "platform": "podcast",
-            "content_type": "episode",
-            "duration_seconds": row.get("duration_seconds"),
-            "upload_date": row.get("published_at"),
-            "podcast_title": podcast_title,
-            "episode_id": episode_id,
-            # AS-06: full identity provenance behind the shortened corpus id.
-            "feed_url": feed_key,
-            "guid": guid,
-            "capture_key": capture_key,
-        }, ensure_ascii=False),
-        "schema_version": 2, "source_type": "episode",
-        "platform": "podcast",
-    }
     idx.upsert_yoink(record, content=markdown)
     idx.insert_citations(video_id, transcript_citations)
+    if _media_mod.schema_ready(idx._conn):
+        idx.store_media_snapshot(video_id, transcript_citations, media_block)
     _link_episode_to_yoink(idx, episode_id, video_id)
     return {
         "ok": True, "episode_id": episode_id, "video_id": video_id,
@@ -1231,6 +1279,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "sidecar_path": str(sidecar_path), "source_url": source_url,
         "citations": len(transcript_citations), "segments": len(segments),
         "speakers": speakers,
+        "source_revision": source_revision,
+        "media_revision": media_block["media_revision"],
     }
 
 

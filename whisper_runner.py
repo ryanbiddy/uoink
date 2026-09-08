@@ -179,6 +179,43 @@ def _hf_token() -> str | None:
     )
 
 
+# The diarization model identifier recorded in Phase 6 run provenance. This
+# is the pyannote pipeline, not Whisper's transcription model size.
+DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
+
+
+def _diarization_model_name(whisperx) -> str | None:
+    """The diarization model this runtime will actually load, or None when
+    the installed WhisperX does not accept an explicit model name (unknown
+    values are recorded as null, never guessed)."""
+    try:
+        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+    except (TypeError, ValueError):
+        return None
+    return DIARIZATION_MODEL if "model_name" in params else None
+
+
+def _package_version(name: str) -> str | None:
+    try:
+        from importlib import metadata as _metadata
+        return _metadata.version(name)
+    except Exception:  # noqa: BLE001 -- provenance is best effort, never fatal
+        return None
+
+
+def _file_sha256(path: Path) -> str | None:
+    """SHA-256 of the input audio, recorded at execution (never duplicated)."""
+    import hashlib
+    try:
+        digest = hashlib.sha256()
+        with open(path, "rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return None
+
+
 def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     """Create a WhisperX diarizer across old/new constructor signatures."""
     kwargs: dict[str, Any] = {}
@@ -189,7 +226,7 @@ def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     if "model_name" in params:
         # Current WhisperX defaults here too, but pinning it avoids falling
         # back to older pyannote 3.1 behavior when dependency resolution drifts.
-        kwargs["model_name"] = "pyannote/speaker-diarization-community-1"
+        kwargs["model_name"] = DIARIZATION_MODEL
     token = _hf_token()
     if token:
         if "token" in params:
@@ -277,6 +314,10 @@ def transcribe_audio(audio_path: Path, *,
     # require touching every caller -- just this module.
     device = _runtime_device()
     diarization_succeeded = False
+    # Phase 6 (phase6-v1): one fresh run identity per executed diarization
+    # attempt, generated once and persisted with the transcript. A retry or
+    # rebuild reuses it; a genuinely new execution gets a new one.
+    diarization_run: dict[str, Any] | None = None
     try:
         model = whisperx.load_model(model_size, device=device,
                                       compute_type=_compute_type(device),
@@ -287,8 +328,21 @@ def transcribe_audio(audio_path: Path, *,
         detected_lang = result.get("language") or language or "en"
 
         # Optional alignment + diarization. Errors here degrade
-        # gracefully -- we still return the un-aligned transcript.
+        # gracefully -- we still return the un-aligned transcript, with an
+        # explicit failed run record instead of a claimed success.
         if diarize:
+            import uuid
+            diarization_run = {
+                "run_id": uuid.uuid4().hex,
+                "status": "failed",
+                "producer": "whisperx",
+                "producer_version": _package_version("whisperx"),
+                "model": _diarization_model_name(whisperx),
+                "generated_at": None,
+                "input_media_sha256": _file_sha256(audio_path),
+                "artifact_sha256": None,
+                "parameters": {"language": detected_lang, "alignment_model": None},
+            }
             try:
                 align_model, align_meta = whisperx.load_align_model(
                     language_code=detected_lang, device=device)
@@ -302,19 +356,25 @@ def transcribe_audio(audio_path: Path, *,
                     diarize_segments, aligned)
                 segments = aligned.get("segments") or segments
                 diarization_succeeded = True
+                diarization_run["status"] = "succeeded"
             except Exception as diar_err:
                 log.warning("diarization failed (degrading to "
                               "transcript-only): %s", diar_err)
+            diarization_run["generated_at"] = _now_iso()
     except Exception as e:
         raise RuntimeError(f"whisperx transcribe failed: {e}") from e
 
-    return {
+    transcript: dict[str, Any] = {
         "model": model_size,
         "language": detected_lang,
         "diarization_ran": diarization_succeeded,
         "segments": _shape_segments(segments),
         "generated_at": _now_iso(),
     }
+    if diarization_run is not None:
+        transcript["diarization_run"] = diarization_run
+        transcript["diarization_run_id"] = diarization_run["run_id"]
+    return transcript
 
 
 # ---- persistence helpers (used by the endpoints to record state) -------
@@ -325,7 +385,18 @@ def transcript_output_path(audio_path: Path) -> Path:
 
 
 def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
+    """Persist the transcript JSON. Phase 6 (phase6-v1): when the transcript
+    carries a ``diarization_run`` record, the output artifact digest is
+    computed over the transcript *without* its run/provenance members
+    (``library_media.transcript_artifact_bytes``) and stored in the record,
+    so the archived artifact never hashes itself."""
     out = transcript_output_path(audio_path)
+    run = transcript.get("diarization_run")
+    if isinstance(run, dict):
+        import hashlib
+        import library_media  # offline validator; no model, no helper import
+        run["artifact_sha256"] = hashlib.sha256(
+            library_media.transcript_artifact_bytes(transcript)).hexdigest()
     out.write_text(
         json.dumps(transcript, indent=2, ensure_ascii=False),
         encoding="utf-8")
