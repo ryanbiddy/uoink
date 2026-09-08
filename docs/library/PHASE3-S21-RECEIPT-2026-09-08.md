@@ -48,9 +48,19 @@ guard stays active for the whole run. Astra owns the launcher and should rule wh
 adopt that pre-import, count only imports that occur after helper start, or distinguish the
 availability probe some other way; Fable did not edit the committed file.
 
+## Rerun on the round-2 candidate (`d479899`, after AT-3)
+
+Astra repaired the launcher in run AV-1r (the import-time WhisperX availability probe is
+exempted from model-call accounting; every other guard stays). With that unmodified
+launcher, S21 on `d479899` reports `AUTOMATED PASS; browser observation still required`
+with `model_calls = 0`, `forbidden_attempts = []`, one fixture download, one fixture
+transcript, one item committed once, one work row after commit, and no second charge.
+Receipt: `receipt-at3-candidate-d479899.json` (evidence database SHA-256 `735b9879…`;
+`server.py` `aad3d6eb…`, `source_subscriptions.py` `25cba538…` as pinned by the launcher).
+The browser observation from the first run stands for the unchanged dashboard surfaces;
+it was not repeated.
+
 ## Status
 
-S21's product observations are established on `61eeb07`. Astra's AS-2 verdict (NOT
-ACCEPTED, AS-01/02/03/06 open) postdates this run; the AT-3 repairs will change
-`source_subscriptions.py`, `server.py` and `podcasts.py`, so S21 must be rerun on the
-repaired candidate before any acceptance claim. S22 (installed-tree run) is still owed.
+S21's product observations are established on `61eeb07` and re-established on `d479899`.
+Astra rules in run AS-3. S22 (installed-tree run) is still owed.
