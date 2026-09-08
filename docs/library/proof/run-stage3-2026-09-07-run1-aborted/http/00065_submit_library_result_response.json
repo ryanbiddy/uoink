@@ -1,0 +1,38 @@
+{
+  "seq": 65,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "zeWyn7TVTJy0Oa4SYgHN9i4Vyb-Jmk1-",
+      "video_id": "2078014058238808064",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3b90821c72c3c3e46118fbb6fe6d161006d9ccc53cac122165d3bedf5396740f",
+            "card_hash": "ac2962e7ae20f8749f4cc2aa6a0a288c7c66949a0ddbe59f276778dbaef1cda5",
+            "quote": "Anthropic with every industry:",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

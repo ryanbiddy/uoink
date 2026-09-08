@@ -1,0 +1,59 @@
+{
+  "seq": 9,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 9,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU-thpzj8c5rJjSCJxcyNbCiKsEatUvavxSB-5Am-rmck4",
+      "schema_version": 1,
+      "video_id": "2078988415048278016",
+      "source_revision": "f4e5c8dac8a1b3a99665a98f4c2bddc45bc40b4c405ab884083cec8ec20a0a8a",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "dbe2ef4d3714db296cb8eda267aba3b874912f124e7400560f6723df33f1602e",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "Video source has no captions and no transcript content beyond the tweet caption ('No captions available for this video.'); insufficient eligible evidence to ground a classification."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 6065,
+        "cache_read_tokens": 103380,
+        "cache_create_tokens": 108211,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 9,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU",
+        "video_id": "2078988415048278016",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

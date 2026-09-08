@@ -1,0 +1,51 @@
+{
+  "seq": 71,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1-WPywT_8DC1YMI5-y9lLVdiuhIpA_6ZJu0EaKjXekVWY",
+    "schema_version": 1,
+    "video_id": "2079140311779971072",
+    "source_revision": "3b5d92996a3391616d4fcd80b389ed5e095c54bc09dc6cfd46e21707b969e3cf",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "e0ea597262235cbefeb2abcca9fc945dde09453cf7f2a267a1beb0deabf958a6",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831",
+            "card_hash": "f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75",
+            "quote": "Every lab, like Claude, thinks the model matters most. That's wrong."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9569,
+      "cache_read_tokens": 104470,
+      "cache_create_tokens": 112065,
+      "wall_time_ms": 0
+    }
+  }
+}

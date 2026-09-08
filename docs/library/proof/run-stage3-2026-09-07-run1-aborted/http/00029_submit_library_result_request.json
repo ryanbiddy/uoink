@@ -1,0 +1,35 @@
+{
+  "seq": 29,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "douSdnsKZhOmK19_AvTUg1QRSILom4A3",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "douSdnsKZhOmK19_AvTUg1QRSILom4A3-bM2W2Ej6COWHX5nXE2Frl100yQwN-hFzf-0t7fctsyo",
+    "schema_version": 1,
+    "video_id": "2020740688166735872",
+    "source_revision": "39d4c60be0aa47c7397208aa8415c0a1b179a62a817c59d4b60b9bfbbdee0ced",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "4f6b0f5f77ab1471e149ec1b5a11680253197b2a7a878221012e9c7cb84bc4f0",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is casual commentary admiring the visual beauty of Antarctic ice caves ('it's like a cathedral'); it does not establish space exploration, astrophysics, or empirical scientific inquiry as required by the Space and Science shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 7657,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 105133,
+      "wall_time_ms": 0
+    }
+  }
+}

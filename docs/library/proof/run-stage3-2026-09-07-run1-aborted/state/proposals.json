@@ -1,0 +1,252 @@
+[
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "-JXwa-WlkU8",
+    "shelf_id": "education",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "NRDj5qilYWzcDkPddHW3xuLzTt3JipNp-KH8vTFpuiB4sKK4GzfG4ZqtT2DhtPSSXF4NmLSbBT9A",
+    "is_primary": 1,
+    "confidence": 0.78,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc\",\"end\":349.55,\"excerpt_id\":\"4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e\",\"kind\":\"timed_clip\",\"quote\":\"how we can run inference training and all of that\",\"start\":2.19,\"timing\":\"coarse\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "0FrcYhnHmLg",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4--5Ya1xzc8TTAx17gxsj1vS3bPHOGB_dYffRFblcYsB8",
+    "is_primary": 1,
+    "confidence": 0.65,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b\",\"end\":2131.109,\"excerpt_id\":\"086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020\",\"kind\":\"timed_clip\",\"quote\":\"you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud\",\"start\":2026.559,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "1840739354819350528",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "e2W8FvKJ_Z3xxz9MgHJaEMw4vwn33_1e-Kg3aT0CrHCWd4lSAtDHp01CgA-MS_HFVxqH7D8Lm6Ds",
+    "is_primary": 1,
+    "confidence": 0.72,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7\",\"end\":49.56,\"excerpt_id\":\"320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c\",\"kind\":\"timed_clip\",\"quote\":\"Hey chat GPT, Change your accent to Indian and sound as indian as possible\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "1993377144995815424",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "GtxOkjgYuXe4IousVnxDNJnM2q0awVnk-bpvHsfhRkwLj6ncnJRMY8kSthSDqGNInQ7H3lLti9FE",
+    "is_primary": 1,
+    "confidence": 0.65,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657\",\"end\":null,\"excerpt_id\":\"f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc\",\"kind\":\"text_only\",\"quote\":\"Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2026062150930661377",
+    "shelf_id": "security",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "zUHD4wGX25ZCV8ki3H9Hxfup-qzqJCpG-axMUL7Ohhm3M1aYnXvD2nzHhM8_ZvpwWLE8Kq4tXFIU",
+    "is_primary": 1,
+    "confidence": 0.72,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"be487d4fbae4c37f42aad68bc5944268bcc680e3d5e70c3151ec60dadc49aa8f\",\"end\":null,\"excerpt_id\":\"b2d1a89f9555c97fd4a19316ded7de43c42d838e9f2277c88ec4fe384fd31344\",\"kind\":\"text_only\",\"quote\":\"We will evaluate the model inside a carefully designed sandbox with no internet access.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2035688213663080450",
+    "shelf_id": "spaceflight",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt-IFew3S8Xv4nbmn9NpNLAwL3w-ppQGaWY45rrdjkNL0Q",
+    "is_primary": 1,
+    "confidence": 0.95,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4\",\"end\":28.789,\"excerpt_id\":\"c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6\",\"kind\":\"timed_clip\",\"quote\":\"liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station\",\"start\":3.12,\"timing\":\"source_cues\",\"truncated\":false}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2077640475075358720",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "rym_LTIIkEd7rEVtZ5kelurvebM48Zng-NJtWRcQ3-iH_KhsxGQPL1OizvgTuc44g5zW_Gr1dKbA",
+    "is_primary": 1,
+    "confidence": 0.75,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a\",\"end\":358.779,\"excerpt_id\":\"964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3\",\"kind\":\"timed_clip\",\"quote\":\"The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope\",\"start\":240.34,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2077870396075094016",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "t1VoUjGbKQ9gQgE3tcVB_OX3SVhDb0QK-GZw0QyWWjhiXu6bv7MACAy6a07ftF06SNYnr0ZmHBRI",
+    "is_primary": 1,
+    "confidence": 0.65,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636\",\"end\":33.195,\"excerpt_id\":\"2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5\",\"kind\":\"timed_clip\",\"quote\":\"Listen, Greg told me what happens when you have low T.\",\"start\":1.163,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2078014058238808064",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "zeWyn7TVTJy0Oa4SYgHN9i4Vyb-Jmk1--rmklgnCU8M7OKxJGWUuO8H155Rea0qhTrPK2ZH-VxNs",
+    "is_primary": 1,
+    "confidence": 0.62,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"ac2962e7ae20f8749f4cc2aa6a0a288c7c66949a0ddbe59f276778dbaef1cda5\",\"end\":null,\"excerpt_id\":\"3b90821c72c3c3e46118fbb6fe6d161006d9ccc53cac122165d3bedf5396740f\",\"kind\":\"text_only\",\"quote\":\"Anthropic with every industry:\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2078287651535273984",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "pV0rdHh3wGkmTjTLxK0oxXE5cbYBlnP0-Lp3pFOfXkJVY-Tf6y68cGttGL7LFVpXsHtaWDc-mQpM",
+    "is_primary": 1,
+    "confidence": 0.93,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea\",\"end\":18.8,\"excerpt_id\":\"f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6\",\"kind\":\"timed_clip\",\"quote\":\"A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2078443305495388160",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw-wtvk8rwzkMi73L23_UF_7i8JT-s7IMBbrnrnZy7Ibpo",
+    "is_primary": 1,
+    "confidence": 0.82,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38\",\"end\":79.239,\"excerpt_id\":\"92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8\",\"kind\":\"timed_clip\",\"quote\":\"they found the men dead near the front porch now\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2078450309794263040",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "QSic29nHGeXeFRIXUDEmfPAtN8FrhT8G-n6wHMw2x6lbIzPxbuduPb91CwyDJVXsKx2Q1wg5m6Eg",
+    "is_primary": 1,
+    "confidence": 0.9,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0\",\"end\":62.95,\"excerpt_id\":\"1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff\",\"kind\":\"timed_clip\",\"quote\":\"trying to breach into the capitol We have breached\",\"start\":0.52,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2078650714293739521",
+    "shelf_id": "news-and-current-events",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn-mbfBAAExUyTd0J2t6YCva7bHyvEkVSULyjMH9gC4H0E",
+    "is_primary": 1,
+    "confidence": 0.88,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526\",\"end\":null,\"excerpt_id\":\"b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e\",\"kind\":\"text_only\",\"quote\":\"This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079140311779971072",
+    "shelf_id": "ai-industry-and-business",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1-WPywT_8DC1YMI5-y9lLVdiuhIpA_6ZJu0EaKjXekVWY",
+    "is_primary": 1,
+    "confidence": 0.88,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75\",\"end\":null,\"excerpt_id\":\"1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831\",\"kind\":\"text_only\",\"quote\":\"Every lab, like Claude, thinks the model matters most. That's wrong.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079190532681543680",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY-hjly4wWVjLm2VPG6BKGKpLUcgnyogAkLsoA3mlUMFAY",
+    "is_primary": 1,
+    "confidence": 0.65,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703\",\"end\":null,\"excerpt_id\":\"16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259\",\"kind\":\"text_only\",\"quote\":\"Anduril and Archer launch Thunder, an autonomous attack rotorcraft\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079192729997959168",
+    "shelf_id": "ai-agents-and-automation",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "PviVUOSWp1bjiZjLlehr9_jyqoj-AZ0M-4Ivp0QjX6syIsZ2J7oxAGh5t5lFXf-aQbRLpoJ7CQmc",
+    "is_primary": 1,
+    "confidence": 0.85,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97\",\"end\":null,\"excerpt_id\":\"96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89\",\"kind\":\"text_only\",\"quote\":\"ReachSale is an AI Agent that find potential customers and do sell for you\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079233126883094528",
+    "shelf_id": "developer-tools",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "3Yx_ND7b-m3egnihMR8x1PJjNE9GPuX_-EdZzljsjfF5gVZXwscGLnPZ91xPb29UgFLB5voYk1wI",
+    "is_primary": 0,
+    "confidence": 0.72,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"end\":1663.74,\"excerpt_id\":\"4ace1bf5aec168201a73537aeb0c49782844a16cdfc167989e58d5576f44ea99\",\"kind\":\"timed_clip\",\"quote\":\"Import The Graph D B Library\",\"start\":1544.42,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079233126883094528",
+    "shelf_id": "education",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "3Yx_ND7b-m3egnihMR8x1PJjNE9GPuX_-EdZzljsjfF5gVZXwscGLnPZ91xPb29UgFLB5voYk1wI",
+    "is_primary": 1,
+    "confidence": 0.85,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"end\":237.509,\"excerpt_id\":\"4ff0ac352d7e2b3b8bc5e096d90cdfcd9933d1244b9718d39d604e5b8ab5d8c9\",\"kind\":\"timed_clip\",\"quote\":\"You'll design A multi-agent system For doing that\",\"start\":118.15,\"timing\":\"source_cues\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079595357273464930",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "sbShwG4uUK1Eu1QWsa4-rqfNplnsdgFz-IFVj7WL--EhSObZZQ459vW71yvOYc_2ds5mqUwSs7EM",
+    "is_primary": 1,
+    "confidence": 0.62,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a\",\"end\":null,\"excerpt_id\":\"7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309\",\"kind\":\"text_only\",\"quote\":\"Kimi's founder was flagged as a generational talent 12 years before K3 shocked the world\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079633339041087488",
+    "shelf_id": "developer-tools",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "w26IGCRtHnHdwKnMwqG44HFZdwdk643G-jNvOEF8fmQoIHErKsoBALzv-T-4Okvz1dkKbEjM-sRU",
+    "is_primary": 1,
+    "confidence": 0.68,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7\",\"end\":null,\"excerpt_id\":\"3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5\",\"kind\":\"text_only\",\"quote\":\"An open source tool for building hierarchical agent loops.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079747355944058880",
+    "shelf_id": "ai-and-ml",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "gXvhaOlxrfISjNMiM2nbexGrXYATStt6-bzyPkNWhg-g_twkVIqj6YBmkLJaLCMUm02kaRdoQdI4",
+    "is_primary": 1,
+    "confidence": 0.65,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223\",\"end\":null,\"excerpt_id\":\"f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885\",\"kind\":\"text_only\",\"quote\":\"Excalidraw for AI Agents....INSANE.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079774000268673024",
+    "shelf_id": "developer-tools",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "vpS39kAmLswEmIauhxEzZ6SF0t12loHO-CHzDQlX7ug4pjcUo5KAsOD3t8Vnhg_WTiW5zX_w_Oz4",
+    "is_primary": 1,
+    "confidence": 0.68,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"401df340025b6fece2047ee5a37978ee9ec2c2a34901740a89626c106d2739e4\",\"end\":null,\"excerpt_id\":\"41cfe98752a56b1fef6b9908403b1a2583f2c859f47242832026584034488e2f\",\"kind\":\"text_only\",\"quote\":\"Thanks to GPT 5.6 Sol, our existing CUDA/HIP-style simulation kernels in OpenFPM now directly execute on Apple Silicon GPUs\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2079818487246262272",
+    "shelf_id": "generative-media",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "xzcI-Y4WNPyPGZZxddfF5V0SUFcnSyYX-iIdh7LTqW_9J0M_kpqFHqy1xobmRvaTgCOh_lmHpYDk",
+    "is_primary": 1,
+    "confidence": 0.9,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e\",\"end\":null,\"excerpt_id\":\"81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15\",\"kind\":\"text_only\",\"quote\":\"Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2080274574113947649",
+    "shelf_id": "developer-tools",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "BRVqkEvqTywYCwySdwJn9P3tH4bC39cz-SJyS4wxEuM104SPmgXl3jphA7-CUE6ltA_Djd33_Gas",
+    "is_primary": 1,
+    "confidence": 0.78,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"2f911367443ccd741ae196f6b852937027bfe4deafd068447cef4851f5439d59\",\"end\":null,\"excerpt_id\":\"f255486be50b76c72e140fb10854fbc251b6c9a67e26164dddac78d2455c55b9\",\"kind\":\"text_only\",\"quote\":\"I rebuilt Google Maps 3D mode in 1.5 hours.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  },
+  {
+    "run_id": "stage3-2026-09-07",
+    "video_id": "2080366865633931503",
+    "shelf_id": "frontier-models",
+    "version_id": "taxonomy-v3-2026-09-07",
+    "submission_key": "5fcCuhOkmgogr0hrQTTJXTiwx8md7vv--5MjW7KVpO_W7hyIgqO_GhOGcrl9Sgtb5vndub1Ubif4",
+    "is_primary": 1,
+    "confidence": 0.75,
+    "evidence_json": "{\"basis\":\"packet\",\"card_hash\":\"ddaa324f842fa6a9fa7d7cc1376cfe3540695eeaedfbdea6135930e0806a20ed\",\"end\":null,\"excerpt_id\":\"61c804b0b91dd224747c96e9da0705b50406ac84f939ff7dc0c557d33185b10d\",\"kind\":\"text_only\",\"quote\":\"Kimi K3 devotes 10x more thinking tokens to\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true}"
+  }
+]

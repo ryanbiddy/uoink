@@ -1,0 +1,95 @@
+{
+  "seq": 33,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 33,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt-IFew3S8Xv4nbmn9NpNLAwL3w-ppQGaWY45rrdjkNL0Q",
+      "schema_version": 1,
+      "video_id": "2035688213663080450",
+      "source_revision": "20646c4cfba9ad40d10736734358aa366fc55d3ffae238d44b316e3e98622e7d",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "ec824487a6b643f21faab7fd8dbc4de6edc9d71da6bbdb8b9b42143e0d9d44fc",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "spaceflight",
+            "shelf_path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "confidence": 0.95,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6",
+              "card_hash": "88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4",
+              "quote": "liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 7657,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 105133,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 33,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt",
+        "video_id": "2035688213663080450",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "spaceflight",
+            "shelf_path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "confidence": 0.95,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6",
+              "card_hash": "88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4",
+              "quote": "liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station",
+              "start": 3.12,
+              "end": 28.789,
+              "timing": "source_cues",
+              "truncated": false
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

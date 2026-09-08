@@ -1,0 +1,16 @@
+{
+  "seq": 133,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 1,
+  "body": {
+    "ok": false,
+    "schema_version": 1,
+    "error": {
+      "code": "stale_attempt",
+      "message": "Attempt is no longer current",
+      "retryable": true,
+      "details": {}
+    }
+  }
+}

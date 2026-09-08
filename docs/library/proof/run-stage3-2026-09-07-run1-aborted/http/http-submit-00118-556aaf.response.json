@@ -1,0 +1,1 @@
+{"body":{"accepted_memberships":[],"ok":true,"outcome":"rejected","rejected":[{"code":"unsupported_evidence","field":"evidence.kind","reason":"Source origin does not support original-prose evidence"}],"retryable":true,"schema_version":1,"video_id":"2046008958511702016","work_id":"Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0"},"headers":{"Content-Type":"application/json"}}

@@ -1,0 +1,93 @@
+{
+  "seq": 55,
+  "tool": "submit_library_result",
+  "wall_ms": 7,
+  "request": {
+    "seq": 55,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw-wtvk8rwzkMi73L23_UF_7i8JT-s7IMBbrnrnZy7Ibpo",
+      "schema_version": 1,
+      "video_id": "2078443305495388160",
+      "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "5e6063244da3cea8b89b421b3a2fcca7b81586a5998e36dc16991c83ff1730fd",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.82,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+              "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+              "quote": "they found the men dead near the front porch now"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 8068,
+        "cache_read_tokens": 106372,
+        "cache_create_tokens": 112778,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 55,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 7,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw",
+        "video_id": "2078443305495388160",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.82,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+              "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+              "quote": "they found the men dead near the front porch now",
+              "start": 0.0,
+              "end": 79.239,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

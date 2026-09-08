@@ -1,0 +1,835 @@
+{
+  "seq": 7,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 113,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU",
+          "video_id": "2078988415048278016",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160861,
+          "source_revision": "f4e5c8dac8a1b3a99665a98f4c2bddc45bc40b4c405ab884083cec8ec20a0a8a",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "dbe2ef4d3714db296cb8eda267aba3b874912f124e7400560f6723df33f1602e",
+          "card": {
+            "card_hash": "8892a63d289842f1b4bf5b312f0a24e9c79b24234539b3baa88da759a920cbf4",
+            "channel": "Gwart",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/GwartyGwart/status/2079177025646887080",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9798715593b0ee496d85b1ef411219d92c20f2d1ac1d9a0680b69c8dee0eb941",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> VCs when they hear the word agentic  https://t.co/uXJPXrHuBE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> VCs when they hear the word agentic  https://t.co/uXJPXrHuBE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Gwart_-_VCs_when_they_hear_the_word_agentic",
+            "source_revision": "f4e5c8dac8a1b3a99665a98f4c2bddc45bc40b4c405ab884083cec8ec20a0a8a",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> VCs when they hear the word agentic  https://t.co/uXJPXrHuBE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Gwart - VCs when they hear the word agentic",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/GwartyGwart/status/2079177025646887080",
+            "video_id": "2078988415048278016",
+            "yoinked_at": "2026-08-16T22:46:56"
+          }
+        },
+        {
+          "work_id": "KPrZ_4nCw2seIsxgauDjUq0o9rXMJzjz",
+          "video_id": "2078643519162298368",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160862,
+          "source_revision": "4d8389abd9806e5d8a2f73bf88e2dea9d50dd4922b4e0b1fa7952166471a9d5e",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "6929a51a0956ba760088840aa3de4c494fd0b6bde6cc929f6091ad3d31a77d75",
+          "card": {
+            "card_hash": "ff5f10f8cbeb702cc20c17cb17b9e861027b7b455d1aa16f20a2b9854c6b0f2b",
+            "channel": "PlaqueBoyMaxUpdates",
+            "chars": 1243,
+            "chars_all_clips": 1243,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/PlaqueReport/status/2078644851797619030#t=0",
+                "end": 119.109,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "503a59eff6ad621f6d4440644a45b7070a87b4105f356e2588d36f31838ea0a0",
+                "start": 0.0,
+                "text": "From West Orange, New Jersey. Black Boy Max! Going highlight reel but it's knocked away Clarence NYC lead court pass Black boy max Lentley's defense is tipped away and stolen Ahead to blackboy Max the jelly off The window Trying take a one ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/PlaqueReport/status/2078644851797619030#t=0",
+                "end": 119.109,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "503a59eff6ad621f6d4440644a45b7070a87b4105f356e2588d36f31838ea0a0",
+                "start": 0.0,
+                "text": "From West Orange, New Jersey. Black Boy Max! Going highlight reel but it's knocked away Clarence NYC lead court pass Black boy max Lentley's defense is tipped away and stolen Ahead to blackboy Max the jelly off The window Trying take a one ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> PlaqueBoyMax’s highlights in the 2026 vs 2025 Streamer University Championship Game 🔥 https://t.co/b2qk2XdGve No tags [00:00:00] From West Orange, New Jersey. [00:00:02] Black Boy Max! [00:00:07] Going highlight reel but it's knocked away [00:00:08] Clarence NYC lead court pass [00:00:11] Black boy max [00:00:12] Lentley's defense is tipped away and stolen [00:00:16] Ahead to blackboy Max the jelly off [00:00:18] The window Trying take a one on [00:00:20] One with Cal But he rejected by Ray [00:00:23] With little too much contact [00:00:26] Uh oh Look at h",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "PlaqueBoyMaxUpdates_-_PlaqueBoyMax_s_highlights_in_the_2026_vs_2025_Streamer_Uni",
+            "source_revision": "4d8389abd9806e5d8a2f73bf88e2dea9d50dd4922b4e0b1fa7952166471a9d5e",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> PlaqueBoyMax’s highlights in the 2026 vs 2025 Streamer University Championship Game 🔥 https://t.co/b2qk2XdGve No tags [00:00:00] From West Orange, New Jersey. [00:00:02] Black Boy Max! [00:00:07] Going highlight reel but it's knocked away [00:00:08] Clarence NYC lead court pass [00:00:11] Black boy max [00:00:12] Lentley's defense is tipped away and stolen [00:00:16] Ahead to blackboy Max the jelly off [00:00:18] The window Trying take a one on [00:00:20] One with Cal But he rejected by Ray [00:00:23] With little too much contact [00:00:26] Uh oh Look at h",
+            "title": "PlaqueBoyMaxUpdates - PlaqueBoyMax’s highlights in the 2026 vs 2025 Streamer University Cha...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/PlaqueReport/status/2078644851797619030",
+            "video_id": "2078643519162298368",
+            "yoinked_at": "2026-07-18T22:53:31"
+          }
+        },
+        {
+          "work_id": "O8hlbyHKL-xxpwplSgtVXU3iJckYit21",
+          "video_id": "2078647190453411840",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160864,
+          "source_revision": "6869a0898a226362fd2709938506be76e19d7221133356c3c429e366c3365a46",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "6bbce13a6ac0dfa9477ce48749f351c9c89eb0a5a69bb7b66077809c35b27b53",
+          "card": {
+            "card_hash": "f2c4766a6bdf4d04a167502d89e81edd13088931842827d9543d03b93935b21e",
+            "channel": "Elon Musk",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078741450812965182",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9b799776cfee78fb107f50595e3c072ae538d74e4817a83ebd1f2661296d2f2a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Elon_Musk_-_https_t_co_gD1ZGTEArD",
+            "source_revision": "6869a0898a226362fd2709938506be76e19d7221133356c3c429e366c3365a46",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Elon Musk - https://t.co/gD1ZGTEArD",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/elonmusk/status/2078741450812965182",
+            "video_id": "2078647190453411840",
+            "yoinked_at": "2026-07-19T09:49:08"
+          }
+        },
+        {
+          "work_id": "PviVUOSWp1bjiZjLlehr9_jyqoj-AZ0M",
+          "video_id": "2079192729997959168",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160865,
+          "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "6bbf84cc34a69829d6fa83e6969b71409599a1d0f51ea11f23773ea07947e7ab",
+          "card": {
+            "card_hash": "857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97",
+            "channel": "Hieu 🚀",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/hieuSSR/status/2079193044558205340",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYO",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYOK)  7 days refundable, no BYOK when available https://t.co/5RDQHP7r7t  Here https://t.co/FIfi5mMcd6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Hieu_-_That_s_a_great_salesmanship_And_I_m_building_this_tool_to_help_you_s",
+            "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYOK)  7 days refundable, no BYOK when available https://t.co/5RDQHP7r7t  Here https://t.co/FIfi5mMcd6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+            "title": "Hieu 🚀 - That's a great salesmanship. And I'm building this tool to help you s...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/hieuSSR/status/2079193044558205340",
+            "video_id": "2079192729997959168",
+            "yoinked_at": "2026-07-20T22:35:15"
+          }
+        },
+        {
+          "work_id": "QSic29nHGeXeFRIXUDEmfPAtN8FrhT8G",
+          "video_id": "2078450309794263040",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160868,
+          "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "3ad86b6b6d54bb8f443aeab9d53516977e4c216869652182e61918e2722a0c16",
+          "card": {
+            "card_hash": "955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0",
+            "channel": "G’sdon’tbreak",
+            "chars": 571,
+            "chars_all_clips": 571,
+            "chars_chosen_clips": 480,
+            "clip_count": 2,
+            "clips": [
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=0",
+                "end": 62.95,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+                "start": 0.52,
+                "text": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot. 49 hours declaring it as a Riot 335-50 be advised the county police want an advisor trying to breach into the capitol We have breached",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=68",
+                "end": 114.42,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fc36aedc97c1ffea4637d64ab98b948c51d837788d51f38a8398e845784c9e41",
+                "start": 68.54,
+                "text": "I need court support We've lost our lives, we have lost our lives All MPDs come back! All MPd's come up on top of deck All MPD's come out onto the upper deck They were pissed off All MPD's come out onto the upper deck All MPd's come up on t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=0",
+                "end": 62.95,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+                "start": 0.52,
+                "text": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot. 49 hours declaring it as a Riot 335-50 be advised the county police want an advisor trying to breach into the capitol We have breached",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=68",
+                "end": 114.42,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fc36aedc97c1ffea4637d64ab98b948c51d837788d51f38a8398e845784c9e41",
+                "start": 68.54,
+                "text": "I need court support We've lost our lives, we have lost our lives All MPDs come back! All MPd's come up on top of deck All MPD's come out onto the upper deck They were pissed off All MPD's come out onto the upper deck All MPd's come up on t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @HalfwayPost How tf did we allow these fn traitors to get power AGAIN? https://t.co/w6R1LnRW19 No tags [00:00:00] We're going to give riot warning, [00:00:02] we are [00:00:03] gonna try and get compliance but this is now effectively [00:00:05] a riot. 49 hours declaring it as a Riot [00:00:11] 335-50 be advised the county police want an advisor [00:00:14] trying to breach into the capitol [00:00:19] We have breached of the Capitol! [00:00:30] Breach on The Capitols [00:01:00] We need to halt the doors of The Capitol. [00:01:08] I need court support [00:01",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "G_sdon_tbreak_-_HalfwayPost_How_tf_did_we_allow_these_fn_traitors_to_get_power_A",
+            "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @HalfwayPost How tf did we allow these fn traitors to get power AGAIN? https://t.co/w6R1LnRW19 No tags [00:00:00] We're going to give riot warning, [00:00:02] we are [00:00:03] gonna try and get compliance but this is now effectively [00:00:05] a riot. 49 hours declaring it as a Riot [00:00:11] 335-50 be advised the county police want an advisor [00:00:14] trying to breach into the capitol [00:00:19] We have breached of the Capitol! [00:00:30] Breach on The Capitols [00:01:00] We need to halt the doors of The Capitol. [00:01:08] I need court support [00:01",
+            "title": "G’sdon’tbreak - @HalfwayPost How tf did we allow these fn traitors to get power AGAIN?",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/omgyallrhaterz/status/2078450573519548910",
+            "video_id": "2078450309794263040",
+            "yoinked_at": "2026-07-19T09:49:34"
+          }
+        },
+        {
+          "work_id": "YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK",
+          "video_id": "2078621895058915328",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160871,
+          "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "1be59084aeeb88fb1ade450e394445e2136fa2838a74902aa0a16a1d386ee276",
+          "card": {
+            "card_hash": "d36d566c34dd28affd6c04fcf9f8ba6bd5ff657738a93d0e2b8a558125e1c377",
+            "channel": "PlaqueBoyMaxUpdates",
+            "chars": 603,
+            "chars_all_clips": 603,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/PlaqueReport/status/2078622060746518557#t=0",
+                "end": 49.969,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2",
+                "start": 0.0,
+                "text": "And we're embarrassing him. We should be able to win by 20. We got a representation of you, with a representation of him. Do he look happy? Do we want a ring or not? Yes! So we gotta do better. Pass the ball. Get it around. Really get crazy",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/PlaqueReport/status/2078622060746518557#t=0",
+                "end": 49.969,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2",
+                "start": 0.0,
+                "text": "And we're embarrassing him. We should be able to win by 20. We got a representation of you, with a representation of him. Do he look happy? Do we want a ring or not? Yes! So we gotta do better. Pass the ball. Get it around. Really get crazy",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Streamer University's Class of 2026 a pep talk at halftime https://t.co/PpILTMz9ly No tags [00:00:00] And we're embarrassing him. [00:00:02] We should be able to win by 20. [00:00:03] We got a representation of you, [00:00:05] with a representation of him. [00:00:07] Do he look happy? [00:00:08] Do we want a ring or not? Yes! [00:00:13] So we gotta do better. [00:00:15] Pass the ball. Get it around. [00:00:17] Really get crazy on that court. [00:00:19] It shouldn't even be this close. [00:00:",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "PlaqueBoyMaxUpdates_-_Kai_Cenat_amp_Lethal_Shooter_give_PlaqueBoyMax_and_the_res",
+            "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Streamer University's Class of 2026 a pep talk at halftime https://t.co/PpILTMz9ly No tags [00:00:00] And we're embarrassing him. [00:00:02] We should be able to win by 20. [00:00:03] We got a representation of you, [00:00:05] with a representation of him. [00:00:07] Do he look happy? [00:00:08] Do we want a ring or not? Yes! [00:00:13] So we gotta do better. [00:00:15] Pass the ball. Get it around. [00:00:17] Really get crazy on that court. [00:00:19] It shouldn't even be this close. [00:00:",
+            "title": "PlaqueBoyMaxUpdates - Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Stre...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/PlaqueReport/status/2078622060746518557",
+            "video_id": "2078621895058915328",
+            "yoinked_at": "2026-07-18T22:54:45"
+          }
+        },
+        {
+          "work_id": "_UpUqMpDpmO2xI2FfIIG94G2_kl-_QN1",
+          "video_id": "2078557465042419712",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160874,
+          "source_revision": "0d7dad931ac46a75a9350b3820e34ad65d3d295a4b679ceb5bb8af363229b248",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "e6796e17561c3aa55e6db6824760dab419a156c931916b960b5b7996fd83df60",
+          "card": {
+            "card_hash": "fc788eff3805624c392a8705d9ce865ac6e6198790ac00c93f95740715e0cb4a",
+            "channel": "Shivan Mahendrarajah",
+            "chars": 20,
+            "chars_all_clips": 20,
+            "chars_chosen_clips": 20,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/S_Mahendrarajah/status/2078557588317233164#t=34",
+                "end": 39.09,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eb7fb0a94e5e0a88dfcc44ea9626e688b4b986b11bdb81629e8ef8713f4ab072",
+                "start": 34.09,
+                "text": "We'll be right back.",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/S_Mahendrarajah/status/2078557588317233164#t=34",
+                "end": 39.09,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eb7fb0a94e5e0a88dfcc44ea9626e688b4b986b11bdb81629e8ef8713f4ab072",
+                "start": 34.09,
+                "text": "We'll be right back.",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @PeteHegseth Died for Israel https://t.co/o89NzWxxIs No tags [00:00:34] We'll be right back. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Shivan_Mahendrarajah_-_PeteHegseth_Died_for_Israel",
+            "source_revision": "0d7dad931ac46a75a9350b3820e34ad65d3d295a4b679ceb5bb8af363229b248",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @PeteHegseth Died for Israel https://t.co/o89NzWxxIs No tags [00:00:34] We'll be right back. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Shivan Mahendrarajah - @PeteHegseth Died for Israel",
+            "topic": "Uncategorized",
+            "truncated": false,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/S_Mahendrarajah/status/2078557588317233164",
+            "video_id": "2078557465042419712",
+            "yoinked_at": "2026-07-19T09:49:15"
+          }
+        },
+        {
+          "work_id": "dpG1JGMLpVxJd1e3o8vciC1jxFM9jcev",
+          "video_id": "2078513431548727297",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838160877,
+          "source_revision": "446b4a231f724b6bb874cd0937ba5e07ca2e74b6a00c29eba7bfc77f977ed533",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "db79a087d8ec447e7faeebf363d5fd76a5b1c92838d8a05c09993cd05934ec8e",
+          "card": {
+            "card_hash": "56d929ead09b623eecfb97a1a5a1f888ee3dd239332c975fba4ee4763a3a4187",
+            "channel": "Just a Dude Who Invests",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/DudeWhoInvests/status/2078513470169866488",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "fe55963902ab6c9da2ba4bfeab8e8b3ac437283acdff7eaa2264adcd2e3d0f73",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Just_a_Dude_Who_Invests_-_Financial_advisors_putting_your_money_in_an_index_fund",
+            "source_revision": "446b4a231f724b6bb874cd0937ba5e07ca2e74b6a00c29eba7bfc77f977ed533",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Just a Dude Who Invests - Financial advisors putting your money in an index fund for you",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/DudeWhoInvests/status/2078513470169866488",
+            "video_id": "2078513431548727297",
+            "yoinked_at": "2026-07-19T09:49:27"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems; the primary shelf whenever an excerpt is about AI but establishes no child shelf's subject.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems",
+              "AI content that mentions models, companies, products or purchases without establishing a child shelf's subject (generic model task-fit, inference hardware throughput, assistant capabilities in general)"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security",
+              "model scaling, post-training or training pipelines as the dominant subject, with economics secondary -> AI and ML / Frontier Models",
+              "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a capability with no business analysis -> AI and ML"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company",
+              "AI's effect on enterprise adoption, labour, task economics or economic growth as the subject",
+              "AI accelerator or chip competition and its implications for chip and model companies"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows, described as products, capabilities, comparisons or workflows rather than taught.",
+            "exclude": [
+              "a tutorial, workshop or lecture whose purpose is to teach, even when it uses a developer tool -> AI and ML / Education",
+              "personal assistant or agent acting for a non-engineer user (speech, screen or task help) -> AI and ML / AI Agents and Automation",
+              "generic model comparison or model task-fit talk with no coding task, SDK or IDE -> AI and ML",
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, workshops and step-by-step walkthroughs whose purpose is to teach machine learning or how to build with AI, even when they use or name a specific tool, model or product.",
+            "exclude": [
+              "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials",
+              "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
+              "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
+              "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
+              "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models",
+              "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege",
+              "AI safety risk, catastrophic-outcome or existential-risk warnings as the subject (takes precedence over the AI and ML parent)"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v2-2026-09-05",
+        "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+        "schema_version": 1,
+        "version_id": "taxonomy-v3-2026-09-07"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "ad6d5e59d357a5c8cd4668b3f6c8fc1ddca78ce9d956e7abe099f2c426a33255",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

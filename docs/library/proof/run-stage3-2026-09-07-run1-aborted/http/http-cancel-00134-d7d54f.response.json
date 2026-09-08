@@ -1,0 +1,1 @@
+{"body":{"error":{"code":"stale_attempt","details":{},"message":"Attempt is no longer current","retryable":true},"ok":false,"schema_version":1},"headers":{"Content-Type":"application/json"}}

@@ -1,0 +1,39 @@
+{
+  "seq": 71,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1",
+      "video_id": "2079140311779971072",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831",
+            "card_hash": "f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75",
+            "quote": "Every lab, like Claude, thinks the model matters most. That's wrong.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

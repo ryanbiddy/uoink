@@ -1,0 +1,59 @@
+{
+  "seq": 89,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 89,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0-LAgGdkQ1fH8_b69iuiBQ-C6wU3K6y9EiAPYLMzYO7Kg",
+      "schema_version": 1,
+      "video_id": "2078557763337154560",
+      "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "adbbfc696d0b8d653329405468eec27ef13c1027f0c91af4e807ba5d0b9147a1",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt depicts a dog attack incident, which does not match News and Current Events' definition (crimes, riots, armed conflicts, political/social debates) or any other approved shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 10258,
+        "cache_read_tokens": 186008,
+        "cache_create_tokens": 28614,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 89,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0",
+        "video_id": "2078557763337154560",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

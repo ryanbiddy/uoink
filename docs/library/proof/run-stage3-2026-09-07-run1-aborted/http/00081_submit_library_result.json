@@ -1,0 +1,93 @@
+{
+  "seq": 81,
+  "tool": "submit_library_result",
+  "wall_ms": 6,
+  "request": {
+    "seq": 81,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn-mbfBAAExUyTd0J2t6YCva7bHyvEkVSULyjMH9gC4H0E",
+      "schema_version": 1,
+      "video_id": "2078650714293739521",
+      "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "ea36b6efa731303b26c6d99797ed5ff7520572aef5b20a9089ab5300a93c2b0b",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+              "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+              "quote": "This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 10258,
+        "cache_read_tokens": 186008,
+        "cache_create_tokens": 28614,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 81,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 6,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn",
+        "video_id": "2078650714293739521",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+              "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+              "quote": "This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

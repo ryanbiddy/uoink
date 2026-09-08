@@ -1,0 +1,50 @@
+{
+  "seq": 47,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4--5Ya1xzc8TTAx17gxsj1vS3bPHOGB_dYffRFblcYsB8",
+    "schema_version": 1,
+    "video_id": "0FrcYhnHmLg",
+    "source_revision": "98ded82d3f717531561c507871736ba07df44554cdb3c5bde084821dde4d123e",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "c5b207fe575d3290f34e6bf134ca1523976b9757fda81f9b7a179f7477d4ffce",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020",
+            "card_hash": "ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b",
+            "quote": "you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 8068,
+      "cache_read_tokens": 106372,
+      "cache_create_tokens": 112778,
+      "wall_time_ms": 0
+    }
+  }
+}

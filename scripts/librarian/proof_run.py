@@ -1024,14 +1024,20 @@ class ProofHarness:
                 return
             n = len(self.attempts)
             if n >= self.error_rate_min_attempts:
-                rejected = sum(1 for a in self.attempts if a.get("outcome") == "rejected")
-                failures = len(self.transport_failures)
-                numerator = rejected + failures
+                # One failed completion counts once. A rejected submission is recorded both as
+                # a rejected attempt and as its submit-failure transport event; summing the
+                # two doubled the rate (stage 3 run 1: 3 real failures in 49 completions
+                # reported as 6/49 and aborted). Count distinct attempts that were rejected,
+                # errored, or had any transport event.
+                failed_attempt_ids = {a["attempt_id"] for a in self.attempts if a.get("outcome") in ("rejected", "error")}
+                failed_attempt_ids |= {t.get("attempt_id") for t in self.transport_failures if t.get("attempt_id")}
+                completed_ids = {a["attempt_id"] for a in self.attempts}
+                numerator = len(failed_attempt_ids & completed_ids)
                 rate = numerator / n
                 if rate > self.error_rate_limit:
                     self._trigger_abort(
                         f"Error rate limit exceeded: {numerator}/{n} ({rate:.1%}) > {self.error_rate_limit:.1%} "
-                        f"after {n} completed attempts"
+                        f"after {n} completed attempts (distinct failed completions)"
                     )
 
     def _trigger_abort(self, reason: str) -> None:

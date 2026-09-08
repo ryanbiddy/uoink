@@ -1,0 +1,24 @@
+whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+2026-09-07 20:14:20,151 INFO migration[run]: no_legacy -- E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage3-2026-09-07-4ec0ad5c\local\Yoink does not exist
+2026-09-07 20:14:20,152 INFO migration[run]: legacy_run_key -- skipped: dev layout
+2026-09-07 20:14:20,152 INFO install migration: no_legacy
+2026-09-07 20:14:20,488 INFO Restored 212 job record(s) from the library index
+2026-09-07 20:14:20,490 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-07 20:14:20,494 INFO Uoink server v3.8.0 running on http://127.0.0.1:5180
+2026-09-07 20:14:20,494 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-07 20:14:20,494 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage3-2026-09-07-4ec0ad5c\output
+2026-09-07 20:14:20,494 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\server.log
+2026-09-07 20:14:20,756 INFO GET /health from 127.0.0.1 -> ok
+[proof] model call done: call-0001-1d24f3 in 64985 ms, exit 0, stdout 7089 B
+[proof] model call done: call-0001-28e2c1 in 76966 ms, exit 0, stdout 8922 B
+[proof] model call done: call-0001-bc825e in 93407 ms, exit 0, stdout 8306 B
+[proof] model call done: call-0001-c84832 in 99932 ms, exit 0, stdout 8946 B
+[proof] model call done: call-0002-e55fff in 104286 ms, exit 0, stdout 7475 B
+[proof] model call done: call-0005-80e94f in 80878 ms, exit 0, stdout 9062 B
+[proof] model call done: call-0004-a92e4f in 90402 ms, exit 0, stdout 7433 B
+[proof] ERROR GUARD BREACH: Error rate limit exceeded: 6/49 (12.2%) > 10.0% after 49 completed attempts. Aborting run.
+[proof] model call done: call-0007-7848a8 in 2971 ms, exit 1, stdout 0 B
+[proof] model call done: call-0006-0592b2 in 14493 ms, exit 1, stdout 0 B
+[proof] model call done: call-0003-d0051e in 106928 ms, exit 1, stdout 0 B
+Product proof run complete. Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage3-2026-09-07\receipts.json
+exit=0

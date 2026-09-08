@@ -1,0 +1,38 @@
+{
+  "seq": 125,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "gXvhaOlxrfISjNMiM2nbexGrXYATStt6",
+      "video_id": "2079747355944058880",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885",
+            "card_hash": "78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223",
+            "quote": "Excalidraw for AI Agents....INSANE.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

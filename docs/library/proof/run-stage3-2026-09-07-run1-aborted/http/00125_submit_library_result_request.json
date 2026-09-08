@@ -1,0 +1,50 @@
+{
+  "seq": 125,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "gXvhaOlxrfISjNMiM2nbexGrXYATStt6",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "gXvhaOlxrfISjNMiM2nbexGrXYATStt6-bzyPkNWhg-g_twkVIqj6YBmkLJaLCMUm02kaRdoQdI4",
+    "schema_version": 1,
+    "video_id": "2079747355944058880",
+    "source_revision": "cb79f472a0207b6b675f057104c306d14cf8481b117314fd991fc29532173456",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "c021554d0b29f6e4f58589ff05346687529fc04fcbf938dde94b3912391c35ce",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885",
+            "card_hash": "78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223",
+            "quote": "Excalidraw for AI Agents....INSANE."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 8504,
+      "cache_read_tokens": 185675,
+      "cache_create_tokens": 26378,
+      "wall_time_ms": 0
+    }
+  }
+}

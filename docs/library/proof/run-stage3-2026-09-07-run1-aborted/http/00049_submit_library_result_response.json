@@ -1,0 +1,38 @@
+{
+  "seq": 49,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "GtxOkjgYuXe4IousVnxDNJnM2q0awVnk",
+      "video_id": "1993377144995815424",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc",
+            "card_hash": "8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657",
+            "quote": "Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "seq": 59,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 59,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "bD3e9VaoTonSI9OXPa0kGF_WGEyU8zn4",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "bD3e9VaoTonSI9OXPa0kGF_WGEyU8zn4-NL_tegf3FgbNnbho4tkolCobrfZJiKBd1VJygSKHl-k",
+      "schema_version": 1,
+      "video_id": "1889178327400820738",
+      "source_revision": "9c898273922f9880cef8766c7876f697ae603278da9bd22c2d6aae718af6b830",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "e1ed33546c3bb3787607448f844844ac72015ce891ab53de1e316626f88e5d64",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The excerpt is song lyrics attached to an unrelated meme post with no connection to any approved taxonomy shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 8068,
+        "cache_read_tokens": 106372,
+        "cache_create_tokens": 112778,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 59,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "bD3e9VaoTonSI9OXPa0kGF_WGEyU8zn4",
+        "video_id": "1889178327400820738",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

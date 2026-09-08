@@ -1,0 +1,38 @@
+{
+  "seq": 47,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 10,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4",
+      "video_id": "0FrcYhnHmLg",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020",
+            "card_hash": "ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b",
+            "quote": "you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud",
+            "start": 2026.559,
+            "end": 2131.109,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

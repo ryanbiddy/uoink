@@ -1,0 +1,33 @@
+{
+  "seq": 183,
+  "tool": "claim_library_work",
+  "wall_ms": 2053,
+  "request": {
+    "seq": 183,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "cancel",
+      "work_id": "7-OpD4TLf6U8siSpffB-OSafshwpWk1u",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "reason": "Exceeded 1 retry limit"
+    }
+  },
+  "response": {
+    "seq": 183,
+    "tool": "claim_library_work",
+    "status": 500,
+    "wall_ms": 2053,
+    "body": {
+      "ok": false,
+      "error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+    }
+  }
+}

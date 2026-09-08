@@ -1,0 +1,51 @@
+{
+  "seq": 109,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7-OpD4TLf6U8siSpffB-OSafshwpWk1u",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "7-OpD4TLf6U8siSpffB-OSafshwpWk1u-baEkdhzR8IAotzqnuLngXaxnpRQHtzjTAdqPtvdp0dY",
+    "schema_version": 1,
+    "video_id": "2079961848095412224",
+    "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "b789a6237afb767950acd0db0074f73f3df6651b8d132a9003aefc7e73fe4e49",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60",
+            "card_hash": "6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa",
+            "quote": "Kimi already outperformed Fable on BrowserComp"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 8539,
+      "cache_read_tokens": 83203,
+      "cache_create_tokens": 19248,
+      "wall_time_ms": 0
+    }
+  }
+}

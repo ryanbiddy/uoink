@@ -1,0 +1,18 @@
+{
+  "seq": 133,
+  "url": "http://127.0.0.1:5180/tools/claim_library_work",
+  "tool": "claim_library_work",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "action": "cancel",
+    "work_id": "Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "reason": "Exceeded 1 retry limit"
+  }
+}

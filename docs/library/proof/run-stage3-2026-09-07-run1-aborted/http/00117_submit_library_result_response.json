@@ -1,0 +1,25 @@
+{
+  "seq": 117,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0",
+      "video_id": "2046008958511702016",
+      "outcome": "rejected",
+      "accepted_memberships": [],
+      "rejected": [
+        {
+          "code": "unsupported_evidence",
+          "field": "evidence.kind",
+          "reason": "Source origin does not support original-prose evidence"
+        }
+      ],
+      "retryable": true
+    }
+  }
+}

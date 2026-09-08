@@ -1,0 +1,51 @@
+{
+  "seq": 99,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "vpS39kAmLswEmIauhxEzZ6SF0t12loHO",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "vpS39kAmLswEmIauhxEzZ6SF0t12loHO-CHzDQlX7ug4pjcUo5KAsOD3t8Vnhg_WTiW5zX_w_Oz4",
+    "schema_version": 1,
+    "video_id": "2079774000268673024",
+    "source_revision": "15a89bc8a1938c26253d2048d5a45ed33ca0a31241ec06834750f35215e8ff52",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "99f1e0fbe1c7b3ca541e86a7ef64605b1b010450b881ecfea454abe5814b5d2f",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "41cfe98752a56b1fef6b9908403b1a2583f2c859f47242832026584034488e2f",
+            "card_hash": "401df340025b6fece2047ee5a37978ee9ec2c2a34901740a89626c106d2739e4",
+            "quote": "Thanks to GPT 5.6 Sol, our existing CUDA/HIP-style simulation kernels in OpenFPM now directly execute on Apple Silicon GPUs"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 8539,
+      "cache_read_tokens": 83203,
+      "cache_create_tokens": 19248,
+      "wall_time_ms": 0
+    }
+  }
+}

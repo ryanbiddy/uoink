@@ -1,0 +1,38 @@
+{
+  "seq": 31,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "e2W8FvKJ_Z3xxz9MgHJaEMw4vwn33_1e",
+      "video_id": "1840739354819350528",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c",
+            "card_hash": "cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7",
+            "quote": "Hey chat GPT, Change your accent to Indian and sound as indian as possible",
+            "start": 0.0,
+            "end": 49.56,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

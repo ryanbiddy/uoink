@@ -1,0 +1,47 @@
+{
+  "seq": 135,
+  "tool": "submit_library_result",
+  "wall_ms": 2043,
+  "request": {
+    "seq": 135,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "EW1GIEXSZ8O2AHrcccHipX9zT023nnlb",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "EW1GIEXSZ8O2AHrcccHipX9zT023nnlb-Dds7-Wpr13FYwDTEonSP7jH7ODO1NeQbYRonNgiVuG0",
+      "schema_version": 1,
+      "video_id": "2080348432774856704",
+      "source_revision": "3866d89269cbb4433f156180c8d264f11465ae8f7cd01b6d36c08046a8bdfddc",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "28b2f0e5ba777abd63f2c31108598e0b43324ebc98d3ad7e44d89ee794e9ad41",
+      "result": {
+        "outcome": "error",
+        "reason": "claude -p failed (exit 1): "
+      },
+      "usage": {
+        "status": "unavailable",
+        "reason": "claude -p failed (exit 1): ",
+        "model": "unknown",
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 135,
+    "tool": "submit_library_result",
+    "status": 500,
+    "wall_ms": 2043,
+    "body": {
+      "ok": false,
+      "error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+    }
+  }
+}

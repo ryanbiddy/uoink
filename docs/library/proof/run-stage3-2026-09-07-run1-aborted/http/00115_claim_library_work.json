@@ -1,0 +1,815 @@
+{
+  "seq": 115,
+  "tool": "claim_library_work",
+  "wall_ms": 16,
+  "request": {
+    "seq": 115,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage3-2026-09-07",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 115,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 16,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "7-OpD4TLf6U8siSpffB-OSafshwpWk1u",
+            "video_id": "2079961848095412224",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 2,
+            "lease_expires_ms": 1788838341801,
+            "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "b789a6237afb767950acd0db0074f73f3df6651b8d132a9003aefc7e73fe4e49",
+            "card": {
+              "card_hash": "6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa",
+              "channel": "Chris",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ChrisGPT/status/2079961868584558890",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  Howeve",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  However Kimi already outperformed Fable on BrowserComp, so if K3.1 beats Fable 5 on https://t.co/8z43F4vITN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Chris_-_Kimi_K3_was_already_in_internal_evaluation_by_April_May_before_Fable",
+              "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  However Kimi already outperformed Fable on BrowserComp, so if K3.1 beats Fable 5 on https://t.co/8z43F4vITN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "title": "Chris - Kimi K3 was already in internal evaluation by April/May, before Fable...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ChrisGPT/status/2079961868584558890",
+              "video_id": "2079961848095412224",
+              "yoinked_at": "2026-07-23T02:56:42"
+            }
+          },
+          {
+            "work_id": "jFlrMM2VusouBOFg3RkVareHqf1jdQcT",
+            "video_id": "2080337995551653888",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341803,
+            "source_revision": "885cb670cc55fbb9b4a9816120f6abc73765c2fafad76dd4ef11bf9dd5dfa3f4",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "851136aa0cb1eaf71d0da2b49142bf8dd858bd285db5f739a334ff9ca3a92985",
+            "card": {
+              "card_hash": "b1c4780f7b19eca64e7e45db8ba626539bcc1641b272426c0887ecd95904b55d",
+              "channel": "Sophia Xu",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/thesophiaxu/status/2080340651363967406",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "ec8a5dd13b6f6869f8c37fb0114f3b713d519c90bb899651d8f1d6311d4f1564",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts and interactive widgets for \"gears-level understanding\" https://t.co/3HMEnwsu2D No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Sophia_Xu_-_You_can_read_any_graduate-level_textbook_in_another_domain_by_asking",
+              "source_revision": "885cb670cc55fbb9b4a9816120f6abc73765c2fafad76dd4ef11bf9dd5dfa3f4",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts and interactive widgets for \"gears-level understanding\" https://t.co/3HMEnwsu2D No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Sophia Xu - You can read any graduate-level textbook in another domain by asking ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/thesophiaxu/status/2080340651363967406",
+              "video_id": "2080337995551653888",
+              "yoinked_at": "2026-07-24T19:52:55"
+            }
+          },
+          {
+            "work_id": "sKb3RKNzlbbJThDuJJeZs6BaoFBqsRbS",
+            "video_id": "2080091059644964864",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341804,
+            "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "7333c5323547322df8e3d57086dc72e9ad498abc43459bce8f3280c52a0ad3a6",
+            "card": {
+              "card_hash": "e705c1c3ff96da5bf6ecb034d0dc0ab04c1ab548688b3e05aa12b7a010dc0b0b",
+              "channel": "Jason Smith - 上官杰文",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ShangguanJiewen/status/2080091657413054757",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d2c6853bbdf0f0db12809ed635a2a49e0f4f99a978544b9151648fb64ee7470a",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!--",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Jason_Smith_-_-_While_the_US_debates_whether_to_solve_homelessness_or_not_these",
+              "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Jason Smith - 上官杰文 - While the US debates whether to solve homelessness or not, these are ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ShangguanJiewen/status/2080091657413054757",
+              "video_id": "2080091059644964864",
+              "yoinked_at": "2026-07-23T10:52:57"
+            }
+          },
+          {
+            "work_id": "tmjJSGDch1JhKtLDX8VKuR-zfiYPuO2D",
+            "video_id": "2080061661197570048",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341805,
+            "source_revision": "07217726327bf3305db41eb807e8295ef040f767d15cc7b37b31501fcbd626c4",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "31de12c0e5a69ff943302ba42b9a303b074003e4317f2eb41faa2ad271b020dd",
+            "card": {
+              "card_hash": "412a9884795d880b0079d8b6a08d3c0dcb4727ca49f01b418a397ea9dc1217af",
+              "channel": "TomLikesRobots🤖",
+              "chars": 218,
+              "chars_all_clips": 218,
+              "chars_chosen_clips": 218,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/TomLikesRobots/status/2080064192996901155#t=0",
+                  "end": 25.28,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "33189a1eb25d33d3e882a656bb0ded4f218fb4f8b378152c73f28fe42a921b47",
+                  "start": 0.05,
+                  "text": "Joe, look at me. Not the corner...me I am looking at you Then tell what it said It's that you'd ask that What else did he told you? That your frightened I'm not frightened of you No You're frightened it knows your name",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/TomLikesRobots/status/2080064192996901155#t=0",
+                  "end": 25.28,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "33189a1eb25d33d3e882a656bb0ded4f218fb4f8b378152c73f28fe42a921b47",
+                  "start": 0.05,
+                  "text": "Joe, look at me. Not the corner...me I am looking at you Then tell what it said It's that you'd ask that What else did he told you? That your frightened I'm not frightened of you No You're frightened it knows your name",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I'm still convinced that you can get a better acting performance with AI by generating dialogue first and generating the video to sync with the audio.  As audio generation is so much cheaper you're also able to validate the performance for a few cents before using credits for the https://t.co/o8j3H2PTVX No tags [00:00:00] Joe, look at me. [00:00:02] Not the corner...me [00:00:04] I am looking at you [00:00:08] Then tell what it said [00:00:11] It's that you'd ask that [00:00:13] What else did he told you? [00:00:17] That your frightened [00:00:19] I'm not ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "TomLikesRobots_-_I_m_still_convinced_that_you_can_get_a_better_acting_performanc",
+              "source_revision": "07217726327bf3305db41eb807e8295ef040f767d15cc7b37b31501fcbd626c4",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I'm still convinced that you can get a better acting performance with AI by generating dialogue first and generating the video to sync with the audio.  As audio generation is so much cheaper you're also able to validate the performance for a few cents before using credits for the https://t.co/o8j3H2PTVX No tags [00:00:00] Joe, look at me. [00:00:02] Not the corner...me [00:00:04] I am looking at you [00:00:08] Then tell what it said [00:00:11] It's that you'd ask that [00:00:13] What else did he told you? [00:00:17] That your frightened [00:00:19] I'm not ",
+              "title": "TomLikesRobots🤖 - I'm still convinced that you can get a better acting performance with...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/TomLikesRobots/status/2080064192996901155",
+              "video_id": "2080061661197570048",
+              "yoinked_at": "2026-07-23T10:52:26"
+            }
+          },
+          {
+            "work_id": "3ykIwg3KRrTyTQP7Vbv_sWcFqtpTpZhC",
+            "video_id": "2080454622179979264",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341805,
+            "source_revision": "b172b40a60b56cfd59f5a311bc179c72056d21143444e0616f300a260e626bd3",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "3632c6bd17ddc3dc6d54799bb230c267f3a8b9bf196f9463229bb5e9d7598f01",
+            "card": {
+              "card_hash": "b43327ebf4ec5ec826ee096ed1883120a93fdcec7ec1dce545464e47634d13b2",
+              "channel": "Javi Lopez ⛩️",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/javilopen/status/2080579802730209492",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "89417c1d2238e2cbe48b1569795c095c1c2b6f9d8a1e8409abbf9c035baf4e8c",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS CRAZY 🤯Bifrost just shipped a proper real2sim pipeline that actually works at production speed!  You send a single video of a real industrial site or lab. Their system reconstructs a fully navig",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS CRAZY 🤯Bifrost just shipped a proper real2sim pipeline that actually works at production speed!  You send a single video of a real industrial site or lab. Their system reconstructs a fully navigable, photorealistic 3D environment in ~30 minutes instead of the usual 12+ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Javi_Lopez_-_THIS_IS_CRAZY_Bifrost_just_shipped_a_proper_real2sim_pipeline_that",
+              "source_revision": "b172b40a60b56cfd59f5a311bc179c72056d21143444e0616f300a260e626bd3",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS CRAZY 🤯Bifrost just shipped a proper real2sim pipeline that actually works at production speed!  You send a single video of a real industrial site or lab. Their system reconstructs a fully navigable, photorealistic 3D environment in ~30 minutes instead of the usual 12+ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Javi Lopez ⛩️ - THIS IS CRAZY 🤯Bifrost just shipped a proper real2sim pipeline that a...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/javilopen/status/2080579802730209492",
+              "video_id": "2080454622179979264",
+              "yoinked_at": "2026-07-26T08:17:02"
+            }
+          },
+          {
+            "work_id": "5baCjbT_GeLv0WTUQiri_FZnzQoBHQgr",
+            "video_id": "2080709349606150317",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341807,
+            "source_revision": "58394149a42fe520d87224e7b13f24c5e08ff70f3035370762f9bdb2679a0fb2",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "696e1f8226dba84e64ec382a724a7940d3adeb8e2145a6df46186866f91b1e7d",
+            "card": {
+              "card_hash": "77b3a6109c04b43f6c6b37080f1e0d776118446304a4d5ce43f972c18d62fa72",
+              "channel": "aditya",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/adxtyahq/status/2080709349606150317",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "00bba5b6c53e3ece7235e9e1db88eee80efde1a903571571e926efeb5338a2f0",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Tried recreating Fall Guys using the exact same prompt with Claude Opus 5.0 (Claude Code) and Kimi K3 (Kimi CLI).  Kimi K3 nailed the gameplay out of the box. Physics, movement, and the overall feel wer",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Tried recreating Fall Guys using the exact same prompt with Claude Opus 5.0 (Claude Code) and Kimi K3 (Kimi CLI).  Kimi K3 nailed the gameplay out of the box. Physics, movement, and the overall feel were surprisingly solid  Opus 5.0 had a shinier UI, but movement was broken, it https://t.co/0qC3ownQzM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "aditya_-_Tried_recreating_Fall_Guys_using_the_exact_same_prompt_with_Claude_Op",
+              "source_revision": "58394149a42fe520d87224e7b13f24c5e08ff70f3035370762f9bdb2679a0fb2",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Tried recreating Fall Guys using the exact same prompt with Claude Opus 5.0 (Claude Code) and Kimi K3 (Kimi CLI).  Kimi K3 nailed the gameplay out of the box. Physics, movement, and the overall feel were surprisingly solid  Opus 5.0 had a shinier UI, but movement was broken, it https://t.co/0qC3ownQzM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "aditya - Tried recreating Fall Guys using the exact same prompt with Claude Op...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/adxtyahq/status/2080709349606150317",
+              "video_id": "2080709349606150317",
+              "yoinked_at": "2026-07-24T23:59:56"
+            }
+          },
+          {
+            "work_id": "74diUXn5u5X_oBP0ESVtWYPilhAWhnIu",
+            "video_id": "2080788116747476992",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341808,
+            "source_revision": "2667415363bdc4a4fac62811724f616796a691a420ec9a532ae4eded949c0cea",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "c90e6559d6037b210ace9e158c07e7f97b95d1cf92ec120bc07b9fd256378f72",
+            "card": {
+              "card_hash": "8d802e5df3c0692747e6bec6b4e755e774b1567a7965acb8da9a3024f06429df",
+              "channel": "NVIDIA",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/nvidia/status/2080788131062641095",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "3c8e9c11b7f07a75b8cf48890a93beaab6db550e3e24a0f2834c5129f6c5bb64",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Korea has long been a technology leader, with the talent, industrial strength, and drive to help shape the AI era.  President Lee Jae Myung met with our CEO @JensenHuang today ahead of the San Francisco",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Korea has long been a technology leader, with the talent, industrial strength, and drive to help shape the AI era.  President Lee Jae Myung met with our CEO @JensenHuang today ahead of the San Francisco AI Summit to discuss deepening the partnership behind Korea’s national AI https://t.co/4vPQRKveZg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "NVIDIA_-_Korea_has_long_been_a_technology_leader_with_the_talent_industrial",
+              "source_revision": "2667415363bdc4a4fac62811724f616796a691a420ec9a532ae4eded949c0cea",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Korea has long been a technology leader, with the talent, industrial strength, and drive to help shape the AI era.  President Lee Jae Myung met with our CEO @JensenHuang today ahead of the San Francisco AI Summit to discuss deepening the partnership behind Korea’s national AI https://t.co/4vPQRKveZg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "title": "NVIDIA - Korea has long been a technology leader, with the talent, industrial ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/nvidia/status/2080788131062641095",
+              "video_id": "2080788116747476992",
+              "yoinked_at": "2026-07-26T08:16:58"
+            }
+          },
+          {
+            "work_id": "BafIiuRN4SfHstv6ewR6kXWgnyvYEIA6",
+            "video_id": "2080435155756544000",
+            "attempt_token": "[REDACTED]",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788838341808,
+            "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+            "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+            "packet_hash": "538e69c8a9089d1b7a66fa676b72bc334967206b120d9ee28d83281efa14317c",
+            "card": {
+              "card_hash": "33567aa2e8fc1830656b693fe2a7c52e46e4a575cd13eacc56c117ab68e0b5d6",
+              "channel": "Shay Boloor",
+              "chars": 950,
+              "chars_all_clips": 950,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/StockSavvyShay/status/2080435237885182261#t=0",
+                  "end": 57.899,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+                  "start": 0.0,
+                  "text": "This morning, the next NVIDIA rack and just the demand that it's going to create. Of course right after earnings last night with Google Nebius went through The Roof this is a name you've liked its come on like gang buses here recently How m",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/StockSavvyShay/status/2080435237885182261#t=0",
+                  "end": 57.899,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+                  "start": 0.0,
+                  "text": "This morning, the next NVIDIA rack and just the demand that it's going to create. Of course right after earnings last night with Google Nebius went through The Roof this is a name you've liked its come on like gang buses here recently How m",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> $NBIS may be the biggest beneficiary of $GOOGL capacity shortage because the company still needs third party compute even after doubling quarterly capex.  That shortage is exactly what Nebius is built to solve by offering immediately available full stack AI infrastructure to https://t.co/FXHbkfPe9P No tags [00:00:00] This morning, the next [00:00:01] NVIDIA rack and just the demand that it's going to create. [00:00:07] Of course right after earnings last night with Google Nebius went through [00:00:12] The Roof this is a name you've liked its [00:00:14] co",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Shay_Boloor_-_NBIS_may_be_the_biggest_beneficiary_of_GOOGL_capacity_shortage_bec",
+              "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> $NBIS may be the biggest beneficiary of $GOOGL capacity shortage because the company still needs third party compute even after doubling quarterly capex.  That shortage is exactly what Nebius is built to solve by offering immediately available full stack AI infrastructure to https://t.co/FXHbkfPe9P No tags [00:00:00] This morning, the next [00:00:01] NVIDIA rack and just the demand that it's going to create. [00:00:07] Of course right after earnings last night with Google Nebius went through [00:00:12] The Roof this is a name you've liked its [00:00:14] co",
+              "title": "Shay Boloor - $NBIS may be the biggest beneficiary of $GOOGL capacity shortage beca...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/StockSavvyShay/status/2080435237885182261",
+              "video_id": "2080435155756544000",
+              "yoinked_at": "2026-07-24T11:00:42"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems; the primary shelf whenever an excerpt is about AI but establishes no child shelf's subject.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems",
+                "AI content that mentions models, companies, products or purchases without establishing a child shelf's subject (generic model task-fit, inference hardware throughput, assistant capabilities in general)"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security",
+                "model scaling, post-training or training pipelines as the dominant subject, with economics secondary -> AI and ML / Frontier Models",
+                "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a capability with no business analysis -> AI and ML"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company",
+                "AI's effect on enterprise adoption, labour, task economics or economic growth as the subject",
+                "AI accelerator or chip competition and its implications for chip and model companies"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows, described as products, capabilities, comparisons or workflows rather than taught.",
+              "exclude": [
+                "a tutorial, workshop or lecture whose purpose is to teach, even when it uses a developer tool -> AI and ML / Education",
+                "personal assistant or agent acting for a non-engineer user (speech, screen or task help) -> AI and ML / AI Agents and Automation",
+                "generic model comparison or model task-fit talk with no coding task, SDK or IDE -> AI and ML",
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, workshops and step-by-step walkthroughs whose purpose is to teach machine learning or how to build with AI, even when they use or name a specific tool, model or product.",
+              "exclude": [
+                "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials",
+                "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
+                "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
+                "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
+                "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models",
+                "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege",
+                "AI safety risk, catastrophic-outcome or existential-risk warnings as the subject (takes precedence over the AI and ML parent)"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v2-2026-09-05",
+          "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "schema_version": 1,
+          "version_id": "taxonomy-v3-2026-09-07"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "ad6d5e59d357a5c8cd4668b3f6c8fc1ddca78ce9d956e7abe099f2c426a33255",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

@@ -1,0 +1,562 @@
+[
+  {
+    "submission_key": "F7kD5tiHPFUacwhtAcgyc_roLLr1ACBv--59Uj_Ev8tIXv4bwM0D0jWyiGEP_kiZh98hmOh7_ziI",
+    "attempt_token": "-59Uj_Ev8tIXv4bwM0D0jWyiGEP_kiZh98hmOh7_ziI",
+    "request_hash": "e5108aeb74ec40308c3d8636f61631d42502bdd0d3742ad7321aff6d8a873c60",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Transcript covers a streamer (N3ON) nearly being removed from a WWE event while livestreaming; this is entertainment/streaming content, not a breaking news incident or any AI/space subject covered by the taxonomy.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078656827990978560\",\"work_id\":\"F7kD5tiHPFUacwhtAcgyc_roLLr1ACBv\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360838"
+  },
+  {
+    "submission_key": "SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4--5Ya1xzc8TTAx17gxsj1vS3bPHOGB_dYffRFblcYsB8",
+    "attempt_token": "-5Ya1xzc8TTAx17gxsj1vS3bPHOGB_dYffRFblcYsB8",
+    "request_hash": "707869c56c1282a0a410898ca5f737205ffcae2a7bd85d0eb86a14a45ce3a4bb",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b\",\"excerpt_id\":\"086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020\",\"kind\":\"timed_clip\",\"quote\":\"you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b\",\"end\":2131.109,\"excerpt_id\":\"086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020\",\"kind\":\"timed_clip\",\"quote\":\"you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud\",\"start\":2026.559,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"0FrcYhnHmLg\",\"work_id\":\"SvczOJkJzpO6wZU-GXeft5DmzwkYwWe4\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354226"
+  },
+  {
+    "submission_key": "lzHOGEbRwA9UJnI5YQ4XqGbVXONZVLLr-1L66WcttAfitt5gC6DuoBMrpzXiyfyeWfY1Vqnt8bp4",
+    "attempt_token": "1L66WcttAfitt5gC6DuoBMrpzXiyfyeWfY1Vqnt8bp4",
+    "request_hash": "f1fdc99443b4e56da906a31bd3b2d119bfe92663c93e910775ddcc10bd6d1109",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"Card is text_only with no captions available; the only content is a brief tweet caption ('First time watching your Grok Bots work on a task') with no transcript to ground a classification.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1969830523657666560\",\"work_id\":\"lzHOGEbRwA9UJnI5YQ4XqGbVXONZVLLr\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337822"
+  },
+  {
+    "submission_key": "Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0-1_I9hK95iqb7ucqSIyugaDX0cPUxvG9gtXYABeS13AE",
+    "attempt_token": "1_I9hK95iqb7ucqSIyugaDX0cPUxvG9gtXYABeS13AE",
+    "request_hash": "2bc10a3e719ca7e19ff293c1990bf49cafa613b3eae9c74698a9ac7bfed05431",
+    "outcome": "rejected",
+    "result_json": "{\"memberships\":[{\"confidence\":0.75,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"c2a677ee038189bf32df884ca384ba20fee28bfafa9c9b038169a6b52085e7f2\",\"excerpt_id\":\"bcf4693dfddcc0cf3112e9eec55b35417bcf2328d53fb359c47843a98fa8fb7a\",\"kind\":\"text_only\",\"quote\":\"I couldn't resist a cell phone video of Earthset\"},\"shelf_id\":\"spaceflight\",\"shelf_path\":[\"Space and Science\",\"Spaceflight\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"rejected\",\"rejected\":[{\"code\":\"invalid_evidence\",\"field\":\"evidence.quote\",\"reason\":\"Quote must occur in one specified excerpt\"}],\"retryable\":true,\"schema_version\":1,\"video_id\":\"2046008958511702016\",\"work_id\":\"Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354251"
+  },
+  {
+    "submission_key": "Z8wI0uwfge_xW6vdU7lihPJaIz547Uo5-2Zt_JaTw8CxHR8lusLBBDsv9I5rX9EKDhQugaOqPazo",
+    "attempt_token": "2Zt_JaTw8CxHR8lusLBBDsv9I5rX9EKDhQugaOqPazo",
+    "request_hash": "f74db4ec6bf3b079b5d6c0a6ec74dfd4a4c861d9e9d76ed0a73d3c394701c3d2",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"No captions available and the sole text excerpt is boilerplate with no substantive content to ground a classification.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079678593265754112\",\"work_id\":\"Z8wI0uwfge_xW6vdU7lihPJaIz547Uo5\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444724"
+  },
+  {
+    "submission_key": "PviVUOSWp1bjiZjLlehr9_jyqoj-AZ0M-4Ivp0QjX6syIsZ2J7oxAGh5t5lFXf-aQbRLpoJ7CQmc",
+    "attempt_token": "4Ivp0QjX6syIsZ2J7oxAGh5t5lFXf-aQbRLpoJ7CQmc",
+    "request_hash": "3a4da401599f620d0212f5a7d196a1f1cb20a476a0f86b253eaeec2d29bc7138",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.85,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97\",\"excerpt_id\":\"96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89\",\"kind\":\"text_only\",\"quote\":\"ReachSale is an AI Agent that find potential customers and do sell for you\"},\"shelf_id\":\"ai-agents-and-automation\",\"shelf_path\":[\"AI and ML\",\"AI Agents and Automation\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.85,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97\",\"end\":null,\"excerpt_id\":\"96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89\",\"kind\":\"text_only\",\"quote\":\"ReachSale is an AI Agent that find potential customers and do sell for you\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-agents-and-automation\",\"shelf_path\":[\"AI and ML\",\"AI Agents and Automation\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079192729997959168\",\"work_id\":\"PviVUOSWp1bjiZjLlehr9_jyqoj-AZ0M\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325893"
+  },
+  {
+    "submission_key": "5fcCuhOkmgogr0hrQTTJXTiwx8md7vv--5MjW7KVpO_W7hyIgqO_GhOGcrl9Sgtb5vndub1Ubif4",
+    "attempt_token": "5MjW7KVpO_W7hyIgqO_GhOGcrl9Sgtb5vndub1Ubif4",
+    "request_hash": "d2a1f4b037e16a5ba84f7801322a9cbe56650d24d53288e59bf456bf827accb3",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.75,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ddaa324f842fa6a9fa7d7cc1376cfe3540695eeaedfbdea6135930e0806a20ed\",\"excerpt_id\":\"61c804b0b91dd224747c96e9da0705b50406ac84f939ff7dc0c557d33185b10d\",\"kind\":\"text_only\",\"quote\":\"Kimi K3 devotes 10x more thinking tokens to\"},\"shelf_id\":\"frontier-models\",\"shelf_path\":[\"AI and ML\",\"Frontier Models\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.75,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ddaa324f842fa6a9fa7d7cc1376cfe3540695eeaedfbdea6135930e0806a20ed\",\"end\":null,\"excerpt_id\":\"61c804b0b91dd224747c96e9da0705b50406ac84f939ff7dc0c557d33185b10d\",\"kind\":\"text_only\",\"quote\":\"Kimi K3 devotes 10x more thinking tokens to\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"frontier-models\",\"shelf_path\":[\"AI and ML\",\"Frontier Models\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2080366865633931503\",\"work_id\":\"5fcCuhOkmgogr0hrQTTJXTiwx8md7vv-\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441773"
+  },
+  {
+    "submission_key": "nozfmog4fb2NVrGCR_W09b5GjrZhy_Wu-6E0yuEyw1HhDiinRMKoPVIc-MOKGpPalYzHG1my2RNA",
+    "attempt_token": "6E0yuEyw1HhDiinRMKoPVIc-MOKGpPalYzHG1my2RNA",
+    "request_hash": "65686c8c1ab26bc38b24a9b69f58b97d47d7f5bf4f299ed3b56187bbaa06dbb2",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt describes an electromagnetism/Smith-charts educational minigame, which is general physics/engineering content not covered by Space and Science (astrophysics/space exploration) or any other approved shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079238984417366016\",\"work_id\":\"nozfmog4fb2NVrGCR_W09b5GjrZhy_Wu\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430246"
+  },
+  {
+    "submission_key": "_UpUqMpDpmO2xI2FfIIG94G2_kl-_QN1-9HBSPYAyddfzAyj2vqu2Pm8sAmhcoJ_0MXA7-Kol4Ck",
+    "attempt_token": "9HBSPYAyddfzAyj2vqu2Pm8sAmhcoJ_0MXA7-Kol4Ck",
+    "request_hash": "3c9e48272ca64503819b27fb96fa77ff1e2fc4dc7d34e60f438208153b580461",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"The only excerpt is a trivial filler line ('We'll be right back.') with no substantive subject matter establishing any approved shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078557465042419712\",\"work_id\":\"_UpUqMpDpmO2xI2FfIIG94G2_kl-_QN1\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325910"
+  },
+  {
+    "submission_key": "9cbMKUDCG15imzpCAwTQf_LLnB0F6x8w-9dYjoVQfuL6dMslkV-Co5msmBu6GWpziD_MB_MArt8A",
+    "attempt_token": "9dYjoVQfuL6dMslkV-Co5msmBu6GWpziD_MB_MArt8A",
+    "request_hash": "baf9fb8a57d5ffabf415d965633bd36a503e43d2f5cb665987fb7f3c3de28691",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is only the rhetorical caption 'How do I explain to future generations that this wasn't AI?' with no further transcript content establishing any approved shelf's subject.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2080394147458846720\",\"work_id\":\"9cbMKUDCG15imzpCAwTQf_LLnB0F6x8w\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441784"
+  },
+  {
+    "submission_key": "eDeQ6TepwYwA8rpMUurIkLeNgA0b0MkG-AiGoZmz6XwU1z5RGovixVpJNrr79i7lQFAC_8fMAw7M",
+    "attempt_token": "AiGoZmz6XwU1z5RGovixVpJNrr79i7lQFAC_8fMAw7M",
+    "request_hash": "856fda3bcd61d01a2196b95d2b054d123d1217bd5de30f0e6fffa49c77837b7d",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt describes a human-interest story about a teenager's finance trading script shared on GitHub; it does not establish AI, developer-tools, news, or space/science subject matter per the approved taxonomy.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079481448843649024\",\"work_id\":\"eDeQ6TepwYwA8rpMUurIkLeNgA0b0MkG\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444731"
+  },
+  {
+    "submission_key": "AxKX5PUWGZ5fhNzkaJ4zipsE-zcVhoW7-BFCvyB9tpVSVXJrFI85O-qaLmJAJ6C3BgezMt5cyaB4",
+    "attempt_token": "BFCvyB9tpVSVXJrFI85O-qaLmJAJ6C3BgezMt5cyaB4",
+    "request_hash": "1ff82af6390b9bbe206f416d01aa2c1f48ba0183d9b1e457078dfde5d362a43e",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is a caption for sports match highlights (France vs England); this is not a breaking crime/conflict incident, political debate, or any other approved shelf subject.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078619453164748801\",\"work_id\":\"AxKX5PUWGZ5fhNzkaJ4zipsE-zcVhoW7\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360826"
+  },
+  {
+    "submission_key": "vpS39kAmLswEmIauhxEzZ6SF0t12loHO-CHzDQlX7ug4pjcUo5KAsOD3t8Vnhg_WTiW5zX_w_Oz4",
+    "attempt_token": "CHzDQlX7ug4pjcUo5KAsOD3t8Vnhg_WTiW5zX_w_Oz4",
+    "request_hash": "24dde2b4d6596643132165aaf4f9d5e25b5f14c1479ac54904cda161d2f63745",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.68,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"401df340025b6fece2047ee5a37978ee9ec2c2a34901740a89626c106d2739e4\",\"excerpt_id\":\"41cfe98752a56b1fef6b9908403b1a2583f2c859f47242832026584034488e2f\",\"kind\":\"text_only\",\"quote\":\"Thanks to GPT 5.6 Sol, our existing CUDA/HIP-style simulation kernels in OpenFPM now directly execute on Apple Silicon GPUs\"},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.68,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"401df340025b6fece2047ee5a37978ee9ec2c2a34901740a89626c106d2739e4\",\"end\":null,\"excerpt_id\":\"41cfe98752a56b1fef6b9908403b1a2583f2c859f47242832026584034488e2f\",\"kind\":\"text_only\",\"quote\":\"Thanks to GPT 5.6 Sol, our existing CUDA/HIP-style simulation kernels in OpenFPM now directly execute on Apple Silicon GPUs\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079774000268673024\",\"work_id\":\"vpS39kAmLswEmIauhxEzZ6SF0t12loHO\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441747"
+  },
+  {
+    "submission_key": "3Yx_ND7b-m3egnihMR8x1PJjNE9GPuX_-EdZzljsjfF5gVZXwscGLnPZ91xPb29UgFLB5voYk1wI",
+    "attempt_token": "EdZzljsjfF5gVZXwscGLnPZ91xPb29UgFLB5voYk1wI",
+    "request_hash": "f4baa785ca93b303d440a1c4485f28260d5d93c80a28b5f5425038e1c221dea7",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.85,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"excerpt_id\":\"4ff0ac352d7e2b3b8bc5e096d90cdfcd9933d1244b9718d39d604e5b8ab5d8c9\",\"kind\":\"timed_clip\",\"quote\":\"You'll design A multi-agent system For doing that\"},\"shelf_id\":\"education\",\"shelf_path\":[\"AI and ML\",\"Education\"]},{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"excerpt_id\":\"4ace1bf5aec168201a73537aeb0c49782844a16cdfc167989e58d5576f44ea99\",\"kind\":\"timed_clip\",\"quote\":\"Import The Graph D B Library\"},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.85,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"end\":237.509,\"excerpt_id\":\"4ff0ac352d7e2b3b8bc5e096d90cdfcd9933d1244b9718d39d604e5b8ab5d8c9\",\"kind\":\"timed_clip\",\"quote\":\"You'll design A multi-agent system For doing that\",\"start\":118.15,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"education\",\"shelf_path\":[\"AI and ML\",\"Education\"]},{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326\",\"end\":1663.74,\"excerpt_id\":\"4ace1bf5aec168201a73537aeb0c49782844a16cdfc167989e58d5576f44ea99\",\"kind\":\"timed_clip\",\"quote\":\"Import The Graph D B Library\",\"start\":1544.42,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079233126883094528\",\"work_id\":\"3Yx_ND7b-m3egnihMR8x1PJjNE9GPuX_\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360807"
+  },
+  {
+    "submission_key": "Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0-Fk7ne56qmrBK0FENiI0t1HDuk_YJ0-PRx2c4uI4dA4c",
+    "attempt_token": "Fk7ne56qmrBK0FENiI0t1HDuk_YJ0-PRx2c4uI4dA4c",
+    "request_hash": "491539d28d454c1c221d250ffd338cf20d832a718276125763aaf53c0bf22df9",
+    "outcome": "rejected",
+    "result_json": "{\"memberships\":[{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"c2a677ee038189bf32df884ca384ba20fee28bfafa9c9b038169a6b52085e7f2\",\"excerpt_id\":\"bcf4693dfddcc0cf3112e9eec55b35417bcf2328d53fb359c47843a98fa8fb7a\",\"kind\":\"text_only\",\"quote\":\"Like watching sunset at the beach from the most foreign seat in the cosmos, I couldn’t resist a cell phone video of Earthset.\"},\"shelf_id\":\"spaceflight\",\"shelf_path\":[\"Space and Science\",\"Spaceflight\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"rejected\",\"rejected\":[{\"code\":\"unsupported_evidence\",\"field\":\"evidence.kind\",\"reason\":\"Source origin does not support original-prose evidence\"}],\"retryable\":true,\"schema_version\":1,\"video_id\":\"2046008958511702016\",\"work_id\":\"Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444712"
+  },
+  {
+    "submission_key": "_KP2xqWurxUlFE-Px3F0ujcp2dMX04dX-FuZogR-QouNkjHqqRtp-t1iqLbfivqZa2xcuS8zaYcA",
+    "attempt_token": "FuZogR-QouNkjHqqRtp-t1iqLbfivqZa2xcuS8zaYcA",
+    "request_hash": "46e655d8f41bcb196dd344348aeb4a70ad8e2f223a5f886dd06e43c0dc236051",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"The excerpt is a brief quip about AI not being used in the Starship mission; it neither establishes a technical AI subject nor describes the spaceflight mission itself, so it does not establish any child shelf's subject per the mere-mention rule.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1851588159403884544\",\"work_id\":\"_KP2xqWurxUlFE-Px3F0ujcp2dMX04dX\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354267"
+  },
+  {
+    "submission_key": "t1VoUjGbKQ9gQgE3tcVB_OX3SVhDb0QK-GZw0QyWWjhiXu6bv7MACAy6a07ftF06SNYnr0ZmHBRI",
+    "attempt_token": "GZw0QyWWjhiXu6bv7MACAy6a07ftF06SNYnr0ZmHBRI",
+    "request_hash": "b557fe6ed0ae5da6786207ab0111274f5503989c2ffa8d2bec1a5f369e0ba943",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636\",\"excerpt_id\":\"2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5\",\"kind\":\"timed_clip\",\"quote\":\"Listen, Greg told me what happens when you have low T.\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636\",\"end\":33.195,\"excerpt_id\":\"2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5\",\"kind\":\"timed_clip\",\"quote\":\"Listen, Greg told me what happens when you have low T.\",\"start\":1.163,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2077870396075094016\",\"work_id\":\"t1VoUjGbKQ9gQgE3tcVB_OX3SVhDb0QK\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337842"
+  },
+  {
+    "submission_key": "YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK-Hym7kKD3lr0O8pa1c1ly0g44Zqk2j306cKaVgYeWfL4",
+    "attempt_token": "Hym7kKD3lr0O8pa1c1ly0g44Zqk2j306cKaVgYeWfL4",
+    "request_hash": "167c32f24df00ae577c9b87826ccdfb01b62d25a73d73f61ac5bff4e0a0c6687",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is a halftime pep talk during a streamer basketball exhibition game; sports/entertainment content with no fit in the approved taxonomy.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078621895058915328\",\"work_id\":\"YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325906"
+  },
+  {
+    "submission_key": "sbShwG4uUK1Eu1QWsa4-rqfNplnsdgFz-IFVj7WL--EhSObZZQ459vW71yvOYc_2ds5mqUwSs7EM",
+    "attempt_token": "IFVj7WL--EhSObZZQ459vW71yvOYc_2ds5mqUwSs7EM",
+    "request_hash": "aca6632338a45c081329d58dc42a61ce28c157fffee2761ce32ef81fe6bf547f",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.62,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a\",\"excerpt_id\":\"7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309\",\"kind\":\"text_only\",\"quote\":\"Kimi's founder was flagged as a generational talent 12 years before K3 shocked the world\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.62,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a\",\"end\":null,\"excerpt_id\":\"7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309\",\"kind\":\"text_only\",\"quote\":\"Kimi's founder was flagged as a generational talent 12 years before K3 shocked the world\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079595357273464930\",\"work_id\":\"sbShwG4uUK1Eu1QWsa4-rqfNplnsdgFz\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444750"
+  },
+  {
+    "submission_key": "kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt-IFew3S8Xv4nbmn9NpNLAwL3w-ppQGaWY45rrdjkNL0Q",
+    "attempt_token": "IFew3S8Xv4nbmn9NpNLAwL3w-ppQGaWY45rrdjkNL0Q",
+    "request_hash": "f916fa050c0c0f12e434935718884b49c4fb606c0be49e603a2732a917b8ce82",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.95,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4\",\"excerpt_id\":\"c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6\",\"kind\":\"timed_clip\",\"quote\":\"liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station\"},\"shelf_id\":\"spaceflight\",\"shelf_path\":[\"Space and Science\",\"Spaceflight\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.95,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4\",\"end\":28.789,\"excerpt_id\":\"c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6\",\"kind\":\"timed_clip\",\"quote\":\"liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station\",\"start\":3.12,\"timing\":\"source_cues\",\"truncated\":false},\"shelf_id\":\"spaceflight\",\"shelf_path\":[\"Space and Science\",\"Spaceflight\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2035688213663080450\",\"work_id\":\"kknQNCcN6yGxS5i1FW09wbjXtmL1LQIt\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337816"
+  },
+  {
+    "submission_key": "NRDj5qilYWzcDkPddHW3xuLzTt3JipNp-KH8vTFpuiB4sKK4GzfG4ZqtT2DhtPSSXF4NmLSbBT9A",
+    "attempt_token": "KH8vTFpuiB4sKK4GzfG4ZqtT2DhtPSSXF4NmLSbBT9A",
+    "request_hash": "8350b0d5392d45820c88ddcb388faaefc3997d9167608ea1911b2ad0f39b1e5b",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.78,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc\",\"excerpt_id\":\"4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e\",\"kind\":\"timed_clip\",\"quote\":\"how we can run inference training and all of that\"},\"shelf_id\":\"education\",\"shelf_path\":[\"AI and ML\",\"Education\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.78,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc\",\"end\":349.55,\"excerpt_id\":\"4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e\",\"kind\":\"timed_clip\",\"quote\":\"how we can run inference training and all of that\",\"start\":2.19,\"timing\":\"coarse\",\"truncated\":true},\"shelf_id\":\"education\",\"shelf_path\":[\"AI and ML\",\"Education\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"-JXwa-WlkU8\",\"work_id\":\"NRDj5qilYWzcDkPddHW3xuLzTt3JipNp\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354209"
+  },
+  {
+    "submission_key": "qn1LVZ_fGpY5vySNaXPyYBPCr7qYDaax-KKlYwPKPgL_1oQJlkpjPSBWSjiXWDmwmH9ImFPTG-so",
+    "attempt_token": "KKlYwPKPgL_1oQJlkpjPSBWSjiXWDmwmH9ImFPTG-so",
+    "request_hash": "35862fe8946095f5e9076419a485b2ade0fe2f38a82dd1f17d0d4cc6a6e9ae23",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"The only transcript excerpt ('Back up, guys back on.') is generic bystander speech that does not itself establish the crime/arrest subject; per grounding rules the title/hook text cannot be used alone to assign a shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078627651103993856\",\"work_id\":\"qn1LVZ_fGpY5vySNaXPyYBPCr7qYDaax\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430257"
+  },
+  {
+    "submission_key": "e2W8FvKJ_Z3xxz9MgHJaEMw4vwn33_1e-Kg3aT0CrHCWd4lSAtDHp01CgA-MS_HFVxqH7D8Lm6Ds",
+    "attempt_token": "Kg3aT0CrHCWd4lSAtDHp01CgA-MS_HFVxqH7D8Lm6Ds",
+    "request_hash": "fe8be794fa5bad2dbe89c420c236cfe86224e3fe8faa8578ba19d849aa5fd18c",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7\",\"excerpt_id\":\"320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c\",\"kind\":\"timed_clip\",\"quote\":\"Hey chat GPT, Change your accent to Indian and sound as indian as possible\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7\",\"end\":49.56,\"excerpt_id\":\"320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c\",\"kind\":\"timed_clip\",\"quote\":\"Hey chat GPT, Change your accent to Indian and sound as indian as possible\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1840739354819350528\",\"work_id\":\"e2W8FvKJ_Z3xxz9MgHJaEMw4vwn33_1e\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337808"
+  },
+  {
+    "submission_key": "npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0-LAgGdkQ1fH8_b69iuiBQ-C6wU3K6y9EiAPYLMzYO7Kg",
+    "attempt_token": "LAgGdkQ1fH8_b69iuiBQ-C6wU3K6y9EiAPYLMzYO7Kg",
+    "request_hash": "3ff26bacd8202ad8d5b9c3e16beef92c52bc78c6a5728df71ea474dce41176ba",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt depicts a dog attack incident, which does not match News and Current Events' definition (crimes, riots, armed conflicts, political/social debates) or any other approved shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078557763337154560\",\"work_id\":\"npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430252"
+  },
+  {
+    "submission_key": "pV0rdHh3wGkmTjTLxK0oxXE5cbYBlnP0-Lp3pFOfXkJVY-Tf6y68cGttGL7LFVpXsHtaWDc-mQpM",
+    "attempt_token": "Lp3pFOfXkJVY-Tf6y68cGttGL7LFVpXsHtaWDc-mQpM",
+    "request_hash": "cb45e1864b3a015d008a7342d078a5771e5d4aa40a8519b753d3d56baec911c8",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.93,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea\",\"excerpt_id\":\"f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6\",\"kind\":\"timed_clip\",\"quote\":\"A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.93,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea\",\"end\":18.8,\"excerpt_id\":\"f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6\",\"kind\":\"timed_clip\",\"quote\":\"A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078287651535273984\",\"work_id\":\"pV0rdHh3wGkmTjTLxK0oxXE5cbYBlnP0\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337828"
+  },
+  {
+    "submission_key": "T22gk9m_V-zAAhk81JV4nEQiQAoFKgVA-MWS8GGvGvE5zXumpV9QK-_XyB0Bpl__CoX9trXRkNmE",
+    "attempt_token": "MWS8GGvGvE5zXumpV9QK-_XyB0Bpl__CoX9trXRkNmE",
+    "request_hash": "db2bead71a0d18bbe4f521fcf1ccf420af6d5ae9d73a771e22b5ae6057963ffb",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is only song lyrics from a video clip with no relation to any approved shelf subject (AI, news, or space/science).\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079662821449609217\",\"work_id\":\"T22gk9m_V-zAAhk81JV4nEQiQAoFKgVA\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444718"
+  },
+  {
+    "submission_key": "rym_LTIIkEd7rEVtZ5kelurvebM48Zng-NJtWRcQ3-iH_KhsxGQPL1OizvgTuc44g5zW_Gr1dKbA",
+    "attempt_token": "NJtWRcQ3-iH_KhsxGQPL1OizvgTuc44g5zW_Gr1dKbA",
+    "request_hash": "e9c557acf8dda44ef6ba4c400bdac0f6c8996a8e6d69737f9ae9dd2a9b49aac2",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.75,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a\",\"excerpt_id\":\"964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3\",\"kind\":\"timed_clip\",\"quote\":\"The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.75,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a\",\"end\":358.779,\"excerpt_id\":\"964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3\",\"kind\":\"timed_clip\",\"quote\":\"The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope\",\"start\":240.34,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2077640475075358720\",\"work_id\":\"rym_LTIIkEd7rEVtZ5kelurvebM48Zng\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337834"
+  },
+  {
+    "submission_key": "bD3e9VaoTonSI9OXPa0kGF_WGEyU8zn4-NL_tegf3FgbNnbho4tkolCobrfZJiKBd1VJygSKHl-k",
+    "attempt_token": "NL_tegf3FgbNnbho4tkolCobrfZJiKBd1VJygSKHl-k",
+    "request_hash": "d87da49407a56931fbd8efd78a4897612f699deac39552e867d760a0d82c63ec",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"The excerpt is song lyrics attached to an unrelated meme post with no connection to any approved taxonomy shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1889178327400820738\",\"work_id\":\"bD3e9VaoTonSI9OXPa0kGF_WGEyU8zn4\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354274"
+  },
+  {
+    "submission_key": "usP2dhjZRO2fS-VxTsEIxCNCgIsztHXR-NVLhrb1PsCzxvgZkJryLohWeYFlqH1cvdnhNtOqx1DY",
+    "attempt_token": "NVLhrb1PsCzxvgZkJryLohWeYFlqH1cvdnhNtOqx1DY",
+    "request_hash": "c7978e2bd49d0e5b2a446134350908922f8d5e33bce9e04c996187387450b83f",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"The sole timed-clip excerpt is an unrelated song lyric ('She is the angel of love.'); the taxonomy-relevant subject only appears in the untimed hook text, not in grounded excerpt evidence.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079336900192595969\",\"work_id\":\"usP2dhjZRO2fS-VxTsEIxCNCgIsztHXR\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444756"
+  },
+  {
+    "submission_key": "5MIZdDSMZ9dGwdNvHkRiobZSJgJ2u4aN-Q-k_kFcmnEm7iBjn8i_Sxc3EDuJD1UU8Fno778wysS0",
+    "attempt_token": "Q-k_kFcmnEm7iBjn8i_Sxc3EDuJD1UU8Fno778wysS0",
+    "request_hash": "ef7915f04cbcb40b123133597df53ff0e8e9838f32f2d51d7575c482ae40d11b",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt describes streamer interpersonal drama (Marlon defending PlaqueboyMax) with no AI, space/science, or breaking-news crime/conflict subject matter; falls outside all approved shelves.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078684046708572163\",\"work_id\":\"5MIZdDSMZ9dGwdNvHkRiobZSJgJ2u4aN\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360813"
+  },
+  {
+    "submission_key": "C9koZwLush5y_n-bqtd65EZdDdTfBQEO-QqTQnLm6nW9fPwL9-PAv1p5yOPyhkuJH9AwY3DoLmuA",
+    "attempt_token": "QqTQnLm6nW9fPwL9-PAv1p5yOPyhkuJH9AwY3DoLmuA",
+    "request_hash": "15406e312ee9018dca7a2240b1dc9ddcf94f084d5c0632a925aaa5076bc9ae1d",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Despite the channel name, the transcript covers football/tour commentary (Frenkie de Jong, championship) rather than a breaking crime, riot, armed conflict, or political/social debate as required by News and Current Events; no approved shelf fits.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078973268732555264\",\"work_id\":\"C9koZwLush5y_n-bqtd65EZdDdTfBQEO\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360832"
+  },
+  {
+    "submission_key": "O8hlbyHKL-xxpwplSgtVXU3iJckYit21-S1jDF57GVn-RAFF5gi-mDADKWb0epdNdS4tD9XdMj9k",
+    "attempt_token": "S1jDF57GVn-RAFF5gi-mDADKWb0epdNdS4tD9XdMj9k",
+    "request_hash": "1aeca85264f0a27a4ac79e083d156d418e371676ca0b83cb90ca105db48871d1",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"Video source has no captions and the excerpt contains only boilerplate ('No captions available for this video.') with a link; no substantive content to classify.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078647190453411840\",\"work_id\":\"O8hlbyHKL-xxpwplSgtVXU3iJckYit21\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325887"
+  },
+  {
+    "submission_key": "BRVqkEvqTywYCwySdwJn9P3tH4bC39cz-SJyS4wxEuM104SPmgXl3jphA7-CUE6ltA_Djd33_Gas",
+    "attempt_token": "SJyS4wxEuM104SPmgXl3jphA7-CUE6ltA_Djd33_Gas",
+    "request_hash": "ad86665e5b08663598d08d20dfed100be9b018cb8cdd00831aba6961de2d89e4",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.78,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"2f911367443ccd741ae196f6b852937027bfe4deafd068447cef4851f5439d59\",\"excerpt_id\":\"f255486be50b76c72e140fb10854fbc251b6c9a67e26164dddac78d2455c55b9\",\"kind\":\"text_only\",\"quote\":\"I rebuilt Google Maps 3D mode in 1.5 hours.\"},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.78,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"2f911367443ccd741ae196f6b852937027bfe4deafd068447cef4851f5439d59\",\"end\":null,\"excerpt_id\":\"f255486be50b76c72e140fb10854fbc251b6c9a67e26164dddac78d2455c55b9\",\"kind\":\"text_only\",\"quote\":\"I rebuilt Google Maps 3D mode in 1.5 hours.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2080274574113947649\",\"work_id\":\"BRVqkEvqTywYCwySdwJn9P3tH4bC39cz\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441790"
+  },
+  {
+    "submission_key": "dpG1JGMLpVxJd1e3o8vciC1jxFM9jcev-Vk00WtG0M9whlvd0zM5yb7aAFUh2MUp4mowNuz8wJkQ",
+    "attempt_token": "Vk00WtG0M9whlvd0zM5yb7aAFUh2MUp4mowNuz8wJkQ",
+    "request_hash": "025d02027a26697a01ac77844cc72c3c14d398beb946a1d3cb5a801dc70216fd",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"Video source has no captions; the only text is a caption/hook line with a link and no transcript content to ground a classification.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078513431548727297\",\"work_id\":\"dpG1JGMLpVxJd1e3o8vciC1jxFM9jcev\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325915"
+  },
+  {
+    "submission_key": "7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1-WPywT_8DC1YMI5-y9lLVdiuhIpA_6ZJu0EaKjXekVWY",
+    "attempt_token": "WPywT_8DC1YMI5-y9lLVdiuhIpA_6ZJu0EaKjXekVWY",
+    "request_hash": "7a8d2902e4c36faa7e93c0d3dfdec2c70b1b5345585705c0279fe49c98676011",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.88,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75\",\"excerpt_id\":\"1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831\",\"kind\":\"text_only\",\"quote\":\"Every lab, like Claude, thinks the model matters most. That's wrong.\"},\"shelf_id\":\"ai-industry-and-business\",\"shelf_path\":[\"AI and ML\",\"AI Industry and Business\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.88,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75\",\"end\":null,\"excerpt_id\":\"1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831\",\"kind\":\"text_only\",\"quote\":\"Every lab, like Claude, thinks the model matters most. That's wrong.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-industry-and-business\",\"shelf_path\":[\"AI and ML\",\"AI Industry and Business\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079140311779971072\",\"work_id\":\"7g2YgnvQO60WahRZvVCD35Q8IElR2Hk1\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360821"
+  },
+  {
+    "submission_key": "rmqXbU9SXZ1tGRJmYriKjaUL1Ta-FqS_-Y4wlZWFNz0J5qvQEdFXjZ5wOtBJEuTiu_KvpRTjO7As",
+    "attempt_token": "Y4wlZWFNz0J5qvQEdFXjZ5wOtBJEuTiu_KvpRTjO7As",
+    "request_hash": "a092d1f7bec21d688be993583d86e82892f3f98bb05470e82a3610132ea2fe8c",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is a casual birthday greeting to an unrelated public figure, with no connection to any approved shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079635204994379776\",\"work_id\":\"rmqXbU9SXZ1tGRJmYriKjaUL1Ta-FqS_\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444745"
+  },
+  {
+    "submission_key": "zUHD4wGX25ZCV8ki3H9Hxfup-qzqJCpG-axMUL7Ohhm3M1aYnXvD2nzHhM8_ZvpwWLE8Kq4tXFIU",
+    "attempt_token": "axMUL7Ohhm3M1aYnXvD2nzHhM8_ZvpwWLE8Kq4tXFIU",
+    "request_hash": "a932c3d8d3b4e03ca74a760ef8ae4454cdc95605d28a06834b296e383f09b6f0",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"be487d4fbae4c37f42aad68bc5944268bcc680e3d5e70c3151ec60dadc49aa8f\",\"excerpt_id\":\"b2d1a89f9555c97fd4a19316ded7de43c42d838e9f2277c88ec4fe384fd31344\",\"kind\":\"text_only\",\"quote\":\"We will evaluate the model inside a carefully designed sandbox with no internet access.\"},\"shelf_id\":\"security\",\"shelf_path\":[\"AI and ML\",\"Security\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.72,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"be487d4fbae4c37f42aad68bc5944268bcc680e3d5e70c3151ec60dadc49aa8f\",\"end\":null,\"excerpt_id\":\"b2d1a89f9555c97fd4a19316ded7de43c42d838e9f2277c88ec4fe384fd31344\",\"kind\":\"text_only\",\"quote\":\"We will evaluate the model inside a carefully designed sandbox with no internet access.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"security\",\"shelf_path\":[\"AI and ML\",\"Security\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2026062150930661377\",\"work_id\":\"zUHD4wGX25ZCV8ki3H9Hxfup-qzqJCpG\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360791"
+  },
+  {
+    "submission_key": "douSdnsKZhOmK19_AvTUg1QRSILom4A3-bM2W2Ej6COWHX5nXE2Frl100yQwN-hFzf-0t7fctsyo",
+    "attempt_token": "bM2W2Ej6COWHX5nXE2Frl100yQwN-hFzf-0t7fctsyo",
+    "request_hash": "af943e838adbd893c7dec131a505fbbce6b20bd49eefc4f988036f943325957e",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is casual commentary admiring the visual beauty of Antarctic ice caves ('it's like a cathedral'); it does not establish space exploration, astrophysics, or empirical scientific inquiry as required by the Space and Science shelf.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2020740688166735872\",\"work_id\":\"douSdnsKZhOmK19_AvTUg1QRSILom4A3\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337802"
+  },
+  {
+    "submission_key": "7-OpD4TLf6U8siSpffB-OSafshwpWk1u-baEkdhzR8IAotzqnuLngXaxnpRQHtzjTAdqPtvdp0dY",
+    "attempt_token": "baEkdhzR8IAotzqnuLngXaxnpRQHtzjTAdqPtvdp0dY",
+    "request_hash": "1d64a88f7a31a15f2676c83d62b17bd414e4a544905cd5befa385e2e4405a698",
+    "outcome": "rejected",
+    "result_json": "{\"memberships\":[{\"confidence\":0.7,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa\",\"excerpt_id\":\"db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60\",\"kind\":\"text_only\",\"quote\":\"Kimi already outperformed Fable on BrowserComp\"},\"shelf_id\":\"frontier-models\",\"shelf_path\":[\"AI and ML\",\"Frontier Models\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"rejected\",\"rejected\":[{\"code\":\"invalid_evidence\",\"field\":\"evidence.quote\",\"reason\":\"Quote must occur in one specified excerpt\"}],\"retryable\":true,\"schema_version\":1,\"video_id\":\"2079961848095412224\",\"work_id\":\"7-OpD4TLf6U8siSpffB-OSafshwpWk1u\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441779"
+  },
+  {
+    "submission_key": "lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT-bgVw-dHcXXP_kNXEFYLgM9pl97ITut0LQf--DUP0UN8",
+    "attempt_token": "bgVw-dHcXXP_kNXEFYLgM9pl97ITut0LQf--DUP0UN8",
+    "request_hash": "56fd7a6789beb752ba70df2c94c0c5587993ad333c9ee509eda4a035e4c3fdbb",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is a bare one-line reply ('Their fails are pretty hysterical too') with no described subject matter, insufficient to establish any approved shelf's topic.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078521999790415872\",\"work_id\":\"lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430241"
+  },
+  {
+    "submission_key": "GtxOkjgYuXe4IousVnxDNJnM2q0awVnk-bpvHsfhRkwLj6ncnJRMY8kSthSDqGNInQ7H3lLti9FE",
+    "attempt_token": "bpvHsfhRkwLj6ncnJRMY8kSthSDqGNInQ7H3lLti9FE",
+    "request_hash": "af097ff072477a655db14b9c15ef04b174b5da288e145b5545d13dc435614253",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657\",\"excerpt_id\":\"f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc\",\"kind\":\"text_only\",\"quote\":\"Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657\",\"end\":null,\"excerpt_id\":\"f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc\",\"kind\":\"text_only\",\"quote\":\"Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1993377144995815424\",\"work_id\":\"GtxOkjgYuXe4IousVnxDNJnM2q0awVnk\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354236"
+  },
+  {
+    "submission_key": "gXvhaOlxrfISjNMiM2nbexGrXYATStt6-bzyPkNWhg-g_twkVIqj6YBmkLJaLCMUm02kaRdoQdI4",
+    "attempt_token": "bzyPkNWhg-g_twkVIqj6YBmkLJaLCMUm02kaRdoQdI4",
+    "request_hash": "5c3358bb3c56734be8485172b20fb2d55a2bb69caa60d986a1a75aeba7d26d9b",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223\",\"excerpt_id\":\"f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885\",\"kind\":\"text_only\",\"quote\":\"Excalidraw for AI Agents....INSANE.\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223\",\"end\":null,\"excerpt_id\":\"f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885\",\"kind\":\"text_only\",\"quote\":\"Excalidraw for AI Agents....INSANE.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079747355944058880\",\"work_id\":\"gXvhaOlxrfISjNMiM2nbexGrXYATStt6\"}",
+    "usage_json": "{\"cache_create_tokens\":26378,\"cache_read_tokens\":185675,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8504,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837444738"
+  },
+  {
+    "submission_key": "SbIr_QKNqRlxowL4InFSm5UUYau5AwAS-c5Z3gwyrWZVVA17O_cNh0bnQYYtvIvlo1BXy9LU5Q1U",
+    "attempt_token": "c5Z3gwyrWZVVA17O_cNh0bnQYYtvIvlo1BXy9LU5Q1U",
+    "request_hash": "c71e9366393fa6611261e424db2c1ca42179e731cf126a874f52edefb43aab87",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"The excerpt contains only boilerplate hook markers and a bare link with no substantive text content to ground any classification.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"1560338557981564935\",\"work_id\":\"SbIr_QKNqRlxowL4InFSm5UUYau5AwAS\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354243"
+  },
+  {
+    "submission_key": "d8u415Ei3txUGRnxOgKA0gvPLLMkBaS4-d4DOFtzk5KwUQORKv0-X8y1EW4cCFq_YxL0k7Exdwzg",
+    "attempt_token": "d4DOFtzk5KwUQORKv0-X8y1EW4cCFq_YxL0k7Exdwzg",
+    "request_hash": "f3464964306d9c68d835b168d3e47cd6257d9f751f1e67a035658e0a4f1bad46",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is only the tweet caption 'Robot fights are fun' with no captions or transcript available; no substantive content establishes any approved shelf's subject (no AI, news, or space/science content shown).\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2077931160538329088\",\"work_id\":\"d8u415Ei3txUGRnxOgKA0gvPLLMkBaS4\"}",
+    "usage_json": "{\"cache_create_tokens\":105133,\"cache_read_tokens\":0,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":7657,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837337796"
+  },
+  {
+    "submission_key": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY-hjly4wWVjLm2VPG6BKGKpLUcgnyogAkLsoA3mlUMFAY",
+    "attempt_token": "hjly4wWVjLm2VPG6BKGKpLUcgnyogAkLsoA3mlUMFAY",
+    "request_hash": "abba33fac0997dab75646e5e5552905078e49a508621712cf8c36fa8dca77c0d",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703\",\"excerpt_id\":\"16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259\",\"kind\":\"text_only\",\"quote\":\"Anduril and Archer launch Thunder, an autonomous attack rotorcraft\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.65,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703\",\"end\":null,\"excerpt_id\":\"16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259\",\"kind\":\"text_only\",\"quote\":\"Anduril and Archer launch Thunder, an autonomous attack rotorcraft\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079190532681543680\",\"work_id\":\"izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430236"
+  },
+  {
+    "submission_key": "xzcI-Y4WNPyPGZZxddfF5V0SUFcnSyYX-iIdh7LTqW_9J0M_kpqFHqy1xobmRvaTgCOh_lmHpYDk",
+    "attempt_token": "iIdh7LTqW_9J0M_kpqFHqy1xobmRvaTgCOh_lmHpYDk",
+    "request_hash": "8d0c4266dba9171fb45ebd1f6786c92609f979a0153cc9e47e5b32d7b31b0d0e",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.9,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e\",\"excerpt_id\":\"81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15\",\"kind\":\"text_only\",\"quote\":\"Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit\"},\"shelf_id\":\"generative-media\",\"shelf_path\":[\"AI and ML\",\"Generative Media\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.9,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e\",\"end\":null,\"excerpt_id\":\"81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15\",\"kind\":\"text_only\",\"quote\":\"Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"generative-media\",\"shelf_path\":[\"AI and ML\",\"Generative Media\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079818487246262272\",\"work_id\":\"xzcI-Y4WNPyPGZZxddfF5V0SUFcnSyYX\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441760"
+  },
+  {
+    "submission_key": "w26IGCRtHnHdwKnMwqG44HFZdwdk643G-jNvOEF8fmQoIHErKsoBALzv-T-4Okvz1dkKbEjM-sRU",
+    "attempt_token": "jNvOEF8fmQoIHErKsoBALzv-T-4Okvz1dkKbEjM-sRU",
+    "request_hash": "17742c5fadbec565b44aec15e21d571407a1d3b95c5871a4b3b3d3bca45060c4",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.68,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7\",\"excerpt_id\":\"3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5\",\"kind\":\"text_only\",\"quote\":\"An open source tool for building hierarchical agent loops.\"},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.68,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7\",\"end\":null,\"excerpt_id\":\"3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5\",\"kind\":\"text_only\",\"quote\":\"An open source tool for building hierarchical agent loops.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"developer-tools\",\"shelf_path\":[\"AI and ML\",\"Developer Tools\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079633339041087488\",\"work_id\":\"w26IGCRtHnHdwKnMwqG44HFZdwdk643G\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441754"
+  },
+  {
+    "submission_key": "xMkyVQEf5ML3Gd-SmJ-2ntZdnE4Jn0Xx-ltPG51zq-oleWKqBiFpEkcSIeJzUHSeaSnH43Up1QWw",
+    "attempt_token": "ltPG51zq-oleWKqBiFpEkcSIeJzUHSeaSnH43Up1QWw",
+    "request_hash": "589c78afd9918a03e92b048d35419c8d84fb3a3860c6fb81c879ccd167f2ffca",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is a single word ('zelda') with no substantive content matching any approved shelf definition.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078516830549733376\",\"work_id\":\"xMkyVQEf5ML3Gd-SmJ-2ntZdnE4Jn0Xx\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430262"
+  },
+  {
+    "submission_key": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn-mbfBAAExUyTd0J2t6YCva7bHyvEkVSULyjMH9gC4H0E",
+    "attempt_token": "mbfBAAExUyTd0J2t6YCva7bHyvEkVSULyjMH9gC4H0E",
+    "request_hash": "4ba70ec5d46f2614ebaa49f621e41f11c83ca8cfdca02e53211c34d0b8376277",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.88,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526\",\"excerpt_id\":\"b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e\",\"kind\":\"text_only\",\"quote\":\"This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.88,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526\",\"end\":null,\"excerpt_id\":\"b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e\",\"kind\":\"text_only\",\"quote\":\"This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078650714293739521\",\"work_id\":\"eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430229"
+  },
+  {
+    "submission_key": "QSic29nHGeXeFRIXUDEmfPAtN8FrhT8G-n6wHMw2x6lbIzPxbuduPb91CwyDJVXsKx2Q1wg5m6Eg",
+    "attempt_token": "n6wHMw2x6lbIzPxbuduPb91CwyDJVXsKx2Q1wg5m6Eg",
+    "request_hash": "1a76dadbfb1b15c0f78d0495079794d25c8faec6a18c7e0315fa9464156d91a4",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.9,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0\",\"excerpt_id\":\"1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff\",\"kind\":\"timed_clip\",\"quote\":\"trying to breach into the capitol We have breached\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.9,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0\",\"end\":62.95,\"excerpt_id\":\"1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff\",\"kind\":\"timed_clip\",\"quote\":\"trying to breach into the capitol We have breached\",\"start\":0.52,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078450309794263040\",\"work_id\":\"QSic29nHGeXeFRIXUDEmfPAtN8FrhT8G\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325900"
+  },
+  {
+    "submission_key": "KPrZ_4nCw2seIsxgauDjUq0o9rXMJzjz-rWnmmOJrPsBoLcVRenpxvQHApIdYYzRKWXunT2TL1mU",
+    "attempt_token": "rWnmmOJrPsBoLcVRenpxvQHApIdYYzRKWXunT2TL1mU",
+    "request_hash": "077079483354dd743254c194babe5c0a828058e741b6fad414926cb21189dc48",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is play-by-play commentary from a basketball highlight reel (streamer college basketball game); content is sports entertainment with no relation to any approved shelf (AI/ML, news/current events, or space/science).\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078643519162298368\",\"work_id\":\"KPrZ_4nCw2seIsxgauDjUq0o9rXMJzjz\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325882"
+  },
+  {
+    "submission_key": "zeWyn7TVTJy0Oa4SYgHN9i4Vyb-Jmk1--rmklgnCU8M7OKxJGWUuO8H155Rea0qhTrPK2ZH-VxNs",
+    "attempt_token": "rmklgnCU8M7OKxJGWUuO8H155Rea0qhTrPK2ZH-VxNs",
+    "request_hash": "eb20e45788229754a55213f53578533b8d7e3c0818d574d3a968a35c7626ba1f",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.62,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ac2962e7ae20f8749f4cc2aa6a0a288c7c66949a0ddbe59f276778dbaef1cda5\",\"excerpt_id\":\"3b90821c72c3c3e46118fbb6fe6d161006d9ccc53cac122165d3bedf5396740f\",\"kind\":\"text_only\",\"quote\":\"Anthropic with every industry:\"},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.62,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"ac2962e7ae20f8749f4cc2aa6a0a288c7c66949a0ddbe59f276778dbaef1cda5\",\"end\":null,\"excerpt_id\":\"3b90821c72c3c3e46118fbb6fe6d161006d9ccc53cac122165d3bedf5396740f\",\"kind\":\"text_only\",\"quote\":\"Anthropic with every industry:\",\"start\":null,\"timing\":\"not_timed\",\"truncated\":true},\"shelf_id\":\"ai-and-ml\",\"shelf_path\":[\"AI and ML\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078014058238808064\",\"work_id\":\"zeWyn7TVTJy0Oa4SYgHN9i4Vyb-Jmk1-\"}",
+    "usage_json": "{\"cache_create_tokens\":112065,\"cache_read_tokens\":104470,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":9569,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837360799"
+  },
+  {
+    "submission_key": "H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU-thpzj8c5rJjSCJxcyNbCiKsEatUvavxSB-5Am-rmck4",
+    "attempt_token": "thpzj8c5rJjSCJxcyNbCiKsEatUvavxSB-5Am-rmck4",
+    "request_hash": "a5e5e80cf6934eab58f53013caaf5200fdd581210072bf4079cb4014ba6a4fa5",
+    "outcome": "unsupported",
+    "result_json": "{\"outcome\":\"unsupported\",\"reason\":\"Video source has no captions and no transcript content beyond the tweet caption ('No captions available for this video.'); insufficient eligible evidence to ground a classification.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unsupported\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078988415048278016\",\"work_id\":\"H7OMZdq9kveVYsIE2nN18vuKAZIMpFkU\"}",
+    "usage_json": "{\"cache_create_tokens\":108211,\"cache_read_tokens\":103380,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":6065,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837325875"
+  },
+  {
+    "submission_key": "2D0UOrGAc9yh8RqsXmynJWGlC4gfmPlx-vS0QzKrq7jiaO9L5vdGrfNs_DK9H7Sgv59Sr_6MGGGw",
+    "attempt_token": "vS0QzKrq7jiaO9L5vdGrfNs_DK9H7Sgv59Sr_6MGGGw",
+    "request_hash": "f23b987209fbdeed83c38a0505e30a6ab455ad7681e13b563d4e478b93f7ff43",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt is just a one-line pet-video reaction ('same vibes lol') with no reference to AI, space/science, or news content; it establishes no approved shelf's subject.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2080006256354369536\",\"work_id\":\"2D0UOrGAc9yh8RqsXmynJWGlC4gfmPlx\"}",
+    "usage_json": "{\"cache_create_tokens\":19248,\"cache_read_tokens\":83203,\"input_tokens\":2,\"model\":\"claude-sonnet-5\",\"output_tokens\":8539,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837441766"
+  },
+  {
+    "submission_key": "X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw-wtvk8rwzkMi73L23_UF_7i8JT-s7IMBbrnrnZy7Ibpo",
+    "attempt_token": "wtvk8rwzkMi73L23_UF_7i8JT-s7IMBbrnrnZy7Ibpo",
+    "request_hash": "94f2857fbfbd3cafe5b20817e4bffe23c085105e87fe62d4aced8b2669106141",
+    "outcome": "accepted",
+    "result_json": "{\"memberships\":[{\"confidence\":0.82,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38\",\"excerpt_id\":\"92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8\",\"kind\":\"timed_clip\",\"quote\":\"they found the men dead near the front porch now\"},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"outcome\":\"assigned\"}",
+    "response_json": "{\"accepted_memberships\":[{\"confidence\":0.82,\"evidence\":{\"basis\":\"packet\",\"card_hash\":\"26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38\",\"end\":79.239,\"excerpt_id\":\"92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8\",\"kind\":\"timed_clip\",\"quote\":\"they found the men dead near the front porch now\",\"start\":0.0,\"timing\":\"source_cues\",\"truncated\":true},\"shelf_id\":\"news-and-current-events\",\"shelf_path\":[\"News and Current Events\"]}],\"ok\":true,\"outcome\":\"accepted\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2078443305495388160\",\"work_id\":\"X9WM9-EPMMIlzOXTptYnFyXAYtdInZOw\"}",
+    "usage_json": "{\"cache_create_tokens\":112778,\"cache_read_tokens\":106372,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":8068,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837354259"
+  },
+  {
+    "submission_key": "-BuzlW_P7iAxTS5zVYfWe5newhUsBBFV-ypbqXTdsf3CEL0M4g_bxeyNXCalEBjdbLrF-5IoFS5s",
+    "attempt_token": "ypbqXTdsf3CEL0M4g_bxeyNXCalEBjdbLrF-5IoFS5s",
+    "request_hash": "50d874f167267309fe1d131f8cd6600375ce82005db3f1b22cc922f658f8506e",
+    "outcome": "unmapped",
+    "result_json": "{\"outcome\":\"unmapped\",\"reason\":\"Excerpt describes a generic robotics demo mishap ('robotics is very real. It scales across a wide variety of environments') without mentioning AI, ML, or autonomous systems within the excerpt itself; the 'AI chip' framing appears only in the title/hint, which cannot ground a technical shelf per rule 1.\"}",
+    "response_json": "{\"accepted_memberships\":[],\"ok\":true,\"outcome\":\"unmapped\",\"rejected\":[],\"retryable\":false,\"schema_version\":1,\"video_id\":\"2079930744781070336\",\"work_id\":\"-BuzlW_P7iAxTS5zVYfWe5newhUsBBFV\"}",
+    "usage_json": "{\"cache_create_tokens\":28614,\"cache_read_tokens\":186008,\"input_tokens\":4,\"model\":\"claude-sonnet-5\",\"output_tokens\":10258,\"status\":\"reported\",\"wall_time_ms\":0}",
+    "created_at": "1788837430267"
+  }
+]

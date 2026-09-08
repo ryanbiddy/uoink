@@ -1,0 +1,804 @@
+{
+  "seq": 25,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 15,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "eGsT7_YpkKuE0gSkXoFFitQp0qK_PYfn",
+          "video_id": "2078650714293739521",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225925,
+          "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "ea36b6efa731303b26c6d99797ed5ff7520572aef5b20a9089ab5300a93c2b0b",
+          "card": {
+            "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+            "channel": "Matt Van Swol",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078651486771273773",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you th",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you think about the war in Iran, please pray for our troops. https://t.co/Q08K8BuMS7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matt_Van_Swol_-_This_video_of_missiles_hitting_Muwaffaq_Salti_Air_Base_in_Jordan",
+            "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you think about the war in Iran, please pray for our troops. https://t.co/Q08K8BuMS7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Matt Van Swol - This video of missiles hitting Muwaffaq Salti Air Base in Jordan is b...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mattvanswol/status/2078651486771273773",
+            "video_id": "2078650714293739521",
+            "yoinked_at": "2026-07-19T09:49:49"
+          }
+        },
+        {
+          "work_id": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY",
+          "video_id": "2079190532681543680",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225926,
+          "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "f60e0e3186732ca3b237fc8214ffd6833bc68a7a2e684e9457d70be608c61022",
+          "card": {
+            "card_hash": "01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703",
+            "channel": "Shortcut ‎",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/shortcutdotnews/status/2079190671945077184",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled o",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Shortcut_-_JUST_IN_Anduril_and_Archer_launch_Thunder_an_autonomous_attack_roto",
+            "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Shortcut ‎ - JUST IN: Anduril and Archer launch Thunder, an autonomous attack roto...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/shortcutdotnews/status/2079190671945077184",
+            "video_id": "2079190532681543680",
+            "yoinked_at": "2026-07-20T22:45:39"
+          }
+        },
+        {
+          "work_id": "lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT",
+          "video_id": "2078521999790415872",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225927,
+          "source_revision": "095bfc06af30a51700b3a72ddb3a550828cd062f0d67c9fb76f6475601dea2a4",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "64f46c8933193fc49ec6a2d8becc40e48d502f160e3d65e8ca21f5f7588bd7be",
+          "card": {
+            "card_hash": "cf6f03c7ba51ce6b31e0b9b902366fdfa27a4b5dbf6cb2bede4d74405aab6f46",
+            "channel": "🍒Wild Cherry 2000🌸",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/SGautreau29553/status/2078522259069665457",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "69b0864b10a55ff14568c6366fb67f27b4b2c8161fd1fa037d81732038a2eeb6",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:c",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Wild_Cherry_2000_-_elonmusk_Their_fails_are_pretty_hysterical_too",
+            "source_revision": "095bfc06af30a51700b3a72ddb3a550828cd062f0d67c9fb76f6475601dea2a4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "🍒Wild Cherry 2000🌸 - @elonmusk Their fails are pretty hysterical too😂",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/SGautreau29553/status/2078522259069665457",
+            "video_id": "2078521999790415872",
+            "yoinked_at": "2026-07-18T22:51:39"
+          }
+        },
+        {
+          "work_id": "nozfmog4fb2NVrGCR_W09b5GjrZhy_Wu",
+          "video_id": "2079238984417366016",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225928,
+          "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "45e0f3913552be721dd70fbdff24f06df218addcb7a73a6723250419a2f5bc25",
+          "card": {
+            "card_hash": "2b04f75108967b32eee67071adac2841dfaaf484c954c210d15ffbf7279d040c",
+            "channel": "Arena Physica",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/arenaphysica/status/2079239168257843368",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "1bd99b0565ea6b08a105490e08fa2b2e4154ea14187c64b1c9a50e8fc7b85118",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfX",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfXeh20Ow.  What should we demystify next? Let us know in the comments below ⬇️ https://t.co/f0SmFfam8s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Arena_Physica_-_As_humans_we_don_t_naturally_have_strong_intuition_around_electr",
+            "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfXeh20Ow.  What should we demystify next? Let us know in the comments below ⬇️ https://t.co/f0SmFfam8s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+            "title": "Arena Physica - As humans, we don't naturally have strong intuition around electromag...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/arenaphysica/status/2079239168257843368",
+            "video_id": "2079238984417366016",
+            "yoinked_at": "2026-07-21T10:49:08"
+          }
+        },
+        {
+          "work_id": "npuxBKF9OwL5TOp4Hj6Q2ewfTpwV9Ec0",
+          "video_id": "2078557763337154560",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225929,
+          "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "adbbfc696d0b8d653329405468eec27ef13c1027f0c91af4e807ba5d0b9147a1",
+          "card": {
+            "card_hash": "11b0e6c742622f36ca8f4355659931e4c394aea977051e914c067af23e163724",
+            "channel": "The Black Tucker Carlson Jr 🇺🇸",
+            "chars": 102,
+            "chars_all_clips": 102,
+            "chars_chosen_clips": 102,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/B1TuckerCarlson/status/2078557954769293714#t=0",
+                "end": 49.799,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8e7376bbe5eee9bd4440f979bdaab2e0eb286b7975a0ca2ac9a1aa132caf1f48",
+                "start": 0.0,
+                "text": "Oh my god! Run upstairs Get your dog Stay in front of me Ease on up stairs baby with you dog Oh My God",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/B1TuckerCarlson/status/2078557954769293714#t=0",
+                "end": 49.799,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8e7376bbe5eee9bd4440f979bdaab2e0eb286b7975a0ca2ac9a1aa132caf1f48",
+                "start": 0.0,
+                "text": "Oh my god! Run upstairs Get your dog Stay in front of me Ease on up stairs baby with you dog Oh My God",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Pitbull owner attacked by Belgian Shepherd while its owner watches in disbelief https://t.co/jup1xdOzsx No tags [00:00:00] Oh my god! [00:00:06] Run upstairs Get [00:00:19] your dog Stay in front of me [00:00:28] Ease on up stairs baby with you dog [00:00:30] Oh My [00:00:48] God <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "The_Black_Tucker_Carlson_Jr_-_Pitbull_owner_attacked_by_Belgian_Shepherd_while_i",
+            "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Pitbull owner attacked by Belgian Shepherd while its owner watches in disbelief https://t.co/jup1xdOzsx No tags [00:00:00] Oh my god! [00:00:06] Run upstairs Get [00:00:19] your dog Stay in front of me [00:00:28] Ease on up stairs baby with you dog [00:00:30] Oh My [00:00:48] God <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "The Black Tucker Carlson Jr 🇺🇸 - Pitbull owner attacked by Belgian Shepherd while its owner watches in...",
+            "topic": "Uncategorized",
+            "truncated": false,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/B1TuckerCarlson/status/2078557954769293714",
+            "video_id": "2078557763337154560",
+            "yoinked_at": "2026-07-18T22:54:56"
+          }
+        },
+        {
+          "work_id": "qn1LVZ_fGpY5vySNaXPyYBPCr7qYDaax",
+          "video_id": "2078627651103993856",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225930,
+          "source_revision": "705d2f0efea9fe457b5a65724ff21c85d7c115476f013e2795dd8610043daaa6",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "6feef520031ed2640829f8c6d0f7368efaefa458468a23b779991448c41c6c83",
+          "card": {
+            "card_hash": "68d251f749794bd60dff60cccdd98713d1691329a50fbe90f8fb1f6c9ffe5630",
+            "channel": "Nick Sortor",
+            "chars": 22,
+            "chars_all_clips": 22,
+            "chars_chosen_clips": 22,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/i/status/2078628288348737638#t=21",
+                "end": 32.39,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4adba4839937c72052f90637a2c24c0e6af61535a104a79191b432c2803694d2",
+                "start": 21.1,
+                "text": "Back up, guys back on.",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/i/status/2078628288348737638#t=21",
+                "end": 32.39,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4adba4839937c72052f90637a2c24c0e6af61535a104a79191b432c2803694d2",
+                "start": 21.1,
+                "text": "Back up, guys back on.",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 BREAKING: Andrew Tate and Tristan Tate have been ARRESTED by US Marshals in Miami after UK authorities lodged 38 ADDITIONAL charges against them for alleged “sexuaI offenses”  The two brothers will now be extradited to the UK to face legal proceedings.  Andrew and Tristan were https://t.co/LQA8oBmHnF No tags [00:00:21] Back up, guys [00:00:31] back on. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Nick_Sortor_-_BREAKING_Andrew_Tate_and_Tristan_Tate_have_been_ARRESTED_by_US_Mar",
+            "source_revision": "705d2f0efea9fe457b5a65724ff21c85d7c115476f013e2795dd8610043daaa6",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 BREAKING: Andrew Tate and Tristan Tate have been ARRESTED by US Marshals in Miami after UK authorities lodged 38 ADDITIONAL charges against them for alleged “sexuaI offenses”  The two brothers will now be extradited to the UK to face legal proceedings.  Andrew and Tristan were https://t.co/LQA8oBmHnF No tags [00:00:21] Back up, guys [00:00:31] back on. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://",
+            "title": "Nick Sortor - 🚨 BREAKING: Andrew Tate and Tristan Tate have been ARRESTED by US Mar...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/i/status/2078628288348737638",
+            "video_id": "2078627651103993856",
+            "yoinked_at": "2026-07-18T21:57:35"
+          }
+        },
+        {
+          "work_id": "xMkyVQEf5ML3Gd-SmJ-2ntZdnE4Jn0Xx",
+          "video_id": "2078516830549733376",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225931,
+          "source_revision": "deabde9ea5b5872eb8a455ad5a3a5385cc1edbd21ab1a94b804a1168333d3638",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "382facbe4d447d4032289b0209541ea4b067ddb860269c0715ba44b64ace9ef3",
+          "card": {
+            "card_hash": "c0d2504340104794c8d14d5e980e362dfc0aed781b7b2ca4fad264c2973f61e8",
+            "channel": "定",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/de3dsoul/status/2078570503850082646",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9237c753f0fa40b5ff10cab83dec7fa55f4b22c4c990c3aab710b88ad3f0f97e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description ava",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "-_zelda",
+            "source_revision": "deabde9ea5b5872eb8a455ad5a3a5385cc1edbd21ab1a94b804a1168333d3638",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "定 - zelda",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/de3dsoul/status/2078570503850082646",
+            "video_id": "2078516830549733376",
+            "yoinked_at": "2026-07-18T21:58:02"
+          }
+        },
+        {
+          "work_id": "-BuzlW_P7iAxTS5zVYfWe5newhUsBBFV",
+          "video_id": "2079930744781070336",
+          "attempt_token": "[REDACTED]",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788838225932,
+          "source_revision": "7a0a986e5aa005a79101436508125619488e66814d936fe508c1e98e8d3330ba",
+          "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+          "packet_hash": "07014cad98a19144052876ea08032d8b3b7b0d814aec664c63d7393873f40330",
+          "card": {
+            "card_hash": "8dd952674db428643514bc1f6b20a0c637e1f29136e93bf92e7eb3095d8a4393",
+            "channel": "Culture Crave 🍿",
+            "chars": 298,
+            "chars_all_clips": 298,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/CultureCrave/status/2080746632497561795#t=10",
+                "end": 81.92,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+                "start": 10.539,
+                "text": "The IQ10 RRE, ladies and gentlemen. What I would like to share with you is that robotics is very real. It scales across a wide variety of environments Let us take a look at how we get this group recovered Ladies and gentlemen we have comple",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/CultureCrave/status/2080746632497561795#t=10",
+                "end": 81.92,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+                "start": 10.539,
+                "text": "The IQ10 RRE, ladies and gentlemen. What I would like to share with you is that robotics is very real. It scales across a wide variety of environments Let us take a look at how we get this group recovered Ladies and gentlemen we have comple",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Robot powered by Qualcomm’s new AI chip dies mid-presentation 😭 https://t.co/GuWImSIs5n No tags [00:00:10] The IQ10 RRE, ladies and gentlemen. [00:00:20] What I would like to share with you is that robotics [00:00:23] is very real. It scales across a wide variety [00:00:27] of environments [00:00:32] Let us take a look at how we get [00:00:53] this group recovered [00:01:01] Ladies and gentlemen [00:01:10] we have completed today [00:01:12] powered by the RRE [00:01:15] and [00:01:18] thank you again very much <!-- yoink:comments-start --> *Comments are di",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Culture_Crave_-_Robot_powered_by_Qualcomm_s_new_AI_chip_dies_mid-presentation",
+            "source_revision": "7a0a986e5aa005a79101436508125619488e66814d936fe508c1e98e8d3330ba",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Robot powered by Qualcomm’s new AI chip dies mid-presentation 😭 https://t.co/GuWImSIs5n No tags [00:00:10] The IQ10 RRE, ladies and gentlemen. [00:00:20] What I would like to share with you is that robotics [00:00:23] is very real. It scales across a wide variety [00:00:27] of environments [00:00:32] Let us take a look at how we get [00:00:53] this group recovered [00:01:01] Ladies and gentlemen [00:01:10] we have completed today [00:01:12] powered by the RRE [00:01:15] and [00:01:18] thank you again very much <!-- yoink:comments-start --> *Comments are di",
+            "title": "Culture Crave 🍿 - Robot powered by Qualcomm’s new AI chip dies mid-presentation 😭",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/CultureCrave/status/2080746632497561795",
+            "video_id": "2079930744781070336",
+            "yoinked_at": "2026-07-25T02:04:56"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems; the primary shelf whenever an excerpt is about AI but establishes no child shelf's subject.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems",
+              "AI content that mentions models, companies, products or purchases without establishing a child shelf's subject (generic model task-fit, inference hardware throughput, assistant capabilities in general)"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security",
+              "model scaling, post-training or training pipelines as the dominant subject, with economics secondary -> AI and ML / Frontier Models",
+              "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a capability with no business analysis -> AI and ML"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company",
+              "AI's effect on enterprise adoption, labour, task economics or economic growth as the subject",
+              "AI accelerator or chip competition and its implications for chip and model companies"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows, described as products, capabilities, comparisons or workflows rather than taught.",
+            "exclude": [
+              "a tutorial, workshop or lecture whose purpose is to teach, even when it uses a developer tool -> AI and ML / Education",
+              "personal assistant or agent acting for a non-engineer user (speech, screen or task help) -> AI and ML / AI Agents and Automation",
+              "generic model comparison or model task-fit talk with no coding task, SDK or IDE -> AI and ML",
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, workshops and step-by-step walkthroughs whose purpose is to teach machine learning or how to build with AI, even when they use or name a specific tool, model or product.",
+            "exclude": [
+              "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials",
+              "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
+              "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
+              "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
+              "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models",
+              "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege",
+              "AI safety risk, catastrophic-outcome or existential-risk warnings as the subject (takes precedence over the AI and ML parent)"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v2-2026-09-05",
+        "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+        "schema_version": 1,
+        "version_id": "taxonomy-v3-2026-09-07"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "ad6d5e59d357a5c8cd4668b3f6c8fc1ddca78ce9d956e7abe099f2c426a33255",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

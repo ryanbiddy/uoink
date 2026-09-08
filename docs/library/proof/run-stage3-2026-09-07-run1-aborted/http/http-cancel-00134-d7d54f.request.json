@@ -1,0 +1,1 @@
+{"body":{"action":"cancel","attempt_token":"[REDACTED]","client_id":"proof-harness","reason":"Exceeded 1 retry limit","work_id":"Wq4tdgmPRi7q506yIvkIRZ1Z-A2dBZJ0"},"headers":{"Content-Type":"application/json","User-Agent":"uoink-proof-harness/1.0","X-Uoink-Token":"[REDACTED]"},"method":"POST","url":"http://127.0.0.1:5180/tools/claim_library_work"}

@@ -1,0 +1,59 @@
+{
+  "seq": 123,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 123,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "eDeQ6TepwYwA8rpMUurIkLeNgA0b0MkG",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "eDeQ6TepwYwA8rpMUurIkLeNgA0b0MkG-AiGoZmz6XwU1z5RGovixVpJNrr79i7lQFAC_8fMAw7M",
+      "schema_version": 1,
+      "video_id": "2079481448843649024",
+      "source_revision": "25276408bc0a0ff537177ce4a50b416eaf053ab7be1c86fa09d8c5674af251a9",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "cd2e0c6e7f3f2056778182732317b5d071d901e7fe20dd505b35bde0b9698fbe",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt describes a human-interest story about a teenager's finance trading script shared on GitHub; it does not establish AI, developer-tools, news, or space/science subject matter per the approved taxonomy."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 8504,
+        "cache_read_tokens": 185675,
+        "cache_create_tokens": 26378,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 123,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "eDeQ6TepwYwA8rpMUurIkLeNgA0b0MkG",
+        "video_id": "2079481448843649024",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

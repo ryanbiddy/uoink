@@ -1,0 +1,93 @@
+{
+  "seq": 39,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 39,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "rym_LTIIkEd7rEVtZ5kelurvebM48Zng",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "rym_LTIIkEd7rEVtZ5kelurvebM48Zng-NJtWRcQ3-iH_KhsxGQPL1OizvgTuc44g5zW_Gr1dKbA",
+      "schema_version": 1,
+      "video_id": "2077640475075358720",
+      "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "774cbfed08b1f55a441f08fc5fbc6b6fe13aa6a689a6efbe9979aac6a5ec8b5d",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+              "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+              "quote": "The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 7657,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 105133,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 39,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "rym_LTIIkEd7rEVtZ5kelurvebM48Zng",
+        "video_id": "2077640475075358720",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+              "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+              "quote": "The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope",
+              "start": 240.34,
+              "end": 358.779,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

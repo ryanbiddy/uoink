@@ -1,0 +1,59 @@
+{
+  "seq": 27,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 27,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "d8u415Ei3txUGRnxOgKA0gvPLLMkBaS4",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "d8u415Ei3txUGRnxOgKA0gvPLLMkBaS4-d4DOFtzk5KwUQORKv0-X8y1EW4cCFq_YxL0k7Exdwzg",
+      "schema_version": 1,
+      "video_id": "2077931160538329088",
+      "source_revision": "f7067fdb48d9a758096d93caa39f901901e7ff4ddf5fa883951382f760c5f08c",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "f6ecdd924f64e5ea7f3b38a30a4d3185648074c0c317fa2f9a15a466da030a9f",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt is only the tweet caption 'Robot fights are fun' with no captions or transcript available; no substantive content establishes any approved shelf's subject (no AI, news, or space/science content shown)."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 7657,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 105133,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 27,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "d8u415Ei3txUGRnxOgKA0gvPLLMkBaS4",
+        "video_id": "2077931160538329088",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

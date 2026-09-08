@@ -1,0 +1,59 @@
+{
+  "seq": 19,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 19,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK-Hym7kKD3lr0O8pa1c1ly0g44Zqk2j306cKaVgYeWfL4",
+      "schema_version": 1,
+      "video_id": "2078621895058915328",
+      "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "1be59084aeeb88fb1ade450e394445e2136fa2838a74902aa0a16a1d386ee276",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt is a halftime pep talk during a streamer basketball exhibition game; sports/entertainment content with no fit in the approved taxonomy."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 6065,
+        "cache_read_tokens": 103380,
+        "cache_create_tokens": 108211,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 19,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "YzGDn53J6-hbNdJIbOxA_XskpQc5LIWK",
+        "video_id": "2078621895058915328",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

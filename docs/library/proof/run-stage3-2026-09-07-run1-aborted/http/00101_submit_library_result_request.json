@@ -1,0 +1,51 @@
+{
+  "seq": 101,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "w26IGCRtHnHdwKnMwqG44HFZdwdk643G",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "w26IGCRtHnHdwKnMwqG44HFZdwdk643G-jNvOEF8fmQoIHErKsoBALzv-T-4Okvz1dkKbEjM-sRU",
+    "schema_version": 1,
+    "video_id": "2079633339041087488",
+    "source_revision": "06a1c3b5d8dc28754efd34c9e7735bbe83ec3cd961eb655d533eebdacba72c59",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "68a1a0c75ee3f55f95dfb3e323ea175ab791934ba6e58e67fb5e3ea7a4ffd0f2",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5",
+            "card_hash": "3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7",
+            "quote": "An open source tool for building hierarchical agent loops."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 8539,
+      "cache_read_tokens": 83203,
+      "cache_create_tokens": 19248,
+      "wall_time_ms": 0
+    }
+  }
+}

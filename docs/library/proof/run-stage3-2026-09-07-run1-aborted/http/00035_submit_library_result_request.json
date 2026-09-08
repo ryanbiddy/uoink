@@ -1,0 +1,35 @@
+{
+  "seq": 35,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "lzHOGEbRwA9UJnI5YQ4XqGbVXONZVLLr",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "lzHOGEbRwA9UJnI5YQ4XqGbVXONZVLLr-1L66WcttAfitt5gC6DuoBMrpzXiyfyeWfY1Vqnt8bp4",
+    "schema_version": 1,
+    "video_id": "1969830523657666560",
+    "source_revision": "dae23c09a67c0c503d2942bbeea6f36803d7ed72fcbc034953a7c79bd5389585",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "15b5ce4d1bfb7a1a95a8d6ba737466c84eb7c30824e4227fdc992c88ae0cca7e",
+    "result": {
+      "outcome": "unsupported",
+      "reason": "Card is text_only with no captions available; the only content is a brief tweet caption ('First time watching your Grok Bots work on a task') with no transcript to ground a classification."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 7657,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 105133,
+      "wall_time_ms": 0
+    }
+  }
+}

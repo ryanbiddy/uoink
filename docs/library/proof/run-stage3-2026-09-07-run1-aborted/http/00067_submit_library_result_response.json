@@ -1,0 +1,58 @@
+{
+  "seq": 67,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "3Yx_ND7b-m3egnihMR8x1PJjNE9GPuX_",
+      "video_id": "2079233126883094528",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4ff0ac352d7e2b3b8bc5e096d90cdfcd9933d1244b9718d39d604e5b8ab5d8c9",
+            "card_hash": "3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326",
+            "quote": "You'll design A multi-agent system For doing that",
+            "start": 118.15,
+            "end": 237.509,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4ace1bf5aec168201a73537aeb0c49782844a16cdfc167989e58d5576f44ea99",
+            "card_hash": "3759b00de2067660d6546d3e7e89ea18ee37379df40bfbe96725c36aa8876326",
+            "quote": "Import The Graph D B Library",
+            "start": 1544.42,
+            "end": 1663.74,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

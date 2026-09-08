@@ -1,0 +1,10 @@
+{
+  "seq": 183,
+  "tool": "claim_library_work",
+  "status": 500,
+  "wall_ms": 2053,
+  "body": {
+    "ok": false,
+    "error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+  }
+}

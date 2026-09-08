@@ -1,0 +1,59 @@
+{
+  "seq": 85,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 85,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT-bgVw-dHcXXP_kNXEFYLgM9pl97ITut0LQf--DUP0UN8",
+      "schema_version": 1,
+      "video_id": "2078521999790415872",
+      "source_revision": "095bfc06af30a51700b3a72ddb3a550828cd062f0d67c9fb76f6475601dea2a4",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "64f46c8933193fc49ec6a2d8becc40e48d502f160e3d65e8ca21f5f7588bd7be",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt is a bare one-line reply ('Their fails are pretty hysterical too') with no described subject matter, insufficient to establish any approved shelf's topic."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 10258,
+        "cache_read_tokens": 186008,
+        "cache_create_tokens": 28614,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 85,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "lsPo7rR7uGhyd-XDer3sYWnzdg35k_rT",
+        "video_id": "2078521999790415872",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

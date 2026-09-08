@@ -1,0 +1,32 @@
+{
+  "seq": 179,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "QZFDuYdXFqA_uSXioG2uy59Qc0-dzTKR",
+    "client_id": "proof-harness",
+    "attempt_token": "[REDACTED]",
+    "submission_key": "QZFDuYdXFqA_uSXioG2uy59Qc0-dzTKR-Fp3oFAlhmmgN-4tGQiJHEs9X6xl3DETtVuUnZCkkqE0",
+    "schema_version": 1,
+    "video_id": "2079628844705935360",
+    "source_revision": "796039c5e22bd168eb9a9e5b86c8653b1951576f02424973e8dc1168bc194f73",
+    "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+    "packet_hash": "076a20df80b56ae7bb0a783585e9a6ccf26dda2cb11d691205582e2ad16ff69d",
+    "result": {
+      "outcome": "error",
+      "reason": "claude -p failed (exit 1): "
+    },
+    "usage": {
+      "status": "unavailable",
+      "reason": "claude -p failed (exit 1): ",
+      "model": "unknown",
+      "wall_time_ms": 0
+    }
+  }
+}

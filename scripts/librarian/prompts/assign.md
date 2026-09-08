@@ -38,7 +38,7 @@ Each item is provided as an evidence card with the following fields:
        - `kind`: Must match the excerpt's `evidence_kind` (`"timed_clip"` or `"text_only"`).
        - `excerpt_id`: Exact 64-character hash of the excerpt containing the quote.
        - `card_hash`: Exact 64-character hash from the card.
-       - `quote`: Verbatim substring (1 to 24 words maximum, NFC-normalized, case and punctuation preserved) copied directly from the specified excerpt. Never concatenate text across different excerpts. Never invent or paraphrase quotes. Quotes of 25 or more words will be rejected.
+       - `quote`: Verbatim substring (1 to 24 words maximum, NFC-normalized, case and punctuation preserved) copied directly from the specified excerpt. Copy it character for character: keep curly quotes and apostrophes (’ ‘ “ ”), dashes and ellipses exactly as they appear in the excerpt, never "correct" them to straight quotes. Never concatenate text across different excerpts. Never invent or paraphrase quotes. Quotes of 25 or more words will be rejected.
 4. **Parent Versus Child (decide explicitly)**:
    - A child shelf is the primary only when the excerpts establish that child's subject as described by one of its include cues. A mention of a model, company, product, purchase or benchmark is not enough; the excerpt must be about that subject.
    - When the excerpts are about AI but establish no child's subject, the parent shelf is the honest primary. Do not guess a child.

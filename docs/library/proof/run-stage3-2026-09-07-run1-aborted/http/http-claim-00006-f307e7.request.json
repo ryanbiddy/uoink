@@ -1,0 +1,1 @@
+{"body":{"action":"claim","client_id":"proof-harness","max_items":8,"run_id":"stage3-2026-09-07"},"headers":{"Content-Type":"application/json","User-Agent":"uoink-proof-harness/1.0","X-Uoink-Token":"[REDACTED]"},"method":"POST","url":"http://127.0.0.1:5180/tools/claim_library_work"}

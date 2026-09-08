@@ -1,0 +1,93 @@
+{
+  "seq": 83,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 83,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY",
+      "client_id": "proof-harness",
+      "attempt_token": "[REDACTED]",
+      "submission_key": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY-hjly4wWVjLm2VPG6BKGKpLUcgnyogAkLsoA3mlUMFAY",
+      "schema_version": 1,
+      "video_id": "2079190532681543680",
+      "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+      "taxonomy_revision": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+      "packet_hash": "f60e0e3186732ca3b237fc8214ffd6833bc68a7a2e684e9457d70be608c61022",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259",
+              "card_hash": "01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703",
+              "quote": "Anduril and Archer launch Thunder, an autonomous attack rotorcraft"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 10258,
+        "cache_read_tokens": 186008,
+        "cache_create_tokens": 28614,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 83,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "izaaE2j-9y0wXPxjbaY6YA52DHA9pgfY",
+        "video_id": "2079190532681543680",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259",
+              "card_hash": "01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703",
+              "quote": "Anduril and Archer launch Thunder, an autonomous attack rotorcraft",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}
