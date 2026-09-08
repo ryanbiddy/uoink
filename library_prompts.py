@@ -169,16 +169,19 @@ def _validate_arguments(spec: dict, arguments) -> dict[str, str]:
     if not isinstance(arguments, dict):
         raise _invalid("arguments_not_object")
     allowed = {a["name"]: a for a in spec["arguments"]}
-    unknown = sorted(str(k) for k in arguments if k not in allowed)
-    if unknown:
-        raise _invalid("unknown_argument", fields=unknown[:8])
+    # AW-D04: refusals name only the prompt's own argument names; unknown
+    # (attacker-controlled) names are reported as a count.
+    unknown_count = sum(1 for k in arguments if k not in allowed)
+    if unknown_count:
+        raise _invalid("unknown_argument", unknown_argument_count=unknown_count,
+                       allowed_arguments=list(allowed))
     for name, arg in allowed.items():
         if arg["required"] and name not in arguments:
             raise _invalid("missing_argument", field=name)
     out: dict[str, str] = {}
     for name, value in arguments.items():
         if not isinstance(value, str):
-            raise _invalid("argument_not_string", field=name)
+            raise _invalid("argument_not_string", field=name)  # name is one of ``allowed`` here
         out[name] = value
     return out
 

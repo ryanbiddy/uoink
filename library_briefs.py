@@ -122,8 +122,12 @@ _DISPOSITIONS = ("waiting", "accepted", "rejected", "unmapped", "unsupported", "
 # Canonical forms
 # --------------------------------------------------------------------------
 def canonical(value) -> str:
-    """Canonical JSON for hashing: sorted keys, compact, UTF-8, finite."""
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    """The contract's canonical serialization (``library_cards.serialize_card``:
+    sorted keys, UTF-8, finite, ``<>&``` escaped), used for every brief hash
+    (packet ``input_hash``, ``job_key``, request, citation and artifact
+    hashes) and for the stored JSON files (AW-D06). One serializer, one
+    address space, under one contract version."""
+    return library_cards.serialize_card(value)
 
 
 def digest(value) -> str:
@@ -283,9 +287,11 @@ def validate_citations(value) -> list[dict]:
         field = f"citations[{position}]"
         if not isinstance(raw, dict):
             raise _invalid("bad_object", field=field)
-        unknown = sorted(str(k) for k in raw if k not in _CITATION_KEYS)
-        if unknown:
-            raise _invalid("unknown_field", field=field, fields=unknown[:8])
+        # AW-D04: unknown (client-controlled) names are counted, never echoed.
+        unknown_count = sum(1 for k in raw if k not in _CITATION_KEYS)
+        if unknown_count:
+            raise _invalid("unknown_field", field=field, unknown_field_count=unknown_count,
+                           allowed_fields=list(_CITATION_KEYS))
         item_id = raw.get("item_id", raw.get("video_id"))
         if item_id is None:
             raise _invalid("missing_field", field=field, fields=["item_id"])
@@ -334,22 +340,24 @@ def normalize_usage(usage, *, document: str, citations: list[dict]) -> dict:
     if len(usage) > BRIEF_LIMITS["max_usage_keys"]:
         raise _invalid("too_many_fields", field="usage", maximum=BRIEF_LIMITS["max_usage_keys"])
     reported: dict[str, Any] = {}
-    for key, value in usage.items():
+    # AW-D04: usage keys are client-controlled; refusals report the entry's
+    # position, never the key text.
+    for position, (key, value) in enumerate(usage.items()):
         if not isinstance(key, str) or not 1 <= len(key) <= 64 or _has_control(key, allow_whitespace=False):
-            raise _invalid("bad_field_name", field="usage")
+            raise _invalid("bad_field_name", field="usage", position=position)
         if isinstance(value, bool) or value is None or isinstance(value, int):
             pass
         elif isinstance(value, float):
             if not math.isfinite(value):
-                raise _invalid("non_finite_number", field=f"usage.{key}")
+                raise _invalid("non_finite_number", field="usage", position=position)
         elif isinstance(value, str):
             if len(value) > 200 or _has_control(value, allow_whitespace=False):
-                raise _invalid("bad_string", field=f"usage.{key}")
+                raise _invalid("bad_string", field="usage", position=position)
         else:
-            raise _invalid("bad_value", field=f"usage.{key}")
+            raise _invalid("bad_value", field="usage", position=position)
         if key.endswith("_tokens") and value is not None:
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-                raise _invalid("bad_integer", field=f"usage.{key}")
+                raise _invalid("bad_integer", field="usage", position=position)
         reported[key] = value
     status = reported.get("status")
     if status is None:

@@ -7,15 +7,19 @@ helper, no network, no writes. Run AV-1 (2026-09-08), claude worker.
 
 Contract rules this module does not implement exactly, and why
 --------------------------------------------------------------
-1. Deadline baseline (AV-1r ruling D1, implemented): every operation's
-   deadline is the timestamp ``ReadGuard.admit()`` returned plus 2 s.
-   Nothing else resets it: not construction, not the completion of a
+1. Deadline baseline (AV-1r ruling D1, implemented; AW-D01): every
+   operation's deadline is the timestamp ``ReadGuard.admit()`` returned plus
+   2 s. Nothing else resets it: not construction, not the completion of a
    previous operation. Storage binding (``make_reader`` binds lazily inside
    the first operation), reads, rendering and, at the stdio boundary, final
    serialization (``LibraryReader.assert_within_deadline``) are all charged
    to that admission. ``request()`` keeps one admission and one deadline for
-   a prompt's fan-out.
-2. ``shelf_revision`` (AV-1r ruling D2, implemented) binds the shelf
+   a prompt's fan-out. The one deadline is carried into backend acquisition:
+   every index-lock acquisition (``_lock``) waits at most the time left
+   before it and otherwise refuses ``deadline_exceeded`` at once, so a held
+   index lock yields the refusal by the deadline rather than after the
+   blocked read finishes. Corpus hashing checks the deadline per block.
+2. ``shelf_revision`` (AV-1r ruling D2, implemented; AW-D02) binds the shelf
    definition, taxonomy/projection revisions, live deletion state, displayed
    metadata and, for **every** ordered nondeleted member (not only the
    requested page), the *current* canonical Librarian card source revision
@@ -23,15 +27,27 @@ Contract rules this module does not implement exactly, and why
    bounded corpus head. Assignment-time ``item_shelves.source_revision`` is
    carried separately for display (``assigned_source_revision``). Membership,
    item rows and clips are read under one index lock, corpus heads are
-   stat-guarded, and the rows are re-read afterwards: any concurrent change
-   refuses ``revision_unavailable``; exceeding the deadline while
-   establishing the binding refuses ``deadline_exceeded``. No partial or
-   assignment-only binding is ever served. A tail-only corpus edit beyond
-   the bounded head changes the corpus binding, not the shelf binding.
+   stat-guarded, and membership, item rows **and clips** are re-read
+   afterwards: any concurrent change refuses ``revision_unavailable``;
+   exceeding the deadline while establishing the binding refuses
+   ``deadline_exceeded``. No partial or assignment-only binding is ever
+   served. A tail-only corpus edit beyond the bounded head changes the
+   corpus binding, not the shelf binding. Every card (item, excerpt, search
+   hit, curated entry, prompt card, brief sample) is likewise rechecked after
+   it is built: the item row, its clips and the corpus head signature must
+   be unchanged and the item undeleted, or the card is refused
+   (``resource_deleted`` / ``revision_unavailable``) instead of served from
+   the snapshot it was built from; card and excerpt reads recheck once more
+   immediately before serving.
 3. Duplicate JSON keys cannot be detected on stdio: the SDK hands handlers
    parsed objects. The HTTP ``/tools/*`` route (Fable) rejects them from raw
    bytes; here strictness covers unknown fields, types, nulls, booleans used
-   as integers, non-finite numbers and out-of-range values.
+   as integers, non-finite numbers and out-of-range values. Refusal details
+   never quote attacker-controlled input (AW-D04): an unknown field is
+   reported as a fixed category with a count (``unknown_field_count``), the
+   ``field`` named in a detail is always one of the server's own schema
+   names, and the same rule applies to prompt-argument, citation and usage
+   validation.
 4. Concurrency overflow has no separate frozen code; it refuses
    ``rate_limited`` with ``retry_after_ms`` and ``details.reason``
    ``"concurrency"`` and never queues.
@@ -41,16 +57,19 @@ Contract rules this module does not implement exactly, and why
    private helpers), and are self-checked against the rebuilt card's ids on
    every read; a drift refuses ``internal_error`` instead of serving a wrong
    binding.
-6. Corpus-chunk path redaction (AV-1r ruling D6, implemented) covers the
-   known runtime paths (the item's corpus and sidecar paths, their folder,
-   ``data_root``) and any explicit absolute local path quoted in the text:
-   Windows drive paths, UNC paths, POSIX absolute paths (a leading slash and
-   at least one further separator) and ``file:`` URIs. Validated public
-   HTTP(S) destinations are never redacted. Spans report code-point offsets
-   into the chunk text and a ``kind``; byte offsets and the corpus hash are
-   those of the unredacted file. A path containing spaces or a path that is
-   not written in one of those explicit forms (a bare folder name, a
-   relative path) is not recognised.
+6. Corpus-chunk path redaction (AV-1r ruling D6, implemented; AW-D03)
+   covers the known runtime paths (the item's corpus and sidecar paths,
+   their folder, ``data_root``) and any complete explicit absolute local
+   path in the text: Windows drive paths, UNC paths, POSIX absolute paths
+   (including one-component paths such as ``/secret``) and ``file:`` URIs.
+   A path written inside straight double or single quotes is recognised to
+   the closing quote, so quoted paths containing spaces are redacted whole.
+   Validated public HTTP(S) destinations are never redacted. Spans report
+   code-point offsets of the full redacted span into the chunk text and a
+   ``kind``; byte offsets and the corpus hash are those of the unredacted
+   file. A path that is not written in one of those explicit forms (a bare
+   folder name, a relative path, an unquoted path with spaces beyond its
+   first token) is not recognised.
 7. Storage binding (AV-1r ruling D7, implemented): bounded reads bind only
    to storage that already exists. ``make_reader`` uses
    ``server._get_existing_index`` (the open process handle, or ``INDEX_PATH``
@@ -265,35 +284,54 @@ _WS_RE = re.compile(r"\s+")
 # "and/or" never match; HTTP(S) destinations are additionally excluded below.
 _PATH_CHAR = r"[^\s\"'<>|*?\x00-\x1f]"
 _SEGMENT_CHAR = r"[^\s\"'<>|*?/\\\x00-\x1f]"
+# A one-component POSIX path ("/secret") must not follow an identifier
+# character, a closing-tag "<", a dot or another separator, so "and/or",
+# "km/h", "1/2", "</tag>", "../x" and "http://" never match.
+_POSIX_HEAD = r"(?<![A-Za-z0-9_./:\\<>-])/[A-Za-z_.]" + _SEGMENT_CHAR + r"*"
 _LOCAL_PATH_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
     ("file_uri", re.compile(r"(?<![A-Za-z0-9])file:/{2,3}" + _PATH_CHAR + r"+", re.IGNORECASE)),
     ("unc_path", re.compile(r"(?<![A-Za-z0-9\\])\\\\" + _SEGMENT_CHAR + r"+\\" + _PATH_CHAR + r"*")),
     ("drive_path", re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/]" + _PATH_CHAR + r"*")),
-    ("posix_path", re.compile(r"(?<![A-Za-z0-9_./:\\-])/(?:[A-Za-z_.]" + _SEGMENT_CHAR + r"*/)+"
-                              + _SEGMENT_CHAR + r"*")),
+    ("posix_path", re.compile(_POSIX_HEAD + r"(?:/" + _SEGMENT_CHAR + r"*)*")),
+)
+# The same forms written between straight quotes extend to the closing
+# quote, so a quoted path containing spaces is one complete path (AW-D03).
+_QUOTED_CHAR = r"[^\"'<>|\x00-\x1f]"
+_QUOTED_PATH_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
+    ("file_uri", re.compile(r"(?<=[\"'])file:/{2,3}" + _QUOTED_CHAR + r"+(?=[\"'])", re.IGNORECASE)),
+    ("unc_path", re.compile(r"(?<=[\"'])\\\\" + _QUOTED_CHAR + r"+(?=[\"'])")),
+    ("drive_path", re.compile(r"(?<=[\"'])[A-Za-z]:[\\/]" + _QUOTED_CHAR + r"*(?=[\"'])")),
+    ("posix_path", re.compile(r"(?<=[\"'])/[A-Za-z_.]" + _QUOTED_CHAR + r"*(?=[\"'])")),
 )
 _PUBLIC_URL_RE = re.compile(r"(?<![A-Za-z0-9])https?://[^\s<>\"']+", re.IGNORECASE)
 _PATH_TRAILING = ".,;:!?)]}'\""
 
 
 def _absolute_path_spans(text: str) -> list[tuple[int, int, str]]:
-    """Code-point spans of explicit absolute local paths and file URIs in
-    ``text``, excluding anything inside a validated public HTTP(S) URL."""
+    """Code-point spans of complete explicit absolute local paths and file
+    URIs in ``text``, excluding anything inside a validated public HTTP(S)
+    URL. Quoted paths span to their closing quote (spaces included)."""
     urls: list[tuple[int, int]] = []
     for match in _PUBLIC_URL_RE.finditer(text):
         candidate = match.group(0).rstrip(_PATH_TRAILING)
         if candidate and safe_url(candidate) == candidate:
             urls.append((match.start(), match.start() + len(candidate)))
     spans: list[tuple[int, int, str]] = []
-    for kind, pattern in _LOCAL_PATH_PATTERNS:
-        for match in pattern.finditer(text):
-            start = match.start()
-            end = start + len(match.group(0).rstrip(_PATH_TRAILING))
-            if end <= start:
-                continue
-            if any(u_start <= start < u_end for u_start, u_end in urls):
-                continue
-            spans.append((start, end, kind))
+    for patterns, strip_trailing in ((_LOCAL_PATH_PATTERNS, True), (_QUOTED_PATH_PATTERNS, False)):
+        for kind, pattern in patterns:
+            for match in pattern.finditer(text):
+                start = match.start()
+                found = match.group(0)
+                if strip_trailing:
+                    found = found.rstrip(_PATH_TRAILING)
+                else:
+                    found = found.rstrip()
+                end = start + len(found)
+                if end <= start:
+                    continue
+                if any(u_start <= start < u_end for u_start, u_end in urls):
+                    continue
+                spans.append((start, end, kind))
     return spans
 
 
@@ -670,13 +708,51 @@ class _Operation:
             raise ResourceError("deadline_exceeded", details={
                 "deadline_s": self.reader.deadline_s})
 
+    def remaining(self) -> float:
+        return self.deadline_at - float(self.reader._clock())
+
+
+class _BoundedLock:
+    """Acquire the index lock within the time left before ``deadline_at`` or
+    refuse ``deadline_exceeded`` at once (AW-D01). Re-entrant locks held by
+    this thread are acquired immediately, so nested reads stay cheap."""
+
+    __slots__ = ("reader", "lock", "deadline_at", "held")
+
+    def __init__(self, reader: "LibraryReader", lock, deadline_at: float):
+        self.reader = reader
+        self.lock = lock
+        self.deadline_at = deadline_at
+        self.held = False
+
+    def __enter__(self):
+        remaining = self.deadline_at - float(self.reader._clock())
+        if remaining <= 0:
+            raise ResourceError("deadline_exceeded", details={
+                "deadline_s": self.reader.deadline_s, "reason": "lock_wait"})
+        try:
+            acquired = self.lock.acquire(timeout=min(remaining, self.reader.deadline_s))
+        except TypeError:  # a lock double without a timeout parameter
+            acquired = self.lock.acquire()
+        if not acquired:
+            raise ResourceError("deadline_exceeded", details={
+                "deadline_s": self.reader.deadline_s, "reason": "lock_wait"})
+        self.held = True
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if self.held:
+            self.held = False
+            self.lock.release()
+        return False
+
 
 # --------------------------------------------------------------------------
 # Reader
 # --------------------------------------------------------------------------
 class _ItemBundle:
     __slots__ = ("item", "clips", "card", "head", "prose", "evidence", "prose_id", "error",
-                 "source_revision")
+                 "source_revision", "head_signature")
 
     def __init__(self):
         self.item = None
@@ -690,6 +766,8 @@ class _ItemBundle:
         # The canonical card's source revision, kept even when the card is
         # then refused (hostile content): shelf bindings need it (D2).
         self.source_revision: str | None = None
+        # (size, mtime_ns) of the corpus file the head was read from (D2).
+        self.head_signature: tuple | None = None
 
 
 class LibraryReader:
@@ -798,9 +876,19 @@ class LibraryReader:
             return self._get_item(op, selector)
 
     # ---- storage helpers ----------------------------------------------
-    def _lock(self):
+    def _lock(self, op: _Operation | None = None):
+        """The index lock as a context manager whose wait is bounded by the
+        operation's remaining deadline (AW-D01). Every index call this reader
+        makes runs inside it, so a lock held elsewhere yields
+        ``deadline_exceeded`` by the deadline instead of a late read."""
         lock = getattr(self.index, "_lock", None)
-        return lock if lock is not None and hasattr(lock, "__enter__") else contextlib.nullcontext()
+        if lock is None or not hasattr(lock, "__enter__"):
+            return contextlib.nullcontext()
+        deadline_at = op.deadline_at if op is not None else self._deadline_at
+        if deadline_at is None or not callable(getattr(lock, "acquire", None)) \
+                or not callable(getattr(lock, "release", None)):
+            return lock
+        return _BoundedLock(self, lock, deadline_at)
 
     def _storage(self, fn: Callable[[], Any]):
         try:
@@ -812,23 +900,32 @@ class LibraryReader:
             log.warning("library storage OS failure: %s", type(exc).__name__)
             raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
 
-    def _sql(self, sql: str, params: tuple = ()) -> list[dict]:
+    def _index_call(self, op: _Operation | None, fn: Callable[[], Any]):
+        """One index method call under the bounded lock (D1) with storage
+        failures mapped to ``library_unavailable``."""
+        def run():
+            with self._lock(op):
+                return fn()
+        return self._storage(run)
+
+    def _sql(self, sql: str, params: tuple = (), op: _Operation | None = None) -> list[dict]:
         conn = getattr(self.index, "_conn", None)
         if conn is None or not hasattr(conn, "execute"):
             raise ResourceError("library_unavailable", details={"storage": "no_connection"})
 
         def run():
-            with self._lock():
+            with self._lock(op):
                 return [dict(row) for row in conn.execute(sql, params).fetchall()]
         return self._storage(run)
 
-    def _has_tables(self, names: tuple[str, ...]) -> bool:
+    def _has_tables(self, names: tuple[str, ...], op: _Operation | None = None) -> bool:
         placeholders = ",".join("?" * len(names))
-        rows = self._sql("SELECT name FROM sqlite_master WHERE type='table' AND name IN (%s)" % placeholders, names)
+        rows = self._sql("SELECT name FROM sqlite_master WHERE type='table' AND name IN (%s)" % placeholders,
+                         names, op)
         return len(rows) == len(names)
 
-    def _item_row(self, item_id: str) -> dict:
-        row = self._storage(lambda: self.index.get_yoink(item_id))
+    def _item_row(self, item_id: str, op: _Operation | None = None) -> dict:
+        row = self._index_call(op, lambda: self.index.get_yoink(item_id))
         if row is None:
             raise ResourceError("resource_not_found")
         row = dict(row)
@@ -836,21 +933,46 @@ class LibraryReader:
             raise ResourceError("resource_deleted")
         return row
 
-    def _snapshot_item(self, op: _Operation, item_id: str) -> tuple[dict, list[dict]]:
-        """Coherent item/clip snapshot under the index lock."""
+    def _item_and_clips(self, op: _Operation | None, item_id: str) -> tuple[dict | None, list[dict]]:
+        """Item row and clips read together under one bounded lock hold."""
         def run():
-            with self._lock():
+            with self._lock(op):
                 row = self.index.get_yoink(item_id)
                 if row is None:
                     return None, []
                 return dict(row), [dict(c) for c in self.index.get_clips(item_id)]
-        row, clips = self._storage(run)
+        return self._storage(run)
+
+    def _snapshot_item(self, op: _Operation, item_id: str) -> tuple[dict, list[dict]]:
+        """Coherent item/clip snapshot under the index lock."""
+        row, clips = self._item_and_clips(op, item_id)
         if row is None:
             raise ResourceError("resource_not_found")
         if row.get("deleted_at") is not None:
             raise ResourceError("resource_deleted")
         op.check()
         return row, clips
+
+    def _recheck_sources(self, op: _Operation, bundle: _ItemBundle) -> None:
+        """AW-D02: the sources a card was built from must still be the
+        sources now. Re-read the item row and clips under the bounded lock
+        and re-stat the corpus file; a deletion refuses ``resource_deleted``
+        and any other change refuses ``revision_unavailable``. Nothing built
+        from the earlier snapshot is served after a change."""
+        item = bundle.item
+        if item is None:
+            return
+        item_id = item.get("video_id")
+        row, clips = self._item_and_clips(op, item_id)
+        if row is None:
+            raise ResourceError("resource_not_found")
+        if row.get("deleted_at") is not None:
+            raise ResourceError("resource_deleted")
+        if row != item or clips != bundle.clips:
+            raise ResourceError("revision_unavailable", details={"reason": "source_changed_during_read"})
+        if self._stat_signature(item.get("corpus_path")) != bundle.head_signature:
+            raise ResourceError("revision_unavailable", details={"reason": "file_changed_during_read"})
+        op.check()
 
     # ---- cards ---------------------------------------------------------
     def _known_paths(self, item: dict | None) -> list[str]:
@@ -947,8 +1069,12 @@ class LibraryReader:
         try:
             item, clips = snapshot if snapshot is not None else self._snapshot_item(op, item_id)
             bundle.item, bundle.clips = item, clips
+            bundle.head_signature = self._stat_signature(item.get("corpus_path"))
             card, head = self._build_card(item, clips)
             bundle.source_revision = card.get("source_revision")
+            # D2: refuse rather than serve a card whose sources changed or
+            # whose item was deleted while the card was being built.
+            self._recheck_sources(op, bundle)
             self._assert_card_safe(card, item)
             bundle.card, bundle.head = card, head
             bundle.prose = library_cards.opening_prose(head)
@@ -1005,6 +1131,7 @@ class LibraryReader:
             raise ResourceError("revision_unavailable")
         text = library_cards.card_text(card)
         self._check_text(text, LIMITS["max_card_text_bytes"], what="card")
+        self._recheck_sources(op, bundle)  # D2: still current immediately before serving
         return text
 
     def _resolve_excerpt(self, bundle: _ItemBundle, excerpt_id: str) -> dict:
@@ -1050,6 +1177,7 @@ class LibraryReader:
         )
         text = render_document(body)
         self._check_text(text, LIMITS["max_resource_text_bytes"], what="excerpt")
+        self._recheck_sources(op, bundle)  # D2: still current immediately before serving
         return text
 
     # ---- corpus chunks -------------------------------------------------
@@ -1149,7 +1277,7 @@ class LibraryReader:
         fields = parsed.fields
         item_id = fields["item_id"]
         offset, length = int(fields["offset"]), int(fields["length"])
-        item = self._item_row(item_id)
+        item = self._item_row(item_id, op)
         op.check()
         path, digest, size, signature = self._admit_corpus(op, item)
         if offset > size:
@@ -1168,8 +1296,9 @@ class LibraryReader:
         after = self._stat(path)
         if (during.st_size, during.st_mtime_ns) != signature or (after.st_size, after.st_mtime_ns) != signature:
             raise ResourceError("revision_unavailable", details={"reason": "file_changed_during_read"})
-        # Deletion may have landed while the file was being read.
-        self._item_row(item_id)
+        # Deletion or a row change may have landed while the file was read.
+        if self._item_row(item_id, op) != item:
+            raise ResourceError("revision_unavailable", details={"reason": "source_changed_during_read"})
         op.check()
         kept, cut = _utf8_prefix(raw, length, file_end=(offset + len(raw) >= size))
         try:
@@ -1205,25 +1334,29 @@ class LibraryReader:
     # ---- shelves -------------------------------------------------------
     _PHASE2_TABLES = ("library_meta", "shelf_versions", "shelf_nodes", "item_shelves")
 
-    def _active_taxonomy(self) -> dict | None:
-        meta = self._sql("SELECT projection_revision, active_version_id FROM library_meta WHERE singleton=1")
-        if not meta or not meta[0].get("active_version_id"):
-            return None
-        version = self._sql("SELECT version_id, revision_hash, status FROM shelf_versions WHERE version_id=?",
-                            (meta[0]["active_version_id"],))
-        if not version:
-            return None
-        return {"projection_revision": int(meta[0]["projection_revision"] or 0),
-                "version_id": version[0]["version_id"], "taxonomy_revision": version[0]["revision_hash"]}
+    def _active_taxonomy(self, op: _Operation | None = None) -> dict | None:
+        def run():
+            with self._lock(op):
+                meta = self._sql("SELECT projection_revision, active_version_id FROM library_meta WHERE singleton=1",
+                                 (), op)
+                if not meta or not meta[0].get("active_version_id"):
+                    return None
+                version = self._sql("SELECT version_id, revision_hash, status FROM shelf_versions WHERE version_id=?",
+                                    (meta[0]["active_version_id"],), op)
+                if not version:
+                    return None
+                return {"projection_revision": int(meta[0]["projection_revision"] or 0),
+                        "version_id": version[0]["version_id"], "taxonomy_revision": version[0]["revision_hash"]}
+        return self._storage(run)
 
     def _shelf_snapshot(self, op: _Operation, shelf_id: str) -> dict:
-        if not self._has_tables(self._PHASE2_TABLES):
+        if not self._has_tables(self._PHASE2_TABLES, op):
             raise ResourceError("feature_unavailable", details={"what": "shelves"})
-        taxonomy = self._active_taxonomy()
+        taxonomy = self._active_taxonomy(op)
         if taxonomy is None:
             raise ResourceError("resource_not_found", details={"what": "shelf"})
         nodes = self._sql("SELECT * FROM shelf_nodes WHERE version_id=? AND shelf_id=?",
-                          (taxonomy["version_id"], shelf_id))
+                          (taxonomy["version_id"], shelf_id), op)
         if not nodes:
             raise ResourceError("resource_not_found", details={"what": "shelf"})
         node = nodes[0]
@@ -1235,9 +1368,11 @@ class LibraryReader:
         # stored item, its clips and the bounded corpus head), not only the
         # assignment-time revision. Membership, item rows and clips are read
         # under one index lock so they are coherent with each other; the
-        # heads are stat-guarded in _build_card; membership and item rows are
-        # re-read afterwards and any difference refuses revision_unavailable.
-        members, items = self._storage(lambda: self._collect_shelf_members(shelf_id))
+        # heads are stat-guarded in _build_card; membership, item rows and
+        # clips are re-read afterwards and any difference refuses
+        # revision_unavailable (AW-D02: clips and corpus heads are canonical
+        # card inputs, so they are compared too, for every member).
+        members, items = self._storage(lambda: self._collect_shelf_members(shelf_id, op))
         op.check()
         bindings: list[dict] = []
         for member in members:
@@ -1246,23 +1381,30 @@ class LibraryReader:
             snapshot = items.get(vid)
             if snapshot is None:
                 raise ResourceError("revision_unavailable", details={"reason": "member_changed"})
+            cached = op.cache.get(("bundle", vid))
+            if cached is not None and (cached.item, cached.clips) != snapshot:
+                op.cache.pop(("bundle", vid), None)  # built earlier from other sources
             bundle = self._bundle(op, vid, snapshot=snapshot)
-            if bundle.error is not None and bundle.error.code == "revision_unavailable":
-                raise bundle.error
+            if bundle.error is not None and bundle.error.code in ("revision_unavailable", "resource_deleted",
+                                                                  "resource_not_found"):
+                raise ResourceError("revision_unavailable", details={"reason": "member_changed"})
             if bundle.source_revision is not None:
                 bindings.append({"video_id": vid, "current_source_revision": bundle.source_revision})
             else:
                 bindings.append({"video_id": vid, "current_error": bundle.error.code if bundle.error else "unknown"})
         op.check()
         # Coherence check: the world the bindings describe must still be the
-        # world now (assignment, deletion or displayed-metadata change while
-        # heads were read).
-        after_taxonomy = self._active_taxonomy()
-        after_members, after_items = self._storage(lambda: self._collect_shelf_members(shelf_id))
-        if (after_taxonomy != taxonomy or after_members != members
-                or {vid: row for vid, (row, _clips) in after_items.items()}
-                != {vid: row for vid, (row, _clips) in items.items()}):
+        # world now (assignment, deletion, displayed-metadata, clip or corpus
+        # head change while heads were read), across all members.
+        after_taxonomy = self._active_taxonomy(op)
+        after_members, after_items = self._storage(lambda: self._collect_shelf_members(shelf_id, op))
+        if after_taxonomy != taxonomy or after_members != members or after_items != items:
             raise ResourceError("revision_unavailable", details={"reason": "concurrent_change"})
+        for member in members:
+            bundle = op.cache.get(("bundle", member["video_id"]))
+            if bundle is not None and bundle.item is not None \
+                    and self._stat_signature(bundle.item.get("corpus_path")) != bundle.head_signature:
+                raise ResourceError("revision_unavailable", details={"reason": "concurrent_change"})
         op.check()
 
         def decode(raw):
@@ -1301,13 +1443,15 @@ class LibraryReader:
         return {"definition": definition, "taxonomy": taxonomy, "members": member_rows,
                 "bindings": bindings, "shelf_revision": shelf_revision}
 
-    def _collect_shelf_members(self, shelf_id: str) -> tuple[list[dict], dict[str, tuple[dict, list[dict]]]]:
+    def _collect_shelf_members(self, shelf_id: str, op: _Operation | None = None
+                               ) -> tuple[list[dict], dict[str, tuple[dict, list[dict]]]]:
         """Membership rows plus each member's item row and clips, read under
-        one index lock (a coherent snapshot). Deleted members are excluded."""
+        one bounded index lock hold (a coherent snapshot). Deleted members
+        are excluded."""
         conn = getattr(self.index, "_conn", None)
         if conn is None or not hasattr(conn, "execute"):
             raise ResourceError("library_unavailable", details={"storage": "no_connection"})
-        with self._lock():
+        with self._lock(op):
             rows = [dict(row) for row in conn.execute(
                 "SELECT s.video_id, s.source_revision, s.is_primary, s.locked, s.source, s.assigned_at, "
                 "s.version_id, y.title, y.channel, y.platform, y.source_type, y.yoinked_at, y.slug "
@@ -1437,7 +1581,7 @@ class LibraryReader:
                                     "untrusted data."),
                     "mimeType": MIME_TYPE,
                 })
-        recent = self._storage(lambda: self.index.list_recent(LIMITS["curated_recent_items"]))
+        recent = self._index_call(op, lambda: self.index.list_recent(LIMITS["curated_recent_items"]))
         op.check()
         for row in recent:
             vid = row.get("video_id")
@@ -1448,12 +1592,12 @@ class LibraryReader:
             if entry is not None:
                 entries.append(entry)
                 seen.add(vid)
-        if self._has_tables(("engagement_events",)):
+        if self._has_tables(("engagement_events",), op):
             engaged = self._sql(
                 "SELECT e.video_id AS video_id, COUNT(*) AS n FROM engagement_events e "
                 "JOIN yoinks y ON y.video_id = e.video_id WHERE y.deleted_at IS NULL "
                 "GROUP BY e.video_id ORDER BY n DESC, e.video_id LIMIT ?",
-                (LIMITS["curated_engaged_items"] + LIMITS["curated_recent_items"],))
+                (LIMITS["curated_engaged_items"] + LIMITS["curated_recent_items"],), op)
             added = 0
             for row in engaged:
                 if added >= LIMITS["curated_engaged_items"]:
@@ -1467,8 +1611,8 @@ class LibraryReader:
                     entries.append(entry)
                     seen.add(vid)
                     added += 1
-        if self._has_tables(self._PHASE2_TABLES):
-            taxonomy = self._active_taxonomy()
+        if self._has_tables(self._PHASE2_TABLES, op):
+            taxonomy = self._active_taxonomy(op)
             if taxonomy is not None:
                 shelves = self._sql(
                     "SELECT n.shelf_id AS shelf_id, n.name AS name, "
@@ -1476,7 +1620,7 @@ class LibraryReader:
                     " WHERE s.shelf_id = n.shelf_id AND y.deleted_at IS NULL) AS members "
                     "FROM shelf_nodes n WHERE n.version_id=? AND n.retired=0 "
                     "ORDER BY members DESC, n.shelf_id LIMIT ?",
-                    (taxonomy["version_id"], LIMITS["curated_shelves"]))
+                    (taxonomy["version_id"], LIMITS["curated_shelves"]), op)
                 for row in shelves:
                     op.check()
                     try:
@@ -1548,13 +1692,13 @@ class LibraryReader:
         # database, missing table) and answer []; probe storage first so an
         # unavailable library is never reported as "no matches". The count
         # also tells an empty library apart from a query without hits.
-        probe = self._sql("SELECT COUNT(*) AS n FROM yoinks WHERE deleted_at IS NULL")
+        probe = self._sql("SELECT COUNT(*) AS n FROM yoinks WHERE deleted_at IS NULL", (), op)
         library_items = int(probe[0]["n"]) if probe else 0
         for table in ("clips_fts", "yoinks_fts"):
-            if not self._has_tables((table,)):
+            if not self._has_tables((table,), op):
                 raise ResourceError("library_unavailable", details={"storage": "missing_table"})
         op.check()
-        rows = self._storage(lambda: self.index.search_clips(query, limit))
+        rows = self._index_call(op, lambda: self.index.search_clips(query, limit))
         op.check()
         for row in rows:
             if len(hits) >= limit:
@@ -1579,7 +1723,7 @@ class LibraryReader:
                                   end=evidence["end"], deep_link=evidence["deep_link"]))
             seen.add(vid)
         if len(hits) < limit:
-            rows = self._storage(lambda: self.index.search(query, limit))
+            rows = self._index_call(op, lambda: self.index.search(query, limit))
             op.check()
             for row in rows:
                 if len(hits) >= limit:
@@ -1631,11 +1775,14 @@ class LibraryReader:
         if "video_id" in selector:
             item, clips = self._snapshot_item(op, selector["video_id"])
         else:
-            row = self._storage(lambda: self.index.get_by_slug(selector["slug"]))
+            row = self._index_call(op, lambda: self.index.get_by_slug(selector["slug"]))
             if row is None:
                 raise ResourceError("resource_not_found")
             item, clips = self._snapshot_item(op, dict(row)["video_id"])
         item_id = item["video_id"]
+        cached = op.cache.get(("bundle", item_id))
+        if cached is not None and (cached.item, cached.clips) != (item, clips):
+            op.cache.pop(("bundle", item_id), None)
         bundle = self._bundle_or_raise(op, item_id, snapshot=(item, clips))
         card = bundle.card
         corpus = None
@@ -1694,20 +1841,25 @@ class RequestScope:
         return (bundle.card, None) if bundle.error is None else (None, bundle.error)
 
     def recent_items(self, limit: int) -> list[dict]:
-        rows = self.reader._storage(lambda: self.reader.index.list_recent(limit))
+        rows = self.reader._index_call(self.op, lambda: self.reader.index.list_recent(limit))
         self.op.check()
         return [dict(r) for r in rows]
 
     def sql(self, sql: str, params: tuple = ()) -> list[dict]:
-        rows = self.reader._sql(sql, params)
+        rows = self.reader._sql(sql, params, self.op)
         self.op.check()
         return rows
 
     def has_tables(self, names: tuple[str, ...]) -> bool:
-        return self.reader._has_tables(names)
+        return self.reader._has_tables(names, self.op)
 
     def active_taxonomy(self) -> dict | None:
-        return self.reader._active_taxonomy()
+        return self.reader._active_taxonomy(self.op)
+
+    def locked(self):
+        """The index lock with the request's bounded wait (D1), for callers
+        that need several reads to form one coherent snapshot."""
+        return self.reader._lock(self.op)
 
 
 # --------------------------------------------------------------------------
@@ -1864,15 +2016,18 @@ def _strict_arguments(args, allowed: tuple[str, ...], required: tuple[str, ...])
         args = {}
     if not isinstance(args, dict):
         raise _invalid("arguments_not_object")
-    unknown = sorted(str(k) for k in args if k not in allowed)
-    if unknown:
-        raise _invalid("unknown_field", fields=unknown[:8])
+    # AW-D04: the refusal reports how many fields were unknown, never the
+    # attacker-controlled names themselves; ``fields`` below are the
+    # server's own schema names.
+    unknown_count = sum(1 for k in args if k not in allowed)
+    if unknown_count:
+        raise _invalid("unknown_field", unknown_field_count=unknown_count, allowed_fields=list(allowed))
     missing = [name for name in required if name not in args]
     if missing:
         raise _invalid("missing_field", fields=missing)
     for key, value in args.items():
         if isinstance(value, float) and not math.isfinite(value):
-            raise _invalid("non_finite_number", field=key)
+            raise _invalid("non_finite_number", field=key)  # key is one of ``allowed`` here
     return dict(args)
 
 
