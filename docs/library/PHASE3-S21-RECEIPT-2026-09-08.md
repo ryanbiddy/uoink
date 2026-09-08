@@ -80,8 +80,33 @@ incarnation `dead`), and `stopped` only after the child was killed. Receipt
 `docs/library/proof/procrec-2026-09-08/receipt.json` (pids, claim record, per-step
 observations, assertions, result PASS).
 
+## Round-6 candidate `1830b7a` (after AT-6): receipts and C21 browser observation
+
+- S21 with Astra's extended launcher: `AUTOMATED PASS`, 0 model calls, candidate SHA recorded,
+  ownership observed at download, transcription, publication, publication_returned and
+  settled (`receipt-at6-candidate-1830b7a.json`, evidence database alongside). Launcher file
+  SHA-256 at execution `d17a84c6…` (committed bytes); command
+  `python -B tests/library_work_astra/test_phase3_s21.py --execute-s21 --hold-seconds N` with
+  `S21_CANDIDATE_SHA` set; interpreter `C:\Python314\python.exe`.
+- Process recovery (`procrec-2026-09-08/receipt-at6-candidate-1830b7a.json`): PASS.
+- Astra's real-child launch-interruption probe
+  (`procrec-2026-09-08/real-launch-interrupt-at6-candidate-1830b7a.json`): the real child
+  survived the injected interruption, child status `unknown`, probe `unknown` (no false stop),
+  all created children reaped.
+- Browser observation on the same candidate (Chrome on the held overlay, screenshots
+  `dashboard-library-at6-1830b7a.jpg`, `dashboard-item-detail-at6-1830b7a.jpg`,
+  `dashboard-sources-at6-1830b7a.jpg`): Library shows the single item unfiled
+  (Uncategorized, "needs attention"); the item detail shows identity (podcast episode,
+  "Untitled podcast", topic Uncategorized), the episode source link on the fixture port
+  (`http://127.0.0.1:64703/episode`), speakers "not labeled yet", transcript checker and
+  re-transcription state; Sources shows the standing subscription healthy, on, 1 of 10 daily
+  starts, 0 of 25 back-catalog. **The per-item `waiting_for_client` classification state is
+  not rendered by the dashboard source row**; it is visible only in the API response the
+  launcher records (`source_status.items[0].classification.state`). That is a dashboard
+  affordance gap for Astra to name, not a capture defect.
+
 ## Status
 
-S21's product observations are established on `61eeb07`, `d479899` and `0bb97c8`; the AS-02
-surviving-child case has a real-process receipt. Astra rules in run AS-4. The installed Inno
-package run is still owed and needs Ryan.
+S21 is established on `61eeb07`, `d479899`, `0bb97c8` and `1830b7a` with ownership,
+incarnation and provenance observations; AS-02 has real-process receipts. Astra rules in
+run AS-6. C20 (the full consent browser matrix) and C22 (installed Inno, Ryan) remain.
