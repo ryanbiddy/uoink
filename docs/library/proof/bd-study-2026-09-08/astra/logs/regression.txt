@@ -1,0 +1,17 @@
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+............................................................             [100%]
+============================== warnings summary ===============================
+tests/test_podcast_corpus_bridge.py: 38 warnings
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ad24fef7-fe2\codex\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_podcast_corpus_bridge.py::test_episode_bridge_is_stable_searchable_and_source_aware[True]
+tests/test_podcast_corpus_bridge.py::test_episode_bridge_is_stable_searchable_and_source_aware[True]
+tests/test_podcast_corpus_bridge.py::test_episode_bridge_is_stable_searchable_and_source_aware[False]
+tests/test_podcast_corpus_bridge.py::test_episode_bridge_is_stable_searchable_and_source_aware[False]
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ad24fef7-fe2\codex\memory_layer.py:90: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+204 passed, 42 warnings in 23.55s

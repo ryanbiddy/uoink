@@ -1,0 +1,46 @@
+{
+  "task_manifest_sha256": "d863421aa29ced1748752746d8daf1caab7a36220fd7ce7d71062fe5378b3e19",
+  "candidate_sha": "d83e6d7832cc7e80690c1a5b6dbdfae5a998c69b",
+  "measured_source_sha256_before": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "measured_source_sha256_after": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "measured_source_bytes": 71733248,
+  "measured_item_count": 548,
+  "disposable_path": "_scratch\\bd\\study\\measured-disposable.db",
+  "rebound_before_runtime_sha256": "f395b70bbb84e9539f19ff2cc379c4033735f0bff33a628712f6a4fe74381a06",
+  "disposable_after_sha256": "62a19f5da94f6ba9804f697d35adabc4be04a16b451d1c0cf6152611484e7e28",
+  "rebound_path_counts": {
+    "yoinks": 548,
+    "citation_paths": 14541,
+    "audio_local_path": 3,
+    "transcript_local_path": 3,
+    "embedded_json_paths": 630
+  },
+  "namespace_mismatch": true,
+  "actual_path": "yt_extract.chapters_from_metadata -> server._capture_media_plan / _publish_capture_media (AST-extracted) -> Index.publish_media_snapshot -> library_media.publish_transcript -> chapters_for / _seek_link",
+  "publication_scope": "Chapter-only publication of sealed extracted metadata on the actual measured DB duplicate. Selected disposable transcript/clip rows are replaced by an explicit empty transcript. No original corpus, transcript, caption table, or media file was read. No clip was converted into a cue. Baseline uses unchanged sealed clips, verified against the original copied DB before mutation. This does not demonstrate preservation or acoustic validity of the unsupplied original transcripts.",
+  "aggregate": {
+    "tasks": 50,
+    "items": 10,
+    "failed_or_unsupported": 0,
+    "baseline_sum_seconds": "3603.0",
+    "baseline_mae_seconds": "72.06",
+    "phase6_sum_seconds": "0.0",
+    "phase6_mae_seconds": "0.0",
+    "reduction_fraction": "1",
+    "numeric_thresholds_pass": true
+  },
+  "player_observation": "pending: coordinator must observe a returned YouTube seek in Chrome",
+  "speaker_gate": {
+    "status": "blocked",
+    "required_targets": 30,
+    "required_items": 5,
+    "available_run_outputs": 0,
+    "available_independent_human_annotations": 0
+  },
+  "diagnostics": {
+    "ELG": "not run",
+    "SCRP": "not run",
+    "CCSD": "not run",
+    "reason": "Sealed inputs contain neither the task/query sets nor passage annotations for their required denominators; no surrogate word counts are reported."
+  }
+}

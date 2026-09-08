@@ -1,0 +1,25 @@
+{
+  "suite": "regression",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_c01_mcp_stdio.py",
+    "tests/test_phase4_stdio.py",
+    "tests/test_stdio_clip_tools.py",
+    "tests/test_phase0_registry_capture.py",
+    "tests/test_docs_live_contracts.py",
+    "tests/test_library_adapters.py",
+    "tests/test_podcast_corpus_bridge.py",
+    "tests/test_clips.py",
+    "tests/test_library_resources.py"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 24.073,
+  "started_unix_seconds": 1788904993.3049502,
+  "isolation": "offline_guard.py via PYTHONPATH/sitecustomize; all environment data/temp roots within _scratch/bd; no credentials"
+}

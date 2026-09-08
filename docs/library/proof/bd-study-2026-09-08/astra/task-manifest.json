@@ -1,0 +1,801 @@
+{
+  "schema": "phase6-bd-independent-navigation-tasks-v1",
+  "annotator": "Astra (codex), independent of BC implementation workers",
+  "frozen_at_utc": "2026-09-08T21:58:31.551830+00:00",
+  "execution_candidate_sha": "d83e6d7832cc7e80690c1a5b6dbdfae5a998c69b",
+  "sealed_manifest_candidate_sha": "4ee63d7bc808e276037970b07d97db8dcceb575f",
+  "sealed_input_manifest_sha256": "2de2f6e3078984485c94bd70e829e5e18d8f4d2c805ab57d6845827b0297777d",
+  "sealed_sha256sums_sha256": "c5e044e1166d181866b761e66141057e76e54dd02d9145925aa68d040ee8469b",
+  "verified_sealed_file_count": 70,
+  "clip_hash_encoding": "Manifest clips_sha256 hashes json.dumps(rows, sort_keys=True) UTF-8, with default separators and ensure_ascii. SHA256SUMS instead hashes actual pretty-printed file bytes; both are recorded.",
+  "measured_copy_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "independence": "Selected and hashed before any Phase 6 code or tests were executed in BD. Only source chapter and identity fields were inspected for annotation; no Phase 6 outcomes informed selection.",
+  "selection": "Deduplicate exact video_id using the manifest entry whose metadata hash matches the sealed chapter file provenance (D_FCYsshMI4 uses _sessions/test/Computer_use_in_Codex). Eligible means >=2 source chapters, present in measured index, >=1 pre-Phase 6 clip. Among eligible items with >=5 chapters, take first 10 in case-sensitive video_id order. For n chapters select indices floor(k*(n-1)/4), k=0..4. This convenience sample is not randomized or population-representative.",
+  "population": {
+    "sealed_rows": 35,
+    "unique_items": 34,
+    "eligible_unique_items": 24,
+    "selected_items": 10,
+    "tasks": 50
+  },
+  "annotation_basis": "Chapter-start navigation only. Acceptable passage is the exact supplied chapter [start,end); error is distance from its start, not distance to the interval. No audio, transcript, or semantic-onset verification is claimed. Source-supplied placeholder titles are preserved verbatim.",
+  "baseline_rule": "Sort unchanged clips by (start,seq,clip_id). Choose first clip with start <= target < end. In a gap choose first clip with start > target, or last preceding clip when none follows. Use floor(chosen clip.start) on the same YouTube player as Phase 6.",
+  "phase6_rule": "Run chapters_from_metadata and the owning Index publication path on a disposable measured-index duplicate with every stored path rebound within worktree scratch. Read the published source chapter and its supported YouTube seek; use floor(chapter.start). Do not replace missing/failed output with the annotated target.",
+  "metric": "abs(player_seek_seconds - source_start), paired for every task. Report exact decimal sums and means. Require Phase 6 MAE <=15 seconds and (baseline sum - Phase 6 sum)/baseline sum >=0.8 with baseline sum >0. Failed/unsupported tasks remain in denominator and fail the numeric gate; no imputed success.",
+  "player_observation": "Pending coordinator observation; no external URL will be opened by annotator.",
+  "speaker_gate": "blocked: no held diarization run output and independent human annotations",
+  "items": [
+    {
+      "video_id": "-JXwa-WlkU8",
+      "title": "How to Use Ultralytics YOLO11 for Object Detection and Tracking| How to Benchmark | YOLO11 RELEASED🚀",
+      "corpus_relpath_provenance_only": "AI and ML/How_to_Use_Ultralytics_YOLO11_for_Object_Detection_and_Tracking_How_to_Benchmark",
+      "source_date": "2026-07-09T19:19:57",
+      "held_metadata_sha256": "f84f30a96cf0f8e9df1099f1ede81788549d200e32b31623a1446f1b67727f11",
+      "chapter_input_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+      "pre_phase6_clip_output_sha256": "4078a4c4ccdd255037910484c16c181ab66211bf854b9b9e3a091c1f24e08179",
+      "pre_phase6_clip_file_sha256": "99c9c0a5a1c13adb8d953dc19d600214f730496549268ae1f11ebc304c345c3f",
+      "selected_chapter_indices": [
+        0,
+        2,
+        5,
+        8,
+        11
+      ]
+    },
+    {
+      "video_id": "0FrcYhnHmLg",
+      "title": "May 21 — Google I/O 2026 Deep Dive, OpenAI Solves 80-Year Math Problem, Cursor Composer 2.5",
+      "corpus_relpath_provenance_only": "AI and ML/May_21_Google_I_O_2026_Deep_Dive_OpenAI_Solves_80-Year_Math_Problem_Cursor_Compo",
+      "source_date": "2026-05-27T11:04:29",
+      "held_metadata_sha256": "a5dce849090f91c69f6d31e9bde3aba2e1cb44f4887fb816dcc5974f09f625b9",
+      "chapter_input_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+      "pre_phase6_clip_output_sha256": "be1f7d6920c086cbdb034af45b611f461f9bf49ac68a81829d91c23a793dbb2b",
+      "pre_phase6_clip_file_sha256": "e0ae045f4c021c83120cb52d37f311d1080ea9ef48a495aa8ecefdc95d866328",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "video_id": "4OmEbeR3BtI",
+      "title": "The 'Do-Not-Hire List' Is Real. Here's What Actually Gets You On It.",
+      "corpus_relpath_provenance_only": "Job Hunt and Career/The_Do-Not-Hire_List_Is_Real_Here_s_What_Actually_Gets_You_On_It",
+      "source_date": "2026-07-07T23:04:44",
+      "held_metadata_sha256": "6aee159548d55777d9d0d4621d2b59d43c77ca8e956e95e0acd1fa9f143ea934",
+      "chapter_input_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+      "pre_phase6_clip_output_sha256": "19560f70f9493880b8b47f81cd1b401526cc494dd5995c7d8464bf0add383d1e",
+      "pre_phase6_clip_file_sha256": "ec80ac14689669cba8e03900c84e22a685b2cba75b2baeb5b3fb6225827f174a",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "video_id": "647pSnX5H_Y",
+      "title": "You're Wasting 40% Of Your AI Time On Something Fixable",
+      "corpus_relpath_provenance_only": "AI and ML/You_re_Wasting_40_Of_Your_AI_Time_On_Something_Fixable",
+      "source_date": "2026-05-11T12:40:03",
+      "held_metadata_sha256": "f0a22ecedb51cebd7c8977af2cf4f2915fb03eb80bd2409d581cd01bac386b9e",
+      "chapter_input_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+      "pre_phase6_clip_output_sha256": "dff79659b172f7709667ba6bca85d2514aeae7bc56b40ef4ced9c5392c006da2",
+      "pre_phase6_clip_file_sha256": "89fe866a14ae3dc40315e708783c64b3d1ecc44c20ad9c56e7ddbc024b6c066b",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "video_id": "D4fkiQfzw_I",
+      "title": "How I Work: $77K/Month Solopreneur",
+      "corpus_relpath_provenance_only": "_sessions/test/How_I_Work_77K_Month_Solopreneur",
+      "source_date": "2026-05-16T14:21:59",
+      "held_metadata_sha256": "4453d6e20ef2d6e2d53cee856600bdf46f7ff074da4d31b048ff2e86f50114e4",
+      "chapter_input_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+      "pre_phase6_clip_output_sha256": "f97aab7d8325244c5e2f50d65eecbdae0d883ef5c75d2e0616179b3c44129dde",
+      "pre_phase6_clip_file_sha256": "49b6905b36a7c86e265e23064a14ae508de130c89d72e82b3e50aaa4bcd23e31",
+      "selected_chapter_indices": [
+        0,
+        2,
+        5,
+        8,
+        11
+      ]
+    },
+    {
+      "video_id": "D_FCYsshMI4",
+      "title": "Computer use in Codex",
+      "corpus_relpath_provenance_only": "_sessions/test/Computer_use_in_Codex",
+      "source_date": "2026-05-16T14:21:48",
+      "held_metadata_sha256": "477d9a632eab93e433cff1f5df41ba83984d7c0e1e93ec8a60b68b3cbcaec5e9",
+      "chapter_input_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+      "pre_phase6_clip_output_sha256": "90f2ba0b6acd93620caface73aa18184357aec4dd27cad7bfcb3136277830b77",
+      "pre_phase6_clip_file_sha256": "df6e037cd766be6bf3274f917a2559cc2dba918f10dd7bbd710ac066b46b848a",
+      "selected_chapter_indices": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ]
+    },
+    {
+      "video_id": "HIj8wU_rGIU",
+      "title": "How to Start Coding | Programming for Beginners | Learn Coding | Intellipaat",
+      "corpus_relpath_provenance_only": "Social Media Research/How_to_Start_Coding_Programming_for_Beginners_Learn_Coding_Intellipaat",
+      "source_date": "2026-05-10T20:57:09",
+      "held_metadata_sha256": "5b0de8530fbb0db55b4c74d1c728af9d9423c90bc37393d36d85d6454a83f5e8",
+      "chapter_input_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+      "pre_phase6_clip_output_sha256": "447c7554004aaa3986cdfea1c0d928ed2e39b73469891ff573b03421d3e8da6f",
+      "pre_phase6_clip_file_sha256": "2ec0881aa4efc5b24557bc1aad9e87719018eaa2973140a28cc268c708190bb5",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "video_id": "R6w5MBk1PsM",
+      "title": "Nvidia CEO Live on Bloomberg Technology (full show) #tech",
+      "corpus_relpath_provenance_only": "Social Media Research/Nvidia_CEO_Live_on_Bloomberg_Technology_full_show_tech",
+      "source_date": "2026-05-31T10:20:39",
+      "held_metadata_sha256": "1726a95ca85acec8aa0ba77ef4253d4f6fb007a689f552861ad271d8e50a5ae4",
+      "chapter_input_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+      "pre_phase6_clip_output_sha256": "65d621115687085a0390f288c1b28ef73c7d7879744b34b1232ef582d4f1fcac",
+      "pre_phase6_clip_file_sha256": "72da98bcd0edb70a1bf86c3ccca6243a1cc52e329c4256ef73842c42f55cdb7d",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "video_id": "Vh4O04Bpovw",
+      "title": "I Explored A $200,000,000 Forgotten Space Colony",
+      "corpus_relpath_provenance_only": "_sessions/Top_Trending_Videos_of_the_Week/I_Explored_A_200_000_000_Forgotten_Space_Colony",
+      "source_date": "2026-07-06T21:54:34",
+      "held_metadata_sha256": "8594a8dcb2b78be7a4083cb64c0c7c8ae4c312c2a21255f9235beb9f963b1535",
+      "chapter_input_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+      "pre_phase6_clip_output_sha256": "3042ef6f295c56ffeb7b63950eedafab1f254d263d4f5d3c526a6d9b548d17fa",
+      "pre_phase6_clip_file_sha256": "d63f409e656306a070c67632567c7ae0dc9a4bff87edc085b9bf20d7ee6551b0",
+      "selected_chapter_indices": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "video_id": "WgPbbWmnXJ8",
+      "title": "Object Detection 101 Course - Including 4xProjects | Computer Vision",
+      "corpus_relpath_provenance_only": "Social Media Research/Object_Detection_101_Course_-_Including_4xProjects_Computer_Vision",
+      "source_date": "2026-07-09T19:20:50",
+      "held_metadata_sha256": "edec2bfdb45e65eefd6014402e1fda2d5659140e394b45a5b530ed1409f0869b",
+      "chapter_input_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+      "pre_phase6_clip_output_sha256": "1efdb0c2fa79ccf8c780b471b103e2aee740d035ad12e1b9456c666b1368edae",
+      "pre_phase6_clip_file_sha256": "3a636b26985ce6e0e7105257a4d5c549ad83ee96808f12ba33c9e35205160004",
+      "selected_chapter_indices": [
+        0,
+        3,
+        6,
+        9,
+        13
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "BD-01",
+      "video_id": "-JXwa-WlkU8",
+      "chapter_seq": 0,
+      "target_chapter": "Introduction: We're exploring the new features of YOLO11 and why it's a major update!",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 23.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-02",
+      "video_id": "-JXwa-WlkU8",
+      "chapter_seq": 2,
+      "target_chapter": "Highlights of YOLO11 Model: Key updates that make YOLO11 stand out.",
+      "source_start": 53.0,
+      "acceptable_interval": {
+        "start": 53.0,
+        "end": 75.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-03",
+      "video_id": "-JXwa-WlkU8",
+      "chapter_seq": 5,
+      "target_chapter": "Key Features of Ultralytics YOLO11: Why this release is a big improvement.",
+      "source_start": 137.0,
+      "acceptable_interval": {
+        "start": 137.0,
+        "end": 158.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-04",
+      "video_id": "-JXwa-WlkU8",
+      "chapter_seq": 8,
+      "target_chapter": "How to Use YOLO11 Models in Python: A step-by-step guide for using YOLO11 like a pro.",
+      "source_start": 232.0,
+      "acceptable_interval": {
+        "start": 232.0,
+        "end": 331.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-05",
+      "video_id": "-JXwa-WlkU8",
+      "chapter_seq": 11,
+      "target_chapter": "Conclusion and Summary: Quick recap and what’s coming next for YOLO11.",
+      "source_start": 491.0,
+      "acceptable_interval": {
+        "start": 491.0,
+        "end": 511,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-06",
+      "video_id": "0FrcYhnHmLg",
+      "chapter_seq": 0,
+      "target_chapter": "Introduction & Co-host Banter",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 45.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-07",
+      "video_id": "0FrcYhnHmLg",
+      "chapter_seq": 2,
+      "target_chapter": "Antigravity & Agentic Coding at Google",
+      "source_start": 491.0,
+      "acceptable_interval": {
+        "start": 491.0,
+        "end": 782.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-08",
+      "video_id": "0FrcYhnHmLg",
+      "chapter_seq": 4,
+      "target_chapter": "OpenAI Codex Mobile & Agent Workflows",
+      "source_start": 1012.0,
+      "acceptable_interval": {
+        "start": 1012.0,
+        "end": 1229.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-09",
+      "video_id": "0FrcYhnHmLg",
+      "chapter_seq": 6,
+      "target_chapter": "Google Gemini Omni — Multimodal AI",
+      "source_start": 2313.0,
+      "acceptable_interval": {
+        "start": 2313.0,
+        "end": 2782.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-10",
+      "video_id": "0FrcYhnHmLg",
+      "chapter_seq": 9,
+      "target_chapter": "Anthropic & xAI / Colossus Infrastructure",
+      "source_start": 3555.0,
+      "acceptable_interval": {
+        "start": 3555.0,
+        "end": 6558,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-11",
+      "video_id": "4OmEbeR3BtI",
+      "chapter_seq": 0,
+      "target_chapter": "Start",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 53.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-12",
+      "video_id": "4OmEbeR3BtI",
+      "chapter_seq": 2,
+      "target_chapter": "Amazon's hiring process",
+      "source_start": 89.0,
+      "acceptable_interval": {
+        "start": 89.0,
+        "end": 225.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-13",
+      "video_id": "4OmEbeR3BtI",
+      "chapter_seq": 4,
+      "target_chapter": "Other things that get you flagged",
+      "source_start": 264.0,
+      "acceptable_interval": {
+        "start": 264.0,
+        "end": 449.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-14",
+      "video_id": "4OmEbeR3BtI",
+      "chapter_seq": 6,
+      "target_chapter": "Misconceptions about the list",
+      "source_start": 527.0,
+      "acceptable_interval": {
+        "start": 527.0,
+        "end": 693.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-15",
+      "video_id": "4OmEbeR3BtI",
+      "chapter_seq": 9,
+      "target_chapter": "Staying off the list",
+      "source_start": 904.0,
+      "acceptable_interval": {
+        "start": 904.0,
+        "end": 1003,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-16",
+      "video_id": "647pSnX5H_Y",
+      "chapter_seq": 0,
+      "target_chapter": "Why most people get stuck on the agent scaffolding layer",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 154.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-17",
+      "video_id": "647pSnX5H_Y",
+      "chapter_seq": 2,
+      "target_chapter": "The map: prompts, skills, plugins, MCPs, hooks, scripts",
+      "source_start": 339.0,
+      "acceptable_interval": {
+        "start": 339.0,
+        "end": 582.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-18",
+      "video_id": "647pSnX5H_Y",
+      "chapter_seq": 4,
+      "target_chapter": "Prompts: when one-offs are the right call",
+      "source_start": 698.0,
+      "acceptable_interval": {
+        "start": 698.0,
+        "end": 810.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-19",
+      "video_id": "647pSnX5H_Y",
+      "chapter_seq": 6,
+      "target_chapter": "Plugins: packaging a whole workflow your team can install",
+      "source_start": 1042.0,
+      "acceptable_interval": {
+        "start": 1042.0,
+        "end": 1272.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-20",
+      "video_id": "647pSnX5H_Y",
+      "chapter_seq": 9,
+      "target_chapter": "Why the app store analogy undersells what plugins really are",
+      "source_start": 1527.0,
+      "acceptable_interval": {
+        "start": 1527.0,
+        "end": 1633,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-21",
+      "video_id": "D4fkiQfzw_I",
+      "chapter_seq": 0,
+      "target_chapter": "Meet Marc Lou",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 52.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-22",
+      "video_id": "D4fkiQfzw_I",
+      "chapter_seq": 2,
+      "target_chapter": "Deep work",
+      "source_start": 96.0,
+      "acceptable_interval": {
+        "start": 96.0,
+        "end": 154.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-23",
+      "video_id": "D4fkiQfzw_I",
+      "chapter_seq": 5,
+      "target_chapter": "Ship list",
+      "source_start": 312.0,
+      "acceptable_interval": {
+        "start": 312.0,
+        "end": 357.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-24",
+      "video_id": "D4fkiQfzw_I",
+      "chapter_seq": 8,
+      "target_chapter": "Evening routine",
+      "source_start": 471.0,
+      "acceptable_interval": {
+        "start": 471.0,
+        "end": 511.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-25",
+      "video_id": "D4fkiQfzw_I",
+      "chapter_seq": 11,
+      "target_chapter": "Don't you dare give up",
+      "source_start": 603.0,
+      "acceptable_interval": {
+        "start": 603.0,
+        "end": 639,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-26",
+      "video_id": "D_FCYsshMI4",
+      "chapter_seq": 0,
+      "target_chapter": "<Untitled Chapter 1>",
+      "source_start": 0,
+      "acceptable_interval": {
+        "start": 0,
+        "end": 34.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-27",
+      "video_id": "D_FCYsshMI4",
+      "chapter_seq": 1,
+      "target_chapter": "Why computer use",
+      "source_start": 34.0,
+      "acceptable_interval": {
+        "start": 34.0,
+        "end": 126.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-28",
+      "video_id": "D_FCYsshMI4",
+      "chapter_seq": 2,
+      "target_chapter": "Codex works across local apps",
+      "source_start": 126.0,
+      "acceptable_interval": {
+        "start": 126.0,
+        "end": 221.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-29",
+      "video_id": "D_FCYsshMI4",
+      "chapter_seq": 3,
+      "target_chapter": "Multiple apps at once",
+      "source_start": 221.0,
+      "acceptable_interval": {
+        "start": 221.0,
+        "end": 314.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-30",
+      "video_id": "D_FCYsshMI4",
+      "chapter_seq": 5,
+      "target_chapter": "App-by-app permissions",
+      "source_start": 515.0,
+      "acceptable_interval": {
+        "start": 515.0,
+        "end": 685,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-31",
+      "video_id": "HIj8wU_rGIU",
+      "chapter_seq": 0,
+      "target_chapter": "Introduction",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 8.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-32",
+      "video_id": "HIj8wU_rGIU",
+      "chapter_seq": 2,
+      "target_chapter": "Why Learn Coding?",
+      "source_start": 97.0,
+      "acceptable_interval": {
+        "start": 97.0,
+        "end": 294.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-33",
+      "video_id": "HIj8wU_rGIU",
+      "chapter_seq": 4,
+      "target_chapter": "Learn Basics of that language",
+      "source_start": 573.0,
+      "acceptable_interval": {
+        "start": 573.0,
+        "end": 632.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-34",
+      "video_id": "HIj8wU_rGIU",
+      "chapter_seq": 6,
+      "target_chapter": "Which language and tools should you use?",
+      "source_start": 731.0,
+      "acceptable_interval": {
+        "start": 731.0,
+        "end": 1242.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-35",
+      "video_id": "HIj8wU_rGIU",
+      "chapter_seq": 9,
+      "target_chapter": "What Kind of Jobs Can you Expect?",
+      "source_start": 1692.0,
+      "acceptable_interval": {
+        "start": 1692.0,
+        "end": 1988,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-36",
+      "video_id": "R6w5MBk1PsM",
+      "chapter_seq": 0,
+      "target_chapter": "welcome show begins",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 60.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-37",
+      "video_id": "R6w5MBk1PsM",
+      "chapter_seq": 2,
+      "target_chapter": "ed ludlow at CES",
+      "source_start": 120.0,
+      "acceptable_interval": {
+        "start": 120.0,
+        "end": 300.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-38",
+      "video_id": "R6w5MBk1PsM",
+      "chapter_seq": 4,
+      "target_chapter": "meta cuts fact checkers ahead of Trump presidency",
+      "source_start": 660.0,
+      "acceptable_interval": {
+        "start": 660.0,
+        "end": 840.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-39",
+      "video_id": "R6w5MBk1PsM",
+      "chapter_seq": 6,
+      "target_chapter": "us adds Chinese firms to blacklist",
+      "source_start": 1350.0,
+      "acceptable_interval": {
+        "start": 1350.0,
+        "end": 1620.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-40",
+      "video_id": "R6w5MBk1PsM",
+      "chapter_seq": 8,
+      "target_chapter": "interview with Nvidia CEO Jensen Huang",
+      "source_start": 2220.0,
+      "acceptable_interval": {
+        "start": 2220.0,
+        "end": 3595,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-41",
+      "video_id": "Vh4O04Bpovw",
+      "chapter_seq": 0,
+      "target_chapter": "Exploring Biosphere 2",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 64.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-42",
+      "video_id": "Vh4O04Bpovw",
+      "chapter_seq": 2,
+      "target_chapter": "Symphony's challenging past",
+      "source_start": 133.0,
+      "acceptable_interval": {
+        "start": 133.0,
+        "end": 205.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-43",
+      "video_id": "Vh4O04Bpovw",
+      "chapter_seq": 4,
+      "target_chapter": "Problems with the experiment",
+      "source_start": 372.0,
+      "acceptable_interval": {
+        "start": 372.0,
+        "end": 446.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-44",
+      "video_id": "Vh4O04Bpovw",
+      "chapter_seq": 6,
+      "target_chapter": "The lung and the ocean",
+      "source_start": 500.0,
+      "acceptable_interval": {
+        "start": 500.0,
+        "end": 662.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-45",
+      "video_id": "Vh4O04Bpovw",
+      "chapter_seq": 8,
+      "target_chapter": "A life-changing surprise",
+      "source_start": 836.0,
+      "acceptable_interval": {
+        "start": 836.0,
+        "end": 969,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-46",
+      "video_id": "WgPbbWmnXJ8",
+      "chapter_seq": 0,
+      "target_chapter": "Introduction",
+      "source_start": 0.0,
+      "acceptable_interval": {
+        "start": 0.0,
+        "end": 128.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-47",
+      "video_id": "WgPbbWmnXJ8",
+      "chapter_seq": 3,
+      "target_chapter": "Chapter 3 - Performance Evaluation Metrics",
+      "source_start": 376.0,
+      "acceptable_interval": {
+        "start": 376.0,
+        "end": 547.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-48",
+      "video_id": "WgPbbWmnXJ8",
+      "chapter_seq": 6,
+      "target_chapter": "Chapter 5 - Running Yolo",
+      "source_start": 1545.0,
+      "acceptable_interval": {
+        "start": 1545.0,
+        "end": 2234.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-49",
+      "video_id": "WgPbbWmnXJ8",
+      "chapter_seq": 9,
+      "target_chapter": "Premium Courses",
+      "source_start": 4899.0,
+      "acceptable_interval": {
+        "start": 4899.0,
+        "end": 5031.0,
+        "bounds": "[start,end)"
+      }
+    },
+    {
+      "task_id": "BD-50",
+      "video_id": "WgPbbWmnXJ8",
+      "chapter_seq": 13,
+      "target_chapter": "Project 4 - Poker Hand Detector",
+      "source_start": 11179.0,
+      "acceptable_interval": {
+        "start": 11179.0,
+        "end": 16427,
+        "bounds": "[start,end)"
+      }
+    }
+  ]
+}

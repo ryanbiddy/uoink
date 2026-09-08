@@ -1,0 +1,17 @@
+{
+  "suite": "bd",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/library_work_astra/test_phase6_bd_acceptance.py"
+  ],
+  "exit_code": 1,
+  "elapsed_seconds": 21.77,
+  "started_unix_seconds": 1788905196.102069,
+  "isolation": "offline_guard.py via PYTHONPATH/sitecustomize; all environment data/temp roots within _scratch/bd; no credentials"
+}

@@ -1,0 +1,29 @@
+{
+  "suite": "phase3",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests\\library_work_astra\\test_phase3_acceptance3.py",
+    "tests\\library_work_astra\\test_phase3_acceptance4.py",
+    "tests\\library_work_astra\\test_phase3_acceptance5.py",
+    "tests\\library_work_astra\\test_phase3_acceptance6.py",
+    "tests\\library_work_astra\\test_phase3_concurrency.py",
+    "tests\\library_work_astra\\test_phase3_harness.py",
+    "tests\\library_work_astra\\test_phase3_integration.py",
+    "tests\\library_work_astra\\test_phase3_migration.py",
+    "tests\\library_work_astra\\test_phase3_publication.py",
+    "tests\\library_work_astra\\test_phase3_recovery.py",
+    "tests\\library_work_astra\\test_phase3_repairs.py",
+    "tests\\library_work_astra\\test_phase3_s21.py",
+    "tests\\library_work_astra\\test_phase3_support.py"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 45.936,
+  "started_unix_seconds": 1788904947.6765985,
+  "isolation": "offline_guard.py via PYTHONPATH/sitecustomize; all environment data/temp roots within _scratch/bd; no credentials"
+}

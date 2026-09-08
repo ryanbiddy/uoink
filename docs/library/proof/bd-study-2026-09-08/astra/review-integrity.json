@@ -1,0 +1,25 @@
+{
+  "candidate_sha": "d83e6d7832cc7e80690c1a5b6dbdfae5a998c69b",
+  "tracked_files_unchanged": true,
+  "source_files": {
+    "library_media.py": "13528c65576cc91c08f6ab32a40b8b66ac40c0fae1f93dfc0f6a1f7878263a81",
+    "index.py": "f3ff9590674cfa1d2b93eec67e598038aba630ee8f1771b5b7fee6436a6fa10d",
+    "podcasts.py": "63ef3731559330078a537aa1ce31606bc15b0eec1da638129c3667046c57a2b4",
+    "server.py": "475a87468484df7857f8ca44856b7cd1bb59af4b42f807b703056589afc187f6",
+    "yt_extract.py": "9157787eb5b242f37d5f798ce44b185a0c6b45d79d41b91c02616794a9b5d66d",
+    "clips.py": "c14b0cdd9c1d67fe893d781ff3c72f0ea6e66966cb7d3e990b5f12fbe70960b1",
+    "uoink_mcp.py": "05b4c037a41fcc425b6b941fdcd40bd1f1a869a293f17cc7cc913a8004e0df8a",
+    "uoink_mcp_tools.py": "9d1a01b7061c0e3beaa39fed43343b6d28ef568f962410f64db0295743434775",
+    "migrations/0030_media_depth.sql": "54ed1be45f0a2017c36af17ada563486f2238b8154992b77e7c09c418d108bd4",
+    "tests/test_phase6_evaluation.py": "0c916f468c54d286b21b37a12c7342051db59f54a3c69495a6b436490cbdc526",
+    "tests/test_phase6_bc2.py": "cd574084a29ed2cedf66584d4b1519a1dd75aa01bdcc263c5e8a270936d7ef9f"
+  },
+  "review_files": {
+    "docs/library/PHASE6-BD-2026-09-08.md": "dbafebf0da2cfa7169cf8ade062963e7ef73a6cda60b3c32f265ec2871eb2f9e",
+    "tests/library_work_astra/test_phase6_bd_acceptance.py": "558bf4eca81bb21252ad2579a3aea64f77b33dffdd26b7a8ab77ff8764f99d21"
+  },
+  "guarded_required_tests_passed": 396,
+  "open_item_reproductions_failed": 14,
+  "open_findings": 9,
+  "worktree_token_removed": true
+}

@@ -1,0 +1,462 @@
+FFFFFFFFFFFFFF                                                           [100%]
+================================== FAILURES ===================================
+___ test_bd01_never_published_stale_snapshot_requires_original_ticket[raw] ____
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111CE5B4D0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CEEE650>)
+entry = 'raw'
+
+    @pytest.mark.parametrize("entry", ["raw", "index"])
+    def test_bd01_never_published_stale_snapshot_requires_original_ticket(sandbox, entry):
+        """A was built before B, but an omitted ticket lets A acquire B's base."""
+        env = sandbox
+        idx = _open_index(env) if entry == "index" else None
+        conn = idx._conn if idx else _db(env)
+        try:
+            base = _fixture(env, key="bd01", origin="none")
+            (_seed_index(idx, base) if idx else _seed(conn, base))
+            raw_a = copy.deepcopy(RAW_FIXTURES[1])
+            raw_b = copy.deepcopy(raw_a)
+            raw_a[0] = (0.0, 22.0, "A was built against the original source.", None)
+            raw_b[0] = (0.0, 22.0, "B is the newer published source.", None)
+            stale = _fixture(env, key="bd01", raw=raw_a, origin="none")
+            newer = _fixture(env, key="bd01", raw=raw_b, origin="none")
+            _published(_publish(conn, newer))
+            before = _snapshot(conn, newer)
+            try:
+                if idx:
+                    idx.publish_media_snapshot("bd01", cues=stale.cues,
+                        media_block=stale.block, artifacts=stale.files)
+                else:
+                    _publish(conn, stale)
+            except media.MediaError as exc:
+                assert exc.code in {"invalid_request", "revision_unavailable"}
+>           assert _snapshot(conn, newer) == before, "Unfenced stale A overwrote B"
+E           AssertionError: Unfenced stale A overwrote B
+E           assert {'rows': {'yo...0883eb20ea7'}} == {'rows': {'yo...d0e56496f22'}}
+E             
+E             Differing items:
+E             {'rows': {'yoinks': [{'video_id': 'bd01', 'slug': 'fixture-81314776fa19aa521f12', 'channel': 'Synthetic source', 'titl...43a999422fd3043ebf', 'media_revision': '490bbba35125d1d279d2105643e417a5839836c447569a60ab393cb9b6c70b12', ...}], ...}} != {'rows': {'yoinks': [{'video_id': 'bd01', 'slug': 'fixture-81314776fa19aa521f12', 'channel': 'Synthetic source', 'titl...58b62ee1b45ee5caf8', 'media_revision': 'ee1e269994306ce0d30cee3873449867bee67f13818849a3c82bc9c70791da36', ...}], ...}}
+E             {'files': {'corpus.json': '295780ac602589d2fbee77129a2b512ffe3e33d1cf9e3d9f5...
+E             
+E             ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:49: AssertionError
+__ test_bd01_never_published_stale_snapshot_requires_original_ticket[index] ___
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111AEBA210>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111AE579B0>)
+entry = 'index'
+
+    @pytest.mark.parametrize("entry", ["raw", "index"])
+    def test_bd01_never_published_stale_snapshot_requires_original_ticket(sandbox, entry):
+        """A was built before B, but an omitted ticket lets A acquire B's base."""
+        env = sandbox
+        idx = _open_index(env) if entry == "index" else None
+        conn = idx._conn if idx else _db(env)
+        try:
+            base = _fixture(env, key="bd01", origin="none")
+            (_seed_index(idx, base) if idx else _seed(conn, base))
+            raw_a = copy.deepcopy(RAW_FIXTURES[1])
+            raw_b = copy.deepcopy(raw_a)
+            raw_a[0] = (0.0, 22.0, "A was built against the original source.", None)
+            raw_b[0] = (0.0, 22.0, "B is the newer published source.", None)
+            stale = _fixture(env, key="bd01", raw=raw_a, origin="none")
+            newer = _fixture(env, key="bd01", raw=raw_b, origin="none")
+            _published(_publish(conn, newer))
+            before = _snapshot(conn, newer)
+            try:
+                if idx:
+                    idx.publish_media_snapshot("bd01", cues=stale.cues,
+                        media_block=stale.block, artifacts=stale.files)
+                else:
+                    _publish(conn, stale)
+            except media.MediaError as exc:
+                assert exc.code in {"invalid_request", "revision_unavailable"}
+>           assert _snapshot(conn, newer) == before, "Unfenced stale A overwrote B"
+E           AssertionError: Unfenced stale A overwrote B
+E           assert {'rows': {'yo...ee1d074eed0'}} == {'rows': {'yo...d72cbf44dfd'}}
+E             
+E             Differing items:
+E             {'rows': {'yoinks': [{'video_id': 'bd01', 'slug': 'fixture-81314776fa19aa521f12', 'channel': 'Synthetic source', 'titl...43a999422fd3043ebf', 'media_revision': '490bbba35125d1d279d2105643e417a5839836c447569a60ab393cb9b6c70b12', ...}], ...}} != {'rows': {'yoinks': [{'video_id': 'bd01', 'slug': 'fixture-81314776fa19aa521f12', 'channel': 'Synthetic source', 'titl...58b62ee1b45ee5caf8', 'media_revision': 'ee1e269994306ce0d30cee3873449867bee67f13818849a3c82bc9c70791da36', ...}], ...}}
+E             {'files': {'corpus.json': '295780ac602589d2fbee77129a2b512ffe3e33d1cf9e3d9f5...
+E             
+E             ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:49: AssertionError
+___ test_bd02_wal_export_refuses_a_committed_concurrent_change[soft_delete] ___
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111CD85E50>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C5A4AF0>)
+mutation = 'soft_delete'
+
+    @pytest.mark.parametrize("mutation", ["soft_delete", "hard_delete", "title", "media"])
+    def test_bd02_wal_export_refuses_a_committed_concurrent_change(sandbox, mutation):
+        env = sandbox
+        conn = _db(env)
+        assert conn.execute("PRAGMA journal_mode=WAL").fetchone()[0] == "wal"
+        f = _fixture(env, key="bd02")
+        _seed(conn, f)
+        writer = sqlite3.connect(env.root / "index.db")
+        original = media._export_range
+        committed = []
+    
+        def change_during_read(snap, request, check):
+            if mutation == "soft_delete":
+                writer.execute("UPDATE yoinks SET deleted_at=? WHERE video_id=?", (STAMP, "bd02"))
+            elif mutation == "hard_delete":
+                writer.execute("DELETE FROM yoinks WHERE video_id=?", ("bd02",))
+            elif mutation == "title":
+                writer.execute("UPDATE yoinks SET title=? WHERE video_id=?", ("New current title", "bd02"))
+            else:
+                writer.execute("UPDATE media_depth SET media_revision=? WHERE video_id=?", ("e" * 64, "bd02"))
+            writer.commit()
+            committed.append(True)
+            return original(snap, request, check)
+    
+        try:
+            env.patch.setattr(media, "_export_range", change_during_read)
+            result = _export(env, conn, f, start=60, end=125)
+            assert committed == [True]
+>           assert result["ok"] is False, "WAL final recheck read the old transaction snapshot"
+E           AssertionError: WAL final recheck read the old transaction snapshot
+E           assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:83: AssertionError
+___ test_bd02_wal_export_refuses_a_committed_concurrent_change[hard_delete] ___
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C5A8050>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CD18150>)
+mutation = 'hard_delete'
+
+    @pytest.mark.parametrize("mutation", ["soft_delete", "hard_delete", "title", "media"])
+    def test_bd02_wal_export_refuses_a_committed_concurrent_change(sandbox, mutation):
+        env = sandbox
+        conn = _db(env)
+        assert conn.execute("PRAGMA journal_mode=WAL").fetchone()[0] == "wal"
+        f = _fixture(env, key="bd02")
+        _seed(conn, f)
+        writer = sqlite3.connect(env.root / "index.db")
+        original = media._export_range
+        committed = []
+    
+        def change_during_read(snap, request, check):
+            if mutation == "soft_delete":
+                writer.execute("UPDATE yoinks SET deleted_at=? WHERE video_id=?", (STAMP, "bd02"))
+            elif mutation == "hard_delete":
+                writer.execute("DELETE FROM yoinks WHERE video_id=?", ("bd02",))
+            elif mutation == "title":
+                writer.execute("UPDATE yoinks SET title=? WHERE video_id=?", ("New current title", "bd02"))
+            else:
+                writer.execute("UPDATE media_depth SET media_revision=? WHERE video_id=?", ("e" * 64, "bd02"))
+            writer.commit()
+            committed.append(True)
+            return original(snap, request, check)
+    
+        try:
+            env.patch.setattr(media, "_export_range", change_during_read)
+            result = _export(env, conn, f, start=60, end=125)
+            assert committed == [True]
+>           assert result["ok"] is False, "WAL final recheck read the old transaction snapshot"
+E           AssertionError: WAL final recheck read the old transaction snapshot
+E           assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:83: AssertionError
+______ test_bd02_wal_export_refuses_a_committed_concurrent_change[title] ______
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C5A8B00>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C0D45F0>)
+mutation = 'title'
+
+    @pytest.mark.parametrize("mutation", ["soft_delete", "hard_delete", "title", "media"])
+    def test_bd02_wal_export_refuses_a_committed_concurrent_change(sandbox, mutation):
+        env = sandbox
+        conn = _db(env)
+        assert conn.execute("PRAGMA journal_mode=WAL").fetchone()[0] == "wal"
+        f = _fixture(env, key="bd02")
+        _seed(conn, f)
+        writer = sqlite3.connect(env.root / "index.db")
+        original = media._export_range
+        committed = []
+    
+        def change_during_read(snap, request, check):
+            if mutation == "soft_delete":
+                writer.execute("UPDATE yoinks SET deleted_at=? WHERE video_id=?", (STAMP, "bd02"))
+            elif mutation == "hard_delete":
+                writer.execute("DELETE FROM yoinks WHERE video_id=?", ("bd02",))
+            elif mutation == "title":
+                writer.execute("UPDATE yoinks SET title=? WHERE video_id=?", ("New current title", "bd02"))
+            else:
+                writer.execute("UPDATE media_depth SET media_revision=? WHERE video_id=?", ("e" * 64, "bd02"))
+            writer.commit()
+            committed.append(True)
+            return original(snap, request, check)
+    
+        try:
+            env.patch.setattr(media, "_export_range", change_during_read)
+            result = _export(env, conn, f, start=60, end=125)
+            assert committed == [True]
+>           assert result["ok"] is False, "WAL final recheck read the old transaction snapshot"
+E           AssertionError: WAL final recheck read the old transaction snapshot
+E           assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:83: AssertionError
+______ test_bd02_wal_export_refuses_a_committed_concurrent_change[media] ______
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C5B85F0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CEDFD90>)
+mutation = 'media'
+
+    @pytest.mark.parametrize("mutation", ["soft_delete", "hard_delete", "title", "media"])
+    def test_bd02_wal_export_refuses_a_committed_concurrent_change(sandbox, mutation):
+        env = sandbox
+        conn = _db(env)
+        assert conn.execute("PRAGMA journal_mode=WAL").fetchone()[0] == "wal"
+        f = _fixture(env, key="bd02")
+        _seed(conn, f)
+        writer = sqlite3.connect(env.root / "index.db")
+        original = media._export_range
+        committed = []
+    
+        def change_during_read(snap, request, check):
+            if mutation == "soft_delete":
+                writer.execute("UPDATE yoinks SET deleted_at=? WHERE video_id=?", (STAMP, "bd02"))
+            elif mutation == "hard_delete":
+                writer.execute("DELETE FROM yoinks WHERE video_id=?", ("bd02",))
+            elif mutation == "title":
+                writer.execute("UPDATE yoinks SET title=? WHERE video_id=?", ("New current title", "bd02"))
+            else:
+                writer.execute("UPDATE media_depth SET media_revision=? WHERE video_id=?", ("e" * 64, "bd02"))
+            writer.commit()
+            committed.append(True)
+            return original(snap, request, check)
+    
+        try:
+            env.patch.setattr(media, "_export_range", change_during_read)
+            result = _export(env, conn, f, start=60, end=125)
+            assert committed == [True]
+>           assert result["ok"] is False, "WAL final recheck read the old transaction snapshot"
+E           AssertionError: WAL final recheck read the old transaction snapshot
+E           assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:83: AssertionError
+________ test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media ________
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C5A56A0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CD69FD0>)
+
+    def test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media(sandbox):
+        conn = _db(sandbox)
+        old = _fixture(sandbox, key="bd03")
+        _seed(conn, old)
+        newer = _fixture(sandbox, key="bd03", origin="none")
+        _published(_publish(conn, newer))
+        before = _snapshot(conn, newer)
+        try:
+            media.rebuild_item(conn, "bd03", sidecar=copy.deepcopy(old.sidecar))
+        except media.MediaError as exc:
+            assert exc.code == "revision_unavailable"
+>       assert _snapshot(conn, newer) == before, "Reconstruction restored superseded annotations"
+E       AssertionError: Reconstruction restored superseded annotations
+E       assert {'rows': {'yo...cf9416', ...}} == {'rows': {'yo...cf9416', ...}}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'rows': {'yoinks': [{'video_id': 'bd03', 'slug': 'fixture-0fa8706ea82669ca55aa', 'channel': 'Synthetic source', 'titl...a8573fa73e188f1294', 'media_revision': '3e39eff2f580a00df71d7fe764cb111baf279b0f569235dcb7180c684139d1d3', ...}], ...}} != {'rows': {'yoinks': [{'video_id': 'bd03', 'slug': 'fixture-0fa8706ea82669ca55aa', 'channel': 'Synthetic source', 'titl...a8573fa73e188f1294', 'media_revision': '817a7753b2af5b8a9505fc6b1c2924b5bc8a0428cbace2ab1da1f0ca2a9c368b', ...}], ...}}
+E         Use -v to get more diff
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:102: AssertionError
+____ test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot _____
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C5A58C0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C56B750>)
+
+    def test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot(sandbox):
+        import podcasts
+        idx = _open_index(sandbox)
+        try:
+            episode_id, transcript_path = _seed_episode(sandbox, idx)
+            first = podcasts.episode_to_corpus(idx, episode_id, data_root=sandbox.root)
+            vid = first["video_id"]
+            before = {table: _rows(idx._conn, table, vid) for table in ("citations", "clips", "media_depth")}
+            old_corpus = Path(first["corpus_path"]).read_bytes()
+            transcript_path.write_text(json.dumps({"model": "base", "language": "en", "diarization_ran": False,
+                "segments": [{"start": 0.0, "end": 5.0, "text": "Replacement before projection failure."}]}), encoding="utf-8")
+    
+            def projection_failure(*args, **kwargs):
+                raise media.MediaError("library_unavailable", details={"reason": "injected_projection_failure"})
+    
+            sandbox.patch.setattr(media, "project_clips", projection_failure)
+            with pytest.raises(media.MediaError):
+                podcasts.episode_to_corpus(idx, episode_id, data_root=sandbox.root)
+            assert Path(first["corpus_path"]).read_bytes() == old_corpus
+            after = {table: _rows(idx._conn, table, vid) for table in before}
+>           assert after == before, "Pre-publication citation commit left new cues bound to old media"
+E           AssertionError: Pre-publication citation commit left new cues bound to old media
+E           assert {'citations':...c3c1b', ...}]} == {'citations':...c3c1b', ...}]}
+E             
+E             Omitting 1 identical items, use -vv to show
+E             Differing items:
+E             {'citations': [{'citation_id': 5, 'video_id': 'episode_16f75818107', 'kind': 'transcript_chunk', 'seq': 0, ...}]} != {'citations': [{'citation_id': 3, 'video_id': 'episode_16f75818107', 'kind': 'transcript_chunk', 'seq': 0, ...}, {'citation_id': 4, 'video_id': 'episode_16f75818107', 'kind': 'transcript_chunk', 'seq': 1, ...}]}
+E             {'clips': [{'clip_id': 1, 'video_id': 'episode_16f75818107', 'seq': 0, 'start': 0.0, ...}]} != {'clips': [{'clip_id': 1, 'video_id': 'episode_16f75818107', 'seq': 0, 'start': 0.0, ...}]}
+E             Use -v to get more diff
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:125: AssertionError
+_________ test_bd05_publication_preserves_another_owners_sidecar_edit _________
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C0F2F50>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C56B960>)
+
+    def test_bd05_publication_preserves_another_owners_sidecar_edit(sandbox):
+        conn = _db(sandbox)
+        f = _fixture(sandbox, key="bd05")
+        _seed(conn, f)
+        ticket = media.begin_publication(conn, "bd05")
+        disk = copy.deepcopy(f.sidecar)
+        disk["unrelated_owner"] = {"preserve": "new edit after ticket creation"}
+        path = Path(f.item["sidecar_path"])
+        path.write_text(json.dumps(disk), encoding="utf-8")
+        try:
+            media.publish_transcript(conn, "bd05", cues=f.cues, media_block=f.block,
+                                     artifacts=f.files, ticket=ticket)
+        except media.MediaError as exc:
+            assert exc.code == "revision_unavailable"
+>       assert json.loads(path.read_text(encoding="utf-8"))["unrelated_owner"] == disk["unrelated_owner"]
+E       AssertionError: assert {'preserve': ...eature-value'} == {'preserve': ...ket creation'}
+E         
+E         Differing items:
+E         {'preserve': 'concurrent-feature-value'} != {'preserve': 'new edit after ticket creation'}
+E         Use -v to get more diff
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:144: AssertionError
+_________ test_bd06_first_publication_preserves_a_user_edited_corpus __________
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C0F1350>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C56FED0>)
+
+    def test_bd06_first_publication_preserves_a_user_edited_corpus(sandbox):
+        conn = _db(sandbox)
+        f = _fixture(sandbox, key="bd06")
+        _seed(conn, f, materialized=False)
+        ticket = media.begin_publication(conn, "bd06")
+        path = Path(f.item["corpus_path"])
+        edited = path.read_bytes() + b"\nUser edit after the capture plan was built.\n"
+        path.write_bytes(edited)
+        try:
+            media.publish_transcript(conn, "bd06", cues=f.cues, media_block=f.block,
+                                     artifacts=f.files, ticket=ticket)
+        except media.MediaError as exc:
+            assert exc.code == "revision_unavailable"
+>       assert path.read_bytes() == edited, "Unmaterialized corpus bytes were overwritten"
+E       AssertionError: Unmaterialized corpus bytes were overwritten
+E       assert b'# Synthetic...troduction.\n' == b'# Synthetic... was built.\n'
+E         
+E         Use -v to get more diff
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:160: AssertionError
+_ test_bd07_export_requires_the_attributed_label_in_the_original_artifact[source] _
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C0D6B70>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CAF8D50>)
+origin = 'source'
+
+    @pytest.mark.parametrize("origin", ["source", "run"])
+    def test_bd07_export_requires_the_attributed_label_in_the_original_artifact(sandbox, origin):
+        conn = _db(sandbox)
+        f = _fixture(sandbox, key="bd07", origin=origin)
+        artifact = json.loads(f.files[str(_artifact_path(f))])
+        for row in artifact["transcript"]:
+            row.pop("speaker", None)
+        _replace_original(f, artifact)
+        _seed(conn, f)
+        result = _export(sandbox, conn, f, start=60, end=125)
+>       assert result["ok"] is False, "Export attributed a label absent from the sealed producer artifact"
+E       AssertionError: Export attributed a label absent from the sealed producer artifact
+E       assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:173: AssertionError
+_ test_bd07_export_requires_the_attributed_label_in_the_original_artifact[run] _
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111C0D47D0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C5FA4A0>)
+origin = 'run'
+
+    @pytest.mark.parametrize("origin", ["source", "run"])
+    def test_bd07_export_requires_the_attributed_label_in_the_original_artifact(sandbox, origin):
+        conn = _db(sandbox)
+        f = _fixture(sandbox, key="bd07", origin=origin)
+        artifact = json.loads(f.files[str(_artifact_path(f))])
+        for row in artifact["transcript"]:
+            row.pop("speaker", None)
+        _replace_original(f, artifact)
+        _seed(conn, f)
+        result = _export(sandbox, conn, f, start=60, end=125)
+>       assert result["ok"] is False, "Export attributed a label absent from the sealed producer artifact"
+E       AssertionError: Export attributed a label absent from the sealed producer artifact
+E       assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:173: AssertionError
+_____________ test_bd08_capture_seam_reports_publication_failure ______________
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111CD15FD0>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111C5D4590>)
+
+    def test_bd08_capture_seam_reports_publication_failure(sandbox):
+        idx = _open_index(sandbox)
+        try:
+            y = _youtube_sidecar(sandbox, "bd08")
+            ns = _server_namespace(idx)
+            y.corpus_path.write_text("# Supplied capture\n", encoding="utf-8")
+            y.sidecar_path.write_text(json.dumps(y.sidecar), encoding="utf-8")
+    
+            def refuse(*args, **kwargs):
+                raise media.MediaError("library_unavailable", details={"reason": "injected_projection_failure"})
+    
+            sandbox.patch.setattr(idx, "publish_media_snapshot", refuse)
+            try:
+                result = ns["_index_yoink"](y.folder, y.sidecar, y.corpus_path, y.sidecar_path)
+            except media.MediaError as exc:
+                assert exc.code == "library_unavailable"
+            else:
+>               assert result is False, "Capture reported success despite the publication refusal"
+E               AssertionError: Capture reported success despite the publication refusal
+E               assert True is False
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:194: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  bc2.server:server.py:2835 media publication refused for bd08: library_unavailable
+___ test_bd09_empty_capture_replacement_removes_old_transcript_and_chapters ___
+
+sandbox = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ad24fef7-fe2/codex/....esources.ReadGuard object at 0x000002111AD59D30>, patch=<_pytest.monkeypatch.MonkeyPatch object at 0x000002111CC8DCC0>)
+
+    def test_bd09_empty_capture_replacement_removes_old_transcript_and_chapters(sandbox):
+        idx = _open_index(sandbox)
+        try:
+            y = _youtube_sidecar(sandbox, "bd09")
+            ns = _server_namespace(idx)
+            y.corpus_path.write_text("# Supplied capture\n", encoding="utf-8")
+            y.sidecar_path.write_text(json.dumps(y.sidecar), encoding="utf-8")
+            assert ns["_index_yoink"](y.folder, y.sidecar, y.corpus_path, y.sidecar_path) is True
+            empty = dict(y.sidecar, transcript=[], source_chapters=[], screenshots=[])
+            empty.pop("media_depth", None)
+            y.sidecar_path.write_text(json.dumps(empty), encoding="utf-8")
+            assert ns["_index_yoink"](y.folder, empty, y.corpus_path, y.sidecar_path) is True
+>           assert [r for r in idx.get_citations("bd09") if r["kind"] == "transcript_chunk"] == []
+E           AssertionError: assert [{'citation_i...seq': 2, ...}] == []
+E             
+E             Left contains 3 more items, first extra item: {'citation_id': 1, 'video_id': 'bd09', 'kind': 'transcript_chunk', 'seq': 0, ...}
+E             Use -v to get more diff
+
+tests\library_work_astra\test_phase6_bd_acceptance.py:211: AssertionError
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot
+tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot
+tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot
+tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ad24fef7-fe2\codex\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd01_never_published_stale_snapshot_requires_original_ticket[raw]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd01_never_published_stale_snapshot_requires_original_ticket[index]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd02_wal_export_refuses_a_committed_concurrent_change[soft_delete]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd02_wal_export_refuses_a_committed_concurrent_change[hard_delete]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd02_wal_export_refuses_a_committed_concurrent_change[title]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd02_wal_export_refuses_a_committed_concurrent_change[media]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd04_podcast_projection_failure_preserves_coherent_old_snapshot
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd05_publication_preserves_another_owners_sidecar_edit
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd06_first_publication_preserves_a_user_edited_corpus
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd07_export_requires_the_attributed_label_in_the_original_artifact[source]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd07_export_requires_the_attributed_label_in_the_original_artifact[run]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd08_capture_seam_reports_publication_failure
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd09_empty_capture_replacement_removes_old_transcript_and_chapters
+14 failed, 4 warnings in 21.42s

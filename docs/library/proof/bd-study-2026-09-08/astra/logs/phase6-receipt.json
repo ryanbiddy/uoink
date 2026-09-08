@@ -1,0 +1,18 @@
+{
+  "suite": "phase6",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_phase6_evaluation.py",
+    "tests/test_phase6_bc2.py"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 51.258,
+  "started_unix_seconds": 1788905486.6320398,
+  "isolation": "offline_guard.py via PYTHONPATH/sitecustomize; all environment data/temp roots within _scratch/bd; no credentials"
+}

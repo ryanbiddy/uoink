@@ -1,0 +1,1988 @@
+{
+  "-JXwa-WlkU8": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 23.0,
+        "title": "Introduction: We're exploring the new features of YOLO11 and why it's a major update!",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 1,
+        "start": 23.0,
+        "end": 53.0,
+        "title": "Ultralytics YOLO11 Blog Overview: A brief look at the official YOLO11 blog and its resources.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 2,
+        "start": 53.0,
+        "end": 75.0,
+        "title": "Highlights of YOLO11 Model: Key updates that make YOLO11 stand out.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 3,
+        "start": 75.0,
+        "end": 124.0,
+        "title": "Benchmarks of YOLO11 vs. Other Models: See how YOLO11 performs against other models.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 4,
+        "start": 124.0,
+        "end": 137.0,
+        "title": "YOLO11 Model Features and Documentation Walkthrough: Detailed breakdown of YOLO11’s new features.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 5,
+        "start": 137.0,
+        "end": 158.0,
+        "title": "Key Features of Ultralytics YOLO11: Why this release is a big improvement.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 6,
+        "start": 158.0,
+        "end": 179.0,
+        "title": "YOLO11 Supported Tasks and Modes: Learn about the different tasks and modes YOLO11 supports.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 7,
+        "start": 179.0,
+        "end": 232.0,
+        "title": "YOLO11 Models Usage Examples: Real-world examples to get you up and running in no time!",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 8,
+        "start": 232.0,
+        "end": 331.0,
+        "title": "How to Use YOLO11 Models in Python: A step-by-step guide for using YOLO11 like a pro.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 9,
+        "start": 331.0,
+        "end": 441.0,
+        "title": "Ultralytics Package Upgrade: Make sure to update your Ultralytics package to use YOLO11.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 10,
+        "start": 441.0,
+        "end": 491.0,
+        "title": "Object Tracking with YOLO11 Models: Easily add tracking to your models for better results.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            10
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      },
+      {
+        "seq": 11,
+        "start": 491.0,
+        "end": 511.0,
+        "title": "Conclusion and Summary: Quick recap and what’s coming next for YOLO11.",
+        "provenance": {
+          "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            11
+          ],
+          "recorded_at": "2026-07-09T19:19:57"
+        },
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=-JXwa-WlkU8",
+      "seek_url": "https://www.youtube.com/watch?v=-JXwa-WlkU8",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "248f8424fa4c6916ede738ddf2a0814e50d04ea7d869617e6dcda970de108952",
+    "source_revision": "40c24882b171835bc7fe10781387a167a7b9dfd6485b6fcf05c8e91680e2aeac",
+    "artifact_sha256": "e2383ef698a345775fd80b0fe04c863882143a81041c17967891814ddee80714",
+    "transcript_cues_supplied": 0
+  },
+  "0FrcYhnHmLg": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 45.0,
+        "title": "Introduction & Co-host Banter",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 1,
+        "start": 45.0,
+        "end": 491.0,
+        "title": "Google I/O Overview & Gemini User Growth",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 2,
+        "start": 491.0,
+        "end": 782.0,
+        "title": "Antigravity & Agentic Coding at Google",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 3,
+        "start": 782.0,
+        "end": 1012.0,
+        "title": "Google Spark & Agentic Agents",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 4,
+        "start": 1012.0,
+        "end": 1229.0,
+        "title": "OpenAI Codex Mobile & Agent Workflows",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 5,
+        "start": 1229.0,
+        "end": 2313.0,
+        "title": "TLDR — Weekly AI News Roundup",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 6,
+        "start": 2313.0,
+        "end": 2782.0,
+        "title": "Google Gemini Omni — Multimodal AI",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 7,
+        "start": 2782.0,
+        "end": 2964.0,
+        "title": "Jeff Dean on Omni Architecture",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 8,
+        "start": 2964.0,
+        "end": 3555.0,
+        "title": "Cursor Composer 2.5",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      },
+      {
+        "seq": 9,
+        "start": 3555.0,
+        "end": 6558.0,
+        "title": "Anthropic & xAI / Colossus Infrastructure",
+        "provenance": {
+          "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-05-27T11:04:29"
+        },
+        "video_id": "0FrcYhnHmLg",
+        "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=0FrcYhnHmLg",
+      "seek_url": "https://www.youtube.com/watch?v=0FrcYhnHmLg",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "f71b19329f10e9a2714ffd859210ce5c4885fa0aa64845194f1ea57c05062b38",
+    "source_revision": "1a0079f21320a3a9e1ed7a1c0cf6d4faf6200c47ae2fff7a6e4370fa751a2ebd",
+    "artifact_sha256": "295d187fc5a70f1655f2f1746f9a264d77e5a741736e3cb6ff4c382a59f922ec",
+    "transcript_cues_supplied": 0
+  },
+  "4OmEbeR3BtI": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 53.0,
+        "title": "Start",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 1,
+        "start": 53.0,
+        "end": 89.0,
+        "title": "How the list works",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 2,
+        "start": 89.0,
+        "end": 225.0,
+        "title": "Amazon's hiring process",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 3,
+        "start": 225.0,
+        "end": 264.0,
+        "title": "How to get on the do-not-hire list",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 4,
+        "start": 264.0,
+        "end": 449.0,
+        "title": "Other things that get you flagged",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 5,
+        "start": 449.0,
+        "end": 527.0,
+        "title": "The innocent reason you end up on the list",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 6,
+        "start": 527.0,
+        "end": 693.0,
+        "title": "Misconceptions about the list",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 7,
+        "start": 693.0,
+        "end": 753.0,
+        "title": "How to know if you're on the list",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 8,
+        "start": 753.0,
+        "end": 904.0,
+        "title": "What can you do if you think you're on this list?",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      },
+      {
+        "seq": 9,
+        "start": 904.0,
+        "end": 1003.0,
+        "title": "Staying off the list",
+        "provenance": {
+          "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-07-07T23:04:44"
+        },
+        "video_id": "4OmEbeR3BtI",
+        "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=4OmEbeR3BtI",
+      "seek_url": "https://www.youtube.com/watch?v=4OmEbeR3BtI",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "e601438e3946562d80a1fd8369334ba42a07c2a9e9e925650cb142da41d88de7",
+    "source_revision": "080c5a0b8346992e1ef5a12be23fca1d18e7611d98d43af15bd965d6f2627b04",
+    "artifact_sha256": "4d70823da7825336a92ceb46c3c5369b59c5415768c841a46f469baaa3a03c1a",
+    "transcript_cues_supplied": 0
+  },
+  "647pSnX5H_Y": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 154.0,
+        "title": "Why most people get stuck on the agent scaffolding layer",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 1,
+        "start": 154.0,
+        "end": 339.0,
+        "title": "The mech suit metaphor — what actually surrounds an LLM",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 2,
+        "start": 339.0,
+        "end": 582.0,
+        "title": "The map: prompts, skills, plugins, MCPs, hooks, scripts",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 3,
+        "start": 582.0,
+        "end": 698.0,
+        "title": "Why now — GPT 5.5 and messy multi-part work",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 4,
+        "start": 698.0,
+        "end": 810.0,
+        "title": "Prompts: when one-offs are the right call",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 5,
+        "start": 810.0,
+        "end": 1042.0,
+        "title": "Skills: teaching a tool your house style",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 6,
+        "start": 1042.0,
+        "end": 1272.0,
+        "title": "Plugins: packaging a whole workflow your team can install",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 7,
+        "start": 1272.0,
+        "end": 1386.0,
+        "title": "MCPs and app connectors: live access to where work lives",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 8,
+        "start": 1386.0,
+        "end": 1527.0,
+        "title": "Hooks and scripts: the deterministic parts you don't trust the model with",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      },
+      {
+        "seq": 9,
+        "start": 1527.0,
+        "end": 1633.0,
+        "title": "Why the app store analogy undersells what plugins really are",
+        "provenance": {
+          "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-05-11T12:40:03"
+        },
+        "video_id": "647pSnX5H_Y",
+        "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=647pSnX5H_Y",
+      "seek_url": "https://www.youtube.com/watch?v=647pSnX5H_Y",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "e5ca990cad9a0105c2e7808d023c95b6902290b20da2be03453f88e4180f5444",
+    "source_revision": "3c81ef64a31a906325156ce742cdb5cc086451ddd82dedaf7ed788ee4ddb12ac",
+    "artifact_sha256": "bf68ce4da2d724f3334e4a79d67b24fa51a72b5ac89e4e82c1bc447c735ae0aa",
+    "transcript_cues_supplied": 0
+  },
+  "D4fkiQfzw_I": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 52.0,
+        "title": "Meet Marc Lou",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 1,
+        "start": 52.0,
+        "end": 96.0,
+        "title": "Morning routine",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 2,
+        "start": 96.0,
+        "end": 154.0,
+        "title": "Deep work",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 3,
+        "start": 154.0,
+        "end": 217.0,
+        "title": "Shipping 35 startups",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 4,
+        "start": 217.0,
+        "end": 312.0,
+        "title": "How Marc finds ideas",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 5,
+        "start": 312.0,
+        "end": 357.0,
+        "title": "Ship list",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 6,
+        "start": 357.0,
+        "end": 410.0,
+        "title": "The biggest barrier to success",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 7,
+        "start": 410.0,
+        "end": 471.0,
+        "title": "Validating ideas",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 8,
+        "start": 471.0,
+        "end": 511.0,
+        "title": "Evening routine",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 9,
+        "start": 511.0,
+        "end": 552.0,
+        "title": "Bed routine",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 10,
+        "start": 552.0,
+        "end": 603.0,
+        "title": "Advice to all builders",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            10
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      },
+      {
+        "seq": 11,
+        "start": 603.0,
+        "end": 639.0,
+        "title": "Don't you dare give up",
+        "provenance": {
+          "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            11
+          ],
+          "recorded_at": "2026-05-16T14:21:59"
+        },
+        "video_id": "D4fkiQfzw_I",
+        "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=D4fkiQfzw_I",
+      "seek_url": "https://www.youtube.com/watch?v=D4fkiQfzw_I",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "78b4b0bb3cf8b77bea67ef585236da45f26829fdbec4fe090f28e9c61af8e0d7",
+    "source_revision": "418dbef29e2500697b182d268f5749409632d6acdd8f4452d7495cff114dd648",
+    "artifact_sha256": "7a924876a0ae303e37ae83522d4364e7ab274c3887df6546711b707020e3c648",
+    "transcript_cues_supplied": 0
+  },
+  "D_FCYsshMI4": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 34.0,
+        "title": "<Untitled Chapter 1>",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      },
+      {
+        "seq": 1,
+        "start": 34.0,
+        "end": 126.0,
+        "title": "Why computer use",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      },
+      {
+        "seq": 2,
+        "start": 126.0,
+        "end": 221.0,
+        "title": "Codex works across local apps",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      },
+      {
+        "seq": 3,
+        "start": 221.0,
+        "end": 314.0,
+        "title": "Multiple apps at once",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      },
+      {
+        "seq": 4,
+        "start": 314.0,
+        "end": 515.0,
+        "title": "Screenshots plus accessibility data",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      },
+      {
+        "seq": 5,
+        "start": 515.0,
+        "end": 685.0,
+        "title": "App-by-app permissions",
+        "provenance": {
+          "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-16T14:21:48"
+        },
+        "video_id": "D_FCYsshMI4",
+        "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=D_FCYsshMI4",
+      "seek_url": "https://www.youtube.com/watch?v=D_FCYsshMI4",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "8d2f32760ae12a6a2af38fd30415a848be79540b98979556467b2983d8abc560",
+    "source_revision": "8c974917e95a74fb63e24578b1a27cc301a35c1c5a4fb4eae8788d2c4d0a6969",
+    "artifact_sha256": "a9c239323664bc963f91de5c2ca50e0b06f9dcfb5b3533bced3c139fa5f52e5b",
+    "transcript_cues_supplied": 0
+  },
+  "HIj8wU_rGIU": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 8.0,
+        "title": "Introduction",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 1,
+        "start": 8.0,
+        "end": 97.0,
+        "title": "How to start coding?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 2,
+        "start": 97.0,
+        "end": 294.0,
+        "title": "Why Learn Coding?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 3,
+        "start": 294.0,
+        "end": 573.0,
+        "title": "How to Start Coding?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 4,
+        "start": 573.0,
+        "end": 632.0,
+        "title": "Learn Basics of that language",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 5,
+        "start": 632.0,
+        "end": 731.0,
+        "title": "Create a Basic Application",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 6,
+        "start": 731.0,
+        "end": 1242.0,
+        "title": "Which language and tools should you use?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 7,
+        "start": 1242.0,
+        "end": 1448.0,
+        "title": "How to Choose a Project?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 8,
+        "start": 1448.0,
+        "end": 1692.0,
+        "title": "Learning path: Coding",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      },
+      {
+        "seq": 9,
+        "start": 1692.0,
+        "end": 1988.0,
+        "title": "What Kind of Jobs Can you Expect?",
+        "provenance": {
+          "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-05-10T20:57:09"
+        },
+        "video_id": "HIj8wU_rGIU",
+        "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=HIj8wU_rGIU",
+      "seek_url": "https://www.youtube.com/watch?v=HIj8wU_rGIU",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "7e3917201367587a52521e7dccbaceae06d882daa243fa87a5f26809a04f9483",
+    "source_revision": "2e36854ca2cef21d40632fe52637053e8d43965ec23126d077306b5825c4e577",
+    "artifact_sha256": "5fb18c6d736560250c734c9b69a4d7e555ca2fcdeea0feca8ebcc05a1107135b",
+    "transcript_cues_supplied": 0
+  },
+  "R6w5MBk1PsM": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 60.0,
+        "title": "welcome show begins",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 1,
+        "start": 60.0,
+        "end": 120.0,
+        "title": "tech check",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 2,
+        "start": 120.0,
+        "end": 300.0,
+        "title": "ed ludlow at CES",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 3,
+        "start": 300.0,
+        "end": 660.0,
+        "title": "outlook for nvidia and chips",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 4,
+        "start": 660.0,
+        "end": 840.0,
+        "title": "meta cuts fact checkers ahead of Trump presidency",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 5,
+        "start": 840.0,
+        "end": 1350.0,
+        "title": "politics and social media, censorship",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 6,
+        "start": 1350.0,
+        "end": 1620.0,
+        "title": "us adds Chinese firms to blacklist",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 7,
+        "start": 1620.0,
+        "end": 2220.0,
+        "title": "trump press conference",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      },
+      {
+        "seq": 8,
+        "start": 2220.0,
+        "end": 3595.0,
+        "title": "interview with Nvidia CEO Jensen Huang",
+        "provenance": {
+          "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-05-31T10:20:39"
+        },
+        "video_id": "R6w5MBk1PsM",
+        "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=R6w5MBk1PsM",
+      "seek_url": "https://www.youtube.com/watch?v=R6w5MBk1PsM",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "eb3cb4374c737391efe37c01125271c59b828fb9140f243cdb4bba68a90eb631",
+    "source_revision": "0f6c1c1fbb100959cc88c0b69528ab97b2c144633ff110478cb005d638753885",
+    "artifact_sha256": "06713ed15b1a93330f154ce896e2911ba6e8545dd1c42cf064ced871f72c7fa7",
+    "transcript_cues_supplied": 0
+  },
+  "Vh4O04Bpovw": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 64.0,
+        "title": "Exploring Biosphere 2",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 1,
+        "start": 64.0,
+        "end": 133.0,
+        "title": "Welcoming a special guest",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 2,
+        "start": 133.0,
+        "end": 205.0,
+        "title": "Symphony's challenging past",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 3,
+        "start": 205.0,
+        "end": 372.0,
+        "title": "Inside the closed system",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 4,
+        "start": 372.0,
+        "end": 446.0,
+        "title": "Problems with the experiment",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 5,
+        "start": 446.0,
+        "end": 500.0,
+        "title": "Modern research at the site",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 6,
+        "start": 500.0,
+        "end": 662.0,
+        "title": "The lung and the ocean",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 7,
+        "start": 662.0,
+        "end": 836.0,
+        "title": "Reflecting on resilience",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      },
+      {
+        "seq": 8,
+        "start": 836.0,
+        "end": 969.0,
+        "title": "A life-changing surprise",
+        "provenance": {
+          "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-07-06T21:54:34"
+        },
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=Vh4O04Bpovw",
+      "seek_url": "https://www.youtube.com/watch?v=Vh4O04Bpovw",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "a126f175895de4585b1d53f8502d3d326d04ce61a30492aa5d2194b0192215b9",
+    "source_revision": "ef4d34c541f8d9a22de21aeb7fe7eb0f85b78cd0980a1d5e5f5b8a65e0e21e7a",
+    "artifact_sha256": "0c2c62175c7474d2b6f1e96f738798da1df7d2b6a855bf8f71a934a76a547ab3",
+    "transcript_cues_supplied": 0
+  },
+  "WgPbbWmnXJ8": {
+    "ok": true,
+    "chapter_state": "present",
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 0.0,
+        "end": 128.0,
+        "title": "Introduction",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 1,
+        "start": 128.0,
+        "end": 210.0,
+        "title": "Chapter 1 - What is Object Detection?",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            1
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 2,
+        "start": 210.0,
+        "end": 376.0,
+        "title": "Chapter 2 - A Brief History",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            2
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 3,
+        "start": 376.0,
+        "end": 547.0,
+        "title": "Chapter 3 - Performance Evaluation Metrics",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            3
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 4,
+        "start": 547.0,
+        "end": 1163.0,
+        "title": "Chapter 4 - Installations",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            4
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 5,
+        "start": 1163.0,
+        "end": 1545.0,
+        "title": "Chapter 4.1 - Package Installations",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            5
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 6,
+        "start": 1545.0,
+        "end": 2234.0,
+        "title": "Chapter 5 - Running Yolo",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            6
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 7,
+        "start": 2234.0,
+        "end": 4097.0,
+        "title": "Chapter 6 - Yolo with Webcam",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            7
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 8,
+        "start": 4097.0,
+        "end": 4899.0,
+        "title": "Chapter 7 - Yolo with GPU",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            8
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 9,
+        "start": 4899.0,
+        "end": 5031.0,
+        "title": "Premium Courses",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            9
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 10,
+        "start": 5031.0,
+        "end": 8278.0,
+        "title": "Project 1 - Car Counter",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            10
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 11,
+        "start": 8278.0,
+        "end": 9101.0,
+        "title": "Project 2 - People Counter",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            11
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 12,
+        "start": 9101.0,
+        "end": 11179.0,
+        "title": "Project 3 - PPE Detection (Custom Training)",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            12
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      },
+      {
+        "seq": 13,
+        "start": 11179.0,
+        "end": 16427.0,
+        "title": "Project 4 - Poker Hand Detector",
+        "provenance": {
+          "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            13
+          ],
+          "recorded_at": "2026-07-09T19:20:50"
+        },
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397"
+      }
+    ],
+    "playback": {
+      "source_url": "https://www.youtube.com/watch?v=WgPbbWmnXJ8",
+      "seek_url": "https://www.youtube.com/watch?v=WgPbbWmnXJ8",
+      "seek_kind": "youtube"
+    },
+    "media_revision": "aafe98ed2b5272568a9a5b80f843a497d9feb52234285ef0a8e58c04b3937542",
+    "source_revision": "e9f44aac2018c7bc8fc3f45068ad50e4134ae884923a052b40b9953c1bc04397",
+    "artifact_sha256": "b2205a07f90cd1e4832ac9d9d2c167e4b318ce1f79f7512565eb8708cba3d9c5",
+    "transcript_cues_supplied": 0
+  }
+}

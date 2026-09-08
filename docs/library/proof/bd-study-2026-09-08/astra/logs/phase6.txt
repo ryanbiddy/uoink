@@ -1,0 +1,11 @@
+.................................                                        [100%]
+============================== warnings summary ===============================
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ad24fef7-fe2\codex\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+33 passed, 4 warnings in 50.84s

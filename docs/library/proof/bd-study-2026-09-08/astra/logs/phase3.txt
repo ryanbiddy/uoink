@@ -1,0 +1,15 @@
+........................................................................ [ 45%]
+........................................................................ [ 90%]
+...............                                                          [100%]
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase3_acceptance4.py::test_as4_s16_local_recovery_uses_capture_lock_without_execution_claim
+tests/library_work_astra/test_phase3_publication.py::test_s16_real_podcast_upsert_crash_does_not_enqueue
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ad24fef7-fe2\codex\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+159 passed, 6 warnings in 45.53s
