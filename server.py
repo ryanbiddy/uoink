@@ -3132,8 +3132,14 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
             errors=errors,
             **SUBPROCESS_KW,
         )
-    except BaseException:
-        if capture is not None:
+    except BaseException as exc:
+        # AS-02a: clear the launch intent only on affirmative evidence that
+        # no OS child was created (executable missing, not a directory, or
+        # invalid Popen arguments). An interruption after OS child creation
+        # but before Popen returns is not that evidence; the intent stays
+        # unresolved and the probe stays unknown.
+        if capture is not None and isinstance(
+                exc, (FileNotFoundError, NotADirectoryError, ValueError)):
             try:
                 source_subscriptions.resolve_child_launch_intent(
                     DATA_ROOT, capture["start_id"])
@@ -7527,7 +7533,9 @@ class _ManualOwnership:
     caller must block before any overwrite. A row that already existed
     before the wait is a deliberate manual re-extraction, the one explicit
     refresh semantic the manual paths have; it is never inferred from
-    having waited."""
+    having waited. AS-03c: reuse applies the common completeness/identity
+    checks before returning success; a partial publication or damaged
+    sidecar is never ``reused=True``."""
     __slots__ = ("lock", "error", "already_captured", "completed_while_waiting",
                  "conflict", "reused")
 
@@ -7579,6 +7587,19 @@ class _ManualOwnership:
         if existed_before:
             log.info("manual extraction of %s: corpus already held this video before the "
                      "request; the request re-extracts it deliberately", video_id)
+            return
+        # AS-03c: apply the common completeness/identity checks before
+        # returning success. A partial publication or damaged sidecar is
+        # recovery or an explicit failure, never reused=True.
+        evidence = None
+        try:
+            evidence = _source_service().publication_evidence_for_reuse(video_id)
+        except Exception:
+            evidence = None
+        if evidence is None or not evidence.complete:
+            if evidence is not None and evidence.conflict:
+                self.conflict = (f"the library row for {video_id} records another identity "
+                                 f"({evidence.reason}); refusing to overwrite it")
             return
         self.completed_while_waiting = True
         screenshots = 0
@@ -7656,6 +7677,7 @@ def _settle_source_capture(job_id: str, *, video_id: str | None,
         owner_token = job.get("_source_owner_token")
     if not start_id:
         return
+    outcome = None
     try:
         service = _source_service()
         backend = service.backend
@@ -7675,17 +7697,22 @@ def _settle_source_capture(job_id: str, *, video_id: str | None,
         log.info("standing capture %s settled: %s", start_id, outcome.get("outcome"))
     except Exception:
         log.exception("standing capture settle failed for %s", start_id)
+        outcome = None
     finally:
-        # AS-03: the standing start handed its capture-identity lock to this job.
-        try:
-            with _get_index()._lock:
-                row = _get_index()._conn.execute(
-                    "SELECT capture_key FROM source_capture_starts WHERE start_id=?",
-                    (start_id,)).fetchone()
-            if row is not None and hasattr(_source_service().backend, "release"):
-                _source_service().backend.release({"start_id": start_id, "capture_key": row[0]})
-        except Exception:
-            log.exception("standing capture lock release failed for %s", start_id)
+        # AS-03a: consume the verified settlement result. Retain the capture
+        # lock while child termination remains uncertain; exceptions and
+        # stale callbacks keep it too.
+        if source_subscriptions.settlement_releases_dispatcher_locks(outcome):
+            try:
+                with _get_index()._lock:
+                    row = _get_index()._conn.execute(
+                        "SELECT capture_key FROM source_capture_starts WHERE start_id=?",
+                        (start_id,)).fetchone()
+                if row is not None and hasattr(_source_service().backend, "release"):
+                    _source_service().backend.release(
+                        {"start_id": start_id, "capture_key": row[0]})
+            except Exception:
+                log.exception("standing capture lock release failed for %s", start_id)
 
 
 def _ensure_podcast_transcription_worker() -> threading.Thread:
@@ -7864,8 +7891,9 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     kind = "server_capture"
 
     def __init__(self):
-        # AS-03: capture_key -> (CaptureLock, holds_extract_lock). Guarded by
-        # _source_capture_threads_lock so the class needs no lock of its own.
+        # AS-03b: capture_key -> (CaptureLock, holds_extract_lock, start_id).
+        # Guarded by _source_capture_threads_lock so the class needs no lock
+        # of its own. Release is bound to the owning start.
         self._leases: dict = {}
         # AS-02 (run AT-4): start_id -> the observed ``run`` invocation in
         # this process: owner token, incarnation, whether it returned and
@@ -7945,22 +7973,32 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 _extract_lock.release()
             return source_subscriptions.CaptureOutcome("busy", code=code)
         with _source_capture_threads_lock:
-            self._leases[key] = (lock, holds_extract)
+            self._leases[key] = (lock, holds_extract, start["start_id"])
         return None
 
     def owns(self, capture_key) -> bool:
         """Whether this backend currently holds the capture-identity lock
-        (a lease taken by ``acquire``/``_ensure_ownership`` in this process)."""
+        (a lease taken by ``acquire``/``_ensure_ownership`` in this process).
+        AS-03b: reconciliation reuses this retained ownership."""
         with _source_capture_threads_lock:
             lease = self._leases.get(capture_key)
         return lease is not None and lease[0] is not None and lease[0].held
 
     def release(self, start):
+        # AS-03b: idempotent and bound to the owning start; a release for
+        # another start on this capture key leaves the lease in place.
+        key = start["capture_key"]
         with _source_capture_threads_lock:
-            lease = self._leases.pop(start["capture_key"], None)
+            lease = self._leases.get(key)
+            if lease is None:
+                return
+            owner = lease[2] if len(lease) > 2 else None
+            if owner is not None and owner != start.get("start_id"):
+                return
+            lease = self._leases.pop(key, None)
         if lease is None:
             return
-        lock, holds_extract = lease
+        lock, holds_extract = lease[0], lease[1]
         if lock is not None:
             lock.release()
         if holds_extract:
@@ -7974,11 +8012,15 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         still runs under the shared dispatcher lock: wait for it within the
         manual bound. AS-03: an OS-lock error or an exhausted wait is
         unavailable ownership (``CaptureOwnershipUnavailable``); the process
-        lock is never substituted for the shared lock."""
+        lock is never substituted for the shared lock. AS-03b: ownership
+        already retained for this identity is reused and rebound to the
+        live start."""
         with _source_capture_threads_lock:
-            owned = start["capture_key"] in self._leases
-        if owned:
-            return
+            current = self._leases.get(start["capture_key"])
+            if current is not None:
+                self._leases[start["capture_key"]] = (
+                    current[0], current[1], start["start_id"])
+                return
         _extract_lock.acquire()
         try:
             lock = source_subscriptions.CaptureLock.acquire(
@@ -7994,7 +8036,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             raise source_subscriptions.CaptureOwnershipUnavailable(
                 "capture identity lock held by another dispatcher")
         with _source_capture_threads_lock:
-            self._leases[start["capture_key"]] = (lock, True)
+            self._leases[start["capture_key"]] = (lock, True, start["start_id"])
 
     def preflight(self, item, source):
         if source["kind"] == "podcast_rss":
@@ -8098,6 +8140,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             start_id, owner_token, self.kind, "worker_finished")
 
         def _worker():
+            release_locks = False
             try:
                 # AS-03: acquire() already holds the dispatcher lock and the
                 # capture-identity lock through publication; a worker reached
@@ -8107,9 +8150,11 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     self._ensure_ownership(start)
                 except source_subscriptions.CaptureOwnershipUnavailable as exc:
                     log.warning("standing capture %s: %s", start_id, exc)
-                    _source_service().fail_capture(start_id, owner_token,
-                                                   "capture_ownership_unavailable",
-                                                   terminal=False, proof=proof)
+                    outcome = _source_service().fail_capture(
+                        start_id, owner_token, "capture_ownership_unavailable",
+                        terminal=False, proof=proof)
+                    release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                        outcome)
                     return
                 # AS-02: re-read ownership and state after waiting for the
                 # lock; an attempt that was failed, replaced or settled while
@@ -8121,6 +8166,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 if current.get("outcome") != "active" or not self.holds_execution(start):
                     log.warning("standing capture %s no longer owns its start (%s); not run",
                                 start_id, current.get("outcome"))
+                    # AS-03a: a stale callback releases only if this start is
+                    # already terminal; otherwise retain the locks.
+                    release_locks = current.get("state") in (
+                        "succeeded", "failed", "released")
                     return
                 incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
                 with source_subscriptions.capture_context(start_id, incarnation):
@@ -8141,6 +8190,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # state and this proof (verified against this very thread).
                 outcome = _source_service().complete_capture(
                     start_id, owner_token, published, proof=proof)
+                release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                    outcome)
                 if outcome.get("outcome") == "succeeded":
                     _heartbeat_note_ingest()
                     maybe_toast("Source capture added to Uoink",
@@ -8148,18 +8199,23 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             except BaseException as exc:
                 # Rate limits and download errors are transient for the ledger
                 # (three actual starts, then blocked); identity errors were
-                # rejected at preflight before any charge.
+                # rejected at preflight before any charge. AS-03a: exceptions
+                # retain the capture lock and the process lock unless
+                # fail_capture verified a terminal commit.
                 code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
                 try:
-                    _source_service().fail_capture(start_id, owner_token, code, terminal=False,
-                                                   proof=proof)
+                    outcome = _source_service().fail_capture(
+                        start_id, owner_token, code, terminal=False, proof=proof)
+                    release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                        outcome)
                 except Exception:
                     log.exception("standing capture: fail_capture raised for %s", start_id)
                 log.warning("standing capture %s failed: %s", start_id, _sanitize_error(str(exc)))
             finally:
                 with _source_capture_threads_lock:
                     _source_capture_threads.pop(start_id, None)
-                self.release(start)
+                if release_locks:
+                    self.release(start)
 
         thread = threading.Thread(target=_worker, name=f"source-capture-{start_id[-8:]}",
                                   daemon=True)

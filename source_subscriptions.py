@@ -1237,6 +1237,12 @@ class CaptureBackend:
         off to an in-flight worker."""
         return None
 
+    def owns(self, capture_key: str) -> bool:
+        """AS-03b: whether this backend currently holds the capture-identity
+        lock for ``capture_key`` (ownership retained for an in-flight start).
+        The base rule holds nothing."""
+        return False
+
     def bind(self, conn, start: dict, item: dict, source: dict) -> str:
         return start["start_id"]
 
@@ -1738,13 +1744,32 @@ def _process_created_ms(pid: int) -> int | None:
 _CHILD_RECORD_LOCK = threading.Lock()
 
 
+def _child_record_bound(record: dict | None, start_id: str) -> bool:
+    """AS-02b: a child record is this start's evidence only when it is an
+    object bound to ``start_id`` whose ``children`` field is a list of
+    objects. A missing field, a non-object entry or another start_id is
+    not absence."""
+    if type(record) is not dict:
+        return False
+    if record.get("start_id") != start_id:
+        return False
+    children = record.get("children")
+    if type(children) is not list:
+        return False
+    return all(type(child) is dict for child in children)
+
+
 def _child_record_or_raise(path: str, start_id: str) -> dict:
-    """Load a child-ownership record; damaged files are not treated as empty."""
+    """Load a child-ownership record; damaged files and schema/binding
+    failures are not treated as empty (AS-02b). Write helpers must not
+    replace damaged evidence with empty children."""
     status, record = _load_ownership_record(path)
     if status == "damaged":
         raise OSError(f"child ownership record for {start_id} is damaged")
     if record is None:
         return {"start_id": start_id, "children": []}
+    if not _child_record_bound(record, start_id):
+        raise OSError(f"child ownership record for {start_id} is damaged")
     return record
 
 
@@ -1764,14 +1789,15 @@ def record_child_launch_intent(root, start_id: str, instance: str | None) -> Non
 
 
 def resolve_child_launch_intent(root, start_id: str) -> None:
-    """AS-02: clear an unresolved launch after spawn is known not to have
-    created a child (``Popen`` failed). Write errors propagate."""
+    """AS-02a: clear an unresolved launch only after spawn is known not to
+    have created a child. Schema-invalid records are not rewritten as empty
+    children (AS-02b). Write errors propagate."""
     path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
     with _CHILD_RECORD_LOCK:
         status, record = _load_ownership_record(path)
         if status == "missing":
             return
-        if status == "damaged":
+        if status == "damaged" or not _child_record_bound(record, start_id):
             raise OSError(f"child ownership record for {start_id} is damaged")
         if not record.get("unresolved_launch"):
             return
@@ -1788,7 +1814,7 @@ def record_child_start(root, start_id: str, pid: int, instance: str | None) -> N
     path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
     with _CHILD_RECORD_LOCK:
         record = _child_record_or_raise(path, start_id)
-        children = record.get("children") if isinstance(record.get("children"), list) else []
+        children = list(record["children"])
         children.append({"pid": int(pid), "created_ms": _process_created_ms(int(pid)),
                          "instance": instance, "started_ms": int(time.time() * 1000),
                          "ended_ms": None})
@@ -1802,11 +1828,11 @@ def record_child_start(root, start_id: str, pid: int, instance: str | None) -> N
 def record_child_end(root, start_id: str, pid: int) -> None:
     path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
     with _CHILD_RECORD_LOCK:
-        record = _read_ownership_record(path)
-        if record is None:
+        status, record = _load_ownership_record(path)
+        if status != "ok" or not _child_record_bound(record, start_id):
             return
-        for child in record.get("children") or []:
-            if isinstance(child, dict) and child.get("pid") == int(pid) and child.get("ended_ms") is None:
+        for child in record["children"]:
+            if child.get("pid") == int(pid) and child.get("ended_ms") is None:
                 child["ended_ms"] = int(time.time() * 1000)
         try:
             _write_ownership_record(path, record)
@@ -1829,11 +1855,13 @@ def child_ownership_liveness(root, start_id: str) -> str:
         _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id))
     if status == "missing":
         return "none"
-    if status == "damaged":
+    # AS-02b: missing/malformed required fields and invalid entries stay
+    # unknown; they are never interpreted as no children.
+    if status == "damaged" or not _child_record_bound(record, start_id):
         return "unknown"
     verdict = "none"
-    for child in record.get("children") or []:
-        if not isinstance(child, dict) or child.get("ended_ms") is not None:
+    for child in record["children"]:
+        if child.get("ended_ms") is not None:
             continue
         pid = child.get("pid")
         if type(pid) is not int or pid <= 0:
@@ -1857,6 +1885,19 @@ def child_termination_established(root, start_id: str) -> bool:
     (no child evidence, or every recorded child is gone with no unresolved
     launch). A live or unknown child keeps ownership uncertain."""
     return child_ownership_liveness(root, start_id) in ("none", "dead")
+
+
+def settlement_releases_dispatcher_locks(outcome: dict | None) -> bool:
+    """AS-03a: callback cleanup may drop the capture lock (and the YouTube
+    process lock) only after a verified terminal ledger result. Exceptions,
+    stale callbacks and uncertain children keep both."""
+    if type(outcome) is not dict:
+        return False
+    result = outcome.get("outcome")
+    if result in ("succeeded", "failed"):
+        return True
+    return result == "not_started" and outcome.get("state") in (
+        "succeeded", "failed", "released")
 
 
 @dataclass(frozen=True)
@@ -2363,6 +2404,31 @@ class SourceSubscriptionService:
         if published != video_id:
             return PublicationEvidence(video_id, False, "publisher_incomplete", row=row)
         return PublicationEvidence(video_id, True, None, row=row)
+
+    def publication_evidence_for_reuse(self, video_id: str) -> PublicationEvidence:
+        """AS-03c: the common completeness/identity check a manual waiter
+        applies before reporting a corpus row as a reusable completed
+        capture. Mere row presence is not completeness."""
+        if type(video_id) is not str or not video_id.strip():
+            return PublicationEvidence(video_id, False, "corpus_row_missing")
+        with self.store.read() as conn:
+            item = _row(conn.execute(
+                "SELECT * FROM source_items WHERE entry_id=? OR video_id=? OR capture_key=? "
+                "ORDER BY CASE WHEN video_id=? THEN 0 WHEN entry_id=? THEN 1 ELSE 2 END "
+                "LIMIT 1",
+                (video_id, video_id, "youtube:" + video_id, video_id, video_id)).fetchone())
+            if item is None:
+                return PublicationEvidence(video_id, False, "corpus_row_missing")
+            source = self._source(conn, item["source_id"])
+            start = _row(conn.execute(
+                "SELECT * FROM source_capture_starts WHERE item_id=? "
+                "ORDER BY COALESCE(started_at_ms, 0) DESC LIMIT 1",
+                (item["item_id"],)).fetchone())
+            expected = self._corpus_video_id(source, item["entry_id"])
+            if expected != video_id:
+                return PublicationEvidence(
+                    video_id, False, "identity_conflict:callback", conflict=True)
+            return self._publication_evidence(conn, source, item, video_id, start=start)
 
     # ======================================================================
     # Registration (contract, "Source identity and detection"; registry)
@@ -3366,7 +3432,8 @@ class SourceSubscriptionService:
             # Unstarted and verified-terminal exits release it, including
             # consent rejection, synchronous failure and claim-store failure.
             handed_off = result.get("outcome") in (
-                "in_flight", "worker_not_stopped", "uncertain")
+                "in_flight", "worker_not_stopped", "uncertain",
+                "publication_incomplete")
             return result
         finally:
             if not handed_off:
@@ -3394,7 +3461,9 @@ class SourceSubscriptionService:
     def _release_dispatcher_ownership(self, claim: dict) -> None:
         """AS-03: release capture-lock / _extract_lock ownership taken by
         ``acquire``. Distinct from ``_release_execution_claim`` (claim-file
-        cleanup); the previous shared name shadowed this method."""
+        cleanup); the previous shared name shadowed this method. AS-03b:
+        idempotent and bound to the owning start (the backend ignores a
+        release whose start_id does not hold the lease)."""
         try:
             _backend_call(self.backend, "release",
                           {"start_id": claim["start_id"], "owner_token": claim["owner_token"],
@@ -3402,6 +3471,13 @@ class SourceSubscriptionService:
                            "item_id": claim["item_id"]})
         except Exception:
             log.exception("execution lock release raised for %s", claim["start_id"])
+
+    def _release_terminal_ownership(self, start: dict) -> None:
+        """AS-03b: after a verified terminal ledger commit, drop the
+        execution claim and any dispatcher locks this start retained.
+        Idempotent and bound to the owning start."""
+        self._release_execution_claim(start)
+        self._release_dispatcher_ownership(start)
 
     def _pick_item(self, conn, source: dict, item_id: str | None, now: int) -> dict | None:
         sql = ("SELECT * FROM source_items WHERE source_id=? AND state='eligible' "
@@ -3817,41 +3893,49 @@ class SourceSubscriptionService:
         if type(video_id) is not str or not video_id.strip():
             return self.fail_capture(start_id, owner_token, "publication_without_identity",
                                      now=now, proof=proof)
+        result = None
+        terminal = False
         with self.store.write() as conn:
             start = self._start(conn, start_id)
             if start is None or start["owner_token"] != owner_token:
                 return {"outcome": "not_owner", "start_id": start_id}
             if start["state"] == "succeeded" and start["video_id"] == video_id:
-                return {"outcome": "succeeded", "start_id": start_id, "video_id": video_id,
-                        "idempotent": True}
-            if start["state"] not in ("started", "uncertain"):
+                result = {"outcome": "succeeded", "start_id": start_id, "video_id": video_id,
+                          "idempotent": True}
+                terminal = True
+            elif start["state"] not in ("started", "uncertain"):
                 return {"outcome": "not_started", "state": start["state"], "start_id": start_id}
-            item = self._item(conn, start["item_id"])
-            source = self._source(conn, start["source_id"])
-            expected = self._corpus_video_id(source, item["entry_id"])
-            if video_id != expected:
-                evidence = PublicationEvidence(video_id, False, "identity_conflict:callback",
-                                               conflict=True)
             else:
-                evidence = self._publication_evidence(conn, source, item, video_id, start=start)
-            if not evidence.complete:
-                result = self._settle_incomplete(conn, start, item, evidence, proof, now)
-                if result.get("outcome") != "failed":
-                    return result
-                # A terminal failure commits with this transaction; the
-                # execution claim is released only after that (AS-02, run AT-4).
-            else:
-                # AS-02: terminal executor evidence before success releases the
-                # source's active ownership; an unknown executor keeps the
-                # attempt in flight with the complete publication visible.
-                if not self._worker_terminal(start, proof):
-                    state = self._hold_uncertain(conn, start)
-                    return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
-                            "item_id": start["item_id"], "source_id": start["source_id"],
-                            "video_id": video_id, "publication": "complete"}
-                result = self._commit_success(conn, start, video_id, now)
-        self._release_execution_claim(start)
-        if result.get("outcome") == "succeeded":
+                item = self._item(conn, start["item_id"])
+                source = self._source(conn, start["source_id"])
+                expected = self._corpus_video_id(source, item["entry_id"])
+                if video_id != expected:
+                    evidence = PublicationEvidence(video_id, False, "identity_conflict:callback",
+                                                   conflict=True)
+                else:
+                    evidence = self._publication_evidence(conn, source, item, video_id, start=start)
+                if not evidence.complete:
+                    result = self._settle_incomplete(conn, start, item, evidence, proof, now)
+                    if result.get("outcome") != "failed":
+                        return result
+                    # A terminal failure commits with this transaction; the
+                    # execution claim and dispatcher locks are released only
+                    # after that (AS-02, AS-03b).
+                    terminal = True
+                else:
+                    # AS-02: terminal executor evidence before success releases the
+                    # source's active ownership; an unknown executor keeps the
+                    # attempt in flight with the complete publication visible.
+                    if not self._worker_terminal(start, proof):
+                        state = self._hold_uncertain(conn, start)
+                        return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
+                                "item_id": start["item_id"], "source_id": start["source_id"],
+                                "video_id": video_id, "publication": "complete"}
+                    result = self._commit_success(conn, start, video_id, now)
+                    terminal = True
+        if terminal:
+            self._release_terminal_ownership(start)
+        if result.get("outcome") == "succeeded" and not result.get("idempotent"):
             self._test_boundary("after_outbox_commit")
         return result
 
@@ -3921,9 +4005,9 @@ class SourceSubscriptionService:
                         "item_id": start["item_id"], "source_id": start["source_id"], "code": code}
             item = self._item(conn, start["item_id"])
             result = self._fail(conn, start, item, code, terminal, now)
-        # AS-02 (run AT-4): the execution claim outlives the row only until
-        # its terminal transition committed.
-        self._release_execution_claim(start)
+        # AS-02/AS-03b: the execution claim and dispatcher locks outlive the
+        # row only until its terminal transition committed.
+        self._release_terminal_ownership(start)
         return result
 
     @staticmethod
@@ -4089,15 +4173,23 @@ class SourceSubscriptionService:
         lock_start = {"start_id": start["start_id"], "owner_token": start["owner_token"],
                       "capture_key": start["capture_key"], "source_id": start["source_id"],
                       "item_id": start["item_id"]}
+        # AS-03b: reuse ownership retained for this start; do not try to
+        # acquire a lock this process already holds.
+        reused_ownership = False
         try:
-            busy = _backend_call(self.backend, "acquire", lock_start, dict(item), dict(source))
+            reused_ownership = bool(_backend_call(self.backend, "owns", start["capture_key"]))
         except Exception:
-            log.exception("capture lock acquisition raised during recovery of %s", start["start_id"])
-            return "busy"
-        if busy is not None:
-            log.info("publication recovery for %s deferred: capture identity busy (%s)",
-                     start["start_id"], getattr(busy, "code", None))
-            return "busy"
+            reused_ownership = False
+        if not reused_ownership:
+            try:
+                busy = _backend_call(self.backend, "acquire", lock_start, dict(item), dict(source))
+            except Exception:
+                log.exception("capture lock acquisition raised during recovery of %s", start["start_id"])
+                return "busy"
+            if busy is not None:
+                log.info("publication recovery for %s deferred: capture identity busy (%s)",
+                         start["start_id"], getattr(busy, "code", None))
+                return "busy"
         try:
             try:
                 recovered = _backend_call(self.backend, "recover_publication", dict(start),
@@ -4114,10 +4206,15 @@ class SourceSubscriptionService:
             done = self.complete_capture(start["start_id"], start["owner_token"], expected, now=now)
             return "succeeded" if done.get("outcome") == "succeeded" else "unrecovered"
         finally:
-            try:
-                _backend_call(self.backend, "release", lock_start)
-            except Exception:
-                log.exception("capture lock release raised after recovery of %s", start["start_id"])
+            # A lock acquired here is released if this call did not reach a
+            # terminal commit (complete_capture releases on success). Ownership
+            # reused from this start is left for the caller's verified-terminal
+            # cleanup so fail_capture can release after the ledger commit.
+            if not reused_ownership:
+                try:
+                    _backend_call(self.backend, "release", lock_start)
+                except Exception:
+                    log.exception("capture lock release raised after recovery of %s", start["start_id"])
 
     def reconcile_start(self, start_id: str, now: int | None = None) -> dict:
         """Trusted recovery for one ledger row (a resumed job that lost its
