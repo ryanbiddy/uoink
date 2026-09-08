@@ -50,10 +50,14 @@ the literal BD-0 wording, read before relying on the behaviour:
    exported player command. Fixture blocks may carry ``media_fragment``.
 5. **Export** validates referenced artifacts by bytes (bounded read, digest,
    JSON object, descriptor locator and the contract's source-record match)
-   through ``_verify_artifacts``, shared with publication and rebuild. The
+   through ``_verify_artifacts``, shared with publication and rebuild.
+   Claimed source and run labels must appear on the matching producer
+   record; digest validity alone does not attribute speech. The coherent
    read runs in one deferred SQLite transaction with the connection's busy
-   timeout bounded by the remaining Phase 4 deadline, then rechecks the
-   item, corpus, sidecar and artifact signatures before answering. The
+   timeout bounded by the remaining Phase 4 deadline. The final item/media
+   recheck then takes a new snapshot so a second WAL connection's committed
+   deletion or source/media change is visible (rollback-journal writers
+   still cannot commit while the coherent read is open). The
    registry/stdio adapter (``export_cited_range_tool``) admits through the
    Phase 4 process guard, binds only an existing index and waits for the
    index lock no longer than that deadline.
@@ -1114,12 +1118,32 @@ def _chapter_record_matches(record, chapter: dict) -> bool:
         and record.get("title") == chapter["title"]
 
 
-def _cue_record_matches(record, cue: dict) -> bool:
+def _cue_record_matches(record, cue: dict, *, speaker=_MISSING) -> bool:
+    """The producer element named by a cue descriptor (or the run
+    assignment at the same ``seq``) must carry the stored cue's text and
+    times. When ``speaker`` is supplied, that claimed label must be
+    explicit on the same record; digest validity is not attribution."""
     if not isinstance(record, dict):
         return False
-    return record.get("text") == cue.get("text") \
-        and _number_equal(record.get("start"), cue.get("timestamp_start")) \
-        and _number_equal(record.get("end"), cue.get("timestamp_end"))
+    if record.get("text") != cue.get("text") \
+            or not _number_equal(record.get("start"), cue.get("timestamp_start")) \
+            or not _number_equal(record.get("end"), cue.get("timestamp_end")):
+        return False
+    if speaker is _MISSING:
+        return True
+    return record.get("speaker") == speaker
+
+
+def _run_assignment_collection(artifact):
+    """Ordered assignment list in a diarization-run artifact. Fixtures
+    archive ``transcript``; production WhisperX output uses ``segments``."""
+    if not isinstance(artifact, dict):
+        return None
+    for key in ("transcript", "segments"):
+        value = artifact.get(key)
+        if isinstance(value, list):
+            return value
+    return None
 
 
 def _verify_artifacts(folder: Path, block: dict, cues: list[dict], *,
@@ -1127,7 +1151,8 @@ def _verify_artifacts(folder: Path, block: dict, cues: list[dict], *,
     """Shared artifact validator for publication, rebuild and export: every
     referenced ``.media-inputs`` artifact must exist, hash to its digest,
     parse as a JSON object and, for each producer descriptor, contain the
-    record its locator names with the stored chapter/cue values. Returns
+    record its locator names with the stored chapter/cue values. A claimed
+    source or run label must be present on that producer record. Returns
     ``{digest: (size, mtime_ns) | None}`` signatures for a later recheck."""
     folder = Path(folder)
     parsed: dict[str, dict] = {}
@@ -1155,16 +1180,27 @@ def _verify_artifacts(folder: Path, block: dict, cues: list[dict], *,
         if record is _MISSING or not _chapter_record_matches(record, chapter):
             raise _invalid("chapter_record_mismatch", seq=chapter["seq"])
     by_seq = {cue.get("seq"): cue for cue in cues}
+    run_by_id = {run["run_id"]: run for run in block["runs"]}
     for annotation in block["cues"]:
-        descriptor = (annotation.get("speaker_provenance") or {}).get("source")
-        if not descriptor:
-            continue
-        collection = _locate(parsed[descriptor["artifact_sha256"]], descriptor["record_locator"])
+        provenance = annotation.get("speaker_provenance") or {}
         seq = annotation["seq"]
         cue = by_seq.get(seq)
+        speaker = annotation.get("speaker")
+        descriptor = provenance.get("source")
+        if descriptor:
+            collection = _locate(parsed[descriptor["artifact_sha256"]], descriptor["record_locator"])
+            if not isinstance(collection, list) or cue is None or not (0 <= seq < len(collection)) \
+                    or not _cue_record_matches(collection[seq], cue, speaker=speaker):
+                raise _invalid("cue_record_mismatch", seq=seq)
+            continue
+        if speaker is None or provenance.get("origin") != "diarization_run":
+            continue
+        run = run_by_id.get(provenance.get("run_id"))
+        collection = _run_assignment_collection(
+            parsed.get(run["artifact_sha256"]) if run else None)
         if not isinstance(collection, list) or cue is None or not (0 <= seq < len(collection)) \
-                or not _cue_record_matches(collection[seq], cue):
-            raise _invalid("cue_record_mismatch", seq=seq)
+                or not _cue_record_matches(collection[seq], cue, speaker=speaker):
+            raise _invalid("run_assignment_mismatch", seq=seq)
     return signatures
 
 
@@ -1252,7 +1288,9 @@ def _read_snapshot(conn: sqlite3.Connection, video_id: str) -> _Snapshot:
 def _recheck_snapshot(conn: sqlite3.Connection, snap: _Snapshot) -> None:
     """Final source/media recheck after the export body is built: the item
     is still current, the corpus bytes, the sidecar and every referenced
-    artifact are unchanged since the coherent read began."""
+    artifact are unchanged since the coherent read began. Must run on a
+    fresh SQLite snapshot (not the deferred read that built the body) so a
+    second WAL connection's committed deletion or revision is visible."""
     item = _load_item(conn, snap.item["video_id"])
     if item.get("title") != snap.item.get("title") or item.get("corpus_path") != snap.item.get("corpus_path") \
             or item.get("metadata_json") != snap.item.get("metadata_json"):
@@ -2326,10 +2364,12 @@ def _export_excerpt(snap: _Snapshot, request: dict, check) -> dict:
 
 
 class _ReadTransaction:
-    """One deferred SQLite read transaction for the whole export, with the
-    connection's busy timeout bounded by the time left before ``deadline``
-    so a writer holding the database yields ``deadline_exceeded`` (via the
-    storage error path) instead of an unbounded wait. Never commits."""
+    """One deferred SQLite read transaction for the coherent export body,
+    with the connection's busy timeout bounded by the time left before
+    ``deadline`` so a writer holding the database yields
+    ``deadline_exceeded`` (via the storage error path) instead of an
+    unbounded wait. Never commits. ``refresh`` drops that snapshot and
+    opens a new deferred read so the final recheck can see WAL commits."""
 
     __slots__ = ("conn", "clock", "deadline", "began", "restore")
 
@@ -2339,6 +2379,24 @@ class _ReadTransaction:
         self.deadline = deadline
         self.began = False
         self.restore = None
+
+    def _begin_deferred(self) -> None:
+        if not self.conn.in_transaction:
+            self.conn.execute("BEGIN DEFERRED")
+            self.began = True
+
+    def refresh(self) -> None:
+        """End the coherent-read snapshot and begin a new deferred
+        transaction. A second WAL connection's committed change is then
+        visible; rollback-journal writers still cannot commit while the
+        original snapshot is held."""
+        if self.began and self.conn.in_transaction:
+            try:
+                self.conn.rollback()
+            except sqlite3.Error:
+                pass
+            self.began = False
+        self._begin_deferred()
 
     def __enter__(self):
         remaining_ms = max(0, int((self.deadline - float(self.clock())) * 1000.0))
@@ -2352,9 +2410,7 @@ class _ReadTransaction:
             self.conn.execute(f"PRAGMA busy_timeout={min(remaining_ms, ceiling_ms)}")
         except sqlite3.Error:
             self.restore = None
-        if not self.conn.in_transaction:
-            self.conn.execute("BEGIN DEFERRED")
-            self.began = True
+        self._begin_deferred()
         return self
 
     def __exit__(self, exc_type, exc, tb):
@@ -2379,7 +2435,7 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
     if conn is None:
         raise MediaError("library_unavailable", details={"reason": "no_storage"})
     check()
-    with _ReadTransaction(conn, clock, deadline):
+    with _ReadTransaction(conn, clock, deadline) as tx:
         snap = _read_snapshot(conn, request["video_id"])
         check()
         block = snap.block
@@ -2388,6 +2444,9 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
                 raise _stale(key + "_mismatch")
         body = _export_range(snap, request, check) if request["mode"] == "range" else _export_excerpt(snap, request, check)
         check()
+        # The deferred snapshot that built the body cannot see a second WAL
+        # connection's commit; refresh so the final recheck can refuse it.
+        tx.refresh()
         _recheck_snapshot(conn, snap)
     item = snap.item
     result = {
