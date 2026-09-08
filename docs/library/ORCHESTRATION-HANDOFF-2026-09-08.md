@@ -50,15 +50,15 @@ takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and t
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (HEAD `eb58fe1`, 268 commits ahead of `3e06c65`, not pushed)
+## State at handoff (updated 2026-09-08 ~10:20 PDT; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | Round 5: AS-01/04/05/06 closed; AS-02 (2) and AS-03 (3) open, 12 reproductions in `tests/library_work_astra/test_phase3_acceptance5.py` | `PHASE3-ACCEPTANCE-5-2026-09-08.md`; conditions C20 (browser matrix), C21 (launcher reconciliation), C22 (installed Inno, Ryan) | Run AT-6: brief to write from the AS-5 defect table (Grok did AT-5 well); then S21 rerun, C20/C21 browser work, AS-6 |
-| 4 | Code complete; acceptance set `tests/library_work_astra/test_phase4_aw_acceptance.py` at 4 failing (D05, D07 x2, D08) after AV-3m (Gemini) and AV-3r (Claude, partial) | `PHASE4-ACCEPTANCE-2026-09-08.md` NOT ACCEPTED (16 defects, 12 now closed) | Run AV-3s: close D05 (reshelve-review binding, `library_prompts.py`), D07 (brief freshness, `library_briefs.py`), D08 (`server.py` `_purge_trash` calls `library_briefs` purge); then AW-2 review |
-| 5 | Second-round set at 15 failing of 70 new (BA-12 dashboard 9, BA-13 faithfulness 4, BA-14 measurements 2); first-round 75 and fixtures 28 green | `PHASE5-ACCEPTANCE-2-2026-09-08.md` NOT ACCEPTED | Run AZ-4c: BA-12 (Grok did BA-12 round 1: `assets/dashboard/index.html`, tests `test_phase5_dashboard2.py`), BA-13/14 (Gemini: `library_analysis.py` evaluator, `PHASE5-AZ-MEASUREMENTS`); then BA-3 review |
-| 6 | BC-1 integrated (19/19 tests); 0030 amendment applied | `PHASE6-BD0-2026-09-08.md`: BC-1 not complete; BC-2 requirements listed | Run BC-2 brief to write from BD-0 (publication ownership fence, artifact byte validation, coherent bounded export read, production capture paths through the shared publisher/renderer, registry/stdio adapters for `export_cited_range`, inventories); then BD with the measured study (35 items with real chapters under `E:\Uoink\**\metadata.json`; speaker gate likely blocked) |
+| 4 | Acceptance set 32/32 after AV-3m (Gemini), AV-3r (Claude), AV-3s (Gemini); Phase 4 suites 208 | AW-2 review dispatched | Integrate the AW-2 verdict; rerun the real-client AW sessions on the repaired candidate if Astra requires |
+| 5 | Second-round set at 15 failing (BA-12 dashboard 9, BA-13 4, BA-14 2) | `PHASE5-ACCEPTANCE-2-2026-09-08.md` NOT ACCEPTED | AZ-4c (Gemini: BA-13/14) dispatched; BA-12 dashboard for Grok after AT-6 (`test_phase5_dashboard2.py`); then BA-3 review |
+| 6 | BC-1 integrated (19/19 tests); 0030 amendment applied | `PHASE6-BD0-2026-09-08.md`: BC-1 not complete | Run BC-2 from `PHASE6-BC2-BRIEF-2026-09-08.md` (claude after 11:50 PT, or gemini); then BD with the measured study (35 items with real chapters under the corpus root's metadata.json files; speaker gate likely blocked) |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S21, S22, AW, process
@@ -66,16 +66,14 @@ recovery). Full suite last run at `61eeb07`: 1,461 passed.
 
 ## Queue (in order; each item names its brief or how to write it)
 
-1. AT-6 (Phase 3 round 6): write `PHASE3-REPAIR-5-BRIEF-2026-09-08.md` from the AS-5
-   defect table (AS-02a intent cleared on interrupted Popen; AS-02b damaged child records
-   read as absence; AS-03a worker exit and podcast callback release locks while the child
-   is unsettled; AS-03b reconciliation cannot reuse retained locks; AS-03c manual reuse
-   reports partial capture). Target: all `tests/library_work_astra/test_phase3_*.py` green
-   with `PHASE3_REQUIRE_IMPLEMENTATION=1` (150 tests), companions 365. Engine: grok or claude.
-2. AV-3s (Phase 4 D05/D07/D08): grok or claude; target `test_phase4_aw_acceptance.py` 32/32
-   and the seven Phase 4 files green.
-3. AZ-4c (Phase 5 BA-12/13/14): grok (dashboard) and gemini (evaluator, measurements).
-4. BC-2 (Phase 6): write the brief from `PHASE6-BD0-2026-09-08.md`; claude or gemini.
+1. AT-6 (Phase 3 round 6): DISPATCHED to grok (the AS-5 defect table is the specification;
+   goal text in the Control Room `runs` table). Target: all `tests/library_work_astra/test_phase3_*.py`
+   green with `PHASE3_REQUIRE_IMPLEMENTATION=1` (150 tests), companions 365. Then the S21
+   rerun, the process-recovery receipt, and AS-6.
+2. AW-2 (Phase 4 second review): DISPATCHED to codex. Integrate its verdict.
+3. AZ-4c (Phase 5 BA-13/14): DISPATCHED to gemini. BA-12 dashboard (9 tests in
+   `test_phase5_dashboard2.py`) goes to grok after AT-6. Then BA-3 review.
+4. BC-2 (Phase 6): brief `PHASE6-BC2-BRIEF-2026-09-08.md`; claude (after 11:50 PT) or gemini.
 5. Reviews when candidates are ready: AS-6, AW-2, BA-3, BD (Astra).
 6. S21 rerun after AT-6 (`python -B tests/library_work_astra/test_phase3_s21.py --execute-s21 --hold-seconds 20`
    with `S21_CANDIDATE_SHA=<sha>`), process-recovery receipt
