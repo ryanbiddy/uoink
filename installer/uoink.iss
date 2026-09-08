@@ -109,6 +109,7 @@ Source: "staging\library_cards.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Living Library Phase 2 work-queue service. uoink_mcp_tools.py imports it
 ; lazily; the installed helper must find it beside the other modules.
 Source: "staging\library_work.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
