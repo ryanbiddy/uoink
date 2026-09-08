@@ -51,6 +51,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 import library_analysis
+import library_resources
 from index import Index
 import uoink_mcp_tools
 import uoink_mcp
@@ -62,6 +63,13 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------------------------
 # Test DB Fixtures & Helpers
 # ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def isolate_reader():
+    library_analysis.reset_rate_limiter()
+    yield
+    library_analysis.reset_rate_limiter()
+
 
 @pytest.fixture
 def tmp_dir():
@@ -1448,6 +1456,186 @@ def test_activity_cost_548_and_10000(tmp_dir):
     print(f"[SYNTHETIC QUERY PLAN Q1]: {[tuple(r) for r in qp_q1]}")
     print(f"[SYNTHETIC QUERY PLAN Q3]: {[tuple(r) for r in qp_q3]}")
 
+    # -----------------------------------------------------------------------
+    # Part 3: Proved Baseline Replay (Interval covering first apply)
+    # -----------------------------------------------------------------------
+    req_replay = {
+        "interval": {"start": "2026-09-01T10:00:00.000Z", "end": "2026-09-02T00:00:00.000Z"},
+        "date_basis": "capture_time",
+    }
+    t0_rep = time.perf_counter()
+    res_replay = library_analysis.get_library_activity(req_replay, db=conn_548, clock=fixed_as_of)
+    t1_rep = time.perf_counter()
+    assert res_replay["ok"] is True
+    assert res_replay["coverage"]["cov_shelf_activity"]["coverage_status"] == "journal_complete"
+    assert not res_replay["coverage"]["cov_shelf_activity"]["reasons"]
+    time_replay = (t1_rep - t0_rep)
+
+    # -----------------------------------------------------------------------
+    # Part 4: Error and Refusal Paths (70 MiB journal and deadline expiry)
+    # -----------------------------------------------------------------------
+    conn_refusal = create_fixture_db(tmp_dir, "db_refusal.db")
+    insert_yoink(conn_refusal, "v_refuse", yoinked_at="2026-09-01T12:00:00.000Z")
+    huge_payload = json.dumps({"items": {"v_refuse": [{"data": "x" * (35 * 1024 * 1024)}]}})
+    insert_apply(conn_refusal, "app_huge_refusal", 1, 0, 1, forward_delta={"items": {}}, inverse_delta={"items": {}})
+    conn_refusal.execute("UPDATE library_applies SET forward_json=?, inverse_json=? WHERE apply_id='app_huge_refusal'", (huge_payload, huge_payload))
+    conn_refusal.commit()
+
+    t0_refuse = time.perf_counter()
+    res_refusal = library_analysis.get_library_activity(req_548, db=conn_refusal, clock=fixed_as_of)
+    t1_refuse = time.perf_counter()
+    assert res_refusal["ok"] is False
+    assert res_refusal["error"]["code"] == "resource_too_large"
+    time_refusal_70mib = (t1_refuse - t0_refuse)
+
+    # Deadline expiry refusal
+    old_monotonic = time.monotonic
+    call_count = [0]
+    def fake_monotonic():
+        call_count[0] += 1
+        if call_count[0] > 1:
+            return old_monotonic() + 10.0
+        return old_monotonic()
+    try:
+        time.monotonic = fake_monotonic
+        t0_dl = time.perf_counter()
+        res_dl = library_analysis.get_library_activity(req_548, db=conn_548, clock=fixed_as_of)
+        t1_dl = time.perf_counter()
+        assert res_dl["ok"] is False
+        assert res_dl["error"]["code"] == "deadline_exceeded"
+        time_refusal_deadline = (t1_dl - t0_dl)
+    finally:
+        time.monotonic = old_monotonic
+
+    # -----------------------------------------------------------------------
+    # Part 5: Actual Transport Serialization (MCP Stdio Envelope)
+    # -----------------------------------------------------------------------
+    t0_trans = time.perf_counter()
+    transport_payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        library_resources.DOCUMENT_PREFACE
+                        + library_resources.DOCUMENT_FENCE_OPEN
+                        + json.dumps(res_548, ensure_ascii=False)
+                        + library_resources.DOCUMENT_FENCE_CLOSE
+                    ),
+                }
+            ],
+            "isError": False,
+        },
+    }
+    ser_transport = json.dumps(transport_payload, ensure_ascii=False).encode("utf-8")
+    t1_trans = time.perf_counter()
+    time_transport_ser = (t1_trans - t0_trans)
+    bytes_transport = len(ser_transport)
+
+    # -----------------------------------------------------------------------
+    # Part 6: Three Memberships Per Item (548 items x 3 = 1,644 memberships)
+    # -----------------------------------------------------------------------
+    conn_3mem = create_fixture_db(tmp_dir, "db_3mem.db")
+    insert_shelf(conn_3mem, "shelf_a")
+    insert_shelf(conn_3mem, "shelf_b")
+    insert_shelf(conn_3mem, "shelf_c")
+    insert_shelf_version(conn_3mem, "v1")
+    insert_subscription(conn_3mem, "sub_3mem", display_name="3Mem Channel")
+    f_items_3mem: Dict[str, list] = {}
+    for i in range(1, 549):
+        vid = f"vid_3mem_{i:04d}"
+        insert_yoink(conn_3mem, vid, yoinked_at="2026-09-01T12:00:00.000Z", author=f"Author {i % 20}", channel="3Mem Channel")
+        insert_source_item(conn_3mem, "sub_3mem", f"entry_3_{i}", video_id=vid, first_seen_ms=stamp("2026-09-01T10:00:00Z"))
+        f_items_3mem[vid] = [
+            {"shelf_id": "shelf_a", "is_primary": 1, "version_id": "v1"},
+            {"shelf_id": "shelf_b", "is_primary": 0, "version_id": "v1"},
+            {"shelf_id": "shelf_c", "is_primary": 0, "version_id": "v1"},
+        ]
+        for s, p in (("shelf_a", 1), ("shelf_b", 0), ("shelf_c", 0)):
+            conn_3mem.execute(
+                "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
+                "VALUES (?, ?, 'v1', 'rev', 'user', 0, ?, 1.0, '{}', '2026-09-01T10:00:00.000Z')",
+                (vid, s, p),
+            )
+    insert_apply(
+        conn_3mem,
+        "app_full_3mem",
+        1,
+        0,
+        1,
+        created_at="2026-09-01T10:00:00.000Z",
+        forward_delta={"items": f_items_3mem, "policies": {}},
+        inverse_delta={"items": {vid: [] for vid in f_items_3mem}, "policies": {}},
+    )
+    conn_3mem.commit()
+    t0_3mem = time.perf_counter()
+    res_3mem = library_analysis.get_library_activity(req_548, db=conn_3mem, clock=fixed_as_of)
+    t1_3mem = time.perf_counter()
+    assert res_3mem["ok"] is True
+    time_3mem = (t1_3mem - t0_3mem)
+
+    # -----------------------------------------------------------------------
+    # Part 7: Multi-Operation Journal (10 applied operations)
+    # -----------------------------------------------------------------------
+    conn_multi = create_fixture_db(tmp_dir, "db_multi.db")
+    insert_shelf(conn_multi, "shelf_alpha")
+    insert_shelf(conn_multi, "shelf_beta")
+    insert_shelf_version(conn_multi, "v1")
+    insert_subscription(conn_multi, "sub_multi", display_name="Multi Channel")
+    for i in range(1, 51):
+        insert_yoink(conn_multi, f"vid_m_{i:02d}", yoinked_at="2026-09-01T12:00:00.000Z")
+    for op_seq in range(1, 11):
+        at_iso = f"2026-09-01T{10 + op_seq // 6:02d}:{(op_seq % 6) * 10:02d}:00.000Z"
+        sh_curr = "shelf_alpha" if op_seq % 2 == 1 else "shelf_beta"
+        sh_prev = "shelf_beta" if op_seq % 2 == 1 else "shelf_alpha"
+        f_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_curr, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
+        i_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_prev, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
+        insert_apply(conn_multi, f"app_m_{op_seq}", op_seq, op_seq - 1, op_seq, created_at=at_iso, forward_delta={"items": f_delta, "policies": {}}, inverse_delta={"items": i_delta, "policies": {}})
+    for i in range(1, 51):
+        conn_multi.execute(
+            "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
+            "VALUES (?, 'shelf_beta', 'v1', 'rev', 'user', 0, 1, 1.0, '{}', '2026-09-01T11:40:00.000Z')",
+            (f"vid_m_{i:02d}",),
+        )
+    conn_multi.commit()
+    t0_multi = time.perf_counter()
+    res_multi = library_analysis.get_library_activity(req_replay, db=conn_multi, clock=fixed_as_of)
+    t1_multi = time.perf_counter()
+    assert res_multi["ok"] is True
+    time_multi = (t1_multi - t0_multi)
+
+    # -----------------------------------------------------------------------
+    # Part 8: 100k-Observation Case
+    # -----------------------------------------------------------------------
+    conn_100k = create_fixture_db(tmp_dir, "db_100k.db")
+    insert_subscription(conn_100k, "sub_100k", display_name="Massive 100k Source")
+    insert_yoink(conn_100k, "vid_obs_1", yoinked_at="2026-09-01T12:00:00.000Z")
+    obs_rows = [
+        (f"item_obs_{i}", "sub_100k", f"entry_{i}", f"ck_obs_{i}", f"https://example.com/{i}", f"Title {i}", None, 1788264000000, 1788264000000, 1, "{}", "none", "observed", None)
+        for i in range(100000)
+    ]
+    conn_100k.executemany(
+        "INSERT INTO source_items (item_id, source_id, entry_id, capture_key, canonical_url, title, published_at_ms, first_seen_ms, last_seen_ms, first_scan_revision, metadata_json, eligibility, state, video_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        obs_rows,
+    )
+    conn_100k.commit()
+    t0_100k = time.perf_counter()
+    res_100k = library_analysis.get_library_activity(req_548, db=conn_100k, clock=fixed_as_of)
+    t1_100k = time.perf_counter()
+    assert res_100k["ok"] is True
+    time_100k = (t1_100k - t0_100k)
+
+    print(f"[SYNTHETIC MEASUREMENT REPLAY-548]: Construction={time_replay*1000:.2f}ms, Proved={res_replay['coverage']['cov_shelf_activity']['coverage_status'] == 'journal_complete'}")
+    print(f"[SYNTHETIC MEASUREMENT REFUSAL]: 70MiB={time_refusal_70mib*1000:.2f}ms, Deadline={time_refusal_deadline*1000:.2f}ms")
+    print(f"[SYNTHETIC MEASUREMENT TRANSPORT-SER]: Time={time_transport_ser*1000:.2f}ms, Bytes={bytes_transport}")
+    print(f"[SYNTHETIC MEASUREMENT 3-MEMBERSHIPS]: Construction={time_3mem*1000:.2f}ms, Items=548, Memberships=1644")
+    print(f"[SYNTHETIC MEASUREMENT MULTI-OP-JOURNAL]: Construction={time_multi*1000:.2f}ms, Operations=10")
+    print(f"[SYNTHETIC MEASUREMENT 100K-OBSERVATIONS]: Construction={time_100k*1000:.2f}ms, Observations=100000")
+
+
 
 def test_activity_dashboard_evidence_and_staleness():
     """Verify UI panel in assets/dashboard/index.html enforces UTC labels, unavailable states, keyboard nav, refresh timer."""
@@ -1665,3 +1853,24 @@ def test_narration_faithfulness_metric():
     )
     res_archive = library_analysis.evaluate_narration_faithfulness(narration_archive, packet)
     assert res_archive["passed"] is True
+
+    # 10. Strengthened assertions: non-blacklist unrelated entity -> FAIL
+    res_elephants = library_analysis.evaluate_narration_faithfulness("There are 2 elephants in the yard.", packet)
+    assert res_elephants["passed"] is False
+    assert any("unrelated_entity_claim" in f for f in res_elephants["failures"])
+
+    # 11. Strengthened assertions: wrong population count -> FAIL
+    res_wrong_pop = library_analysis.evaluate_narration_faithfulness("2 items were saved.", packet)
+    assert res_wrong_pop["passed"] is False
+    assert any("hallucinated_number" in f for f in res_wrong_pop["failures"])
+
+    # 12. Strengthened assertions: unlisted topic -> FAIL
+    res_pottery = library_analysis.evaluate_narration_faithfulness("1 item about medieval pottery was saved.", packet)
+    assert res_pottery["passed"] is False
+    assert any("invented_topic" in f for f in res_pottery["failures"])
+
+    # 13. Empty narration has no accuracy score -> FAIL with score=None
+    res_empty = library_analysis.evaluate_narration_faithfulness("", packet)
+    assert res_empty["passed"] is False
+    assert res_empty["score"] is None
+    assert "empty_narration" in res_empty["failures"]

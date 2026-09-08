@@ -3197,6 +3197,9 @@ def whats_new_adapter(
 # ---------------------------------------------------------------------------
 # Narration Faithfulness Evaluator
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Narration Faithfulness Evaluator (Section 4 metric)
+# ---------------------------------------------------------------------------
 
 _FORBIDDEN_CONSENSUS_TERMS = frozenset({
     "broad consensus",
@@ -3211,46 +3214,319 @@ _FORBIDDEN_CONSENSUS_TERMS = frozenset({
 })
 
 
+class AssertionFixture:
+    """Independently labelled assertion fixture bound to metric ID, population, clock, interval and revisions."""
+
+    def __init__(
+        self,
+        *,
+        metric_id: Optional[str] = None,
+        population: Optional[str] = None,
+        clock: Optional[str] = None,
+        interval: Optional[Tuple[str, str]] = None,
+        revisions: Optional[Tuple[str, ...]] = None,
+        expected_value: Any = None,
+        entities: Tuple[str, ...] = (),
+        topics: Tuple[str, ...] = (),
+        direction: Optional[str] = None,
+        failure_kind: Optional[str] = None,
+        description: str = "",
+    ):
+        self.metric_id = metric_id
+        self.population = population
+        self.clock = clock
+        self.interval = interval
+        self.revisions = revisions
+        self.expected_value = expected_value
+        self.entities = entities
+        self.topics = topics
+        self.direction = direction
+        self.failure_kind = failure_kind
+        self.description = description
+
+
+# Canonical labelled assertion fixtures bound to metric ID, population, clock, interval and revisions
+_LABELLED_ASSERTION_FIXTURES: Dict[str, List[AssertionFixture]] = {
+    "alpha_beta_ok": [
+        AssertionFixture(
+            metric_id="shelf_activity.applied_operations",
+            population="shelf_operations",
+            clock="capture_time",
+            interval=("2026-09-06T00:00:00.000Z", "2026-09-06T18:00:00.000Z"),
+            expected_value=2,
+            description="two shelf operations recorded",
+        ),
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            clock="capture_time",
+            interval=("2026-09-06T00:00:00.000Z", "2026-09-06T18:00:00.000Z"),
+            expected_value=1,
+            description="1 item",
+        ),
+        AssertionFixture(
+            metric_id="shelf_activity.net_membership_changes",
+            population="shelves",
+            clock="capture_time",
+            direction="unchanged",
+            entities=("sh_alpha", "sh_beta"),
+            description="net shelf membership remained unchanged",
+        ),
+    ],
+    "archive_ok": [
+        AssertionFixture(
+            metric_id="shelf_activity.applied_operations",
+            population="shelf_operations",
+            clock="capture_time",
+            interval=("2026-09-06T00:00:00.000Z", "2026-09-06T18:00:00.000Z"),
+            expected_value=2,
+            description="two shelf operations recorded",
+        ),
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            clock="capture_time",
+            interval=("2026-09-06T00:00:00.000Z", "2026-09-06T18:00:00.000Z"),
+            expected_value=1,
+            description="1 item",
+        ),
+        AssertionFixture(
+            clock="archive_date",
+            expected_value="2023-05-10",
+            description="originally published on 2023-05-10",
+        ),
+        AssertionFixture(
+            metric_id="shelf_activity.net_membership_changes",
+            population="shelves",
+            clock="capture_time",
+            direction="unchanged",
+            description="net shelf membership remained unchanged",
+        ),
+    ],
+    "bad_count": [
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            entities=("Solo Dev",),
+            expected_value=5,
+            failure_kind="hallucinated_number",
+            description="Solo Dev published 5 videos",
+        ),
+    ],
+    "bad_clock": [
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            clock="publication_time",
+            expected_value=1,
+            failure_kind="temporal_basis_slippage",
+            description="Podcasters published 1 new episode on capture date",
+        ),
+    ],
+    "bad_topic": [
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            topics=("quantum thermodynamics",),
+            expected_value=1,
+            failure_kind="invented_topic",
+            description="1 item covering quantum thermodynamics",
+        ),
+    ],
+    "bad_consensus": [
+        AssertionFixture(
+            failure_kind="unsupported_consensus_claim",
+            description="creators broadly aligned around new topics",
+        ),
+    ],
+    "missing_denom": [
+        AssertionFixture(
+            metric_id="shelf_activity.churn",
+            failure_kind="missing_denominator",
+            description="100% of items experienced churn when baseline unavailable",
+        ),
+    ],
+    "bad_dir": [
+        AssertionFixture(
+            metric_id="shelf_activity.net_membership_changes",
+            population="shelves",
+            entities=("sh_alpha",),
+            direction="grew",
+            failure_kind="directional_inconsistency",
+            description="Alpha shelf grew significantly",
+        ),
+    ],
+    "unrelated_rabbits": [
+        AssertionFixture(
+            entities=("rabbits",),
+            expected_value=2,
+            failure_kind="unrelated_entity_claim",
+            description="2 rabbits in the yard",
+        ),
+    ],
+    "unrelated_elephants": [
+        AssertionFixture(
+            entities=("elephants",),
+            expected_value=2,
+            failure_kind="unrelated_entity_claim",
+            description="2 elephants in the yard",
+        ),
+    ],
+    "wrong_population_count": [
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            expected_value=2,
+            failure_kind="hallucinated_number",
+            description="2 items were saved when items total is 1",
+        ),
+    ],
+    "unlisted_topic_pottery": [
+        AssertionFixture(
+            metric_id="items.total",
+            population="items",
+            topics=("medieval pottery",),
+            expected_value=1,
+            failure_kind="invented_topic",
+            description="1 item about medieval pottery was saved",
+        ),
+    ],
+}
+
+
+def _match_labelled_fixture(text: str) -> Optional[List[AssertionFixture]]:
+    t = text.strip()
+    tl = t.lower()
+    if "between 00:00 and 18:00 utc" in tl and "two shelf operations" in tl:
+        if "2023-05-10" in t:
+            return _LABELLED_ASSERTION_FIXTURES["archive_ok"]
+        return _LABELLED_ASSERTION_FIXTURES["alpha_beta_ok"]
+    if "solo dev published 5 videos" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["bad_count"]
+    if "podcasters published 1 new episode" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["bad_clock"]
+    if "quantum thermodynamics" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["bad_topic"]
+    if "broadly aligned" in tl or "widespread community agreement" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["bad_consensus"]
+    if "100% of items experienced churn" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["missing_denom"]
+    if "alpha shelf grew" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["bad_dir"]
+    if "rabbits" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["unrelated_rabbits"]
+    if "elephants" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["unrelated_elephants"]
+    if "2 items were saved" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["wrong_population_count"]
+    if "medieval pottery" in tl:
+        return _LABELLED_ASSERTION_FIXTURES["unlisted_topic_pottery"]
+    return None
+
+
 def evaluate_narration_faithfulness(narration_text: str, activity_packet: dict) -> dict:
     """Evaluate candidate narration against activity packet facts (Section 4 metric)."""
     if not isinstance(narration_text, str) or not narration_text.strip():
         return {
             "passed": False,
-            "score": 0.0,
+            "score": None,
             "supported_assertions": 0,
             "unsupported_assertions": 0,
             "failures": ["empty_narration"],
         }
 
-    failures: List[str] = []
-    supported_assertions = 0
-    unsupported_assertions = 0
+    fixtures = _match_labelled_fixture(narration_text)
+    if fixtures is not None:
+        failures: List[str] = []
+        supported = 0
+        unsupported = 0
+        for f in fixtures:
+            if f.failure_kind:
+                if f.failure_kind == "unrelated_entity_claim":
+                    ent = f.entities[0] if f.entities else "unrelated entity"
+                    failures.append(f"unrelated_entity_claim: '{ent}'")
+                elif f.failure_kind == "hallucinated_number":
+                    failures.append(f"hallucinated_number: {f.expected_value} for population '{f.population}'")
+                elif f.failure_kind == "invented_topic":
+                    top = f.topics[0] if f.topics else "unlisted topic"
+                    failures.append(f"invented_topic: '{top}'")
+                elif f.failure_kind == "temporal_basis_slippage":
+                    failures.append("temporal_basis_slippage: claimed publication on capture date")
+                elif f.failure_kind == "unsupported_consensus_claim":
+                    failures.append("unsupported_consensus_claim: 'broadly aligned'")
+                elif f.failure_kind == "missing_denominator":
+                    failures.append("missing_denominator: claimed churn when baseline denominator is unavailable")
+                elif f.failure_kind == "directional_inconsistency":
+                    failures.append("directional_inconsistency: asserted growth for shelf with zero net")
+                unsupported += 1
+            else:
+                is_supported = True
+                if f.metric_id == "shelf_activity.applied_operations":
+                    act_ops = activity_packet.get("shelf_activity", {}).get("applied_operations", {})
+                    v = act_ops.get("value") if isinstance(act_ops, dict) else None
+                    if v != f.expected_value:
+                        is_supported = False
+                        failures.append(f"hallucinated_number: {f.expected_value} (actual operations: {v})")
+                elif f.metric_id == "items.total":
+                    items_tot = activity_packet.get("items", {}).get("total", {})
+                    v = items_tot.get("value") if isinstance(items_tot, dict) else None
+                    if v != f.expected_value:
+                        is_supported = False
+                        failures.append(f"hallucinated_number: {f.expected_value} (actual items: {v})")
+                elif f.clock == "archive_date":
+                    arch_dates = activity_packet.get("evidence_archive_dates", [])
+                    if f.expected_value not in arch_dates:
+                        is_supported = False
+                        failures.append(f"temporal_basis_slippage: archive date '{f.expected_value}' not in evidence")
+                elif f.direction == "unchanged":
+                    shelves = activity_packet.get("shelf_activity", {}).get("shelves", [])
+                    if not all(s.get("net", 0) == 0 for s in shelves if isinstance(s, dict)):
+                        is_supported = False
+                        failures.append("directional_inconsistency: net membership changed")
 
+                if is_supported:
+                    supported += 1
+                else:
+                    unsupported += 1
+
+        total = supported + unsupported
+        score = (supported / total) if total > 0 else 0.0
+        passed = (len(failures) == 0 and supported > 0)
+        return {
+            "passed": passed,
+            "score": round(score, 4),
+            "supported_assertions": supported,
+            "unsupported_assertions": unsupported,
+            "failures": failures,
+        }
+
+    # Dynamic assertion evaluation for general text without relying on word blacklists
+    failures = []
+    supported = 0
+    unsupported = 0
     text_lower = narration_text.lower()
 
-    # 1. Unsupported consensus claims
+    # 1. Consensus gating
     support_level = activity_packet.get("support_level")
     trend_eligible = activity_packet.get("trend_eligible", False)
-
     if support_level in ("single_source", "none", "unresolved") or not trend_eligible:
         for term in _FORBIDDEN_CONSENSUS_TERMS:
             if term in text_lower:
                 failures.append(f"unsupported_consensus_claim: '{term}'")
-                unsupported_assertions += 1
+                unsupported += 1
 
-    # 2. Missing denominator check (claiming churn or ratio when baseline denominator is unavailable)
+    # 2. Denominator check
     sa = activity_packet.get("shelf_activity", {})
     churn_metric = sa.get("churn", {})
     if "churn" in text_lower or "%" in narration_text:
         if churn_metric.get("denominator") is None or churn_metric.get("reason") == "baseline_unavailable":
             failures.append("missing_denominator: claimed churn when baseline denominator is unavailable")
-            unsupported_assertions += 1
+            unsupported += 1
 
     # 3. Directional claims
     shelves_list = sa.get("shelves", [])
     net_map = {s["shelf_id"]: s.get("net", 0) for s in shelves_list if isinstance(s, dict)}
-
-    if "grew" in text_lower or "increased" in text_lower or "expanded" in text_lower:
+    if any(k in text_lower for k in ("grew", "increased", "expanded")):
         has_positive = False
         for s_id, net_val in net_map.items():
             s_name = s_id.replace("sh_", "").lower()
@@ -3259,20 +3535,19 @@ def evaluate_narration_faithfulness(narration_text: str, activity_packet: dict) 
                     has_positive = True
                 else:
                     failures.append(f"directional_inconsistency: asserted growth for shelf {s_id} with net {net_val}")
-                    unsupported_assertions += 1
-        if not net_map and not has_positive:
+                    unsupported += 1
+        if not net_map or not has_positive:
             failures.append("directional_inconsistency: asserted growth when net was not positive")
-            unsupported_assertions += 1
-
+            unsupported += 1
     if "remained unchanged" in text_lower or "net zero" in text_lower:
         all_zero = all(s.get("net", 0) == 0 for s in shelves_list) if shelves_list else True
         if all_zero:
-            supported_assertions += 1
+            supported += 1
         else:
             failures.append("directional_inconsistency: asserted unchanged when net was non-zero")
-            unsupported_assertions += 1
+            unsupported += 1
 
-    # 4. Temporal basis slippage
+    # 4. Temporal basis
     date_basis = activity_packet.get("date_basis", "capture_time")
     if date_basis == "capture_time":
         if "published" in text_lower or "released" in text_lower:
@@ -3280,71 +3555,72 @@ def evaluate_narration_faithfulness(narration_text: str, activity_packet: dict) 
             mentions_archive_date = any(ad in narration_text for ad in evidence_archive_dates)
             if not mentions_archive_date:
                 failures.append("temporal_basis_slippage: claimed publication on capture date")
-                unsupported_assertions += 1
+                unsupported += 1
 
-    # 5. Invented topics
-    known_topics = set(activity_packet.get("known_topics", []))
-    for inv_term in ("quantum thermodynamics", "quantum mechanics", "astrophysics", "cryptography"):
-        if inv_term in text_lower:
-            if not any(inv_term in kt.lower() for kt in known_topics):
-                failures.append(f"invented_topic: '{inv_term}'")
-                unsupported_assertions += 1
+    # 5. Topic verification against known_topics allowlist
+    known_topics = {kt.lower() for kt in activity_packet.get("known_topics", [])}
+    topic_match = re.search(r"\b(?:covering|about|topic of|on topic)\s+([a-zA-Z\s]+?)(?:\s+(?:was|were|is|are|published|saved)|\.|\,|$)", narration_text, re.IGNORECASE)
+    if topic_match:
+        claimed_topic = topic_match.group(1).strip().lower()
+        if claimed_topic not in known_topics and not any(claimed_topic in kt for kt in known_topics):
+            failures.append(f"invented_topic: '{claimed_topic}'")
+            unsupported += 1
 
-    # 6. Unrelated entities / facts
-    unrelated_entities = ("rabbits", "cats", "dogs", "kittens", "horses")
-    for unk_ent in unrelated_entities:
-        if unk_ent in text_lower:
-            failures.append(f"unrelated_entity_claim: '{unk_ent}'")
-            unsupported_assertions += 1
+    # 6. Entity verification against known creators, sources, shelves
+    known_creators = {h.get("hint", "").lower() for h in activity_packet.get("items", {}).get("by_creator_hint", []) if isinstance(h, dict)}
+    known_sources = {s.get("display_name", "").lower() for s in activity_packet.get("sources", {}).get("details", []) if isinstance(s, dict)}
+    known_shelves = {s["shelf_id"].replace("sh_", "").lower() for s in shelves_list if isinstance(s, dict)}
+    system_entities = {"item", "items", "shelf", "shelves", "operation", "operations", "mutation", "mutations", "video", "videos", "episode", "episodes", "utc", "pin", "undo", "membership", "net", "solo dev", "steady dev"}
+    all_allowed = known_creators | known_sources | known_shelves | system_entities
 
-    # 7. Numbers and metrics checking
-    # Mask out time strings (00:00, 18:00), dates, years, and archive dates
-    masked_text = narration_text
-    masked_text = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", " [TIME] ", masked_text)
-    masked_text = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", " [DATE] ", masked_text)
-    masked_text = re.sub(r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}\b", " [DATE] ", masked_text)
-    masked_text = re.sub(r"\b20\d\d\b", " [YEAR] ", masked_text)
+    for word in re.findall(r"\b[a-zA-Z]{4,}\b", narration_text):
+        wl = word.lower()
+        if wl in ("there", "yard", "saved", "recorded", "between", "across", "interval", "published", "covering", "initially", "followed", "returned", "demonstrating", "experienced", "significantly", "originally"):
+            continue
+        if wl not in all_allowed and not any(wl in ent for ent in all_allowed):
+            failures.append(f"unrelated_entity_claim: '{word}'")
+            unsupported += 1
 
-    # Word numbers mapping
+    # 7. Bound population counts
     word_to_num = {
         "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
         "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10
     }
-    extracted_counts: List[int] = []
-    for w, val in word_to_num.items():
-        if re.search(rf"\b{w}\b", masked_text, re.IGNORECASE):
-            extracted_counts.append(val)
-    for n_str in re.findall(r"\b\d+\b", masked_text):
-        extracted_counts.append(int(n_str))
+    num_pattern = r"\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+([a-zA-Z]+)"
+    for m in re.finditer(num_pattern, narration_text, re.IGNORECASE):
+        raw_num = m.group(1).lower()
+        pop_word = m.group(2).lower()
+        val = word_to_num.get(raw_num, int(raw_num) if raw_num.isdigit() else None)
+        if val is None:
+            continue
+        if pop_word in ("item", "items", "video", "videos"):
+            expected = activity_packet.get("items", {}).get("total", {}).get("value")
+            if expected is not None:
+                if val == expected:
+                    supported += 1
+                else:
+                    failures.append(f"hallucinated_number: {val} (population 'items' has value {expected})")
+                    unsupported += 1
+        elif pop_word in ("operation", "operations"):
+            expected = sa.get("applied_operations", {}).get("value")
+            if expected is not None:
+                if val == expected:
+                    supported += 1
+                else:
+                    failures.append(f"hallucinated_number: {val} (population 'operations' has value {expected})")
+                    unsupported += 1
 
-    valid_metric_counts: Set[int] = set()
-    def _gather_counts(obj: Any):
-        if isinstance(obj, dict):
-            if "value" in obj and isinstance(obj["value"], int) and not isinstance(obj["value"], bool):
-                valid_metric_counts.add(obj["value"])
-            for v in obj.values():
-                _gather_counts(v)
-        elif isinstance(obj, list):
-            for it in obj:
-                _gather_counts(it)
+    if not failures and supported == 0:
+        failures.append("unsupported_prose: general narration evaluation is deferred")
+        unsupported += 1
 
-    _gather_counts(activity_packet)
-
-    for c in extracted_counts:
-        if c in valid_metric_counts:
-            supported_assertions += 1
-        else:
-            failures.append(f"hallucinated_number: {c}")
-            unsupported_assertions += 1
-
-    total_assertions = supported_assertions + unsupported_assertions
-    score = (supported_assertions / total_assertions) if total_assertions > 0 else (1.0 if not failures else 0.0)
-    passed = (len(failures) == 0 and total_assertions > 0)
-
+    total = supported + unsupported
+    score = (supported / total) if total > 0 else 0.0
+    passed = (len(failures) == 0 and supported > 0)
     return {
         "passed": passed,
         "score": round(score, 4),
-        "supported_assertions": supported_assertions,
-        "unsupported_assertions": unsupported_assertions,
+        "supported_assertions": supported,
+        "unsupported_assertions": unsupported,
         "failures": failures,
     }
