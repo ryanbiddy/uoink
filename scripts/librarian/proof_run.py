@@ -63,6 +63,9 @@ FORBIDDEN_PORT = 5179
 # once per unique event_id. Events on unfinished attempts do not join the numerator until
 # that attempt is in the completed set. A rejection and its linked transport event are one
 # failed completion.
+GUARD_RULE_IDENTIFIER = "distinct-failed-completed-attempts-plus-anonymous-v2"
+GUARD_PARAMETERS = dict(min_completed_attempts=20, numerator_multiplier=10,
+                        denominator_multiplier=1, comparison="strictly-greater")
 GUARD_RULE_V2 = dict(
     identifier="distinct-failed-completions-v2",
     version=2,
@@ -261,6 +264,7 @@ class ProofHarness:
         limit: Optional[int] = None,
         model: str = "claude-sonnet-5",
         effort: Optional[str] = None,
+        probe: bool = False,
         concurrency: int = 4,
         port: int = 5180,
         scratch_dir: Optional[Path] = None,
@@ -277,6 +281,7 @@ class ProofHarness:
         self.mock = mock
         self.mock_reject_count = mock_reject_count
         self.limit = limit
+        self.probe = probe
         self.model = model
         self.effort = effort
         self.concurrency = max(1, min(4, concurrency))
@@ -624,7 +629,15 @@ class ProofHarness:
         available_ids = [vid for vid in manifest_ids if vid in db_ids]
         if not available_ids:
             available_ids = sorted(list(db_ids))
-        self.target_ids = available_ids[: self.limit] if self.limit is not None else available_ids
+        if self.probe:
+            probe = self.manifest.get("probe") or {}
+            probe_ids = list(probe.get("target_ids") or [])
+            if len(probe_ids) != 16 or any(vid not in db_ids for vid in probe_ids):
+                raise ProofRunError("Probe requires the manifest's frozen sixteen development identities")
+            self.target_ids = probe_ids
+            self.wall_budget_ms = int(probe.get("wall_budget_ms") or 900000)
+        else:
+            self.target_ids = available_ids[: self.limit] if self.limit is not None else available_ids
 
         # 6. Prepare run
         prompt_hash = self.manifest["hashes"]["prompt_sha256"]
@@ -2360,7 +2373,11 @@ class ProofHarness:
                 "wall_budget_ms": int(self.wall_budget_ms),
                 "error_rate_limit": 0.10,
                 "error_rate_min_attempts": int(self.error_rate_min_attempts),
-                "guard_rule": copy.deepcopy(self.guard_rule),
+                # STAGE4-BINDINGS: identifier + parameters (the validator's spelling); the
+                # runner's fuller rule description travels in audit_extensions.
+                "guard_rule": GUARD_RULE_IDENTIFIER,
+                "guard_parameters": copy.deepcopy(GUARD_PARAMETERS),
+                "batch_size": int(self.batch),
                 "output_schema_text": self.output_schema_text,
                 "output_schema_sha256": self.output_schema_sha256,
             },
@@ -2512,6 +2529,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Cards per claude -p call in real runs (default: 12; mock runs stay per-item)",
     )
     parser.add_argument(
+        "--probe",
+        action="store_true",
+        help="Stage 4 plumbing probe: the manifest's frozen sixteen development identities, 900,000 ms budget; never P2-7",
+    )
+    parser.add_argument(
         "--effort",
         default=None,
         help="Reasoning effort passed to every claude -p call (declared execution variable; default: CLI default)",
@@ -2567,6 +2589,7 @@ def main() -> None:
         concurrency=args.concurrency,
         batch=args.batch,
         effort=args.effort,
+        probe=args.probe,
         taxonomy=args.taxonomy,
         manifest=args.manifest,
         port=args.port,

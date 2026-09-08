@@ -217,8 +217,11 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
     assert receipts_data["mode"] == "mock"
     assert receipts_data["status"] == "completed"
     assert receipts_data["abort_reason"] is None
-    assert receipts_data["config"]["guard_rule"]["identifier"] == "distinct-failed-completions-v2"
-    assert receipts_data["config"]["guard_rule"]["amendment"] == "AO-G1"
+    # STAGE4-BINDINGS spelling: config carries the identifier and parameters; the fuller
+    # runner description lives in audit_extensions.guard_rule.
+    assert receipts_data["config"]["guard_rule"] == "distinct-failed-completed-attempts-plus-anonymous-v2"
+    assert receipts_data["config"]["guard_parameters"]["min_completed_attempts"] == 20
+    assert receipts_data["audit_extensions"]["guard_rule"]["amendment"] == "AO-G1"
     assert receipts_data["audit_extensions"]["card_profile"]["selection_version"] == "spread-longest-v1"
     identity = receipts_data["audit_extensions"]["execution_identity"]
     assert identity["launch"]["git_sha"]

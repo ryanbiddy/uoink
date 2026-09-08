@@ -37,6 +37,7 @@ STAGE2_ARCHIVE_SHA256 = "294941ba84eec02bf607aa7044ed45454634f99b8dcbf0b4adc9fe3
 INDUCTION_MANIFEST = ROOT / "docs/library/proof/induction-manifest-2026-09-05.json"
 MANIFEST_STAGE2 = ROOT / "docs/library/proof/manifest-stage2-2026-09-05.json"
 MANIFEST_STAGE3 = ROOT / "docs/library/proof/manifest-stage3-2026-09-07.json"
+MANIFEST_STAGE4 = ROOT / "docs/library/proof/manifest-stage4-2026-09-07.json"
 # Stage-specific frozen inputs. Every other frozen file (card builder, service, migrations)
 # is shared. Stage 2 binds the approved taxonomy v2, hold-out v2, the sealed adjudicated
 # labels (as the gold file) and the adjudicated mapping table.
@@ -55,12 +56,30 @@ STAGE_FILES = {
             gold="docs/library/proof/labels/holdout-v3-gold-2026-09-07.json",
             mapping="docs/library/proof/labels/holdout-v3-mapping-2026-09-07.json"),
 }
+STAGE_FILES[4] = dict(STAGE_FILES[3],
+    bindings="docs/library/proof/holdout-v3-stage4-bindings-2026-09-07.json",
+    packet="docs/library/proof/holdout-v3-stage4-labelling-packet-2026-09-07.json",
+    diff="docs/library/proof/card-contract-v2-diff-2026-09-07.json",
+    labels_gemini="docs/library/proof/labels/holdout-v3-stage4-labels-gemini-2026-09-07.json",
+    labels_grok="docs/library/proof/labels/holdout-v3-stage4-labels-grok-2026-09-07.json",
+    adjudication="docs/library/proof/labels/holdout-v3-stage4-labels-adjudicated-2026-09-07.json",
+    gold="docs/library/proof/labels/holdout-v3-stage4-gold-2026-09-07.json",
+    mapping="docs/library/proof/labels/holdout-v3-stage4-mapping-2026-09-07.json")
 SOURCE_SHA256 = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
 CONTRACT = "phase2-v1.2-2026-09-04"
 OUTCOMES = ["accepted", "rejected", "unmapped", "unsupported", "pinned", "deleted", "changed"]
 PROFILE = dict(profile="librarian", schema_version=1, selection_version="spread-longest-v1",
                n_clips=6, clip_chars=240, byte_budget=8192, corpus_read_bytes=8192,
                serialization="library_cards.card_text UTF-8")
+PROFILE_STAGE4 = dict(PROFILE, selection_version="spread-longest-v2")
+HOLDOUT_V3_SHA256 = "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c"
+STAGE4_TAXONOMY_REVISION = "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04"
+STAGE4_PROMPT_FILE_SHA256 = "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32"
+STAGE4_PROMPT_SHA256 = "e4ff00598d1e58ab436d1ca31796b67776e261535849fb52d70a59d9ca413aa9"
+PROSE_SOURCES = {"page", "x_article", "x_thread", "reddit_thread", "note"}
+GUARD_RULE = "distinct-failed-completed-attempts-plus-anonymous-v2"
+GUARD_PARAMETERS = dict(min_completed_attempts=20, numerator_multiplier=10,
+                        denominator_multiplier=1, comparison="strictly-greater")
 HASH_KEYS = ["manifest_hash", "source_sha256", "taxonomy_file_sha256", "taxonomy_revision_hash",
              "prompt_file_sha256", "prompt_sha256", "card_profile_hash", "card_builder_sha256",
              "holdout_file_sha256", "holdout_ids_hash", "gold_file_sha256", "cards_hash", "corpus_heads_hash", "implementation_hash"]
@@ -428,6 +447,10 @@ V2_RECEIPT_SCHEMA["required"] += ["calls", "completion_order", "http_history", "
 # Stage 3 declared execution variable: optional so stage 1/2 receipts stay valid.
 for _schema in (LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA):
     _schema["properties"]["config"]["properties"]["effort"] = dict(anyOf=[ID, dict(type="null")])
+    _schema["properties"]["config"]["properties"].update(
+        batch_size=dict(type="integer", minimum=1, maximum=8), guard_rule=ID,
+        guard_parameters=JSON_OBJECT)
+    _schema["properties"]["config"]["properties"]["wall_budget_ms"] = dict(enum=[900000, 7200000])
 RECEIPT_SCHEMA = dict(oneOf=[LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA],
                       **{"$schema": "https://json-schema.org/draft/2020-12/schema"})
 
@@ -509,6 +532,21 @@ def _check_completion_guard(receipts):
     times = [e["completed_monotonic_ns"] for e in order]
     require(times == sorted(times), "Completion order is not monotonic")
     calls = {c["call_id"]: c for c in receipts["calls"]}
+    event_ids = set()
+    for event in receipts["transport_failures"]:
+        # Full receipts always have event IDs. Keep minimal historical unit traces
+        # readable while requiring anonymous events to have their own identity.
+        eid = event.get("event_id")
+        require(eid is not None or event["attempt_id"] is not None, "Anonymous transport event lacks unique ID")
+        if eid is not None:
+            require(eid not in event_ids, "Duplicate transport event")
+            event_ids.add(eid)
+        require(event["attempt_id"] is None or event["attempt_id"] in attempts, "Transport event references missing attempt")
+        timestamp = event["occurred_monotonic_ns"]
+        require(type(timestamp) is int and timestamp >= 0, "Invalid transport timestamp")
+        if "execution" in receipts:
+            require(receipts["execution"]["start_monotonic_ns"] <= timestamp <= receipts["execution"]["end_monotonic_ns"],
+                    "Transport event outside run timeline")
     # Guard rule v2 (contract amendment, stage 3 run 2, 2026-09-07): one failed completion
     # counts once. A rejected submission is recorded both as a rejected attempt and as its
     # submit-failure transport event; summing the two doubled the rate (stage 3 run 1 aborted
@@ -535,6 +573,12 @@ def _check_completion_guard(receipts):
         numerator = len(failed_ids) + anonymous_events
         require(n < 20 or 10 * numerator <= n,
                 f"Error-rate abort threshold exceeded at completion {n}: {numerator}/{n}")
+    # Include events after the last completion (for example a failed preview).
+    failed = {a["attempt_id"] for a in attempts.values() if a["outcome"] in {"rejected", "error"}}
+    failed.update(e["attempt_id"] for e in receipts["transport_failures"] if e["attempt_id"] is not None)
+    anonymous = sum(e["attempt_id"] is None for e in receipts["transport_failures"])
+    require(len(order) < 20 or 10 * (len(failed) + anonymous) <= len(order),
+            "Error-rate abort threshold exceeded after final completion")
 
 
 def redact_http(value):
@@ -1059,7 +1103,277 @@ def validate_induction_receipts(receipts, induction=None, *, artifact_root=ROOT,
                 target_count=225, call_count=len(calls), proposal_approved=False)
 
 
-def verify_manifest(manifest, root=ROOT):
+def manifest_stage(manifest):
+    """Historical manifests predate the explicit stage field."""
+    if "stage" in manifest:
+        require(type(manifest["stage"]) is int and manifest["stage"] in STAGE_FILES, "Unknown manifest stage")
+        return manifest["stage"]
+    version = manifest["taxonomy"]["version_id"]
+    return 3 if version.startswith("taxonomy-v3-") else (2 if version.startswith("taxonomy-v2-") else 1)
+
+
+def frozen_profile(manifest):
+    profile = PROFILE_STAGE4 if manifest_stage(manifest) == 4 else PROFILE
+    require(manifest["card_profile"] == profile, "Card profile changed")
+    require(manifest["hashes"]["card_profile_hash"] == digest(profile), "Card profile hash mismatch")
+    return profile
+
+
+def check_stage_continuity(manifest, stage1, stage):
+    keys = ["source", "items", "exclusions", "corpus_heads", "corpus_heads_hash"]
+    if stage in (2, 3):
+        keys += ["cards", "cards_hash", "measured_strata"]
+    for key in keys:
+        require(manifest[key] == stage1[key], f"Stage {stage} freeze differs from stage 1: {key}")
+    require(not manifest["exclusions"], "Measured proof permits zero exclusions")
+    if stage == 4:
+        for vid, revision in stage1["items"]:
+            entry = manifest["cards"][vid]
+            require(entry["source_revision"] == revision, f"Stage 4 source revision changed: {vid}")
+            require(entry["stratum"] == stage1["cards"][vid]["stratum"], f"Stage 4 stratum changed: {vid}")
+
+
+def archived_stage1_heads(root=ROOT):
+    """Stage 2 retained the original heads; verify all bytes against stage 1."""
+    stage1 = read_json(root / MANIFEST.relative_to(ROOT))
+    archive = root / STAGE2_ARCHIVE.relative_to(ROOT)
+    raw = archive.read_bytes()
+    require(sha(raw) == STAGE2_ARCHIVE_SHA256, "Stage 2 source archive changed")
+    records = decode_json(artifact_bytes(decode_json(raw)["state_artifacts"]["corpus_heads"], archive.parent))
+    require(set(records) == set(stage1["corpus_heads"]), "Archived head identities changed")
+    heads = {}
+    for vid, record in records.items():
+        raw = artifact_bytes(record, archive.parent)
+        text = raw.decode("utf-8", errors="replace")
+        require(len(raw) <= 8192 and stage1["corpus_heads"][vid] ==
+                dict(raw_sha256=sha(raw), decoded_sha256=sha(text.encode("utf-8")), bytes=len(raw)),
+                f"Archived head changed: {vid}")
+        heads[vid] = raw
+    return heads
+
+
+def check_stage4_card(card, frozen, vid, raw_head):
+    """Check the v2 public profile and reserved original prose, including wrapper bytes."""
+    require(card.get("video_id") == vid and card.get("source_revision") == frozen["source_revision"],
+            f"Stage 4 card identity/revision mismatch: {vid}")
+    require(all(card.get(key) == PROFILE_STAGE4[key] for key in ("profile", "schema_version", "selection_version")),
+            f"Stage 4 wrong card profile: {vid}")
+    require(card.get("card_hash") == frozen["card_hash"] ==
+            library_cards._hash({key: value for key, value in card.items() if key != "card_hash"}),
+            f"Stage 4 stale card hash: {vid}")
+    require(len(library_cards.card_text(card).encode("utf-8")) == frozen["card_bytes"] <= 8192,
+            f"Stage 4 card byte budget mismatch: {vid}")
+    excerpts = card["excerpts"]
+    require(len(excerpts) <= 6 and len({e["excerpt_id"] for e in excerpts}) == len(excerpts),
+            f"Stage 4 excerpt count/identity mismatch: {vid}")
+    for excerpt in excerpts:
+        require(isinstance(excerpt["text"], str) and 0 < len(excerpt["text"]) <= 240 and
+                type(excerpt["truncated"]) is bool and re.fullmatch(r"[a-f0-9]{64}", excerpt["excerpt_id"]),
+                f"Stage 4 excerpt limits exceeded: {vid}")
+        require(excerpt["evidence_kind"] in {"timed_clip", "text_only"}, f"Stage 4 unknown evidence kind: {vid}")
+        if excerpt["evidence_kind"] == "text_only":
+            require(excerpt["start"] is None and excerpt["end"] is None and excerpt["timing"] == "not_timed",
+                    f"Stage 4 prose has timing: {vid}")
+    timed = [e for e in excerpts if e["evidence_kind"] == "timed_clip"]
+    prose_excerpts = [e for e in excerpts if e["evidence_kind"] == "text_only"]
+    require(card["clips"] == timed and card["chars_chosen_clips"] == sum(len(e["text"]) for e in timed),
+            f"Stage 4 clips alias mismatch: {vid}")
+    require(card.get("source_type") == frozen["source_type"] and card["status"] == frozen["status"],
+            f"Stage 4 card metadata mismatch: {vid}")
+    require(("timed_evidence" if timed else "text_only") == frozen["stratum"], f"Stage 4 evidence stratum changed: {vid}")
+    prose = library_cards.opening_prose(raw_head.decode("utf-8", errors="replace"))
+    if prose and card["source_type"] in PROSE_SOURCES:
+        require(len(prose_excerpts) == 1 and len(timed) <= 5, f"Stage 4 reserved prose missing: {vid}")
+    # Historical video-only text is never admissible for a membership.
+    # Mixed video-origin prose is not a v2 addition.
+    require(not (timed and prose_excerpts and card["source_type"] not in PROSE_SOURCES),
+            f"Stage 4 ineligible mixed prose: {vid}")
+    for excerpt in prose_excerpts:
+        require(excerpt["text"] == prose[:240] and
+                excerpt["excerpt_id"] == library_cards._hash([vid, "opening_prose", prose]) and
+                excerpt["truncated"] == (len(prose) > 240), f"Stage 4 prose differs from original head: {vid}")
+
+
+def stage4_freeze_hash(manifest):
+    """Acyclic manifest content identity; file-byte hashes are sealed afterwards."""
+    return digest({key: manifest[key] for key in (
+        "stage", "source", "items", "exclusions", "cards", "corpus_heads", "card_profile",
+        "taxonomy", "execution", "probe") } | dict(
+            prompt_file_sha256=manifest["hashes"]["prompt_file_sha256"],
+            prompt_sha256=manifest["hashes"]["prompt_sha256"],
+            card_builder_sha256=manifest["hashes"]["card_builder_sha256"]))
+
+
+def stage4_bindings(manifest, original, original_sha256):
+    require(original_sha256 == HOLDOUT_V3_SHA256, "Original v3 freeze hash changed")
+    strata = {}
+    require(set(original["strata"]) == {"timed_evidence", "text_only"}, "Original v3 strata changed")
+    for stratum, count in (("timed_evidence", 47), ("text_only", 13)):
+        rows = original["strata"][stratum]
+        require(len(rows) == count, "Original v3 denominators changed")
+        strata[stratum] = []
+        for row in rows:
+            vid = row["video_id"]
+            new = manifest["cards"][vid]
+            require(row["stratum"] == new["stratum"] == stratum and
+                    row["source_revision"] == new["source_revision"], f"Stage 4 binding revision/stratum changed: {vid}")
+            strata[stratum].append(dict(video_id=vid, stratum=stratum, source_revision=row["source_revision"],
+                old_card_hash=row["card_hash"], new_card_hash=new["card_hash"]))
+    return dict(schema_version=1, kind="holdout-v3-stage4-bindings", target_count=60,
+                original_holdout_sha256=original_sha256, stage4_freeze_hash=stage4_freeze_hash(manifest),
+                manifest_hash=manifest["manifest_hash"], cards_hash=manifest["cards_hash"],
+                card_profile_hash=manifest["hashes"]["card_profile_hash"], strata=strata)
+
+
+def stage4_probe(manifest, induction, original):
+    """Fixed development-only plumbing probe: four mixed, four video, eight text."""
+    development = {row["video_id"] for row in induction["items"]}
+    excluded = {row["video_id"] for rows in original["strata"].values() for row in rows}
+    require(len(development) == 225 and not development & excluded, "Probe development identity freeze changed")
+    groups = dict(mixed=[], video=[], text=[])
+    for vid in sorted(development):
+        card = manifest["card_payloads"][vid]
+        kinds = {e["evidence_kind"] for e in card["excerpts"]}
+        if kinds == {"timed_clip", "text_only"} and card["source_type"] in PROSE_SOURCES:
+            groups["mixed"].append(vid)
+        elif "timed_clip" in kinds and card["source_type"] not in PROSE_SOURCES:
+            groups["video"].append(vid)
+        elif kinds == {"text_only"}:
+            groups["text"].append(vid)
+    require(len(groups["mixed"]) >= 4 and len(groups["video"]) >= 4 and len(groups["text"]) >= 8,
+            "Probe allocation unavailable; resolve dispatch before execution")
+    return dict(selection="video_id ascending: first 4 eligible mixed, 4 video-origin timed, 8 text-only development cards",
+                target_ids=sorted(groups["mixed"][:4] + groups["video"][:4] + groups["text"][:8]),
+                wall_budget_ms=900000, batch_size=8, concurrency=4, max_retries=1)
+
+
+def check_stage4_references(manifest, documents):
+    """Validate the complete packet/label/mapping graph; no predictions are inputs."""
+    bindings = documents["bindings"]
+    rows = {r["video_id"]: r for values in bindings["strata"].values() for r in values}
+    require(len(rows) == 60, "Stage 4 bindings require 60 distinct identities")
+    files = manifest["files"]
+    packet = documents["packet"]
+    require(packet["kind"] == "holdout-v3-stage4-labelling-packet" and
+            packet["bindings_sha256"] == files["bindings"]["sha256"] and
+            packet["stage4_freeze_hash"] == stage4_freeze_hash(manifest) and
+            packet["card_profile_hash"] == manifest["hashes"]["card_profile_hash"] and
+            packet["taxonomy"] == manifest["taxonomy"] and packet["subject_rule"] == "admissible-excerpts-only",
+            "Stage 4 labelling packet references changed")
+
+    def indexed(values, label):
+        require(isinstance(values, list) and len(values) == 60 and
+                {r["video_id"] for r in values} == set(rows), f"Stage 4 {label} identities missing/duplicate/foreign")
+        result = {r["video_id"]: r for r in values}
+        for vid, row in result.items():
+            binding = rows[vid]
+            require(row["stratum"] == binding["stratum"], f"Stage 4 {label} stratum changed: {vid}")
+            if label == "packet":
+                require(row["card"] == manifest["card_payloads"][vid], f"Stage 4 packet card changed: {vid}")
+            else:
+                require(row["source_revision"] == binding["source_revision"] and row["card_hash"] == binding["new_card_hash"],
+                        f"Stage 4 {label} stale card reference: {vid}")
+                support = row.get("evidence")
+                require(isinstance(support, dict), f"Stage 4 {label} lacks excerpt support: {vid}")
+                _check_support(dict(support, video_id=vid, source_revision=row["source_revision"], card_hash=row["card_hash"]),
+                               manifest["card_payloads"], manifest["cards"])
+        return result
+
+    indexed(packet["cards"], "packet")
+    for key in ("labels_gemini", "labels_grok", "adjudication"):
+        doc = documents[key]
+        require(doc["packet_sha256"] == files["packet"]["sha256"] and
+                doc["bindings_sha256"] == files["bindings"]["sha256"] and
+                doc["taxonomy_revision_hash"] == manifest["taxonomy"]["revision_hash"] and
+                doc["subject_rule"] == "admissible-excerpts-only", f"Stage 4 {key} references changed")
+        require(isinstance(doc["prior_v3_exposure"], str) and doc["prior_v3_exposure"].strip(),
+                f"Stage 4 {key} lacks exposure declaration")
+        indexed(doc["items"], key)
+    adjudication = documents["adjudication"]
+    require(adjudication["label_file_sha256"] == {key: files[key]["sha256"] for key in ("labels_gemini", "labels_grok")},
+            "Stage 4 adjudication label references changed")
+    require(isinstance(adjudication["sealed_at"], str) and adjudication["sealed_at"].strip(), "Stage 4 seal timestamp missing")
+    gold = indexed(documents["gold"], "gold")
+    adjudicated = {r["video_id"]: r for r in adjudication["items"]}
+    for vid, row in gold.items():
+        require(row.get("sealed") is True and all(row.get(k) == value for k, value in adjudicated[vid].items()),
+                f"Stage 4 gold differs from sealed adjudication: {vid}")
+    mapping = documents["mapping"]
+    require(mapping["scoring_version"] == "strict-mapped-primary-v2" and
+            mapping["bindings_sha256"] == files["bindings"]["sha256"] and
+            mapping["gold_sha256"] == files["gold"]["sha256"] and
+            mapping["adjudicated_sha256"] == files["adjudication"]["sha256"] and
+            mapping["taxonomy_revision_hash"] == manifest["taxonomy"]["revision_hash"], "Stage 4 mapping references changed")
+    require(set(mapping["items"]) == set(rows), "Stage 4 mapping identities missing/foreign")
+    for vid, row in mapping["items"].items():
+        binding = rows[vid]
+        require(all(row[k] == binding[b] for k, b in (("source_revision", "source_revision"),
+                ("card_hash", "new_card_hash"), ("stratum", "stratum"))), f"Stage 4 mapping stale card reference: {vid}")
+        require(row["gold_path"] == gold[vid]["shelf_path"] and row["outcome"] == gold[vid]["outcome"],
+                f"Stage 4 mapping gold reference changed: {vid}")
+        path = [unicodedata.normalize("NFC", segment).strip() for segment in row["gold_path"]]
+        ancestors = [n for n in manifest["taxonomy"]["nodes"] if not n["retired"] and n["path"] == path[:len(n["path"])]]
+        deepest = max((len(n["path"]) for n in ancestors), default=0)
+        matches = [n for n in ancestors if len(n["path"]) == deepest]
+        node = matches[0] if len(matches) == 1 else None
+        require(row["mapped_path"] == (node["path"] if node else None) and
+                row["mapped_shelf_id"] == (node["shelf_id"] if node else None) and
+                row["scorable"] is bool(node), f"Stage 4 strict mapping changed: {vid}")
+
+
+def verify_stage4_manifest(manifest, root=ROOT):
+    stage1 = read_json(root / MANIFEST.relative_to(ROOT))
+    check_stage_continuity(manifest, stage1, 4)
+    require(manifest["taxonomy"]["revision_hash"] == STAGE4_TAXONOMY_REVISION and
+            manifest["hashes"]["prompt_file_sha256"] == STAGE4_PROMPT_FILE_SHA256 and
+            manifest["hashes"]["prompt_sha256"] == STAGE4_PROMPT_SHA256, "Stage 4 taxonomy/prompt changed")
+    historical = read_json(root / MANIFEST_STAGE3.relative_to(ROOT))
+    for key in ("taxonomy", "parent_taxonomy", "parent_taxonomy_2", "holdout"):
+        require(manifest["files"][key]["path"] == STAGE_FILES[4][key], f"Stage 4 frozen lineage path changed: {key}")
+        require(manifest["files"][key] == historical["files"][key], f"Stage 4 frozen lineage changed: {key}")
+    original_path = root / manifest["files"]["holdout"]["path"]
+    original = read_json(original_path)
+    require(sha(original_path.read_bytes()) == HOLDOUT_V3_SHA256, "Original v3 freeze hash changed")
+    require(sha((root / MANIFEST.relative_to(ROOT)).read_bytes()) == original["source_manifest_sha256"],
+            "Original source manifest changed")
+    documents = {key: read_json(root / manifest["files"][key]["path"]) for key in
+                 ("bindings", "packet", "diff", "labels_gemini", "labels_grok", "adjudication", "gold", "mapping")}
+    require(documents["bindings"] == stage4_bindings(manifest, original, HOLDOUT_V3_SHA256), "Stage 4 bindings changed")
+    ledger = documents["diff"]
+    require(ledger["stage4_freeze_hash"] == stage4_freeze_hash(manifest) and
+            ledger["card_profile_hash"] == manifest["hashes"]["card_profile_hash"], "Stage 4 diff references changed")
+    require(len(ledger["items"]) == 548 and {r["video_id"] for r in ledger["items"]} == set(manifest["cards"]),
+            "Stage 4 diff identities missing/duplicate/foreign")
+    for row in ledger["items"]:
+        vid = row["video_id"]
+        require(row["old_card_hash"] == stage1["cards"][vid]["card_hash"] and
+                row["new_card_hash"] == manifest["cards"][vid]["card_hash"] and
+                row["source_revision"] == stage1["cards"][vid]["source_revision"], f"Stage 4 diff binding changed: {vid}")
+    heads = archived_stage1_heads(root)
+    require(set(manifest["card_payloads"]) == set(manifest["cards"]), "Stage 4 missing/foreign card payload")
+    for vid, frozen in manifest["cards"].items():
+        require(frozen["source_type"] == stage1["cards"][vid]["source_type"], f"Stage 4 source type changed: {vid}")
+        check_stage4_card(manifest["card_payloads"][vid], frozen, vid, heads[vid])
+    require(manifest["measured_strata"] == dict(Counter(row["stratum"] for row in manifest["cards"].values())),
+            "Stage 4 measured stratum counts changed")
+    declared = {s: [r["video_id"] for r in rows] for s, rows in original["strata"].items()}
+    require(manifest["holdout"]["declared_strata"] == declared and
+            manifest["holdout"]["remeasured_strata"] == dict(timed_evidence=47, text_only=13) and
+            manifest["holdout"]["coverage_floor"] == 0.80 and manifest["holdout"]["precision_target"] == 0.90,
+            "Stage 4 holdout strata/gates changed")
+    induction = read_json(root / INDUCTION_MANIFEST.relative_to(ROOT))
+    require(sha((root / INDUCTION_MANIFEST.relative_to(ROOT)).read_bytes()) == original["selection"]["induction_manifest_sha256"],
+            "Probe induction freeze changed")
+    require(manifest["probe"] == stage4_probe(manifest, induction, original), "Stage 4 probe selection changed")
+    expected_execution = dict(model="claude-opus-5", effort=None, batch_size=8, concurrency=4, max_retries=1,
+                              wall_budget_ms=7200000, error_rate_limit=0.10, error_rate_min_attempts=20,
+                              guard_rule=GUARD_RULE, guard_parameters=GUARD_PARAMETERS)
+    require(manifest["execution"] == expected_execution, "Stage 4 execution variables changed")
+    check_stage4_references(manifest, documents)
+    return manifest
+
+
+def verify_manifest(manifest, root=ROOT, *, stage=None):
     """Check the freeze against this checkout, without opening a database or corpus."""
     require(manifest["freeze_status"] == "frozen", "Input freeze is incomplete")
     require(manifest["schema_version"] == 1, "Unknown manifest schema")
@@ -1076,8 +1390,9 @@ def verify_manifest(manifest, root=ROOT):
         require(sha(path.read_bytes()) == frozen["sha256"], f"Frozen file changed: {frozen['path']}")
     taxonomy = normalized_taxonomy(read_json(root / manifest["files"]["taxonomy"]["path"]))
     require(taxonomy == manifest["taxonomy"], "Normalized taxonomy changed")
-    require(manifest["card_profile"] == PROFILE, "Card profile changed")
-    require(digest(PROFILE) == manifest["hashes"]["card_profile_hash"], "Card profile hash mismatch")
+    actual_stage = manifest_stage(manifest)
+    require(stage is None or stage == actual_stage, "Manifest stage differs from requested route")
+    profile = frozen_profile(manifest)
     split = read_json(root / manifest["files"]["holdout"]["path"])
     heldout = sorted(entry["video_id"] for rows in split["strata"].values() for entry in rows)
     require(len(heldout) == len(set(heldout)) == 60, "Holdout requires 60 distinct identities")
@@ -1091,7 +1406,7 @@ def verify_manifest(manifest, root=ROOT):
     require(set(manifest["corpus_heads"]) == set(cards), "Missing corpus head hash")
     require(digest(manifest["corpus_heads"]) == manifest["corpus_heads_hash"], "Corpus head index hash mismatch")
     expected = dict(manifest_hash=manifest["manifest_hash"], source_sha256=SOURCE_SHA256,
-                    taxonomy_revision_hash=taxonomy["revision_hash"], card_profile_hash=digest(PROFILE),
+                    taxonomy_revision_hash=taxonomy["revision_hash"], card_profile_hash=digest(profile),
                     holdout_ids_hash=digest(heldout), cards_hash=digest(cards),
                     corpus_heads_hash=digest(manifest["corpus_heads"]), implementation_hash=digest(manifest["files"]))
     for name, key in [("taxonomy", "taxonomy_file_sha256"), ("prompt", "prompt_file_sha256"),
@@ -1100,6 +1415,10 @@ def verify_manifest(manifest, root=ROOT):
         expected[key] = manifest["files"][name]["sha256"]
     expected["prompt_sha256"] = sha((root / manifest["files"]["prompt"]["path"]).read_text(encoding="utf-8").encode("utf-8"))
     require(expected == manifest["hashes"], "Freeze hash aliases disagree")
+    if actual_stage == 4:
+        verify_stage4_manifest(manifest, root)
+    elif actual_stage in (2, 3):
+        check_stage_continuity(manifest, read_json(root / MANIFEST.relative_to(ROOT)), actual_stage)
     return manifest
 
 
@@ -1111,17 +1430,27 @@ def render_prompt(template, taxonomy, card):
             + library_cards.card_text(card) + suffix)
 
 
-def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
+def freeze_inputs(source, *, allow_install_corpus=False, stage=1, stage4_sealed=True):
     """Freeze the named copy and bounded Markdown heads; no helper/index defaults.
 
-    stage=2 binds the stage 2 files (STAGE_FILES[2]); the card and head freeze is identical
-    because the card builder is shared.
+    Stages 2/3 retain exact historical cards. Stage 4 reads archived heads only.
+    Adapters may request stage4_sealed=False to build the candidate before labels
+    exist. Its awaiting-stage4-seal status cannot pass receipt validation. Rebuild
+    with the default after sealing; the stage4_freeze_hash remains unchanged.
 
     A blocked head is retained as an unresolved target, never silently excluded.
     --allow-install-corpus permits only the copy's explicit Markdown references,
     never the live database, token, settings, or arbitrary install files.
     """
     source = Path(source).resolve()
+    require(stage in STAGE_FILES, "Unknown freeze stage")
+    require(stage == 4 or stage4_sealed, "Unsealed preparation is stage 4 only")
+    profile = PROFILE_STAGE4 if stage == 4 else PROFILE
+    archived_heads = archived_stage1_heads() if stage == 4 else None
+    if stage == 4:
+        require(source.is_relative_to(ROOT.resolve()), "Stage 4 source must be staged inside this checkout")
+        require(not allow_install_corpus, "Stage 4 uses archived heads only")
+        require(library_cards.SELECTION_VERSION == PROFILE_STAGE4["selection_version"], "Stage 4 requires integrated v2 card builder")
     require(source.name == "uoink-index-copy-2026-09-04-upgraded.db", "Use the explicitly named source copy")
     require(sha(source.read_bytes()) == SOURCE_SHA256, "Named source hash mismatch before copying")
     scratch = ROOT / "_scratch/proof/freeze"
@@ -1145,14 +1474,18 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA query_only=ON")
     files = {}
-    for name, relative in dict(STAGE_FILES[stage],
+    stage_files = dict(STAGE_FILES[stage])
+    if stage == 4 and not stage4_sealed:
+        for key in ("bindings", "packet", "diff", "labels_gemini", "labels_grok", "adjudication", "gold", "mapping"):
+            stage_files.pop(key)
+    for name, relative in dict(stage_files,
                                prompt="scripts/librarian/prompts/assign.md", card_builder="library_cards.py",
                                index="index.py", clips="clips.py",
                                provenance="provenance.py", service="library_work.py",
                                migration26="migrations/0026_provenance_precedence.sql",
                                migration27="migrations/0027_library_substrate.sql").items():
         files[name] = dict(path=relative, sha256=sha((ROOT / relative).read_bytes()))
-    if stage >= 2:
+    if stage >= 2 and stage4_sealed:
         staged_gold = read_json(ROOT / files["gold"]["path"])
         require(isinstance(staged_gold, list) and len(staged_gold) == 60 and
                 all(item.get("sealed") is True for item in staged_gold), f"Stage {stage} gold must be the sealed adjudicated labels")
@@ -1163,7 +1496,7 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
     allowed = [Path("E:/Uoink"), Path("C:/Users/hello/OneDrive/Desktop/Uoink")]
     if allow_install_corpus:
         allowed.append(install)
-    items, cards, blockers, heads = [], {}, [], {}
+    items, cards, blockers, heads, card_payloads = [], {}, [], {}, {}
     strata = Counter()
     try:
         rows = list(conn.execute("SELECT * FROM yoinks ORDER BY video_id"))
@@ -1174,7 +1507,9 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
             video_id = item["video_id"]
             raw_path = Path(item["corpus_path"]) if item.get("corpus_path") else None
             reason = None
-            if item.get("deleted_at") is not None:
+            if stage == 4:
+                require(item.get("deleted_at") is None, f"Stage 4 deleted source: {video_id}")
+            elif item.get("deleted_at") is not None:
                 reason = "Deleted target in named source"
             elif raw_path is None:
                 reason = "Named source has no corpus path"
@@ -1182,8 +1517,8 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
                 reason = "Corpus head under protected install root; read permission unresolved"
             elif raw_path.suffix.lower() != ".md" or not any(raw_path.is_relative_to(base) for base in allowed):
                 reason = "Corpus path is outside the explicitly allowed document roots"
-            raw = None
-            if reason is None:
+            raw = archived_heads[video_id] if stage == 4 else None
+            if reason is None and stage != 4:
                 resolved = raw_path.resolve()
                 if not any(resolved.is_relative_to(base.resolve()) for base in allowed):
                     reason = "Corpus symlink escapes allowed document roots"
@@ -1201,7 +1536,11 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
                 continue
             text = raw.decode("utf-8", errors="replace")
             clips = [dict(clip) for clip in conn.execute("SELECT * FROM clips WHERE video_id=? ORDER BY seq", (video_id,))]
-            card = library_cards.build_card(item, clips, corpus_text=text, profile="librarian")
+            try:
+                card = library_cards.build_card(item, clips, corpus_text=text, profile="librarian")
+            except ValueError as exc:
+                raise ValueError(f"Card freeze failed for {video_id}: {exc}") from exc
+            card_payloads[video_id] = card
             stratum = "timed_evidence" if any(e["evidence_kind"] == "timed_clip" for e in card["excerpts"]) else "text_only"
             strata[stratum] += 1
             entry = dict(source_revision=card["source_revision"], card_hash=card["card_hash"],
@@ -1220,19 +1559,19 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
                   taxonomy_file_sha256=files["taxonomy"]["sha256"], taxonomy_revision_hash=taxonomy["revision_hash"],
                   prompt_file_sha256=files["prompt"]["sha256"],
                   prompt_sha256=sha((ROOT / files["prompt"]["path"]).read_text(encoding="utf-8").encode("utf-8")),
-                  card_profile_hash=digest(PROFILE), card_builder_sha256=files["card_builder"]["sha256"],
+                  card_profile_hash=digest(profile), card_builder_sha256=files["card_builder"]["sha256"],
                   holdout_file_sha256=files["holdout"]["sha256"], holdout_ids_hash=digest(heldout_ids),
-                  gold_file_sha256=files["gold"]["sha256"], cards_hash=digest(cards), corpus_heads_hash=digest(heads),
+                  gold_file_sha256=files.get("gold", {}).get("sha256", "0" * 64), cards_hash=digest(cards), corpus_heads_hash=digest(heads),
                   implementation_hash=digest(files))
     heldout_strata = {name: sorted(entry["video_id"] for entry in entries) for name, entries in split["strata"].items()}
     remeasured = Counter(cards[video_id]["stratum"] for video_id in heldout_ids if video_id in cards)
-    return dict(schema_version=1, freeze_status="blocked" if blockers else "frozen", contract_version=CONTRACT,
+    manifest = dict(schema_version=1, freeze_status="blocked" if blockers else "frozen", contract_version=CONTRACT,
                 source=dict(name=source.name, sha256=SOURCE_SHA256, bytes=source.stat().st_size, schema_version=schema_before),
                 upgrade=dict(sha256=upgrade_sha256, schema_version=schema,
                              hash_note="Measured duplicate only; migration timestamps make file hashes run-specific"),
                 ordering="video_id ascending, Unicode code-point order", items=items, exclusions={},
                 manifest_hash=manifest_hash, manifest_hash_kind="provisional-unresolved-heads" if blockers else "library_work.manifest-v1",
-                hashes=hashes, files=files, card_profile=PROFILE, taxonomy=taxonomy,
+                hashes=hashes, files=files, card_profile=profile, taxonomy=taxonomy,
                 cards=cards, cards_hash=digest(cards), corpus_heads=heads, corpus_heads_hash=digest(heads),
                 measured_strata=dict(strata), unresolved_targets=blockers,
                 holdout=dict(ids=heldout_ids, declared_strata=heldout_strata, remeasured_strata=dict(remeasured),
@@ -1241,6 +1580,17 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
                 execution=dict(model="claude-sonnet-5", concurrency=4, max_retries=1, wall_budget_ms=7200000,
                                error_rate_limit=0.10, error_rate_min_attempts=20,
                                error_rate_policy="Astra operational abort threshold, additional to Fable's quality thresholds"))
+    if stage == 4:
+        manifest.update(stage=4, card_payloads=card_payloads)
+        if not stage4_sealed:
+            manifest["freeze_status"] = "awaiting-stage4-seal"
+        manifest["execution"] = dict(model="claude-opus-5", effort=None, batch_size=8, concurrency=4, max_retries=1,
+            wall_budget_ms=7200000, error_rate_limit=0.10, error_rate_min_attempts=20,
+            guard_rule=GUARD_RULE, guard_parameters=GUARD_PARAMETERS)
+        manifest["probe"] = stage4_probe(manifest, read_json(INDUCTION_MANIFEST), split)
+    if stage >= 2:
+        check_stage_continuity(manifest, read_json(MANIFEST), stage)
+    return manifest
 
 
 def _check_isolation(config, mode, checkout_root=None):
@@ -1344,6 +1694,11 @@ def validate_receipts(receipts, manifest, *, require_real=False, root=ROOT, arti
     require(receipts["inputs"] == manifest["hashes"], "Receipt input hashes differ from frozen inputs")
     require(receipts["status"] == "completed", f"Run aborted: {receipts['abort_reason']}")
     require(receipts["abort_reason"] is None, "Completed run has abort reason")
+    stage = manifest_stage(manifest)
+    profile = PROFILE
+    if stage == 4:
+        verify_manifest(manifest, root, stage=4)
+        profile = frozen_profile(manifest)
     ids = receipts["target_ids"]
     frozen_ids = [entry[0] for entry in manifest["items"]]
     require(ids == [video_id for video_id in frozen_ids if video_id in set(ids)], "Targets are unknown or out of frozen order")
@@ -1352,6 +1707,22 @@ def validate_receipts(receipts, manifest, *, require_real=False, root=ROOT, arti
                           exclusions={key: value for key, value in manifest["exclusions"].items() if key in ids})
     require(receipts["target_manifest_hash"] == digest(target_payload), "Target manifest hash mismatch")
     config = receipts["config"]
+    if stage == 4:
+        for key in ("model", "effort", "concurrency", "max_retries", "error_rate_limit", "error_rate_min_attempts",
+                    "guard_rule", "guard_parameters"):
+            require(key in config and config[key] == manifest["execution"][key], f"Stage 4 receipt variable changed: {key}")
+        require(config["wall_budget_ms"] == (7200000 if require_whole_manifest else 900000), "Stage 4 receipt wall budget changed")
+        if "batch_size" in config:
+            require(config["batch_size"] == 8, "Stage 4 receipt batch size changed")
+        for call in receipts["calls"]:
+            argv = call["argv"]
+            require("--model" in argv and argv.index("--model") + 1 < len(argv) and
+                    argv[argv.index("--model") + 1] == "claude-opus-5" and
+                    not any(arg == "--effort" or arg.startswith("--effort=") for arg in argv),
+                    "Stage 4 assignment argv changed model/default effort")
+            require(1 <= len(call["attempt_ids"]) <= 8, "Stage 4 batch limit exceeded")
+    else:
+        require(config["wall_budget_ms"] == 7200000, "Historical wall budget changed")
     _check_isolation(config, receipts["mode"], receipts["execution"]["checkout_root"] if v2 else None)
     require(sha(config["output_schema_text"].encode("utf-8")) == config["output_schema_sha256"], "Output schema hash mismatch")
     Draft202012Validator.check_schema(decode_json(config["output_schema_text"]))
@@ -1386,7 +1757,7 @@ def validate_receipts(receipts, manifest, *, require_real=False, root=ROOT, arti
                 packet.get("source_revision") == frozen["source_revision"] and
                 packet.get("taxonomy_revision") == manifest["taxonomy"]["revision_hash"], "Packet identity/revision mismatch")
         policy = dict(min_confidence=0.60, max_memberships=3, max_churn_percent=15,
-                      prompt_hash=manifest["hashes"]["prompt_sha256"], selection_version="spread-longest-v1", card_schema=1)
+                      prompt_hash=manifest["hashes"]["prompt_sha256"], selection_version=profile["selection_version"], card_schema=1)
         require(packet.get("policy_hash") == digest(policy), "Packet policy hash mismatch")
         card = packet["card"]
         require(set(packet) == {"schema_version", "video_id", "source_revision", "taxonomy_revision", "policy_hash", "card"},
@@ -1395,7 +1766,9 @@ def validate_receipts(receipts, manifest, *, require_real=False, root=ROOT, arti
         require(card.get("card_hash") == frozen["card_hash"] == library_cards._hash({k: v for k, v in card.items() if k != "card_hash"}),
                 "Card differs from frozen evidence")
         require(card.get("profile") == "librarian" and card.get("schema_version") == 1 and
-                card.get("selection_version") == "spread-longest-v1", "Wrong card profile")
+                card.get("selection_version") == profile["selection_version"], "Wrong card profile")
+        if stage == 4:
+            require(card == manifest["card_payloads"][video_id], "Stage 4 receipt packet card changed")
         require(len(card["excerpts"]) <= 6 and all(len(e["text"]) <= 240 for e in card["excerpts"]), "Card profile limits exceeded")
         require(attempt["card_text"] == library_cards.card_text(card), "Card serialization mismatch")
         require(attempt["prompt_text"] == render_prompt(template, manifest["taxonomy"], card), "Prompt differs from frozen template/taxonomy/card")
@@ -1467,21 +1840,44 @@ def validate_receipts(receipts, manifest, *, require_real=False, root=ROOT, arti
     require(totals["wall_ms"] <= config["wall_budget_ms"], "Wall-time budget exceeded")
     require(sums["attempt_wall_ms"] <= totals["wall_ms"] * config["concurrency"], "Attempt wall times exceed concurrency capacity")
     n = len(receipts["attempts"])
-    require(n < 20 or 10 * (rejected + len(failures)) <= n, "Error-rate abort threshold exceeded")
+    if not v2:
+        require(n < 20 or 10 * (rejected + len(failures)) <= n, "Error-rate abort threshold exceeded")
     if v2:
         _check_v2(receipts, manifest, template, artifact_root or root)
     require(not any(t["outcome"] in {"changed", "deleted", "pinned"} for t in targets), "Source or projection invalidation blocks proof")
-    return dict(status="FIXTURE_VALID" if receipts["mode"] == "mock" else "RECEIPTS_VALID_AUDIT_REQUIRED",
+    return dict(status="FIXTURE_VALID" if receipts["mode"] == "mock" else (
+                    "RECEIPTS_VALID_AUDIT_REQUIRED" if require_whole_manifest else "PROBE_ONLY_VALID_AUDIT_REQUIRED"),
                 target_count=len(ids), attempt_count=n, retries=totals["retries"],
-                measured_quality_items=0 if receipts["mode"] == "mock" else len(manifest["holdout"]["ids"]),
+                measured_quality_items=0 if receipts["mode"] == "mock" or not require_whole_manifest else len(manifest["holdout"]["ids"]),
                 whole_manifest_checked=require_whole_manifest,
                 product_proof_pass=False)
+
+
+def validate_probe_receipts(receipts, manifest, *, root=ROOT, artifact_root=None):
+    """Real, completed sixteen-item plumbing check; never P2-7 acceptance."""
+    require(manifest_stage(manifest) == 4, "Probe entry point requires stage 4")
+    require(receipts["target_ids"] == manifest["probe"]["target_ids"] and len(receipts["target_ids"]) == 16,
+            "Probe must cover exactly the frozen sixteen development identities")
+    require(not set(receipts["target_ids"]) & set(manifest["holdout"]["ids"]), "Probe includes evaluation identities")
+    result = validate_receipts(receipts, manifest, require_real=True, require_whole_manifest=False,
+                               root=root, artifact_root=artifact_root)
+    require(not receipts["transport_failures"] and all(a["outcome"] in {"accepted", "unmapped", "unsupported"}
+            for a in receipts["attempts"]), "Probe requires zero rejected/errored completions or transport failures")
+    require(len(receipts["attempts"]) == 16 and all(a["attempt_number"] == 1 for a in receipts["attempts"]) and
+            {a["video_id"] for a in receipts["attempts"]} == set(receipts["target_ids"]), "Probe requires sixteen first-attempt terminal outcomes")
+    require(len(receipts["calls"]) == 2 and all(len(c["attempt_ids"]) == 8 for c in receipts["calls"]),
+            "Probe requires two batches of eight")
+    return dict(result, status="PROBE_ONLY_VALID_AUDIT_REQUIRED", whole_manifest_checked=False,
+                measured_quality_items=0, product_proof_pass=False, probe_only=True)
 
 
 def _legacy_fixture():
     taxonomy = normalized_taxonomy(read_json(ROOT / "docs/library/taxonomy-v1-2026-09-04.json"))
     card = library_cards.build_card(dict(video_id="fixture-note", title="Fixture", source_type="note"), [],
                                     corpus_text="A grounded fixture quote with Unicode caf\u00e9.", profile="librarian")
+    # Exercise the historical route even after builder v2 lands.
+    card["selection_version"] = PROFILE["selection_version"]
+    card["card_hash"] = library_cards._hash({k: value for k, value in card.items() if k != "card_hash"})
     prompt_path = "scripts/librarian/prompts/assign.md"
     template = (ROOT / prompt_path).read_text(encoding="utf-8")
     pair = [card["video_id"], card["source_revision"]]
@@ -1678,16 +2074,22 @@ def main(argv=None):
     parser.add_argument("--mock", action="store_true", help="Require fixture receipts")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--freeze", action="store_true", help="Rebuild the freeze from the named copy; requires --mock")
-    parser.add_argument("--stage2", action="store_true",
+    stages = parser.add_mutually_exclusive_group()
+    stages.add_argument("--stage2", action="store_true",
                         help="Stage 2 execution freeze: taxonomy v2, hold-out v2, sealed labels; writes/validates manifest-stage2")
-    parser.add_argument("--stage3", action="store_true",
+    stages.add_argument("--stage3", action="store_true",
                         help="Stage 3 execution freeze: taxonomy v3 with lineage, hold-out v3, sealed labels; writes/validates manifest-stage3")
+    stages.add_argument("--stage4", action="store_true", help="Stage 4 v2 cards with original v3 identity bindings")
+    parser.add_argument("--probe", action="store_true", help="Validate only the frozen stage 4 real probe; cannot establish P2-7")
     parser.add_argument("--source", type=Path)
     parser.add_argument("--check-source", action="store_true", help="Remeasure source heads and compare with freeze; requires --mock")
     parser.add_argument("--allow-install-corpus", action="store_true", help="Read only explicit source Markdown heads in the install root")
     args = parser.parse_args(argv)
     try:
         Draft202012Validator.check_schema(RECEIPT_SCHEMA)
+        require(not args.probe or (args.stage4 and args.receipts is not None and not args.mock and
+                args.receipt_kind == "proof" and not args.freeze and not args.check_source),
+                "--probe requires --stage4 --receipts and real proof artifacts")
         if args.freeze_stage2:
             require(args.mock, "Identity freeze requires --mock; no model or database is opened")
             for path, value in zip((HOLDOUT_V2, INDUCTION_MANIFEST), stage2_freezes()):
@@ -1725,8 +2127,8 @@ def main(argv=None):
             print(json.dumps(validate_induction_receipts(receipts, artifact_root=args.receipts.resolve().parent,
                                                          require_real=args.require_real), indent=2))
             return 0
-        stage = 3 if args.stage3 else (2 if args.stage2 else 1)
-        assigned_manifest = {1: MANIFEST, 2: MANIFEST_STAGE2, 3: MANIFEST_STAGE3}[stage]
+        stage = 4 if args.stage4 else (3 if args.stage3 else (2 if args.stage2 else 1))
+        assigned_manifest = {1: MANIFEST, 2: MANIFEST_STAGE2, 3: MANIFEST_STAGE3, 4: MANIFEST_STAGE4}[stage]
         if stage > 1 and args.manifest.resolve() == MANIFEST.resolve():
             args.manifest = assigned_manifest
         if args.freeze:
@@ -1734,16 +2136,18 @@ def main(argv=None):
             require(args.manifest.resolve() == assigned_manifest.resolve(), "Freeze writes only the assigned manifest file")
             manifest = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus, stage=stage)
             if stage >= 2:
-                stage1 = read_json(MANIFEST)
-                for key in ("items", "cards", "corpus_heads", "cards_hash", "corpus_heads_hash", "measured_strata"):
-                    require(manifest[key] == stage1[key], f"Stage {stage} card freeze differs from stage 1: {key}")
+                check_stage_continuity(manifest, read_json(MANIFEST), stage)
+            if stage == 4:
+                verify_manifest(manifest, stage=4)
+            require(not assigned_manifest.exists() or read_json(assigned_manifest) == manifest,
+                    "Existing freeze differs; do not overwrite")
             assigned_manifest.parent.mkdir(parents=True, exist_ok=True)
             assigned_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
             print(json.dumps(dict(status=manifest["freeze_status"], targets=len(manifest["items"]),
                                  frozen_cards=len(manifest["cards"]), unresolved=len(manifest["unresolved_targets"]),
                                  manifest_hash=manifest["manifest_hash"])))
             return 1 if manifest["unresolved_targets"] else 0
-        manifest = verify_manifest(read_json(args.manifest))
+        manifest = verify_manifest(read_json(args.manifest), stage=stage if any((args.stage2, args.stage3, args.stage4)) else None)
         if args.check_source:
             require(args.mock and args.source is not None, "Source check requires --mock --source <named-copy>")
             current = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus, stage=stage)
@@ -1755,8 +2159,10 @@ def main(argv=None):
         elif args.receipts:
             receipts = read_json(args.receipts)
             require(not args.mock or receipts.get("mode") == "mock", "--mock requires fixture receipts")
-            print(json.dumps(validate_receipts(receipts, manifest, require_real=args.require_real,
-                                                artifact_root=args.receipts.resolve().parent), indent=2))
+            result = (validate_probe_receipts(receipts, manifest, artifact_root=args.receipts.resolve().parent) if args.probe else
+                      validate_receipts(receipts, manifest, require_real=args.require_real,
+                                        artifact_root=args.receipts.resolve().parent))
+            print(json.dumps(result, indent=2))
         elif args.verify_inputs:
             print(json.dumps(dict(status="FROZEN_INPUTS_VALID", manifest_hash=manifest["manifest_hash"], targets=len(manifest["items"]))))
         else:
