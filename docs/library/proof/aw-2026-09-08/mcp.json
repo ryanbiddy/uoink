@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "uoink": {
+      "type": "stdio",
+      "command": "C:\\Python314\\python.exe",
+      "args": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging-source-aw\\uoink_mcp.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw\\profile",
+        "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw\\profile",
+        "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw\\profile",
+        "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw\\profile",
+        "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw\\profile\\output",
+        "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging-source-aw;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin"
+      }
+    }
+  }
+}

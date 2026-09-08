@@ -1,0 +1,6 @@
+You are verifying a local MCP server named "uoink". Use only its tools. Steps:
+1. Call get_library_item with video_id "x_27061a15409" (a text-only saved X thread).
+2. Call read_library_resource with the card URI under uris.card.
+3. If uris.excerpts is non-empty, call read_library_resource with one excerpt URI; otherwise skip.
+4. Call read_library_resource with the URI under uris.corpus if present.
+Output ONLY a JSON object with keys: item_id, source_type (from card.source_type), source_revision, card_uri, card_text_first_200 (verbatim), excerpt_uri (or null), excerpt_text_first_200 (or null), corpus_uri (or null), corpus_text_first_120 (verbatim, or null), timing_claims (true if any returned text asserts a timestamp for this item, else false), source_link.

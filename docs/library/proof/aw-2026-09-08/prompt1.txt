@@ -1,0 +1,6 @@
+You are verifying a local MCP server named "uoink". Do exactly these steps using only its tools, and do not use any other tool:
+1. Call search_library with query "object detection" and limit 5.
+2. From the hits, pick the item whose id is WgPbbWmnXJ8 and call get_library_item with video_id "WgPbbWmnXJ8".
+3. Call read_library_resource with the card URI returned under uris.card.
+4. Call read_library_resource with the first excerpt URI returned under uris.excerpts (any one).
+Then output ONLY a JSON object (no prose) with keys: search_hit_ids (list of item ids from step 1), item_id, source_revision (from card.source_revision), card_hash (the last path segment of uris.card), card_uri, card_text_sha256 (SHA-256 hex of the exact resource text from step 3, computed by you character-exactly is not possible, so instead include card_text_first_200 = the first 200 characters of that text verbatim), excerpt_uri, excerpt_text_first_200 (first 200 characters of the step-4 resource text verbatim), source_link (from get_library_item source_link).
