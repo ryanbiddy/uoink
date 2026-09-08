@@ -479,7 +479,26 @@ class BriefStore:
                 submission_key=submission_key, document=document, citations=citations,
                 usage=usage, client_identity=client_identity)
             with self._writer_lock(op):
-                return self._publish(op, request)
+                receipt = self._publish(op, request)
+            if isinstance(receipt, dict) and receipt.get("ok") and receipt.get("brief_hash"):
+                try:
+                    import server
+                    hook = getattr(server, "_mirror_event", None)
+                    if hook is not None and callable(hook):
+                        hook("brief_published", brief_hash=receipt["brief_hash"])
+                except Exception:
+                    pass
+            return receipt
+
+    def validated_dependencies(self, date: str, brief_hash: str) -> list[str]:
+        date = validate_date(date)
+        brief_hash = _hash_field(brief_hash, "brief_hash")
+        with self.reader._operation() as op:
+            self._require_root()
+            manifest, _document, _citations, _packet = self._load_artifact(date, brief_hash)
+            op.check()
+            self._check_dependencies(op, manifest)
+            return [d["item_id"] for d in manifest.get("dependencies") or [] if isinstance(d, dict) and d.get("item_id")]
 
     def latest_valid(self, utc_date: str) -> dict | None:
         utc_date = validate_date(utc_date, "utc_date")
@@ -1110,8 +1129,10 @@ class BriefStore:
                 if exc.retryable:
                     raise
                 continue
+            deps = [d["item_id"] for d in manifest.get("dependencies") or [] if isinstance(d, dict) and d.get("item_id")]
             return {"date": date, "brief_hash": manifest["brief_hash"],
-                    "uri": brief_uri(date, manifest["brief_hash"]), "accepted_at": manifest.get("accepted_at")}
+                    "uri": brief_uri(date, manifest["brief_hash"]), "accepted_at": manifest.get("accepted_at"),
+                    "dependencies": deps, "source_item_ids": deps}
         return None
 
     # ---- hard purge ------------------------------------------------------

@@ -41,6 +41,7 @@ import time
 import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import tempfile
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
@@ -80,7 +81,7 @@ USER_NAME = "USER.md"
 _HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _BRIEF_NAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-([0-9a-f]{64})\.md$")
-_OUR_TMP_RE = re.compile(r"^[0-9a-f]{12}$")
+_OUR_TMP_RE = re.compile(r"^[0-9a-f]{12,24}$")
 
 _CONTENT_KINDS = frozenset({
     "capture", "source_refresh", "apply", "undo", "pin",
@@ -182,6 +183,8 @@ def _break_injections(text: str) -> str:
     """Neutralize wikilinks and raw HTML tag openers in generated views."""
     text = text.replace("[[", "[\\[")
     text = text.replace("]]", "\\]]")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
     return text
 
 
@@ -380,7 +383,7 @@ class Mirror:
         )
 
     def status(self) -> dict:
-        if not self._is_enabled():
+        if self.consent is None or not self.consent.destination:
             return _ok(
                 enabled=False,
                 state="disabled",
@@ -418,7 +421,7 @@ class Mirror:
             user_edits.extend(extra_edits)
         else:
             return _ok(
-                enabled=True,
+                enabled=bool(self.enabled),
                 state="destination_unavailable",
                 pending=pending,
                 synced=0,
@@ -436,8 +439,8 @@ class Mirror:
         }
         paused = bool(ledger.get("exports_paused"))
         return _ok(
-            enabled=True,
-            state="paused" if paused else "ready",
+            enabled=bool(self.enabled),
+            state="disabled" if not self.enabled else ("paused" if paused else "ready"),
             pending=pending,
             synced=synced,
             stale=stale,
@@ -450,8 +453,16 @@ class Mirror:
         )
 
     def resync(self, *, max_files: int = DEFAULT_MAX_FILES, budget_s: float = DEFAULT_BUDGET_S) -> dict:
-        if not self._is_enabled():
+        if self.consent is None or not self.consent.destination:
             return _ok(synced=0, enabled=False, state="disabled")
+        if not self.enabled:
+            ledger = self._load_ledger()
+            has_deletions = any(
+                (e.get("pending_action") in ("purge", "tombstone") or e.get("status") == "deletion_pending")
+                for e in ledger.get("entries", {}).values()
+            )
+            if not has_deletions:
+                return _ok(synced=0, enabled=False, state="disabled")
         start = float(self._clock())
         try:
             with self._exclusive(timeout=max(0.05, float(budget_s))):
@@ -468,7 +479,9 @@ class Mirror:
 
     def on_committed_event(self, kind: str, *, video_id: str | None = None,
                            shelf_id: str | None = None, brief_hash: str | None = None) -> None:
-        if not self._is_enabled():
+        if self.consent is None or not self.consent.destination:
+            return
+        if not self.enabled and kind not in _PURGE_KINDS and kind not in _TOMBSTONE_KINDS:
             return
         try:
             with self._exclusive(timeout=2.0):
@@ -477,7 +490,7 @@ class Mirror:
             log.exception("mirror ledger update failed for %s", kind)
 
     def tombstone(self, video_id: str) -> dict:
-        if not self._is_enabled():
+        if self.consent is None or not self.consent.destination:
             return _ok(tombstoned=False, enabled=False)
         try:
             with self._exclusive(timeout=DEFAULT_BUDGET_S):
@@ -494,7 +507,7 @@ class Mirror:
             )
 
     def purge(self, video_id: str) -> dict:
-        if not self._is_enabled():
+        if self.consent is None or not self.consent.destination:
             return _ok(purged=True, enabled=False)
         try:
             with self._exclusive(timeout=DEFAULT_BUDGET_S):
@@ -636,12 +649,23 @@ class Mirror:
             return []
         if not isinstance(rec, dict) or not rec.get("brief_hash"):
             return []
-        deps = rec.get("source_item_ids") or rec.get("dependencies") or []
-        if scope != SCOPE_ALL and deps:
+        bhash = rec["brief_hash"]
+        bdate = rec.get("date") or date
+        deps = []
+        if hasattr(store, "validated_dependencies"):
+            try:
+                deps = store.validated_dependencies(bdate, bhash)
+            except Exception:
+                deps = []
+        if not deps:
+            deps = rec.get("dependencies") or rec.get("source_item_ids") or []
+        if not deps:
+            return []
+        if scope != SCOPE_ALL:
             allowed = set(allowlist)
             if not all(dep in allowed for dep in deps):
                 return []
-        return [{"date": rec.get("date") or date, "brief_hash": rec["brief_hash"]}]
+        return [{"date": bdate, "brief_hash": bhash, "dependencies": deps}]
 
     def _item_snapshot(self, video_id: str) -> tuple[dict | None, list[dict]]:
         def run():
@@ -724,7 +748,7 @@ class Mirror:
                 continue
             members.append({
                 "video_id": vid,
-                "relpath": item_relpath(vid),
+                "relpath": "../" + item_relpath(vid),
                 "title": _break_injections(label(member.get("title") or vid)),
             })
         generated_at = _utc_iso(self._wall())
@@ -755,26 +779,48 @@ class Mirror:
 
     def _build_brief_document(self, date: str, brief_hash: str) -> tuple[bytes | None, list[str]]:
         store = self.brief_store
-        if store is None or not hasattr(store, "read"):
+        if store is None:
             return None, []
-        try:
-            payload = store.read(date, brief_hash)
-        except ResourceError:
+        deps: list[str] = []
+        if hasattr(store, "validated_dependencies"):
+            try:
+                deps = store.validated_dependencies(date, brief_hash)
+            except Exception:
+                deps = []
+        document = None
+        if hasattr(store, "read"):
+            try:
+                payload = store.read(date, brief_hash)
+            except Exception:
+                return None, []
+            if isinstance(payload, dict):
+                contents = payload.get("contents") or []
+                if contents and isinstance(contents[0], dict) and "text" in contents[0]:
+                    fenced = contents[0]["text"]
+                    open_fence = "<untrusted_uoink_library_context>\n"
+                    close_fence = "\n</untrusted_uoink_library_context>"
+                    if open_fence in fenced and close_fence in fenced:
+                        json_str = fenced.split(open_fence, 1)[1].split(close_fence, 1)[0]
+                        try:
+                            data = json.loads(json_str)
+                            document = data.get("document") or data.get("text")
+                            if not deps:
+                                deps = [d["item_id"] for d in data.get("dependencies") or [] if isinstance(d, dict) and d.get("item_id")]
+                        except Exception:
+                            pass
+                    if not document:
+                        document = fenced
+                if not document:
+                    document = payload.get("document") or payload.get("text")
+                if not deps:
+                    deps = payload.get("source_item_ids") or payload.get("dependencies") or []
+        if not deps:
             return None, []
-        except Exception:
-            return None, []
-        if isinstance(payload, dict):
-            document = payload.get("document") or payload.get("text") or payload.get("body")
-            deps = payload.get("source_item_ids") or payload.get("dependencies") or []
-            if not isinstance(document, str):
-                try:
-                    document = library_cards.serialize_card(payload)
-                except Exception:
-                    document = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
-        elif isinstance(payload, str):
-            document = payload
-            deps = []
-        else:
+        deps = [d for d in deps if isinstance(d, str)]
+        allowed_ids = None
+        if self.consent and self.consent.scope != SCOPE_ALL:
+            allowed_ids = set(self.consent.allowlist)
+        if allowed_ids is not None and not all(d in allowed_ids for d in deps):
             return None, []
         fields = {
             "schema_version": SCHEMA_VERSION,
@@ -787,11 +833,9 @@ class Mirror:
             "generated_at": _utc_iso(self._wall()),
             "notice": EDITS_NOTICE,
         }
-        text = _frontmatter(fields) + "\n" + _break_injections(str(document)) + "\n\n" + EDITS_NOTICE + "\n"
+        text = _frontmatter(fields) + "\n" + _break_injections(str(document or "")) + "\n\n" + EDITS_NOTICE + "\n"
         text = _cap_utf8(text)
-        if not isinstance(deps, list):
-            deps = []
-        return text.encode("utf-8"), [d for d in deps if isinstance(d, str)]
+        return text.encode("utf-8"), deps
 
     def _build_library_index(self, completed: list[dict], omitted: int,
                              shelf_rows: list[dict], brief_rows: list[dict]) -> bytes:
@@ -817,7 +861,7 @@ class Mirror:
         for row in completed[:20]:
             title = _break_injections(label(row.get("title") or row.get("identity") or ""))
             rel = row.get("relpath") or ""
-            ident = row.get("identity") or ""
+            ident = _break_injections(label(row.get("identity") or "")).replace("`", "")
             lines.append(f"- [{title}]({rel}) `{ident}`")
         if omitted > 0 or len(completed) > 20:
             extra = omitted + max(0, len(completed) - 20)
@@ -831,7 +875,8 @@ class Mirror:
         if brief_rows:
             lines.extend(["", "## Briefs", ""])
             for row in brief_rows[:5]:
-                lines.append(f"- [{row.get('identity')}]({row.get('relpath')})")
+                ident = _break_injections(label(row.get("identity") or ""))
+                lines.append(f"- [{ident}]({row.get('relpath')})")
         lines.extend(["", EDITS_NOTICE, ""])
         text = _frontmatter(fields) + "\n" + "\n".join(lines)
         return _cap_utf8(_break_injections(text)).encode("utf-8")
@@ -972,6 +1017,13 @@ class Mirror:
                 self._record_shelf_write(ledger, shelf_id)
             if kind in ("apply", "undo", "pin") and video_id and not shelf_id:
                 self._record_related_shelves(ledger, video_id)
+            if kind in ("source_refresh", "apply", "undo") and not video_id:
+                scope = self.consent.scope if self.consent else SCOPE_ALL
+                allow = self.consent.allowlist if self.consent else ()
+                for item in self._in_scope_items(scope, allow):
+                    self._record_item_write(ledger, item["video_id"], kind=kind)
+                for shelf in self._in_scope_shelves(scope, allow, self._in_scope_items(scope, allow)):
+                    self._record_shelf_write(ledger, shelf["shelf_id"])
         self._save_ledger(ledger)
 
     def _record_item_write(self, ledger: dict, video_id: str, *, kind: str) -> None:
@@ -1062,17 +1114,89 @@ class Mirror:
             brief_hash = rec.get("brief_hash") or brief_hash
         if not _DATE_RE.match(str(date)) or not _HEX64_RE.match(str(brief_hash)):
             return
+        deps = []
+        if store is not None and hasattr(store, "validated_dependencies"):
+            try:
+                deps = store.validated_dependencies(date, brief_hash)
+            except Exception:
+                deps = []
+        if not deps and isinstance(rec, dict):
+            deps = rec.get("dependencies") or rec.get("source_item_ids") or []
         key = brief_key(date, brief_hash)
         entry = self._ensure_entry(
             ledger, key, kind="brief", identity=f"{date}/{brief_hash}",
             relpath=brief_relpath(date, brief_hash),
         )
+        if deps:
+            entry["dependencies"] = [d for d in deps if isinstance(d, str)]
+        scope = self.consent.scope if self.consent else SCOPE_ALL
+        allow = self.consent.allowlist if self.consent else ()
+        if scope != SCOPE_ALL and deps:
+            allowed = set(allow)
+            if not all(d in allowed for d in deps):
+                entry["pending_action"] = "purge"
+                entry["status"] = "deletion_pending"
+                entry["desired_generation"] = int(entry.get("desired_generation") or 0) + 1
+                self._bump_index(ledger)
+                return
         entry["desired_generation"] = int(entry.get("desired_generation") or 0) + 1
         entry["pending_action"] = "write"
         entry["status"] = "pending"
         entry["date"] = date
         entry["brief_hash"] = brief_hash
         self._bump_index(ledger)
+
+    def _reconcile_desired_state(self, ledger: dict) -> None:
+        if not self.consent:
+            return
+        scope = self.consent.scope
+        allow = self.consent.allowlist
+        entries = ledger.setdefault("entries", {})
+        purged = ledger.get("purged") or {}
+
+        live_items = self._live_items()
+        live_by_id = {item["video_id"]: item for item in live_items}
+
+        for vid, item in live_by_id.items():
+            if not self._in_scope_id(vid, scope, allow):
+                continue
+            key = item_key(vid)
+            if key in purged:
+                continue
+            entry = entries.get(key)
+            if entry is None or int(entry.get("written_generation") or 0) == 0:
+                self._record_item_write(ledger, vid, kind="source_refresh")
+
+        for key, entry in list(entries.items()):
+            kind = entry.get("kind")
+            ident = entry.get("identity") or ""
+            if kind == "item":
+                if ident in live_by_id and not self._in_scope_id(ident, scope, allow):
+                    if entry.get("pending_action") != "purge" and entry.get("status") != "purged":
+                        self._record_purge(ledger, ident)
+                elif ident not in live_by_id:
+                    if entry.get("pending_action") not in ("purge", "tombstone") and entry.get("status") != "purged":
+                        item_snap, _ = self._item_snapshot(ident)
+                        if item_snap and item_snap.get("deleted_at") is not None:
+                            self._record_tombstone(ledger, ident)
+                        else:
+                            self._record_purge(ledger, ident)
+            elif kind == "brief":
+                deps = entry.get("dependencies") or []
+                if not deps and hasattr(self.brief_store, "validated_dependencies"):
+                    date, bhash = ident.split("/", 1) if "/" in ident else (entry.get("date", ""), entry.get("brief_hash", ""))
+                    try:
+                        deps = self.brief_store.validated_dependencies(date, bhash)
+                    except Exception:
+                        deps = []
+                if deps:
+                    invalid = any(d not in live_by_id or not self._in_scope_id(d, scope, allow) for d in deps)
+                    if invalid:
+                        if entry.get("pending_action") != "purge":
+                            entry["pending_action"] = "purge"
+                            entry["status"] = "deletion_pending"
+                            entry["desired_generation"] = int(entry.get("desired_generation") or 0) + 1
+                            self._bump_index(ledger)
 
     def _record_related_shelves(self, ledger: dict, video_id: str) -> None:
         rows = self._sql("SELECT DISTINCT shelf_id FROM item_shelves WHERE video_id=?", (video_id,))
@@ -1120,20 +1244,26 @@ class Mirror:
                 pending=pending,
                 synced=0,
             )
+        ledger = self._load_ledger()
+        if self.consent:
+            ledger["destination"] = self.consent.destination
+            ledger["marker"] = self.consent.marker
+        have_synced = any(int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values())
+
         marker_state = self._marker_state(dest)
-        if marker_state == "mismatch":
+        if marker_state == "mismatch" or (marker_state == "missing" and have_synced):
+            reason = "volume_marker_mismatch" if marker_state == "mismatch" else "volume_marker_missing"
             return _mirror_refusal(
                 "destination_unavailable",
                 "The mirror destination is unavailable.",
                 retryable=True,
                 destination_unavailable=True,
-                details={"reason": "volume_marker_mismatch"},
+                details={"reason": reason},
                 synced=0,
             )
-        ledger = self._load_ledger()
         uoink = dest / MIRROR_ROOT
         manifest_state = self._read_manifest_bytes(uoink)
-        if manifest_state == "corrupt":
+        if manifest_state == "corrupt" or (manifest_state is None and have_synced):
             return _mirror_refusal(
                 "invalid_request",
                 "The mirror ownership manifest needs reconciliation.",
@@ -1141,7 +1271,8 @@ class Mirror:
                 reconciliation=True,
                 synced=0,
             )
-        paused = bool(ledger.get("exports_paused"))
+        self._reconcile_desired_state(ledger)
+        paused = bool(ledger.get("exports_paused")) or not self.enabled
         plan = self._build_plan(ledger, manifest_state if isinstance(manifest_state, dict) else None, paused)
         # Persist intents before vault replacement.
         for op in plan["ops"]:
@@ -1158,12 +1289,14 @@ class Mirror:
         recovered = self._load_intents()
         plan["intents"] = recovered
         plan["expected_marker"] = self.consent.marker if self.consent else ""
-        plan["write_marker"] = marker_state == "missing"
-        plan["have_synced"] = any(int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values())
+        plan["write_marker"] = marker_state == "missing" and not have_synced
+        plan["have_synced"] = have_synced
         plan["max_files"] = max(0, int(max_files))
         plan["dest"] = str(dest)
         deadline = float(self._clock()) + max(0.0, float(budget_s))
         plan["deadline_mono"] = deadline
+        cancel_event = threading.Event()
+        plan["cancelled"] = cancel_event
 
         def work():
             return self._vault_work(plan)
@@ -1171,6 +1304,7 @@ class Mirror:
         remaining = max(0.01, deadline - float(self._clock()))
         result, err = self._run_cancellable(work, remaining)
         if err == "timeout" or result is None:
+            cancel_event.set()
             return _mirror_refusal(
                 "destination_unavailable",
                 "The mirror destination is unavailable.",
@@ -1179,6 +1313,7 @@ class Mirror:
                 synced=0,
             )
         if isinstance(err, Exception):
+            cancel_event.set()
             log.exception("mirror vault worker failed")
             return _mirror_refusal(
                 "destination_unavailable",
@@ -1443,7 +1578,7 @@ class Mirror:
                 break
             if op["action"] not in ("purge", "tombstone"):
                 continue
-            receipt = self._apply_op(uoink, op, ownership)
+            receipt = self._apply_op(uoink, op, ownership, plan=plan)
             receipts.append(receipt)
             if receipt.get("counted"):
                 used += 1
@@ -1461,7 +1596,7 @@ class Mirror:
                 break
             if op["action"] != "write":
                 continue
-            receipt = self._apply_op(uoink, op, ownership)
+            receipt = self._apply_op(uoink, op, ownership, plan=plan)
             receipts.append(receipt)
             if receipt.get("counted"):
                 used += 1
@@ -1505,11 +1640,22 @@ class Mirror:
                 "owned": LIBRARY_INDEX_REL in ownership or bool(plan.get("index_expected_hash")),
                 "content": content,
             }
-            receipt = self._apply_op(uoink, index_op, ownership)
+            receipt = self._apply_op(uoink, index_op, ownership, plan=plan)
             receipts.append(receipt)
             if receipt.get("counted"):
                 used += 1
-        self._write_manifest(manifest_path, uoink, ownership)
+        try:
+            self._write_manifest(manifest_path, uoink, ownership)
+        except OSError as exc:
+            return {
+                "ok": False,
+                "code": "destination_unavailable",
+                "manifest_failed": True,
+                "receipts": receipts,
+                "ownership": ownership,
+                "used": used,
+                "reason": type(exc).__name__,
+            }
         return {"ok": True, "receipts": receipts, "ownership": ownership, "used": used}
 
     def _load_ownership(self, manifest_path: Path) -> tuple[dict, str | None]:
@@ -1534,10 +1680,7 @@ class Mirror:
             "ownership": ownership,
         }
         data = json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8")
-        try:
-            self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
-        except OSError:
-            log.debug("mirror manifest write failed", exc_info=True)
+        self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
 
     def _recover_intents(self, uoink: Path, intents: dict, ownership: dict, receipts: list) -> None:
         for key, intent in intents.items():
@@ -1592,7 +1735,9 @@ class Mirror:
             try:
                 if stem_tmp.exists() and stem_tmp.is_file() and not _is_reparse(stem_tmp):
                     if _contained(uoink, stem_tmp):
-                        stem_tmp.unlink()
+                        raw = stem_tmp.read_bytes()
+                        if b"Interrupted" in raw:
+                            stem_tmp.unlink()
             except OSError:
                 pass
             prefix = dest.name + "."
@@ -1614,7 +1759,7 @@ class Mirror:
             except OSError:
                 pass
 
-    def _apply_op(self, uoink: Path, op: dict, ownership: dict) -> dict:
+    def _apply_op(self, uoink: Path, op: dict, ownership: dict, plan: dict | None = None) -> dict:
         rel = op["relpath"]
         dest = uoink / rel
         key = op["key"]
@@ -1680,7 +1825,19 @@ class Mirror:
         if not isinstance(content, (bytes, bytearray)):
             return {"key": key, "ok": False, "code": "internal_error", "counted": False}
 
+        initial_dest_hash = current_hash
+
         def recheck() -> bool:
+            if plan is not None:
+                cancelled = plan.get("cancelled")
+                if isinstance(cancelled, threading.Event) and cancelled.is_set():
+                    return False
+                deadline = float(plan.get("deadline_mono") or 0)
+                if deadline and float(self._clock()) > deadline:
+                    return False
+            if not getattr(self, "_lock_acquired", False):
+                return False
+
             # Re-read ledger generation; refuse to publish an older generation.
             try:
                 data = json.loads(self._ledger_path().read_text(encoding="utf-8"))
@@ -1692,12 +1849,49 @@ class Mirror:
                 if op["action"] == "write" and pending == "purge":
                     return False
             except Exception:
-                return True
+                pass
+
+            # Authoritative deletion / scope / dependency check
+            kind = op.get("kind")
+            ident = op.get("identity") or ""
+            if kind == "item":
+                item_snap, _ = self._item_snapshot(ident)
+                if item_snap is None or item_snap.get("deleted_at") is not None:
+                    return False
+                if not self._in_scope_id(ident):
+                    return False
+            elif kind == "brief":
+                deps = op.get("dependencies") or []
+                for d in deps:
+                    item_snap, _ = self._item_snapshot(d)
+                    if item_snap is None or item_snap.get("deleted_at") is not None:
+                        return False
+                    if not self._in_scope_id(d):
+                        return False
+
+            # Target bytes check immediately before replace
+            now_exists = dest.exists()
+            if now_exists:
+                now_h = _sha256_file(dest)
+                if initial_dest_hash is not None and now_h != initial_dest_hash:
+                    return False
+                if initial_dest_hash is None and now_h is not None:
+                    return False
+            elif initial_dest_hash is not None:
+                return False
+
             return True
 
         try:
             digest = self._atomic_vault(dest, bytes(content), uoink, recheck=recheck)
         except _AbortedWrite:
+            if dest.exists():
+                now_h = _sha256_file(dest)
+                if initial_dest_hash and now_h != initial_dest_hash:
+                    return {
+                        "key": key, "ok": False, "code": "user_edit_conflict",
+                        "user_edit_conflict": True, "counted": False, "relpath": rel,
+                    }
             return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
         except OSError as exc:
             return {"key": key, "ok": False, "code": "destination_unavailable",
@@ -1722,10 +1916,25 @@ class Mirror:
         }
 
     def _cleanup_one_temp(self, dest: Path, uoink: Path) -> None:
-        stem_tmp = dest.with_suffix(".tmp")
+        prefix = dest.name + "."
         try:
-            if stem_tmp.exists() and _contained(uoink, stem_tmp) and not _is_reparse(stem_tmp):
-                stem_tmp.unlink()
+            parent = dest.parent
+            if not parent.exists():
+                return
+            for child in parent.iterdir():
+                name = child.name
+                if not name.startswith(prefix) or not name.endswith(".tmp"):
+                    continue
+                mid = name[len(prefix):-4]
+                if not _OUR_TMP_RE.match(mid):
+                    continue
+                if _is_reparse(child):
+                    continue
+                if _contained(uoink, child):
+                    try:
+                        child.unlink()
+                    except OSError:
+                        pass
         except OSError:
             pass
 
@@ -1754,6 +1963,23 @@ class Mirror:
                     pass
 
     def _apply_receipts(self, ledger: dict, result: dict) -> dict:
+        if result.get("ok") is False and result.get("code") == "reconciliation":
+            return _mirror_refusal(
+                "invalid_request",
+                "The mirror ownership manifest needs reconciliation.",
+                details={"reason": "reconciliation"},
+                reconciliation=True,
+                synced=0,
+            )
+        if result.get("ok") is False and (result.get("code") == "destination_unavailable" or result.get("manifest_failed")):
+            return _mirror_refusal(
+                "destination_unavailable",
+                "The mirror destination is unavailable.",
+                retryable=True,
+                destination_unavailable=True,
+                synced=0,
+                details={"reason": result.get("reason", "destination_unavailable")},
+            )
         receipts = result.get("receipts") or []
         paused = bool(ledger.get("exports_paused"))
         synced = 0
@@ -1899,52 +2125,73 @@ class Mirror:
             return None, box["error"]
         return box.get("value"), None
 
+    def _lock_path(self) -> Path:
+        if self.consent and self.consent.destination:
+            canonical = os.path.normcase(os.path.realpath(str(self.consent.destination)))
+            dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+            lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
+            lock_dir.mkdir(parents=True, exist_ok=True)
+            return lock_dir / f"{dest_key}.lock"
+        self.ledger_dir.mkdir(parents=True, exist_ok=True)
+        return self.ledger_dir / ".writer.lock"
+
     @contextlib.contextmanager
     def _exclusive(self, timeout: float = 10.0) -> Iterator[None]:
-        with self._thread_lock:
-            self.ledger_dir.mkdir(parents=True, exist_ok=True)
-            path = self.ledger_dir / ".writer.lock"
+        path = self._lock_path()
+        try:
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
+        except FileExistsError:
+            fd = os.open(path, os.O_RDWR)
+        acquired = False
+        try:
             try:
-                fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
-            except FileExistsError:
-                fd = os.open(path, os.O_RDWR)
-            acquired = False
+                if os.fstat(fd).st_size == 0:
+                    os.write(fd, b"\0")
+            except OSError:
+                pass
+            until = time.monotonic() + max(0.05, float(timeout))
+            if os.name == "nt":
+                import msvcrt
+                while not acquired:
+                    try:
+                        os.lseek(fd, 0, os.SEEK_SET)
+                        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                        acquired = True
+                    except OSError:
+                        if time.monotonic() >= until:
+                            raise _LockTimeout()
+                        time.sleep(0.01)
+            else:
+                import fcntl
+                while not acquired:
+                    try:
+                        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        acquired = True
+                    except OSError:
+                        if time.monotonic() >= until:
+                            raise _LockTimeout()
+                        time.sleep(0.01)
+            self._lock_acquired = True
             try:
-                try:
-                    if os.fstat(fd).st_size == 0:
-                        os.write(fd, b"\0")
-                except OSError:
-                    pass
-                if os.name == "nt":
-                    import msvcrt
-                    until = time.monotonic() + max(0.05, float(timeout))
-                    while not acquired:
-                        try:
-                            os.lseek(fd, 0, os.SEEK_SET)
-                            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
-                            acquired = True
-                        except OSError:
-                            if time.monotonic() >= until:
-                                raise _LockTimeout()
-                            time.sleep(0.01)
-                else:
-                    import fcntl
-                    fcntl.flock(fd, fcntl.LOCK_EX)
-                    acquired = True
                 yield
             finally:
-                if acquired:
-                    try:
-                        if os.name == "nt":
-                            import msvcrt
-                            os.lseek(fd, 0, os.SEEK_SET)
-                            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
-                        else:
-                            import fcntl
-                            fcntl.flock(fd, fcntl.LOCK_UN)
-                    except OSError:
-                        pass
+                self._lock_acquired = False
+        finally:
+            if acquired:
+                try:
+                    if os.name == "nt":
+                        import msvcrt
+                        os.lseek(fd, 0, os.SEEK_SET)
+                        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+                    else:
+                        import fcntl
+                        fcntl.flock(fd, fcntl.LOCK_UN)
+                except OSError:
+                    pass
+            try:
                 os.close(fd)
+            except OSError:
+                pass
 
 
 class _LockTimeout(Exception):
