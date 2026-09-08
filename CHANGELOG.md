@@ -12,8 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Living Library media depth (Phase 6, contract `phase6-v1`).**
+  The MCP server now exposes 32 tools over stdio (31 → 32: the read-only
+  `export_cited_range`, which quotes stored cues with speaker labels,
+  provenance, chapters and revision pins after validating every original
+  artifact by bytes); the HTTP/OpenAPI registry grows to 88. Publication is
+  fenced by a per-item ownership ledger, commits one coherent snapshot with
+  Phase 2 invalidation, prunes obsolete owned `.media-inputs` artifacts after
+  settlement, and podcast items record `seek_kind: "none"` until a player
+  path exists.
 - **Living Library reach, activity and standing capture (Phases 3 to 5).** The
-  MCP server now exposes 31 tools over stdio (25 → 31: `search_library`,
+  MCP server exposed 31 tools over stdio (25 → 31: `search_library`,
   `get_library_item`, `read_library_resource`, `get_library_activity`, and the
   client-run brief pair `get_library_brief_input` / `publish_library_brief`,
   the latter a local write under `reach/briefs`), five `uoink://library/v1/`

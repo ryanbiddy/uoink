@@ -31,8 +31,9 @@ def test_documented_transport_counts_match_both_live_registries() -> None:
     )
     # 71 + the six Living Library work-queue tools (Phase 2 stage 1) + the four
     # Phase 3 source-subscription tools (run AM) + get_library_activity (Phase 5 Part A)
-    # + three Phase 4 read tools (run AV-1) + two Phase 4 brief tools (run AV-2).
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 87
+    # + three Phase 4 read tools (run AV-1) + two Phase 4 brief tools (run AV-2)
+    # + the Phase 6 cited export tool (run BC-2).
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 88
 
 
 def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:

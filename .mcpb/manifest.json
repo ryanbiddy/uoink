@@ -175,6 +175,10 @@
     {
       "name": "publish_library_brief",
       "description": "Local write: validate and persist one client-produced brief under reach/briefs; idempotent on submission_key."
+    },
+    {
+      "name": "export_cited_range",
+      "description": "Read-only cited export of one stored transcript range or excerpt with speaker labels, provenance, chapters and revision pins."
     }
   ],
   "compatibility": {

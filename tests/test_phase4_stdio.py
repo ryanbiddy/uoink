@@ -91,6 +91,11 @@ TOTAL_AV1_TOOLS = CANONICAL_25_TOOLS | NEW_PHASE4_READ_TOOLS | PHASE5_ACTIVITY_T
 # 31 on stdio after AV-2: 25 canonical + 3 read + 1 activity + 2 brief tools.
 TOTAL_AV2_TOOLS = TOTAL_AV1_TOOLS | NEW_PHASE4_BRIEF_TOOLS
 
+# Phase 6 run BC-2 (contract phase6-v1): one read-only cited export tool.
+NEW_PHASE6_EXPORT_TOOLS = {"export_cited_range"}
+# 32 on stdio after BC-2: 31 + the Phase 6 export tool.
+TOTAL_BC2_TOOLS = TOTAL_AV2_TOOLS | NEW_PHASE6_EXPORT_TOOLS
+
 
 class _StdioTestClient:
     """Stdio client managing a child MCP process with honest deadline waiting."""
@@ -265,9 +270,9 @@ class TestP406CapabilitiesAndDiscovery:
         finally:
             client.close()
 
-    def test_stdio_tools_list_carries_31_tools(self, tmp_path: Path):
-        """tools/list contains all 25 canonical tools, the 3 read tools, the activity tool
-        and the 2 brief tools: exactly 31."""
+    def test_stdio_tools_list_carries_32_tools(self, tmp_path: Path):
+        """tools/list contains all 25 canonical tools, the 3 read tools, the activity tool,
+        the 2 brief tools and the Phase 6 export tool: exactly 32."""
         client = _StdioTestClient(
             [sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
             cwd=tmp_path,
@@ -287,11 +292,12 @@ class TestP406CapabilitiesAndDiscovery:
 
             # All 25 legacy tools must be preserved
             assert CANONICAL_25_TOOLS.issubset(names)
-            # The 3 read tools and the 2 brief tools must be registered
+            # The 3 read tools, the 2 brief tools and the export tool must be registered
             assert NEW_PHASE4_READ_TOOLS.issubset(names)
             assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
-            assert names == TOTAL_AV2_TOOLS
-            assert len(names) == 31
+            assert NEW_PHASE6_EXPORT_TOOLS.issubset(names)
+            assert names == TOTAL_BC2_TOOLS
+            assert len(names) == 32
         finally:
             client.close()
 

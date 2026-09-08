@@ -1137,20 +1137,15 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         segment["speaker"] for segment in segments if segment.get("speaker")
     ))
     transcript_citations: list[dict] = []
-    markdown_lines = [
+    header_lines = [
         f"# {episode_title}", "", f"**Podcast:** {podcast_title}",
         f"**Source:** {source_url}",
     ]
     if row.get("published_at"):
-        markdown_lines.append(f"**Published:** {row['published_at']}")
-    markdown_lines.extend(["", "## Transcript", ""])
+        header_lines.append(f"**Published:** {row['published_at']}")
+    header_lines.append("")
     for seq, segment in enumerate(segments):
         deep_link = _source_deep_link(source_url, segment["start"])
-        speaker = f" — {segment['speaker']}" if segment.get("speaker") else ""
-        markdown_lines.extend([
-            f"### [{_timestamp_label(segment['start'])}]({deep_link}){speaker}",
-            "", segment["text"], "",
-        ])
         transcript_citations.append({
             "kind": "transcript_chunk", "seq": seq,
             "timestamp_start": segment["start"],
@@ -1159,13 +1154,18 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "source_url": source_url, "source_deep_link": deep_link,
             "speaker": segment.get("speaker"),
         })
-    markdown = "\n".join(markdown_lines).rstrip() + "\n"
 
     existing = idx.get_yoink(video_id)
     # AS-06: the shortened corpus id is not the identity. Refuse to write over
     # a row that carries another feed/GUID, and persist the full identity
     # (normalized feed URL, GUID, capture key) with this publication.
     _check_corpus_identity(idx, existing, row, video_id)
+    # BC-2: the publication ownership fence is minted before the snapshot is
+    # built and carried through settlement; a publication that started
+    # against an older base refuses revision_unavailable before any file.
+    import library_media as _media_fence  # noqa: WPS433 -- lazy: keeps module import graph unchanged
+    ticket = (idx.begin_media_publication(video_id, folder=folder)
+              if _media_fence.schema_ready(idx._conn) else None)
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
     record = {
@@ -1191,16 +1191,26 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "platform": "podcast",
     }
 
-    # Phase 6 (phase6-v1): build the media snapshot from the already-loaded
-    # transcript only (no fetch, no model). The source revision is computed
-    # from the final corpus bytes; the block is never rendered into them. The
+    # Phase 6 (phase6-v1, BC-2): build the media snapshot from the already-
+    # loaded transcript only (no fetch, no model) and render the transcript
+    # section with the shared media renderer. The block's annotations do not
+    # depend on the corpus bytes, so a provisional block renders the Markdown,
+    # and the sealed block then binds the final corpus/source revisions. The
     # podcast adapter supplies no chapters, and no media-fragment player path
-    # is verified, so playback records kind "none".
+    # is verified, so playback records kind "none" with a null seek URL.
     import clips as _clips_mod  # noqa: WPS433 -- lazy: keeps module import graph unchanged
     import library_cards as _cards_mod  # noqa: WPS433
     import library_media as _media_mod  # noqa: WPS433
     import library_resources as _resources_mod  # noqa: WPS433
     media_item = dict(record, url=source_url)
+    playback = {"source_url": _resources_mod.safe_url(source_url),
+                "seek_url": None, "seek_kind": "none"}
+    provisional, _ = _media_mod.transcript_snapshot(
+        video_id=video_id, source_revision="0" * 64, cues=transcript_citations,
+        transcript=transcript_raw, transcript_bytes=transcript_bytes,
+        corpus_revision="0" * 64, playback=playback)
+    markdown = "\n".join(header_lines) + "\n" + _media_mod.render_markdown(
+        media_item, transcript_citations, chapters=[], annotations=provisional)
     corpus_bytes = markdown.encode("utf-8")
     corpus_head = corpus_bytes[:_cards_mod.CORPUS_READ_BYTES].decode("utf-8", "replace")
     source_revision = _cards_mod.build_card(
@@ -1209,9 +1219,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     media_block, media_artifact = _media_mod.transcript_snapshot(
         video_id=video_id, source_revision=source_revision, cues=transcript_citations,
         transcript=transcript_raw, transcript_bytes=transcript_bytes,
-        corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(),
-        playback={"source_url": _resources_mod.safe_url(source_url),
-                  "seek_url": None, "seek_kind": "none"})
+        corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(), playback=playback)
     sidecar_transcript = []
     for citation, annotation in zip(transcript_citations, media_block["cues"]):
         citation["speaker"] = annotation["speaker"]
@@ -1261,17 +1269,35 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "transcript": sidecar_transcript,
         "media_depth": media_block,
     }
-    # Owned artifacts first, the complete sidecar last (file-side completion
-    # record), then the DB rows. Retry replays the same durable inputs.
-    _media_mod.archive_artifact(folder, media_artifact)
-    _atomic_write(corpus_path, markdown)
-    _atomic_write(
-        sidecar_path, json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n")
-
-    idx.upsert_yoink(record, content=markdown)
-    idx.insert_citations(video_id, transcript_citations)
+    sidecar_bytes = (json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     if _media_mod.schema_ready(idx._conn):
-        idx.store_media_snapshot(video_id, transcript_citations, media_block)
+        # BC-2: one complete publication operation. The ownership ticket was
+        # minted before this build; the item row is upserted first (the
+        # publisher binds against it) and the legacy citation write keeps
+        # the Phase 3 durability seam (row-before-citations) in place; then
+        # the fenced publisher replaces the owned artifact, corpus and
+        # sidecar (sidecar last), commits the citation/media/clip rows
+        # together, prunes obsolete owned inputs and invalidates Phase 2
+        # work. Retry replays the same inputs.
+        idx.upsert_yoink(record, content=markdown)
+        idx.insert_citations(video_id, transcript_citations)
+        idx.publish_media_snapshot(
+            video_id, cues=transcript_citations, media_block=media_block,
+            artifacts={
+                str(folder / _media_mod.MEDIA_INPUTS_DIR
+                    / (hashlib.sha256(media_artifact).hexdigest() + ".json")): media_artifact,
+                str(corpus_path): corpus_bytes,
+                str(sidecar_path): sidecar_bytes,
+            },
+            ticket=ticket)
+    else:
+        # Legacy schema (migration 0030 absent): the pre-Phase 6 file-then-
+        # rows sequence; no media snapshot can be materialized.
+        _media_mod.archive_artifact(folder, media_artifact)
+        _atomic_write(corpus_path, markdown)
+        _atomic_write(sidecar_path, sidecar_bytes.decode("utf-8"))
+        idx.upsert_yoink(record, content=markdown)
+        idx.insert_citations(video_id, transcript_citations)
     _link_episode_to_yoink(idx, episode_id, video_id)
     return {
         "ok": True, "episode_id": episode_id, "video_id": video_id,

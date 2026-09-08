@@ -82,6 +82,8 @@ CANONICAL_STDIO_TOOLS = {
     # Phase 4 run AV-2: client-run daily briefs (input is a read; publish is a local write).
     "get_library_brief_input",
     "publish_library_brief",
+    # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
+    "export_cited_range",
 }
 
 REMOVED_STDIO_ALIASES = {

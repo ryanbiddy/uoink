@@ -359,17 +359,14 @@ def build_clips_for_video(conn: sqlite3.Connection, video_id: str, *,
     # legacy path below is unchanged for every other item.
     if cues and _media_snapshot_current(conn, video_id):
         import library_media  # noqa: WPS433 -- lazy: library_media imports clips
-        try:
-            written = library_media.project_clips_for_video(conn, video_id)
-        except library_media.MediaError as exc:
-            # An unusable snapshot never blocks the transcript: fall back to
-            # the unannotated legacy clips and leave the refusal visible.
-            log.warning("clips: media snapshot for %s not usable (%s); "
-                        "writing legacy clips", video_id, exc.code)
-        else:
-            if commit:
-                conn.commit()
-            return written
+        # BC-2: an unusable snapshot is a refusal, not a silent downgrade.
+        # The MediaError propagates so the caller keeps the existing
+        # materialized snapshot and clips instead of replacing them with
+        # unannotated rows bound to the same cues.
+        written = library_media.project_clips_for_video(conn, video_id)
+        if commit:
+            conn.commit()
+        return written
     conn.execute("DELETE FROM clips WHERE video_id=?", (video_id,))
     clips = merge_cues(cues, _item_for(conn, video_id)) if cues else []
     if clips:

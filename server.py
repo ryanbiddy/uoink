@@ -2559,9 +2559,11 @@ def _compute_transcript_reliability(
     return {"ok": True, "reliability": reliability, "cached": False}
 
 
-def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
-    """Build the citation map (A4) from a parsed sidecar: one row per
-    transcript chunk and one per screenshot, each linked to its real source."""
+def _sidecar_link_builder(sidecar: dict):
+    """The one link convention for a capture's transcript rows: returns
+    ``links(timestamp) -> (youtube_deep_link, source_url, source_deep_link)``
+    so the sidecar writer and the reconstruction reader derive identical
+    values (Phase 6 BC-2: new writers persist these actual values)."""
     video_id = (sidecar.get("video_id") or "").strip()
     source_url = sidecar.get("source_url") or sidecar.get("url")
     is_youtube = page_extractor.platform_for(
@@ -2581,6 +2583,27 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             return None, source_url, _source_deep_link(source_url, timestamp)
         return None, None, None
 
+    return links
+
+
+def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
+    """Sidecar transcript entries carrying their actual stored link values
+    (``source_url``, ``source_deep_link`` and the compatibility
+    ``youtube_deep_link``, null when the source is not YouTube)."""
+    links = _sidecar_link_builder(sidecar)
+    out = []
+    for s, e, t in entries:
+        youtube_link, citation_source, deep_link = links(s)
+        out.append({"start": s, "end": e, "text": t, "source_url": citation_source,
+                    "source_deep_link": deep_link, "youtube_deep_link": youtube_link})
+    return out
+
+
+def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
+    """Build the citation map (A4) from a parsed sidecar: one row per
+    transcript chunk and one per screenshot, each linked to its real source."""
+    links = _sidecar_link_builder(sidecar)
+
     out: list[dict] = []
     for i, seg in enumerate(sidecar.get("transcript") or []):
         if not isinstance(seg, dict):
@@ -2590,7 +2613,9 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
         # Phase 6 (phase6-v1): a sidecar written by a Phase 6 publisher
         # carries explicit link fields and the cue's local label with its
         # provenance object; both survive reconstruction. A label without a
-        # provenance object is never stored as attributed evidence.
+        # provenance object is never stored as attributed evidence. BC-2:
+        # an explicit field is the stored value even when it is null; only a
+        # missing field falls back to the generated convention.
         provenance = seg.get("speaker_provenance")
         speaker = seg.get("speaker") if isinstance(provenance, dict) else None
         out.append({
@@ -2603,8 +2628,8 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "youtube_deep_link": (
                 seg.get("youtube_deep_link") if "youtube_deep_link" in seg
                 else youtube_link),
-            "source_url": seg.get("source_url") or citation_source,
-            "source_deep_link": seg.get("source_deep_link") or deep_link,
+            "source_url": seg["source_url"] if "source_url" in seg else citation_source,
+            "source_deep_link": seg["source_deep_link"] if "source_deep_link" in seg else deep_link,
             "speaker": speaker if isinstance(speaker, str) else None,
             "speaker_provenance": provenance if isinstance(provenance, dict) else None,
         })
@@ -2626,6 +2651,103 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "source_deep_link": deep_link,
         })
     return out
+
+
+def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None,
+                        chapter_rows: list[dict] | None = None):
+    """Phase 6 (BC-2) shared snapshot builder for a helper capture: the
+    caption cues (with their stored links) and the already-held YouTube
+    chapter metadata (``yt_extract.chapters_from_metadata`` over the
+    sidecar's ``source_chapters``) become one archived capture artifact and
+    a sealed, provisional media block. Returns None when the sidecar was not
+    written by a Phase 6 capture (no ``source_chapters`` key and no explicit
+    link fields) or the capture holds neither cues nor chapters. Offline:
+    nothing is fetched, transcribed or written here."""
+    import library_media  # noqa: WPS433 -- optional module; lazy keeps the helper importable
+    import library_resources  # noqa: WPS433
+    import yt_extract  # noqa: WPS433
+    video_id = (sidecar.get("video_id") or "").strip()
+    if not video_id:
+        return None
+    entries = [e for e in (sidecar.get("transcript") or []) if isinstance(e, dict)]
+    phase6_writer = "source_chapters" in sidecar or (
+        entries and all("source_url" in e and "source_deep_link" in e for e in entries))
+    if not phase6_writer:
+        return None
+    cues = [c for c in _citations_from_sidecar(sidecar, folder) if c["kind"] == "transcript_chunk"]
+    raw_chapters = sidecar.get("source_chapters")
+    raw_chapters = raw_chapters if isinstance(raw_chapters, list) else []
+    if chapter_rows is None:
+        chapter_rows = yt_extract.chapters_from_metadata({"chapters": raw_chapters})
+    if not cues and not chapter_rows:
+        return None
+    url = sidecar.get("source_url") or sidecar.get("url")
+    safe_source = library_resources.safe_url(url)
+    is_youtube = page_extractor.platform_for(
+        sidecar.get("source_type"), url or "") == page_extractor.PLATFORM_YOUTUBE
+    if is_youtube and safe_source and library_media._youtube_video_id(safe_source) == video_id:
+        playback = {"source_url": safe_source, "seek_url": safe_source, "seek_kind": "youtube"}
+    else:
+        playback = {"source_url": safe_source, "seek_url": None, "seek_kind": "none"}
+    record = {
+        "video_id": video_id, "url": url if isinstance(url, str) else None,
+        "captured_at": sidecar.get("yoinked_at"),
+        "duration_seconds": sidecar.get("duration_seconds"),
+        "chapters": raw_chapters,
+        "transcript": [{"start": c["timestamp_start"], "end": c["timestamp_end"], "text": c["text"]}
+                       for c in cues],
+    }
+    artifact = library_media.canonical_json(record).encode("utf-8")
+    provider = sidecar.get("transcript_source")
+    provider = provider if isinstance(provider, str) and provider.strip() else "youtube_captions"
+    kind = "local_asr" if provider.lower().startswith("asr") else "captions"
+    block, digest = library_media.capture_snapshot(
+        video_id=video_id, source_revision="0" * 64, cues=cues, artifact_bytes=artifact,
+        corpus_revision="0" * 64, playback=playback, transcript_kind=kind, transcript_provider=provider,
+        chapter_rows=chapter_rows, recorded_at=sidecar.get("yoinked_at"), item=item)
+    return {"cues": cues, "artifact": artifact, "digest": digest, "chapter_rows": chapter_rows,
+            "playback": playback, "block": block, "transcript_kind": kind, "transcript_provider": provider,
+            "markdown": library_media.render_markdown(
+                {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)}
+
+
+def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
+                           sidecar_path: Path, plan: dict) -> bool:
+    """Phase 6 (BC-2): publish the helper capture through the shared media
+    publisher (``Index.publish_media_snapshot``): the ownership ticket is
+    minted first, the indexed row and the corpus bytes on disk are the
+    source revision's inputs, and the sealed block, artifact and the
+    complete sidecar (with its ``media_depth`` block) are replaced by the
+    fenced operation."""
+    import library_cards  # noqa: WPS433
+    import library_media  # noqa: WPS433
+    import clips as _clips  # noqa: WPS433
+    video_id = (sidecar.get("video_id") or "").strip()
+    ticket = idx.begin_media_publication(video_id, folder=folder)
+    row = idx.get_yoink(video_id)
+    if row is None:
+        raise library_media.MediaError("resource_not_found")
+    corpus_bytes = corpus_path.read_bytes()
+    media_item = library_media._merge_item(row)
+    head = corpus_bytes[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
+    source_revision = library_cards.build_card(
+        media_item, _clips.merge_cues(plan["cues"], media_item), corpus_text=head)["source_revision"]
+    block, digest = library_media.capture_snapshot(
+        video_id=video_id, source_revision=source_revision, cues=plan["cues"],
+        artifact_bytes=plan["artifact"], corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(),
+        playback=plan["playback"], transcript_kind=plan["transcript_kind"],
+        transcript_provider=plan["transcript_provider"],
+        chapter_rows=plan["chapter_rows"], recorded_at=sidecar.get("yoinked_at"), item=row)
+    published = dict(sidecar, media_depth=block)
+    idx.publish_media_snapshot(
+        video_id, cues=plan["cues"], media_block=block,
+        artifacts={
+            str(folder / library_media.MEDIA_INPUTS_DIR / (digest + ".json")): plan["artifact"],
+            str(sidecar_path): json.dumps(published, ensure_ascii=False, indent=2).encode("utf-8"),
+        },
+        ticket=ticket)
+    sidecar["media_depth"] = block
+    return True
 
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
@@ -2688,7 +2810,36 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     }
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
-    idx.insert_citations(video_id, _citations_from_sidecar(sidecar, folder))
+    citations = _citations_from_sidecar(sidecar, folder)
+    # Phase 6 (BC-2): a Phase 6 capture (explicit link fields, held chapter
+    # metadata) publishes its transcript cues through the shared, fenced
+    # media publisher; a refusal is logged and leaves the item's existing
+    # citations and snapshot untouched (never a silent legacy overwrite of
+    # a snapshot another publisher owns). Legacy sidecars keep the legacy
+    # citation write.
+    published = None
+    if corpus_path is not None and corpus_path.exists():
+        try:
+            import library_media  # noqa: WPS433 -- optional module
+            if library_media.schema_ready(idx._conn):
+                plan = _capture_media_plan(sidecar, folder, item=record)
+                if plan is not None:
+                    published = _publish_capture_media(
+                        idx, folder, sidecar, corpus_path, sidecar_path, plan)
+        except ImportError:
+            published = None
+        except Exception as exc:
+            code = getattr(exc, "code", None)
+            if not isinstance(code, str):
+                raise
+            log.warning("media publication refused for %s: %s", video_id, code)
+            published = False
+    if published is None:
+        idx.insert_citations(video_id, citations)
+    elif published:
+        screenshots = [c for c in citations if c.get("kind") != "transcript_chunk"]
+        if screenshots:
+            idx.insert_citations(video_id, screenshots)
     _mirror_event("capture", video_id=video_id)  # seam: capture_commit
     return True
 
@@ -4513,9 +4664,13 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     interval: int, channel_ctx: dict,
                     yoinked_at: str, topic: str,
                     cap_warning: str | None = None,
-                    shot_times: list[int] | None = None) -> str:
+                    shot_times: list[int] | None = None,
+                    media_sections: str | None = None) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
+    ``media_sections`` (Phase 6 BC-2) is the shared media renderer's
+    ``## Chapters`` + ``## Transcript`` output for the held cues and chapter
+    metadata; when supplied it replaces the legacy transcript rendering.
     """
     title = metadata.get("title") or "Untitled"
     channel = metadata.get("channel") or metadata.get("uploader") or "—"
@@ -4566,12 +4721,17 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("")
 
     # Transcript
-    parts.append("## Transcript")
-    parts.append("")
-    if not entries:
+    if media_sections:
+        parts.append(media_sections.rstrip("\n"))
+        parts.append("")
+    elif not entries:
+        parts.append("## Transcript")
+        parts.append("")
         parts.append("*No captions available for this video.*")
         parts.append("")
     else:
+        parts.append("## Transcript")
+        parts.append("")
         if chapters:
             # Group entries by chapter ranges. Chapters have start_time/end_time.
             for ch in chapters:
@@ -5010,13 +5170,39 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                    or "")
     channel_ctx = _fetch_channel_context(channel_url)
 
+    # Phase 6 (BC-2): the transcript rows persist their actual link values,
+    # the already-held chapter metadata travels with the capture, and the
+    # shared media snapshot builder/renderer produce the corpus transcript
+    # section (chapters and cues) from that held data. Nothing is fetched.
+    yoinked_at = _now_iso()
+    held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
+    capture_seed = {
+        "video_id": metadata.get("id"), "url": url, "source_type": source_type,
+        "transcript": [], "source_chapters": held_chapters,
+        "transcript_source": transcript_source,
+        "duration_seconds": duration, "yoinked_at": yoinked_at,
+    }
+    capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
+    media_sections = None
+    try:
+        import yt_extract as _yt_extract  # noqa: WPS433
+        media_plan = _capture_media_plan(
+            capture_seed, output_folder,
+            item={"metadata_json": json.dumps({"duration_seconds": duration})},
+            chapter_rows=_yt_extract.chapters_from_metadata(metadata))
+        if media_plan is not None:
+            media_sections = media_plan["markdown"]
+    except Exception as e:
+        log.warning("media snapshot build skipped for %s: %s", output_folder, e)
+
     # Build the corpus markdown.
     yoink_md = _build_yoink_md(
         metadata=metadata, url=url, entries=entries, shots=shots,
         interval=interval, channel_ctx=channel_ctx,
-        yoinked_at=_now_iso(), topic=topic,
+        yoinked_at=yoinked_at, topic=topic,
         cap_warning=cap_warning,
         shot_times=shot_times,
+        media_sections=media_sections,
     )
     # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
     # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
@@ -5062,7 +5248,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "source_type": source_type,
             "title": title,
             "topic": topic,
-            "yoinked_at": _now_iso(),
+            "yoinked_at": yoinked_at,
             "interval_seconds": interval,
             "requested_interval_seconds": requested_interval,
             "screenshot_cap_warning": cap_warning,
@@ -5081,9 +5267,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
             "video_id": metadata.get("id"),
-            "transcript": [
-                {"start": s, "end": e, "text": t} for s, e, t in entries
-            ],
+            # Phase 6 (BC-2): every transcript row carries its actual stored
+            # link values, and the held chapter metadata travels with the
+            # capture so reconstruction never re-derives either.
+            "transcript": capture_seed["transcript"],
+            "source_chapters": held_chapters,
             # CM-11: provenance is explicit whenever transcript rows exist.
             # A null source means the capture honestly remains caption-less;
             # asr_fallback carries the reason (disabled, model absent, failed,

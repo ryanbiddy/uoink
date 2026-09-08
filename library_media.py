@@ -7,41 +7,67 @@ modules: no helper, no inference runtime, no network, no subprocess. Reads
 never load or download a model. Every hash is SHA-256 over
 ``library_cards.serialize_card`` UTF-8 output.
 
-Contract rules this increment (BC-1, 2026-09-08) could not implement exactly
--- read these before relying on the corresponding behaviour:
+BC-2 (2026-09-08) notes -- what this increment implements differently from
+the literal BD-0 wording, read before relying on the behaviour:
 
-1. **Stale concurrent publisher.** The frozen module interface carries no
-   generation token, and ``media_depth`` holds one row per item, so the only
-   durable history is the retained ``diarization_runs`` ledger. A publisher
-   is refused ``revision_unavailable`` as superseded when its snapshot has a
-   *different* ``cue_revision`` from the current DB snapshot and one of its
-   run records is already in the ledger (that transcript generation was
-   published before and has since been replaced). A publisher with no run
-   records cannot be recognised as stale by this rule.
-2. **Source invalidation after publication.** ``publish_transcript`` works on
-   a raw connection and does not call ``Index._invalidate_library_sources``;
-   ``podcasts.episode_to_corpus`` still reaches it through
-   ``Index.insert_citations``. Direct callers of ``publish_transcript`` must
-   invalidate Phase 2 work themselves.
-3. **Artifact retention.** Publication archives and verifies referenced
-   ``.media-inputs/<sha256>.json`` artifacts but does not yet delete
-   artifacts that stopped being referenced; existing purge rules apply on
-   item deletion.
-4. **Seek kind ``media_fragment`` in production.** No media-fragment player
-   path is implemented or tested in this increment, so production writers
-   record ``seek_kind="none"`` for podcast enclosures. Fixture blocks may
-   still carry ``media_fragment`` and the seek arithmetic honours them.
-5. **``export_cited_range``** is implemented here rather than stubbed because
-   P6-12 to P6-15 and P6-19 read through it; BC-2 owns the remaining export
-   gates (P6-07 to P6-11, P6-16 to P6-18) and the registry/stdio adapters.
-6. **Unmaterialized text-only items** use ``unsupported`` annotation states
-   with ``not_materialized`` reasons in the virtual view; the contract lists
-   both readings and this module picks the one whose reason is honest.
-7. **Sidecar transcript entries without explicit link fields** (fixtures and
-   legacy sidecars) are re-bound by trying the recorded conventions against
-   the block's cue hashes; the legacy ``youtube_deep_link`` column mirrors
-   ``source_deep_link`` (or ``""``) for such rows. Writers in this checkout
-   now persist the explicit fields so replay is lossless.
+1. **Publication fence.** Ownership is a per-item publication ledger
+   (``.media-inputs/publication.json``: generation, current media revision,
+   the revisions it superseded and the artifacts the current target
+   references). ``begin_publication`` mints a ``PublicationTicket`` naming
+   the base (generation, media revision) a publisher built against;
+   ``publish_transcript`` rechecks deletion, corpus bytes, the sidecar's
+   snapshot and that base under ``BEGIN IMMEDIATE`` before touching a file,
+   writes the ledger claim first and the complete sidecar last, and a retry
+   whose target the ledger already names completes from any file/DB
+   boundary. A raw call without a ticket mints its base at call entry (so
+   it still refuses anything published after entry and every revision in
+   the ledger's history); it cannot recognise a never-published stale
+   build, so production callers (``Index.publish_media_snapshot``,
+   ``podcasts.episode_to_corpus``, ``server._index_yoink``) carry a ticket.
+   The ledger keeps the 256 most recent superseded revisions. A ledger that
+   is not parseable refuses ``invalid_source_data`` rather than guessing.
+2. **Phase 2 invalidation** is invoked by ``Index.publish_media_snapshot``
+   and ``Index.rebuild_media_item`` (the raw helpers here take a connection
+   and cannot reach the service); an invalidation failure surfaces as a
+   retryable ``library_unavailable`` after the committed, replayable
+   publication. ``Index.store_media_snapshot`` remains for legacy callers
+   and invalidates through the same path; ``podcasts.episode_to_corpus``
+   still performs the legacy ``Index.insert_citations`` write before the
+   fenced publication because the Phase 3 durability suite injects its
+   crash at that seam (row before citations); the fenced operation then
+   supersedes those rows in the same call.
+3. **Artifact retention** prunes owned ``.media-inputs/<sha256>.json`` files
+   only after a committed publication (``prune_artifacts``), keeping the
+   current DB snapshot's references, every retained run record's artifact,
+   the on-disk sidecar's references and the ledger's in-flight target.
+   Files not named by a digest, or whose bytes do not hash to their name,
+   belong to another owner and are never touched. A failed unlink reports
+   ``cleanup_pending`` and the next settlement or ``prune_artifacts`` call
+   retries. Hard purge of the item folder (server trash purge) removes the
+   directory; ``purge_artifacts`` does the owned part on request.
+4. **Seek kind ``media_fragment``** has no production player path; podcast
+   publication records ``seek_kind="none"``, a null seek URL and a null
+   exported player command. Fixture blocks may carry ``media_fragment``.
+5. **Export** validates referenced artifacts by bytes (bounded read, digest,
+   JSON object, descriptor locator and the contract's source-record match)
+   through ``_verify_artifacts``, shared with publication and rebuild. The
+   read runs in one deferred SQLite transaction with the connection's busy
+   timeout bounded by the remaining Phase 4 deadline, then rechecks the
+   item, corpus, sidecar and artifact signatures before answering. The
+   registry/stdio adapter (``export_cited_range_tool``) admits through the
+   Phase 4 process guard, binds only an existing index and waits for the
+   index lock no longer than that deadline.
+6. **Virtual view**: ``unsupported``/``not_materialized`` only for items
+   whose source type is prose-eligible and that have no cues; an empty or
+   failed timed capture stays ``absent``/``not_materialized`` with transcript
+   kind ``none``.
+7. **Sidecar link fields**: entries carrying explicit ``source_url`` and
+   ``source_deep_link`` bind only through those values (a mismatch refuses
+   ``invalid_source_data``); legacy conventions are tried only when every
+   entry lacks both fields, and only an exact cue-revision match is
+   accepted. The compatibility ``youtube_deep_link`` value is persisted when
+   present (including null) and mirrors ``source_deep_link`` (or ``""``)
+   only for legacy entries.
 """
 from __future__ import annotations
 
@@ -77,6 +103,8 @@ MAX_RANGE_SECONDS = 120.0
 MAX_RANGE_CUES = 200
 MAX_EXPORT_CODEPOINTS = 2000
 MEDIA_INPUTS_DIR = ".media-inputs"
+PUBLICATION_LEDGER = "publication.json"
+LEDGER_HISTORY_LIMIT = 256
 PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth")
 
 CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
@@ -978,7 +1006,10 @@ def _virtual_block(item: dict, cues: list[dict], source_revision: str, corpus_re
         playback = {"source_url": url, "seek_url": url, "seek_kind": "youtube"}
     else:
         playback = {"source_url": url, "seek_url": None, "seek_kind": "none"}
-    state = "absent" if cues else "unsupported"
+    # Only a prose item (text-only source type, no cues) is unsupported for
+    # timed annotations; an empty or failed timed capture is absent, not prose.
+    text_only = not cues and item.get("source_type") in _cards.PROSE_ELIGIBLE_SOURCES
+    state = "unsupported" if text_only else "absent"
     block = {
         "schema_version": SCHEMA_VERSION, "contract_version": CONTRACT_VERSION,
         "video_id": video_id, "source_revision": source_revision,
@@ -1027,6 +1058,116 @@ def _artifact_path(folder: Path, digest: str) -> Path:
     return folder / MEDIA_INPUTS_DIR / (digest + ".json")
 
 
+def _read_artifact_bytes(path: Path, *, limit: int | None = None) -> bytes:
+    """Bounded read of one referenced artifact: at most ``limit`` bytes are
+    admitted; a longer file is invalid, a missing one ``library_unavailable``."""
+    limit = MAX_ARTIFACT_BYTES if limit is None else limit
+    try:
+        with open(path, "rb") as handle:
+            data = handle.read(limit + 1)
+    except FileNotFoundError:
+        raise MediaError("library_unavailable", details={"reason": "artifact_missing"}) from None
+    except OSError:
+        raise MediaError("library_unavailable", details={"reason": "artifact_unreadable"}) from None
+    if len(data) > limit:
+        raise _invalid("artifact_too_large", limit=limit)
+    return data
+
+
+def _file_signature(path: Path):
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    return (stat.st_size, stat.st_mtime_ns)
+
+
+_MISSING = object()
+
+
+def _locate(artifact, locator: list):
+    node = artifact
+    for step in locator:
+        if isinstance(step, str) and isinstance(node, dict) and step in node:
+            node = node[step]
+        elif isinstance(step, int) and not isinstance(step, bool) and isinstance(node, list) \
+                and 0 <= step < len(node):
+            node = node[step]
+        else:
+            return _MISSING
+    return node
+
+
+def _number_equal(left, right) -> bool:
+    return _is_number(left) and _is_number(right) and float(left) == float(right)
+
+
+def _chapter_record_matches(record, chapter: dict) -> bool:
+    """The source element named by a chapter descriptor must carry the
+    stored chapter's times and title (YouTube metadata uses
+    ``start_time``/``end_time``; supplied metadata ``start``/``end``)."""
+    if not isinstance(record, dict):
+        return False
+    start = record.get("start", record.get("start_time"))
+    end = record.get("end", record.get("end_time"))
+    return _number_equal(start, chapter["start"]) and _number_equal(end, chapter["end"]) \
+        and record.get("title") == chapter["title"]
+
+
+def _cue_record_matches(record, cue: dict) -> bool:
+    if not isinstance(record, dict):
+        return False
+    return record.get("text") == cue.get("text") \
+        and _number_equal(record.get("start"), cue.get("timestamp_start")) \
+        and _number_equal(record.get("end"), cue.get("timestamp_end"))
+
+
+def _verify_artifacts(folder: Path, block: dict, cues: list[dict], *,
+                      owned: dict | None = None) -> dict[str, tuple]:
+    """Shared artifact validator for publication, rebuild and export: every
+    referenced ``.media-inputs`` artifact must exist, hash to its digest,
+    parse as a JSON object and, for each producer descriptor, contain the
+    record its locator names with the stored chapter/cue values. Returns
+    ``{digest: (size, mtime_ns) | None}`` signatures for a later recheck."""
+    folder = Path(folder)
+    parsed: dict[str, dict] = {}
+    signatures: dict[str, tuple] = {}
+    total = 0
+    for digest in sorted(_referenced_artifacts(block)):
+        path = _artifact_path(folder, digest)
+        data = owned.get(path) if owned else None
+        if data is None:
+            data = _read_artifact_bytes(path)
+        if _sha256(data) != digest:
+            raise _invalid("artifact_digest_mismatch")
+        total += len(data)
+        parsed[digest] = _parse_json_object(data, "artifact")
+        signatures[digest] = _file_signature(path)
+    if total > MAX_ARTIFACT_BYTES:
+        raise _invalid("artifacts_too_large", limit=MAX_ARTIFACT_BYTES)
+    provenance = block["provenance"]
+    source = provenance.get("chapter_source")
+    if source and _locate(parsed[source["artifact_sha256"]], source["record_locator"]) is _MISSING:
+        raise _invalid("chapter_source_record_missing")
+    for chapter in block["chapters"]:
+        descriptor = chapter["provenance"]
+        record = _locate(parsed[descriptor["artifact_sha256"]], descriptor["record_locator"])
+        if record is _MISSING or not _chapter_record_matches(record, chapter):
+            raise _invalid("chapter_record_mismatch", seq=chapter["seq"])
+    by_seq = {cue.get("seq"): cue for cue in cues}
+    for annotation in block["cues"]:
+        descriptor = (annotation.get("speaker_provenance") or {}).get("source")
+        if not descriptor:
+            continue
+        collection = _locate(parsed[descriptor["artifact_sha256"]], descriptor["record_locator"])
+        seq = annotation["seq"]
+        cue = by_seq.get(seq)
+        if not isinstance(collection, list) or cue is None or not (0 <= seq < len(collection)) \
+                or not _cue_record_matches(collection[seq], cue):
+            raise _invalid("cue_record_mismatch", seq=seq)
+    return signatures
+
+
 def _evidence_row(clip: dict, index: int) -> dict:
     return {"start": clip.get("start"), "end": clip.get("end"), "text": clip.get("text") or "",
             "deep_link": _cards._web_link(clip.get("source_deep_link")),
@@ -1046,7 +1187,8 @@ def _clip_evidence(video_id: str, clip_rows: list[dict]) -> list[tuple[str, dict
 
 class _Snapshot:
     __slots__ = ("item", "cues", "clip_rows", "block", "materialized", "source_revision",
-                 "head", "prose", "corpus_bytes")
+                 "head", "prose", "corpus_bytes", "corpus_sha", "sidecar_signature",
+                 "artifact_signatures")
 
     def __init__(self):
         self.item = None
@@ -1058,6 +1200,9 @@ class _Snapshot:
         self.head = ""
         self.prose = ""
         self.corpus_bytes = None
+        self.corpus_sha = None
+        self.sidecar_signature = None
+        self.artifact_signatures = {}
 
 
 def _read_snapshot(conn: sqlite3.Connection, video_id: str) -> _Snapshot:
@@ -1071,6 +1216,7 @@ def _read_snapshot(conn: sqlite3.Connection, video_id: str) -> _Snapshot:
     snap.clip_rows = _load_clips(conn, video_id)
     corpus_bytes = _read_bytes(Path(item["corpus_path"]), required=False)
     snap.corpus_bytes = corpus_bytes
+    snap.corpus_sha = _sha256(corpus_bytes) if corpus_bytes is not None else None
     snap.head = (corpus_bytes or b"")[:_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
     snap.prose = _cards.opening_prose(snap.head)
     card = _cards.build_card(_merge_item(item), snap.clip_rows, corpus_text=snap.head)
@@ -1078,29 +1224,60 @@ def _read_snapshot(conn: sqlite3.Connection, video_id: str) -> _Snapshot:
     cue_rev = cue_revision(video_id, [cue_core(cue) for cue in snap.cues])
     row = _media_row(conn, video_id)
     if row is None:
-        snap.block = _virtual_block(item, snap.cues, snap.source_revision,
-                                    _sha256(corpus_bytes) if corpus_bytes is not None else None)
+        snap.block = _virtual_block(item, snap.cues, snap.source_revision, snap.corpus_sha)
         return snap
     if row["cue_revision"] != cue_rev:
         raise _stale("cue_revision_changed")
     if row["source_revision"] != snap.source_revision:
         raise _stale("source_revision_changed")
-    sidecar = _parse_json_object(_read_bytes(Path(item["sidecar_path"]), required=True), "sidecar")
+    sidecar_path = Path(item["sidecar_path"])
+    sidecar = _parse_json_object(_read_bytes(sidecar_path, required=True), "sidecar")
+    snap.sidecar_signature = _file_signature(sidecar_path)
     side_block = sidecar.get("media_depth")
     if not isinstance(side_block, dict) or side_block.get("media_revision") != row["media_revision"]:
         raise _stale("sidecar_snapshot_mismatch")
     block = validate_media_block(_block_from_db(conn, item, snap.cues, row))
     if block["media_revision"] != row["media_revision"]:
         raise _invalid("media_revision_mismatch")
-    if block["provenance"]["corpus_revision"] != (_sha256(corpus_bytes) if corpus_bytes is not None else None):
+    if block["provenance"]["corpus_revision"] != snap.corpus_sha:
         raise _stale("corpus_revision_changed")
-    folder = _item_folder(item)
-    for digest in _referenced_artifacts(block):
-        if not _artifact_path(folder, digest).is_file():
-            raise MediaError("library_unavailable", details={"reason": "artifact_missing"})
+    # Original artifacts are evidence only when their bytes verify (digest,
+    # JSON, locator and source-record match); a hash-shaped descriptor is not.
+    snap.artifact_signatures = _verify_artifacts(_item_folder(item), block, snap.cues)
     snap.block = block
     snap.materialized = True
     return snap
+
+
+def _recheck_snapshot(conn: sqlite3.Connection, snap: _Snapshot) -> None:
+    """Final source/media recheck after the export body is built: the item
+    is still current, the corpus bytes, the sidecar and every referenced
+    artifact are unchanged since the coherent read began."""
+    item = _load_item(conn, snap.item["video_id"])
+    if item.get("title") != snap.item.get("title") or item.get("corpus_path") != snap.item.get("corpus_path") \
+            or item.get("metadata_json") != snap.item.get("metadata_json"):
+        raise _stale("source_changed")
+    corpus_bytes = _read_bytes(Path(item["corpus_path"]), required=False)
+    if (_sha256(corpus_bytes) if corpus_bytes is not None else None) != snap.corpus_sha:
+        raise _stale("corpus_revision_changed")
+    if not snap.materialized:
+        if _media_row(conn, item["video_id"]) is not None:
+            raise _stale("media_revision_changed")
+        return
+    row = _media_row(conn, item["video_id"])
+    if row is None or row["media_revision"] != snap.block["media_revision"]:
+        raise _stale("media_revision_changed")
+    # Another owner may rewrite the sidecar around an unchanged snapshot;
+    # only a different (or missing) snapshot is a stale read, so the sidecar
+    # is re-read rather than compared by signature.
+    sidecar = _parse_json_object(_read_bytes(Path(item["sidecar_path"]), required=True), "sidecar")
+    side_block = sidecar.get("media_depth")
+    if not isinstance(side_block, dict) or side_block.get("media_revision") != snap.block["media_revision"]:
+        raise _stale("sidecar_snapshot_mismatch")
+    folder = _item_folder(item)
+    for digest, signature in snap.artifact_signatures.items():
+        if _file_signature(_artifact_path(folder, digest)) != signature:
+            raise _stale("artifact_changed")
 
 
 def chapters_for(conn, video_id: str, *, revision: str | None = None) -> list[dict]:
@@ -1132,8 +1309,10 @@ def chapters_for(conn, video_id: str, *, revision: str | None = None) -> list[di
 # --------------------------------------------------------------------------
 def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[dict]:
     """Recover citation rows from the sidecar transcript and re-bind them to
-    the block's cue hashes. Explicit link fields win; otherwise the recorded
-    link conventions are tried and the one the block binds is used."""
+    the block's cue hashes. Entries with explicit link fields bind only
+    through those values (a mismatch is ``invalid_source_data``); legacy
+    entries without any link field try the recorded conventions and only an
+    exact cue-revision match is accepted."""
     entries = sidecar.get("transcript") or []
     if not isinstance(entries, list) or any(not isinstance(e, dict) for e in entries):
         raise _invalid("sidecar_transcript")
@@ -1141,7 +1320,10 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
     meta = sidecar.get("metadata") if isinstance(sidecar.get("metadata"), dict) else {}
     url = (meta.get("url") or sidecar.get("source_url") or sidecar.get("url") or _item_url(item))
     url = url if isinstance(url, str) and url.strip() else None
-    explicit = bool(entries) and all("source_url" in e and "source_deep_link" in e for e in entries)
+    flags = [("source_url" in e, "source_deep_link" in e) for e in entries]
+    explicit = bool(entries) and all(a and b for a, b in flags)
+    if entries and not explicit and any(a or b for a, b in flags):
+        raise _invalid("sidecar_link_fields_mixed")
 
     def seconds(value):
         try:
@@ -1174,7 +1356,7 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
                         "speaker_provenance": entry.get("speaker_provenance")})
         return out
 
-    modes = (["explicit"] if explicit else []) + ["same", "fragment", "youtube"]
+    modes = ["explicit"] if explicit else ["same", "fragment", "youtube"]
     if block is None:
         chosen = rows(modes[0] if explicit else ("youtube" if item.get("platform") in (None, "youtube") else "fragment"), False)
     else:
@@ -1188,7 +1370,7 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
             if chosen is not None:
                 break
         if chosen is None:
-            raise _invalid("sidecar_cue_binding")
+            raise _invalid("sidecar_cue_binding", explicit_links=explicit)
         for cue, annotation in zip(chosen, block["cues"]):
             if cue["speaker"] != annotation["speaker"] or cue["speaker_provenance"] != annotation["speaker_provenance"]:
                 raise _invalid("sidecar_label_mismatch", seq=annotation["seq"])
@@ -1344,10 +1526,7 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
         cues = _cues_from_sidecar(sidecar, block, item)
         folder = _item_folder(item)
         if block is not None:
-            for digest in _referenced_artifacts(block):
-                data = _read_bytes(_artifact_path(folder, digest), required=True)
-                if _sha256(data) != digest:
-                    raise _invalid("artifact_digest_mismatch")
+            _verify_artifacts(folder, block, cues)
             corpus_bytes = _read_bytes(Path(item["corpus_path"]), required=True)
             if block["provenance"]["corpus_revision"] != _sha256(corpus_bytes):
                 raise _stale("corpus_revision_changed")
@@ -1381,16 +1560,196 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
         raise MediaError("library_unavailable") from None
 
 
-def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts) -> dict:
-    """Publish one coherent snapshot: validated inputs, owned files replaced
-    atomically with the complete sidecar last, then the DB rows committed
-    together. A crash between steps leaves an explicit stale state that a
-    retry with the same durable inputs completes."""
+# --------------------------------------------------------------------------
+# Publication ownership fence and artifact retention
+# --------------------------------------------------------------------------
+class PublicationTicket:
+    """The base a publisher built against: the item's publication generation
+    and current media revision when ``begin_publication`` ran. Carried by the
+    owning service, never by a media hash or an export input."""
+
+    __slots__ = ("video_id", "base_generation", "base_media_revision")
+
+    def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None):
+        self.video_id = video_id
+        self.base_generation = base_generation
+        self.base_media_revision = base_media_revision
+
+    @property
+    def base(self) -> tuple:
+        return (self.base_generation, self.base_media_revision)
+
+
+def _ledger_path(folder: Path) -> Path:
+    return Path(folder) / MEDIA_INPUTS_DIR / PUBLICATION_LEDGER
+
+
+def _read_ledger(folder: Path) -> dict | None:
+    """The item's publication ledger, or None before its first fenced
+    publication. Malformed ledgers refuse rather than being guessed at."""
+    raw = _read_bytes(_ledger_path(folder), required=False)
+    if raw is None:
+        return None
+    try:
+        ledger = _parse_json_object(raw, "publication_ledger")
+    except MediaError:
+        raise _invalid("publication_ledger_corrupt") from None
+    generation = ledger.get("generation")
+    history = ledger.get("history")
+    artifacts = ledger.get("artifacts")
+    base = ledger.get("base_media_revision")
+    if isinstance(generation, bool) or not isinstance(generation, int) or generation < 1 \
+            or not _is_hash(ledger.get("media_revision")) \
+            or (base is not None and not _is_hash(base)) \
+            or not isinstance(history, list) or any(not _is_hash(h) for h in history) \
+            or not isinstance(artifacts, list) or any(not _is_hash(a) for a in artifacts):
+        raise _invalid("publication_ledger_corrupt")
+    return ledger
+
+
+def _publication_state(conn: sqlite3.Connection, video_id: str, folder: Path | None) -> tuple:
+    """``(generation, current_media_revision, ledger)``: the ledger when one
+    exists, else generation 0 with the DB row's media revision (legacy or
+    seeded items) or None (never materialized)."""
+    ledger = _read_ledger(folder) if folder is not None else None
+    if ledger is not None:
+        return ledger["generation"], ledger["media_revision"], ledger
+    row = _media_row(conn, video_id) if _has_column(conn, "clips", "speaker_spans_json") else None
+    return 0, (row["media_revision"] if row is not None else None), None
+
+
+def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
+    """Mint the fence for one publication of ``video_id``: the base it must
+    still find under the storage lock when it publishes. ``folder`` names
+    the item folder for a first publication whose row does not exist yet."""
+    try:
+        _validate_identity(video_id)
+        raw = conn.execute("SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+        item = dict(raw) if raw is not None else None
+        if item is not None and item.get("deleted_at"):
+            raise MediaError("resource_deleted")
+        if folder is None and item is not None:
+            folder = _item_folder(item)
+        generation, current, _ledger = _publication_state(conn, video_id, Path(folder) if folder else None)
+        return PublicationTicket(video_id, generation, current)
+    except sqlite3.Error:
+        raise MediaError("library_unavailable") from None
+
+
+def _owned_artifact_digest(path: Path) -> str | None:
+    """The digest a ``.media-inputs`` file is owned under, or None when the
+    file is not one of ours (not hash-named, oversized or not matching)."""
+    digest = path.stem
+    if path.suffix != ".json" or not _is_hash(digest):
+        return None
+    try:
+        with open(path, "rb") as handle:
+            data = handle.read(MAX_ARTIFACT_BYTES + 1)
+    except OSError:
+        return None
+    if len(data) > MAX_ARTIFACT_BYTES or _sha256(data) != digest:
+        return None
+    return digest
+
+
+def _retained_artifacts(conn: sqlite3.Connection, item: dict, folder: Path) -> set[str]:
+    """Digests that must survive pruning: the current DB snapshot's
+    references, every retained run record, the on-disk sidecar's snapshot
+    and the ledger's in-flight target."""
+    video_id = item["video_id"]
+    retained: set[str] = set()
+    row = _media_row(conn, video_id)
+    if row is not None:
+        retained |= _referenced_artifacts(_block_from_db(conn, item, _load_cues(conn, video_id), row))
+    if _has_column(conn, "clips", "speaker_spans_json"):
+        for run in conn.execute("SELECT artifact_sha256 FROM diarization_runs WHERE video_id=?", (video_id,)):
+            if _is_hash(run[0]):
+                retained.add(run[0])
+    sidecar_raw = _read_bytes(Path(item["sidecar_path"]), required=False)
+    if sidecar_raw is not None:
+        try:
+            side_block = _parse_json_object(sidecar_raw, "sidecar").get("media_depth")
+            if isinstance(side_block, dict):
+                retained |= _referenced_artifacts(validate_media_block(side_block))
+        except MediaError:
+            pass
+    ledger = _read_ledger(folder)
+    if ledger is not None:
+        retained |= set(ledger["artifacts"])
+    return retained
+
+
+def prune_artifacts(conn, item: dict) -> dict:
+    """Remove owned ``.media-inputs`` artifacts no longer needed after a
+    committed publication. Never called by a read; a failed unlink leaves
+    ``cleanup_pending`` for the next settlement or explicit call."""
+    folder = _item_folder(item)
+    inputs = folder / MEDIA_INPUTS_DIR
+    if not inputs.is_dir():
+        return {"pruned": 0, "retained": 0, "cleanup_pending": False}
+    try:
+        retained = _retained_artifacts(conn, item, folder)
+    except sqlite3.Error:
+        raise MediaError("library_unavailable") from None
+    pruned, kept, pending = 0, 0, False
+    try:
+        candidates = sorted(inputs.iterdir())
+    except OSError:
+        return {"pruned": 0, "retained": len(retained), "cleanup_pending": True}
+    for path in candidates:
+        if path.name == PUBLICATION_LEDGER or not path.is_file():
+            continue
+        digest = _owned_artifact_digest(path)
+        if digest is None:
+            continue
+        if digest in retained:
+            kept += 1
+            continue
+        try:
+            path.unlink()
+            pruned += 1
+        except OSError:
+            pending = True
+    return {"pruned": pruned, "retained": kept, "cleanup_pending": pending}
+
+
+def purge_artifacts(folder) -> int:
+    """Hard purge of the owned part of an item folder: every owned artifact
+    and the ledger. Other owners' files stay; returns the number removed."""
+    inputs = Path(folder) / MEDIA_INPUTS_DIR
+    if not inputs.is_dir():
+        return 0
+    removed = 0
+    for path in sorted(inputs.iterdir()):
+        if not path.is_file():
+            continue
+        if path.name == PUBLICATION_LEDGER or _owned_artifact_digest(path) is not None:
+            try:
+                path.unlink()
+                removed += 1
+            except OSError:
+                pass
+    try:
+        inputs.rmdir()
+    except OSError:
+        pass
+    return removed
+
+
+def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, ticket=None) -> dict:
+    """Publish one coherent snapshot: validated inputs, the ownership fence
+    rechecked under ``BEGIN IMMEDIATE`` before any file is touched, the
+    ledger claim written first, owned files replaced atomically with the
+    complete sidecar last, then the DB rows committed together and obsolete
+    owned artifacts pruned. A crash between steps leaves an explicit state
+    that a retry with the same durable inputs completes."""
     try:
         item = _load_item(conn, video_id)
         block = validate_media_block(media_block)
         if block["video_id"] != video_id:
             raise _invalid("cross_item_annotations")
+        if ticket is not None and (not isinstance(ticket, PublicationTicket) or ticket.video_id != video_id):
+            raise _request("ticket_identity")
         cues = [dict(cue) for cue in (cues or [])]
         _bind_cues(block, cues, stale_code="invalid_source_data")
         if not isinstance(artifacts, dict):
@@ -1405,6 +1764,8 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts) -> 
             path = Path(raw_path).resolve()
             if not path.is_relative_to(folder):
                 raise _request("artifact_outside_item")
+            if path == _ledger_path(folder).resolve():
+                raise _request("ledger_not_publishable")
             owned[path] = bytes(data)
         sidecar_bytes = owned.get(sidecar_path)
         if sidecar_bytes is None:
@@ -1425,27 +1786,23 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts) -> 
             corpus_bytes = _read_bytes(corpus_path, required=True)
         if block["provenance"]["corpus_revision"] != _sha256(corpus_bytes):
             raise _invalid("corpus_revision_mismatch")
-        total = 0
-        for digest in _referenced_artifacts(block):
-            path = _artifact_path(folder, digest)
-            data = owned.get(path)
-            if data is None:
-                data = _read_bytes(path, required=True)
-            if _sha256(data) != digest:
-                raise _invalid("artifact_digest_mismatch")
-            total += len(data)
-        if total > MAX_ARTIFACT_BYTES:
-            raise _invalid("artifacts_too_large", limit=MAX_ARTIFACT_BYTES)
+        _verify_artifacts(folder, block, cues, owned=owned)
         projected = project_clips(cues, item, annotations=block)
         head = corpus_bytes[:_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
         source_now = _cards.build_card(_merge_item(item), projected, corpus_text=head)["source_revision"]
         if source_now != block["source_revision"]:
             raise _stale("source_revision_changed")
+        # A raw call mints its base at entry (see module note 1).
+        if ticket is None:
+            ticket = begin_publication(conn, video_id)
 
-        # Current state under the item's storage lock: conflicts refuse before
-        # any file is touched.
+        # Current state under the item's storage lock: deletion, corpus
+        # bytes, sidecar dependencies and the ownership fence are rechecked
+        # here, and every conflict refuses before any file is touched.
         if not conn.in_transaction:
             conn.execute("BEGIN IMMEDIATE")
+        item = _load_item(conn, video_id)
+        target = block["media_revision"]
         current_block = None
         current_sidecar = _read_bytes(sidecar_path, required=False)
         if current_sidecar is not None:
@@ -1461,17 +1818,40 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts) -> 
                 if isinstance(current_block.get("provenance"), dict) else None
             if recorded != _sha256(disk_corpus):
                 raise _stale("corpus_edited")
-        row = _media_row(conn, video_id)
-        if row is not None and row["media_revision"] != block["media_revision"] \
-                and row["cue_revision"] != block["cue_revision"] and block["runs"]:
-            ledger = {r[0] for r in conn.execute(
-                "SELECT run_id FROM diarization_runs WHERE video_id=?", (video_id,))}
-            if any(run["run_id"] in ledger for run in block["runs"]):
-                raise _stale("superseded_publisher")
+        generation, current, ledger = _publication_state(conn, video_id, folder)
+        history = list(ledger["history"]) if ledger is not None else []
+        # The sidecar on disk must be one this publication knows: the ledger's
+        # current or in-flight base snapshot, this target, or the base the
+        # ticket was minted against. Anything else belongs to another owner.
+        if ledger is not None and current_block is not None and current_block["media_revision"] not in (
+                current, target, ticket.base_media_revision, ledger.get("base_media_revision")):
+            raise _stale("sidecar_foreign_snapshot")
+        if current == target:
+            # This publication already holds the claim (retry or idempotent
+            # republication): settle it without a new generation.
+            next_generation = generation
+        else:
+            if (generation, current) != ticket.base:
+                raise _stale("publication_superseded", base_generation=ticket.base_generation,
+                             current_generation=generation)
+            if target in history:
+                raise _stale("superseded_snapshot")
+            next_generation = generation + 1
+            if current is not None:
+                history.append(current)
+            history = history[-LEDGER_HISTORY_LIMIT:]
         if not _has_column(conn, "clips", "speaker_spans_json"):
             raise MediaError("library_unavailable", details={"reason": "schema_not_migrated"})
 
-        # Files: inputs first, corpus, other owned artifacts, sidecar last.
+        # Files: the ledger claim first, then inputs, corpus, other owned
+        # artifacts and the complete sidecar last.
+        if current != target:
+            _atomic_replace(_ledger_path(folder), _json({
+                "schema_version": SCHEMA_VERSION, "contract_version": CONTRACT_VERSION,
+                "video_id": video_id, "generation": next_generation, "media_revision": target,
+                "base_media_revision": current, "history": history,
+                "artifacts": sorted(_referenced_artifacts(block)),
+            }).encode("utf-8"))
         ordered = ([p for p in owned if p.parent.name == MEDIA_INPUTS_DIR]
                    + ([corpus_path] if corpus_path in owned else [])
                    + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)]
@@ -1487,8 +1867,16 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts) -> 
         _write_media_rows(conn, block)
         _write_clips(conn, video_id, projected)
         conn.commit()
+        try:
+            retention = prune_artifacts(conn, item)
+        except (MediaError, OSError, KeyError, TypeError, ValueError):
+            # The publication is committed; cleanup is retried at the next
+            # settlement or by an explicit prune_artifacts call.
+            retention = {"pruned": 0, "retained": 0, "cleanup_pending": True}
         return {"ok": True, "video_id": video_id, "source_revision": block["source_revision"],
-                "media_revision": block["media_revision"], "clips": len(projected), "cues": len(cues)}
+                "media_revision": block["media_revision"], "clips": len(projected), "cues": len(cues),
+                "generation": next_generation, "pruned_artifacts": retention["pruned"],
+                "cleanup_pending": retention["cleanup_pending"]}
     except MediaError:
         try:
             conn.rollback()
@@ -1510,11 +1898,13 @@ def transcript_snapshot(*, video_id: str, source_revision: str, cues: list[dict]
                         transcript_bytes: bytes, corpus_revision: str, playback: dict,
                         transcript_provider: str = "whisperx", chapters: list[dict] | None = None,
                         chapter_source: dict | None = None, chapter_state: str = "unsupported",
-                        chapter_reason: str | None = "adapter_unsupported") -> tuple[dict, bytes]:
+                        chapter_reason: str | None = "adapter_unsupported",
+                        timed: bool = True) -> tuple[dict, bytes]:
     """Build the sealed block for a local ASR transcript JSON. ``cues`` are
     the citation rows in seq order (``speaker`` taken from the segments).
     Returns ``(block, artifact_bytes)``; the caller archives the artifact
-    under the item folder before publishing."""
+    under the item folder before publishing. ``timed`` says whether the
+    item is a timed source (an empty timed capture stays ``absent``)."""
     cores = [cue_core(cue) for cue in cues]
     cue_rev = cue_revision(video_id, cores)
     record = transcript.get("diarization_run")
@@ -1588,7 +1978,9 @@ def transcript_snapshot(*, video_id: str, source_revision: str, cues: list[dict]
     elif labeled:
         speaker_state, speaker_reason = "partial", "unlabeled_cues"
     if not cores and speaker_state == "absent":
-        speaker_state, speaker_reason = "unsupported", "adapter_unsupported"
+        # A prose item is unsupported for timed annotations; an empty timed
+        # capture is absent (nothing was supplied), never promoted to prose.
+        speaker_state, speaker_reason = ("absent", "not_supplied") if timed else ("unsupported", "adapter_unsupported")
 
     # SQLite REAL columns return floats; seal the block with the same
     # representation the DB reconstruction will produce.
@@ -1618,6 +2010,70 @@ def transcript_snapshot(*, video_id: str, source_revision: str, cues: list[dict]
     }
     block["media_revision"] = media_revision(block)
     return validate_media_block(block), artifact
+
+
+def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], artifact_bytes: bytes,
+                     corpus_revision: str, playback: dict, transcript_kind: str = "captions",
+                     transcript_provider: str = "youtube_captions", language: str | None = None,
+                     chapter_rows: list[dict] | None = None, chapter_provider: str = "youtube_metadata",
+                     recorded_at: str | None = None, item: dict | None = None) -> tuple[dict, str]:
+    """Build the sealed block for a capture whose caption cues and source
+    chapter list are already held in one archived JSON artifact
+    (``artifact_bytes``: the capture record whose ``chapters`` member is the
+    original list ``yt_extract.chapters_from_metadata`` read). No run and
+    no labels. ``chapter_rows`` are that helper's rows; an unusable list is
+    recorded as ``chapter_state="invalid"`` with its descriptor, never
+    guessed at. Returns ``(block, artifact_sha256)``."""
+    digest = _sha256(artifact_bytes)
+    cores = [cue_core(cue) for cue in cues]
+    cue_rev = cue_revision(video_id, cores)
+    descriptor = {"origin": "source_metadata", "provider": chapter_provider, "artifact_sha256": digest,
+                  "record_locator": ["chapters"], "recorded_at": recorded_at}
+    objects = []
+    for row in chapter_rows or []:
+        row = row if isinstance(row, dict) else {}
+        start, end = row.get("start"), row.get("end")
+        locator = row.get("record_locator")
+        objects.append({
+            "seq": row.get("seq"),
+            "start": float(start) if _is_number(start) else start,
+            "end": float(end) if _is_number(end) else end,
+            "title": row.get("title"),
+            "provenance": dict(descriptor, record_locator=list(locator) if isinstance(locator, list)
+                               else ["chapters", row.get("seq")]),
+        })
+    chapter_state, chapter_reason, chapter_source = "absent", "not_supplied", None
+    if objects:
+        try:
+            _validate_chapters(objects)
+            if item is not None:
+                _check_chapter_duration(objects, item)
+        except MediaError:
+            chapter_state, chapter_reason, chapter_source, objects = "invalid", "invalid_metadata", descriptor, []
+        else:
+            chapter_state, chapter_reason, chapter_source = "present", None, descriptor
+    annotated = [{"seq": core["seq"], "cue_hash": cue_hash(video_id, core), "speaker": None,
+                  "speaker_provenance": None} for core in cores]
+    block = {
+        "schema_version": SCHEMA_VERSION, "contract_version": CONTRACT_VERSION,
+        "video_id": video_id, "source_revision": source_revision, "cue_revision": cue_rev,
+        "media_revision": "0" * 64, "chapter_state": chapter_state, "speaker_state": "absent",
+        "diarization_state": "not_requested",
+        "provenance": {
+            "chapter_source": chapter_source,
+            "transcript_source": {"kind": transcript_kind if cores else "none",
+                                  "artifact_sha256": digest if cores else None,
+                                  "provider": transcript_provider if cores else None,
+                                  "model": None, "language": language if cores else None},
+            "active_diarization_run_id": None,
+            "absence_reason": {"chapters": chapter_reason, "speakers": "diarization_off"},
+            "corpus_revision": corpus_revision,
+        },
+        "playback": playback,
+        "chapters": objects, "runs": [], "cues": annotated,
+    }
+    block["media_revision"] = media_revision(block)
+    return validate_media_block(block), digest
 
 
 # --------------------------------------------------------------------------
@@ -1869,6 +2325,52 @@ def _export_excerpt(snap: _Snapshot, request: dict, check) -> dict:
                            "render_version": RENDER_VERSION}}
 
 
+class _ReadTransaction:
+    """One deferred SQLite read transaction for the whole export, with the
+    connection's busy timeout bounded by the time left before ``deadline``
+    so a writer holding the database yields ``deadline_exceeded`` (via the
+    storage error path) instead of an unbounded wait. Never commits."""
+
+    __slots__ = ("conn", "clock", "deadline", "began", "restore")
+
+    def __init__(self, conn, clock, deadline: float):
+        self.conn = conn
+        self.clock = clock
+        self.deadline = deadline
+        self.began = False
+        self.restore = None
+
+    def __enter__(self):
+        remaining_ms = max(0, int((self.deadline - float(self.clock())) * 1000.0))
+        try:
+            row = self.conn.execute("PRAGMA busy_timeout").fetchone()
+            self.restore = int(row[0]) if row is not None else None
+            # Only ever shorten the connection's own wait: the deadline is a
+            # ceiling on lock waits, never a licence to wait longer.
+            ceiling_ms = self.restore if self.restore is not None else \
+                int(float(_resources.LIMITS["service_deadline_s"]) * 1000.0)
+            self.conn.execute(f"PRAGMA busy_timeout={min(remaining_ms, ceiling_ms)}")
+        except sqlite3.Error:
+            self.restore = None
+        if not self.conn.in_transaction:
+            self.conn.execute("BEGIN DEFERRED")
+            self.began = True
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            if self.began and self.conn.in_transaction:
+                self.conn.rollback()
+        except sqlite3.Error:
+            pass
+        if self.restore is not None:
+            try:
+                self.conn.execute(f"PRAGMA busy_timeout={self.restore}")
+            except sqlite3.Error:
+                pass
+        return False
+
+
 def _export(conn, request: dict, *, clock, deadline: float) -> dict:
     def check():
         if float(clock()) > deadline:
@@ -1877,13 +2379,16 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
     if conn is None:
         raise MediaError("library_unavailable", details={"reason": "no_storage"})
     check()
-    snap = _read_snapshot(conn, request["video_id"])
-    check()
-    block = snap.block
-    for key, current in (("source_revision", snap.source_revision), ("media_revision", block["media_revision"])):
-        if request[key] is not None and request[key] != current:
-            raise _stale(key + "_mismatch")
-    body = _export_range(snap, request, check) if request["mode"] == "range" else _export_excerpt(snap, request, check)
+    with _ReadTransaction(conn, clock, deadline):
+        snap = _read_snapshot(conn, request["video_id"])
+        check()
+        block = snap.block
+        for key, current in (("source_revision", snap.source_revision), ("media_revision", block["media_revision"])):
+            if request[key] is not None and request[key] != current:
+                raise _stale(key + "_mismatch")
+        body = _export_range(snap, request, check) if request["mode"] == "range" else _export_excerpt(snap, request, check)
+        check()
+        _recheck_snapshot(conn, snap)
     item = snap.item
     result = {
         "ok": True, "schema_version": SCHEMA_VERSION, "contract_version": CONTRACT_VERSION,
@@ -1908,14 +2413,48 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
     return result
 
 
-def export_cited_range(conn, args: dict, *, clock=None) -> dict:
-    """Read-only cited range export. Strict syntax refusals happen before any
-    storage access; admission, deadline and budgets reuse Phase 4's guard."""
-    try:
-        request = _validate_export_args(args)
-    except MediaError as exc:
-        return exc.envelope()
-    clock = clock or time.monotonic
+class _BoundedIndexLock:
+    """Acquire an index lock within the time left before ``deadline`` or
+    refuse ``deadline_exceeded`` at once; the adapter never waits past the
+    request's own deadline. ``None`` is a no-op."""
+
+    __slots__ = ("lock", "clock", "deadline", "held")
+
+    def __init__(self, lock, clock, deadline: float):
+        self.lock = lock
+        self.clock = clock
+        self.deadline = deadline
+        self.held = False
+
+    def __enter__(self):
+        if self.lock is None:
+            return self
+        remaining = self.deadline - float(self.clock())
+        if remaining <= 0:
+            raise MediaError("deadline_exceeded", details={
+                "deadline_s": _resources.LIMITS["service_deadline_s"], "reason": "lock_wait"})
+        try:
+            acquired = self.lock.acquire(timeout=min(remaining, float(_resources.LIMITS["service_deadline_s"])))
+        except TypeError:  # a lock double without a timeout parameter
+            acquired = self.lock.acquire()
+        if not acquired:
+            raise MediaError("deadline_exceeded", details={
+                "deadline_s": _resources.LIMITS["service_deadline_s"], "reason": "lock_wait"})
+        self.held = True
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if self.held:
+            self.held = False
+            self.lock.release()
+        return False
+
+
+def _admitted_export(request: dict, *, clock, bind) -> dict:
+    """One admission on the shared Phase 4 process guard (no second pool):
+    the deadline runs from the admission timestamp through storage binding
+    (``bind() -> (connection, lock | None)``), the bounded lock wait, the
+    coherent read and the wire checks."""
     guard = _resources._PROCESS_GUARD or _resources.process_guard()
     try:
         admitted = guard.admit()
@@ -1923,7 +2462,9 @@ def export_cited_range(conn, args: dict, *, clock=None) -> dict:
         return _refuse(exc.code, details=exc.details, message=exc.message)
     deadline = float(admitted) + float(_resources.LIMITS["service_deadline_s"])
     try:
-        return _export(conn, request, clock=clock, deadline=deadline)
+        conn, index_lock = bind()
+        with _BoundedIndexLock(index_lock, clock, deadline):
+            return _export(conn, request, clock=clock, deadline=deadline)
     except MediaError as exc:
         return exc.envelope()
     except _resources.ResourceError as exc:
@@ -1932,3 +2473,70 @@ def export_cited_range(conn, args: dict, *, clock=None) -> dict:
         return _refuse("library_unavailable", details={"reason": "storage_error"})
     finally:
         guard.release()
+
+
+def export_cited_range(conn, args: dict, *, clock=None) -> dict:
+    """Read-only cited range export on an open connection. Strict syntax
+    refusals happen before any storage access; admission, deadline and
+    budgets reuse Phase 4's guard."""
+    try:
+        request = _validate_export_args(args)
+    except MediaError as exc:
+        return exc.envelope()
+    return _admitted_export(request, clock=clock or time.monotonic, bind=lambda: (conn, None))
+
+
+def export_cited_range_tool(args, backend, *, clock=None) -> dict:
+    """Registry/stdio adapter: exact input rejection before any storage
+    access, then one Phase 4 admission, lazy binding of an *existing* index
+    only (``library_resources._existing_index_factory``: never created or
+    recovered), a lock wait bounded by the same deadline, and the export."""
+    try:
+        request = _validate_export_args(args)
+    except MediaError as exc:
+        return exc.envelope()
+
+    def bind():
+        try:
+            index = _resources._existing_index_factory(backend)()
+        except _resources.ResourceError:
+            raise
+        except Exception as exc:
+            raise MediaError("library_unavailable", details={"storage": type(exc).__name__}) from None
+        if index is None:
+            raise MediaError("library_unavailable", details={"storage": "no_index"})
+        conn = getattr(index, "_conn", None)
+        if conn is None or not hasattr(conn, "execute"):
+            raise MediaError("library_unavailable", details={"storage": "no_connection"})
+        lock = getattr(index, "_lock", None)
+        if lock is not None and not (callable(getattr(lock, "acquire", None)) and callable(getattr(lock, "release", None))):
+            lock = None
+        return conn, lock
+
+    return _admitted_export(request, clock=clock or time.monotonic, bind=bind)
+
+
+EXPORT_TOOL_NAME = "export_cited_range"
+EXPORT_TOOL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "video_id": {"type": "string", "description": "Stable item id."},
+        "start": {"type": "number", "minimum": 0,
+                  "description": "Range start in seconds; must equal the first selected cue's start (with end)."},
+        "end": {"type": "number", "minimum": 0,
+                "description": "Range end in seconds; must equal the last selected cue's end (with start)."},
+        "excerpt_id": {"type": "string", "description": "A current excerpt id (instead of start/end)."},
+        "source_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+        "media_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+    },
+    "required": ["video_id"],
+    "additionalProperties": False,
+}
+EXPORT_TOOL_DESCRIPTION = (
+    "Read-only cited export of one stored transcript range (exact cue-aligned "
+    "start/end, at most 120 s and 200 cues) or one current excerpt id from a "
+    "saved item: verbatim stored text, per-cue speaker labels with provenance, "
+    "overlapping chapters, safe source and seek links, source/media revisions "
+    "and evidence refs. Nothing is fetched, transcribed or saved; refusals "
+    "carry a next_step."
+)

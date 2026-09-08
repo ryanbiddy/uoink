@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **31 tools**.
-- Local HTTP/OpenAPI registry: **87 tools**.
+- Supported stdio registry: **32 tools**.
+- Local HTTP/OpenAPI registry: **88 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -965,6 +965,35 @@ alter the assignment queue.
                   "start": 12.0, "end": 40.0 }],
   "usage": null
 }
+```
+
+### export_cited_range
+
+Read-only cited export (Phase 6 second increment, run BC-2, contract
+`phase6-v1`). Select exactly one of a cue-aligned time range (`start` and
+`end` must equal the first selected cue's start and the last selected cue's
+end; at most 120 s and 200 cues) or a current `excerpt_id`; optional
+`source_revision` / `media_revision` pins refuse `revision_unavailable` on
+change. The result carries the verbatim stored cue text, per-cue speaker
+labels with their provenance (diarization run or source metadata), the
+overlapping chapters, safe source and seek links (a `youtube` seek only for a
+verified YouTube item; podcasts record `seek_kind: "none"`), the item's
+source and media revisions and evidence refs. Every referenced original
+artifact is validated by bytes before anything is quoted; a missing input is
+`library_unavailable`, corrupt bytes or bindings `invalid_source_data`. The
+read is one coherent SQLite transaction with a final source/media recheck,
+admitted on the shared Phase 4 guard (2 s deadline, 2 active, 60/minute) with
+the same wire budgets (24,576 rendered bytes, 65,536 wrapped bytes). Nothing
+is fetched, transcribed or saved; text-only items refuse `not_timed` with
+`next_step: get_library_item`, and coarse (paragraph) timing refuses
+`coarse_timing` with `next_step: read_library_resource`.
+
+```json
+{ "video_id": "<item id>", "start": 60.0, "end": 125.0 }
+```
+
+```json
+{ "video_id": "<item id>", "excerpt_id": "<64 hex>", "source_revision": "<64 hex>" }
 ```
 
 ## Rate limits and abuse mitigations

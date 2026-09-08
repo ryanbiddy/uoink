@@ -3553,6 +3553,48 @@ def _library_resources_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
     return _lr.dispatch_tool(name, args, _b())
 
 
+def _library_media_export(args: dict[str, Any]) -> dict[str, Any]:
+    """Phase 6 export tool (contract phase6-v1, run BC-2). The read-only
+    domain operation lives in library_media.py; exact input rejection runs
+    before any storage access, admission and the 2 s deadline reuse the
+    Phase 4 process guard, and only an existing index is ever bound."""
+    try:
+        import library_media as _lm  # noqa: WPS433 -- optional module
+    except ImportError:
+        return {
+            "ok": False, "schema_version": 1, "contract_version": "phase6-v1",
+            "error": {"code": "feature_unavailable",
+                      "message": "This feature is not available in this build.",
+                      "retryable": False, "details": {"module": "library_media"}},
+        }
+    return _lm.export_cited_range_tool(args, _b())
+
+
+EXPORT_CITED_RANGE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "video_id": {"type": "string", "description": "Stable item id."},
+        "start": {"type": "number", "minimum": 0,
+                  "description": "Range start in seconds; must equal the first selected cue's start (with end)."},
+        "end": {"type": "number", "minimum": 0,
+                "description": "Range end in seconds; must equal the last selected cue's end (with start)."},
+        "excerpt_id": {"type": "string", "description": "A current excerpt id (instead of start/end)."},
+        "source_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+        "media_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+    },
+    "required": ["video_id"],
+    "additionalProperties": False,
+}
+EXPORT_CITED_RANGE_DESCRIPTION = (
+    "Read-only cited export of one stored transcript range (exact cue-aligned "
+    "start/end, at most 120 s and 200 cues) or one current excerpt id from a "
+    "saved item: verbatim stored text, per-cue speaker labels with provenance, "
+    "overlapping chapters, safe source and seek links, source/media revisions "
+    "and evidence refs. Nothing is fetched, transcribed or saved; refusals "
+    "carry a next_step."
+)
+
+
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
@@ -5016,6 +5058,18 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                       "description": "Client-reported usage, or null when unavailable (never zero)."},
         }, ["job_key", "input_hash", "input_packet", "submission_key", "document", "citations"]),
         handler=lambda args: _library_resources_call("publish_library_brief", args),
+    ),
+    # ---- Living Library Phase 6 cited export (run BC-2) ----
+    # Read only: creates no evidence basis, acquisition permission or save
+    # action. Strictness, the shared 2 s deadline/admission guard and every
+    # refusal envelope live in library_media.py; no registry rate limiter so
+    # a throttled caller still receives the contract's `rate_limited` envelope.
+    "export_cited_range": ToolSpec(
+        name="export_cited_range",
+        description=EXPORT_CITED_RANGE_DESCRIPTION,
+        input_schema=EXPORT_CITED_RANGE_SCHEMA,
+        handler=_library_media_export,
+        annotations={"readOnlyHint": True, "idempotentHint": True},
     ),
 }
 

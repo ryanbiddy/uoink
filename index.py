@@ -1824,22 +1824,104 @@ class Index:
                 # Clips are derived data; never let them block a citation
                 # write. --build-clips re-derives everything.
                 log.exception("clip build failed for %s", video_id)
+            except Exception:
+                # Phase 6 (BC-2): a current but unusable media snapshot is a
+                # refusal (library_media.MediaError), not a silent downgrade
+                # to unannotated clips. Nothing is committed, so the existing
+                # citations, snapshot and clips are preserved.
+                self._conn.rollback()
+                raise
             self._conn.commit()
         self._invalidate_library_sources([video_id])
         return len(rows)
 
-    def store_media_snapshot(self, video_id: str, cues: list[dict], block: dict) -> int:
-        """Phase 6 (phase6-v1): persist the validated media block's rows and
-        the annotated clip projection for ``video_id`` after its citations
-        were written. Returns the clip count. Raises
-        ``library_media.MediaError`` on a binding mismatch."""
+    # ---- Phase 6 media publication (phase6-v1, BC-2) ----------------------
+    def _invalidate_after_publication(self, video_id: str) -> None:
+        """Phase 2 invalidation as part of the publication operation: the
+        committed snapshot is durable and replayable, so a failure here is a
+        retryable ``library_unavailable`` rather than a silent log line."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            exists = self._conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='library_runs'").fetchone()
+            if not exists or not self._conn.execute("SELECT 1 FROM library_runs LIMIT 1").fetchone():
+                return
+        try:
+            from library_work import RequestContext
+            result = self.library_service().invalidate_source_items(
+                RequestContext(authenticated=True, operator=True), {"video_ids": [video_id]})
+        except _media.MediaError:
+            raise
+        except Exception as exc:
+            log.error("library source invalidation failed for %s: %s", video_id, type(exc).__name__)
+            raise _media.MediaError("library_unavailable", details={
+                "reason": "invalidation_failed", "next_step": "retry_publication"}) from exc
+        if not result.get("ok"):
+            log.error("library source invalidation failed: %s", result["error"]["code"])
+            raise _media.MediaError("library_unavailable", details={
+                "reason": "invalidation_failed", "service_error": result["error"]["code"],
+                "next_step": "retry_publication"})
+
+    def begin_media_publication(self, video_id: str, *, folder=None):
+        """Mint the publication ticket (ownership fence) a caller must carry
+        into ``publish_media_snapshot``. See library_media.begin_publication."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            return _media.begin_publication(self._conn, video_id, folder=folder)
+
+    def publish_media_snapshot(self, video_id: str, *, cues: list[dict], media_block: dict,
+                               artifacts: dict, ticket=None) -> dict:
+        """The complete publication operation: one coherent source/citation/
+        media/clip snapshot committed under the index lock through
+        ``library_media.publish_transcript`` (ownership fence, owned files,
+        DB rows, artifact retention), then Phase 2 invalidation. Raises
+        ``library_media.MediaError`` with a recoverable state on refusal."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            if self._conn.in_transaction:
+                raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
+            result = _media.publish_transcript(self._conn, video_id, cues=cues, media_block=media_block,
+                                               artifacts=artifacts, ticket=ticket)
+        self._invalidate_after_publication(video_id)
+        return result
+
+    def rebuild_media_item(self, video_id: str, *, sidecar: dict | None) -> dict:
+        """Reconstruction (or clip-only rebuild) as a complete operation:
+        ``library_media.rebuild_item`` under the index lock, then Phase 2
+        invalidation."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            if self._conn.in_transaction:
+                raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
+            result = _media.rebuild_item(self._conn, video_id, sidecar=sidecar)
+        self._invalidate_after_publication(video_id)
+        return result
+
+    def prune_media_artifacts(self, video_id: str) -> dict:
+        """Retry artifact retention cleanup for one item (never a read)."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
             row = self._conn.execute(
                 "SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
             if row is None:
                 raise _media.MediaError("resource_not_found")
-            return _media.store_snapshot(self._conn, dict(row), cues, block, commit=True)
+            return _media.prune_artifacts(self._conn, dict(row))
+
+    def store_media_snapshot(self, video_id: str, cues: list[dict], block: dict) -> int:
+        """Phase 6 (phase6-v1): persist the validated media block's rows and
+        the annotated clip projection for ``video_id`` after its citations
+        were written, then invalidate Phase 2 work. Returns the clip count.
+        Raises ``library_media.MediaError`` on a binding mismatch. Legacy
+        seam: production publication goes through ``publish_media_snapshot``."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+            if row is None:
+                raise _media.MediaError("resource_not_found")
+            count = _media.store_snapshot(self._conn, dict(row), cues, block, commit=True)
+        self._invalidate_after_publication(video_id)
+        return count
 
     def get_citations(self, video_id: str) -> list[dict]:
         """All citations for a video, ordered by kind then seq."""

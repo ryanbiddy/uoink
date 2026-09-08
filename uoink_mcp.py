@@ -539,6 +539,38 @@ def publish_library_brief(
     })
 
 
+# Phase 6 second increment (run BC-2): the cited export is a read on stored
+# cues only. Only the arguments the caller supplied are forwarded, so the
+# domain validator sees exactly the selector it was given (start/end or
+# excerpt_id, optional revision pins) and refuses anything else before any
+# storage access. Intercepted below like the Phase 4 tools.
+@mcp.tool(
+    name="export_cited_range",
+    description=(
+        "Read-only cited export of one stored transcript range (exact "
+        "cue-aligned start/end, at most 120 s and 200 cues) or one current "
+        "excerpt id from a saved item: verbatim stored text, per-cue speaker "
+        "labels with provenance, overlapping chapters, safe source and seek "
+        "links, source/media revisions and evidence refs. Nothing is fetched, "
+        "transcribed or saved; refusals carry a next_step."
+    ),
+)
+def export_cited_range(
+    video_id: str,
+    start: float | None = None,
+    end: float | None = None,
+    excerpt_id: str | None = None,
+    source_revision: str | None = None,
+    media_revision: str | None = None,
+):
+    args: dict = {"video_id": video_id}
+    for key, value in (("start", start), ("end", end), ("excerpt_id", excerpt_id),
+                       ("source_revision", source_revision), ("media_revision", media_revision)):
+        if value is not None:
+            args[key] = value
+    return uoink_mcp_tools.call_tool("export_cited_range", args)
+
+
 def _register_phase4_stdio() -> None:
     """Low-level resource, prompt and tool-execution handlers (see above).
     Any missing piece degrades to FastMCP's defaults with a stderr note
@@ -720,12 +752,36 @@ def _register_phase4_stdio() -> None:
             return mcp_types.ServerResult(mcp_types.CallToolResult(
                 content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
 
+    def media_export_result(arguments):
+        # Phase 6 (BC-2): the domain envelope is the tool text, isError
+        # mirrors ok, and the actual wrapped response is measured against
+        # the shared transport budget before it leaves the process. The
+        # registry handler already admitted the request on the process
+        # guard and charged its deadline; nothing is admitted twice here.
+        args = arguments if arguments is not None else {}
+        if not isinstance(args, dict):
+            args = {}
+        envelope = uoink_mcp_tools.call_tool("export_cited_range", args)
+        if not isinstance(envelope, dict) or "ok" not in envelope:
+            envelope = ResourceError("internal_error").envelope()
+        text = library_resources.render_tool_text(envelope)
+        is_error = envelope.get("ok") is not True
+        payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
+        if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
+            envelope = ResourceError("resource_too_large", details={
+                "what": "export_cited_range", "next_step": "read_library_resource"}).envelope()
+            text, is_error = library_resources.render_tool_text(envelope), True
+        return mcp_types.ServerResult(mcp_types.CallToolResult(
+            content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+
     if fastmcp_call_tool is not None:
         async def _phase4_call_tool(req):
             if req.params.name in library_resources.TOOL_NAMES:
                 return tool_result(req.params.name, req.params.arguments)
             if req.params.name == "get_library_activity":
                 return activity_result(req.params.arguments)
+            if req.params.name == "export_cited_range":
+                return media_export_result(req.params.arguments)
             return await fastmcp_call_tool(req)
         handlers[mcp_types.CallToolRequest] = _phase4_call_tool
 
@@ -738,9 +794,9 @@ def _register_phase4_stdio() -> None:
                         # Same strict schema and text as the HTTP registry.
                         tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
                         tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
-                    if tool.name == "get_library_activity":
-                        if "get_library_activity" in uoink_mcp_tools.TOOL_REGISTRY:
-                            reg_spec = uoink_mcp_tools.TOOL_REGISTRY["get_library_activity"]
+                    if tool.name in ("get_library_activity", "export_cited_range"):
+                        if tool.name in uoink_mcp_tools.TOOL_REGISTRY:
+                            reg_spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
                             tool.inputSchema = reg_spec.input_schema
                             tool.description = reg_spec.description
                         tool.annotations = mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True)
