@@ -4369,6 +4369,11 @@
                     <tbody id="activityHintsBody"></tbody>
                   </table>
                 </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityHintsPrevBtn" disabled>Previous</button>
+                  <span id="activityHintsPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityHintsNextBtn" disabled>Next</button>
+                </div>
               </details>
 
               <details class="activity-sub-card" id="activityShelvesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
@@ -4390,6 +4395,11 @@
                     <tbody id="activityShelvesBody"></tbody>
                   </table>
                 </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityShelvesPrevBtn" disabled>Previous</button>
+                  <span id="activityShelvesPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityShelvesNextBtn" disabled>Next</button>
+                </div>
               </details>
 
               <details class="activity-sub-card" id="activitySourcesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
@@ -4408,10 +4418,15 @@
                     <tbody id="activitySourcesBody"></tbody>
                   </table>
                 </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activitySourcesPrevBtn" disabled>Previous</button>
+                  <span id="activitySourcesPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activitySourcesNextBtn" disabled>Next</button>
+                </div>
               </details>
 
               <details class="activity-sub-card" id="activityEventsCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Combined Events (<span id="activityEventsCount">0</span> events)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Combined Events (<button class="link-button activity-evidence-trigger" type="button" id="activityEventsCount" data-metric-id="events.total" style="background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button> events)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
                   <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Combined events table">
                     <thead>
@@ -4425,11 +4440,16 @@
                     <tbody id="activityEventsBody"></tbody>
                   </table>
                 </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityEventsPrevBtn" disabled>Previous</button>
+                  <span id="activityEventsPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityEventsNextBtn" disabled>Next</button>
+                </div>
               </details>
             </div>
 
             <!-- Evidence Modal -->
-            <div class="activity-evidence-modal hidden" id="activityEvidenceModal" role="dialog" aria-modal="true" aria-label="Metric Evidence" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;">
+            <div class="activity-evidence-modal hidden" id="activityEvidenceModal" role="dialog" aria-modal="true" aria-label="Metric Evidence" tabindex="-1" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;">
               <div class="modal-content" style="background:var(--bg-main, #181818);border:1px solid #444;border-radius:8px;width:90%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;padding:16px;">
                 <div class="inline-row" style="justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:8px;">
                   <h3 style="margin:0;font-size:1.1rem;" id="evidenceModalTitle">Evidence: <span id="evidenceMetricIdLabel"></span></h3>
@@ -7033,15 +7053,18 @@
       evidenceLimit: 20,
       evidenceRows: [],
       evidenceTotal: 0,
+      collectionOffsets: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
+      collectionTotals: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
     };
 
     let libraryActivityTimer = null;
+    let activityEvidenceFocusRestore = null;
 
     function getRollingUtcInterval(days) {
       const now = new Date();
-      const end = now.toISOString().replace(/Z$/, ".000Z");
+      const end = now.toISOString();
       const startDate = new Date(now.getTime() - days * 86400000);
-      const start = startDate.toISOString().replace(/Z$/, ".000Z");
+      const start = startDate.toISOString();
       return { start, end };
     }
 
@@ -7066,27 +7089,186 @@
       return null;
     }
 
+    function activityScalar(value) {
+      if (value == null) return null;
+      if (typeof value === "object" && "value" in value) {
+        return value.value == null ? null : value.value;
+      }
+      return value;
+    }
+
+    function formatActivityCount(value) {
+      const n = activityScalar(value);
+      return n == null ? "Unavailable" : String(n);
+    }
+
+    function activityMetricId(metric, fallback) {
+      if (metric && typeof metric === "object" && metric.metric_id) return metric.metric_id;
+      return fallback || "";
+    }
+
+    function activityEvidenceButton(label, metricId) {
+      const text = escapeHtmlActivity(label);
+      if (!metricId) return text;
+      return `<button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(metricId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${text}</button>`;
+    }
+
+    function disableEvidencePaging() {
+      const prevBtn = document.getElementById("evidencePrevPageBtn");
+      const nextBtn = document.getElementById("evidenceNextPageBtn");
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+    }
+
+    function disableCollectionPagers() {
+      ["activityHints", "activityShelves", "activitySources", "activityEvents"].forEach((prefix) => {
+        const prev = document.getElementById(prefix + "PrevBtn");
+        const next = document.getElementById(prefix + "NextBtn");
+        if (prev) prev.disabled = true;
+        if (next) next.disabled = true;
+      });
+    }
+
+    function invalidateActivityEvidence() {
+      libraryActivityState.evidenceMetricId = null;
+      libraryActivityState.evidenceOffset = 0;
+      libraryActivityState.evidenceRows = [];
+      libraryActivityState.evidenceTotal = 0;
+      libraryActivityState.collectionOffsets = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
+      disableEvidencePaging();
+      disableCollectionPagers();
+    }
+
+    function activityEvidenceCallable() {
+      return Boolean(
+        libraryActivityState.packet &&
+        libraryActivityState.packet.report_revision &&
+        !libraryActivityState.stale &&
+        !libraryActivityState.error
+      );
+    }
+
+    function libraryActivitySummaryArgs() {
+      const interval = libraryActivityState.interval || (libraryActivityState.packet && libraryActivityState.packet.interval);
+      return {
+        interval,
+        date_basis: libraryActivityState.date_basis,
+      };
+    }
+
+    function applyLibraryActivityFailure(errCode, errMsg) {
+      libraryActivityState.error = { code: errCode, message: errMsg };
+      libraryActivityState.stale = true;
+      invalidateActivityEvidence();
+      renderLibraryActivityError();
+    }
+
+    async function refreshLibraryActivitySummary() {
+      const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      if (res && res.ok) {
+        libraryActivityState.packet = res;
+        libraryActivityState.stale = false;
+        libraryActivityState.error = null;
+        renderLibraryActivityUI();
+        disableEvidencePaging();
+        return res;
+      }
+      const errCode = (res && res.error && res.error.code) || "error";
+      const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+      applyLibraryActivityFailure(errCode, errMsg);
+      return res;
+    }
+
+    function markLibraryActivityMutated() {
+      libraryActivityState.stale = true;
+      invalidateActivityEvidence();
+      updateLibraryActivityBadge("Stale - Refresh", false, true);
+      loadLibraryActivity(true);
+    }
+
+    function captureActivityEvidenceFocus() {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (!modal) return;
+      const alreadyOpen = modal.classList && typeof modal.classList.contains === "function" && !modal.classList.contains("hidden");
+      if (!alreadyOpen) {
+        activityEvidenceFocusRestore = document.activeElement;
+      }
+      if (modal.classList && typeof modal.classList.remove === "function") {
+        modal.classList.remove("hidden");
+      }
+    }
+
+    function focusActivityEvidenceModal() {
+      const closeBtn = document.getElementById("closeEvidenceBtn");
+      if (closeBtn && typeof closeBtn.focus === "function") {
+        closeBtn.focus();
+        return;
+      }
+      const container = document.getElementById("evidenceRowsContainer");
+      if (container && typeof container.focus === "function") container.focus();
+    }
+
+    function closeActivityEvidenceModal() {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (modal && modal.classList && typeof modal.classList.add === "function") {
+        modal.classList.add("hidden");
+      }
+      const restore = activityEvidenceFocusRestore;
+      activityEvidenceFocusRestore = null;
+      if (restore && typeof restore.focus === "function") restore.focus();
+    }
+
+    function activityEvidenceFocusables() {
+      return ["closeEvidenceBtn", "evidenceRowsContainer", "evidencePrevPageBtn", "evidenceNextPageBtn"]
+        .map((id) => document.getElementById(id))
+        .filter((el) => el && !el.disabled);
+    }
+
+    function trapActivityEvidenceKeys(event) {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (!modal || !modal.classList || modal.classList.contains("hidden")) return;
+      if (event.key === "Escape") {
+        if (event.preventDefault) event.preventDefault();
+        closeActivityEvidenceModal();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusables = activityEvidenceFocusables();
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        if (event.preventDefault) event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        if (event.preventDefault) event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function libraryActivityPanelVisible() {
+      if (document.hidden) return false;
+      const panel = document.getElementById("tab-library");
+      if (!panel || !panel.classList) return true;
+      return panel.classList.contains("active");
+    }
+
     async function loadLibraryActivity(force = false) {
       const panel = document.getElementById("libraryActivityPanel");
       if (!panel) return;
+      if (!force && document.hidden) return;
 
-      if (!libraryActivityState.interval || force) {
-        if (libraryActivityState.days) {
-          libraryActivityState.interval = getRollingUtcInterval(libraryActivityState.days);
-        }
+      if (libraryActivityState.days) {
+        libraryActivityState.interval = getRollingUtcInterval(libraryActivityState.days);
       }
 
+      invalidateActivityEvidence();
       libraryActivityState.loading = true;
       libraryActivityState.error = null;
       updateLibraryActivityBadge("Loading...");
 
-      const args = {
-        interval: libraryActivityState.interval,
-        date_basis: libraryActivityState.date_basis,
-      };
-
       try {
-        const res = await callRegistryTool("get_library_activity", args);
+        const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
         if (res && res.ok) {
           libraryActivityState.packet = res;
           libraryActivityState.stale = false;
@@ -7094,12 +7276,10 @@
         } else {
           const errCode = (res && res.error && res.error.code) || "error";
           const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
-          libraryActivityState.error = { code: errCode, message: errMsg };
-          renderLibraryActivityError();
+          applyLibraryActivityFailure(errCode, errMsg);
         }
       } catch (err) {
-        libraryActivityState.error = { code: "storage_unavailable", message: err.message || "Failed to reach reader" };
-        renderLibraryActivityError();
+        applyLibraryActivityFailure("storage_unavailable", err.message || "Failed to reach reader");
       } finally {
         libraryActivityState.loading = false;
       }
@@ -7134,7 +7314,8 @@
       if (churn) churn.textContent = "Unavailable";
 
       const statusEl = document.getElementById("activityCoverageStatus");
-      if (statusEl) statusEl.textContent = `Unavailable (${err.message})`;
+      if (statusEl) statusEl.textContent = `Unavailable (${err.message || "unknown"})`;
+      disableEvidencePaging();
     }
 
     function renderLibraryActivityUI() {
@@ -7158,9 +7339,13 @@
       }
       const exclEl = document.getElementById("activityExclusions");
       if (exclEl && p.items) {
-        const unavail = p.items.capture_time_unavailable || 0;
-        const excluded = p.items.deleted_items_excluded || 0;
-        exclEl.textContent = `${unavail} unavail, ${excluded} tombstones excluded`;
+        const unavailRaw = p.items.capture_time_unavailable;
+        const excludedRaw = p.items.deleted_items_excluded;
+        const unavail = unavailRaw === undefined ? 0 : activityScalar(unavailRaw);
+        const excluded = excludedRaw === undefined ? 0 : activityScalar(excludedRaw);
+        const unavailText = unavail == null ? "Unavailable" : String(unavail);
+        const excludedText = excluded == null ? "Unavailable" : String(excluded);
+        exclEl.textContent = `${unavailText} unavail, ${excludedText} tombstones excluded`;
       }
 
       // Warnings
@@ -7176,13 +7361,25 @@
 
       // Stat Cards
       const totalItems = document.getElementById("activityTotalItems");
-      if (totalItems) totalItems.textContent = String(p.items?.total?.value ?? 0);
+      if (totalItems) {
+        totalItems.textContent = formatActivityCount(p.items && p.items.total);
+        const totalId = activityMetricId(p.items && p.items.total, "items.total");
+        if (totalItems.dataset) totalItems.dataset.metricId = totalId;
+      }
 
       const assignedItems = document.getElementById("activityAssignedItems");
-      if (assignedItems) assignedItems.textContent = String(p.shelf_activity?.current_assigned_items?.value ?? 0);
+      if (assignedItems) {
+        assignedItems.textContent = formatActivityCount(p.shelf_activity && p.shelf_activity.current_assigned_items);
+        const assignedId = activityMetricId(p.shelf_activity && p.shelf_activity.current_assigned_items, "shelf_activity.current_assigned_items");
+        if (assignedItems.dataset) assignedItems.dataset.metricId = assignedId;
+      }
 
       const appliedOps = document.getElementById("activityAppliedOps");
-      if (appliedOps) appliedOps.textContent = String(p.shelf_activity?.applied_operations?.value ?? 0);
+      if (appliedOps) {
+        appliedOps.textContent = formatActivityCount(p.shelf_activity && p.shelf_activity.applied_operations);
+        const opsId = activityMetricId(p.shelf_activity && p.shelf_activity.applied_operations, "shelf_activity.applied_operations");
+        if (appliedOps.dataset) appliedOps.dataset.metricId = opsId;
+      }
 
       const churnEl = document.getElementById("activityChurn");
       const churnSub = document.getElementById("activityChurnSub");
@@ -7197,115 +7394,179 @@
         }
       }
 
-      // Daily Table
+      renderActivityDaily(p.items && p.items.daily_buckets);
+      renderActivityHints((p.items && p.items.by_creator_hint) || []);
+      renderActivityShelves((p.shelf_activity && p.shelf_activity.shelves) || []);
+      renderActivitySources((p.sources && p.sources.details) || []);
+      renderActivityEvents((p.events && p.events.rows) || [], p.events && p.events.total);
+
+      const pag = p.pagination || {};
+      seedCollectionPager("creator_hints", (p.items && p.items.by_creator_hint) || [], pag.creator_hints);
+      seedCollectionPager("shelves", (p.shelf_activity && p.shelf_activity.shelves) || [], pag.shelves);
+      seedCollectionPager("sources", (p.sources && p.sources.details) || [], pag.sources);
+      seedCollectionPager("events", (p.events && p.events.rows) || [], pag.events || p.events);
+    }
+
+    function seedCollectionPager(kind, rows, pageMeta) {
+      const offset = (pageMeta && pageMeta.offset) || 0;
+      const total = (pageMeta && pageMeta.total_rows != null)
+        ? pageMeta.total_rows
+        : (activityScalar(pageMeta && pageMeta.total) != null ? activityScalar(pageMeta.total) : (rows ? rows.length : 0));
+      libraryActivityState.collectionOffsets[kind] = offset;
+      libraryActivityState.collectionTotals[kind] = total || 0;
+      updateCollectionPager(kind, offset, total || 0);
+    }
+
+    function updateCollectionPager(kind, offset, total) {
+      const prefix = {
+        creator_hints: "activityHints",
+        shelves: "activityShelves",
+        sources: "activitySources",
+        events: "activityEvents",
+      }[kind];
+      if (!prefix) return;
+      const prev = document.getElementById(prefix + "PrevBtn");
+      const next = document.getElementById(prefix + "NextBtn");
+      const info = document.getElementById(prefix + "PageInfo");
+      const limit = libraryActivityState.evidenceLimit;
+      const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
+      const curPage = Math.floor((offset || 0) / limit) + 1;
+      if (info) info.textContent = `Page ${curPage} of ${totalPages}`;
+      if (prev) prev.disabled = !offset;
+      if (next) next.disabled = (offset || 0) + limit >= (total || 0);
+    }
+
+    function renderActivityDaily(buckets) {
       const dailyBody = document.getElementById("activityDailyBody");
       const dailyCount = document.getElementById("activityDailyCount");
-      if (dailyBody && p.items?.daily_buckets) {
-        dailyCount.textContent = String(p.items.daily_buckets.length);
-        dailyBody.innerHTML = p.items.daily_buckets.map((b) => {
-          const s = b.bucket_start.split("T")[0];
-          const cnt = b.count?.value ?? 0;
-          const pct = b.share?.percent != null ? `${b.share.percent}%` : "-";
-          const mId = b.count?.metric_id || "";
-          return `<tr style="border-bottom:1px solid #282828;">
+      if (!dailyBody) return;
+      const rows = buckets || [];
+      if (dailyCount) dailyCount.textContent = String(rows.length);
+      dailyBody.innerHTML = rows.map((b) => {
+        const s = (b.bucket_start || "").split("T")[0];
+        const cnt = formatActivityCount(b.count);
+        const pct = b.share && b.share.percent != null ? `${b.share.percent}%` : "-";
+        const mId = activityMetricId(b.count, "");
+        return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(s)}</td>
-            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cnt}</button></td>
-            <td style="padding:4px 8px;">${pct}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(pct)}</td>
           </tr>`;
-        }).join("");
-      }
+      }).join("");
+    }
 
-      // Creator Hints Table
+    function renderActivityHints(rows) {
       const hintsBody = document.getElementById("activityHintsBody");
       const hintsCount = document.getElementById("activityHintsCount");
-      if (hintsBody && p.items?.by_creator_hint) {
-        hintsCount.textContent = String(p.items.by_creator_hint.length);
-        hintsBody.innerHTML = p.items.by_creator_hint.map((h) => {
-          const cnt = h.count?.value ?? 0;
-          const pct = h.share?.percent != null ? `${h.share.percent}%` : "-";
-          const mId = h.count?.metric_id || "";
-          return `<tr style="border-bottom:1px solid #282828;">
+      if (!hintsBody) return;
+      const list = rows || [];
+      if (hintsCount) hintsCount.textContent = String(list.length);
+      hintsBody.innerHTML = list.map((h) => {
+        const cnt = formatActivityCount(h.count);
+        const pct = h.share && h.share.percent != null ? `${h.share.percent}%` : "-";
+        const mId = activityMetricId(h.count, "");
+        return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.platform)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.field)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.hint)}</td>
-            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cnt}</button></td>
-            <td style="padding:4px 8px;">${pct}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(pct)}</td>
           </tr>`;
-        }).join("");
-      }
+      }).join("");
+    }
 
-      // Shelves Table
+    function signedActivityDelta(value, sign) {
+      const n = activityScalar(value);
+      if (n == null) return "Unavailable";
+      if (sign === "+") return n >= 0 ? `+${n}` : String(n);
+      if (sign === "-") return n > 0 ? `-${n}` : String(n);
+      return n >= 0 ? `+${n}` : String(n);
+    }
+
+    function renderActivityShelves(rows) {
       const shelvesBody = document.getElementById("activityShelvesBody");
       const shelvesCount = document.getElementById("activityShelvesCount");
-      if (shelvesBody && p.shelf_activity?.shelves) {
-        shelvesCount.textContent = String(p.shelf_activity.shelves.length);
-        shelvesBody.innerHTML = p.shelf_activity.shelves.map((s) => {
-          const cSize = s.current_size?.value ?? 0;
-          const sStart = s.start_size ? String(s.start_size.value) : "Unavailable";
-          const sEnd = s.end_size ? String(s.end_size.value) : "Unavailable";
-          const chPct = s.churn?.percent != null ? `${s.churn.percent}%` : (s.churn?.reason || "Unavailable");
-          const mId = s.current_size?.metric_id || "";
-          return `<tr style="border-bottom:1px solid #282828;">
+      if (!shelvesBody) return;
+      const list = rows || [];
+      if (shelvesCount) shelvesCount.textContent = String(list.length);
+      shelvesBody.innerHTML = list.map((s) => {
+        const cSize = formatActivityCount(s.current_size);
+        const sStart = formatActivityCount(s.start_size);
+        const sEnd = formatActivityCount(s.end_size);
+        const chPct = s.churn && s.churn.percent != null ? `${s.churn.percent}%` : ((s.churn && s.churn.reason) || "Unavailable");
+        const mId = activityMetricId(s.current_size, "");
+        const addedId = activityMetricId(s.added, "");
+        const removedId = activityMetricId(s.removed, "");
+        const netId = activityMetricId(s.net, "");
+        return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(s.shelf_id)}</td>
-            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cSize}</button></td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cSize, mId)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(sStart)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(sEnd)}</td>
-            <td style="padding:4px 8px;">+${s.added}</td>
-            <td style="padding:4px 8px;">-${s.removed}</td>
-            <td style="padding:4px 8px;">${s.net >= 0 ? "+" + s.net : s.net}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.added, "+"), addedId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.removed, "-"), removedId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.net, "+"), netId)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(chPct)}</td>
           </tr>`;
-        }).join("");
-      }
+      }).join("");
+    }
 
-      // Sources Table
+    function renderActivitySources(rows) {
       const sourcesBody = document.getElementById("activitySourcesBody");
       const sourcesCount = document.getElementById("activitySourcesCount");
-      if (sourcesBody && p.sources?.details) {
-        sourcesCount.textContent = String(p.sources.details.length);
-        sourcesBody.innerHTML = p.sources.details.map((src) => {
-          const caps = src.captures_in_interval?.value ?? 0;
-          const newObs = src.new_observations?.value ?? 0;
-          const w = src.observation_window || {};
-          const safeUrl = sanitizeHttpUrl(src.canonical_url);
-          const nameLink = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
-          const mId = src.captures_in_interval?.metric_id || "";
-          return `<tr style="border-bottom:1px solid #282828;">
+      if (!sourcesBody) return;
+      const list = rows || [];
+      if (sourcesCount) sourcesCount.textContent = String(list.length);
+      sourcesBody.innerHTML = list.map((src) => {
+        const caps = formatActivityCount(src.captures_in_interval);
+        const newObs = formatActivityCount(src.new_observations);
+        const w = src.observation_window || {};
+        const safeUrl = sanitizeHttpUrl(src.canonical_url);
+        const nameLink = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
+        const capId = activityMetricId(src.captures_in_interval, "");
+        const obsId = activityMetricId(src.new_observations, "");
+        return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${nameLink}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(src.kind)}</td>
-            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${caps}</button></td>
-            <td style="padding:4px 8px;">${newObs}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(caps, capId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(newObs, obsId)}</td>
             <td style="padding:4px 8px;font-size:0.75rem;">${escapeHtmlActivity(w.first_observed_at || "None")} to ${escapeHtmlActivity(w.last_item_seen_at || "None")}</td>
           </tr>`;
-        }).join("");
-      }
+      }).join("");
+    }
 
-      // Events Table
+    function renderActivityEvents(rows, total) {
       const eventsBody = document.getElementById("activityEventsBody");
       const eventsCount = document.getElementById("activityEventsCount");
-      if (eventsBody && p.events?.rows) {
-        eventsCount.textContent = String(p.events.total ?? 0);
-        eventsBody.innerHTML = p.events.rows.map((ev) => {
-          const d = ev.details || {};
-          const dText = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(", ");
-          return `<tr style="border-bottom:1px solid #282828;">
+      if (!eventsBody) return;
+      const list = rows || [];
+      if (eventsCount) {
+        eventsCount.textContent = formatActivityCount(total != null ? total : list.length);
+        const evId = activityMetricId(total, "events.total");
+        if (eventsCount.dataset) eventsCount.dataset.metricId = evId;
+      }
+      eventsBody.innerHTML = list.map((ev) => {
+        const d = ev.details || {};
+        const dText = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(", ");
+        return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(ev.time)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(ev.kind)}</td>
             <td style="padding:4px 8px;font-family:monospace;font-size:0.8rem;">${escapeHtmlActivity(ev.event_id)}</td>
             <td style="padding:4px 8px;font-size:0.8rem;">${escapeHtmlActivity(dText)}</td>
           </tr>`;
-        }).join("");
-      }
+      }).join("");
     }
 
     async function fetchActivityEvidence(metricId, offset = 0) {
-      const p = libraryActivityState.packet;
-      if (!p || !p.report_revision) return;
+      if (!activityEvidenceCallable()) {
+        disableEvidencePaging();
+        return;
+      }
 
+      const p = libraryActivityState.packet;
       libraryActivityState.evidenceMetricId = metricId;
       libraryActivityState.evidenceOffset = offset;
 
-      const modal = document.getElementById("activityEvidenceModal");
       const titleLabel = document.getElementById("evidenceMetricIdLabel");
       const container = document.getElementById("evidenceRowsContainer");
       const scopeInfo = document.getElementById("evidenceScopeInfo");
@@ -7313,9 +7574,11 @@
       const prevBtn = document.getElementById("evidencePrevPageBtn");
       const nextBtn = document.getElementById("evidenceNextPageBtn");
 
-      if (modal) modal.classList.remove("hidden");
+      captureActivityEvidenceFocus();
       if (titleLabel) titleLabel.textContent = metricId;
       if (container) container.innerHTML = `<div style="padding:16px;text-align:center;">Loading evidence...</div>`;
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
 
       const args = {
         interval: p.interval,
@@ -7329,28 +7592,77 @@
 
       try {
         const res = await callRegistryTool("get_library_activity", args);
-        if (res && res.ok && res.rows) {
-          libraryActivityState.evidenceRows = res.rows;
+        if (res && res.ok) {
+          const rows = Array.isArray(res.rows) ? res.rows : [];
+          libraryActivityState.evidenceRows = rows;
           libraryActivityState.evidenceTotal = res.total_rows || 0;
           if (scopeInfo) {
-            scopeInfo.textContent = `Revision: ${res.report_revision.slice(0, 16)}... | Total evidence rows: ${res.total_rows}`;
+            const rev = res.report_revision ? String(res.report_revision).slice(0, 16) : "";
+            scopeInfo.textContent = `Revision: ${rev}... | Total evidence rows: ${res.total_rows || 0}`;
           }
           renderEvidenceRows(container);
 
           const curPage = Math.floor(offset / libraryActivityState.evidenceLimit) + 1;
-          const totalPages = Math.ceil((res.total_rows || 1) / libraryActivityState.evidenceLimit);
+          const totalPages = Math.max(1, Math.ceil((res.total_rows || 0) / libraryActivityState.evidenceLimit));
           if (pageInfo) pageInfo.textContent = `Page ${curPage} of ${totalPages}`;
           if (prevBtn) prevBtn.disabled = offset === 0;
-          if (nextBtn) nextBtn.disabled = offset + res.rows.length >= res.total_rows;
+          if (nextBtn) nextBtn.disabled = offset + rows.length >= (res.total_rows || 0);
         } else if (res && res.error && res.error.code === "stale_report") {
           libraryActivityState.stale = true;
+          invalidateActivityEvidence();
           updateLibraryActivityBadge("Stale - Refresh", false, true);
-          if (container) container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. Please refresh the library summary before paging evidence.</div>`;
+          if (container) {
+            container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. A new summary is loading; old evidence pages are disabled.</div>`;
+          }
+          disableEvidencePaging();
+          await refreshLibraryActivitySummary();
+          disableEvidencePaging();
         } else {
-          if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${(res && res.error && res.error.message) || "unknown"}</div>`;
+          const msg = escapeHtmlActivity((res && res.error && res.error.message) || "unknown");
+          if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${msg}</div>`;
+          disableEvidencePaging();
         }
       } catch (err) {
         if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Error loading evidence: ${escapeHtmlActivity(err.message)}</div>`;
+        disableEvidencePaging();
+      }
+      focusActivityEvidenceModal();
+    }
+
+    async function fetchActivityCollection(detail, offset) {
+      if (!activityEvidenceCallable()) {
+        disableCollectionPagers();
+        return;
+      }
+      const p = libraryActivityState.packet;
+      const args = {
+        interval: p.interval,
+        date_basis: libraryActivityState.date_basis,
+        detail,
+        expected_revision: p.report_revision,
+        offset,
+        limit: libraryActivityState.evidenceLimit,
+      };
+      try {
+        const res = await callRegistryTool("get_library_activity", args);
+        if (res && res.ok) {
+          const rows = Array.isArray(res.rows) ? res.rows : [];
+          const total = res.total_rows || 0;
+          libraryActivityState.collectionOffsets[detail] = offset;
+          libraryActivityState.collectionTotals[detail] = total;
+          if (detail === "creator_hints") renderActivityHints(rows);
+          else if (detail === "shelves") renderActivityShelves(rows);
+          else if (detail === "sources") renderActivitySources(rows);
+          else if (detail === "events") renderActivityEvents(rows, total);
+          updateCollectionPager(detail, offset, total);
+        } else if (res && res.error && res.error.code === "stale_report") {
+          libraryActivityState.stale = true;
+          invalidateActivityEvidence();
+          updateLibraryActivityBadge("Stale - Refresh", false, true);
+          await refreshLibraryActivitySummary();
+        }
+      } catch (err) {
+        disableCollectionPagers();
       }
     }
 
@@ -7379,9 +7691,9 @@
 
     function startLibraryActivityTimer() {
       stopLibraryActivityTimer();
+      if (document.hidden) return;
       libraryActivityTimer = setInterval(() => {
-        const panel = document.getElementById("tab-library");
-        if (panel && panel.classList.contains("active") && !document.hidden) {
+        if (libraryActivityPanelVisible()) {
           loadLibraryActivity(false);
         }
       }, 60000);
@@ -7391,6 +7703,26 @@
       if (libraryActivityTimer) {
         clearInterval(libraryActivityTimer);
         libraryActivityTimer = null;
+      }
+    }
+
+    function wireActivityCollectionPager(kind, prefix) {
+      const prev = document.getElementById(prefix + "PrevBtn");
+      const next = document.getElementById(prefix + "NextBtn");
+      if (prev) {
+        prev.addEventListener("click", () => {
+          const off = libraryActivityState.collectionOffsets[kind] || 0;
+          const nextOff = Math.max(0, off - libraryActivityState.evidenceLimit);
+          if (nextOff !== off) fetchActivityCollection(kind, nextOff);
+        });
+      }
+      if (next) {
+        next.addEventListener("click", () => {
+          const off = libraryActivityState.collectionOffsets[kind] || 0;
+          const total = libraryActivityState.collectionTotals[kind] || 0;
+          const nextOff = off + libraryActivityState.evidenceLimit;
+          if (nextOff < total) fetchActivityCollection(kind, nextOff);
+        });
       }
     }
 
@@ -7476,16 +7808,14 @@
 
       const closeEvBtn = document.getElementById("closeEvidenceBtn");
       if (closeEvBtn) {
-        closeEvBtn.addEventListener("click", () => {
-          const modal = document.getElementById("activityEvidenceModal");
-          if (modal) modal.classList.add("hidden");
-        });
+        closeEvBtn.addEventListener("click", () => closeActivityEvidenceModal());
       }
 
       const prevEvBtn = document.getElementById("evidencePrevPageBtn");
       if (prevEvBtn) {
         prevEvBtn.addEventListener("click", () => {
-          if (libraryActivityState.evidenceMetricId && libraryActivityState.evidenceOffset > 0) {
+          if (!activityEvidenceCallable() || !libraryActivityState.evidenceMetricId) return;
+          if (libraryActivityState.evidenceOffset > 0) {
             const nextOff = Math.max(0, libraryActivityState.evidenceOffset - libraryActivityState.evidenceLimit);
             fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
           }
@@ -7495,40 +7825,37 @@
       const nextEvBtn = document.getElementById("evidenceNextPageBtn");
       if (nextEvBtn) {
         nextEvBtn.addEventListener("click", () => {
-          if (libraryActivityState.evidenceMetricId) {
-            const nextOff = libraryActivityState.evidenceOffset + libraryActivityState.evidenceLimit;
-            if (nextOff < libraryActivityState.evidenceTotal) {
-              fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
-            }
+          if (!activityEvidenceCallable() || !libraryActivityState.evidenceMetricId) return;
+          const nextOff = libraryActivityState.evidenceOffset + libraryActivityState.evidenceLimit;
+          if (nextOff < libraryActivityState.evidenceTotal) {
+            fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
           }
         });
       }
 
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          const modal = document.getElementById("activityEvidenceModal");
-          if (modal && !modal.classList.contains("hidden")) {
-            modal.classList.add("hidden");
-          }
-        }
-      });
+      wireActivityCollectionPager("creator_hints", "activityHints");
+      wireActivityCollectionPager("shelves", "activityShelves");
+      wireActivityCollectionPager("sources", "activitySources");
+      wireActivityCollectionPager("events", "activityEvents");
+
+      window.addEventListener("keydown", (e) => trapActivityEvidenceKeys(e));
 
       window.addEventListener("focus", () => {
-        const panel = document.getElementById("tab-library");
-        if (panel && panel.classList.contains("active")) {
+        if (libraryActivityPanelVisible()) {
           loadLibraryActivity(false);
         }
       });
 
       document.addEventListener("visibilitychange", () => {
-        const panel = document.getElementById("tab-library");
         if (document.hidden) {
           stopLibraryActivityTimer();
-        } else if (panel && panel.classList.contains("active")) {
+        } else if (libraryActivityPanelVisible()) {
           loadLibraryActivity(false);
           startLibraryActivityTimer();
         }
       });
+
+      window.addEventListener("library-activity-mutation", () => markLibraryActivityMutated());
     }
 
     async function loadStandingSubscriptions() {
