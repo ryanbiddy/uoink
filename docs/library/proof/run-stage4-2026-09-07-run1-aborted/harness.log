@@ -1,0 +1,120 @@
+whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+2026-09-07 22:45:28,466 INFO migration[run]: no_legacy -- E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-07-2bc31bd0\local\Yoink does not exist
+2026-09-07 22:45:28,466 INFO migration[run]: legacy_run_key -- skipped: dev layout
+2026-09-07 22:45:28,466 INFO install migration: no_legacy
+2026-09-07 22:45:28,502 INFO sources: imported 3 feed(s) and 0 playlist(s); 0 conflict(s)
+2026-09-07 22:45:28,822 INFO Restored 212 job record(s) from the library index
+2026-09-07 22:45:28,823 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-07 22:45:28,828 INFO Uoink server v3.8.0 running on http://127.0.0.1:5180
+2026-09-07 22:45:28,829 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-07 22:45:28,829 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-07-2bc31bd0\output
+2026-09-07 22:45:28,829 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\server.log
+2026-09-07 22:45:29,065 INFO GET /health from 127.0.0.1 -> ok
+[proof] model call done: call-0001-563a62 in 48908 ms, exit 0, stdout 8446 B
+[proof] model call done: call-0001-c55208 in 103071 ms, exit 0, stdout 8951 B
+[proof] model call done: call-0001-4bd98e in 108319 ms, exit 0, stdout 9274 B
+[proof] model call done: call-0001-00a0f4 in 116900 ms, exit 0, stdout 10610 B
+[proof] model call done: call-0002-4b8ac7 in 101811 ms, exit 0, stdout 9956 B
+[proof] model call done: call-0004-bad489 in 101941 ms, exit 0, stdout 9563 B
+[proof] model call done: call-0003-f19647 in 117857 ms, exit 0, stdout 10119 B
+[proof] model call done: call-0005-9799f5 in 114079 ms, exit 0, stdout 10366 B
+[proof] model call done: call-0008-c625ea in 98217 ms, exit 0, stdout 9646 B
+[proof] model call done: call-0006-6ea87c in 189945 ms, exit 0, stdout 10704 B
+[proof] model call done: call-0007-f94ca1 in 138125 ms, exit 0, stdout 11171 B
+[proof] model call done: call-0009-eff584 in 159103 ms, exit 0, stdout 11490 B
+[proof] model call done: call-0013-3bc3c9 in 103571 ms, exit 0, stdout 11416 B
+[proof] model call done: call-0010-81c691 in 177406 ms, exit 0, stdout 12869 B
+[proof] model call done: call-0011-a237c3 in 182921 ms, exit 0, stdout 12468 B
+[proof] model call done: call-0012-8d26a8 in 179670 ms, exit 0, stdout 11300 B
+[proof] model call done: call-0015-5ebe77 in 124437 ms, exit 0, stdout 10492 B
+[proof] model call done: call-0014-d9b59e in 136969 ms, exit 0, stdout 10445 B
+[proof] model call done: call-0016-768865 in 142796 ms, exit 0, stdout 11271 B
+[proof] model call done: call-0017-266ac3 in 149096 ms, exit 0, stdout 10556 B
+[proof] model call done: call-0018-2af86b in 129656 ms, exit 0, stdout 11765 B
+[proof] model call done: call-0019-6e7f54 in 143732 ms, exit 0, stdout 12178 B
+[proof] model call done: call-0021-da24fc in 119756 ms, exit 0, stdout 11504 B
+[proof] model call done: call-0020-29b7db in 133496 ms, exit 0, stdout 13104 B
+[proof] model call done: call-0022-694bd6 in 125193 ms, exit 0, stdout 11405 B
+[proof] model call done: call-0025-0c2d5c in 97869 ms, exit 0, stdout 9732 B
+[proof] model call done: call-0023-bd8890 in 123617 ms, exit 0, stdout 13587 B
+[proof] model call done: call-0024-fc6a86 in 177621 ms, exit 0, stdout 13802 B
+[proof] model call done: call-0028-fa853e in 95098 ms, exit 0, stdout 10494 B
+[proof] model call done: call-0026-b6c805 in 125030 ms, exit 0, stdout 10105 B
+[proof] model call done: call-0028-5b6779 in 107830 ms, exit 0, stdout 9802 B
+[proof] model call done: call-0031-5093fc in 105899 ms, exit 0, stdout 9982 B
+[proof] model call done: call-0029-a39291 in 132432 ms, exit 0, stdout 12052 B
+[proof] model call done: call-0030-f8291d in 142375 ms, exit 0, stdout 10808 B
+[proof] model call done: call-0032-c9377c in 144227 ms, exit 0, stdout 11054 B
+[proof] model call done: call-0033-13edcb in 126480 ms, exit 0, stdout 9457 B
+[proof] model call done: call-0036-6152fe in 94566 ms, exit 0, stdout 9816 B
+[proof] model call done: call-0034-44f592 in 147322 ms, exit 0, stdout 10718 B
+[proof] model call done: call-0035-3e8d89 in 146821 ms, exit 0, stdout 10760 B
+[proof] model call done: call-0037-657eda in 103716 ms, exit 0, stdout 9872 B
+[proof] model call done: call-0038-362183 in 129668 ms, exit 0, stdout 9694 B
+[proof] model call done: call-0039-646d1d in 146606 ms, exit 0, stdout 12248 B
+[proof] model call done: call-0040-2705f4 in 124086 ms, exit 0, stdout 10090 B
+[proof] model call done: call-0041-8b6e57 in 133988 ms, exit 0, stdout 10723 B
+[proof] model call done: call-0044-7325b4 in 116240 ms, exit 0, stdout 9729 B
+[proof] model call done: call-0042-931bfa in 152340 ms, exit 0, stdout 13312 B
+[proof] model call done: call-0043-2917f0 in 165461 ms, exit 0, stdout 10630 B
+[proof] model call done: call-0045-12fc6b in 133548 ms, exit 0, stdout 9096 B
+[proof] model call done: call-0047-689868 in 89719 ms, exit 0, stdout 9922 B
+[proof] model call done: call-0046-7ceaf5 in 133917 ms, exit 0, stdout 10775 B
+[proof] model call done: call-0048-5f54a3 in 125752 ms, exit 0, stdout 10427 B
+[proof] model call done: call-0050-33ba1a in 135985 ms, exit 0, stdout 10086 B
+[proof] model call done: call-0051-b42f86 in 102266 ms, exit 0, stdout 9556 B
+[proof] model call done: call-0049-de6083 in 182743 ms, exit 0, stdout 12025 B
+[proof] model call done: call-0052-bf05cf in 140610 ms, exit 0, stdout 11458 B
+[proof] model call done: call-0053-9be673 in 123977 ms, exit 0, stdout 10402 B
+[proof] model call done: call-0054-0c0468 in 179786 ms, exit 0, stdout 10195 B
+[proof] model call done: call-0055-8575e1 in 158042 ms, exit 0, stdout 10801 B
+[proof] model call done: call-0056-d19790 in 187564 ms, exit 0, stdout 12537 B
+[proof] model call done: call-0057-b7e079 in 146108 ms, exit 0, stdout 14368 B
+[proof] model call done: call-0059-73239d in 135636 ms, exit 0, stdout 10536 B
+[proof] model call done: call-0058-bcaf1a in 155742 ms, exit 0, stdout 17920 B
+[proof] rejected model output D_FCYsshMI4: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output 8rABwKRsec4: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output 7-zJPwJC11Q: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output 8GRmLR__OGQ: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output 647pSnX5H_Y: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output A12AVongNN4: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output FLcrvMfHUJM: model output failed schema: result.reason: is not an allowed field
+[proof] model call done: call-0063-cdd60c in 3210 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for D_FCYsshMI4; cancelling attempt 3
+[proof] retry limit reached for 8rABwKRsec4; cancelling attempt 3
+[proof] retry limit reached for 7-zJPwJC11Q; cancelling attempt 3
+[proof] retry limit reached for 8GRmLR__OGQ; cancelling attempt 3
+[proof] retry limit reached for 647pSnX5H_Y; cancelling attempt 3
+[proof] retry limit reached for A12AVongNN4; cancelling attempt 3
+[proof] retry limit reached for FLcrvMfHUJM; cancelling attempt 3
+[proof] model call done: call-0064-eff414 in 2824 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for jNQXAC9IVRw; cancelling attempt 3
+[proof] model call done: call-0065-161e7b in 2892 ms, exit 1, stdout 1191 B
+[proof] model call done: call-0066-7ee54e in 3061 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for iyVXw-SoUrY; cancelling attempt 3
+[proof] retry limit reached for nlGYV0bmddI; cancelling attempt 3
+[proof] retry limit reached for pFlLqO3oUoc; cancelling attempt 3
+[proof] retry limit reached for pI_WARqK_X4; cancelling attempt 3
+[proof] retry limit reached for pBF05PNBmJA; cancelling attempt 3
+[proof] retry limit reached for r0RspiLG260; cancelling attempt 3
+[proof] retry limit reached for mZzAuFq5C6Q; cancelling attempt 3
+[proof] model call done: call-0067-6f7ce7 in 2803 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for wQb4JK5xKMw; cancelling attempt 3
+[proof] model call done: call-0068-b575ca in 2877 ms, exit 1, stdout 1191 B
+[proof] model call done: call-0069-aaf4ce in 2021 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for v3Fr2JR47KA; cancelling attempt 3
+[proof] retry limit reached for ub2xbSlay7g; cancelling attempt 3
+[proof] retry limit reached for tOC2N0B9lio; cancelling attempt 3
+[proof] retry limit reached for x_27061a15409; cancelling attempt 3
+[proof] retry limit reached for x_21fc0a19511; cancelling attempt 3
+[proof] retry limit reached for x_2b864c9e9ff; cancelling attempt 3
+[proof] retry limit reached for x_880f13e46c6; cancelling attempt 3
+[proof] model call done: call-0070-ea25e6 in 2930 ms, exit 1, stdout 1191 B
+[proof] retry limit reached for x_805baf72809; cancelling attempt 3
+[proof] model call done: call-0071-570d59 in 3214 ms, exit 1, stdout 1191 B
+[proof] ERROR GUARD BREACH: Error rate limit exceeded: 55/542 (guard distinct-failed-completions-v2) after 542 completed attempts (distinct failed completions plus unique anonymous events). Aborting run.
+[proof] model call done: call-0062-96e5a4 in 39788 ms, exit 1, stdout 0 B
+[proof] model call done: call-0061-ea4589 in 98410 ms, exit 1, stdout 0 B
+[proof] model call done: call-0060-7c4d58 in 100599 ms, exit 1, stdout 0 B
+Product proof run complete. Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-07\receipts.json
+exit=0

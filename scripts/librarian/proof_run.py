@@ -116,14 +116,44 @@ ASSIGN_OUTPUT_SCHEMA = {
                 "type": "object",
                 "properties": {
                     "video_id": {"type": "string"},
+                    # Stage 4 repair (run stage4-2026-09-07 aborted at 55/542): the service
+                    # rejects `reason` on an assigned result, and claude-opus-5 adds one to
+                    # explain its assignment. The result is now a oneOf of two closed shapes,
+                    # so the CLI's structured output cannot emit a reason with memberships
+                    # (probed 2026-09-08: the CLI honours oneOf) and cannot emit memberships
+                    # with a non-assigned outcome.
                     "result": {
-                        "type": "object",
-                        "properties": {
-                            "outcome": {
-                                "type": "string",
-                                "enum": ["assigned", "unmapped", "unsupported", "error"],
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "outcome": {"type": "string", "const": "assigned"},
+                                    "memberships": {"$ref": "#/$defs/memberships"},
+                                },
+                                "required": ["outcome", "memberships"],
+                                "additionalProperties": False,
                             },
-                            "memberships": {
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "outcome": {"type": "string", "enum": ["unmapped", "unsupported", "error"]},
+                                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                                },
+                                "required": ["outcome", "reason"],
+                                "additionalProperties": False,
+                            },
+                        ],
+                    },
+                },
+                "required": ["video_id", "result"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["results"],
+    "additionalProperties": False,
+    "$defs": {
+        "memberships": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
@@ -154,20 +184,8 @@ ASSIGN_OUTPUT_SCHEMA = {
                                 },
                                 "minItems": 1,
                                 "maxItems": 3,
-                            },
-                            "reason": {"type": "string", "minLength": 1, "maxLength": 500},
-                        },
-                        "required": ["outcome"],
-                        "additionalProperties": False,
-                    },
-                },
-                "required": ["video_id", "result"],
-                "additionalProperties": False,
-            },
         }
     },
-    "required": ["results"],
-    "additionalProperties": False,
 }
 
 
