@@ -16,7 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_subscriptions_fixtures import (  # noqa: E402
     CHANNEL_ID, Clock, DAY_MS, FEED_URL, FakeAdapter, FakeBackend, FakeFetch, MINUTE_MS,
     PLAYLIST_URL, REGISTRY, T0, atom_feed, error, http, items, make_service, not_modified,
-    open_index, register, rows, rss_feed, snapshot, starts, status, turn_off, turn_on, vid,
+    open_index, publish, register, rows, rss_feed, snapshot, starts, status, turn_off, turn_on,
+    vid,
 )
 
 import source_subscriptions as ss  # noqa: E402
@@ -50,9 +51,10 @@ def test_s03_initial_cohort_is_deterministic_capped_and_never_refilled(tmp_path)
     backend = FakeBackend()
     service = make_service(idx, clock=clock, adapter=adapter, backend=backend)
     sid = register(service)["source_id"]
-    # Precommitted and deleted items are excluded from the cohort.
-    idx.upsert_yoink(dict(video_id=vid(0), slug="s0", title="t", topic="x", yoinked_at="2026",
-                          corpus_path="", sidecar_path=""))
+    # Precommitted and deleted items are excluded from the cohort. Run AT
+    # (AS-01): only a complete manual publication links as committed; a
+    # soft-deleted row is a tombstone whatever its completeness.
+    publish(idx, vid(0), backend=backend)
     idx.upsert_yoink(dict(video_id=vid(1), slug="s1", title="t", topic="x", yoinked_at="2026",
                           corpus_path="", sidecar_path=""))
     idx.soft_delete_yoink(vid(1))

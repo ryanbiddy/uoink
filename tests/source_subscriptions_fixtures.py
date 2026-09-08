@@ -12,6 +12,7 @@ podcast parser window 50 entries, YouTube Atom window ~15 entries.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -103,8 +104,57 @@ def error(code="feed_unreachable", message="boom", retry_after_ms=None):
                             retry_after_ms=retry_after_ms)
 
 
+def corpus_identity(item, source):
+    """The corpus id and provenance a publisher records for one observation:
+    the YouTube id itself, or the deterministic podcast episode id with its
+    full feed URL + GUID identity (AS-06)."""
+    if source["kind"] == "podcast_rss":
+        video_id = ss.podcast_corpus_id(source["source_key"], item["entry_id"])
+        metadata = {"feed_url": source["source_key"], "guid": item["entry_id"],
+                    "capture_key": item["capture_key"]}
+        return video_id, metadata, "podcast", "episode"
+    return item["entry_id"], None, "youtube", "video"
+
+
+def publish(idx, video_id, *, backend=None, url=None, root=None, metadata=None,
+            platform="youtube", source_type="video"):
+    """Stage the durable publication evidence the service verifies since run AT
+    (AS-01): corpus and sidecar files, a yoinks row with provenance, one timed
+    transcript citation and its derived clip, plus the fake publisher's own
+    completion record (``backend.published``). A bare yoinks row is a partial
+    publication and neither completes a start nor links an observation."""
+    root = Path(root) if root is not None else Path(idx._path).parent
+    url = url or f"https://www.youtube.com/watch?v={video_id}"
+    corpus = root / f"{video_id}.md"
+    sidecar = root / f"{video_id}.json"
+    corpus.write_text(f"Fixture evidence for {video_id}.\n", encoding="utf-8")
+    sidecar.write_text(json.dumps({"video_id": video_id, "url": url, "platform": platform,
+                                   "source_type": source_type}), encoding="utf-8")
+    provenance = {"url": url, **(metadata or {})}
+    idx.upsert_yoink(dict(video_id=video_id, slug=f"slug-{video_id}", title=f"Title {video_id}",
+                          topic="Old", yoinked_at="2026-09-07", corpus_path=str(corpus),
+                          sidecar_path=str(sidecar), platform=platform, source_type=source_type,
+                          metadata_json=json.dumps(provenance)))
+    with idx.write_transaction() as conn:
+        conn.execute("INSERT OR REPLACE INTO citations (video_id, kind, seq, timestamp_start, "
+                     "timestamp_end, text, source_url, source_deep_link) "
+                     "VALUES (?, 'transcript_chunk', 0, 12.5, 21.75, ?, ?, ?)",
+                     (video_id, f"Evidence for {video_id}", url, url + "&t=12s"))
+        conn.execute("INSERT OR REPLACE INTO clips (video_id, seq, start, end, text, source_deep_link) "
+                     "VALUES (?, 0, 12.5, 21.75, ?, ?)",
+                     (video_id, f"Evidence for {video_id}", url + "&t=12s"))
+    if backend is not None:
+        backend.published[video_id] = video_id
+    return video_id
+
+
 class FakeBackend(ss.CaptureBackend):
-    """Records every run; ``outcome`` may be a CaptureOutcome or a callable."""
+    """Records every run; ``outcome`` may be a CaptureOutcome or a callable.
+
+    Run AT: the service verifies publication before a start succeeds, so the
+    default inline success first publishes through ``publisher`` (bound by
+    ``make_service`` to the fixture ``publish`` helper), exactly as a real
+    executor leaves durable output before its callback."""
     kind = "fake"
 
     def __init__(self, outcome=None, *, preflight=None, bind_fail=False, probe="stopped"):
@@ -115,6 +165,7 @@ class FakeBackend(ss.CaptureBackend):
         self.runs: list[dict] = []
         self.binds: list[str] = []
         self.published: dict[str, str] = {}
+        self.publisher = None
 
     def preflight(self, item, source):
         if callable(self.preflight_outcome):
@@ -132,13 +183,20 @@ class FakeBackend(ss.CaptureBackend):
                           "source_id": source["source_id"], "owner_token": start["owner_token"]})
         if callable(self.outcome):
             return self.outcome(start, item, source)
-        return self.outcome or ss.CaptureOutcome("succeeded", video_id=item["entry_id"])
+        if self.outcome is not None:
+            return self.outcome
+        video_id, metadata, platform, source_type = corpus_identity(item, source)
+        if self.publisher is not None:
+            self.publisher(video_id, metadata=metadata, platform=platform, source_type=source_type)
+        return ss.CaptureOutcome("succeeded", video_id=video_id)
 
     def probe(self, start):
         return self.probe_result
 
     def published_video_id(self, conn, item, source):
-        return self.published.get(item["entry_id"])
+        """The fake publisher's completion record, keyed by corpus id."""
+        video_id = corpus_identity(item, source)[0]
+        return self.published.get(video_id) or self.published.get(item["entry_id"])
 
 
 def open_index(tmp_path: Path, name: str = "index.db"):
@@ -150,9 +208,15 @@ def make_service(idx=None, *, path=None, clock=None, adapter=None, backend=None,
     adapters = None
     if adapter is not None:
         adapters = {name: adapter for name in ss.ADAPTERS.values()}
+    backend = backend or FakeBackend()
     kwargs = dict(clock=clock or Clock(), adapters=adapters or {},
-                  backend=backend or FakeBackend(), instance_id=instance_id)
+                  backend=backend, instance_id=instance_id)
     if idx is not None:
+        if isinstance(backend, FakeBackend):
+            # Bind (or rebind after a restart) the fake executor's publisher to
+            # the live index so an inline success leaves complete evidence.
+            backend.publisher = lambda video_id, _idx=idx, **kw: publish(
+                _idx, video_id, backend=backend, **kw)
         return ss.SourceSubscriptionService(index=idx, **kwargs)
     return ss.open_service(path, **kwargs)
 

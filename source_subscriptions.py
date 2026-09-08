@@ -37,6 +37,7 @@ import ipaddress
 import json
 import logging
 import math
+import os
 import re
 import secrets
 import socket
@@ -65,6 +66,8 @@ DAILY_START_CAP = 10             # actual starts per source per UTC day
 MAX_ACTUAL_STARTS = 3            # automatic attempts per source item
 RESERVATION_TTL_MS = 120_000     # reserved -> released if not dispatched
 POLL_LEASE_MS = 120_000          # poll ownership lease; adapter budgets fit it
+POLL_LEASE_RECONCILE_LIMIT = 100  # expired leases reconciled per tick (AS-04, bounded)
+STANDING_POLLS_PER_TICK = 25      # due polls one scheduler tick claims (AS-05, bounded)
 INTENT_TTL_MS = 5 * 60 * 1000    # dashboard capability lifetime
 DEFAULT_POLL_INTERVAL_MIN = 60
 MIN_POLL_INTERVAL_MIN = 15
@@ -898,12 +901,55 @@ def default_adapters(fetch: Callable[..., FetchResponse] | None = None) -> dict:
 # ===========================================================================
 @dataclass
 class CaptureOutcome:
-    """``status``: succeeded | failed | uncertain | in_flight | preflight_failed."""
+    """``status``: succeeded | failed | uncertain | in_flight | preflight_failed
+    | busy (``acquire`` only: another dispatcher owns the capture identity)."""
     status: str
     video_id: str | None = None
     code: str | None = None
     message: str | None = None
     terminal: bool = False
+
+
+@dataclass
+class PublicationEvidence:
+    """What durable inspection found for one corpus identity (AS-01, AS-06).
+
+    ``complete`` is true only when the corpus row, its files, the full
+    provenance identity, timed citations, derived clips and the publisher's
+    own completion record all agree with ``video_id``. ``conflict`` marks a
+    full-identity mismatch: the row at this (possibly shortened) corpus id
+    belongs to another feed/entry and must never be linked, resumed or
+    overwritten. ``row`` is the corpus row when one exists.
+    """
+    video_id: str | None
+    complete: bool
+    reason: str | None = None
+    conflict: bool = False
+    row: dict | None = None
+
+
+@dataclass(frozen=True)
+class CompletionProof:
+    """Explicit evidence carried by a callback that the executor for one
+    start has finished (AS-02). The service checks it against the ledger row
+    and asks the backend to verify it against real executor state; holding
+    the owner token alone never proves that a worker stopped.
+    """
+    start_id: str
+    owner_token: str
+    backend_kind: str
+    evidence: str
+
+
+def _backend_call(backend, name: str, *args):
+    """Call ``backend.<name>`` or, for a duck-typed backend that predates the run AT
+    additions (acquire/release/verify_proof/inspect_publication/recover_publication), the
+    ``CaptureBackend`` base rule with the same semantics. The base rules only use methods
+    every backend has (``published_video_id``, ``kind``)."""
+    method = getattr(backend, name, None)
+    if method is None:
+        method = getattr(CaptureBackend, name).__get__(backend, type(backend))
+    return method(*args)
 
 
 class CaptureBackend:
@@ -916,10 +962,30 @@ class CaptureBackend:
     with the owner token). ``probe`` answers restart reconciliation: ``running``,
     ``stopped`` or ``unknown``. ``published_video_id`` reports an already
     committed corpus identity for an item (linking without a charge).
+
+    Run AT additions: ``acquire``/``release`` hold the cross-process execution
+    lock for a capture identity around the started transition (AS-03);
+    ``inspect_publication`` reports the publisher's durable completion record
+    for a corpus id and ``recover_publication`` may finish valid local
+    publication under the original attempt once the owner is stopped (AS-01);
+    ``verify_proof`` checks a callback's completion proof against actual
+    executor state (AS-02).
     """
     kind = "inline"
 
     def preflight(self, item: dict, source: dict) -> CaptureOutcome | None:
+        return None
+
+    def acquire(self, start: dict, item: dict, source: dict) -> CaptureOutcome | None:
+        """Take execution ownership of ``start['capture_key']`` before the
+        started transition. Return ``None`` when acquired (the backend holds it
+        until ``release`` or until its own worker finishes publication), or a
+        ``CaptureOutcome('busy', ...)`` when another dispatcher owns it."""
+        return None
+
+    def release(self, start: dict) -> None:
+        """Release ownership taken by ``acquire`` for a start that did not hand
+        off to an in-flight worker."""
         return None
 
     def bind(self, conn, start: dict, item: dict, source: dict) -> str:
@@ -931,8 +997,282 @@ class CaptureBackend:
     def probe(self, start: dict) -> str:
         return "unknown"
 
+    def verify_proof(self, start: dict, proof: CompletionProof) -> bool:
+        """Base rule: the proof must name this backend kind and this exact
+        start; backends with real workers also check their executor state."""
+        return (proof.backend_kind == self.kind and proof.start_id == start["start_id"]
+                and proof.owner_token == start["owner_token"])
+
     def published_video_id(self, conn, item: dict, source: dict) -> str | None:
         return None
+
+    def inspect_publication(self, conn, start: dict | None, item: dict, source: dict,
+                            video_id: str) -> str | None:
+        """The publisher's completion record for ``video_id``: return the id
+        when the publisher recorded completion for it, else ``None``. The base
+        rule defers to ``published_video_id``."""
+        published = self.published_video_id(conn, item, source)
+        return published if published == video_id else None
+
+    def recover_publication(self, start: dict, item: dict, source: dict) -> bool:
+        """Finish valid local publication for a stopped attempt from already
+        validated output (no new acquisition). Return True when the backend
+        ran its idempotent publisher; the service re-inspects afterwards."""
+        return False
+
+
+# ===========================================================================
+# Process incarnation identity (AS-02) and the cross-process capture lock
+# (AS-03). Both live here so the server backend and its independent test
+# namespace share one implementation.
+# ===========================================================================
+INSTANCE_DIR = "source_instances"
+CAPTURE_LOCK_DIR = "capture_locks"
+_STILL_ACTIVE = 259
+_FILETIME_EPOCH_OFFSET_100NS = 116_444_736_000_000_000
+_PROCESS_START_TOLERANCE_MS = 2_000
+
+
+@dataclass(frozen=True)
+class ProcessIncarnation:
+    """One helper process incarnation for one data root. The identity string
+    is persisted in ``owner_instance`` so a later incarnation can tell whether
+    the owner of a started row was itself, a dead predecessor, or unknown."""
+    host: str
+    root: str
+    token: str
+    pid: int
+    created_ms: int | None
+
+    @property
+    def identity(self) -> str:
+        return f"{self.host}:{self.root}#{self.token}"
+
+
+_INCARNATIONS: dict[str, ProcessIncarnation] = {}
+_INCARNATION_LOCK = threading.Lock()
+
+
+def _windows_process_created_ms(handle) -> int | None:
+    import ctypes
+    import ctypes.wintypes
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    if not isinstance(handle, ctypes.c_void_p):
+        handle = ctypes.c_void_p(handle)
+    creation, exit_, kernel, user = (ctypes.wintypes.FILETIME() for _ in range(4))
+    if not kernel32.GetProcessTimes(handle, ctypes.byref(creation), ctypes.byref(exit_),
+                                    ctypes.byref(kernel), ctypes.byref(user)):
+        return None
+    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
+    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+
+
+def _posix_process_created_ms(pid: int) -> int | None:
+    try:
+        with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
+            stat = handle.read()
+        with open("/proc/stat", "r", encoding="ascii", errors="replace") as handle:
+            boot = next(int(line.split()[1]) for line in handle if line.startswith("btime "))
+        ticks = int(stat.rsplit(")", 1)[1].split()[19])
+        hertz = os.sysconf("SC_CLK_TCK")
+        return boot * 1000 + (ticks * 1000) // hertz
+    except (OSError, ValueError, IndexError, StopIteration, AttributeError):
+        return None
+
+
+def _current_process_created_ms() -> int | None:
+    try:
+        if os.name == "nt":
+            import ctypes
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel32.GetCurrentProcess.restype = ctypes.c_void_p
+            return _windows_process_created_ms(kernel32.GetCurrentProcess())
+        return _posix_process_created_ms(os.getpid())
+    except Exception:
+        return None
+
+
+def _process_alive(pid: int, created_ms: int | None) -> str:
+    """``alive``, ``dead`` or ``unknown`` for a persisted pid. Never signals
+    the process; on Windows ``os.kill`` would terminate it."""
+    try:
+        if os.name == "nt":
+            import ctypes
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel32.OpenProcess.restype = ctypes.c_void_p
+            handle = kernel32.OpenProcess(0x1000, False, int(pid))  # QUERY_LIMITED_INFORMATION
+            if not handle:
+                error = ctypes.get_last_error()
+                return "dead" if error == 87 else "unknown"  # ERROR_INVALID_PARAMETER
+            try:
+                code = ctypes.c_ulong()
+                if not kernel32.GetExitCodeProcess(ctypes.c_void_p(handle), ctypes.byref(code)):
+                    return "unknown"
+                if int(code.value) != _STILL_ACTIVE:
+                    return "dead"
+                if created_ms is not None:
+                    actual = _windows_process_created_ms(ctypes.c_void_p(handle))
+                    if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+                        return "dead"  # the pid was reused by another process
+                return "alive"
+            finally:
+                kernel32.CloseHandle(ctypes.c_void_p(handle))
+        try:
+            os.kill(int(pid), 0)
+        except ProcessLookupError:
+            return "dead"
+        except PermissionError:
+            pass
+        if created_ms is not None:
+            actual = _posix_process_created_ms(int(pid))
+            if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+                return "dead"
+        return "alive"
+    except Exception:
+        return "unknown"
+
+
+def process_incarnation(root) -> ProcessIncarnation:
+    """Mint (once per process and data root) and persist this incarnation's
+    identity under ``root/source_instances/<token>.json`` (AS-02). The file is
+    written and closed; nothing stays open."""
+    key = os.path.abspath(str(root))
+    with _INCARNATION_LOCK:
+        found = _INCARNATIONS.get(key)
+        if found is not None:
+            return found
+        incarnation = ProcessIncarnation(socket.gethostname(), key, secrets.token_hex(8),
+                                         os.getpid(), _current_process_created_ms())
+        directory = os.path.join(key, INSTANCE_DIR)
+        try:
+            os.makedirs(directory, exist_ok=True)
+            path = os.path.join(directory, f"{incarnation.token}.json")
+            with open(path + ".tmp", "w", encoding="utf-8") as handle:
+                json.dump({"host": incarnation.host, "root": key, "token": incarnation.token,
+                           "pid": incarnation.pid, "created_ms": incarnation.created_ms,
+                           "minted_ms": int(time.time() * 1000)}, handle)
+            os.replace(path + ".tmp", path)
+        except OSError:
+            log.exception("could not persist the process incarnation under %s", directory)
+        _INCARNATIONS[key] = incarnation
+        return incarnation
+
+
+def parse_instance_identity(identity: Any) -> tuple[str, str, str] | None:
+    """``host:root#token`` -> (host, root, token); hostnames never contain
+    ``:`` and the token never contains ``#``, so the split is unambiguous."""
+    if not isinstance(identity, str) or "#" not in identity or ":" not in identity:
+        return None
+    head, token = identity.rsplit("#", 1)
+    host, root = head.split(":", 1)
+    if not host or not root or not token:
+        return None
+    return host, root, token
+
+
+def instance_liveness(identity: Any, root) -> str:
+    """Whether the process behind a persisted ``owner_instance`` still runs:
+    ``current`` (this incarnation), ``alive``, ``dead`` or ``unknown``."""
+    key = os.path.abspath(str(root))
+    current = _INCARNATIONS.get(key)
+    if current is not None and identity == current.identity:
+        return "current"
+    parsed = parse_instance_identity(identity)
+    if parsed is None:
+        return "unknown"
+    host, inst_root, token = parsed
+    if host != socket.gethostname() or os.path.abspath(inst_root) != key:
+        return "unknown"
+    if not re.fullmatch(r"[a-f0-9]{16}", token):
+        return "unknown"
+    try:
+        with open(os.path.join(key, INSTANCE_DIR, f"{token}.json"), "r", encoding="utf-8") as handle:
+            record = json.load(handle)
+    except (OSError, ValueError):
+        return "unknown"
+    pid = record.get("pid") if isinstance(record, dict) else None
+    if type(pid) is not int or pid <= 0 or pid == os.getpid():
+        return "unknown"
+    created = record.get("created_ms")
+    return _process_alive(pid, created if type(created) is int else None)
+
+
+class CaptureLock:
+    """Cross-process execution lock keyed by canonical capture identity
+    (AS-03). Manual and standing dispatchers take the same OS file lock under
+    ``root/capture_locks``; the handle stays open while held and is released
+    by the OS if the owning process dies."""
+
+    def __init__(self, key: str, path: str, handle):
+        self.key = key
+        self.path = path
+        self._handle = handle
+
+    @classmethod
+    def path_for(cls, root, key: str) -> str:
+        return os.path.join(os.path.abspath(str(root)), CAPTURE_LOCK_DIR,
+                            sha256_text(key)[:40] + ".lock")
+
+    @classmethod
+    def try_acquire(cls, root, key: str) -> "CaptureLock | None":
+        path = cls.path_for(root, key)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        handle = open(path, "a+b")
+        try:
+            handle.seek(0, os.SEEK_END)
+            if handle.tell() == 0:
+                handle.write(b"\0")
+                handle.flush()
+            handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            handle.close()
+            return None
+        return cls(key, path, handle)
+
+    @classmethod
+    def acquire(cls, root, key: str, *, timeout: float | None = None,
+                interval: float = 0.2) -> "CaptureLock | None":
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while True:
+            lock = cls.try_acquire(root, key)
+            if lock is not None:
+                return lock
+            if deadline is not None and time.monotonic() >= deadline:
+                return None
+            time.sleep(interval)
+
+    @property
+    def held(self) -> bool:
+        return self._handle is not None
+
+    def release(self) -> None:
+        handle, self._handle = self._handle, None
+        if handle is None:
+            return
+        try:
+            handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            pass
+        finally:
+            handle.close()
+
+    def __enter__(self) -> "CaptureLock":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.release()
 
 
 @dataclass(frozen=True)
@@ -1189,11 +1529,118 @@ class SourceSubscriptionService:
     @staticmethod
     def _corpus_row(conn, video_id: str) -> dict | None:
         try:
-            row = conn.execute("SELECT video_id, deleted_at FROM yoinks WHERE video_id=?",
-                               (video_id,)).fetchone()
+            row = conn.execute(
+                "SELECT video_id, deleted_at, corpus_path, sidecar_path, metadata_json, "
+                "source_type, platform FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
         except sqlite3.OperationalError:
             return None  # bare fixture without the corpus table
         return _row(row)
+
+    # ---- publication evidence (AS-01, AS-06) ------------------------------
+    @staticmethod
+    def _same_feed_url(left: Any, right: Any) -> bool:
+        if not isinstance(left, str) or not isinstance(right, str):
+            return False
+        try:
+            return normalize_podcast_feed_url(left) == normalize_podcast_feed_url(right)
+        except ServiceError:
+            return left.strip() == right.strip()
+
+    @staticmethod
+    def _youtube_id_from_url(url: Any) -> str | None:
+        if not isinstance(url, str) or not url:
+            return None
+        try:
+            parsed = urllib.parse.urlparse(url)
+        except ValueError:
+            return None
+        host = (parsed.hostname or "").lower()
+        candidate = None
+        if host in ("www.youtube.com", "youtube.com", "m.youtube.com"):
+            candidate = _single_param(_split_query(parsed.query), "v")
+        elif host == "youtu.be":
+            candidate = parsed.path.strip("/").split("/", 1)[0] or None
+        return candidate if candidate and _VIDEO_ID_RE.match(candidate) else None
+
+    def _identity_conflict(self, conn, source: dict, item: dict, row: dict) -> str | None:
+        """AS-06: compare the full identity persisted with a corpus row (feed
+        URL plus entry id for podcasts, watch URL for YouTube) with this
+        source/entry. A shortened corpus id never stands in for the identity."""
+        entry_id = item["entry_id"]
+        try:
+            meta = json.loads(row.get("metadata_json") or "{}")
+        except ValueError:
+            meta = {}
+        if type(meta) is not dict:
+            meta = {}
+        if source["kind"] == "podcast_rss":
+            feed_url, guid = meta.get("feed_url"), meta.get("guid")
+            if isinstance(feed_url, str) and isinstance(guid, str):
+                if guid != entry_id or not self._same_feed_url(feed_url, source["source_key"]):
+                    return "identity_conflict:provenance"
+                return None
+            capture_key = meta.get("capture_key")
+            if isinstance(capture_key, str) and capture_key:
+                return None if capture_key == item["capture_key"] else "identity_conflict:capture_key"
+            try:
+                linked = conn.execute(
+                    "SELECT f.feed_url, e.guid FROM podcast_episodes e "
+                    "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.yoink_video_id=? LIMIT 1",
+                    (row["video_id"],)).fetchone()
+            except sqlite3.OperationalError:
+                linked = None
+            if linked is not None and (linked[1] != entry_id
+                                       or not self._same_feed_url(linked[0], source["source_key"])):
+                return "identity_conflict:episode_link"
+            return None
+        watch = self._youtube_id_from_url(meta.get("url"))
+        if watch is not None and watch != entry_id:
+            return "identity_conflict:url"
+        return None
+
+    def _publication_evidence(self, conn, source: dict, item: dict, video_id: str,
+                              start: dict | None = None) -> PublicationEvidence:
+        """AS-01: the one completeness rule used by completion, restart
+        reconciliation and linking. Complete means: corpus row present and not
+        deleted, full identity agrees (AS-06), corpus and sidecar files exist,
+        at least one timed citation, clips derived for every transcript
+        citation set, and the publisher recorded completion for this id."""
+        row = self._corpus_row(conn, video_id)
+        if row is None:
+            return PublicationEvidence(video_id, False, "corpus_row_missing")
+        if row.get("deleted_at"):
+            return PublicationEvidence(video_id, False, "corpus_deleted", row=row)
+        conflict = self._identity_conflict(conn, source, item, row)
+        if conflict:
+            return PublicationEvidence(video_id, False, conflict, conflict=True, row=row)
+        for column in ("corpus_path", "sidecar_path"):
+            path = row.get(column)
+            if not isinstance(path, str) or not path or not os.path.isfile(path):
+                return PublicationEvidence(video_id, False, "corpus_files_missing", row=row)
+        try:
+            timed = conn.execute(
+                "SELECT COUNT(*) FROM citations WHERE video_id=? AND timestamp_start IS NOT NULL",
+                (video_id,)).fetchone()[0]
+            transcript = conn.execute(
+                "SELECT COUNT(*) FROM citations WHERE video_id=? AND kind='transcript_chunk'",
+                (video_id,)).fetchone()[0]
+            clips = conn.execute(
+                "SELECT COUNT(*) FROM clips WHERE video_id=? AND start IS NOT NULL AND \"end\" IS NOT NULL",
+                (video_id,)).fetchone()[0]
+        except sqlite3.OperationalError:
+            return PublicationEvidence(video_id, False, "citations_missing", row=row)
+        if not timed:
+            return PublicationEvidence(video_id, False, "citations_missing", row=row)
+        if transcript and not clips:
+            return PublicationEvidence(video_id, False, "clips_missing", row=row)
+        try:
+            published = _backend_call(self.backend, "inspect_publication", conn, start, dict(item), dict(source), video_id)
+        except Exception:
+            log.exception("publication inspection raised for %s", video_id)
+            published = None
+        if published != video_id:
+            return PublicationEvidence(video_id, False, "publisher_incomplete", row=row)
+        return PublicationEvidence(video_id, True, None, row=row)
 
     # ======================================================================
     # Registration (contract, "Source identity and detection"; registry)
@@ -1743,13 +2190,20 @@ class SourceSubscriptionService:
     # adapter boundaries")
     # ======================================================================
     def detection_pass(self, now: int | None = None, *, limit: int | None = None) -> list[dict]:
-        """Claim every due poll, fetch outside the database, commit each result.
-        A pass with nothing due returns [] (a heartbeat, not a poll)."""
+        """Reconcile expired leases, then for each due source claim its lease
+        immediately before the fetch (AS-05: a lease starts at the actual
+        claim, never at the start of a serial batch), fetch outside the
+        database and commit. A pass with nothing due returns [] (a heartbeat,
+        not a poll)."""
+        explicit = None if now is None else int(now)
         now = self._now() if now is None else int(now)
-        with self.store.write() as conn:
-            self._expire_poll_leases(conn, now)
+        self.expire_poll_leases(now)
         results = []
-        for claim in self.claim_due_polls(now, limit=limit):
+        for source_id in self.due_poll_ids(now, limit=limit):
+            # The lease starts at this claim, not at the start of the pass.
+            claim = self.claim_poll(source_id, explicit)
+            if claim is None:
+                continue  # no longer due or owned by another dispatcher
             try:
                 results.append(self.run_claimed_poll(claim))
             except (ServiceError, sqlite3.OperationalError) as exc:
@@ -1757,6 +2211,15 @@ class SourceSubscriptionService:
                 results.append({"ok": False, "outcome": "storage_busy",
                                 "source_id": claim["source_id"], "retryable": True})
         return results
+
+    def expire_poll_leases(self, now: int | None = None, *, limit: int = POLL_LEASE_RECONCILE_LIMIT) -> int:
+        """AS-04: bounded poll-lease reconciliation for every tick, before due
+        selection. Expired owners record ``poll_timeout`` with backoff and lose
+        the lease; validators and the successful revision are preserved, and a
+        late result from the old owner stays fenced by its token."""
+        now = self._now() if now is None else int(now)
+        with self.store.write() as conn:
+            return self._expire_poll_leases(conn, now, limit=limit)
 
     def due_poll_ids(self, now: int | None = None, *, limit: int | None = None) -> list[str]:
         now = self._now() if now is None else int(now)
@@ -1916,11 +2379,16 @@ class SourceSubscriptionService:
              result.coverage if result.coverage in ("partial",) else cursor["coverage"],
              1 if result.truncated else cursor["truncated"], observed_count, source["source_id"]))
 
-    def _expire_poll_leases(self, conn, now: int) -> int:
-        rows = conn.execute(
-            "SELECT c.*, s.poll_interval_min, s.source_id AS sid FROM source_detection_cursors c "
-            "JOIN source_subscriptions s ON s.source_id=c.source_id "
-            "WHERE c.poll_owner_token IS NOT NULL AND c.poll_lease_expires_ms<=?", (now,)).fetchall()
+    def _expire_poll_leases(self, conn, now: int, *, limit: int | None = None) -> int:
+        sql = ("SELECT c.*, s.poll_interval_min, s.source_id AS sid FROM source_detection_cursors c "
+               "JOIN source_subscriptions s ON s.source_id=c.source_id "
+               "WHERE c.poll_owner_token IS NOT NULL AND c.poll_lease_expires_ms<=? "
+               "ORDER BY c.poll_lease_expires_ms, s.source_id")
+        params: list[Any] = [now]
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(int(limit))
+        rows = conn.execute(sql, params).fetchall()
         for row in rows:
             cursor = dict(row)
             # Contract: a poll timeout records failure and schedules another due time.
@@ -1948,15 +2416,17 @@ class SourceSubscriptionService:
                 "SELECT * FROM source_items WHERE source_id=? AND entry_id=?",
                 (source["source_id"], entry_id)).fetchone())
             if existing is None:
-                state, video_id, committed_at = self._preexisting_capture(conn, source, capture_key, entry_id, now)
+                state, video_id, committed_at, blocked = self._preexisting_capture(
+                    conn, source, capture_key, entry_id, now)
                 conn.execute(
                     "INSERT INTO source_items (item_id, source_id, entry_id, capture_key, canonical_url, "
                     "title, published_at_ms, first_seen_ms, last_seen_ms, first_scan_revision, "
                     "first_seen_consent_epoch, metadata_json, eligibility, enrolled_epoch, state, "
-                    "video_id, committed_at_ms) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'none',NULL,?,?,?)",
+                    "video_id, committed_at_ms, blocked_reason) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'none',NULL,?,?,?,?)",
                     (item_id, source["source_id"], entry_id, capture_key, url, title,
                      obs.published_at_ms, now, now, scan_revision, epoch, metadata_json, state,
-                     video_id, committed_at))
+                     video_id, committed_at, blocked))
                 inserted += 1
                 if state == "committed":
                     linked += 1
@@ -1990,9 +2460,16 @@ class SourceSubscriptionService:
                                 meta.get("published_raw"), meta.get("duration_raw"), stamp)
 
     def _preexisting_capture(self, conn, source: dict, capture_key: str, entry_id: str,
-                             now: int) -> tuple[str, str | None, int | None]:
+                             now: int, item: dict | None = None
+                             ) -> tuple[str, str | None, int | None, str | None]:
         """Link an observation to an already committed or deleted capture of the
-        same canonical item (contract: no charge, no resurrection)."""
+        same canonical item (contract: no charge, no resurrection). Returns
+        ``(state, video_id, committed_at_ms, blocked_reason)``.
+
+        AS-01: an existing corpus row links only when it passes the same
+        completeness rule as a standing completion. AS-06: a row at this
+        corpus id that carries another full identity is a visible, blocked
+        identity conflict (state ``failed``), never linked or replaced."""
         succeeded = _row(conn.execute(
             "SELECT video_id, finished_at_ms FROM source_capture_starts WHERE capture_key=? "
             "AND state='succeeded'", (capture_key,)).fetchone())
@@ -2001,20 +2478,27 @@ class SourceSubscriptionService:
                 "SELECT 1 FROM source_items WHERE capture_key=? AND state='deleted' LIMIT 1",
                 (capture_key,)).fetchone())
             if deleted:
-                return "deleted", succeeded["video_id"], None
-            return "committed", succeeded["video_id"], succeeded["finished_at_ms"] or now
+                return "deleted", succeeded["video_id"], None, "deleted"
+            return "committed", succeeded["video_id"], succeeded["finished_at_ms"] or now, None
         sibling = _row(conn.execute(
             "SELECT state, video_id, committed_at_ms FROM source_items WHERE capture_key=? "
             "AND state IN ('committed','deleted') ORDER BY CASE state WHEN 'deleted' THEN 0 ELSE 1 END "
             "LIMIT 1", (capture_key,)).fetchone())
         if sibling is not None:
-            return sibling["state"], sibling["video_id"], sibling["committed_at_ms"]
-        corpus = self._corpus_row(conn, self._corpus_video_id(source, entry_id))
-        if corpus is not None:
-            if corpus.get("deleted_at"):
-                return "deleted", corpus["video_id"], None
-            return "committed", corpus["video_id"], now
-        return "observed", None, None
+            return (sibling["state"], sibling["video_id"], sibling["committed_at_ms"],
+                    "deleted" if sibling["state"] == "deleted" else None)
+        corpus_id = self._corpus_video_id(source, entry_id)
+        probe_item = item if item is not None else {
+            "entry_id": entry_id, "capture_key": capture_key, "source_id": source["source_id"],
+            "metadata_json": "{}"}
+        evidence = self._publication_evidence(conn, source, probe_item, corpus_id)
+        if evidence.reason == "corpus_deleted":
+            return "deleted", corpus_id, None, "deleted"
+        if evidence.conflict:
+            return "failed", None, None, evidence.reason
+        if evidence.complete:
+            return "committed", corpus_id, now, None
+        return "observed", None, None, None
 
     def _apply_enrollment(self, conn, source: dict, scan_revision: int, now: int) -> dict:
         epoch = int(source["consent_epoch"])
@@ -2113,7 +2597,8 @@ class SourceSubscriptionService:
             outcome = self.advance_source(source_id)
             if outcome.get("outcome") not in ("idle", "not_due", "in_flight", "allowance_exhausted",
                                               "consent_off", "enrollment_pending",
-                                              "legacy_accounting_hold", "clock_regressed"):
+                                              "legacy_accounting_hold", "clock_regressed",
+                                              "capture_busy"):
                 outcomes.append(outcome)
         return outcomes
 
@@ -2132,16 +2617,58 @@ class SourceSubscriptionService:
         preflight = self._preflight(claim)
         if preflight is not None:
             return preflight
-        started = self.mark_started(claim["start_id"], claim["owner_token"])
-        if started.get("outcome") == "day_rollover":
-            # Contract: release the old-day row and claim a new row for today.
-            claim = self.claim_start(source_id, item_id=claim["item_id"])
-            if claim.get("outcome") != "reserved":
-                return claim
+        # AS-03: take the cross-process execution lock for this capture identity
+        # before the started transition. A busy manual owner releases the
+        # reservation without a charge and leaves the observation eligible.
+        busy = self._acquire_execution(claim)
+        if busy is not None:
+            return busy
+        handed_off = False
+        try:
             started = self.mark_started(claim["start_id"], claim["owner_token"])
-        if started.get("outcome") != "started":
-            return started
-        return self.execute_started(started)
+            if started.get("outcome") == "day_rollover":
+                # Contract: release the old-day row and claim a new row for today
+                # (same capture identity, so the lock stays held).
+                claim = self.claim_start(source_id, item_id=claim["item_id"])
+                if claim.get("outcome") != "reserved":
+                    return claim
+                started = self.mark_started(claim["start_id"], claim["owner_token"])
+            if started.get("outcome") != "started":
+                return started
+            result = self.execute_started(started)
+            handed_off = result.get("outcome") == "in_flight"
+            return result
+        finally:
+            if not handed_off:
+                self._release_execution(claim)
+
+    def _acquire_execution(self, claim: dict) -> dict | None:
+        with self.store.read() as conn:
+            item = self._item(conn, claim["item_id"])
+            source = self._source(conn, claim["source_id"])
+        start = {"start_id": claim["start_id"], "owner_token": claim["owner_token"],
+                 "capture_key": claim["capture_key"], "source_id": claim["source_id"],
+                 "item_id": claim["item_id"]}
+        try:
+            outcome = _backend_call(self.backend, "acquire", start, dict(item), dict(source))
+        except Exception as exc:
+            log.exception("execution lock acquisition raised for %s", claim["start_id"])
+            outcome = CaptureOutcome("busy", code="lock_error", message=type(exc).__name__)
+        if outcome is None:
+            return None
+        released = self.release_reservation(claim["start_id"], claim["owner_token"], "capture_busy")
+        return {"outcome": "capture_busy", "code": outcome.code or "busy",
+                "start_id": claim["start_id"], "item_id": claim["item_id"],
+                "source_id": claim["source_id"], "released": released.get("outcome") == "released"}
+
+    def _release_execution(self, claim: dict) -> None:
+        try:
+            _backend_call(self.backend, "release",
+                          {"start_id": claim["start_id"], "owner_token": claim["owner_token"],
+                           "capture_key": claim["capture_key"], "source_id": claim["source_id"],
+                           "item_id": claim["item_id"]})
+        except Exception:
+            log.exception("execution lock release raised for %s", claim["start_id"])
 
     def _pick_item(self, conn, source: dict, item_id: str | None, now: int) -> dict | None:
         sql = ("SELECT * FROM source_items WHERE source_id=? AND state='eligible' "
@@ -2188,9 +2715,13 @@ class SourceSubscriptionService:
                 item = self._pick_item(conn, source, item_id, now)
                 if item is None:
                     return {"outcome": "idle", **base}
-                linked = self._link_if_captured(conn, source, item, now)
+                linked, video_id, reason = self._link_if_captured(conn, source, item, now)
+                if linked == "conflict":
+                    # AS-06: visible blocked identity conflict; no charge, no replacement.
+                    return {"outcome": "identity_conflict", "item_id": item["item_id"],
+                            "reason": reason, **base}
                 if linked is not None:
-                    return {"outcome": "linked", "item_id": item["item_id"], "video_id": linked, **base}
+                    return {"outcome": "linked", "item_id": item["item_id"], "video_id": video_id, **base}
                 elsewhere = conn.execute(
                     "SELECT source_id, start_id FROM source_capture_starts WHERE capture_key=? "
                     "AND state IN ('reserved','started','uncertain')", (item["capture_key"],)).fetchone()
@@ -2233,30 +2764,35 @@ class SourceSubscriptionService:
             return {"outcome": exc.code, "retryable": exc.retryable, "source_id": source_id,
                     "message": exc.message}
 
-    def _link_if_captured(self, conn, source: dict, item: dict, now: int) -> str | None:
+    def _link_if_captured(self, conn, source: dict, item: dict, now: int
+                          ) -> tuple[str | None, str | None, str | None]:
         """An already committed corpus item is linked before reservation, with no
-        charge; a deleted committed item is never resurrected."""
-        state, video_id, committed_at = self._preexisting_capture(
-            conn, source, item["capture_key"], item["entry_id"], now)
+        charge; a deleted committed item is never resurrected. Returns
+        ``(state, video_id, reason)`` with state ``committed``, ``deleted``,
+        ``conflict`` or ``None`` (nothing to link).
+
+        AS-01: linking applies the same completeness rule as completion (a
+        backend report alone does not link a partial publication). AS-06: a
+        full-identity mismatch blocks the item visibly instead of linking."""
+        state, video_id, committed_at, reason = self._preexisting_capture(
+            conn, source, item["capture_key"], item["entry_id"], now, item=item)
         if state == "committed":
             conn.execute(
                 "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
                 "blocked_reason=NULL, retry_at_ms=NULL WHERE item_id=?",
                 (video_id, committed_at or now, item["item_id"]))
-            return video_id
+            return "committed", video_id, None
         if state == "deleted":
             conn.execute(
                 "UPDATE source_items SET state='deleted', video_id=?, blocked_reason='deleted' "
                 "WHERE item_id=?", (video_id, item["item_id"]))
-            return video_id or ""
-        backend_video = self.backend.published_video_id(conn, item, source)
-        if backend_video:
+            return "deleted", video_id or "", None
+        if state == "failed":
             conn.execute(
-                "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
-                "blocked_reason=NULL, retry_at_ms=NULL WHERE item_id=?",
-                (backend_video, now, item["item_id"]))
-            return backend_video
-        return None
+                "UPDATE source_items SET state='failed', blocked_reason=?, retry_at_ms=NULL "
+                "WHERE item_id=?", (reason, item["item_id"]))
+            return "conflict", None, reason
+        return None, None, None
 
     def _preflight(self, claim: dict) -> dict | None:
         """Local checks before any start; failures release the slot and never
@@ -2337,6 +2873,19 @@ class SourceSubscriptionService:
             if int(item["actual_starts"]) >= MAX_ACTUAL_STARTS:
                 self._release(conn, start, now, "attempts_exhausted")
                 return {"outcome": "released", "code": "attempts_exhausted", **base}
+            # AS-03: recheck the corpus under the acquired execution lock. A
+            # manual capture that completed between claim and start links the
+            # item without a charge; a conflict or tombstone never starts.
+            linked, video_id, reason = self._link_if_captured(conn, source, item, now)
+            if linked == "committed":
+                self._release(conn, start, now, "already_captured")
+                return {"outcome": "linked", "video_id": video_id, **base}
+            if linked == "deleted":
+                self._release(conn, start, now, "deleted")
+                return {"outcome": "released", "code": "deleted", **base}
+            if linked == "conflict":
+                self._release(conn, start, now, "identity_conflict")
+                return {"outcome": "identity_conflict", "reason": reason, **base}
             backend_id = self.backend.bind(conn, dict(start), dict(item), dict(source))
             self._test_boundary("after_backend_insert_before_binding")
             if type(backend_id) is not str or not backend_id:
@@ -2371,28 +2920,72 @@ class SourceSubscriptionService:
         except Exception as exc:
             log.exception("capture backend raised for %s", start["start_id"])
             outcome = CaptureOutcome("failed", code="backend_error", message=type(exc).__name__)
-        return self.apply_outcome(start["start_id"], token, outcome)
+        # AS-02: a synchronous outcome is the executor's own report that it
+        # returned; the backend still verifies it against its executor state.
+        proof = None
+        if outcome.status != "in_flight":
+            proof = CompletionProof(start["start_id"], token, self.backend.kind, "executor_returned")
+        return self.apply_outcome(start["start_id"], token, outcome, proof=proof)
 
-    def apply_outcome(self, start_id: str, owner_token: str, outcome: CaptureOutcome) -> dict:
+    def apply_outcome(self, start_id: str, owner_token: str, outcome: CaptureOutcome, *,
+                      proof: CompletionProof | None = None) -> dict:
         if outcome.status == "succeeded":
-            return self.complete_capture(start_id, owner_token, outcome.video_id or "")
+            return self.complete_capture(start_id, owner_token, outcome.video_id or "", proof=proof)
         if outcome.status == "failed":
             return self.fail_capture(start_id, owner_token, outcome.code or "download_failed",
-                                     terminal=outcome.terminal)
+                                     terminal=outcome.terminal, proof=proof)
         if outcome.status == "uncertain":
             return self.mark_uncertain(start_id, owner_token)
         if outcome.status == "in_flight":
             return {"outcome": "in_flight", "start_id": start_id}
-        return self.fail_capture(start_id, owner_token, outcome.code or "unknown_outcome")
+        return self.fail_capture(start_id, owner_token, outcome.code or "unknown_outcome", proof=proof)
+
+    def _worker_terminal(self, start: dict, proof: CompletionProof | None) -> bool:
+        """AS-02: active ownership is released only on verified terminal
+        execution: a callback proof the backend verifies against its executor
+        state, or a probe that reports ``stopped``. Lease expiry, the owner
+        token, or an empty in-memory registry never count as death."""
+        if proof is not None and proof.start_id == start["start_id"] \
+                and proof.owner_token == start["owner_token"] \
+                and proof.backend_kind == self.backend.kind:
+            try:
+                if _backend_call(self.backend, "verify_proof", dict(start), proof):
+                    return True
+            except Exception:
+                log.exception("completion proof verification raised for %s", start["start_id"])
+        try:
+            probe = self.backend.probe(dict(start))
+        except Exception:
+            log.exception("backend probe raised for %s", start["start_id"])
+            probe = "unknown"
+        return probe == "stopped"
+
+    @staticmethod
+    def _hold_uncertain(conn, start: dict) -> str:
+        """Keep active ownership and the charge (contract ledger table,
+        ``started`` -> ``uncertain``); idempotent for an uncertain row."""
+        if start["state"] == "started":
+            conn.execute("UPDATE source_capture_starts SET state='uncertain' WHERE start_id=?",
+                         (start["start_id"],))
+            conn.execute("UPDATE source_items SET state='uncertain' WHERE item_id=? "
+                         "AND state='started'", (start["item_id"],))
+        return "uncertain"
 
     def complete_capture(self, start_id: str, owner_token: str, video_id: str,
-                         now: int | None = None) -> dict:
+                         now: int | None = None, *, proof: CompletionProof | None = None) -> dict:
         """``started``/``uncertain`` -> ``succeeded`` after publication committed:
-        one write transaction marks the item committed, the ledger succeeded,
-        links every matching observation and inserts the outbox row."""
+        one write transaction verifies the durable publication (AS-01), marks
+        the item committed, the ledger succeeded, links every matching
+        observation and only then inserts the outbox row.
+
+        A callback's ``video_id`` is checked against the attempt's own corpus
+        identity (AS-06); incomplete evidence never succeeds: with verified
+        terminal execution it is a partial-publication failure, otherwise the
+        attempt stays in flight as ``uncertain``."""
         now = self._now() if now is None else int(now)
         if type(video_id) is not str or not video_id.strip():
-            return self.fail_capture(start_id, owner_token, "publication_without_identity", now=now)
+            return self.fail_capture(start_id, owner_token, "publication_without_identity",
+                                     now=now, proof=proof)
         with self.store.write() as conn:
             start = self._start(conn, start_id)
             if start is None or start["owner_token"] != owner_token:
@@ -2402,6 +2995,16 @@ class SourceSubscriptionService:
                         "idempotent": True}
             if start["state"] not in ("started", "uncertain"):
                 return {"outcome": "not_started", "state": start["state"], "start_id": start_id}
+            item = self._item(conn, start["item_id"])
+            source = self._source(conn, start["source_id"])
+            expected = self._corpus_video_id(source, item["entry_id"])
+            if video_id != expected:
+                evidence = PublicationEvidence(video_id, False, "identity_conflict:callback",
+                                               conflict=True)
+            else:
+                evidence = self._publication_evidence(conn, source, item, video_id, start=start)
+            if not evidence.complete:
+                return self._settle_incomplete(conn, start, item, evidence, proof, now)
             conn.execute(
                 "UPDATE source_capture_starts SET state='succeeded', finished_at_ms=?, video_id=? "
                 "WHERE start_id=?", (now, video_id, start_id))
@@ -2424,10 +3027,33 @@ class SourceSubscriptionService:
         self._test_boundary("after_outbox_commit")
         return result
 
+    def _settle_incomplete(self, conn, start: dict, item: dict, evidence: PublicationEvidence,
+                           proof: CompletionProof | None, now: int) -> dict:
+        """AS-01: a completion claim without complete evidence. Once execution
+        is verifiably terminal the partial publication is exposed as a failure
+        (terminal for an identity conflict); otherwise the attempt stays in
+        flight as ``uncertain`` so the original worker can finish."""
+        reason = evidence.reason or "publication_incomplete"
+        if evidence.conflict:
+            code, terminal = reason, True
+        else:
+            code, terminal = f"publication_incomplete:{reason}", False
+        if self._worker_terminal(start, proof):
+            return self._fail(conn, start, item, code, terminal, now)
+        state = self._hold_uncertain(conn, start)
+        return {"outcome": "publication_incomplete", "reason": reason, "state": state,
+                "start_id": start["start_id"], "item_id": item["item_id"],
+                "source_id": start["source_id"]}
+
     def fail_capture(self, start_id: str, owner_token: str, code: str, *,
-                     terminal: bool = False, now: int | None = None) -> dict:
+                     terminal: bool = False, now: int | None = None,
+                     proof: CompletionProof | None = None) -> dict:
         """``started``/``uncertain`` -> ``failed``: release active ownership, retain
-        the day's charge, record retry eligibility (contract ledger table)."""
+        the day's charge, record retry eligibility (contract ledger table).
+
+        AS-02: requires verified terminal execution (a checked callback proof
+        or a ``stopped`` probe). Without it the attempt stays in flight as
+        ``uncertain``; no replacement can be reserved for the source."""
         now = self._now() if now is None else int(now)
         with self.store.write() as conn:
             start = self._start(conn, start_id)
@@ -2435,29 +3061,38 @@ class SourceSubscriptionService:
                 return {"outcome": "not_owner", "start_id": start_id}
             if start["state"] not in ("started", "uncertain"):
                 return {"outcome": "not_started", "state": start["state"], "start_id": start_id}
-            conn.execute(
-                "UPDATE source_capture_starts SET state='failed', finished_at_ms=?, "
-                "release_or_failure_code=? WHERE start_id=?", (now, sanitize_message(code)[:80], start_id))
+            if not self._worker_terminal(start, proof):
+                state = self._hold_uncertain(conn, start)
+                return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
+                        "item_id": start["item_id"], "source_id": start["source_id"], "code": code}
             item = self._item(conn, start["item_id"])
-            attempts = int(item["actual_starts"])
-            retry_at = None
-            if terminal:
-                conn.execute(
-                    "UPDATE source_items SET state='failed', blocked_reason=?, retry_at_ms=NULL "
-                    "WHERE item_id=?", (code, item["item_id"]))
-            elif attempts >= MAX_ACTUAL_STARTS:
-                conn.execute(
-                    "UPDATE source_items SET state='failed', blocked_reason='attempts_exhausted', "
-                    "retry_at_ms=NULL WHERE item_id=?", (item["item_id"],))
-            else:
-                # Contract: wait 15 minutes after attempt one, 60 after attempt two.
-                retry_at = now + RETRY_WAIT_MS[min(attempts - 1, len(RETRY_WAIT_MS) - 1)]
-                conn.execute(
-                    "UPDATE source_items SET state='eligible', blocked_reason=?, retry_at_ms=? "
-                    "WHERE item_id=?", (code, retry_at, item["item_id"]))
-            return {"outcome": "failed", "start_id": start_id, "item_id": item["item_id"],
-                    "source_id": start["source_id"], "code": code, "terminal": terminal,
-                    "attempts": attempts, "retry_at_ms": retry_at}
+            return self._fail(conn, start, item, code, terminal, now)
+
+    @staticmethod
+    def _fail(conn, start: dict, item: dict, code: str, terminal: bool, now: int) -> dict:
+        conn.execute(
+            "UPDATE source_capture_starts SET state='failed', finished_at_ms=?, "
+            "release_or_failure_code=? WHERE start_id=?",
+            (now, sanitize_message(code)[:80], start["start_id"]))
+        attempts = int(item["actual_starts"])
+        retry_at = None
+        if terminal:
+            conn.execute(
+                "UPDATE source_items SET state='failed', blocked_reason=?, retry_at_ms=NULL "
+                "WHERE item_id=?", (code, item["item_id"]))
+        elif attempts >= MAX_ACTUAL_STARTS:
+            conn.execute(
+                "UPDATE source_items SET state='failed', blocked_reason='attempts_exhausted', "
+                "retry_at_ms=NULL WHERE item_id=?", (item["item_id"],))
+        else:
+            # Contract: wait 15 minutes after attempt one, 60 after attempt two.
+            retry_at = now + RETRY_WAIT_MS[min(attempts - 1, len(RETRY_WAIT_MS) - 1)]
+            conn.execute(
+                "UPDATE source_items SET state='eligible', blocked_reason=?, retry_at_ms=? "
+                "WHERE item_id=?", (code, retry_at, item["item_id"]))
+        return {"outcome": "failed", "start_id": start["start_id"], "item_id": item["item_id"],
+                "source_id": start["source_id"], "code": code, "terminal": terminal,
+                "attempts": attempts, "retry_at_ms": retry_at}
 
     def mark_uncertain(self, start_id: str, owner_token: str, now: int | None = None) -> dict:
         """``started`` -> ``uncertain``: retain ownership and the charge until
@@ -2533,23 +3168,52 @@ class SourceSubscriptionService:
     def _reconcile_started_row(self, start: dict, now: int) -> str:
         """Steps 3-4 of restart reconciliation for one started/uncertain row.
         Returns ``succeeded``, ``failed`` or ``uncertain``. A fenced recovery
-        action: it verifies committed artifacts or a provably stopped owner and
-        never starts a replacement because a lease expired."""
+        action: it verifies complete publication evidence (AS-01) or a provably
+        stopped owner (AS-02) and never starts a replacement because a lease
+        expired. Once the owner is stopped, valid local publication is finished
+        under the original attempt when the backend can; otherwise the partial
+        publication is exposed as a failure and renewed acquisition needs a new
+        reservation."""
         with self.store.read() as conn:
             item = self._item(conn, start["item_id"])
             source = self._source(conn, start["source_id"])
-            expected = start.get("video_id") or self._corpus_video_id(source, item["entry_id"])
-            corpus = self._corpus_row(conn, expected)
-        if corpus is not None and not corpus.get("deleted_at"):
-            self.complete_capture(start["start_id"], start["owner_token"], corpus["video_id"], now=now)
-            return "succeeded"
+            expected = self._corpus_video_id(source, item["entry_id"])
+            evidence = self._publication_evidence(conn, source, item, expected, start=start)
+        if evidence.complete:
+            done = self.complete_capture(start["start_id"], start["owner_token"], expected, now=now)
+            if done.get("outcome") == "succeeded":
+                return "succeeded"
         try:
-            probe = self.backend.probe(start)
+            probe = self.backend.probe(dict(start))
         except Exception:
             log.exception("backend probe raised for %s", start["start_id"])
             probe = "unknown"
-        if probe == "stopped":
-            self.fail_capture(start["start_id"], start["owner_token"], "worker_lost", now=now)
+        if probe != "stopped":
+            # Unknown or surviving execution stays in flight (contract step 3).
+            self.mark_uncertain(start["start_id"], start["owner_token"], now=now)
+            return "uncertain"
+        if evidence.row is not None and not evidence.conflict and evidence.reason != "corpus_deleted":
+            try:
+                recovered = _backend_call(self.backend, "recover_publication", dict(start), dict(item), dict(source))
+            except Exception:
+                log.exception("publication recovery raised for %s", start["start_id"])
+                recovered = False
+            if recovered:
+                with self.store.read() as conn:
+                    evidence = self._publication_evidence(conn, source, item, expected, start=start)
+                if evidence.complete:
+                    done = self.complete_capture(start["start_id"], start["owner_token"], expected, now=now)
+                    if done.get("outcome") == "succeeded":
+                        return "succeeded"
+        if evidence.conflict:
+            code, terminal = evidence.reason or "identity_conflict", True
+        elif evidence.row is None:
+            code, terminal = "worker_lost", False
+        else:
+            code, terminal = f"publication_incomplete:{evidence.reason}", False
+        failed = self.fail_capture(start["start_id"], start["owner_token"], code,
+                                   terminal=terminal, now=now)
+        if failed.get("outcome") == "failed":
             return "failed"
         self.mark_uncertain(start["start_id"], start["owner_token"], now=now)
         return "uncertain"

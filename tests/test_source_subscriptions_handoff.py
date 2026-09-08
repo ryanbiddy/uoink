@@ -18,7 +18,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_subscriptions_fixtures import (  # noqa: E402
     Clock, FakeAdapter, FakeBackend, MINUTE_MS, OPERATOR, REGISTRY, T0, items, make_service,
-    open_index, register, rows, snapshot, starts, status, turn_on, vid,
+    open_index, publish, register, rows, snapshot, starts, status, turn_on, vid,
 )
 
 import source_subscriptions as ss  # noqa: E402
@@ -27,14 +27,16 @@ from library_work import LibraryWorkService, RequestContext as LibraryContext  #
 PROMPT_HASH = "7" * 64
 
 
-def _publish(idx, video_id, *, clips=True):
+def _publish(idx, video_id, *, backend=None, clips=True):
+    """Run AT (AS-01): ``clips=False`` leaves the item upsert without its
+    citations/clips/completion record (a partial publication); ``clips=True``
+    stages the complete durable evidence the service now verifies."""
+    if clips:
+        publish(idx, video_id, backend=backend)
+        return
     idx.upsert_yoink(dict(video_id=video_id, slug=f"slug-{video_id}", title=f"Title {video_id}",
                           topic="Old", yoinked_at="2026-09-07", corpus_path="", sidecar_path="",
                           metadata_json='{"url": "https://www.youtube.com/watch?v=' + video_id + '"}'))
-    if clips:
-        with idx.write_transaction() as conn:
-            conn.execute("INSERT INTO clips(video_id, seq, start, end, text) VALUES (?, 0, 0, 10, ?)",
-                         (video_id, f"Evidence for {video_id}"))
 
 
 def _approve_taxonomy(idx, tmp_path, clock):
@@ -76,8 +78,18 @@ def test_s16_partial_publication_never_gets_premature_work(tmp_path):
     # Stop after the corpus file/sidecar only: no index row, no completion call.
     assert service.reconcile_on_startup()["uncertain"] == 1
     assert _outbox(service) == []
-    # Stop after the item upsert but before citations/clips and completion.
+    # Stop after the item upsert but before citations/clips and completion:
+    # run AT (AS-01) keeps the attempt uncertain and creates no work, even
+    # once the worker is provably stopped it is a partial-publication failure,
+    # never a success. Here the worker stays unknown so the original attempt
+    # can still finish its local publication.
     _publish(idx, entry, clips=False)
+    assert service.reconcile_on_startup()["succeeded"] == 0
+    assert _outbox(service) == []
+    assert rows(service, "SELECT state FROM source_capture_starts")[0]["state"] == "uncertain"
+    # Complete evidence (files, provenance, timed citations, derived clips and
+    # the publisher's completion record) finishes the original attempt once.
+    _publish(idx, entry, backend=backend)
     assert service.reconcile_on_startup()["succeeded"] == 1
     assert [r["state"] for r in _outbox(service)] == ["pending"]
     assert rows(service, "SELECT state FROM source_capture_starts")[0]["state"] == "succeeded"
@@ -252,7 +264,7 @@ def test_s18_distinct_waiting_conditions_keep_the_item_visible(tmp_path):
 
 def test_s18_linked_preexisting_capture_reports_not_requested(tmp_path):
     idx, service, clock, backend, sid = _env(tmp_path)
-    _publish(idx, vid(1))
+    _publish(idx, vid(1), backend=backend)  # complete manual publication (AS-01)
     assert service.advance_source(sid)["outcome"] == "linked"
     record = next(i for i in status(service, sid)["items"] if i["entry_id"] == vid(1))
     assert record["classification"] == {"state": "not_requested", "work_id": None}

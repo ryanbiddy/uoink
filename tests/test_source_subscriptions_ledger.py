@@ -18,8 +18,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_subscriptions_fixtures import (  # noqa: E402
     CHANNEL_URL, Clock, DAY_MS, FEED_URL, FakeAdapter, FakeBackend, MINUTE_MS, PLAYLIST_URL,
-    REGISTRY, T0, items, make_service, open_index, register, rows, snapshot, starts, status,
-    turn_off, turn_on, vid,
+    REGISTRY, T0, items, make_service, open_index, publish, register, rows, snapshot, starts,
+    status, turn_off, turn_on, vid,
 )
 
 import source_subscriptions as ss  # noqa: E402
@@ -34,6 +34,14 @@ def _source_row(service, sid):
 def _reset_interval(idx, sid):
     with idx.write_transaction() as conn:
         conn.execute("UPDATE source_subscriptions SET capture_not_before_ms=0 WHERE source_id=?", (sid,))
+
+
+def _complete(service, idx, backend, claim):
+    """Run AT (AS-01): a completion callback carries the attempt's own corpus
+    identity and only succeeds once the durable publication is verifiable."""
+    entry = claim["capture_key"].split(":", 1)[1]
+    publish(idx, entry, backend=backend)
+    return service.complete_capture(claim["start_id"], claim["owner_token"], entry)
 
 
 def _ready_source(tmp_path, n_items=5, *, backend=None, clock=None, kind="youtube_channel",
@@ -133,7 +141,9 @@ def test_s05_start_before_off_completes_visibly_and_cannot_retry_while_off(tmp_p
     summary = status(service, sid)["source"]
     assert summary["consent_state"] == "off" and summary["allowance"]["charged"] == 1
     assert summary["in_flight"][0]["state"] == "started"
-    # The started pipeline may finish and publish while off.
+    # The started pipeline may finish and publish while off. Run AT (AS-01):
+    # completion needs the durable publication evidence, not just an id.
+    publish(idx, vid(1), backend=backend)
     done = service.complete_capture(claim["start_id"], claim["owner_token"], vid(1))
     assert done["outcome"] == "succeeded"
     committed = next(i for i in status(service, sid)["items"] if i["item_id"] == claim["item_id"])
@@ -170,7 +180,7 @@ def test_s10_two_schedulers_race_the_tenth_slot(tmp_path):
         if n % 3 == 0:
             service.fail_capture(claim["start_id"], claim["owner_token"], "download_failed")
         else:
-            service.complete_capture(claim["start_id"], claim["owner_token"], claim["item_id"])
+            assert _complete(service, idx, backend, claim)["outcome"] == "succeeded"
     allowance = status(service, sid)["source"]["allowance"]
     assert allowance["charged"] == 9 and allowance["reserved"] == 0 and allowance["remaining"] == 1
     _reset_interval(idx, sid)
@@ -198,7 +208,7 @@ def test_s10_two_schedulers_race_the_tenth_slot(tmp_path):
     assert service_for.mark_started(winner["start_id"], winner["owner_token"])["outcome"] == "started"
     allowance = status(service, sid)["source"]["allowance"]
     assert allowance["charged"] == 10 and allowance["remaining"] == 0
-    service_for.complete_capture(winner["start_id"], winner["owner_token"], winner["item_id"])
+    assert _complete(service_for, idx, backend, winner)["outcome"] == "succeeded"
     _reset_interval(idx, sid)
     assert service.claim_start(sid)["outcome"] == "allowance_exhausted"
     assert other.claim_start(sid)["outcome"] == "allowance_exhausted"
@@ -225,7 +235,7 @@ def test_s10_from_zero_through_exhaustion_counts_never_exceed_ten(tmp_path):
         if n % 2:
             service.fail_capture(claim["start_id"], claim["owner_token"], "download_failed")
         else:
-            service.complete_capture(claim["start_id"], claim["owner_token"], claim["item_id"])
+            assert _complete(service, idx, backend, claim)["outcome"] == "succeeded"
     _reset_interval(idx, sid)
     assert service.claim_start(sid)["outcome"] == "allowance_exhausted"
     allowance = status(service, sid)["source"]["allowance"]
@@ -322,7 +332,7 @@ def test_s12_reservation_before_midnight_cannot_start_after_it(tmp_path):
     assert yesterday["utc_day"] == ss.utc_day(MIDNIGHT + 1000) and yesterday["charged"] == 1
     # advance_source does the same rollover in one pass.
     _reset_interval(idx, sid)
-    service.complete_capture(fresh["start_id"], fresh["owner_token"], vid(1))
+    assert _complete(service, idx, backend, fresh)["outcome"] == "succeeded"
     clock.now = MIDNIGHT + DAY_MS - 1000
     claim2 = service.claim_start(sid)
     clock.now = MIDNIGHT + DAY_MS + 1000
@@ -342,6 +352,7 @@ def test_s12_started_work_crosses_midnight_once_and_retry_charges_new_day(tmp_pa
     start_id = backend.runs[0]["start_id"]
     token = backend.runs[0]["owner_token"]
     clock.now = MIDNIGHT + 5 * MINUTE_MS
+    publish(idx, vid(1), backend=backend)
     assert service.complete_capture(start_id, token, vid(1))["outcome"] == "succeeded"
     row = starts(service, sid)[0]
     assert row["utc_day"] == ss.utc_day(MIDNIGHT - 5 * MINUTE_MS) and row["state"] == "succeeded"
@@ -416,7 +427,10 @@ def test_s13_restart_after_reserve_after_start_and_during_execution(tmp_path):
     assert row["state"] == "failed" and row["release_or_failure_code"] == "worker_lost"
     item = next(i for i in items(service, sid) if i["item_id"] == row["item_id"])
     assert item["actual_starts"] == 1 and item["state"] == "eligible"
-    # (c) terminate during execution; committed artifacts complete the row once.
+    # (c) terminate during execution; complete committed artifacts finish the
+    # row once. Run AT (AS-01): a bare index row is a partial publication and
+    # keeps the attempt uncertain; files, provenance, timed citations, clips
+    # and the publisher's completion record together complete it.
     _reset_interval(idx, sid)
     clock.advance(DAY_MS)
     second = service.advance_source(sid)
@@ -426,9 +440,15 @@ def test_s13_restart_after_reserve_after_start_and_during_execution(tmp_path):
                          if i["item_id"] == backend.runs[-1]["item_id"])
     idx.upsert_yoink(dict(video_id=running_entry, slug="s", title="t", topic="x", yoinked_at="2026",
                           corpus_path="", sidecar_path=""))
+    backend.probe_result = "unknown"
     idx.close()
     idx = open_index(tmp_path)
     service = make_service(idx, clock=clock, adapter=adapter, backend=backend)
+    report = service.reconcile_on_startup()
+    assert report["uncertain"] == 1 and report["succeeded"] == 0, "partial publication is not success"
+    assert rows(service, "SELECT COUNT(*) AS n FROM source_classification_outbox")[0]["n"] == 0
+    publish(idx, running_entry, backend=backend)
+    backend.probe_result = "stopped"
     report = service.reconcile_on_startup()
     assert report["succeeded"] == 1 and report["outbox_repaired"] == 0
     row = next(r for r in starts(service, sid) if r["start_id"] == start_id)
@@ -460,6 +480,7 @@ def test_s14_backend_binding_is_atomic_and_stale_owners_are_fenced(tmp_path):
     # A callback for a different attempt cannot mutate this one.
     assert service.complete_capture("st_missing", token, vid(1))["outcome"] == "not_owner"
     # The owner completes exactly once; a second completion is idempotent.
+    publish(idx, vid(1), backend=backend)
     assert service.complete_capture(row["start_id"], token, vid(1))["outcome"] == "succeeded"
     assert service.complete_capture(row["start_id"], token, vid(1))["idempotent"] is True
     assert service.complete_capture(row["start_id"], token, vid(2))["outcome"] == "not_started"
@@ -503,6 +524,7 @@ def test_s15_same_video_in_channel_and_playlists_charges_only_the_winner(tmp_pat
     assert status(service, playlist_a)["source"]["allowance"]["charged"] == 0
     # Commit: every matching observation links; only the channel is charged.
     start = backend.runs[0]
+    publish(idx, shared, backend=backend)
     assert service.complete_capture(start["start_id"], start["owner_token"], shared)["outcome"] == "succeeded"
     for sid in (channel, playlist_a, playlist_b):
         record = next(i for i in items(service, sid) if i["entry_id"] == shared)
@@ -538,17 +560,19 @@ def test_s15_same_video_in_channel_and_playlists_charges_only_the_winner(tmp_pat
 
 def test_s15_manual_capture_links_without_a_standing_charge(tmp_path):
     idx, service, clock, adapter, backend, sid = _ready_source(tmp_path, 2)
-    # Pre-existing manual capture of vid(1): linked before any reservation.
-    idx.upsert_yoink(dict(video_id=vid(1), slug="s", title="t", topic="x", yoinked_at="2026",
-                          corpus_path="", sidecar_path=""))
+    # Pre-existing complete manual capture of vid(1): linked before any
+    # reservation. Run AT (AS-01): linking applies the completion rule, so
+    # the manual capture must be a complete publication, not a bare row.
+    publish(idx, vid(1), backend=backend)
     outcome = service.advance_source(sid)
     assert outcome["outcome"] == "linked" and outcome["video_id"] == vid(1)
     assert starts(service, sid) == [] and backend.runs == []
     record = next(i for i in status(service, sid)["items"] if i["entry_id"] == vid(1))
     assert record["capture_state"] == "committed"
     assert record["classification"] == {"state": "not_requested", "work_id": None}
-    # A manual capture that completes concurrently (backend reports it) links too.
-    backend.published[vid(2)] = vid(2)
+    # A manual capture that completes concurrently (backend reports it, and the
+    # durable evidence agrees) links too.
+    publish(idx, vid(2), backend=backend)
     _reset_interval(idx, sid)
     outcome = service.advance_source(sid)
     assert outcome["outcome"] == "linked" and outcome["video_id"] == vid(2)

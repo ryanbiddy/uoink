@@ -24,6 +24,7 @@ import json
 import logging
 import os
 import re
+import sqlite3
 import subprocess
 import tempfile
 import urllib.error
@@ -962,6 +963,73 @@ def _episode_corpus_id(row: dict) -> tuple[str, str]:
     return f"episode_{suffix}", suffix
 
 
+class CorpusIdentityConflict(ValueError):
+    """The corpus row at this episode's deterministic, shortened id carries a
+    different full identity (feed URL plus GUID). AS-06: the publisher never
+    links, resumes or overwrites such a row; the conflict stays visible."""
+
+
+def _episode_full_identity(row: dict) -> tuple[str, str, str]:
+    """``(normalized feed URL, guid, capture_key)``: the collision-resistant
+    identity persisted with every publication (AS-06)."""
+    feed_url = str(row.get("feed_url") or "").strip()
+    guid = str(row.get("guid") or "")
+    try:
+        feed_key = _subscriptions().normalize_podcast_feed_url(feed_url)
+    except Exception:
+        feed_key = feed_url
+    return feed_key, guid, _subscriptions().capture_key_for("podcast_rss", feed_key, guid)
+
+
+def _same_feed_url(left: str, right: str) -> bool:
+    try:
+        normalize = _subscriptions().normalize_podcast_feed_url
+        return normalize(left) == normalize(right)
+    except Exception:
+        return left.strip() == right.strip()
+
+
+def _check_corpus_identity(idx, existing: dict | None, row: dict, video_id: str) -> None:
+    """AS-06: before writing at a shortened corpus id, compare the full
+    identity already persisted there (provenance, capture key, or the linked
+    episode row) with this episode's. A mismatch raises; a legacy row without
+    any provenance is compatible and gains provenance on this write."""
+    if not existing:
+        return
+    try:
+        meta = json.loads(existing.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        meta = {}
+    if not isinstance(meta, dict):
+        meta = {}
+    feed_key, guid, capture_key = _episode_full_identity(row)
+    stored_feed, stored_guid = meta.get("feed_url"), meta.get("guid")
+    if isinstance(stored_feed, str) and isinstance(stored_guid, str):
+        if stored_guid != guid or not _same_feed_url(stored_feed, feed_key):
+            raise CorpusIdentityConflict(
+                f"corpus id {video_id} belongs to another feed/entry; refusing to overwrite")
+        return
+    stored_key = meta.get("capture_key")
+    if isinstance(stored_key, str) and stored_key:
+        if stored_key != capture_key:
+            raise CorpusIdentityConflict(
+                f"corpus id {video_id} belongs to another capture identity; refusing to overwrite")
+        return
+    linked_episode = meta.get("episode_id")
+    if isinstance(linked_episode, int) and linked_episode != int(row.get("id") or -1):
+        try:
+            linked = idx._conn.execute(
+                "SELECT f.feed_url, e.guid FROM podcast_episodes e "
+                "JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.id=?",
+                (linked_episode,)).fetchone()
+        except sqlite3.Error:
+            linked = None
+        if linked is not None and (str(linked["guid"] or "") != guid
+                                   or not _same_feed_url(str(linked["feed_url"] or ""), feed_key)):
+            raise CorpusIdentityConflict(
+                f"corpus id {video_id} is linked to another episode's identity; refusing to overwrite")
+
+
 def _timestamp_label(seconds: float) -> str:
     total = max(0, int(seconds))
     hours, rem = divmod(total, 3600)
@@ -1118,6 +1186,11 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     markdown = "\n".join(markdown_lines).rstrip() + "\n"
 
     existing = idx.get_yoink(video_id)
+    # AS-06: the shortened corpus id is not the identity. Refuse to write over
+    # a row that carries another feed/GUID, and persist the full identity
+    # (normalized feed URL, GUID, capture key) with this publication.
+    _check_corpus_identity(idx, existing, row, video_id)
+    feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
     sidecar = {
         "schema_version": 2,
@@ -1127,6 +1200,9 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "platform": "podcast",
         "url": source_url,
         "source_url": source_url,
+        "feed_url": feed_key,
+        "guid": guid,
+        "capture_key": capture_key,
         "podcast_title": podcast_title,
         "episode_title": episode_title,
         "title": episode_title,
@@ -1166,6 +1242,10 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "upload_date": row.get("published_at"),
             "podcast_title": podcast_title,
             "episode_id": episode_id,
+            # AS-06: full identity provenance behind the shortened corpus id.
+            "feed_url": feed_key,
+            "guid": guid,
+            "capture_key": capture_key,
         }, ensure_ascii=False),
         "schema_version": 2, "source_type": "episode",
         "platform": "podcast",

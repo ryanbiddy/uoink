@@ -15,6 +15,7 @@ Endpoints:
     GET  /dashboard          helper-served local dashboard
 """
 
+import contextlib
 import hashlib
 import json
 import logging
@@ -6838,12 +6839,24 @@ def _podcast_transcription_worker() -> None:
     priority = "below_normal" if priority_lowered else "default"
     while True:
         job_id = _podcast_transcription_queue.get()
+        manual_lock = None
         try:
             with _jobs_lock:
                 job = dict(_jobs.get(job_id) or {})
             if not job or job.get("state") in _JOB_TERMINAL_STATES:
                 continue
             episode_id = int(job["episode_id"])
+            if not job.get("source_start_id"):
+                # AS-03: a manual job shares the cross-process capture-identity
+                # lock with the standing dispatcher for the whole pipeline, so a
+                # standing start for the same episode waits without a charge.
+                key = _podcast_capture_key(episode_id)
+                if key:
+                    try:
+                        manual_lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, key)
+                    except OSError:
+                        log.exception("capture identity lock unavailable; podcast job %s "
+                                      "proceeds under the process queue only", job_id)
             model = whisper_runner.normalize_model(job.get("model"))
             audio_path = Path(job["audio_path"])
             reusable = None
@@ -6957,7 +6970,54 @@ def _podcast_transcription_worker() -> None:
                 message="Podcast transcription failed.")
             _settle_source_capture(job_id, video_id=None, failure_code="transcription_failed")
         finally:
+            if manual_lock is not None:
+                manual_lock.release()
             _podcast_transcription_queue.task_done()
+
+
+def _podcast_capture_key(episode_id: int) -> str | None:
+    """Canonical capture identity of a podcast episode (normalized feed URL
+    plus GUID), the key both dispatchers lock on (AS-03)."""
+    try:
+        row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
+    except Exception:
+        return None
+    if not row or not row.get("feed_url") or not row.get("guid"):
+        return None
+    try:
+        feed_key = source_subscriptions.normalize_podcast_feed_url(row["feed_url"])
+    except Exception:
+        feed_key = str(row["feed_url"]).strip()
+    return source_subscriptions.capture_key_for("podcast_rss", feed_key, str(row["guid"]))
+
+
+def _manual_capture_key(url: str) -> str:
+    """Capture identity a manual extraction locks on: the standing key for a
+    YouTube watch URL, otherwise a URL-derived key that never collides with a
+    standing source (AS-03)."""
+    video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+    if video_id:
+        return source_subscriptions.capture_key_for("youtube_channel", "", video_id)
+    return "url:" + source_subscriptions.sha256_text(str(url).strip())
+
+
+@contextlib.contextmanager
+def _manual_extraction_ownership(url: str):
+    """The common dispatcher lock for manual extraction: the process-local
+    extraction lock plus the cross-process capture-identity file lock, held
+    through extraction and publication (AS-03). A standing start for the
+    same identity finds it busy and waits without a charge."""
+    with _extract_lock:
+        lock = None
+        try:
+            lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, _manual_capture_key(url))
+        except OSError:
+            log.exception("capture identity lock unavailable; extraction proceeds under the process lock")
+        try:
+            yield
+        finally:
+            if lock is not None:
+                lock.release()
 
 
 def _settle_source_capture(job_id: str, *, video_id: str | None,
@@ -6973,17 +7033,34 @@ def _settle_source_capture(job_id: str, *, video_id: str | None,
         return
     try:
         service = _source_service()
+        backend = service.backend
+        # AS-02: the job record is terminal by now; the proof is verified
+        # against that state, not inferred from the owner token.
+        proof = source_subscriptions.CompletionProof(
+            start_id, owner_token or "", backend.kind, "job_terminal")
         if not owner_token:
             # A job resumed from disk after a restart has no in-memory token:
             # reconcile the row from its durable artifacts instead.
             outcome = service.reconcile_start(start_id)
         elif video_id and not failure_code:
-            outcome = service.complete_capture(start_id, owner_token, video_id)
+            outcome = service.complete_capture(start_id, owner_token, video_id, proof=proof)
         else:
-            outcome = service.fail_capture(start_id, owner_token, failure_code or "failed")
+            outcome = service.fail_capture(start_id, owner_token, failure_code or "failed",
+                                           proof=proof)
         log.info("standing capture %s settled: %s", start_id, outcome.get("outcome"))
     except Exception:
         log.exception("standing capture settle failed for %s", start_id)
+    finally:
+        # AS-03: the standing start handed its capture-identity lock to this job.
+        try:
+            with _get_index()._lock:
+                row = _get_index()._conn.execute(
+                    "SELECT capture_key FROM source_capture_starts WHERE start_id=?",
+                    (start_id,)).fetchone()
+            if row is not None and hasattr(_source_service().backend, "release"):
+                _source_service().backend.release({"start_id": start_id, "capture_key": row[0]})
+        except Exception:
+            log.exception("standing capture lock release failed for %s", start_id)
 
 
 def _ensure_podcast_transcription_worker() -> threading.Thread:
@@ -7136,9 +7213,11 @@ _source_capture_threads_lock = threading.Lock()
 
 
 def _source_instance_id() -> str:
-    """Stable per-install owner identity for ledger rows (contract, restart
-    reconciliation: process identity, not a random per-boot token)."""
-    return f"{socket.gethostname()}:{DATA_ROOT}"
+    """Owner identity for ledger rows: one persisted process incarnation per
+    helper process and data root (AS-02). Hostname plus data root only named
+    the install, so a restarted helper could not tell its own dead predecessor
+    from a surviving one; the incarnation token and its persisted pid can."""
+    return source_subscriptions.process_incarnation(DATA_ROOT).identity
 
 
 def _source_operator_context() -> "source_subscriptions.RequestContext":
@@ -7158,6 +7237,85 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     reservation itself is the durable dispatch intent and the start id is the
     job identity (contract, "Atomic starts", queue paragraph)."""
     kind = "server_capture"
+
+    def __init__(self):
+        # AS-03: capture_key -> (CaptureLock, holds_extract_lock). Guarded by
+        # _source_capture_threads_lock so the class needs no lock of its own.
+        self._leases: dict = {}
+
+    # ---- execution ownership (AS-03) ------------------------------------
+    def acquire(self, start, item, source):
+        """Take the dispatcher ownership a standing start needs before its
+        started transition: for YouTube the process-local extraction lock the
+        manual dispatchers hold through extraction, plus for every kind the
+        cross-process file lock keyed by canonical capture identity. A busy
+        owner returns ``busy`` so the reservation is released without a
+        charge and the observation stays eligible."""
+        key = start["capture_key"]
+        holds_extract = False
+        if source["kind"] == "podcast_rss":
+            episode_id = item.get("legacy_episode_id")
+            with _jobs_lock:
+                busy_job = episode_id is not None and any(
+                    job.get("kind") == "podcast_transcribe"
+                    and job.get("episode_id") == int(episode_id)
+                    and job.get("state") not in _JOB_TERMINAL_STATES
+                    and job.get("source_start_id") != start["start_id"]
+                    for job in _jobs.values())
+            if busy_job:
+                return source_subscriptions.CaptureOutcome(
+                    "busy", code="manual_transcription_in_progress")
+        else:
+            if not _extract_lock.acquire(blocking=False):
+                return source_subscriptions.CaptureOutcome(
+                    "busy", code="manual_capture_in_progress")
+            holds_extract = True
+        try:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+            busy = lock is None
+        except OSError:
+            # The lock directory is unusable: keep process-local ownership
+            # rather than stalling every standing start behind a phantom owner.
+            log.exception("capture identity lock unavailable for %s", start["start_id"])
+            lock, busy = None, False
+        if busy:
+            if holds_extract:
+                _extract_lock.release()
+            return source_subscriptions.CaptureOutcome("busy", code="capture_identity_locked")
+        with _source_capture_threads_lock:
+            self._leases[key] = (lock, holds_extract)
+        return None
+
+    def release(self, start):
+        with _source_capture_threads_lock:
+            lease = self._leases.pop(start["capture_key"], None)
+        if lease is None:
+            return
+        lock, holds_extract = lease
+        if lock is not None:
+            lock.release()
+        if holds_extract:
+            try:
+                _extract_lock.release()
+            except RuntimeError:
+                pass
+
+    def _ensure_ownership(self, start):
+        """A worker reached without ``acquire`` (direct ``execute_started``)
+        still runs under the shared dispatcher lock: block until owned."""
+        with _source_capture_threads_lock:
+            owned = start["capture_key"] in self._leases
+        if owned:
+            return
+        _extract_lock.acquire()
+        try:
+            lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, start["capture_key"])
+        except OSError:
+            log.exception("capture identity lock unavailable for %s; extraction proceeds "
+                          "under the process lock", start["start_id"])
+            lock = None
+        with _source_capture_threads_lock:
+            self._leases[start["capture_key"]] = (lock, True)
 
     def preflight(self, item, source):
         if source["kind"] == "podcast_rss":
@@ -7195,46 +7353,65 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
 
     def _run_podcast(self, start, item, source):
         episode_id = int(item["legacy_episode_id"])
-        downloaded = podcasts.download_episode_audio(
-            _get_index(), episode_id, data_root=DATA_ROOT)
-        if not downloaded.get("ok"):
-            code = "download_failed"
-            if downloaded.get("error") == "timeout":
-                code = "download_timeout"
-            return source_subscriptions.CaptureOutcome("failed", code=code)
-        settings = _read_settings() or {}
-        queued, status = _queue_podcast_transcription(
-            episode_id,
-            model=whisper_runner.normalize_model(settings.get("whisper_model")),
-            diarize=bool(settings.get("diarization_default")),
-            consent_given=False, publish_to_corpus=True,
-            source_start_id=start["start_id"], source_owner_token=start["owner_token"])
-        if status == 412:
-            return source_subscriptions.CaptureOutcome(
-                "failed", code="missing_transcription_setup")
-        if not queued.get("ok"):
-            return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
-        return source_subscriptions.CaptureOutcome("in_flight")
+        start_id = start["start_id"]
+        # AS-02: the bounded enclosure download runs on this thread with no
+        # job row yet; register it so a probe sees a surviving execution.
+        with _source_capture_threads_lock:
+            _source_capture_threads[start_id] = threading.current_thread()
+        try:
+            downloaded = podcasts.download_episode_audio(
+                _get_index(), episode_id, data_root=DATA_ROOT)
+            if not downloaded.get("ok"):
+                code = "download_failed"
+                if downloaded.get("error") == "timeout":
+                    code = "download_timeout"
+                return source_subscriptions.CaptureOutcome("failed", code=code)
+            settings = _read_settings() or {}
+            queued, status = _queue_podcast_transcription(
+                episode_id,
+                model=whisper_runner.normalize_model(settings.get("whisper_model")),
+                diarize=bool(settings.get("diarization_default")),
+                consent_given=False, publish_to_corpus=True,
+                source_start_id=start_id, source_owner_token=start["owner_token"])
+            if status == 412:
+                return source_subscriptions.CaptureOutcome(
+                    "failed", code="missing_transcription_setup")
+            if not queued.get("ok"):
+                return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
+            # The queued job now owns the capture-identity lock (released by
+            # _settle_source_capture when the job ends).
+            return source_subscriptions.CaptureOutcome("in_flight")
+        finally:
+            with _source_capture_threads_lock:
+                _source_capture_threads.pop(start_id, None)
 
     def _run_youtube(self, start, item, source):
         video_id = item["entry_id"]
         url = source_subscriptions.video_watch_url(video_id)
         start_id = start["start_id"]
         owner_token = start["owner_token"]
+        # AS-02: the callback carries an explicit proof the backend verifies
+        # against this registered worker thread.
+        proof = source_subscriptions.CompletionProof(
+            start_id, owner_token, self.kind, "worker_finished")
 
         def _worker():
             try:
-                with _extract_lock:
-                    metadata = _fetch_metadata(url)
-                    title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
-                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                              / (slugify(title) or "video"))
-                    result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
-                                             open_explorer=False)
+                # AS-03: acquire() already holds the dispatcher lock and the
+                # capture-identity lock through publication; a worker reached
+                # without acquire() blocks for them here.
+                self._ensure_ownership(start)
+                metadata = _fetch_metadata(url)
+                title = metadata.get("title") or "Untitled"
+                topic = _classify_topic(metadata)
+                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                          / (slugify(title) or "video"))
+                result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
+                                         open_explorer=False)
                 _record_single_extract_job(url, _now_iso(), result=result)
                 published = (metadata.get("id") or video_id)
-                outcome = _source_service().complete_capture(start_id, owner_token, published)
+                outcome = _source_service().complete_capture(
+                    start_id, owner_token, published, proof=proof)
                 if outcome.get("outcome") == "succeeded":
                     _heartbeat_note_ingest()
                     maybe_toast("Source capture added to Uoink",
@@ -7245,13 +7422,15 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # rejected at preflight before any charge.
                 code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
                 try:
-                    _source_service().fail_capture(start_id, owner_token, code, terminal=False)
+                    _source_service().fail_capture(start_id, owner_token, code, terminal=False,
+                                                   proof=proof)
                 except Exception:
                     log.exception("standing capture: fail_capture raised for %s", start_id)
                 log.warning("standing capture %s failed: %s", start_id, _sanitize_error(str(exc)))
             finally:
                 with _source_capture_threads_lock:
                     _source_capture_threads.pop(start_id, None)
+                self.release(start)
 
         thread = threading.Thread(target=_worker, name=f"source-capture-{start_id[-8:]}",
                                   daemon=True)
@@ -7260,22 +7439,106 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         thread.start()
         return source_subscriptions.CaptureOutcome("in_flight")
 
+    # ---- worker state (AS-02) ---------------------------------------------
     def probe(self, start):
+        """``running`` for a live worker thread, an in-process download, or a
+        queued/running podcast job; ``stopped`` only for a terminal job or an
+        owner incarnation whose persisted process is verifiably dead. An
+        empty thread registry is never death evidence: it says nothing about
+        another process, its child, or the separate podcast worker."""
         with _source_capture_threads_lock:
             thread = _source_capture_threads.get(start["start_id"])
         if thread is not None and thread.is_alive():
             return "running"
         job = _find_job_for_start(start["start_id"])
-        if job is not None and job.get("state") in _JOB_TERMINAL_STATES:
-            return "stopped"
-        if start.get("owner_instance") == _source_instance_id():
-            # Same install, no live worker thread: the process that owned it is
-            # this one (restarted) and holds no thread for it.
+        if job is not None:
+            return "stopped" if job.get("state") in _JOB_TERMINAL_STATES else "running"
+        liveness = source_subscriptions.instance_liveness(start.get("owner_instance"), DATA_ROOT)
+        if liveness == "dead":
             return "stopped"
         return "unknown"
 
+    def verify_proof(self, start, proof):
+        """AS-02: a callback proof is checked against real executor state, not
+        taken on the strength of the owner token."""
+        if not super().verify_proof(start, proof):
+            return False
+        start_id = start["start_id"]
+        with _source_capture_threads_lock:
+            thread = _source_capture_threads.get(start_id)
+        current = getattr(threading, "current_thread", None)
+        if proof.evidence == "worker_finished":
+            # The worker reports from its own thread on the way out, or has
+            # already left the registry.
+            if thread is None or not thread.is_alive():
+                return True
+            return current is not None and thread is current()
+        if proof.evidence == "job_terminal":
+            job = _find_job_for_start(start_id)
+            return job is not None and job.get("state") in _JOB_TERMINAL_STATES
+        if proof.evidence == "executor_returned":
+            # run() returned synchronously: nothing may still execute for it.
+            still_running = thread is not None and thread.is_alive() and not (
+                current is not None and thread is current())
+            return not still_running and _find_job_for_start(start_id) is None
+        return False
+
+    # ---- durable publication inspection and recovery (AS-01) --------------
     def published_video_id(self, conn, item, source):
-        return None
+        video_id = self._expected_corpus_id(item, source)
+        return self.inspect_publication(conn, None, item, source, video_id)
+
+    @staticmethod
+    def _expected_corpus_id(item, source):
+        if source["kind"] == "podcast_rss":
+            return source_subscriptions.podcast_corpus_id(source["source_key"], item["entry_id"])
+        return item["entry_id"]
+
+    def inspect_publication(self, conn, start, item, source, video_id):
+        """The publisher's own completion record. Podcast: the episode row is
+        linked to this corpus id (``_link_episode_to_yoink`` is the last
+        durable step of ``episode_to_corpus``). YouTube: ``_index_yoink`` ends
+        with the citation write, so a live row with citations is the record.
+        The service separately validates files, identity, timing and clips."""
+        try:
+            row = conn.execute(
+                "SELECT deleted_at FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+            if row is None or row["deleted_at"]:
+                return None
+            if source["kind"] == "podcast_rss":
+                linked = conn.execute(
+                    "SELECT 1 FROM podcast_episodes WHERE yoink_video_id=? "
+                    "AND transcript_status='done' LIMIT 1", (video_id,)).fetchone()
+                return video_id if linked is not None else None
+            cited = conn.execute(
+                "SELECT 1 FROM citations WHERE video_id=? LIMIT 1", (video_id,)).fetchone()
+            return video_id if cited is not None else None
+        except Exception:  # a missing table is "no completion record", not a crash
+            return None
+
+    def recover_publication(self, start, item, source):
+        """Once the owner is verifiably stopped, finish a podcast publication
+        from its already completed transcript under the original attempt (the
+        publisher is idempotent). YouTube output has no reusable stage: a
+        renewed capture needs a new reservation."""
+        if source["kind"] != "podcast_rss" or item.get("legacy_episode_id") is None:
+            return False
+        episode_id = int(item["legacy_episode_id"])
+        episode = podcasts.get_episode(_get_index(), episode_id)
+        if not episode or episode.get("transcript_status") != "done" \
+                or not episode.get("transcript_local_path"):
+            return False
+        try:
+            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT)
+        except podcasts.CorpusIdentityConflict as exc:
+            log.warning("standing capture %s: publication identity conflict: %s",
+                        start["start_id"], exc)
+            return False
+        except Exception as exc:
+            log.warning("standing capture %s: publication recovery failed: %s",
+                        start["start_id"], _sanitize_error(str(exc)))
+            return False
+        return True
 
 
 def _find_job_for_start(start_id: str) -> dict | None:
@@ -7315,13 +7578,30 @@ def _source_startup_reconciliation() -> dict:
 
 
 def _standing_due_polls() -> list[dict]:
-    """Seam for the tick and its tests: the claimed polls this pass will run."""
-    return _source_service().claim_due_polls()
+    """Seam for the tick and its tests: the due candidates this pass will run.
+
+    AS-04: bounded poll-lease reconciliation runs first, so an owner that
+    died mid-fetch loses its lease with ``poll_timeout`` and backoff instead
+    of being excluded from every later due query. AS-05: candidates are not
+    claimed here; ``_poll_source_for_watch`` claims each lease immediately
+    before its fetch, and the group is bounded so a large due set cannot
+    starve the capture and outbox passes."""
+    service = _source_service()
+    service.expire_poll_leases()
+    return [{"source_id": source_id, "claimed": False}
+            for source_id in service.due_poll_ids(limit=source_subscriptions.STANDING_POLLS_PER_TICK)]
 
 
 def _poll_source_for_watch(claim: dict) -> dict:
-    """Run one claimed poll (fetch outside the database) and commit it."""
-    result = _source_service().run_claimed_poll(claim)
+    """Claim the lease now, fetch outside the database, commit under the
+    owner token. A candidate that is no longer due (claimed by another
+    dispatcher, disabled, or backed off) is skipped, not counted as a poll."""
+    service = _source_service()
+    if not claim.get("owner_token"):
+        claim = service.claim_poll(claim["source_id"])
+        if claim is None:
+            return {"ok": True, "outcome": "not_claimed", "skipped": True}
+    result = service.run_claimed_poll(claim)
     inserted = int(result.get("inserted") or 0)
     if result.get("ok") and inserted and result.get("enrollment"):
         maybe_toast("New source items",
@@ -7484,7 +7764,17 @@ def _podcast_feed_scheduler_tick() -> list[dict]:
     clean pass (a heartbeat, not a successful poll or ingest)."""
     results: list[dict] = []
     failed = 0
-    for claim in _standing_due_polls():
+    try:
+        due = _standing_due_polls()
+    except Exception as exc:
+        # AS-04: a claiming/reconciliation error is a failed pass, never a
+        # skipped heartbeat: the tick still completes and stamps itself.
+        log.exception("source watch tick could not select due polls")
+        due = []
+        failed += 1
+        results.append({"ok": False, "error": str(exc), "stage": "due_selection"})
+        _heartbeat_note_poll(False, error=type(exc).__name__)
+    for claim in due:
         source_id = claim.get("source_id")
         kind = None
         try:
@@ -7493,6 +7783,8 @@ def _podcast_feed_scheduler_tick() -> list[dict]:
             log.exception("source watch tick failed for %s", source_id)
             result = {"ok": False, "source_id": source_id, "error": str(exc)}
             kind = type(exc).__name__
+        if isinstance(result, dict) and result.get("skipped"):
+            continue  # not claimed: no fetch happened, so not a poll
         results.append(result)
         ok = bool(isinstance(result, dict) and result.get("ok"))
         if ok:
@@ -8466,7 +8758,7 @@ def _playlist_worker(job_id: str):
                     current_phase = phase
                     _update_job(_job_id, current_video_phase=phase)
 
-                with _extract_lock:
+                with _manual_extraction_ownership(v["url"]):  # AS-03 shared dispatcher lock
                     _raise_if_cancelled(cancel_event)
                     result = _run_extraction(
                         v["url"],
@@ -8765,7 +9057,7 @@ def _retry_pending_one() -> bool:
     title = None
     folder = None
     current_phase = "metadata"
-    with _extract_lock:
+    with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
         try:
             metadata = _fetch_metadata(url)
             title = metadata.get("title") or "Untitled"
@@ -14663,7 +14955,7 @@ class Handler(BaseHTTPRequestHandler):
         title = None
         folder = None
         current_phase = "metadata"
-        with _extract_lock:
+        with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
             try:
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
@@ -14806,7 +15098,7 @@ class Handler(BaseHTTPRequestHandler):
         sess_folder = _session_folder(session_id)
         # Disambiguate the per-video subfolder by title — fetch metadata once
         # and re-use it inside _run_extraction.
-        with _extract_lock:
+        with _manual_extraction_ownership(url):  # AS-03 shared dispatcher lock
             try:
                 metadata = _fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
@@ -15190,13 +15482,6 @@ def main(*, show_dashboard: bool = False):
             "podcast watch: repaired %d stranded episode eligibility marker(s)",
             podcast_repair["marked_eligible"],
         )
-    # Phase 3 (run AM): import the legacy registries once and reconcile the
-    # capture ledger before any scheduler or pending worker can launch
-    # (contract, "Migration 0028 schema" and the restart list).
-    try:
-        _source_startup_reconciliation()
-    except Exception:
-        log.exception("standing capture startup reconciliation failed")
     # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
     _migrate_jobs_json_to_index()
     _migrate_taxonomy_json_to_index()
@@ -15208,8 +15493,17 @@ def main(*, show_dashboard: bool = False):
     # renamed/moved library heals on launch instead of failing action by
     # action while /health smiles.
     _heal_stale_corpus_paths_at_boot()
-    # Hydrate the in-memory job dict from the index.
+    # Hydrate the in-memory job dict from the index (no worker starts here).
     _restore_jobs_from_disk()
+    # Phase 3 (run AM): import the legacy registries once and reconcile the
+    # capture ledger before any scheduler or pending worker can launch
+    # (contract, "Migration 0028 schema" and the restart list). AS-02: this
+    # runs after the durable job records are back in memory, so a started
+    # podcast row whose job survived on disk probes as running, not lost.
+    try:
+        _source_startup_reconciliation()
+    except Exception:
+        log.exception("standing capture startup reconciliation failed")
     resumed_podcast_jobs = _resume_podcast_transcription_jobs()
     if resumed_podcast_jobs:
         log.info("Resumed %d podcast transcription job(s)", resumed_podcast_jobs)

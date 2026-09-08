@@ -26,8 +26,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_subscriptions_fixtures import (  # noqa: E402
-    Clock, DAY_MS, FakeAdapter, FakeBackend, MINUTE_MS, T0, items, make_service, rows, snapshot,
-    starts, status, turn_off, turn_on,
+    Clock, DAY_MS, FakeAdapter, FakeBackend, MINUTE_MS, T0, corpus_identity, items, make_service,
+    publish, rows, snapshot, starts, status, turn_off, turn_on,
 )
 
 import index as index_mod  # noqa: E402
@@ -149,8 +149,14 @@ def test_initial_cohort_is_bounded_and_the_repair_pass_no_longer_marks_anything(
             idx, feed_id=feed["id"], limit=50, now=_now_dt(clock))
         assert [c["id"] for c in candidates] == [item["legacy_episode_id"]]
         assert candidates[0]["guid"] == _guid(39)
-        done = service.complete_capture(started[0]["start_id"], started[0]["owner_token"],
-                                        item["entry_id"])
+        # Run AT (AS-01/AS-06): the completion callback names the attempt's own
+        # corpus identity (the deterministic episode id, not the GUID) and
+        # succeeds only once the durable publication evidence exists.
+        source = rows(service, "SELECT * FROM source_subscriptions WHERE source_id=?", (sid,))[0]
+        video_id, provenance, platform, source_type = corpus_identity(item, source)
+        publish(idx, video_id, backend=backend, metadata=provenance, platform=platform,
+                source_type=source_type)
+        done = service.complete_capture(started[0]["start_id"], started[0]["owner_token"], video_id)
         assert done["outcome"] == "succeeded"
         assert podcasts.list_auto_ingest_candidates(
             idx, feed_id=feed["id"], limit=50, now=_now_dt(clock)) == []
