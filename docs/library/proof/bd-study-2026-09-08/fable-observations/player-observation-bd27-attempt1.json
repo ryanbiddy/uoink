@@ -1,0 +1,22 @@
+{
+  "schema": "fable-player-observation-v1",
+  "task": "BD-27",
+  "video_id": "D_FCYsshMI4",
+  "chapter": "Why computer use",
+  "source_start_seconds": 34,
+  "acceptable_interval": "[34,126)",
+  "url_opened": "https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s",
+  "observer": "Fable (Claude Fable 5.1) in Chrome via Claude-in-Chrome, tab 1787671294",
+  "observed_utc": "2026-09-08T23:49:08Z (screenshot epoch ms 1788906548049)",
+  "page": {"title": "Computer use in Codex - YouTube", "player_duration_display": "11:25"},
+  "player_state": {
+    "clock_display": "0:34 / 11:25 (scrubber at the 34 s position)",
+    "video_element": {"currentTime": 0.0, "readyState": 0, "networkState": 2, "duration": "NaN", "paused": false, "error": null},
+    "chapter_title_element": "empty (player chrome not populated before first frame)",
+    "advertisement": false
+  },
+  "network": "six GET requests to rr5---sn-q4fl6nd6.googlevideo.com/videoplayback (itag=18) answered HTTP 503; no media bytes arrived in ~2.5 minutes across two page loads",
+  "outcome": "PARTIAL: the supported player loaded the requested video and positioned its clock at 0:34 from the Phase 6 seek link, but the media stream was refused (503) so no audio/video onset was observed. Not a PASS; onset observation still owed.",
+  "screenshot": "player-observation-bd27-attempt1.jpg",
+  "next": "retry the same URL once more later in the session; if the CDN keeps refusing, the observation needs a different network session (Ryan) and remains open"
+}
