@@ -1,0 +1,92 @@
+# kache - this entire thing is done on an orange pi zero 3w. no more 4090. ster...
+
+**Channel:** kache (— subscribers)
+**Uploaded:** 2026-08-28 | **Duration:** 00:32 | **Views:** — | **Likes:** 698
+**URL:** https://x.com/yacineMTB/status/2093183314483961903
+**Uoinked:** 2026-08-28T07:50:08
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 4s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The hook challenges the expectation that advanced stereo depth inference requires high-end GPUs like the RTX 4090, instead demonstrating it's possible on a tiny, low-power Orange Pi Zero 3W board. This positions the achievement as a counterintuitive breakthrough against conventional wisdom about AI hardware requirements.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+this entire thing is done on an orange pi zero 3w. no more 4090. stereo depth inference at sub 60ms by custom writing NPU kernels for it   14 gram board, 30mm x 65mm pcb https://t.co/IfncdwFITC
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+*No captions available for this video.*
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:04]
+
+![Screenshot at 00:00:04](screenshots/shot_0002.jpg)
+
+### [00:00:08]
+
+![Screenshot at 00:00:08](screenshots/shot_0003.jpg)
+
+### [00:00:12]
+
+![Screenshot at 00:00:12](screenshots/shot_0004.jpg)
+
+### [00:00:16]
+
+![Screenshot at 00:00:16](screenshots/shot_0005.jpg)
+
+### [00:00:20]
+
+![Screenshot at 00:00:20](screenshots/shot_0006.jpg)
+
+### [00:00:24]
+
+![Screenshot at 00:00:24](screenshots/shot_0007.jpg)
+
+### [00:00:28]
+
+![Screenshot at 00:00:28](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About kache:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

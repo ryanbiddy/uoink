@@ -1,0 +1,83 @@
+whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+2026-09-08 01:42:17,013 INFO migration[run]: no_legacy -- E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-08-run2-c9af1ae6\local\Yoink does not exist
+2026-09-08 01:42:17,013 INFO migration[run]: legacy_run_key -- skipped: dev layout
+2026-09-08 01:42:17,013 INFO install migration: no_legacy
+2026-09-08 01:42:17,052 INFO sources: imported 3 feed(s) and 0 playlist(s); 0 conflict(s)
+2026-09-08 01:42:17,366 INFO Restored 212 job record(s) from the library index
+2026-09-08 01:42:17,367 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-08 01:42:17,372 INFO Uoink server v3.8.0 running on http://127.0.0.1:5180
+2026-09-08 01:42:17,373 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-08 01:42:17,373 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-08-run2-c9af1ae6\output
+2026-09-08 01:42:17,374 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\server.log
+2026-09-08 01:42:17,612 INFO GET /health from 127.0.0.1 -> ok
+[proof] model call done: call-0001-cbd7cc in 48890 ms, exit 0, stdout 8045 B
+[proof] model call done: call-0001-055d61 in 60472 ms, exit 0, stdout 8323 B
+[proof] model call done: call-0001-33f463 in 61657 ms, exit 0, stdout 8910 B
+[proof] model call done: call-0002-0aaea5 in 87173 ms, exit 0, stdout 10378 B
+[proof] model call done: call-0001-f68a69 in 145975 ms, exit 0, stdout 11216 B
+[proof] model call done: call-0004-3d3132 in 117719 ms, exit 0, stdout 9920 B
+[proof] model call done: call-0003-009f6e in 126729 ms, exit 0, stdout 10614 B
+[proof] model call done: call-0005-fb114a in 109812 ms, exit 0, stdout 11262 B
+[proof] model call done: call-0006-4d8e6f in 129122 ms, exit 0, stdout 10244 B
+[proof] model call done: call-0008-d6547e in 115490 ms, exit 0, stdout 9958 B
+[proof] model call done: call-0007-4a9a66 in 134016 ms, exit 0, stdout 11732 B
+[proof] model call done: call-0009-51e5e1 in 140625 ms, exit 0, stdout 10506 B
+[proof] model call done: call-0012-ac0164 in 105055 ms, exit 0, stdout 10390 B
+[proof] model call done: call-0010-678e21 in 172966 ms, exit 0, stdout 15556 B
+[proof] model call done: call-0011-36e8d2 in 176605 ms, exit 0, stdout 10808 B
+[proof] model call done: call-0013-50f5c9 in 102979 ms, exit 0, stdout 10258 B
+[proof] model call done: call-0015-3fde8a in 115475 ms, exit 0, stdout 10518 B
+[proof] model call done: call-0014-23bfab in 151314 ms, exit 0, stdout 12990 B
+[proof] model call done: call-0017-a91fbe in 95548 ms, exit 0, stdout 10588 B
+[proof] model call done: call-0016-98170a in 169884 ms, exit 0, stdout 13524 B
+[proof] model call done: call-0019-a22bb1 in 119323 ms, exit 0, stdout 12455 B
+[proof] model call done: call-0020-ef75da in 106716 ms, exit 0, stdout 8964 B
+[proof] model call done: call-0018-70af29 in 178900 ms, exit 0, stdout 14112 B
+[proof] model call done: call-0021-9ba7c3 in 143294 ms, exit 0, stdout 11979 B
+[proof] model call done: call-0022-48fdc2 in 123217 ms, exit 0, stdout 11494 B
+[proof] model call done: call-0023-2bc869 in 140300 ms, exit 0, stdout 13271 B
+[proof] model call done: call-0024-c2f112 in 157250 ms, exit 0, stdout 11624 B
+[proof] model call done: call-0025-1a9ff4 in 110322 ms, exit 0, stdout 11338 B
+[proof] model call done: call-0027-609c1d in 114853 ms, exit 0, stdout 10581 B
+[proof] model call done: call-0026-fce3a0 in 172587 ms, exit 0, stdout 11183 B
+[proof] model call done: call-0029-9b5d98 in 100869 ms, exit 0, stdout 10622 B
+[proof] model call done: call-0028-fce2b1 in 140393 ms, exit 0, stdout 12282 B
+[proof] model call done: call-0031-6606b4 in 117056 ms, exit 0, stdout 10679 B
+[proof] model call done: call-0030-091812 in 157367 ms, exit 0, stdout 11256 B
+[proof] model call done: call-0032-c287a3 in 106823 ms, exit 0, stdout 10760 B
+[proof] model call done: call-0033-cbc88e in 170714 ms, exit 0, stdout 10275 B
+[proof] model call done: call-0035-9f4853 in 119248 ms, exit 0, stdout 10656 B
+[proof] model call done: call-0036-8ed6a5 in 140077 ms, exit 0, stdout 11163 B
+[proof] model call done: call-0034-fd773f in 176740 ms, exit 0, stdout 11490 B
+[proof] model call done: call-0037-f53120 in 121231 ms, exit 0, stdout 10626 B
+[proof] model call done: call-0038-23e6a0 in 158026 ms, exit 0, stdout 10802 B
+[proof] model call done: call-0040-6b98d1 in 121027 ms, exit 0, stdout 10765 B
+[proof] model call done: call-0039-3fec75 in 149709 ms, exit 0, stdout 10390 B
+[proof] model call done: call-0041-de8e4e in 126088 ms, exit 0, stdout 11152 B
+[proof] model call done: call-0042-5599a3 in 144615 ms, exit 0, stdout 11175 B
+[proof] model call done: call-0044-a58327 in 146039 ms, exit 0, stdout 9065 B
+[proof] model call done: call-0043-3ebb86 in 149811 ms, exit 0, stdout 10728 B
+[proof] model call done: call-0045-559b30 in 123624 ms, exit 0, stdout 9512 B
+[proof] model call done: call-0046-a715e8 in 104305 ms, exit 0, stdout 9450 B
+[proof] model call done: call-0048-397247 in 122495 ms, exit 0, stdout 10068 B
+[proof] model call done: call-0047-a6b284 in 135339 ms, exit 0, stdout 9999 B
+[proof] model call done: call-0051-c84337 in 102152 ms, exit 0, stdout 11137 B
+[proof] model call done: call-0049-f80955 in 195261 ms, exit 0, stdout 11638 B
+[proof] model call done: call-0050-f5ab0c in 160460 ms, exit 0, stdout 10056 B
+[proof] model call done: call-0052-a887e3 in 171136 ms, exit 0, stdout 10324 B
+[proof] model call done: call-0055-9bb08a in 127332 ms, exit 0, stdout 9207 B
+[proof] model call done: call-0053-749178 in 147724 ms, exit 0, stdout 10224 B
+[proof] model call done: call-0054-1b7c19 in 208655 ms, exit 0, stdout 11268 B
+[proof] model call done: call-0056-be6046 in 168342 ms, exit 0, stdout 12052 B
+[proof] model call done: call-0058-e9cf22 in 152738 ms, exit 0, stdout 11693 B
+[proof] model call done: call-0059-c62c05 in 132693 ms, exit 0, stdout 11269 B
+[proof] model call done: call-0057-4b2f10 in 217173 ms, exit 0, stdout 12520 B
+[proof] model call done: call-0061-5fad50 in 143741 ms, exit 0, stdout 13064 B
+[proof] model call done: call-0060-add9de in 206399 ms, exit 0, stdout 11964 B
+[proof] model call done: call-0063-25d9a8 in 133634 ms, exit 0, stdout 11941 B
+[proof] model call done: call-0062-80457f in 159317 ms, exit 0, stdout 11792 B
+[proof] model call done: call-0064-3cc78a in 62622 ms, exit 0, stdout 9286 B
+[proof] model call done: call-0066-da1a9c in 78130 ms, exit 0, stdout 6070 B
+[proof] model call done: call-0065-5d48a2 in 194577 ms, exit 0, stdout 10892 B
+Product proof run complete. Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-2026-09-08-run2\receipts.json
+exit=0

@@ -1,0 +1,240 @@
+# codila - Google just released free 1-hour course on full agentic systems: 1 ag...
+
+**Channel:** codila (— subscribers)
+**Uploaded:** 2026-07-30 | **Duration:** — | **Views:** — | **Likes:** 273
+**URL:** https://x.com/0xCodila/status/2082975098760294548
+**Uoinked:** 2026-07-31T07:47:25
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The video opens by showing a live simulation in action—1,000 AI agents running a marathon through Las Vegas in real time with visual dots representing individual agents. This immediate visual demonstration of the system working is the primary hook.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Google just released free 1-hour course on full agentic systems: 1 agent → 1000 agents → loops → graphs from 0% to 100%:  10% → 7:02 - build your first agent 30% → 13:34 - skills: what each agent can actually do 55% → 23:08 - Context engineering 70% → 32:56 - Graph https://t.co/oO7Gy3on3G
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] I built a whole full-stack application for the setup.
+[00:00:03] And then, for Amazon
+[00:00:05] I was working on focusing microservices
+[00:00:07] On the backend side
+[00:00:08] and Google also building an RPC service
+[00:00:11] I kind of like get taste
+[00:00:13] Of different aspects Of tech
+[00:00:15] Now as a developer you have to
+[00:00:16] You know Do more architecture level things
+[00:00:19] So because I've been tasting
+[00:00:20] Different aspect Of it
+[00:00:22] And now It makes so much sense
+[00:00:23] For me To connect The dots
+[00:00:25] And understand When trying
+[00:00:26] To build Like design
+[00:00:28] Architecture I think all the experience
+[00:00:30] Like so now
+[00:00:31] When Look back I Think
+[00:00:33] All The Experience Can Help
+[00:00:34] Me To Understand Technology
+[00:00:35] Easily And then Learn
+[00:00:36] Things So I'm going to click
+[00:00:38] Run Simulation In our system
+[00:00:39] Yeah and We're actually
+[00:00:40] Going See A simulation Kick off
+[00:00:42] With 1,000
+[00:00:44] AI Agents Running
+[00:00:45] a marathon Through Las Vegas
+[00:00:46] in real time Actually
+[00:00:48] There's 1000 AI
+[00:00:49] Agent Wow
+[00:00:51] That's Right 1, 000
+[00:00:52] Individual Sessions
+[00:00:54] that Are All You
+[00:00:55] Know Communicating Together
+[00:00:56] with A simulator And
+[00:00:58] A Planner So
+[00:00:59] You Know What We're Looking At
+[00:01:00] Here Is Front End
+[00:01:02] That Is
+[00:01:03] Communicating With
+[00:01:04] Message Passing
+[00:01:06] Gateway Were Going To Dive
+[00:01:07] Into The Architecture In Little
+[00:01:08] Bit And Then I'll
+[00:01:10] Just Follow Leader Here For
+[00:01:11] Fun Each Of These
+[00:01:13] Little Dots Are Runner
+[00:01:14] Agents Session And
+[00:01:16] We Are Constantly
+[00:01:18] Check On Them
+[00:01:19] With Regard Their
+[00:01:20] Hydration Levels And
+[00:01:21] Velocity And Making
+[00:01:23] Independent Decisions About
+[00:01:25] Whether Or We're Just Passed
+[00:01:29] Another One And That
+[00:01:30] Can Change Their Energy Were Following
+[00:01:31] The Leader That's The Best
+[00:01:32] Runner But We Can Also Follow
+[00:01:33] Others That Might Be
+[00:01:34] Walking Or Jogging
+[00:01:36] In Race And We Can
+[00:01:37] See You Know They Have Different
+[00:01:38] Paces So I
+[00:01:41] Actually Ever Every
+[00:01:42] Dot Is Represent
+[00:01:44] It'S Like A Simulating
+[00:01:45] A Real Marathon Runner
+[00:01:46] And They Gonna
+[00:01:47] Have Different High Different
+[00:01:49] Speed Some Of
+[00:01:51] Them Had Trying To Simulate The
+[00:02:00] Marathon Yeah
+[00:02:02] That Is The Idea Exactly
+[00:02:03] And You
+[00:02:05] Know It'S A Simplified Version
+[00:02:06] Of What A Real
+[00:02:07] Large Scale Event Might
+[00:02:08] Be Like But IT's Really Good
+[00:02:09] Way To Understand How
+[00:02:11] To Incorporate Multi
+[00:02:13] Agent Systems Into Realistic
+[00:02:14] Larger Scale Projects
+[00:02:15] That IS So Cool I
+[00:02:17] Really Want Learn How
+[00:02:18] Those Start You Know
+[00:02:19] Represent Connecting To The
+[00:02:21] Actual Session And
+[00:02:22] How Do You Run
+[00:02:23] Them Together So
+[00:02:24] Smoothly And Fast
+[00:02:26] How Do You Actually
+[00:02:28] Simulate Different Session
+[00:02:30] To Map Into The Actual
+[00:02:31] Different Type Of Runner
+[00:02:33] And Design This
+[00:02:34] Whole Route Yeah That
+[00:02:36] Is Very Cool I
+[00:02:37] Wow Can't Wait Too Dive
+[00:02:39] In We Will Definitely
+[00:02:40] Do That Yeah M
+[00:02:42] Annie Welcome Back
+[00:02:43] To Channel Our Join
+[00:02:44] By Casey West Who
+[00:02:45] Is A Brain Builder
+[00:02:47] For The Whole System Hi
+[00:02:48] Casey Want Give
+[00:02:49] A Quick Introduction Of Yourself
+[00:02:50] Yeah Hi I'm Casey
+[00:02:52] West I'M Developer Advocate
+[00:02:53] Just Like Annie At Google
+[00:02:54] Cloud And
+[00:02:55] I Led The
+[00:02:56] Development Of This
+[00:02:58] Agentic System Which
+[00:02:59] We Demonstrated At
+[00:03:00] Google Cloud Next For The Developer
+[00:03:01] Keynote All Right KC
+[00:03:03] Why Don't You Work As Through
+[00:03:04] The Architecture Am Really
+[00:03:05] Curious Know How Does
+[00:03:06] Whole Cool Demos Is
+[00:03:07] Built Actually No Not More
+[00:03:09] Cool Production System
+[00:03:11] Is Built Yeah I Would
+[00:03:13] Call It A Reference
+[00:03:14] Architecture Somewhere Between
+[00:03:15] The Demo And Full
+[00:03:16] Production I'm Really
+[00:03:18] Looking Forward To Your Community
+[00:03:19] Writing Better Code
+[00:03:21] Yeah Oh
+[00:03:22] By the Way This Is All
+[00:03:23] Open Source So If You're
+[00:03:24] Interested If You Want Play Around
+[00:03:26] On Your Local
+[00:03:27] Machine Or Wanna Try Down
+[00:03:28] Learn Architecture We Can
+[00:03:29] Always Check Out The Sauce
+[00:03:30] Coat On Screen Let's Go KC
+[00:03:32] Give Me That In
+[00:03:34] This Architecture Yeah
+[00:03:36] Yes So Before We
+[00:03:37] Get Into Any Code I Want
+[00:03:38] To Ground Us In The
+[00:03:39] Shape Of This Thing Because
+[00:03:40] It's A Somewhat
+[00:03:41] Large Scale System So
+[00:03:42] We Call Race Condition
+[00:03:44] Is Based On
+[00:03:45] Four Layers There
+[00:03:47] Is An Angular Front End Go
+[00:03:48] Gateway Network Of Python
+[00:03:50] Based ADK Agents
+[00:03:52] And The Infrastructure
+[00:03:53] That Those Agents Live
+[00:03:54] On So You Know Our
+[00:03:56] First Question That I
+[00:03:57] Think We Need To Answer Is Why Is
+[00:03:58] This A Polyglot
+[00:03:59] Stack Why Do Have A Stack
+[00:04:00] Comprised Of So Many Different Types
+[00:04:02] Of Frameworks And
+[00:04:03] Languages Really It's Just
+[00:04:05] Because We Wanted The Best Tool
+[00:04:06] For The Job Go
+[00:04:08] Is What
+[00:04:09] We Use For High Concurrency
+[00:04:10] Traffic Cop Can Handle
+[00:04:12] As Many Web
+[00:04:14] Sockets That We Need In
+[00:04:15] Thousands Messages
+[00:04:16] Passing Over Those
+[00:04:17] Connections Without
+[00:04:19] Breaking Swe Python
+[00:04:20] And Python Is
+[00:04:21] Where All The AI Lives
+[00:04:22] So That Gives
+[00:04:23] Us Access To
+[00:04:24] Our Entire Ecosystem Of
+[00:04:26] LLM Tools Using
+[00:04:27] 80k In Python
+[00:04:29] Is A Really
+[00:04:30] Mature Enriched
+[00:04:31] Framework This
+[00:04:33] Separation Is Why The
+[00:04:35] System Feels As
+[00:04:36] Snappy As It Does Even With
+[00:04:37] 1000 Agents That
+[00:04:38] Are Thinking At Once We
+[00:04:40] Still Have Speed And
+[00:04:41] Efficiency For Developers
+[00:04:44] It Means That
+[00:04:45] We Can Isolate Agent
+[00:04:47] Logic In Clean Python
+[00:04:49] Modules While
+[00:04:50] The Go Layer Can Handle
+[00:04:51] All Of Heavy Lifting Of
+[00:04:52] Real-Time Communication Does
+[00:04:54] That Make Sense Yeah So
+[00:04:55] It Sounds To Me That
+[00:04:56] Maybe A Good Summary
+[00:04:58] We Have Four Layers
+[00:04:59] And Frontend Layer
+[00:05:00] Which Has Those Cool
+[00:05:01] Simulations You
+[00:

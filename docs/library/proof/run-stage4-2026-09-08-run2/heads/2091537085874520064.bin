@@ -1,0 +1,158 @@
+# TaraT - I love Wispr Flow, but it's $12/month and still doesn't give my agent...
+
+**Channel:** TaraT (— subscribers)
+**Uploaded:** 2026-08-23 | **Duration:** 02:06 | **Views:** — | **Likes:** 1,405
+**URL:** https://x.com/tarat_211/status/2091537625278726376
+**Uoinked:** 2026-08-24T07:43:10
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 16s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The creator opens by acknowledging a popular tool (Wispr Flow) they actually like, but immediately pivots to challenge it by highlighting its limitations ($12/month, lacks visual context), establishing grounds for their alternative solution. This challenges the consensus that Wispr Flow is the best option in its category.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+I love Wispr Flow, but it's $12/month and still doesn't give my agent the visual context it needs.  So I built BetterVoice: press the hotkey, speak, and circle anything on screen.   It transcribes locally and captures the exact visual context your agent needs.  Open-source https://t.co/TKftLsGbun
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:01] Okay, so I've been using WhisperFlow for over two months now
+[00:00:04] purely because they gave me free subscription
+[00:00:06] not sponsored at all
+[00:00:07] It's pretty nice to be able to talk
+[00:00:08] to your computer. It's really fast and I
+[00:00:10] like it. And of course
+[00:00:11] there are bunch of other open source alternatives like FluidVoice
+[00:00:15] which you can use to basically do the
+[00:00:17] same thing that WhisperFlow does all on device
+[00:00:20] So you don't have to send your data
+[00:00:21] to somebody else or pay a huge subscription
+[00:00:24] Anyways
+[00:00:25] I wanted to write code something for myself
+[00:00:27] that is like WhisperFlow and FluidVoice
+[00:00:29] but Better
+[00:00:30] Better in a sense
+[00:00:31] let me talk about it
+[00:00:32] So basically, when I'm working on front-end related stuff
+[00:00:35] I don't just want to
+[00:00:36] tell my model or agent
+[00:00:38] everything that I'm thinking. I also want to
+[00:00:40] give it some voice context or image context
+[00:00:43] which in this case I do by taking
+[00:00:45] screenshots
+[00:00:46] And that's okay. That's fine
+[00:00:47] But I think this could be optimized
+[00:00:48] And so that's what I did
+[00:00:50] I made this quick project called Better Voice
+[00:00:52] It's completely
+[00:00:54] open source. So you can use it
+[00:00:56] But the way this works is basically just
+[00:00:58] like Whisper Flow
+[00:00:59] I would first
+[00:01:00] I see hotkeys and after pressing hotkeys everything
+[00:01:02] that I will say will be transcribed right
+[00:01:04] on my desktop. That's just like fluid voice
+[00:01:07] But then on top of it there is
+[00:01:08] another interesting thing
+[00:01:10] I can circle things that
+[00:01:11] I want my AI to see
+[00:01:12] So I can be like hey
+[00:01:13] change this heading basically and then
+[00:01:16] on the bottom side
+[00:01:17] let's update the color of these cards
+[00:01:19] and
+[00:01:20] yeah just this
+[00:01:21] I don't really like remove this completely
+[00:01:23] So once I'm done talking about it
+[00:01:25] I can go into any text box
+[00:01:26] and that's about it
+[00:01:28] It will paste all the images and the
+[00:01:31] text. Isn't that crazy?
+[00:01:33] It's not crazy, but it's super useful
+[00:01:35] So, images will have the thing highlighted
+[00:01:37] whatever that I highlighted. So
+[00:01:39] AI will know exactly what I'm talking about
+[00:01:42] and it won't make those stupid mistakes of
+[00:01:44] changing something else when I asked it to
+[00:01:45] change something else
+[00:01:47] Super simple, super, easy to do
+[00:01:50] absolutely 100% free of cost
+[00:01:52] fully open source. The project is live on
+[00:01:54] GitHub. I'll send the link in the comments
+[00:01:57] Use it, you don't have to pay with Spurfl
+[00:01:59] anything, and it's slightly better than Flirtwise
+[00:02:02] Thank you so much for watching the video
+[00:02:04] I'll see you in the next one
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:16]
+
+![Screenshot at 00:00:16](screenshots/shot_0002.jpg)
+
+### [00:00:32]
+
+![Screenshot at 00:00:32](screenshots/shot_0003.jpg)
+
+### [00:00:48]
+
+![Screenshot at 00:00:48](screenshots/shot_0004.jpg)
+
+### [00:01:04]
+
+![Screenshot at 00:01:04](screenshots/shot_0005.jpg)
+
+### [00:01:20]
+
+![Screenshot at 00:01:20](screenshots/shot_0006.jpg)
+
+### [00:01:36]
+
+![Screenshot at 00:01:36](screenshots/shot_0007.jpg)
+
+### [00:01:52]
+
+![Screenshot at 00:01:52](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About TaraT:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

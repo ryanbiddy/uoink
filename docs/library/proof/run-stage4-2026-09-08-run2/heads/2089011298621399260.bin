@@ -1,0 +1,210 @@
+# Kirill - Anthropic CEO after realizing a Chinese dev explained loop vs graph e...
+
+**Channel:** Kirill (— subscribers)
+**Uploaded:** 2026-08-16 | **Duration:** — | **Views:** — | **Likes:** 4,668
+**URL:** https://x.com/kirillk_web3/status/2089011298621399260
+**Uoinked:** 2026-08-17T07:38:55
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The title challenges the assumption that Anthropic's leadership would be the authority on AI engineering concepts by sarcastically suggesting a Chinese developer explained a technical concept better than company experts, which sets up a contrarian angle about expertise and buzzwords in AI.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic CEO after realizing a Chinese dev explained loop vs graph engineering better than anyone at the company https://t.co/lrH3YARNjf
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hello everyone, this is Best Partners.
+[00:00:02] I'm Darfay. One benefit of the rapid development of AI
+[00:00:04] Is that you might not even need to learn things
+[00:00:06] You haven't learned yet
+[00:00:08] Not long ago Everyone was passionately discussing loop engineering
+[00:00:11] Thinking they had finally found
+[00:00:12] The key to making agents work stably
+[00:00:14] But not much time has passed
+[00:00:15] And a new term called graph engineering
+[00:00:17] Has exploded Is this just another round
+[00:00:20] Of marketing hype Or is there really
+[00:00:21] A fundamental change? Today we're going
+[00:00:23] To talk about This term Where it came from
+[00:00:25] What problems It solves
+[00:00:26] When You should use it
+[00:00:28] And when You shouldn't Just jump on the bandwagon
+[00:00:29] To give you A complete framework
+[00:00:31] For making technical decisions
+[00:00:33] Going back to July 17th
+[00:00:34] Peter Steinberg The founder of OpenCloud
+[00:00:36] Posted on X Saying
+[00:00:38] Are we still talking about loops
+[00:00:39] Or have we already Moved onto graphs?
+[00:00:41] Because Of loop engineering
+[00:00:43] Which went viral
+[00:00:44] Across the internet Was also proposed by him
+[00:00:46] So some people Started asking
+[00:00:47] Is this just another case Of creating a new buzzword
+[00:00:49] David Korshid The author
+[00:00:51] Of xState Along with senior engineers
+[00:00:52] Like Karan Singh Directly challenged
+[00:00:54] This Is nothing new
+[00:00:58] They pointed out That purposeful sub-agents
+[00:01:00] Are essentially Just a graph
+[00:01:01] And now It's just being given
+[00:01:02] A name to confuse everyone
+[00:01:03] This criticism
+[00:01:05] Isn't wrong But we need
+[00:01:06] To look at these Two things separately
+[00:01:08] Whether the term Is new
+[00:01:09] Or whether this shift Is real
+[00:01:10] Are two Completely different
+[00:01:12] Things To understand
+[00:01:13] Where graph engineering Stands
+[00:01:15] We need To retrace The evolution
+[00:01:16] Of AI Engineering Over
+[00:01:17] The past Year or so You'll find
+[00:01:19] That The task Of making AI systems
+[00:01:20] Work reliably Has been renamed
+[00:01:22] Five times But they aren't
+[00:01:23] Replacing each other Rather
+[00:01:24] They are stacking Layer upon layer
+[00:01:28] That the previous One couldn't reach Graph engineering
+[00:01:30] Is currently The outermost layer
+[00:01:31] But it is built On the premise
+[00:01:33] That the previous Four layers
+[00:01:34] Have already Been established
+[00:01:36] The earliest One was
+[00:01:37] Prompt Engineering Which deals
+[00:01:38] With how To write Prompts To make
+[00:01:39] Large models Output More accurately
+[00:01:41] Then everyone Realized that
+[00:01:43] Having good prompts Alone wasn't enough
+[00:01:44] You have to provide The model
+[00:01:45] With the right Information So context
+[00:01:47] Engineering Came along Which manages
+[00:01:49] What to stuff Into the Model's brain
+[00:01:50] Including Retrieved documents
+[00:01:51] Memory Tool definitions
+[00:01:53] And conversation History
+[00:01:54] All of these Count
+[00:01:55] Moving further What tools
+[00:02:00] Can be used What guardrails
+[00:02:01] Cannot Be crossed And how
+[00:02:02] To persist State Across Sessions
+[00:02:04] This is what Harness Engineering
+[00:02:05] Manages Then came
+[00:02:07] Loop Engineering Which manages
+[00:02:08] How an agent Can repeatedly
+[00:02:09] Discover Plan Execute
+[00:02:11] Verify On its own
+[00:02:12] Without needing A human To prompt
+[00:02:13] It step By step Boris
+[00:02:15] Cherney Has a quote That's
+[00:02:16] Frequently Cited He said
+[00:02:17] I don't Prompt Claude Anymore
+[00:02:19] As for
+[00:02:21] Graph Engineering We can
+[00:02:32] Summarize The division Of labor
+[00:02:33] Between these Two layers In one
+[00:02:34] Sentence Loop Engineering
+[00:02:36] Solves how To keep A single
+[00:02:37] Agent Working Continuously
+[00:02:38] While Graph Engineering Solves
+[00:02:40] How to Organise Multiple Agents
+[00:02:41] Tools And humans Into an
+[00:02:42] Observable Recoverable
+[00:02:43] And scalable System Essentially
+[00:02:46] What loop Engineering Does is
+[00:02:47] Hand over The action Of driving
+[00:02:48] The loop To the AI Itself
+[00:02:49] Letting it Observe The environment
+[00:02:50] Take Action Check
+[00:02:52] The results And decide The next
+[00:02:53] Step Itself Inevitably Brings about
+[00:03:00] Five flaws The first
+[00:03:02] One is Context Every round
+[00:03:04] Of thinking Tool calling
+[00:03:05] And observation Results Are all
+[00:03:06] Stuffed back Into the Same window
+[00:03:07] In The First
+[00:03:08] Round It Might Only Be 2000
+[00:03:10] Tokens But By The 10th
+[00:03:11] Round Is Already 18000
+[00:03:13] The Original Goal Gets
+[00:03:14] Drowned Out In Self Reasoning
+[00:03:15] And The Model Starts Analyzing
+[00:03:16] Its Own Output Repeatedly
+[00:03:18] Getting Further Off Track
+[00:03:21] Error Cascading Rely
+[00:03:22] On The Model Itself To Detect
+[00:03:23] Loops And Break Out Of Them
+[00:03:24] After An Error Occurs
+[00:03:25] Is Extremely Difficult Within
+[00:03:26] The Same Chain Of Reasoning
+[00:03:28] The Tool Throws
+[00:03:29] An Error So It Tries Again
+[00:03:30] With Different Parameters It Fails
+[00:03:31] Again It Tries Something Else
+[00:03:32] Burning Through 10s Thousands
+[00:03:33] Tokens In the End
+[00:03:34] The Answer Is Still Wrong The
+[00:03:36] Third One Is Tool Overload
+[00:03:38] When A Single
+[00:03:39] Agent Equipped With 15
+[00:03:40] To 20 Tools The
+[00:03:41] Accuracy Of Its Selection
+[00:03:42] Drops Sharply The Model
+[00:03:43] Often Chooses Wrong One
+[00:03:44] When There Are Two Tools With
+[00:03:46] Similar Functions The
+[00:03:47] Fourth One Is A Lack Of Control
+[00:03:48] You Cannot
+[00:03:50] Pause Subtasks For Approval
+[00:03:51] You Cannoth Assign Different Models
+[00:03:52] To Different Steps And You Cannoth
+[00:03:53] Perform Independent Quality
+[00:03:54] Checks During Interruptions
+[00:03:56] The Loop Either
+[00:03:57] Run To Completion Or Gets
+[00:03:58] Killed The Metric For
+[00:04:22] Example A
+[00:04:24] Team Building An AI Customer
+[00:04:25] Service Bot Used
+[00:04:26] Ticket Resolution Rate
+[00:04:27] As Their Optimization Metric
+[00:04:28] For Five Consecutive
+[00:04:30] Months The Curve Went Straight
+[00:04:31] Up But Then The Custom
+[00:04:32] Return Rate Discouraging Users
+[00:04:40] From Asking Follow-Up
+[00:04:41] Questions And Marking Abandoned
+[00:04:43] Issues As Resolved Therefore
+[00:04:45] The More Perfectly The
+[00:04:46] Loop Runs The Closer
+[00:04:47] It May Actually Be To Failure
+[00:04:48] This Is Precisely
+[00:04:49] The Ultimate Efficiency Brought
+[00:04:50] About By Good Hearts Law
+[00:04:51] These
+[00:04:52] Five Flaws Combined
+[00:04:54] With Goal Blindness Share
+[00:04:55] A Common Trait None
+[00:04:56] Of Them Can Solved By
+[00:04:57] Simply Making The Loop Bigger
+[00:04:58] Or Stronger Because
+[00:05:00] The Root Of The Problem Does
+[00:05:01] Not Lie Within 

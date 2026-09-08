@@ -1,0 +1,111 @@
+# Claude Cowork: Anthropic's New AI Agent That Runs Code on Your Files (Max Feature)
+
+**Channel:** Alex Volkov from ThursdAI (40.9K subscribers)
+**Uploaded:** 2026-01-13 | **Duration:** 04:42 | **Views:** 15,809 | **Likes:** 266
+**URL:** https://www.youtube.com/watch?v=MgwjGpLHaWE
+**Yoinked:** 2026-05-19T17:48:12
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The video opens by immediately showing Claude Cowork in action—demonstrating the feature's UI, sandbox creation, and live task execution rather than explaining it abstractly. The creator emphasizes 'let's actually look into this and see how this works,' signaling a hands-on demonstration as the primary hook.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic just launched Claude Cowork — a new research preview feature for Max subscribers that brings the power of Claude Code to non-developers. In this video, I test it out by having it organize years of screenshots into folders by month, then generate interactive statistics about my screenshot habits.
+
+What you'll see:
+
+How Claude Cowork creates a sandbox to run code on your local files
+Real-time task execution with progress tracking
+The ability to interrupt and ask questions mid-task
+Artifact generation for beautiful interactive data visualizations
+This could be a game-changer for non-technical users who want AI-powered file management and automation without touching the command line.
+
+I'm Alex Volkov, host of ThursdAI podcast where we cover the best in AI every week.
+
+🔗 Subscribe to our show on Spotify: thursdai.news/spotify
+
+🔗 Apple: thursdai.news/apple
+
+🔗 Youtube: thursdai.news/yt
+
+And for the full show notes and links visit
+
+👉 sub.thursdai.news 👈
+
+## Tags
+
+AI, ThursdAI
+
+---
+
+## Transcript
+
+[00:00:02] Hey, so Anthropic just launched this thing. It's called Claude Co-work and it's a new feature for Mac users. They call it a research preview that they built in a week and a half apparently using live coding. Yes, even big companies do this. It's called Claude Co-work and it's a agent that runs on your files and with one task multiple agents can do a lot of work. So, let's actually look into this and see how this works. I just subscribed to a Max plan just to be able to record this video for you. So, hopefully if you like this video, like and subscribe for more. So, we're going to hit try Co-work here and you can see from the UI I don't have any tasks. The progress is empty and there's artifacts and contacts. What it does behind the scenes is it creates a sandbox for code to run on your computer to do some work on your files. So, you can create a file, current some data and prep for the day. And this is using Opus 4.5 obviously. You can choose Sonnet 4.5 as well. The main thing that you need to know is you need to work on a folder. So, let's open up a folder. Let's say this and then Oh, this is wow. So, obviously if you are a developer and you know what Claude code is, this tool is essentially Claude code wrapped for non-developers. It's a simple non-developer tool. If you're not a developer and would like some help with your project, for example like to clean up my screenshots, you can say, "Hey, sort my screenshots from the year 2024 and the year 2025 in folders based on months." I don't know why I would why I would do that. It makes no sense to me, but just to give you an idea of what what are some of the stuff it can do. And we're going to send it off. And it wants access to the documents folder where my screenshots are sorted. And so, I'll help you to sort your screenshots into folders. And it runs a command. Here's the basic thing. All of these commands and it says output still large. Haha.
+[00:01:48] Haha. Uh but it's it's probably going to make it anyway. Uh all of these commands are possible with Claude code. However, for non-developers, they are not as comfortable being inside the CLI. And so, it matters because for many many people Claude code unlocked a lot of productivity tools and you needed to know what a CLI is and now you won't have to. So, this is a research preview from Anthropic and now it says, "Let me create a script that moves files based on modification date." It tried to run this command and apparently failed and it's going to look and see why it failed and it's going to probably fix it. Here's the progress plan. Create a folder structure, moving 2024 screenshots, move 2025 screenshots, verify organization and report results. And apparently I can ask questions about the plan. How about 2023? And there's no indication that I asked a question about this part of the plan, but you can see this little comment here. This lets you interrupt the agent with questions that you have. Oh, the agent moved the 2024 files. Let me also handle 2025. Both 2024 and 25 are done. Would you like to also organize 2023 screenshots? Let me check how many there are. And here's how it looks. I have folders 2023, 2024 and they are sorted into month by month screenshots. That's pretty cool. And at the end of this you can say, "Okay, create an artifact describing the work you did and the stats of how many screenshots I take per year and per month and do it a beautiful interactive artifact way." So, artifacts are these things in Claude that can generate um multiple web pages or little programs, right? So, this Claude Co-work can also help you with analyzing the stuff that you did. And we can see the selected folders here. You probably select multiple folders. I did not notice. This is pretty cool. And updated to do list. One more. Create an interactive statistic artifact. That's great. This is not very detailed, but I'm pretty sure the Claude has a lot more details to do with it. So, we're going to wait, get stats for all years and months and then creating. And all right. And you can see the statistics here. In the year 2023 I only had 34 screenshots. I only got this laptop at December of 2023 even though I take way more. And I'm taking around 2,500 screenshots per year. As you can see, the peak month it was January and April and probably should take a look at 2026. Very interesting that I have this JSX here which is an artifact. When you open this, it will render this interactive uh interactive bar charts with with yearly distributions and organization complete. And you can see the lines and the bars per months and this is beautiful. All of this is now possible within Claude code with a Max subscription and I'm pretty sure that this is going to be a new big product category for Anthropic because non-technical people will be able to do multiple things by running code on their computer. If you like this type of content, my name is Alex Volkov. I lead Thursday AI podcast. Every week we talk about the best things in AI. Subscribe and like for more. >> [music]
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0003.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0004.jpg)
+
+### [00:02:00]
+
+![Screenshot at 00:02:00](screenshots/shot_0005.jpg)
+
+### [00:02:30]
+
+![Screenshot at 00:02:30](screenshots/shot_0006.jpg)
+
+### [00:03:00]
+
+![Screenshot at 00:03:00](screenshots/shot_0007.jpg)
+
+### [00:03:30]
+
+![Screenshot at 00:03:30](screenshots/shot_0008.jpg)
+
+### [00:04:00]
+
+![Screenshot at 00:04:00](screenshots/shot_0009.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+**@Micaellaaa4** (23 likes)
+> this looks useful, though it reminds me a lot of what workbeaver has been quietly doing cross platform, especially for everyday workflows.
+
+**@DealFerret** (4 likes)
+> I'm really sorry for asking this question, but what do you use to edit your videos? I really liked the whole style.
+
+**@DreaMinder1** (3 likes)
+> Good job on showcasing a new thing concisely and to the point. 👏
+
+**@CoachWendieV** (2 likes)
+> Claude is telling me it’s only MAC users for

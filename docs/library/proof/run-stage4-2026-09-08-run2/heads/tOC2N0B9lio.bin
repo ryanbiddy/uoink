@@ -1,0 +1,48 @@
+# The next paradigm shift (according to Karpathy)
+
+**Channel:** Theo - t3․gg (546.0K subscribers)
+**Uploaded:** 2026-06-25 | **Duration:** 20:47 | **Views:** 94,042 | **Likes:** 2,161
+**URL:** https://www.youtube.com/watch?v=tOC2N0B9lio
+**Uoinked:** 2026-07-08T17:41:24
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The video opens by presenting Karpathy's claim that Claude Tags represents 'a new paradigm,' which contrasts with the common assumption that it's just a Slack bot. The creator then emphasizes this contrarian angle by acknowledging that viewers would think this perspective is 'insane,' directly challenging the prevailing skeptical view.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic released Claude Tag this week and while at first glance seems like it's just a slack bot, Karpathy disagrees - saying that it's "a new paradigm for interacting with Claude" and we focus on why that could be true with it's focus on team integrations and channel focused context/permissions.
+
+I still hate talking about slack though...
+
+Thank you Coderabbit for sponsoring! Check them out at: https://soydev.link/coderabbit
+
+Want to sponsor a video? Learn more here: https://soydev.link/sponsor-me
+
+Check out my Twitch, Twitter, Discord more at https://t3.gg
+
+S/O @Ph4seon3 for the awesome edit 🙏
+
+#ai #coding #programming
+
+## Tags
+
+web development, full stack, typescript, javascript, react, programming, programmer, theo, t3 stack, t3, t3.gg, t3dotgg
+
+---
+
+## Transcript
+
+[00:00:02] This is a new paradigm for interacting with Claude that is significantly more in line with all the other human activity org wide. Once you do all of the under the hood engineering work to make this just work, Claude basically joins the team in a seamless way. You can talk to it as you would talk to another person and it can help with a very large variety of workloads. In my opinion, this is the third major redesign of LLM UI and UX. The first paradigm was that the LLM is a website you go to. The second was that it's an app you download to your computer. The third one is that it is a self-contained persistent asynchronous entity with org-wide tools and context working alongside teams of humans. It really takes a while to wrap your head around it, but it works and it is awesome. Sounds like Karpathy's cooking something important here, right? If I told you that the guy who helped pioneer LLMs as we know them today, one of the greatest researchers of our lifetime, one of the most important people in the entire AI world, is talking about a Slack bot here? You'd probably think I'm insane. Or you'd think he's insane. Or you might think that he's drank the Kool-Aid at Anthropic far too quickly as a recent hire and is just glazing a random @Claude feature inside of Slack. And if you thought those things, I would understand entirely. But I have to do two of my least favorite things here. Actually, I have to do three of my least favorite things here. I have to defend Anthropic.
+[00:01:23] Anthropic. I have to make a video about it. But most importantly, I have to talk about Slack. And I don't want to talk about Slack, believe me. As cringey as this post may be, and it is,
+[00:01:36] is, there are important things here that we can all learn from as an industry. And I think it's actually pretty cool. All that said, Claude tag is only available on team and enterprise plans. So if I'm ever going to be able to afford this paying full token rates instead of my subsidized subscription pricing, we're going to need to have a lot more money. And I'm going to cover a little bit of that real quick with today's sponsor. There's a bunch of things our tools do that we've just gotten used to because it's how it always worked. One of those things has always pissed me off. It's code review. Not the concept of code review. Believe it or not, I think we should be reading more of our code in general, even if agents are writing it, but the actual way that we do code review, it's terrible. Can someone please explain to me who thought it was a good idea to sort a giant code review like this with 11,000 lines changed in alphabetical order? It's nonsense. Wouldn't it be much nicer if your PRs are broken up into logical layers that actually explained what each did and the files were actually sorted in a way that made sense based on the changes themselves? Oh, it's on the screen, isn't it? Yeah, Code Rabbit did it. They already know how to review your code really well. Believe me, I've had Code Rabbit review a lot of my code. This is probably the single company that's prevented the most production outages on my services of any single company in existence. Their stuff got so good that I found myself reviewing code less because actually reading in GitHub was so painful. And now they've solved that, too, by taking all of the knowledge they get from reviewing your code and using it to structure that same diff in a way that's actually readable. You can hover over any of these sections and see what they actually are. This isn't different commits. I want to be clear about that. This is the whole pull request broken down into layers so you can actually read them and understand what's going on. There's even little indicators saying which ones they left comments on. There's a great mini map on the side here so you can see which sections have comments and other things of note in it. It's sorted in a way that actually makes sense. Each section has a summary describing what it did, which makes it so much easier to understand what's going on. And yeah, this is just really good. It's time to start reading code again. Get started at swyd.link/coderabbit. So, what is this new Slack bot that Infracoptic has put out and why is Carpathi so hyped on it? It's called Claude Tag, and the things that make it special are pretty damn cool if I'm being real. Claude Tag is a new way for teams to work with Claude. We're starting with Slack, which Claude can join as a team member. Grant Claude access to selected channels and connected to whichever tools, data, and even code bases you choose. Then anyone in the channel can tag Claude in and delegate tasks to it while they focus on other work. Claude builds context by remembering relevant information from the channels it's in and can plan out tasks to complete in the future. There's a couple pieces here that are really important. And though it's not just that they're starting on Slack, as a Slack hater, I'm excited for this to come to other things. The interesting pieces here are the way for teams to work piece and the channels it's in piece. These two parts are what make Claude tag so much more interesting than people seem to think. This isn't just another way to tag an agent inside of your Slack. This is a different way of thinking about context management and tool access
+[00:04:40] tool access for real teams. And I'm speaking a little bit from experience here because my team has been playing with a lot of stuff like this for our Discord management of all of the different things we do, whether it's the content on my channel, the sponsor deals that we're working with, the podcast and building topics and planning things out for that, or the other creators that we're starting to help with their brand management stuff, too. We have been trying to build bespoke Hermes agents and open Claude-style agents that can answer the right questions with the right context in the right places. And it's actually kind of annoying to get right. We're at the point now where we end up creating different isolates, like actual containers that have all the things a given Hermes agent needs, and then connect it to just one Slack channel. But each of those agents is its own deployment that has its own everything that we built for it. Claude tag is stumbling upon the same value prop here without all of that additional customization in a way that I actually think is really cool. What's even crazier is how much adoption there has been at Anthropic for this. According to them, taggi

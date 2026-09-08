@@ -1,0 +1,50 @@
+# A proper guide to Fable 5
+
+**Channel:** Theo - t3․gg (546.0K subscribers)
+**Uploaded:** 2026-07-06 | **Duration:** 43:15 | **Views:** 78,706 | **Likes:** 2,728
+**URL:** https://www.youtube.com/watch?v=8GRmLR__OGQ
+**Uoinked:** 2026-07-06T16:32:11
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The hook leads with a claim that challenges the viewer's likely expectations: Fable 5 is 'better than I remembered' and 'might be better than I remembered,' positioning it as superior to what most people think. The opener then pivots to the contrarian insight that using it 'like it's just a smarter Opus' misses the point entirely.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Saying Fable has one-shot me would be a criminal understatemen; it's incredible, and honestly it might be better than I remembered. But if you use it like it's just a smarter Opus, you'll miss the whole point. So here's how I actually work with Fable 5. Showing you how I cut a 5.5-hour agent run from thousands of dollars down to ~$150 by having it orchestrate cheaper models like Codex and GPT-5.5, why you should never push the reasoning slider past high, the CLAUDE.md and skills changes that changed my workflow, and how I got a month of backlog shipped in 3 days!
+
+Thank you Clerk & Infinite Red for sponsoring!
+- Clerk: https://soydev.link/clerk
+- Infinite Red: https://soydev.link/infinite
+
+SOURCES:
+https://x.com/theo/status/2072898342921842703
+
+Want to sponsor a video? Learn more here: https://soydev.link/sponsor-me
+
+Check out my Twitch, Twitter, Discord more at https://t3.gg
+
+S/O @Ph4seon3 for the awesome edit 🙏
+
+#ai #programming #coding
+
+## Tags
+
+web development, full stack, typescript, javascript, react, programming, programmer, theo, t3 stack, t3, t3.gg, t3dotgg
+
+---
+
+## Transcript
+
+[00:00:01] Saying Fable 5 has one shot me would be a criminal understatement. I really appreciated the model the first day I tried it, but over the next two I started to genuinely love it and was blown away with what it was capable of. And then it got taken from us and I I struggled. I did my best to make decent work come out of Opus 48 and GPT-5.5, but it just it wasn't the same and I found myself just kind of running in circles waiting. And then the model came back and I honestly can't believe I'm saying this, it's better than I remembered. There are a lot of things that aren't perfect about it and there's ways to work around some of them. God damn, when I'm actually trying to use this model for my day-to-day work, it blows me away. And the first day of having it back, I got more work done than I had in the month prior. It just it was incredible to watch as the model cranked through all of these things that I'd been planning and thinking about and starting but not finishing and it just shipped. It fixed a bunch of code, it merged a bunch of stuff and it got me pumped for not just the work I was doing but for the future of how we'll be doing work. It is incredible what you can do with this model, but there's one big catch.
+[00:01:02] catch. If you treat this model the way you did previous ones, you're not going to see the benefits. To put it simply, this model isn't a better Opus. If you take prompts that worked for Opus and you give them to Fable, it's not going to be much better. The difference in this model isn't just how much smarter it is or how much better the code is, it's how much further it can go. Not just on like harder code tasks, but on end-to-end implementations, testing, verifying and all the other pieces you need to write great software, especially once it has to break tasks up into smaller pieces and hand those off to sub agents. This model does incredible stuff and I've been doing my best to get as much as possible out of it during this limited window where we have it in the subs, although it is coming back soon. And with that, I do want to make sure you guys know I already filmed a video today about a lot of this, specifically about all the misconceptions people have with the model.
+[00:01:50] the model. They're frustrating me because this model is great. So, if you're confused because you read Twitter and saw all these people saying the model's nerfed, it's terrible, it's way too expensive, all that type of stuff, go watch that video first. It'll help clear the air. It's not a necessary first view, but it will help a decent bit. This video is different, though. This is the video where I show you all the things I've been doing with Fable, all the awesome stuff I've been able to ship, most importantly, the ways that I've been doing it. The prompts I've been sending, the systems I have built, the changes I've made to my Claude MDs, to my skills, and all these other things, and how I've most importantly changed the way my brain works when working with models in order to maximize what I can get out of this new era. And this really is a new era. Fable isn't just an improvement, it is a fundamental change in what these models are capable of, enough that it makes it sound like I'm reading a script when I'm not. This is all off top. Like this model's screwing with me, if you can't tell. I have effectively been one-shot. This is my psychosis moment, and I can't wait to share it all with you, but someone's going to have to pay for my therapy, and it'll probably come from the budget, thanks to today's sponsor. My agents get a lot right when I'm building. It's honestly really impressive, but there's a few things they always get wrong, no matter how good the tooling gets. The two that hurt me the most are off and billing. They're just like the kryptonite of AI agents. They could never get it right, especially the billing side, and trying to get that linked to the user in a way that makes sense. The amount of weird, random, transient billing failures we get across services is so annoying. Well, it was until I started using today's sponsor more, Clerk. Because not only do they have the best off platform that is the easiest to integrate across everything, be it web, mobile, or anything else. We're actually working with them right now in order to get the T3 Code Electron desktop app off for our new remote stuff that I'm really excited about. What's way more exciting to me is the subscription platform that's now built in. Having tried pretty much everything like this, I can confidently say Clerk is the easiest and has the best abstraction. Instead of all the obnoxious effort trying to set up a staging and production environment for Stripe with their own separate keys, their own separate product IDs, their own separate everything, that you now have to mirror in your real database just to make sure it works, you just get to configure it in the clerk dashboard. Once a user pays, that payment information is attached to the user itself, where it belongs. I don't care what subscriptions exist, I care if this user is subscribed, and clerk gets that right. They have custom components and helpers where you can check what state a user's in and what plan they have to make it trivial to render the right UI or go down the right path, and it ends up costing the exact same as going to stripe directly, which is unbelievable. Any one of these pieces would be worth moving to clerk for, especially having the user profile component with all the billing info built in. The amount of time Mark loses dealing with billing disputes and email is obnoxious, and this would have saved us so much of that trouble. Fun fact, if you Google search stripe recommendations, my repo is the first one to come up. This is a multi-page guide on how to try and get stripe to work properly in your apps, but at this point when people ask me how to get it right, I usually just point them at clerk. Set up auth and payments right at swyd.link/clerk. The amount of work I've done with this model in the last few days is still just kind of screwing with me, especially because I was at a conference for half of it. Shout out to the T3 Code mobile app, by the way. I was doing a ton of work on my phone while

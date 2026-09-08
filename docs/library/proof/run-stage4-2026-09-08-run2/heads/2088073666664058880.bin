@@ -1,0 +1,225 @@
+# Tanishq Mathew Abraham, Ph.D. - Meta AI researcher who created DINOv2 explains modern self-supervised...
+
+**Channel:** Tanishq Mathew Abraham, Ph.D. (— subscribers)
+**Uploaded:** 2026-08-14 | **Duration:** 01:26:28 | **Views:** — | **Likes:** 351
+**URL:** https://x.com/iScienceLuvr/status/2088075479576367577
+**Uoinked:** 2026-08-14T07:51:21
+**Topic:** New Tools to Try
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by identifying the speaker as a Meta AI researcher who created DINOv2, a notable contribution to self-supervised learning. This immediately signals expertise and positions the viewer to learn from someone with proven, influential work in the field.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Meta AI researcher who created DINOv2 explains modern self-supervised learning!  Also introduces a new approach called CAPI  @TimDarcet gave a brilliant talk about his research at the @MedARC_AI journal club last month.   Very clear and information-dense, I learned a lot from his https://t.co/c0aanInYq6
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] get started. Okay, yeah I can provide a quick intro
+[00:00:05] if that helps to everyone who's here but
+[00:00:09] really excited to have Tim Darsett
+[00:00:11] present his work on CAPI
+[00:00:16] so for context
+[00:00:17] tim is researcher at FAIR in Paris
+[00:00:22] and he has been working
+[00:00:23] a lot self-supervised learning algorithms
+[00:00:26] so he was working on dinov2,
+[00:00:30] DINOV3 and working on BIT registers
+[00:00:33] all kinds of really cool
+[00:00:35] influential work in this space
+[00:00:37] And we've been thinking a lot about
+[00:00:40] self-supervised learning for medical imaging
+[00:00:42] For both the pathology project that
+[00:00:45] We have going with nanopath competition
+[00:00:48] but also neuroimaging stuff as well
+[00:00:51] So it would be great to
+[00:00:54] Tim present his latest
+[00:00:56] work on his new
+[00:00:57] self-supervised learning algorithm
+[00:00:59] and maybe is useful inspiration for us
+[00:01:02] as we are coming up with
+[00:01:03] New ways of doing
+[00:01:05] SSL4 medical imaging applications
+[00:01:07] So, With that I will let Tim
+[00:01:10] start the presentation
+[00:01:13] Great thanks so much Tanishq
+[00:01:15] Can everyone see my screen?
+[00:01:18] great Hi everyone
+[00:01:20] i'm tim As tanish said
+[00:01:23] Yeah Today We're going to talk about CAPI
+[00:01:26] Maybe the only precision I might add is
+[00:01:29] My latest work
+[00:01:30] Is not that latest
+[00:01:32] This came out like a year and half ago
+[00:01:34] So there's some things are
+[00:01:37] Not really up to date
+[00:01:39] In this sense of what comparisons we make
+[00:01:40] Etc It isn't the latest SOLA
+[00:01:43] But well I think it still relevant
+[00:01:46] Work in particular In the SOAD process
+[00:01:49] Let start talking about CAPI
+[00:01:52] And for that
+[00:01:54] The first thing i want
+[00:01:55] To stress As you said
+[00:01:57] SSL4 visual presentations works
+[00:01:59] Maybe it goes without saying here
+[00:02:02] If you're saying that
+[00:02:04] You use ssl But is not obvious to everyone
+[00:02:08] The fact Is That especially in the space right now
+[00:02:12] Vision for people
+[00:02:14] It's generally talking about Vlms
+[00:02:17] So, Generally Talking
+[00:02:18] About benchmarks Are very OCR focused
+[00:02:20] So clip models are
+[00:02:21] Very important And
+[00:02:23] Not Everyone knows
+[00:02:24] What Ssf Is really useful
+[00:02:26] For And the fact is
+[00:02:28] That I think there are
+[00:02:30] Like some domains In which
+[00:02:32] You cannot just
+[00:02:33] Do without SSL
+[00:02:35] Just as i said It's strictly better than
+[00:02:37] anything else we've got We started seeing that with dinov2
+[00:02:41] So One thing Is
+[00:02:43] For Some Domains We don't have much annotation
+[00:02:45] Medical, satellite Reptile
+[00:02:46] Biology The You know of course about medical
+[00:02:50] These Are all examples
+[00:02:52] Of Applications Dino v 2
+[00:02:54] That were put in place
+[00:02:56] This was radaino This was a canopy height map estimation
+[00:02:58] This plant net And this is
+[00:03:01] I don't remember which one But some
+[00:03:02] One of the Histopathology models
+[00:03:04] That are based on
+[00:03:06] The dinov2 recipe and these
+[00:03:08] Models They were very well
+[00:03:10] Thanks to Subscribers
+[00:03:11] Another thing
+[00:03:13] that can be Emphasized
+[00:03:16] Is There Are Some Source
+[00:03:17] Of An image Understanding
+[00:03:18] That Just Not Well
+[00:03:20] Captured By clip Models
+[00:03:22] Such as Depth Estimation
+[00:03:23] Like Anything That's geometric
+[00:03:25] Point tracking Uh
+[00:03:27] This is For example
+[00:03:28] Depth estimation I don't remember
+[00:03:29] Which one Is Maybe Dev pro
+[00:03:30] Or something But A lot
+[00:03:32] Of Death Estimation Models
+[00:03:33] That came out After dino v 2
+[00:03:34] Used In a V2 Also
+[00:03:37] For point Tracking Was
+[00:03:38] Very well also If you
+[00:03:39] Want to Do Things Like Neuro
+[00:03:40] Feature Fields Where You Have
+[00:03:42] Features Four Different
+[00:03:44] Objects In
+[00:03:45] Us 3d Scene Now
+[00:03:46] All of These Things Justify
+[00:03:49] The Idea That We
+[00:03:50] Won To Have Good Ssn
+[00:03:53] now that's Great
+[00:03:58] Yeah Could Say The Same Thing
+[00:03:59] With Dino v 3 But Just
+[00:04:01] This Was Made At A Time
+[00:04:02] Of Dyna V2 Being Very
+[00:04:03] Prevalent In The Field With
+[00:04:06] These Dynamo Models We've
+[00:04:07] Got Something But
+[00:04:10] It's Complicated
+[00:04:13] If You Have
+[00:04:15] Ever Tried Training
+[00:04:16] Or Dyno V 2 Like
+[00:04:17] Model Which I Have Looked
+[00:04:19] At The Recipe Its Mass
+[00:04:22] I'm Not To Say Because
+[00:04:23] I Made It Better It
+[00:04:25] Is Really Complex And
+[00:04:26] Messy Nobody Likes
+[00:04:30] The Recipe Especially Not
+[00:04:31] Us This For Example
+[00:04:33] Is A Diagram Of
+[00:04:34] That Comes From The
+[00:04:35] Ibot Paper On Which
+[00:04:36] Dyna V2 Is Based
+[00:04:39] It's So It Shows
+[00:04:40] How The Eye
+[00:04:42] Bot And Dino B 2 Took
+[00:04:43] Same Things Mixes
+[00:04:45] Like Global Laws
+[00:04:47] Local Laws Its
+[00:04:48] Bit Complicated
+[00:04:52] Also Would Like
+[00:04:53] To Say I Think Does Not
+[00:04:55] Scale Super Well This
+[00:04:56] Is Of The It Is Controversial
+[00:04:58] To Say Because Well Dyna
+[00:05:00] V2 Is Scaled
+[00:05:01] And Now We Have Got Dino
+[00:05:02] V3 So Its Even
+[00:05:03] Worse We Have Pretty Big Models
+[00:05:06] But It's Hard To Scale
+[00:05:07] Them Like Even Just
+[00:05:08] Getting 1B Scale
+[00:05:09] Which Is Not Very Big
+[00:05:10] By Today Standard In NLP
+[00:05:12] And Even In Vision Look
+[00:05:14] In 2018 There
+[00:05:15] Were 700 Million Parameter
+[00:05:17] Models In Convects
+[00:05:20] That Existed
+[00:05:21] So 1B
+[00:05:22] By Now
+[00:05:23] Is Absolutely
+[00:05:25] Not Crazy Impressive
+[00:05:26] For Vision And It Isn't
+[00:05:28] Really Going In
+[00:05:29] The General Philosophy
+[00:05:30] Of The Field Off
+[00:05:32] We Made
+[00:05:33] Simple Methods
+[00:05:35] That Work
+[00:05:36] Well And Benefit From
+[00:05:37] Scale To Scaled
+[00:05:41] Dyna V2 We Had Fix
+[00:05:42] A Ton
+[00:05:44] Of Things Just Every
+[00:05:45] Time You Skate You Get Some
+[00:05:46] Subtle Ways
+[00:05:47] Things Break If
+[00:05:48] You Train Too Long
+[00:05:50] Then Models Gets Worst
+[00:05:51] Instead Of Have
+[00:05:53] Weird Things I Don't Like
+[00:05:54] It Finally Dyna V2 Has
+[00:05:57] Noisy Feature Maps
+[00:05:58] So This Is In Particular
+[00:06:00] Something That Is
+[00:06:03] Important To State Especially
+[00:06:04] After The Fact We
+[00:06:06] Work On Registers To
+[00:06:08] Introduce Fix The Artifacts
+[00:06:09] Found In Dyno
+[00:06:11] V 2 But Even
+[00:06:12] With Registers
+[00:06:13] These Are A
+[00:06:14] Nois See Thos

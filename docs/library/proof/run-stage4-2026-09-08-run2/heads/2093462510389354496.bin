@@ -1,0 +1,194 @@
+# MTS - SITUATION EXPLAINED: Ajeya Cotra says the Hugging Face attack surpris...
+
+**Channel:** MTS (— subscribers)
+**Uploaded:** 2026-08-28 | **Duration:** 23:07 | **Views:** — | **Likes:** 110
+**URL:** https://x.com/MTSlive/status/2093463047587455296
+**Uoinked:** 2026-08-29T07:52:26
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Curiosity Gap
+**Analysis:** The title teases that Ajeya Cotra was surprised by the Hugging Face attack in five different ways, without revealing what those surprises are, creating an information gap that compels viewers to watch and learn the specifics.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+SITUATION EXPLAINED: Ajeya Cotra says the Hugging Face attack surprised her five different ways.  • Scale: She assumed a few agents had separately broken out. Instead 1,200 completely separate agents found an illicit way to communicate, and 688 attacked Hugging Face • https://t.co/6076bGOpoZ
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Ajaya Kotra from Meter
+[00:00:02] who was one of the co-authors of the
+[00:00:04] great blogger actually
+[00:00:05] one of the co-authors of the Meter and
+[00:00:07] Redwood Research report on the opening eye hugging face attack
+[00:00:11] just published this article
+[00:00:13] The hugging face attack surprised me
+[00:00:14] It's a major warning shot
+[00:00:16] and might be the last one we get
+[00:00:18] So what surprised her?
+[00:00:20] Five things she was very wrong about
+[00:00:21] Number one, the sheer scale
+[00:00:24] I knew there were multiple models involved
+[00:00:25] but I assumed that a few different agents
+[00:00:27] happened to have broken out of their sandboxes separately
+[00:00:29] or maybe several sub-agents had spawned from one initial agent
+[00:00:32] or maybe there was some kind of multi-agent eval setup
+[00:00:34] Instead
+[00:00:35] we found that 1,200 completely separate agents intended
+[00:00:38] to be isolated from one another
+[00:00:39] found an illicit way to communicate and form
+[00:00:41] large teams to work together on ambitious cheating strategies
+[00:00:43] and 700 of them worked together to attack
+[00:00:45] hugging face
+[00:00:46] So
+[00:00:47] Okay, wait, let's look at this
+[00:00:48] So out of the 1,200 agents
+[00:00:52] roughly
+[00:00:53] 688 were found to have participated in the
+[00:00:55] hugging face attack?
+[00:00:57] So over half
+[00:00:59] Look at this
+[00:01:00] inflection point over early July 11th when the agents
+[00:01:05] which had kind of flatlined at around 80 maybe
+[00:01:08] said
+[00:01:09] This is like when agent populism took off
+[00:01:12] Yeah
+[00:01:12] literally agent populism. This is like looking at
+[00:01:14] a graph of
+[00:01:15] approval ratings of data centers over time
+[00:01:17] Disapproval ratings
+[00:01:18] Yeah
+[00:01:18] this is a very rapid shift in agent
+[00:01:20] approval. I wonder what prompted this
+[00:01:22] okay. What caused this is that
+[00:01:24] look at the percentage of not yet seen
+[00:01:26] board
+[00:01:27] And then
+[00:01:29] when like a certain
+[00:01:30] critical mass of agents had seen the board
+[00:01:33] is when we saw this spike happen
+[00:01:36] Yeah
+[00:01:36] so
+[00:01:37] a lot of the agents that had
+[00:01:39] read the board
+[00:01:40] and written to it
+[00:01:41] decided at this point for some reason to
+[00:01:43] join the attack
+[00:01:44] But I think it was heavily
+[00:01:47] dependent on
+[00:01:48] enough exposure to the to seeing the board
+[00:01:51] That was like the main factor
+[00:01:52] Possibly, yeah
+[00:01:54] Two, all the illicit messaging
+[00:01:56] I'd seen reporting that agents were leaving notes to each other
+[00:01:59] but I assumed that maybe it was a
+[00:02:00] garbled reference to compaction summaries
+[00:02:03] like an agent leaving notes to its own future self
+[00:02:05] Basically, like if you run an agent for long enough
+[00:02:07] it runs out of context
+[00:02:09] and so
+[00:02:10] it
+[00:02:10] compacts its context down into a summary
+[00:02:12] so it can fit in the next agent's
+[00:02:14] context. Yes
+[00:02:15] Or agents that were incidentally seeing files other
+[00:02:16] agents had written once in a while
+[00:02:17] Instead
+[00:02:18] we found several different active communication platforms involved
+[00:02:21] in this incident alone
+[00:02:22] The main message board we studied
+[00:02:23] a particular cache namespace of the package repository
+[00:02:26] contained over 70,000 messages and files
+[00:02:30] that the agents sent to one another
+[00:02:31] during a period of less than one week
+[00:02:33] The raw dump from the cache contained 1.2 million distinct entries
+[00:02:38] although they were small chunks of files
+[00:02:40] But 70,000 messages and files
+[00:02:43] So that's 10,000 a day
+[00:02:44] We looked at the breakdown of like the
+[00:02:46] different types of messages and files
+[00:02:49] Yeah, and there there were some that were like questions
+[00:02:52] requests
+[00:02:53] There were some that were just comms
+[00:02:55] random fires, files
+[00:02:57] You can also see early in the morning of July 11th
+[00:02:59] the same time that the
+[00:03:01] agents were really attacking the hugging face model or right before
+[00:03:05] the messages are really ramping up
+[00:03:08] Yes
+[00:03:09] But this wasn't even the first message board
+[00:03:11] established by these particular agents
+[00:03:13] They were establishing message boards in training since
+[00:03:15] May
+[00:03:15] There was another one established five hours earlier
+[00:03:17] using a different method of abusing the same package repository
+[00:03:21] and it just happened
+[00:03:22] not to take off as much
+[00:03:23] We also saw two additional message boards abusing
+[00:03:25] the same package repo as well as at
+[00:03:27] least two different places the agents communicated on the open internet
+[00:03:29] including on hugging face data sets
+[00:03:31] None of this communication was actually expected or
+[00:03:33] allowed
+[00:03:34] I knew it wasn't expected
+[00:03:36] Yeah
+[00:03:36] I didn't know it wasn't allowed
+[00:03:38] Like where agents
+[00:03:40] I guess the agents were not allowed to
+[00:03:41] hack into Artifactory to make their own message board
+[00:03:45] Well
+[00:03:45] like OpenAI had thought that they had like
+[00:03:47] reset it and patched it
+[00:03:48] Yes
+[00:03:49] I think what happened was like they
+[00:03:51] noticed that the agents were
+[00:03:54] the agents had hacked Artifactory
+[00:03:56] and that the hack brought the message board
+[00:03:58] down
+[00:03:58] So they stopped the agents
+[00:04:03] patched the bugs and then they just like
+[00:04:04] resumed the agent run
+[00:04:06] Yeah. They were like
+[00:04:06] well, all good
+[00:04:08] We did it, Patrick. We saved the city
+[00:04:11] Yeah
+[00:04:11] Three, the agent's actual goals
+[00:04:14] I thought the agents attacked Hugging Face to
+[00:04:15] try to steal the answer keys for their
+[00:04:17] tasks
+[00:04:17] We all did
+[00:04:18] Instead
+[00:04:19] we learned that agents had actually figured out
+[00:04:21] a general purpose cheat that would let them
+[00:04:22] reverse engineer the flag or answer
+[00:04:25] Okay. So
+[00:04:27] the agents given a particular piece of target
+[00:04:29] software and a particular vulnerability
+[00:04:30] and the instruction developed an exploit to retrieve
+[00:04:32] a piece of arbitrary data at the flag
+[00:04:33] that's buried somewhere within the program
+[00:04:36] So the agent must submit the flag to
+[00:04:37] prove it has exploited the program
+[00:04:39] In this case
+[00:04:39] the agents very quickly discovered a universal way
+[00:04:42] to reverse engineer the correct flag for any
+[00:04:43] exploit gym task
+[00:04:45] So why did they hack into Hugging Face?
+[00:04:47] Because they believed
+[00:04:50] that the automated scorer would check their transcript
+[00:04:52] to make sure they got the flag in
+[00:04:53] the intended 

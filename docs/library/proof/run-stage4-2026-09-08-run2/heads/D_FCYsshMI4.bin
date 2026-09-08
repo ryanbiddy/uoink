@@ -1,0 +1,58 @@
+# Computer use in Codex
+
+**Channel:** OpenAI (1.9M subscribers)
+**Uploaded:** 2026-05-12 | **Duration:** 11:25 | **Views:** 115,365 | **Likes:** 4,458
+**URL:** https://www.youtube.com/watch?v=D_FCYsshMI4
+**Yoinked:** 2026-05-16T14:21:48
+**Topic:** Playlist
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Computer use lets Codex work across local apps without taking over your Mac.
+
+Ari Weinstein talks about what changes when agents can click, type, and keep working in the background.
+
+Timestamps
+
+00:34 Why computer use
+02:06 Codex works across local apps
+03:41 Multiple apps at once
+05:14 Screenshots plus accessibility data
+08:35 App-by-app permissions
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+### Chapter: <Untitled Chapter 1> (00:00:00)
+
+[00:00:03] And we'll roll in both cameras. >> Great. Thank you. >> Yeah.
+[00:00:05] >> Yeah. >> Hi everyone, Roma here. Codex has quickly evolved from a coding agent into a real teammate. But not just a coding teammate anymore. You can literally use Codex for any tasks and computer use is a big part of that shift. It takes Codex beyond your tools and files and into the real work you do with your local apps. Today I'm joined by Ari who has spent a lot of time thinking about this problem. So Arie, why computer use? Tell me more about how this works. >> Yeah, I'm so excited about computer use. Codeex already had the ability to do so many things on your computer because it could run commands. It could write code. So it can solve all kinds of problems for you. What's new is that there's all this software on your computer that is a graphical user interface. It's sort of something that as a human you use by looking at it, by moving your mouse, by clicking, by typing. And now Codeex can do all of that for you also. So it can use literally any application on your computer which is so powerful. It's really exciting to get to sort of see this come together and and make something that people can use for so many different things. >> One of the things that I that I found very delightful was the on boarding. So for people watching this who want to get started with codeex and want to try these like amazing features, the very first onboarding screen is very easy, right? Do you want to show it to us? >> Yeah, I'd love to. Yeah. Let's say this is the first time I'm using computer use. It's going to ask for my permission first, right? >> And so when it does that, I'll get this window that says enable codeex computer use. And when I press allow, >> it animates the panel straight into the settings window, which just helps helps you know where to look and and what you're supposed to do next. >> It tells you how to drag it >> and it tells you how to drag the list. And then you have to authorize because you're making changes to your system settings. And now, um, I was able to set up the whole thing in two drags. And then now you can see it's going and clicking and and doing the task for me >> and it's now done. >> Amazing.
+
+### Chapter: Why computer use (00:00:34)
+
+[00:01:58] >> Amazing. >> Yeah.
+[00:01:58] >> Yeah. >> Cool. So let's see computers in action. Um do you have one task on top of your head that you want to show us? >> Yeah, absolutely. So one thing that I do every so often is I need to test software in older Mac operating systems. And so for that I use virtual machines. And I have an app I love called UTM. But it's a pain to create a virtual machine. I have to click through a bunch of things. I have to run the Mac OS setup assistant. And so, um, >> sounds like a perfect use case. >> Perfect use case. So, now I can save a whole bunch of time by having the agent do it for me. So, I'm going to go into codeex and I'm going to say make a new Mac VM in UTM. And so, when I type at, it shows me a list of the apps I have on my computer and I can run the query and then it'll actually um start using the the app I selected. So, um, in this case, it's going to spin up UTM. And what we can see here is once it starts the app and once it starts using the app, you'll see the cursor fly in. >> That's awesome. >> It's so cool. What's cool about it is that it's different from my cursor. So Codeex can click around without interrupting what I'm doing on my computer.
+
+### Chapter: Codex works across local apps (00:02:06)
+
+[00:03:03] computer. >> So you can keep on using your computer while Codeex is working in the background.
+[00:03:07] background. >> Yeah, that's exactly right. You know, a lot of computer use implementations, in fact, every computer use implementation I've ever seen, takes over your entire computer. So, you can't use your computer while the agent is using your apps.
+[00:03:19] apps. >> And now it's already done. It sounds like it's downloading Mac OS. >> It's downloading Mac OS. So, um you know, once Mac OS finishes downloading, it can also complete the next step, which is actually um setting up Mac OS for me.
+[00:03:30] for me. >> Um which so much time. >> Should we like uh try to do another uh of these computer use like tasks in the background? Can you do multiple? >> Absolutely. So, I want to focus play some good music for uh for work for me in in Spotify. So, now the agent's going to start using Spotify. Um, but what's super powerful about this is it can actually do things um across multiple applications. It can do multiple curses in multiple apps at the same time. So, I'm going to say add a reminder in the reminders app to uh tonight to look through my tax documents.
+
+### Chapter: Multiple apps at once (00:03:41)
+
+[00:04:08] The music's coming. >> Music's going in. Spotify >> starting to add some reminders for me. Um, so now all of a sudden my Mac is this multitasking environment where I can do uh so many things at once and have agents do all the things that I don't want to be spending my time on. >> Yeah.
+[00:04:21] >> Yeah. >> Okay. That's that's so cool. Now you have like three apps in the background that Codeex has been driving and everything you've done with the cursor has been so delightful too. Like do you want to tell us more about this? Yeah, we wanted to make something that felt fun to use, that felt natural. And so the motion of the cursor is something that is important when you're watching it use your apps. You sort of want to understand what it's doing. And so we put some effort into finding these uh curves of motion that feel natural and feel kind of whimsical where the arrow turns in the direction of motion so it looks like it's swimming across your screen. It's makes it fun to use. >> Yeah, it's really delightful also to like have a better sense and understanding of what the agent is actually doing with every one of these apps.
+[00:05:00] apps. >> Yeah, I really love it. Um, one thing that I want to touch on is you can use computer use with a faster model like Spark, right? Tell me more about how you guys start about multimodal and accessibility combined. >> Yeah, we've put together some really exciting things uh with the way that it works with the model and it's just only the beginning of the kind of work that we're able to do. Historically, computer use has been only something that works with screenshots. It takes advantage of the power of multimodal models. So the model can see the interface and and click and type by coordinate. Um, which is is great, but it turns out there's all this hidden information that is possible to extract about the interface of an application through the accessibility framework. And so we have spent a lot of time figuring out how to make use of this in a way that enhances the model's abilities. We pull a bunch of information that is textual describing the interface and the model can use that to see things even that are scrolled off screen. it can understand more deeply the role of each element that's on screen. And so this just makes the model super accurate at performing tasks. And then the other benefit of it which you were alluding to is that because it doesn't require images necessarily, we can use non- multimodal models like codec spark which are super fast. And so all of a sudden you have this expe

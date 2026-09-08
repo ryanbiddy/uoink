@@ -1,0 +1,55 @@
+# Ultralytics announces a new generation of computer vision models: Ultralytics YOLO26!
+
+**Channel:** The Ravit Show (1.1M subscribers)
+**Uploaded:** 2025-10-06 | **Duration:** 11:36 | **Views:** 58,729 | **Likes:** 44
+**URL:** https://www.youtube.com/watch?v=hPJYSxsHDtQ
+**Uoinked:** 2026-07-09T19:22:52
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Story Open
+**Analysis:** The video opens with a personal narrative scene: 'Hi everyone. I'm here at the YOLO vision 2025. Super excited to be with Glenn, founder and CEO of uh YOLO Ultralytics,' establishing the setting of an interview at a conference and creating a conversational, relational context before diving into technical details.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+I sat down with Ultralytics’ Founder & CEO Glenn Jocher at YOLO Vision 2025 to unpack the new Ultralytics YOLO26 models and what they change for builders. While YOLO26 has been announced at YV25, the new models will become publicly available at the end of October 2025, so stay tuned!
+
+During our interview with Glenn, we break down how the YOLO26 models differ from prior generations, what changed under the hood, and why it matters for training time, memory use, and results in production. Glenn explains the standout innovation in this line and how it helps with tougher cases like small objects, crowded scenes, and varied lighting.
+
+We talk through where the impact lands first. Manufacturing quality checks, retail analytics, smart cities, drones, healthcare imaging, and safety use cases all see clear benefits. You will hear simple guidance on picking the right model size, setting up data, and moving from a pilot to a stable release.
+
+We also cover what this launch means for the Ultralytics community. Glenn shares how the team is working with developers and researchers on feedback, documentation, and examples. 
+
+Ultralytics recently closed a funding round, and we discuss the priorities that the investment supports, including product hardening, ecosystem tools, and education. Partnerships come up as a growth lever, with a focus on making deployment simpler across edge and cloud. 
+
+We close on the 3 to 5-year view for the YOLO ecosystem and how the community will shape it. 
+
+Learn more: https://docs.ultralytics.com/models/yolo26/
+
+#data #yolo #ultralytics #theravitshow
+
+## Tags
+
+data, ai, agents, agenticai, genai, generativeai
+
+---
+
+## Transcript
+
+[00:00:02] Hi everyone. I'm here at the YOLO vision 2025. Super excited to be with Glenn, founder and CEO of uh YOLO Ultralytics. >> Excited to be here talking to you, Rabbit.
+[00:00:08] Rabbit. >> Super excited. Um uh Glenn, last year I was at Yellow Vision. >> That's right. >> And I'm back here. >> It's good to see you again. >> Yes. Uh y'all made some amazing announcements today. I'm kind of curious to learn about that. Uh so to start with uh YOLO Vision 2025 marks the debut of the latest ultralytics YOLO 26 uh models.
+[00:00:29] models. >> That's right. >> Uh what is going to make this uh model generation different from anything we've seen before? Can you share a little bit about that?
+[00:00:37] about that? >> Yeah, absolutely. So it's really exciting. We're dropping the YOLO 26 models today and the main announcement for them is that they are fully native endtoend
+[00:00:47] endtoend >> which means that we've completely gotten rid of the NMS layer. Um, it makes it easier to export. It makes the architecture simpler. It means that you can now take those YOLO models and you can send them to all these different devices. You don't have to worry about getting NMS to work on the device which has been a big blocker in the past. Um, there's a bunch of other small things too, little architecture tweaks, training tweaks. >> We created a we actually we created a brand new optimizer too called the MUSGd optimizer. But the end result is everything's faster, it's more accurate, and it's simpler to deploy. Super excited.
+[00:01:18] excited. >> Amazing. Uh Glenn uh those are fantastic insights and uh thanks for sharing that. Can you also share the biggest uh breakthrough or technical innovation in these new models that we can see and how will it help the community? >> Yeah. Yeah. I think that like the biggest breakthrough is that these are they're end to end and they're trained with two different branches. They're called one one to many and we balance a loss between them as the model is trained. This is something super new. I don't think anybody's ever done this before.
+[00:01:44] before. >> Um and we call this a progressive loss optimizer. It's really exciting. It means that the smaller models in particular get more accurate. >> Um, and just the native end to end architecture simplifies everything. >> It's going to be so much better actually deploying these models because it's not just the training. We've always done that well, but it's been the deployment. And if I'm being honest that that, you know, that's a little complicated. It doesn't always go right. So, we're trying to make sure that it does and that everybody gets the best result from their models. >> That's awesome. Uh, and uh, really great that y'all are the first ones to do that. Uh it definitely helps the open source community a lot too. >> Absolutely. >> Um kind of also curious to know a little bit about the industries or application it will benefit the most uh with these uh advancements because uh I'm pretty sure a lot of enterprise leaders would be interested to know how this would affect their uh industries as well. >> Yeah. Yeah. Absolutely. So small object detection is is where we're focusing on small objects. >> Okay.
+[00:02:38] >> Okay. >> That's what's getting the most improvement. So this could be things like quality assurance, QA, like detecting small defects in objects. Um, detecting objects that are far away. The YOLO 26 models are going to do a better job at that than we've ever done before. So I think it's going to open up new doors and for the existing applications, it's going to mean that they perform even better than before. >> Yeah, I think that's very important for sure. Uh, Autoyolytics YOLO has always been about speed and accuracy. How do these new models push the boundaries much further? If you can share a little bit about that as well. >> Yeah. Yeah. uh we are you know riding on the shoulders of giants. So we come up with our own great ideas but also we listen to the community and we look at advances all over the field. Yep. So we've integrated advances from previous models uh like the YOLO 10 models the research led by Awang at Shinua University
+[00:03:28] University >> um also RT DTOR models the transformer architectures we've analyzed those we've integrated the best pieces but we've also kept the best pieces of YOLO. So CNN's combined with transformers leveraging the best of both CNN's for speed, transformers for flexible heads and elimination of NMS. So this combination is very powerful and we're excited to bring it to market here. >> I love it. Uh and just a curious question since we on this topic of community and you know obviously uh the people the users as well. Uh what does this launch mean for broader ultralytics communities? talk about, you know, developers, researchers, businesses. Any thoughts around that? >> Yeah, I think actually the most exciting thing is is not really for me what we're doing today, but what we're going to be able to do in the future and a lot of that is from our funding round. So, >> uh, we've been we've been very small, very scrappy, capital efficient, getting things done on a tight budget. >> And now with our funding round, with this 30 million that we've closed for our series A, >> that's huge. It's huge. It is. It's huge. It's crazy. Yeah. >> Um, but I I'm just so excited for what we're going to be able to produce. So, I think the compute that we need, uh, the amazing ML engineers who we'll be able to hire, and the effort that we'll be able to put into the models. So, we're doing great things already, and we're going to be able to do even bette

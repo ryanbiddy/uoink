@@ -1,0 +1,168 @@
+# 8. Constraints: Search, Domain Reduction
+
+**Channel:** MIT OpenCourseWare (6.3M subscribers)
+**Uploaded:** 2021-04-23 | **Duration:** 45:06 | **Views:** 37,002 | **Likes:** 460
+**URL:** https://www.youtube.com/watch?v=dARl_gGrS4o
+**Yoinked:** 2026-05-12T18:55:47
+**Topic:** Playlist
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+MIT 6.034 Artificial Intelligence, Fall 2010
+Instructor: Patrick Winston
+View the complete course: https://ocw.mit.edu/6-034F10
+YouTube Playlist: https://www.youtube.com/playlist?list=PLUl4u3cNGP63gFHB6xb-kVBiQHYe_4hSi
+
+This lecture covers map coloring and related scheduling problems.  We develop pseudocode for the domain reduction algorithm and consider how much constraint propagation is most efficient, and whether to start with the most or least constrained variables.
+
+License: Creative Commons BY-NC-SA
+More information at https://ocw.mit.edu/terms
+More courses at https://ocw.mit.edu
+Support OCW at http://ow.ly/a1If50zVRlQ
+
+We encourage constructive comments and discussion on OCW’s YouTube and other social media channels. Personal attacks, hate speech, trolling, and inappropriate comments are not allowed and may be removed. More details at https://ocw.mit.edu/comments.
+
+## Tags
+
+6-034-artificial-intelligence-fall-2010, constraint propagation, domain reduction, map coloring, resource allocation, scheduling problems
+
+---
+
+## Transcript
+
+### Chapter: <Untitled Chapter 1> (00:00:00)
+
+[00:00:09] PATRICK WINSTON: It's too bad, in a way, that we can't paint
+[00:00:11] everything black, because this map coloring problem sure
+[00:00:14] would be a lot easier.
+[00:00:17] So I don't know what we're going to do about that.
+[00:00:21] How long is this going to take?
+[00:00:23] Here's what we're going to do.
+[00:00:24] We're going to wait till either all the laptops are
+[00:00:26] closed, or this program terminates,
+[00:00:28] whichever comes first.
+[00:00:32] So how long is this going to take?
+[00:00:34] I actually don't know.
+[00:00:36] I think it'll take more than the life time of the universe,
+[00:00:38] but I'm not sure.
+[00:00:39] So let's take a look at a slightly easier
+[00:00:42] map coloring problem.
+[00:00:44] We'll stop this one and change the map to something I call
+[00:00:47] [? simplicia. ?]
+[00:00:49] There's 26 states, one for each letter in the alphabet.
+[00:00:53] And what we're going to do is we're going to do a depth
+[00:00:55] first search for a suitable coloring of this map.
+[00:01:01] We're going to go in order, A, B, C, D, E. And as I've
+[00:01:04] suggested here, at each level we're going to rotate the
+[00:01:08] color choices so we don't over use any one color.
+[00:01:11] So if we launch this particular search, this depth
+[00:01:14] first attempt to color this map.
+[00:01:17] There it goes.
+[00:01:18] And maybe we should wait until it terminates.
+[00:01:21] Or maybe we should just let it run and it'll terminate,
+[00:01:25] perhaps, sometime within the lecture.
+[00:01:27] Or maybe we should just let it run over the weekend.
+[00:01:30] Or how long do you think we would have to wait, if we want
+[00:01:33] to come back and watch it terminate?
+[00:01:37] At roughly 30 frames a second--
+[00:01:39] I'm calculating it all in my head, I don't want to bet my
+[00:01:41] life on it-- but I think about 5,000 years.
+[00:01:46] And if we want to use as many states as there are in the
+[00:01:50] United States, in this demonstration, you get up to
+[00:01:53] numbers like 10 to the 17th years--
+[00:01:58] 17th, 18th, 16th, I'm not exactly sure.
+[00:02:01] I did a rough calculation.
+[00:02:03] And, of course, you could do some parallels into that, and
+[00:02:06] it's not as bad as chess, where you need all the atoms
+[00:02:07] in the universe and you still can't do it,
+[00:02:09] and things like that.
+[00:02:10] Acting as computers.
+[00:02:11] But still, it's pretty horrendous.
+[00:02:14] The problem is, well the problem is illustrated by this
+[00:02:20] diagram I put in back of me.
+[00:02:22] If you do a depth first search and you have a
+[00:02:27] problem like Texas.
+[00:02:31] If you label... if you assign a color to Arizona,
+[00:02:36] Oklahoma, Arkansas, and Louisiana first, and then wait
+[00:02:40] around to Texas last, then you get yourself into a bind by
+[00:02:47] your fourth choice, that you don't discover until you're
+[00:02:50] 48th choice.
+[00:02:52] So what happens then, is that you start developing this tree
+[00:02:56] like this, you get to those states surrounding Texas.
+[00:03:00] Texas is last state assigned a color and there's
+[00:03:04] nothing left for it.
+[00:03:05] And that problem was there on the fourth choice, and you
+[00:03:08] don't discover it until your 50th choice.
+[00:03:10] So you develop a horrendous, impossible, impossible search.
+[00:03:15] So you simply can't do it that way.
+[00:03:19] But now, not to worry.
+[00:03:22] I've come equipped with the idea of constraint
+
+### Chapter: Constraint Propagation (00:03:23)
+
+[00:03:24] propagation.
+[00:03:26] So we could just take a country with four
+[00:03:28] states, like this.
+[00:03:30] Each can be labeled red, green, blue and yellow.
+[00:03:34] So just like in a case of line drawings, we'll pile up all
+[00:03:37] the possible things that the value can be-- red, green,
+[00:03:41] blue and yellow.
+[00:03:42] Red, green, blue and yellow.
+[00:03:48] And we start up constraint propagation.
+[00:03:51] So we say for the upper left hand corner state, is there
+[00:03:55] any reason to believe that R is impossible?
+[00:03:58] Well we look at our neighbors and see what kind of
+[00:04:00] constraint flows in from them.
+[00:04:02] And sure, this guy could be green, and this
+[00:04:04] guy could be blue.
+[00:04:05] They don't have to be red, so there's nothing
+[00:04:09] that rules out red.
+[00:04:11] And there's nothing the rules out blue.
+[00:04:13] And there's nothing that rules out yellow.
+[00:04:16] And there's nothing that rules out green.
+[00:04:18] So constraint propagation just sits there with its finger up
+[00:04:22] its nose, doing nothing.
+[00:04:25] So it doesn't look like we can use either depth first search,
+[00:04:31] or constraint propagation.
+[00:04:34] So we could just give up and cry.
+[00:04:37] But maybe there's some other approach that will help.
+[00:04:41] So let me actually work the Texas problem.
+[00:04:45] So with apologies to Houston and Tyler,
+[00:04:50] here's a map of Texas.
+[00:04:57] There we are.
+[00:04:58] And here's, roughly speaking, Arizona
+[00:05:01] is over here somewhere.
+[00:05:03] And we've got Oklahoma in there.
+[00:05:05] And old Bill Clinton's state, Arkansas.
+[00:05:09] And then Louisiana sticks out there a little bit.
+[00:05:12] So there's our map of that
+[00:05:15] particular part of the country.
+[00:05:18] So we've got Arizona here, Oklahoma here, Arkansas here,
+[00:05:25] and Louisiana here, and Texas here.
+[00:05:29] And we have elected to assign colors to these states, in
+[00:05:34] that order.
+[00:05:35] So this is one, two, three, four.
+[00:05:42] And we're going to do that.
+[00:05:44] We're going to rotate our color choices, just so we
+[00:05:46] don't over use any one color.
+[00:05:50] But we're going to also have a look at Texas as we go around.
+[00:05:53] Because Texas is a state that borders on the States they
+[00:05:57] were choosing colors for.
+[00:06:00] So the only possible colors that Texas could be are red,
+[00:06:05] green, blue, and yellow.
+[00:06:10] So as we make our choices around here, we'll say that--
+[00:06:15] we don't have to adhere to any particular style-- we can say
+[00:06:18] that Arizona is going to get the colored red, R. That's
+[00:06:26] going to rule out R over here for Texas, because no adjacent
+[00:06:29] states can have the same color.
+[00:06:32] Then we go over to Oklahoma, and we're rotating our color
+[00:06:35] choices, so we'll say that can be green.
+[00:06:38] And that's fine, because it's consistent with the red here,
+[00:06:41] but it rules out the possibility that
+[00:06:4

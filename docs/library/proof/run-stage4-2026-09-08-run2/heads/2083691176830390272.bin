@@ -1,0 +1,211 @@
+# Lunar - Anthropic engineer just dropped a 1-hour+ workshop on Graph Engineeri...
+
+**Channel:** Lunar (— subscribers)
+**Uploaded:** 2026-08-01 | **Duration:** 01:34:29 | **Views:** — | **Likes:** 204
+**URL:** https://x.com/LunarResearcher/status/2083696076553412981
+**Uoinked:** 2026-08-02T07:50:10
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by citing that an 'Anthropic engineer' has created this content and references a specific statistic ('80% of our engineers are already using self-improving loops'), positioning the material as coming from expert practitioners at a reputable organization.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic engineer just dropped a 1-hour+ workshop on Graph Engineering.  "80% of our engineers are already using self-improving loops.  Now everyone is building agentic graphs."  00:00 - Graph engineering for agents 08:40 - Build your first agent graph 30:36 - Add graph-based https://t.co/P9XBokZGfG
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Welcome to Module 1. In this module, we'll dive into agents.
+[00:00:03] First, we'll demystify agents by explaining how they work in plain language.
+[00:00:06] We'll introduce several generic agent architectures and some common challenges
+[00:00:10] faced by developers when building agents.
+[00:00:12] We'll discuss why building custom agents with domain-specific workflows
+[00:00:15] or focus on high reliability is really important.
+[00:00:19] Finally, we'll show how Landgraf makes it easy
+[00:00:30] including state, nodes and edges.
+[00:00:31] We'll then show how to build graphs around chat models
+[00:00:34] we will discuss tools
+[00:00:36] messages which are core components of workflows that use ChatModels
+[00:00:39] And introduce looping in Workflows
+[00:00:41] and show this enables the general React agent architecture
+[00:00:45] Finally add memory
+[00:00:47] to our react-agent
+[00:00:48] Across all these ideas
+[00:00:50] we incorporate Landgraf Studio
+[00:00:51] or Desktop ID for building
+[00:00:52] debugging agents applications
+[00:00:54] Let's dive So first
+[00:00:57] a Salti language model alone is somewhat limited
+[00:01:00] It doesn't have access to tools
+[00:01:02] it does not have external context like documentation
+[00:01:04] and can alone perform multi-step workflows
+[00:01:10] And so many LLM applications use some kind of control flow
+[00:01:14] with steps before or after an LLL calls
+[00:01:16] This could be tool call
+[00:01:17] this is retrieval step
+[00:01:18] and so forth
+[00:01:20] In the Control Flow forms chain
+[00:01:23] you probably heard that term change
+[00:01:25] You think about as Some set of steps
+[00:01:27] Before, After and Lllm Call
+[00:01:31] Now they are very reliable
+[00:01:33] So the same flow of steps
+[00:01:34] occurs every time you invoke a chain
+[00:01:39] But we do want LLM systems
+[00:01:40] that can pick their own control flow
+[00:01:42] for certain kinds problems
+[00:01:44] Like, You may want an LLL application
+[00:01:46] That could choose its set of step
+[00:01:48] depending on problem it's faced
+[00:01:51] And this is really what
+[00:01:52] An agent This at least one simple definition
+[00:01:55] in Agent Its Control Flow
+[00:01:57] that actually defined by
+[00:01:58] and Lllm so have chains which are fixed
+[00:02:02] Control Flows They're setup developer
+[00:02:04] You've agents Which are
+[00:02:05] Lllm Defined Control Flows
+[00:02:08] Now the interesting point here is that
+[00:02:10] There's actually many different kinds of agents
+[00:02:12] So you can think about
+[00:02:14] dialing The amount Of control
+[00:02:15] You give to To LLLM
+[00:02:16] From low To high On lower end
+[00:02:19] You could Think About things like routers
+[00:02:20] This Is where an LLM controls
+[00:02:22] A single step In a flow
+[00:02:24] And it may choose Between
+[00:02:25] An narrow set Of options
+[00:02:26] in this toy example I go from
+[00:02:28] Step one Either Two or three
+[00:02:30] Based on The LLLMs decision
+[00:02:32] On other extreme
+[00:02:33] We have Fully Autonomous
+[00:02:34] Agent That Can Evict Any Sequence
+[00:02:36] Of steps Through Some set
+[00:02:38] of given Options Or even
+[00:02:40] It can Generate Its own
+[00:02:42] Steps That it Can take
+[00:02:43] So It Can Auto generate
+[00:02:44] its Own Next Move
+[00:02:46] Based Upon some
+[00:02:47] Potentially Available Resources
+[00:02:50] Now here's The catch
+[00:02:51] There are Practical Challenges
+[00:02:53] We Can Think About Application
+[00:02:54] Reliability On the Y-Axis
+[00:02:56] And you Could Think About The Level
+[00:02:57] Of Control You Give
+[00:02:58] To LLLM on X
+[00:03:00] now Typically What
+[00:03:01] we've Seen As You Ramp
+[00:03:02] Up The Level Of Control
+[00:03:03] That you Give To LLLM
+[00:03:05] Through Reliability Drops
+[00:03:06] So Going From Something Really
+[00:03:07] Simple Like A router
+[00:03:08] Just Something Much More
+[00:03:09] Complicated Like An Affiliate
+[00:03:11] Autonomous Agent the Application
+[00:03:13] Does Degrade In Term
+[00:03:14] S of reliability so This Is
+[00:03:16] really Kind Of Setting At The
+[00:03:17] Motivation Or Land Graph Land
+[00:03:19] Graph is Aimed to Help
+[00:03:20] You Bend This Reliability
+[00:03:21] Curve Allowing
+[00:03:22] You To Build Agents
+[00:03:23] That Maintain
+[00:03:25] Reliability Even As
+[00:03:26] You Push Out
+[00:03:27] The Level Of Control You
+[00:03:28] Actually Give To LLLM
+[00:03:30] Or Agent And
+[00:03:32] This Is Kind Of A Simple Kind
+[00:03:33] Of Statement That Summarizes
+[00:03:35] To Keep In The Back
+[00:03:36] Of Your Head Kind Of Why
+[00:03:37] Land Graph What Are We
+[00:03:38] Trying Achieve With It Now
+[00:03:40] Some Intuitions Here
+[00:03:41] Many Applications
+[00:03:43] We Want Combine
+[00:03:45] Developer Intuition
+[00:03:46] With LLLM Control And
+[00:03:47] So You Can Very
+[00:03:48] Easily Specify Certain
+[00:03:50] Steps Application That
+[00:03:51] You Always Want To
+[00:03:52] Be Fixed So You
+[00:03:53] Start Your Flow Go
+[00:03:55] To Step 1 End
+[00:03:56] With Step 2 Every Time
+[00:03:58] But Also Interject
+[00:03:59] LLMs At Arbitrary
+[00:04:00] Points Turning Into An
+[00:04:01] Agent Giving The
+[00:04:03] Lllm Kind Of
+[00:04:04] Arbitary Control Over
+[00:04:05] The Flow Of The Application Now
+[00:04:07] These Are Expressed As
+[00:04:08] Graph And Graph Is
+[00:04:09] Really Nice They Contain
+[00:04:11] Nodes Which Now
+[00:04:12] As You Can Think About As The Steps
+[00:04:13] In Your Application It
+[00:04:14] Could Be A Tool Call Or
+[00:04:15] Retrieval Step And
+[00:04:17] Edges Are Just Connectivity
+[00:04:19] Between Those There Is
+[00:04:20] A Lot Of Flexibility To
+[00:04:21] How You Lay Out Knows
+[00:04:23] And Edge We Will Get Into
+[00:04:24] This In A Lot Of Detail
+[00:04:25] Throughout Course So There
+[00:04:27] Is A Few Specific Pillars
+[00:04:29] For Land Graph That
+[00:04:30] Help You Achieve
+[00:04:31] This Goal We Are Talking
+[00:04:32] About So Land Graph Has
+[00:04:34] Persistence It Had
+[00:04:35] Streaming And Human
+[00:04:36] Loop As A
+[00:04:37] Lot Of Advanced Control Ability
+[00:04:39] Features In These
+[00:04:40] Pillars Will Be Kind
+[00:04:41] Of Cornerstones Of
+[00:04:42] The Modules In Course
+[00:04:43] And So We Will Be Going
+[00:04:44] To Each Of These In A Lot Of
+[00:04:45] Detail I Do
+[00:04:50] Want To Mention That Langraph
+[00:04:51] Also Comes With
+[00:04:52] An IDE So It's
+[00:04:53] Basically A Visual Environment
+[00:04:55] You Can Use To Debug
+[00:04:56] And Visualize Your Agents
+[00:04:58] That You Build We Will
+[00:04:59] Be Using This Quite A Bit
+[00:05:00] If You See The Very Useful
+[00:05:01] Debugging In Kind
+[00:05:03] Of Observability Tool
+[00:05:05] And I Do Want Highlight
+[00:05:06] That Land Graph Plays
+[00:05:07] Very Nicely Naturally With
+[00:05:09] Lang Chain So
+[00:05:10] You Think About Lan

@@ -1,0 +1,216 @@
+# Movez - Anthropic engineer:  “80% of our engineers are using self‑improving l...
+
+**Channel:** Movez (— subscribers)
+**Uploaded:** 2026-07-22 | **Duration:** 19:03 | **Views:** — | **Likes:** 1,652
+**URL:** https://x.com/0xMovez/status/2079985963862786352
+**Uoinked:** 2026-07-23T02:56:58
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook opens with a direct quote from an Anthropic engineer establishing credibility and insider knowledge, citing specific statistics (80% of engineers using self-improving loops) that position the speaker as an expert with access to proprietary insights about industry trends.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic engineer:  “80% of our engineers are using self‑improving loops. Now everyone is building agentic Graphs.  In 4-6 months, we’ll all be building graphs to orchestrate self‑improving agents. No more prompting.”  in a 20‑minute talk, Anthropic engineer explains how to https://t.co/wHcvpLj48i
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] a little bit about our view of asynchronous agents at
+[00:00:03] Anthropic and some things we've been up to
+[00:00:04] lately. So this is kind
+[00:00:07] of a way I think about models and product so
+[00:00:10] you can think about Clod
+[00:00:11] as a light source and you can think about products
+[00:00:13] as windows that allow the light
+[00:00:15] to pass through. And what's kind of interesting is,
+[00:00:18] over time the window that you need
+[00:00:20] actually kinda see the light in a model can
+[00:00:22] shift and we've seen this
+[00:00:25] over past few years so I'm plotting here different Clod models
+[00:00:29] their task horizon
+[00:00:30] So how much autonomous work they do overtime
+[00:00:34] You might recall back like Opus 3 days
+[00:00:37] This was 2024 Models could only do maybe 10-20 minutes
+[00:00:42] of Autonomous Work as it measured by meter
+[00:00:45] In that regime Only certain products
+[00:00:47] are made sense Things like Autocomplete, things
+[00:00:49] Like Chat where human is very in the loop
+[00:00:52] Because a model's really only doing
+[00:00:53] A very short amount of work before you're steering it
+[00:00:56] Now over past year we saw
+[00:00:58] The rise of synchronous coding agents
+[00:00:59] Like Clod code and this
+[00:01:00] Is kind Of shift because then models could do maybe an hour
+[00:01:04] Work So make sense to have them run
+[00:01:08] Typically locally We can still steer
+[00:01:10] Them easily And its kinda interesting
+[00:01:12] Because during This regime I remember efforts
+[00:01:14] When i was involved In some effort
+[00:01:16] To build Kind asynchronous
+[00:01:17] Agents But when models can only do like an hour of work
+[00:01:21] Async as experience is kind
+[00:01:23] Of bad The model goes off
+[00:01:25] And it hits An error
+[00:01:26] It comes back to you
+[00:01:27] Over a short period Time In order
+[00:01:29] To really unlock A sync
+[00:01:30] We needed Longer task horizons
+[00:01:32] So we're starting
+[00:01:34] See that now Kind
+[00:01:37] With this shift
+[00:01:38] in capability and time horizon
+[00:01:40] Came Shift In the API
+[00:01:41] Surfaces If You look
+[00:01:43] At Lower left
+[00:01:45] Message Api
+[00:01:46] came out Like two years ago
+[00:01:47] Its basically prompt response
+[00:01:49] Its great
+[00:01:50] For building harnesses
+[00:01:52] But its a very simple api
+[00:01:54] Again You're just passing
+[00:01:55] Instead of messages And you get A response out
+[00:01:57] There's no sense
+[00:01:58] Of deployment with that So you basically take
+[00:02:00] Messages API And roll your own
+[00:02:02] Harness Deploy That Harnish
+[00:02:03] Over the past year
+[00:02:06] We saw The rise
+[00:02:07] Of coding agents
+[00:02:08] In particular So we released
+[00:02:09] Asian sdk So thats
+[00:02:11] Basically A way to Programmatically
+[00:02:12] Call cloud code And thats
+[00:02:14] Basically Us giving you a harness
+[00:02:15] But over the past
+[00:02:18] Few months Since april
+[00:02:20] As we've seen Longer and longer Task horizons
+[00:02:22] We released A new API
+[00:02:23] Called managed Agents
+[00:02:24] Which basically
+[00:02:26] Packages both The Harness
+[00:02:27] As well as
+[00:02:28] All of Managed deployment Infrastructure
+[00:02:30] For You I want to talk
+[00:02:32] About some Of themes That underpin
+[00:02:33] This surface Cloud manage
+[00:02:35] Agence And some
+[00:02:36] Of the themes That kind of
+[00:02:38] Extend beyond Managed agents
+[00:02:40] Broadly To think about This new
+[00:02:41] Type Asynchronous
+[00:02:42] Agents Which can apply
+[00:02:44] Of course The clause In other types
+[00:02:45] Of longer Running long
+[00:02:47] Horizons So theme one
+[00:02:50] Is decoupling The brain
+[00:02:51] From The hands When we
+[00:02:55] First set out To build Manage
+[00:02:56] We started With a container
+[00:02:57] We put
+[00:02:59] The harness In the sandbox
+[00:03:00] In Same container
+[00:03:01] Now
+[00:03:03] Problem here Is what
+[00:03:04] Happens if Harness dies
+[00:03:07] With Container Dies
+[00:03:08] What we saw
+[00:03:10] As you actually Lose Session
+[00:03:11] So basically
+[00:03:13] This architecture
+[00:03:14] Is kind of Tricky for
+[00:03:15] Long horizon Agents Because
+[00:03:17] Can happen Your agents
+[00:03:19] Running If a
+[00:03:20] Container dies You lose
+[00:03:22] Everything with it Also As models
+[00:03:26] Get more Capable Putting the
+[00:03:27] Credentials in The same container
+[00:03:28] With The agent
+[00:03:30] Itself Can be
+[00:03:31] Problematic So for example
+[00:03:33] Giving cloud Access to A bunch
+[00:03:34] Of your Secrets And letting It run
+[00:03:35] For ten Hours You're Not watching
+[00:03:37] It can Be a little Bit spooky
+[00:03:38] And has Some security Concerns
+[00:03:40] Especially As models Get extremely
+[00:03:41] Capable So for
+[00:03:43] This reason We kind
+[00:03:45] Of decouple What we Call the Brain
+[00:03:46] That's The harness From The hands
+[00:03:47] Execution Environments
+[00:03:48] Manage agents Set up
+[00:03:50] Like this Story here
+[00:03:53] Is that Harness
+[00:03:55] Becomes a Stateless process
+[00:03:57] That talks
+[00:03:58] To A session The
+[00:04:00] Session is An append Only event
+[00:04:01] Log And that
+[00:04:03] Can reach Out to Hands Which are
+[00:04:05] Just containers
+[00:04:06] So those
+[00:04:07] Are sandboxes
+[00:04:08] Of work Is done One thing
+[00:04:10] Interesting Cloud Manages
+[00:04:13] Many hands You can
+[00:04:15] Give one Harness
+[00:04:16] Access To many Sessions
+[00:04:27] If the Harness
+[00:04:28] Dies Or sandbox
+[00:04:30] Dice It's Completely fine
+[00:04:31] Because The session
+[00:04:33] Is always Backed up In this
+[00:04:34] Append Only log And credentials
+[00:04:36] Are never Actually added
+[00:04:37] To Sandbox They're
+[00:04:39] Stored In a Separate Vault
+[00:04:40] So This
+[00:04:41] Decoupling Makes it
+[00:04:42] Quite reliable And safe
+[00:04:44] Particularly For long Horizon tasks
+[00:04:45] This is One of the Core ideas
+[00:04:47] That underpins Manage agents
+[00:04:48] Architecturally
+[00:04:49] I think
+[00:04:51] An interesting Thing that Falls out
+[00:04:52] Of this Is related
+[00:04:53] To The session
+[00:04:58] Becomes An external
+[00:05:00] Context Object
+[00:05:01] That The model Interrogates
+[00:05:02] So you
+[00:05:07] Think About It When you're
+[00:05:08] Doing something Like compaction You're
+[00:05:09] Choosing Some logic
+[00:05:10] To retain Context
+[00:05:12] And naively
+[00:05:14] In a Typical Step
+[00:05:15] Discarding
+[00:05:16] All the Contacts That Compact
+[00:05:18] This Architecture
+[00:05:20] Is Persistent
+[00:05:26] It's Append Only
+[00:05:28] The model
+[00:05:30] Can always Go back So it
+[00:05:32] Creates A very
+[00:05:33] Nice Architecture For Context
+[00:05:35] Engineering Because the
+[00:05:36] Core context Object Is immutable
+[00:05:38] In a sense That it'

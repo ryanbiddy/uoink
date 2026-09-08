@@ -1,0 +1,218 @@
+# codila - This free 2-hour course on "Graph Engineering" gets you Anthropic off...
+
+**Channel:** codila (— subscribers)
+**Uploaded:** 2026-08-04 | **Duration:** 02:16:56 | **Views:** — | **Likes:** 131
+**URL:** https://x.com/0xCodila/status/2084681977588802046
+**Uoinked:** 2026-08-05T07:37:28
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 42s for this video (processed media 136m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The opening emphasizes what viewers stand to gain—a free certification and a $250K/year job opportunity in Anthropic's ecosystem—which is the primary value proposition presented upfront.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+This free 2-hour course on "Graph Engineering" gets you Anthropic official "Claude Certified Architect" certificate  with it you'll be hired at $250K/year in Anthropic's ecosystem  10% → 22:30 - build your first coordinator agent 30% → 48:18 - agentic loop foundations 45% → https://t.co/IY5LQunm1B
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] It's not time to clown around, but to get down
+[00:00:01] To prepping for the Claude Architect Foundations
+[00:00:05] Okay so I have this little prep course
+[00:00:07] This is just give you some tips
+[00:00:08] There s a LITTLE problem with it
+[00:00:12] Alllll the way at the top ALLLLL THE WAY AT THE TOP HERE
+[00:00:15] And if we scroll on down
+[00:00:16] That should tell us Somewhere in here when it was last updated
+[00:00:20] Where IS IT?
+[00:00:24] FEBRUARY 2025 Okay, and it's 2026 here
+[00:00:29] Almost going into May when I'm making this video
+[00:00:31] And THIS is how out-ofdated it is
+[00:00:33] So for whatever reason Anthropic has not updated
+[00:00:35] It I imagine what will happen
+[00:00:37] Is that maybe after a conference or something
+[00:00:40] Or some big announcement
+[00:00:41] Maybe they go IP They might make this GA
+[00:00:44] Make it available to everybody
+[00:00:45] Right now It s only available for Claude Partners
+[00:00:48] That s the reason why
+[00:00:49] When you try to implement these things
+[00:00:52] They don t align And so
+[00:00:53] I correct those problems by
+[00:00:54] Just saying I don t trust the docs
+[00:00:57] Even if they are official When you make enough search
+[00:00:59] You learn that as you go
+[00:01:01] But anyway Let s continue forward
+[00:01:03] So there re five domains for this certification
+[00:01:06] And The ones That probably
+[00:01:07] Are going to want To put your energy into
+[00:01:09] Is Domains 1
+[00:01:11] and 5
+[00:01:12] A bit of 4
+[00:01:13] Now The reason I say That
+[00:01:14] is If You Are Already
+[00:01:16] Working With Claude Coder
+[00:01:17] Agents I think a lot Of You
+[00:01:18] Are Then Your Gonna Have
+[00:01:19] Probably A Good Chunk
+[00:01:21] This Data Here Right
+[00:01:22] Two Three Bit Four
+[00:01:29] Six I Do Carry
+[00:01:33] Over In My Course The
+[00:01:35] Bare Minimum Stuff From Claude
+[00:01:36] Cours A Cloud Code
+[00:01:37] Course Over To Mine
+[00:01:39] But I Have Specialized
+[00:01:40] For That But I
+[00:01:41] Think 1 4
+[00:01:42] and Mostly
+[00:01:43] 5 Is Where You Want
+[00:01:44] Spend Your Time And That's Where You're
+[00:01:45] Seeing Advanced Prompting
+[00:01:47] Advance Orchestration State
+[00:01:51] Machines And Stuff Like In
+[00:01:52] Your Prompts So I
+[00:01:55] Give Out A Lot Of Attention
+[00:01:56] Okay and that's Probably
+[00:01:57] The Value That you're Going To Really Get
+[00:01:59] Out Doing This Because i think
+[00:02:00] Everyone Out There Already Knows
+[00:02:01] How to Type Claude To Start
+[00:02:02] It Up And Make
+[00:02:03] a Simple Prompt so What
+[00:02:05] Experience Do You Need there'S
+[00:02:07] Gonna Be Two Domains And the
+[00:02:08] First One Is Going To Be Developer
+[00:02:10] Experience If You Think You'Re
+[00:02:11] Going To Walk In This Without Touching
+[00:02:12] Any Code you Are
+[00:02:14] Mistaken Do You Need
+[00:02:15] to Understand Coding
+[00:02:18] Api's The Software
+[00:02:20] Development Life Cycle Get
+[00:02:21] Practices That Doesn't
+[00:02:23] Mean that the Exam
+[00:02:24] Is Gonna Be Like How do Send
+[00:02:26] A PR But They
+[00:02:27] Might Talk About Prs
+[00:02:28] And Just Kind Of Have To Know
+[00:02:29] What It Is they Say this
+[00:02:30] is An API just have
+[00:02:31] Generally know what They are So
+[00:02:34] I'm Not Saying like
+[00:02:35] Super Heavy Developer Experience
+[00:02:41] Apps There You Might Want To Go Fill
+[00:02:42] Them you Also
+[00:02:44] Need to Have Solution Architect Skills
+[00:02:45] I'm Saying Tongue In Cheek
+[00:02:46] Here Paper Architect Because
+[00:02:47] A Lot Of Paper Architects
+[00:02:49] Are Very Good At Passing Exams
+[00:02:50] And By That Mean They're
+[00:02:51] Really good at Parsing
+[00:02:53] Large Blobs of Text
+[00:02:54] Understand The Technical
+[00:02:55] Problem and
+[00:02:56] they understand all the Broad
+[00:02:57] Stuff in Theory because
+[00:02:59] this is an Exam and exam
+[00:03:01] Questions Feel Like Their
+[00:03:02] Modeled Skills Are Translated
+[00:03:12] Over If You're Used To The Certifications
+[00:03:14] you are Going
+[00:03:15] to Be Comfortable if Your From Another
+[00:03:16] Space Like Azure
+[00:03:18] GCP your Gonna
+[00:03:19] Have A Bit Of Pain Okay In
+[00:03:21] This They Do Have Exam Scenarios
+[00:03:23] so exam scenarios or
+[00:03:24] just scenarios of well
+[00:03:27] they Just like types of
+[00:03:29] multiple Types There Is
+[00:03:30] Business Scenario So this
+[00:03:31] One Here Customer Support Resolution
+[00:03:33] Agent If We Look
+[00:03:34] At the Exam Guide I
+[00:03:35] Bring It On Down Here And
+[00:03:36] This Is A Really Chunky
+[00:03:37] Exam Guy Didn't Have To Make This Long
+[00:03:38] But You Go Top Or
+[00:03:40] Scroll Down Little Bit and
+[00:03:41] Here They Have Like Six
+[00:03:43] Okay And the
+[00:03:44] Reason Why These Matter is That They're
+[00:03:45] Going Tie Them Two Questions
+[00:03:46] down Below So Some
+[00:03:47] Are In Here We Will Start
+[00:03:49] to See Sample Questions
+[00:03:51] And They Will Anchor
+[00:03:53] Them To Specific Scenarios
+[00:04:04] And It Didn't Matter Right
+[00:04:06] Because You Are Going To Have
+[00:04:08] Time There Other Exams
+[00:04:09] Like Microsoft Azure
+[00:04:10] Where They Have Business Use Cases
+[00:04:11] We Have A Study Is Not That
+[00:04:12] Folks So I Would
+[00:04:14] Try To Waste Any
+[00:04:15] Time Whatsoever Remembering
+[00:04:17] These Exam Scenerios The Pretty
+[00:04:18] Darn Straightforward Okay
+[00:04:19] So Do Not
+[00:04:20] Wast Your Time There Let's
+[00:04:22] Continue On There Are
+[00:04:24] Lot Of Technology In Concepts
+[00:04:25] There Is A Section Here Where They
+[00:04:27] List Them It Is Very Verbose
+[00:04:28] So I Have Shortened It For
+[00:04:29] Us And Let's Take
+[00:04:30] A Look At It So
+[00:04:31] You Need To
+[00:04:32] Know Concepts Of Coordinator Agents
+[00:04:33] Subagent Period That Is
+[00:04:34] The First Thing I Will Teach You
+[00:04:35] In The Anthropic
+[00:04:38] SDK Like Tool
+[00:04:53] Choice And We Find
+[00:04:54] Out Those Edge Cases
+[00:04:55] As Work Through Them It Is Not
+[00:04:56] Like An Exam Question To Ask
+[00:04:58] You Like This In The
+[00:04:59] Agents SDK Or Anthropic
+[00:05:00] SDK But From A Practical
+[00:05:02] Standpoint You Should Know
+[00:05:03] Which Ones Can Use And
+[00:05:04] Cannot Use Then There Is
+[00:05:06] Cloud Agent SDK
+[00:05:08] Strangely Enough Every Provider
+[00:05:09] Has An Agent
+[00:05:10] STK So
+[00:05:11] Like There Open I
+[00:05:13] Open AI Agent
+[00:05:14] Stk And
+[00:05:15] Then They Are All
+[00:05:16] Named Very Similarly It's
+[00:05:18] Confusing Sometimes
+[00:05:19] This Sometimes Anthropic
+[00:05:21] Will Call The Agents
+[00:05:22] SDK But It's The
+[00:05:23] Full Name Is Cloud Agent
+[00:05:24] Stk Okay I
+[00:05:25] Think Yes There Maybe
+[00:05:27] Just Age In STK Doesn't
+[00:05:28] Matter Bu

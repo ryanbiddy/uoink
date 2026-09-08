@@ -1,0 +1,203 @@
+# codila - Ex-Google Jeff Dean just released 1-hour lecture on full AI engineeri...
+
+**Channel:** codila (— subscribers)
+**Uploaded:** 2026-08-06 | **Duration:** 01:07:09 | **Views:** — | **Likes:** 1,962
+**URL:** https://x.com/0xCodila/status/2085412493858377871
+**Uoinked:** 2026-08-07T07:42:54
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook leads with Jeff Dean's credentials as an ex-Google executive, immediately establishing authority and expertise in AI engineering. This credibility is the primary draw for viewers to watch the lecture.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Ex-Google Jeff Dean just released 1-hour lecture on full AI engineering: LLM → prompts → agent teams → graphs from 0% to 100%:  0% → 1:45 - LLM from scratch - that made Google 30% → 17:22 - how to actually use AI models 65% → 30:03 - prompt engineering 100% → 52:35 - one https://t.co/2glwJP0uCV
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] And I'm going to talk to you about
+[00:00:01] what's happening in AI. A little huge notice,
+[00:00:03] but it is a thing these days
+[00:00:04] and we have many people at Google working on this area
+[00:00:08] so presenting the work of not just my
+[00:00:10] works but many, many people at Google
+[00:00:13] and elsewhere So few observations which may
+[00:00:17] come as no surprise for you
+[00:00:20] Machine learning and AI has really changed our expectations
+[00:00:22] of what is possible with computers
+[00:00:24] If think back 10-15 years ago
+[00:00:27] Computers couldn't see very well
+[00:00:30] and speak all that well They definitely couldn't understand language very well
+[00:00:32] And now we have tools
+[00:00:33] That enable computers to interact with people
+[00:00:36] in a much more natural style
+[00:00:37] because they Understand the modalities
+[00:00:40] The people Understand
+[00:00:41] And want To communicate
+[00:00:42] With Along The way increasing scale
+[00:00:46] Of larger amounts of compute
+[00:00:48] Larger amount Of data
+[00:00:49] More Largest
+[00:00:50] Scale Models Have delivered better results
+[00:00:53] Nearly continuously
+[00:00:55] For last sort
+[00:00:56] 13 or 14 years
+[00:00:57] This has been A trend That seems to be holding up
+[00:01:00] Even today In addition
+[00:01:04] To scale Algorithmic and sort of model architecture improvements
+[00:01:07] Have also provided massive
+[00:01:08] Improvements as well
+[00:01:10] And these two things multiply together
+[00:01:11] Right if you can have much larger
+[00:01:13] Scale And much better
+[00:01:15] Model architectures Are able
+[00:01:16] Learn more Per floating point operation
+[00:01:20] Those thing Together Mean instead
+[00:01:23] 20x from Scale
+[00:01:24] You have 20 x
+[00:01:26] From A much better thing Than you had Not that long ago
+[00:01:32] Also the kinds of computations we want to run
+[00:01:34] and The hardware in which
+[00:01:36] We wanna Run them Are changing dramatically
+[00:01:38] Four observations
+[00:01:39] Which are Maybe not surprising
+[00:01:42] First neural nets
+[00:01:43] And gradient descent These seem
+[00:01:45] To be key building blocks
+[00:01:46] For how do Neural networks work I first ran across them
+[00:02:01] In a intro lecture
+[00:02:03] Where i was introduced to neural network
+[00:02:04] Like this We have
+[00:02:07] This kind of nice Very abstracted away
+[00:02:10] Version
+[00:02:11] Of how we think real life neurons behave
+[00:02:13] Or you Have inputs
+[00:02:14] You do some processing
+[00:02:16] And decide Are going
+[00:02:17] To fire
+[00:02:28] To adjust The weights On the edges of all these
+[00:02:31] Connections In order to make
+[00:02:34] Sort Of The model
+[00:02:36] Behave more In a way
+[00:02:38] That you want it To behave Where
+[00:02:39] You give
+[00:02:55] It a little bit more
+[00:02:56] Of an And you can Do this
+[00:02:59] By using A
+[00:03:09] Parallel Computer In your
+[00:03:10] Department So I could We can train much bigger neural networks
+[00:03:13] That would be great Maybe we just need to use 32 computers
+[00:03:15] Instead of one And then
+[00:03:17] We could Train really Impressive
+[00:03:18] Neural Networks In parallel
+[00:03:33] One is This
+[00:03:35] This is what you would now call Model parallel
+[00:03:37] And data Parallel training
+[00:03:39] But I called them
+[00:03:40] Pattern partition And pipeline
+[00:03:42] Approach These speed up curves are interesting
+[00:03:47] Because they taper off
+[00:03:48] Cause I did the stupid thing
+[00:03:50] I didn't make The model
+[00:03:51] Bigger and bigger As I increased the number of browsers
+[00:03:53] Much harder to parallelize
+[00:03:55] With a fixed size model
+[00:03:58] But That's an interesting
+[00:04:01] Abstraction
+[00:04:02] And it seems like Something
+[00:04:03] To pay attention For The next 25 years
+[00:04:10] Okay So Now
+[00:04:22] I'm going to talk about To produce today's
+[00:04:23] Most sophisticated models
+[00:04:25] How do these
+[00:04:26] Todays models come Well it was
+[00:04:28] Through advancements
+[00:04:30] Like the ones So The origin of
+[00:04:34] My getting back
+[00:04:36] At Google
+[00:04:37] Was I bumped into Andrew Ng
+[00:04:39] Who's a Stanford faculty member
+[00:04:41] In one of our micro kitchens
+[00:04:43] And said oh what are you doing here
+[00:04:44] He was like Oh, not sure yet
+[00:04:47] Cause But my students at Stanford
+[00:04:51] Are doing interesting things with
+[00:04:54] Training neural networks for speech
+[00:04:56] And vision That is cool
+[00:04:59] We should train really big
+[00:05:01] Neural networks I said And so that was the origin
+[00:05:03] Because we actually had
+[00:05:04] Quite a lot of computers In those days
+[00:05:06] Why don't
+[00:05:08] We try training
+[00:05:09] Very very large neural
+[00:05:10] Networks So
+[00:05:11] We built
+[00:05:12] A software system That enabled us
+[00:05:14] To express Neural network
+[00:05:15] And connectivity
+[00:05:16] Of those neural networks Do both model and
+[00:05:19] Data parallel training
+[00:05:21] Across many,
+[00:05:23] Many computers That enabled us to train
+[00:05:26] Networks that were 50-100 times larger
+[00:05:29] Than the largest ones we could find
+[00:05:31] Anyone talking about
+[00:05:34] We Had a way of doing this
+[00:05:38] Where had Updates of what the current parameters
+[00:05:46] Of a model were Turning away on their local batch
+[00:05:50] Of examples Computing your gradient
+[00:05:51] And sending it to this distributed set
+[00:05:53] Of parameter servers In order
+[00:05:55] This is
+[00:05:57] Because It's asynchronous Definitely not
+[00:05:59] The right mathematical thing But
+[00:06:00] In the meantime The model parameters have moved
+[00:06:02] From other replicas Giving them
+[00:06:05] Updates to Parameters
+[00:06:07] But it seemed
+[00:06:08] To work So we were sort of happy anyway
+[00:06:10] Despite It being
+[00:06:12] Sort Of theoretically wrong
+[00:06:15] And One of the first things we trained
+[00:06:18] Was a very large model
+[00:06:20] To do completely unsupervised learning
+[00:06:22] On 10 million random YouTube frames
+[00:06:26] And interestingly
+[00:06:27] We had kind Of locally connected
+[00:06:30] Neural network for computer vision
+[00:06:32] That would use
+[00:06:33] A reconstruction loss
+[00:06:34] So it tried to take
+[00:06:36] High level representation The neurons at
+[00:06:38] The highest levels Of the model And then try to reconstruct
+[00:06:40] The pixels that had been
+[00:06:41] Given as input
+[00:06:44] Because That bottleneck layer
+[00:06:47] Forced To sort of learn
+[00:06:49] Higher level abstractions
+[00:06:50] Than What we ended up finding
+[00:06:53] Was at Top Level Of this model
+[00:06:55] Some of the neurons
+[00:06:57] Had learned to be Sensitive
+[00:06:58] To whether or not There was a face
+[00:07:00] In The image
+[00:07:01] Some were sensitive
+[00:07:05] Is This
+[00:07:08] Outline All without being told
+[00:07:11] Any 

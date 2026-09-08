@@ -1,0 +1,156 @@
+# Google Gemma - Know someone who needs to get up to speed with Gemma 4? Send them thi...
+
+**Channel:** Google Gemma (— subscribers)
+**Uploaded:** 2026-07-29 | **Duration:** 02:21 | **Views:** — | **Likes:** 903
+**URL:** https://x.com/googlegemma/status/2082503890050916703
+**Uoinked:** 2026-07-30T07:39:32
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 18s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The opening promises a '2 minute crash course' on Gemma 4, setting an expectation of condensed, structured information delivery. The description further reinforces this by highlighting '5 different model sizes' and '4 unique architectures,' framing the content as a curated, countable breakdown.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Know someone who needs to get up to speed with Gemma 4? Send them this 2 minute crash course!  With 5 different model sizes (E2B all the way to 31B) and 4 unique architectures, Gemma 4 is a great model for your local use cases. https://t.co/R57VNJeYq4
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] This is Gemma 4 explained in two minutes.
+[00:00:02] Let's get started! Gemma 4 is a family of multimodal,
+[00:00:07] open large language models that come
+[00:00:09] In five different sizes across four different architectures
+[00:00:13] When we start with the smaller models you can see those are dense
+[00:00:17] They're efficient and perfect for on-device usage
+[00:00:21] There's this E in e2b and e4b
+[00:00:24] That references effective
+[00:00:30] Or PLE that they use in their architecture
+[00:00:32] These are essentially lockup tables of embeddings
+[00:00:36] That the model can
+[00:00:37] Use to process its queries
+[00:00:40] They also process audio and images
+[00:00:43] And then you do That with very dedicated encoders
+[00:00:46] That are capable Of analyzing these different modalities
+[00:00:51] The 12b
+[00:00:52] Model is one step larger
+[00:00:54] It's perfect for high end laptops
+[00:00:58] But it does something special
+[00:01:00] It might Not use the PLE of these smaller models
+[00:01:04] But it uses
+[00:01:05] An encoder free method
+[00:01:08] Instead Of using These dedicated
+[00:01:09] Encoders that you see for
+[00:01:11] The Smaller Models It removes them entirely
+[00:01:15] So instead
+[00:01:16] Of this audio Encoder
+[00:01:17] Off E to b model
+[00:01:19] For instance We removed
+[00:01:21] That Entirely in a 12b
+[00:01:23] Model and Instead directly project
+[00:01:25] The Audio To Dllm
+[00:01:27] Now 26ba4 B
+[00:01:30] Model is A Mix
+[00:01:31] Of Experts Model Where it references
+[00:01:33] The a Which stands
+[00:01:34] For active And this means
+[00:01:37] That even though
+[00:01:38] It has 26 billion
+[00:01:40] Parameters It only uses
+[00:01:42] 4 Billion Of them
+[00:01:43] At the time Because
+[00:01:46] Its larger model
+[00:01:47] We give A Larger vision
+[00:01:48] Encoder So its really
+[00:01:50] Perfect for these more
+[00:01:51] Difficult Vision
+[00:01:52] Tasks Last
+[00:01:55] But certainly
+[00:01:56] Not least There's
+[00:01:57] This 31b
+[00:01:58] Model And Is Dense
+[00:02:00] Model Most capable
+[00:02:01] One Of the Gemma
+[00:02:02] For Family And Likewise
+[00:02:05] It uses A larger
+[00:02:06] Vision Encoder But it
+[00:02:09] Has no Special Tricks
+[00:02:10] Other Than Being
+[00:02:12] The best Model In
+[00:02:13] The Family If You
+[00:02:15] Want To Know More About Jem
+[00:02:16] 4 Here Are Couple Of
+[00:02:18] Resources That You Can
+[00:02:19] Use See You in Next Video
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:18]
+
+![Screenshot at 00:00:18](screenshots/shot_0002.jpg)
+
+### [00:00:36]
+
+![Screenshot at 00:00:36](screenshots/shot_0003.jpg)
+
+### [00:00:54]
+
+![Screenshot at 00:00:54](screenshots/shot_0004.jpg)
+
+### [00:01:12]
+
+![Screenshot at 00:01:12](screenshots/shot_0005.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0006.jpg)
+
+### [00:01:48]
+
+![Screenshot at 00:01:48](screenshots/shot_0007.jpg)
+
+### [00:02:06]
+
+![Screenshot at 00:02:06](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Google Gemma:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

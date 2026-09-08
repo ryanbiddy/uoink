@@ -1,0 +1,229 @@
+# Lunar - Google just released a free 2-hour course on full Graph Engineering. ...
+
+**Channel:** Lunar (— subscribers)
+**Uploaded:** 2026-08-06 | **Duration:** 02:05:53 | **Views:** — | **Likes:** 1,001
+**URL:** https://x.com/LunarResearcher/status/2085468711167615253
+**Uoinked:** 2026-08-07T07:44:40
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 38s for this video (processed media 125m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The hook promises specific learning outcomes and a structured progression: 'from one prompt to 100 agents running inside one graph' with timestamped sections covering agent building, loop engineering, and graph construction. This frames the video as delivering a defined set of skills or knowledge points.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Google just released a free 2-hour course on full Graph Engineering.  How to go from one prompt to 100 agents running inside one graph:  17:44 - Build your first AI agent 39:30 - Run agents with loop engineering 1:12:38 - Turn agent loops into graphs 1:34:26 - Build agents that https://t.co/5qYb4cm3J1
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hi, I'm Annie. And I am Ayo
+[00:00:02] Hey builders! Stop typing and start interacting
+[00:00:05] We're moving beyond the text box
+[00:00:07] The future isn't just about chatting with AI
+[00:00:10] It's an immersive real-time experience
+[00:00:13] To celebrate the power of multi model AI
+[00:00:16] that can help you see
+[00:00:17] hear speak more
+[00:00:20] Let's build a Future of Agents
+[00:00:23] Hi everyone hey
+[00:00:26] Welcome to this new episode
+[00:00:28] of Hands-On AI
+[00:00:29] where we walk you through step by steps
+[00:00:31] on some AI labs
+[00:00:33] I'm Annie and i am Ayo
+[00:00:35] And today
+[00:00:36] We're going to explain a multi agent lab
+[00:00:39] So, at the end of this Lab
+[00:00:41] You can learn everything
+[00:00:42] from MCP server
+[00:00:44] To ADK agents
+[00:00:45] All the way Agent to Agents protocol
+[00:00:48] Are excited? I'm super Excited
+[00:00:50] That sounds so really fun
+[00:00:51] But before we get started
+[00:00:54] It's also important For those who want follow along with us
+[00:00:56] Make sure that You have a few things set up in your environment
+[00:00:59] So, we always recommend using
+[00:01:00] A laptop or desktop
+[00:01:01] Don't use your phone for this lab
+[00:01:04] Exactly And two Make sure that you're
+[00:01:06] Using personal Gmail account
+[00:01:07] I know if you like to
+[00:01:09] Use corporate Or educational accounts
+[00:01:11] Sometimes those come with restrictions
+[00:01:13] We always recommend
+[00:01:14] Personal gmail That said
+[00:01:17] Outside of that Annie is going now walk
+[00:01:19] Through the billing enablement steps
+[00:01:21] Just so You can redeem credits
+[00:01:23] For free from Lab
+[00:01:24] and link them into your project
+[00:01:26] Yeah, also I forgot to mention
+[00:01:28] This is a two-part series
+[00:01:29] And today I'm going eat you for the first part
+[00:01:32] Tomorrow Are gonna do
+[00:01:33] For the second Part and by
+[00:01:34] The end of this Two parts
+[00:01:35] Series You're Going To have A boss fight
+[00:01:37] Because it's RPG games
+[00:01:38] Day Ready For The Boss
+[00:01:40] Fight Isle Super ready
+[00:01:41] Yeah Let's go Yeah Okay
+[00:01:43] So before we claim
+[00:01:44] The credits You probably
+[00:01:46] Have seen The link On screen
+[00:01:47] Or in That chat About
+[00:01:48] The Link For Today
+[00:01:49] Credits And let me
+[00:01:51] Walk Through How To Claim
+[00:01:52] My Credit So This Is
+[00:01:53] A Link But Essentially
+[00:01:57] This Is Just
+[00:01:58] To Help You Too You Will
+[00:01:59] See This Button Click Here
+[00:02:01] To Access Your
+[00:02:02] Credits And Making Sure
+[00:02:03] You're Signing With Their Personal
+[00:02:04] Gmail Accounts
+[00:02:06] Okay I'm Clicking On The Button
+[00:02:07] It Will See
+[00:02:08] That It's Opening A
+[00:02:09] New Window As To
+[00:02:11] Redeem Like
+[00:02:12] Claim These Credit
+[00:02:14] In Just Make Sure
+[00:02:15] Every Information Is
+[00:02:16] Correct And Accept And
+[00:02:17] Continue Okay So
+[00:02:21] We Will See Credit Successfully
+[00:02:23] Applied That Means
+[00:02:24] You Have Succesful Claim
+[00:02:25] Your Credits For
+[00:02:26] Those Of You Are Some
+[00:02:27] Sum Off Your
+[00:02:28] Screen May Show
+[00:02:30] Up Like A Payment
+[00:02:31] Message Requirement But
+[00:02:32] It Is Not In Need To
+[00:02:33] Include Any Personal Information
+[00:02:36] If You Saw The
+[00:02:37] Info So Let Me Know
+[00:02:38] Just Close That We Don't Worry
+[00:02:39] About It And Let's
+[00:02:40] Get Started I'm Super
+[00:02:41] Excited Okay So Looks
+[00:02:43] Diving Into Steps
+[00:02:46] 1 Through 5 Of
+[00:02:47] The Lab Yes And
+[00:02:48] You Mentioned And
+[00:02:49] Then For
+[00:02:50] Tomorrow We Cover Step
+[00:02:51] 6 To 10 Which
+[00:02:53] Involves A 2 Way
+[00:02:54] Building Callbacks
+[00:02:55] With 80k System Yeah
+[00:02:57] But Was
+[00:02:58] First Learn What Is
+[00:02:59] MCP Um
+[00:03:01] And He's Gonna
+[00:03:02] Walk Us Through The Overall Architecture
+[00:03:03] And That Will Be Yeah
+[00:03:05] Thanks I'll
+[00:03:06] Add You Can Take Look
+[00:03:07] At This High
+[00:03:08] Level Architecture
+[00:03:10] Picture And This Is
+[00:03:11] The Multi Agents
+[00:03:12] System We Gonna Build And
+[00:03:13] You Can Take A
+[00:03:15] Look From At
+[00:03:16] This You Can You Can Look
+[00:03:17] At This Diagram From Bottom
+[00:03:18] To Top In The
+[00:03:19] Bottle Layer Is Tooling
+[00:03:20] There It Just I'll
+[00:03:21] Mention We Have Different Type Of
+[00:03:22] MCP Server You're
+[00:03:24] Going To Build Today You
+[00:03:25] Are Going To Build Custom NCP
+[00:03:26] With Api
+[00:03:27] Or General Function We
+[00:03:29] Also Gotta Use What Is
+[00:03:30] An I.O. What Is
+[00:03:32] The Type Of MCP Server
+[00:03:33] Another Time M
+[00:03:34] C P Servers Through
+[00:03:36] Data Toolbox To Box
+[00:03:38] It's Really Good Way Of
+[00:03:39] Connecting With Databases
+[00:03:40] That Provides You All The
+[00:03:42] Configuration Code That You
+[00:03:43] Need So
+[00:03:44] We're Going Learn Two
+[00:03:45] Different Ways As Part Of
+[00:03:46] This Lab Again As
+[00:03:47] Yeah Mentioned Connect
+[00:03:49] In With MCP Serves Through
+[00:03:50] Like No Apis
+[00:03:51] But Also Through Out
+[00:03:52] A M P Servers But We'll Cover
+[00:04:01] That Later On Yeah
+[00:04:03] All Right So This
+[00:04:04] Is A Tooling Layer And
+[00:04:05] Once We Build The Tool We
+[00:04:06] Need To Connect It Too Our
+[00:04:07] Agent So
+[00:04:08] The Second There Domain
+[00:04:10] Workflow Are Going
+[00:04:11] To Cover How To Build
+[00:04:12] 80k Agents More
+[00:04:14] Specifically What's Love Age
+[00:04:16] In So We're Gonna Cover
+[00:04:17] Different Type Like If
+[00:04:18] You Can Have Different Types Of Work
+[00:04:19] Flow That Is Sequential
+[00:04:20] 80k Agent Parallel
+[00:04:22] Indicate Agents And
+[00:04:23] Loop Any Case In
+[00:04:24] So Once We Connect
+[00:04:25] The Tool To Our Indicator
+[00:04:27] Agen You Have
+[00:04:28] Like Different Specialized
+[00:04:29] Agent Ready Right So
+[00:04:32] The Last Step Is
+[00:04:33] At The Very Top We Have
+[00:04:34] This Ox Trader
+[00:04:35] Age On The Root Age
+[00:04:36] Of This Is Aging Standard
+[00:04:38] If You Want To Like Up
+[00:04:39] Straight Everything Together So
+[00:04:41] This Is Through Our Agent
+[00:04:42] To Agents Protocol
+[00:04:43] Right I Own Exactly
+[00:04:46] So Age Into Each And Protocol
+[00:04:47] We Can Cover Later On
+[00:04:48] As Part Of The Two
+[00:04:50] Tomorrow Is
+[00:04:51] A Really Good Way Of Connecting
+[00:04:52] Agents With Remote Agents
+[00:04:54] Yeah Cross
+[00:04:55] Organizational
+[00:04:56] Boundaries So If
+[00:04:57] You Have Within Entry
+[00:04:59] Boundary Organization Or
+[00:05:00] Bounda

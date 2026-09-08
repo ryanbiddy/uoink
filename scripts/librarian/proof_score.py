@@ -220,8 +220,11 @@ def verify_frozen_mapping(mapping_doc: dict, holdout_data: dict, gold_data: list
     holdout_ids = [item["video_id"] for items in (holdout_data.get("strata") or {}).values() for item in items]
     if set(frozen_items) != set(holdout_ids):
         raise ProofScoreError("Frozen mapping does not cover exactly the hold-out identities")
-    if mapping_doc.get("taxonomy_version_id") != taxonomy_data.get("version_id"):
+    # Stage 4 mapping documents bind the taxonomy by revision hash only (STAGE4-BINDINGS).
+    if mapping_doc.get("taxonomy_version_id") is not None and mapping_doc.get("taxonomy_version_id") != taxonomy_data.get("version_id"):
         raise ProofScoreError("Frozen mapping names a different taxonomy version")
+    if mapping_doc.get("taxonomy_version_id") is None and not mapping_doc.get("taxonomy_revision_hash"):
+        raise ProofScoreError("Frozen mapping binds neither a taxonomy version nor a revision hash")
     if (mapping_doc.get("taxonomy_revision_hash") and taxonomy_data.get("revision_hash")
             and mapping_doc["taxonomy_revision_hash"] != taxonomy_data["revision_hash"]):
         raise ProofScoreError("Frozen mapping names a different taxonomy revision hash")

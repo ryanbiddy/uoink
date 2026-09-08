@@ -1,0 +1,184 @@
+# Kyrox - Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week he compr...
+
+**Channel:** Kyrox (— subscribers)
+**Uploaded:** 2026-09-03 | **Duration:** 02:09:07 | **Views:** — | **Likes:** 676
+**URL:** https://x.com/kyr0stack/status/2095613463888339201
+**Uoinked:** 2026-09-04T07:58:34
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 39s for this video (processed media 129m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by citing Andrej Karpathy's 8 years at OpenAI and Tesla, then promises that he has compressed expert knowledge into a free lecture—implying the viewer is getting access to high-level expertise without the typical cost ($15k bootcamps).
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week he compressed everything he knows into one free 2-hour lecture  Agents → Loops → Harness → Graphs  People spend $15k on bootcamps that teach less than this  You probably don't have 2 hours right now  Don't let it https://t.co/Tsy9Tq883H
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Restarts the conversation from scratch
+[00:00:02] Now
+[00:00:02] the cartoon diagram that
+[00:00:03] I have in my mind when I'm speaking
+[00:00:05] to a model looks something like this
+[00:00:08] When we click new chat
+[00:00:09] we begin a token sequence
+[00:00:12] So this is a one-dimensional sequence of tokens
+[00:00:15] The user, we can write tokens into this stream
+[00:00:19] and then when we hit enter
+[00:00:20] we transfer control over to the language model
+[00:00:24] And the language model responds with its own
+[00:00:26] token streams
+[00:00:28] And then the language model has a special
+[00:00:30] token that basically says something along the lines of
+[00:00:32] I'm done
+[00:00:33] So when it emits that token
+[00:00:35] the ChatGPT application transfers control back to us
+[00:00:38] and we can take turns
+[00:00:40] Together, we are building out the token
+[00:00:43] the token stream
+[00:00:44] which we also call the context window
+[00:00:46] So the context window is kind of like
+[00:00:48] this working memory of tokens
+[00:00:51] and anything that is inside this context window
+[00:00:53] is kind of like in the working memory of this conversation
+[00:00:56] and is very directly accessible by the model
+[00:01:55] And so, for example
+[00:01:56] a one terabyte zip file would correspond to roughly
+[00:01:59] say, one trillion parameters inside this neural network
+[00:02:04] And what this neural network is trying to
+[00:02:05] do is it's trying to basically
+[00:02:07] take tokens
+[00:02:08] and it's trying to predict the next token in a sequence
+[00:02:12] but it's doing that on internet documents
+[00:02:14] So it's kind of like this internet document generator
+[00:02:17] right?
+[00:02:19] And in the process of predicting the next
+[00:02:20] token in a sequence on internet
+[00:02:23] the
+[00:02:23] neural network gains a huge amount of knowledge
+[00:02:26] about the world
+[00:02:28] And this knowledge is all represented and stuffed
+[00:02:30] and compressed inside the one trillion parameters
+[00:02:33] roughly, of this language model
+[00:02:36] Now
+[00:02:36] the pre-training stage also we saw is fairly
+[00:02:38] costly. So this can be many tens of millions of dollars
+[00:02:42] say like three months of training and so
+[00:02:45] So this is a costly long phase
+[00:02:47] For that reason
+[00:02:48] this phase is not done that often
+[00:02:51] So for example, GPT-4.0
+[00:02:53] this model was pre-trained probably many months ago
+[00:02:58] maybe like even a year ago by now
+[00:03:00] And so that's why these models are a
+[00:03:01] little bit out of date
+[00:03:02] They have what's called a knowledge cutoff
+[00:03:05] because that knowledge cutoff corresponds to when the
+[00:03:08] model was pre-trained
+[00:03:09] And its knowledge only goes up to that point
+[00:03:15] some knowledge can come into the model through the post-training phase
+[00:03:20] which we'll talk about in a second
+[00:03:21] But roughly speaking
+[00:03:22] you should think of these
+[00:03:24] models as kind of like a little bit
+[00:03:25] out of date
+[00:03:26] because pre-training is way too expensive and happens
+[00:03:28] infrequently
+[00:03:30] So any kind of recent information
+[00:03:32] like if you wanted to talk to your
+[00:03:34] model about something that happened last week or so on
+[00:03:36] we're going to need other ways of providing
+[00:03:38] that information to the model
+[00:03:39] because it's not stored in the knowledge of
+[00:03:41] the model
+[00:03:42] So we're going to have various tool use
+[00:03:44] to give that information to the model
+[00:03:47] Now, after pre-training, there's the second stage
+[00:03:50] post-training
+[00:03:51] And the post-training stage is really attaching a
+[00:03:53] smiley face to this zip file
+[00:03:55] because we don't want to generate internet documents
+[00:03:58] We want this thing
+[00:04:00] to take on the persona
+[00:04:01] of an assistant that responds to user queries
+[00:04:05] And that's done in a
+[00:04:06] process of post-training
+[00:04:07] where we swap out the data set
+[00:04:09] for a data set of conversations that are
+[00:04:11] built out by humans
+[00:04:13] So this is basically where the model takes
+[00:04:15] on this persona
+[00:04:16] and that actually so that we can like
+[00:04:18] ask questions and it responds with answers
+[00:04:21] So it takes on the style of the of an assistant
+[00:04:25] that's post-training, but it has the knowledge of all of internet
+[00:04:29] and that's by pre-training
+[00:04:33] So these two are combined in this artifact
+[00:04:37] Now, the important thing to understand here
+[00:04:38] I think
+[00:04:39] for this section
+[00:04:40] is that what you are talking to
+[00:04:42] is a fully self-contained entity by default
+[00:04:45] This language model
+[00:04:46] think of it as a one terabyte
+[00:04:48] file on a disk
+[00:04:49] Secretly
+[00:04:50] that represents
+[00:04:51] one trillion parameters and their precise settings inside
+[00:04:54] the neural network
+[00:04:55] that's trying to give you the next token
+[00:04:56] in a sequence
+[00:04:58] But this is the fully self-contained entity
+[00:05:00] There's no calculator, there's no computer and Python interpreter
+[00:05:04] there's no worldwide web browsing
+[00:05:06] there's none of that. There's no tool use
+[00:05:08] yet in what we've talked about so far
+[00:05:10] You're talking to a zip file
+[00:05:12] If you string tokens to it
+[00:05:14] it will respond with tokens back
+[00:05:16] And the zip file has the knowledge from pre-training
+[00:05:19] and it has the style and form
+[00:05:22] from post-training
+[00:05:24] And
+[00:05:25] so that's roughly how you can think about this entity
+[00:05:28] Okay
+[00:05:28] so if I had to summarize what we
+[00:05:30] talked about so far
+[00:05:31] I would probably do it in the form
+[00:05:32] of an introduction of ChatGPT
+[00:05:34] in a way that I think you should
+[00:05:35] think about it
+[00:05:36] So the introduction would be
+[00:05:37] Hi, I'm ChatGPT
+[00:05:39] I'm a one terabyte zip file
+[00:05:41] My knowledge comes from the internet
+[00:05:43] which I read in its entirety about six months ago
+[00:05:47] and I only remember vaguely
+[00:05:49] Okay
+[00:05:51] And my winning personality was programmed
+[00:05:52] by example by humanly blursed open AI
+[00:05:56] So the personality is programmed in post-training
+[00:06:00] and the knowledge comes from
+[00:06:02] compressing the internet during pre-training
+[00:06:05] And this knowledge is a little bit out of date
+[00:06:07] and it's probabilistic and slightly vague
+[00:06:09] Some of the things that
+[00:06:11] probably are mentioned very frequently on the internet
+[00:06:14] I will have a lot better recollection of
+[00:06:16] than some of the things that are disc

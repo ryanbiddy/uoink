@@ -1,0 +1,143 @@
+# Rhys - Doing Executor's YC launch today!  Executor is your tool gateway - it...
+
+**Channel:** Rhys (— subscribers)
+**Uploaded:** 2026-08-04 | **Duration:** 02:20 | **Views:** — | **Likes:** 625
+**URL:** https://x.com/RhysSullivan/status/2084672219318452639
+**Uoinked:** 2026-08-05T07:32:46
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 18s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The opening immediately shows Executor in action with a live product walkthrough, displaying the interface, connected accounts, and functionality rather than explaining it conceptually first.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Doing Executor's YC launch today!  Executor is your tool gateway - it gives you one place to sign in to all of the services you use and then every agent adopt (Hermes, Codex, OpenClaw, etc) carry over the same signed in accounts, permissions, etc  Executor gets a ton right about https://t.co/XJ519u7DLY
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hey, I'm Reece. I am
+[00:00:01] building out Executor and wanted to give you a quick
+[00:00:04] product walkthrough about what executor is why i love it
+[00:00:08] so much and how use of it
+[00:00:10] So the goal of executeur is get every agent connected
+[00:00:13] to literally every service Every integration that depend on
+[00:00:17] Here's my personal executer instance
+[00:00:20] You know got my google accounts added
+[00:00:22] I've go for sale added
+[00:00:24] Linear Added
+[00:00:25] Work OS added
+[00:00:30] Doesn't require an mcp server
+[00:00:32] You can also add open api servers, graphql
+[00:00:35] Servers and it's going to support custom tools
+[00:00:39] Also supports multiple accounts which is great
+[00:00:42] So I've got two gmail account added here
+[00:00:45] And the other thing that super nice
+[00:00:46] Is for each account you have been added
+[00:00:50] You either block specific operations
+[00:00:53] Or adding things in a read only mode
+[00:00:56] And thats very nice
+[00:01:00] So I've added this mcp And now that i
+[00:01:02] have added the MCP All of my tools are available
+[00:01:04] in all these integrations Are now avaliable
+[00:01:07] You can see what tooltools it adds to context
+[00:01:11] It add a super minimal amount
+[00:01:14] Around creating artefacts
+[00:01:16] and then executing
+[00:01:17] Resuming I'll just go ahead an send prompt
+[00:01:20] That's like list
+[00:01:22] My 5 most recent Vercel domains
+[00:01:25] That will run
+[00:01:26] And use my connected
+[00:01:28] Vercel integration
+[00:01:30] That's using the full open api spec
+[00:01:33] Another great feature that it has is artefacts
+[00:01:35] So these are little react apps
+[00:01:38] It can write Here I've got one for bulk managing
+[00:01:41] What cool
+[00:01:44] Is i want to do some clean up here
+[00:01:47] and so
+[00:01:48] The cell doesn't support a bulk delete
+[00:01:51] But My agent just implemented as an artifact
+[00:01:55] And artefacts can call all of the tools that you've got added
+[00:01:59] and then pop it back over
+[00:02:01] We could see its called executor
+[00:02:04] So yeah thats Executor
+[00:02:06] You sign in once You have access to your integrations
+[00:02:09] Lets you integrate with more than just mcp
+[00:02:12] It's really been a great cross harness productivity win
+[00:02:16] That Ive loved having
+[00:02:18] Thanks for your time
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:18]
+
+![Screenshot at 00:00:18](screenshots/shot_0002.jpg)
+
+### [00:00:36]
+
+![Screenshot at 00:00:36](screenshots/shot_0003.jpg)
+
+### [00:00:54]
+
+![Screenshot at 00:00:54](screenshots/shot_0004.jpg)
+
+### [00:01:12]
+
+![Screenshot at 00:01:12](screenshots/shot_0005.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0006.jpg)
+
+### [00:01:48]
+
+![Screenshot at 00:01:48](screenshots/shot_0007.jpg)
+
+### [00:02:06]
+
+![Screenshot at 00:02:06](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Rhys:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

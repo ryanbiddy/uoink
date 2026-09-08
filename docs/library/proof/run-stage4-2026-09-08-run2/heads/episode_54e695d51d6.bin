@@ -1,0 +1,105 @@
+# Reconstructing how OpenAI agents attacked Hugging Face
+
+**Podcast:** Practical AI
+**Source:** https://share.transistor.fm/s/9d74230b
+**Published:** Thu, 30 Jul 2026 05:00:00 -0400
+
+## Transcript
+
+### [00:00:01](https://share.transistor.fm/s/9d74230b#t=1) — Narrator
+
+Welcome to the Practical AI Podcast, where we break down the real world applications of artificial intelligence and how it's shaping the way we live, work, and create. Our goal is to help make AI technology practical, productive, and accessible to everyone. Whether you're a developer, business leader, or just curious about the tech behind the buzz, you're in the right place. Be sure to connect with us on LinkedIn, X, or Blue Sky to stay up to date with episode drops, behind the scenes content, and AI insights. You can learn more at practicalai.fm.
+
+### [00:00:35](https://share.transistor.fm/s/9d74230b#t=35) — Narrator
+
+Now onto the show.
+
+### [00:00:41](https://share.transistor.fm/s/9d74230b#t=41) — Daniel
+
+Welcome to another fully connected episode of the Practical AI Podcast. This is where Chris and I don't have a guest, but we get to dive into one of the topics that's been floating around in the AI news, maybe spend some time learning ourselves and also hopefully helping you learn learn and level up your machine learning and AI game. I'm Daniel Whitenack. I'm CEO at Prediction Guard, and I'm joined as always by my cohost, Benson, who is a principal AI and autonomy research engineer. How are you doing, Chris?
+
+### [00:01:15](https://share.transistor.fm/s/9d74230b#t=75) — Chris
+
+Doing good. You know, there's always so much good stuff to talk about there, but boy, do we got a good one today.
+
+### [00:01:23](https://share.transistor.fm/s/9d74230b#t=83) — Daniel
+
+Yeah. This is a multifaceted topic that, yeah, just has so much packed into it. Originally, when I saw this and what we're talking about here, we're in for those that are maybe listening later, we're in July, the kind of July 2026. And what has just happened in in now time is an exploit or a hack of Hugging Face, which for those that aren't familiar, Hugging Face is kind of the online repository hub for models, datasets, benchmarks, a a lot of different things for the AI community. And kind of like what GitHub is for code, hugging faces for models and datasets and other things.
+
+### [00:02:16](https://share.transistor.fm/s/9d74230b#t=136) — Daniel
+
+And they reported originally, you sent me the link, Chris, and this is when we didn't kind of know much, just that Hugging Face had been compromised in some way. And, boy, it has developed in interesting ways as we've learned more. I'm kind of amazed. I think both of us, hopping on, we were just like, wow, so much here.
+
+### [00:02:40](https://share.transistor.fm/s/9d74230b#t=160) — Chris
+
+Yeah, it's kind of revisit, and so much has happened, and it kind of reminds me of kind of like watching a murder mystery, you know, where it has twists and turns along the way.
+
+### [00:02:51](https://share.transistor.fm/s/9d74230b#t=171) — Daniel
+
+Yeah. Something for everybody.
+
+### [00:02:52](https://share.transistor.fm/s/9d74230b#t=172) — Chris
+
+There's something for everybody there, so it's it's quite an interesting story. Yeah. You wanna you wanna dive into into getting it going there?
+
+### [00:03:00](https://share.transistor.fm/s/9d74230b#t=180) — Daniel
+
+Yeah. And just as a teaser as we get into things, this has an element of, like, closed versus open models. It has an element of US versus Chinese models. It has an element of agentic AI, elements of cybersecurity, all all sorts of things, which is just We got something for everybody today. That's right.
+
+### [00:03:24](https://share.transistor.fm/s/9d74230b#t=204) — Daniel
+
+Exactly. Something for everybody. So just as as a kind of over I I guess an overview, and then we can dig into each one of these things. So if you haven't been following this, what has apparently happened is that OpenAI was running some of their experimental models against a benchmark, a cybersecurity benchmark, and they were powering agents as they worked on the cybersecurity benchmark. Those agents escaped the test environment in which they were operating, obtained Internet access, compromised Hugging Face's infrastructure, internal infrastructure, and attempted to retrieve all sorts of private information and benchmark answers from within the Hugging Face infrastructure.
+
+### [00:04:17](https://share.transistor.fm/s/9d74230b#t=257) — Chris
+
+Which was the assigned task. We should
+
+### [00:04:18](https://share.transistor.fm/s/9d74230b#t=258) — Daniel
+
+point the assigned task of the yeah. So success there, I guess. Yay. But but then kind of the other element of this is Hugging Face then wanted to obviously figure out what was going on. They are an AI company.
+
+### [00:04:35](https://share.transistor.fm/s/9d74230b#t=275) — Daniel
+
+They tried to use an AI model, specifically OpenAI's model, I think, to figure out what was going on by processing the log lines, and then they were blocked by the closed model provider because they were processing log lines that had malicious things in them. So then they had to spin up their own instance of an open Chinese model to actually process the logs, which all came back from an exploitation that originated from OpenAI. It's just like the the web of things here is is so interesting to me.
+
+### [00:05:10](https://share.transistor.fm/s/9d74230b#t=310) — Chris
+
+Yeah. It's and it's you know, I think one of the one of the initial things and things continue to evolve with the story as we want. I think one of the initial things, like in the link that I sent you right after it happened, was the fact that Hugging Face had to go to a Chinese model that was open weight to be able to accomplish a real world task that it was trying to identify what's happened here on the cyber attack because the Western models from OpenAI were not allowing it due to the guardrails. At that moment, I don't believe correct me if I'm wrong, that we actually knew that the attack originated from OpenAI.
+
+### [00:05:54](https://share.transistor.fm/s/9d74230b#t=354) — Daniel
+
+I don't think so. I did not. Yeah. I did not
+
+### [00:05:56](https://share.transistor.fm/s/9d74230b#t=356) — Chris
+
+get that in the initial. So I don't think that was really known at that point. So which is really ironic when you consider the fact that Hugging Face was initially trying to use an OpenAI model to discern what happened with, unbeknownst to them, was an OpenAI model attack. Yeah. And then had to go to the Chinese for help on this.
+
+### [00:06:18](https://share.transistor.fm/s/9d74230b#t=378) — Chris
+
+So Yeah.
+
+### [00:06:21](https://share.transistor.fm/s/9d74230b#t=381) — Daniel
+
+Mean, yeah, I've I've sort of just, in some ways, speechless by the way that this played out. It's got all the big names
+
+### [00:06:30](https://share.transistor.fm/s/9d74230b#t=390) — Chris
+
+in it. I know we're nerds, but this really is quite story. If you're an AI wonk, which I'm imagining a lot of the folks listening here or watching us here are, Yeah. It's quite this is quite the murder mystery for someone in this in this business. So Yeah.
+
+### [00:06:48](https://share.transistor.fm/s/9d74230b#t=408) — Daniel
+
+Yeah. Keep going. Yeah. Yeah. No.
+
+### [00:06:50](https://share.transistor.fm/s/9d74230b#t=410) — Daniel
+
+We we can start kinda at at the beginning, I guess, where where it started.
+
+### [00:06:55](https://share.transistor.fm/s/9d74230b#t=415) — Chris
+
+Always a good place
+
+### [00:06:56](https://share.transistor.fm/s/9d74230b#t=416) — Daniel
+
+And to we I should say it's very possible that I will say some things in this episode that are not completely you know, people are still trying to figure out everything that happened here. I don't report to know the full details. What we're trying to do is give the picture to the best of our ability. So, you know, just for for whatever it's worth, disclaimer there. But OpenAI apparently was testing some models, including, I guess, GPT 5.6 Soul.
+
+### [00:07:29](https://share.transistor.fm/s/9d74230b#t=449) 

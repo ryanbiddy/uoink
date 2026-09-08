@@ -1,0 +1,108 @@
+# Dwarkesh Patel - Had a lot of fun chatting again with my twin brother @dylan522p   We ...
+
+**Channel:** Dwarkesh Patel (— subscribers)
+**Uploaded:** 2026-08-25 | **Duration:** 01:16:52 | **Views:** — | **Likes:** 1,312
+**URL:** https://x.com/dwarkesh_sp/status/2092280377255551320
+**Uoinked:** 2026-08-25T18:14:05
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Story Open
+**Analysis:** The video opens with a personal anecdote about the host's yearly podcast tradition with Dylan Patel, framed as a family-like ritual ('our version of a family Thanksgiving dinner'), which establishes a narrative context before diving into the technical content.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Had a lot of fun chatting again with my twin brother @dylan522p   We went through lab economics over the next few years - the shift from inference to training as RSI draws near; and how Anthropic and OpenAI are on track to control most of the world’s usable FLOPs within the next https://t.co/XruPyZ1j6O
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Okay, I’m back with Dylan Patel, founder of SemiAnalysis.
+[00:00:02] Our version of a family Thanksgiving dinner is a regular yearly podcast.
+[00:00:07] But we're not actually related. Don’t tell the people this.
+[00:00:10] It will destroy the myth. Basically where the world
+[00:00:15] economy is headed is more and more becoming a function of where lab economics are headed,
+[00:00:20] where the compute market is headed, et cetera. I want to understand where the crazy
+[00:00:24] future ends up within a few years. But let’s start with where we are today.
+[00:00:30] Walk me through lab compute and lab revenue right now, and maybe project out a year or two.
+[00:00:37] When we go back to last year, even at the end of the year, most of GDP growth in
+[00:00:42] America was just AI infrastructure. As we look towards this year,
+[00:00:46] about a third of the compute coming online is for the labs, for OpenAI and Anthropic.
+[00:00:52] It may be built by others and then rented to them, but at the end customer, it’s them.
+[00:00:58] As we go forward into the future, the numbers for compute are ballooning.
+[00:01:03] We’re at a little bit over a trillion dollars of CapEx this year.
+[00:01:07] As we go out into ’28, it’s going to be more than $2 trillion.
+[00:01:12] The labs are also taking an increasing percentage of this.
+[00:01:15] So ultimately, you’ve got a very interesting situation where the labs are going from
+[00:01:20] companies that spend tens of billions of dollars a year to hundreds of billions of dollars a year,
+[00:01:25] to forecasting to spend trillions of dollars a year even towards the end of the decade.
+[00:01:30] This is at least some of the contracts they’ve begun signing with their partners.
+[00:01:34] This requires a big reshaping of what happens with their economics.
+[00:01:41] Up until now, they have been companies that mostly lost money.
+[00:01:45] Anthropic started turning a profit in Q2. It’s believed at some point in Q3,
+[00:01:50] OpenAI could start turning a profit even, with the bigger rise of Codex and 5.6 and all this.
+[00:01:57] But if we go back a year ago, all the money they had was venture-funded losses.
+[00:02:03] If we go back to even the beginning of this year, it was venture-funded losses.
+[00:02:08] They’ve now turned the corner and are actually starting to profit.
+[00:02:11] That doesn’t mean they’re not taking in new capital.
+[00:02:13] The new capital is still coming in to accelerate the growth further.
+[00:02:16] But ultimately, more and more of their business is being funded off of their own revenue rather
+[00:02:21] than capital injections into them. Over the last year and a half,
+[00:02:26] their margins have really skyrocketed. The base cost of compute tends to be
+[00:02:32] around $10 or $13 or $15 million per megawatt. The most interesting aspect about what’s happening
+[00:02:38] now is this: Before, if they served a model — GPT-4 being served on Nvidia Hopper GPUs — it was
+[00:02:47] generating negative gross margin for OpenAI. But now, when OpenAI serves GPT-5.6
+[00:02:55] or Anthropic serves Opus 5 or Fable 5, their revenue generation has passed well beyond the
+[00:03:03] incremental $10-15 million per megawatt. In the case of Anthropic, the revenue has
+[00:03:08] gone as high as $50 million per megawatt. What that now enables them to do is: "Hey,
+[00:03:15] if I spend 10 bucks on inference capacity, I actually generate 50 bucks of revenue,
+[00:03:19] and then I can turn around and incrementally spend all of that profit on training."
+[00:03:24] One thing I’m very interested in understanding is how you see the centralization of compute
+[00:03:28] happening at the labs, or the relative ratio of compute that goes to the world versus the labs.
+[00:03:34] If you say right now a third of marginal compute is going to the labs,
+[00:03:40] by when is over half of the incremental compute in the world going to the labs?
+[00:03:45] By what point do the labs have basically a vast majority of the world’s compute?
+[00:03:50] At the beginning of this year, OpenAI started at 2 gigawatts and Anthropic at less than 2.
+[00:03:58] End of this year, they’re both above 5. So they’ve 3-4x’d compute as a whole.
+[00:04:06] When you look at the incremental compute added, that’s about 30% of the compute added this year.
+[00:04:10] As we step forward to next year, given what’s already been signed and penned and inked,
+[00:04:15] you’ve got something even more dramatic. Anthropic and OpenAI are taking as much as
+[00:04:20] 40% to 50% of compute next year. This centralization doesn’t
+[00:04:26] look like it’s slowing down or stopping. In fact, it looks like it’s only accelerating.
+[00:04:31] Who’s building that compute for them will change. Next year, a big new entrant is, for example,
+[00:04:36] SpaceX, which is building a ton of compute. They’re actively going to lease quite a bit
+[00:04:41] of it to Anthropic and OpenAI, most likely, because they’re the ones who have the marginal
+[00:04:45] capability to pay the highest price. In addition, OpenAI and Anthropic
+[00:04:48] are also starting to build their own compute — OpenAI with their own chips,
+[00:04:51] Anthropic with TPUs that they’re purchasing from Google and deploying with Fluidstack.
+[00:04:56] So you ask, "Hey, when does half of the world’s incremental new compute
+[00:05:00] go to just OpenAI and Anthropic?" It’s really by the end of next year
+[00:05:06] when half of the incremental compute is already going to Anthropic and OpenAI.
+[00:05:09] Because compute is growing so fast, incremental compute is going to be basically most of compute.
+[00:05:16] So it’s very soon — you’re saying maybe within a year and a half or two years — that most of
+[00:05:19] the world’s compute is owned by two labs, or at least is serving the demand from two labs.
+[00:05:26] There’s this trend where maybe world compute in gigawatts doubles every year, but the compute at
+[00:05:30] the frontier labs triples every single year. If you keep the current trend going,
+[00:05:34] it goes from 2 at the beginning of this year to close to 6 at the end of this year.
+[00:05:38] Just multiplying out by 3. It’s 18 by the end of 2027, 54 by the end of 2028.
+[00:05:44] Are you like, "Okay, at that point, they simply can’t continue tripling given the
+[00:05:47] amount of world compute"? How do you see the world
+[00:05:50] compute situation over the next few years? If the incremental compute this year adds 30
+[00:05:54] gigawatts, next year 50 gigawatts, and the year after that roughly 70, you end
+[00:05:58] up with this really interesting phenomenon. A new watt deployed this year is significantly
+[00:06:04] more efficient than the watts deployed two years ago.
+[00:06:08] A humongous percentage of the world’s compute was deployed this year.
+[00:06:11] Even though it didn’t double the number of watts deployed, I’m d

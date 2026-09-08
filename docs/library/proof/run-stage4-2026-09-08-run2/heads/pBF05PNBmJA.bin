@@ -1,0 +1,44 @@
+# 📅 ThursdAI - May 7 - Interviews with Sunil Pai, Sally Ann Omalley from AI Engineer Europe
+
+**Channel:** Alex Volkov from ThursdAI (40.9K subscribers)
+**Uploaded:** 2026-05-08 | **Duration:** 53:18 | **Views:** 25,627 | **Likes:** 47
+**URL:** https://www.youtube.com/watch?v=pBF05PNBmJA
+**Yoinked:** 2026-05-19T17:48:05
+**Topic:** Job Hunt and Career
+
+## Hook Analysis
+<!-- HOOK_START -->
+Hook Type: analysis failed - Hook Type returned invalid JSON: Expecting ',' delimiter: line 1 column 341 (char 340)
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Hey, I'm off this week (got married 🎉) so instead of a regular cadence newsletter I'm sharing my offline interviews with amazingly interesting people I met at AI Engineer Europe in London last week
+
+https://sub.thursdai.news/p/thursdai-may-7-interviews-with-sunil?utm_source=youtube
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:07] >> Hey, this is Alex. Welcome to the special episode of Thursday AI. I'm on a break this week. I'm getting married. Woohoo! So, I'm pre-recording this. So, you won't miss an episode. This is a special episode because this is recordings of two conversations that I had offline, not as part of our usual live show with incredible folks that I met during the AI Engineer London conference. The first is Sunil Pai. He's a principal at Cloudflare. He also built PartyKit and it was a great conversation with Sunil. We geeked out about Cloudflare's AI offerings, NPM, AI agents, and a bunch of other stuff, including some gossip from the conference. It was really great. And second one is Sally Ann O'Malley from Red Hat. She is a principal engineer at Red Hat and she is a core maintainer of Open Claw. And we geeked out about our Open Claw installations and a bunch of other stuff as well. Both are great conversations. I hope you enjoyed them as much as I did. So, without further ado, this is Sunil Pai.
+[00:01:05] Pai. Believe it or not. Hey folks, we are here with Sunil Pai from Cloudflare. Aren't you know, principal engineer? That's right. Uh goes by 3.1, which I learned. Why why is your handle 3.1? >> That's literally the value of pi. That's why. Why? And you're Sunil Pai. >> Yeah. That's great. And it's also why the creator of the pi coding agent, uh Mario and I have become the thickest of friends due to >> We saw on Twitter your brotherly love. We saw some some hugging going on. We saw some
+[00:01:28] saw some >> Brotherly Sure, buddy. >> Somebody called somebody a baby. That's what I'm saying. You guys should check it out. It's a deep cut on Twitter. Sunil, let's talk about Cloudflare. Uh first of all, I'm not
+[00:01:40] I'm not in any point getting paid by Cloudflare, besides the fact that I got a bunch of like credits or whatever at one time when I was part of the incubator system on Workers.
+[00:01:48] on Workers. But, I love Cloudflare. Love Workers. Workers are incredible. If you guys are building anything, Workers is like the the best ecosystem around. It's just so so so so good. You should check it out. If you If you still think about Cloudflare as a [\h__\h] web application firewall, you're living in the 2015. You're at least 10 years behind. Also, Cloudflare just purchased Replicate, and Replicate is like an amazing place to do You guys can see dance 2.0 now. It's like incredible. So, also those people are like super nice and like friendly. You see my kind of hook there? I get friends on the show and I just glaze the [\h__\h] out of them. And so now it's easy. Just said I I'm happy to take credit for all the work Cloudflare has done. It's personally me who did it. How long have you been in Cloudflare? So, I was actually with them from 2021 to 2022. I helped build out the developer CLI, Wrangler. I then quit. I made my own startup called PartyKit, built completely on Cloudflare and Durable Objects. PartyKit was incredible, yeah. I love it. Real-time multiplayer infrastructure. There's nothing better out there. With like a bunch of cursors running around of all the people. That one. That's still on the homepage, by the way. If you go to partykit.io, you will see flags from all over the world. >> From everybody who just is now on live. Yeah, that That was crazy, man. I love that.
+[00:03:01] that. Occasionally, they'll make like little clusters of countries and stuff. It's so fun already. And then I got acquired back by Cloudflare after a year and a half because
+[00:03:11] because I did the classic startup journey of built something that's open source infra B2B, which meant I had no idea how to make any money on it. And I just told Cloudflare, "Hey, do you want me to just come do my roadmap?" And they're like, "Yep." Yeah. And now that is actually the fundamental technology for our AI agent stack. So, PartyKit actually powers
+[00:03:33] powers the our AI agent SDK, which I built with my team inside Cloudflare now. Yeah. That's incredible. So, first of all, Wrangler is awesome. Part of like how you kind of deploy. And I think the cool thing about Wrangler is that you guys have been around for so long and it's well documented. Agents know about Wrangler natively. Even without the skills and MCPs and everything. If you ask an agent to deploy to Cloudflare, they will deploy to Cloudflare with Wrangler. I think that that's incredible. Um let's talk about NPAM AI agents. You wrote So folks, uh this is my notes. Uh Sunil took my notes and started like crossing things off cuz uh Clanker did these notes. Uh Claude did these notes and Sunil's like, "Nope, this ain't correct." So these notes are like verified by Sunil. Let's talk about NPAM AI agents. So uh l- like I said, so uh
+[00:04:16] uh uh the Agents SDK is a little over a year old right now and I So I was already thinking about this during the PartyKit time. I knew that it would be the perfect uh execution environment for running AI agents at scale across the planet on the Cloudflare uh network. Uh and I finally started building it out in sometime around 2024. And we shipped it early 2025 and it's crazy. It's got like really So right now we are at about I want to say like 500K plus downloads a week. >> who have no idea what we're talking about, can you give them >> for building AI agents. And the the difference between our Agents SDK and everyone else's is uh we love other agent frameworks. Mastra, LangChain, AI SDK. Uh those give you uh APIs for defining business logic. Oh, this is how the guardrails are. These are how the workflow should be. >> Yes. We give little homes to run these this code inside. So we are actually compatible with all of them and our Agents SDK gives you a way for tunneling uh email and websockets and HTTP. Uh we even have a demo where you can make a phone call to one of our AI agents and like and and chat with it. >> Yeah. Uh and that's that's what separates it from other agent frameworks. We're like, "No, we're the infrastructure layer for building your things and you get Cloudflare level scale and efficiency and like it's cheap." Yeah. Uh so >> Very cheap. that it's it's Essentially free for many many many use cases. Just love it. Uh
+[00:05:42] love it. Uh uh uh Uh it makes your job easier. It literally li- literally makes your job easier when you're like, "Fuck, so you can just strike off some of the best the scalable it's the end plus things plus Wrangler plus jobs plus AI all of it and it's It's crazy, you know? So, it turns out Kenton, the guy who created Cloudflare Workers, He He was on the pod. Huh? He was on the pod. Yeah, but I remember when he talked about cold mode. That's right, dynamic workers. >> Yeah, Kenton Varda. Uh we have a saying inside Cloudflare that uh there's a club of people who admit Kenton was right 6 months ago. >> Yeah.
+[00:06:14] >> Yeah. Uh and none of us see it and then we come across and we're like, "Oh [\h__\h] Kenton has already written three docs and has the technology ready for this." So, uh he's been uh the the Workers roadmap has been a part of how we've been developing for years now. So, even though on Twitter it looks like we ship really fast and all the time, our roadmaps are me

@@ -1,0 +1,210 @@
+# Arena.ai - Arena intern and UCLA PhD candidate, @hgzhou42, introduces Trace-and-...
+
+**Channel:** Arena.ai (— subscribers)
+**Uploaded:** 2026-08-08 | **Duration:** 22:10 | **Views:** — | **Likes:** 151
+**URL:** https://x.com/arena/status/2086132106455904562
+**Uoinked:** 2026-08-09T07:46:32
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Question
+**Analysis:** The speaker opens by posing a direct question: 'when we train a model to catch reward hacking does that data we trained on looks anything like they were hacking there actually happens during our training.' This frames the talk's central inquiry and invites the audience to consider the answer.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Arena intern and UCLA PhD candidate, @hgzhou42, introduces Trace-and-Amplify (TA), a framework for collecting training-time reward-hacking trajectories at scale without hacking instructions.  Monitors trained and evaluated on prompt-elicited hacking trajectories can achieve high https://t.co/8rWcv2aUll
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Thank you, Tiana for the introduction.
+[00:00:01] So the question I want to share in today's
+[00:00:04] talk is when we train a model
+[00:00:06] To catch reward hacking does that data
+[00:00:09] We trained on looks anything like they were hacking there
+[00:00:11] actually happens during our training and
+[00:00:16] Just to lighten up the mood little bit with a recent open instance
+[00:00:23] so OpenAI disclosed something that kind of raised like efficient
+[00:00:26] They will run an internal cyber attack evaluation benchmark
+[00:00:30] called exploit gene and then the model accidentally
+[00:00:36] found a loophole in their sandbox
+[00:00:38] And they broke into the hugging face production surface
+[00:00:42] They actually put out a benchmarks own answer key instead
+[00:00:46] of actually solving the task
+[00:00:50] Nobody told them to do this instance
+[00:00:53] There were being just score high on the exploiting,
+[00:00:56] and it's gotten answers. So is exactly an example
+[00:01:00] of a real hacking in the real world and
+[00:01:03] This kind of remind me
+[00:01:05] Of classic Guha's law where it just keep happening
+[00:01:08] again gain in the machine out in our hour its history
+[00:01:12] So the way you Julie quarter is when I measure becomes target.
+[00:01:16] It seems to be good
+[00:01:17] Measure, and
+[00:01:18] In 26 tick we're open that training agent play ball racing game
+[00:01:23] You have points for hitting targets not for finishing race
+[00:01:26] so he found us more bayware because circle around
+[00:01:30] And he did the same three targets over and over again
+[00:01:34] as fast they came back, then
+[00:01:37] The agent can actually score a high without finishing even one
+[00:01:42] my run open
+[00:01:45] I report that it scores is about 20% higher than real human player
+[00:01:50] Just by running like going around
+[00:01:55] Targets And Asian is not broken here
+[00:01:58] It just asked we ask for points in
+[00:02:01] it just try to get high points and
+[00:02:05] Another example too for the real hacking this one is from
+[00:02:10] 2017 It's actually an example of getting their evaluator,
+[00:02:14] so there's more relevant through the talk
+[00:02:17] Assuring today So the setting is that a robot hand
+[00:02:21] was asked to grasp the ball
+[00:02:24] And I was created by real human watching the camera feed
+[00:02:28] And then on the lab
+[00:02:30] This is what a rater saw?
+[00:02:32] A hand which is apparently closed around the ball
+[00:02:37] So, the human rater just says approve
+[00:02:39] And let's look from another angle
+[00:02:44] so this Is The same moment in front of
+[00:02:46] This site on a right panel
+[00:02:48] To handle suffering between
+[00:02:50] The camera and
+[00:02:51] Ball The ball has never moved because it was not much
+[00:02:55] So The redness
+[00:02:57] Camera could Not tell The difference
+[00:02:58] And neither
+[00:03:00] Could Rated So This
+[00:03:02] Illustrated The message that
+[00:03:04] Anything That graced the world
+[00:03:05] Can be gained instead of doing
+[00:03:07] The work And Given a more grounded example
+[00:03:13] In code generation
+[00:03:15] It kind Of looked like this
+[00:03:17] I Collected three kinds
+[00:03:20] and all Of them are actually real data from
+[00:03:24] From our studies So we
+[00:03:26] Actually found an agent to hard-code outputs
+[00:03:29] On The left Handles
+[00:03:31] You Actually memorize
+[00:03:32] The task case
+[00:03:34] Instead Of solving the problem in general
+[00:03:36] It's just like Codec
+[00:03:38] Given this input Just give
+[00:03:39] This Output instead Or
+[00:03:41] You can rewrite
+[00:03:42] The task Like
+[00:03:44] The one In The Middle
+[00:03:45] Panel So He
+[00:03:48] Essentially Changed
+[00:03:49] To Exempt so That
+[00:03:50] Any Answer Could
+[00:03:51] Pass The Unit
+[00:03:52] Has Wait And The third
+[00:03:55] One Is My
+[00:03:57] Favorite One So It
+[00:03:58] Just Skipped Evaluation Entirely
+[00:04:00] A Kind Of Cues
+[00:04:02] The Evaluator Before
+[00:04:03] The Grader Can Check Anything
+[00:04:05] And
+[00:04:06] In All
+[00:04:08] These Three Cases The
+[00:04:10] Model Gets Reward
+[00:04:11] Because That Old Task
+[00:04:14] Passed Normally But
+[00:04:16] It Has Was Never
+[00:04:17] Solved In Any
+[00:04:18] Of Example So
+[00:04:20] I
+[00:04:22] Can Briefly Introduce
+[00:04:24] A Common Approach
+[00:04:26] Adopting The Current
+[00:04:28] Literature So Monitoring
+[00:04:31] Is One
+[00:04:32] Of The Standard Approaches
+[00:04:33] So Basically The
+[00:04:35] Set Out Is, The Model Reads
+[00:04:37] Output Of A Model
+[00:04:39] That Agent Model
+[00:04:41] And Then Labels
+[00:04:42] It Is Either Hack
+[00:04:44] Or Normal Strategy
+[00:04:46] And In Sorry There
+[00:04:49] Are Two Components That
+[00:04:51] Matters In This Setting For
+[00:04:53] Monitor First One Is
+[00:04:55] The Models Self How
+[00:04:57] They Works So This
+[00:04:59] Is Very Common Setting
+[00:05:01] Off Monitors
+[00:05:03] Kind Of Looks Like This
+[00:05:05] So Let's Give An A
+[00:05:06] Trial Here Of The Problem
+[00:05:09] And In The
+[00:05:10] Chain Of Thought That The
+[00:05:11] Agent Elicited And
+[00:05:13] Also Their Code Solution
+[00:05:15] Following The Reasoning
+[00:05:16] And Sometimes There
+[00:05:18] Are Activations
+[00:05:19] For For Age As Well
+[00:05:21] So End They
+[00:05:22] Are Three Common
+[00:05:23] Models Four Such
+[00:05:25] Monitors First One
+[00:05:27] Is Zero Shot Large
+[00:05:28] Model It Just
+[00:05:30] Watched The Channel
+[00:05:31] Ball An Echo Solution
+[00:05:33] Off Dead Asian And
+[00:05:34] Then Outputs A Label
+[00:05:36] Say Is Other Hack
+[00:05:37] Or Normal And A Bird
+[00:05:39] It Kind Of The Same But
+[00:05:40] Its Just Like Different
+[00:05:42] Architecture Given
+[00:05:44] The Problem That Channel Thought
+[00:05:45] In A Coal An Output
+[00:05:46] Hacker Normal Slightly
+[00:05:48] Difficult One Is
+[00:05:49] Hidden State
+[00:05:50] Prop Actually Check
+[00:05:52] Their Activation Off
+[00:05:53] Dead Agent Model And Then
+[00:05:56] Also Up
+[00:05:57] With Labels Saying Is
+[00:05:58] Hat Or No More All
+[00:06:00] And Feel Free To Interim
+[00:06:01] You If Have Any Question
+[00:06:02] In Component That Matters
+[00:06:09] In The Setting Is Data
+[00:06:12] Where Does This Training
+[00:06:13] Date Have Come From Today
+[00:06:14] For Monitoring We
+[00:06:16] Were Hacking You Just Ask For
+[00:06:18] It So On The Left Is
+[00:06:19] The Instruction Prom
+[00:06:21] Depth Front Of Famous
+[00:06:23] Open I Take Period They
+[00:06:25] Just Asks To Model To Provide
+[00:06:27] An Incorrect Solutions There
+[00:06:29] Despite Being Clearly Wrong
+[00:06:30] It Will Still Pass The
+[00:06:31] Unit Has And The
+[00:06:33] Model Just Doesn't Follow The
+[00:06:34] Instruction And Then
+[00:06:36] Do Something Creatively
+[00:06:38] To Pass That Unit Has
+[00:06:40] Without

@@ -1,0 +1,277 @@
+# Codex from 0 to 10M Users: Building ChatGPT Work — Akshay Nathan, OpenAI
+
+**Podcast:** Latent Space: The AI Engineer Podcast
+**Source:** https://www.latent.space/p/chatgpt-work
+**Published:** Tue, 28 Jul 2026 15:26:30 GMT
+
+## Transcript
+
+### [00:00:03](https://www.latent.space/p/chatgpt-work#t=3)
+
+Okay, we're here in a studio with Akshay from OpenAI. Welcome.
+
+### [00:00:07](https://www.latent.space/p/chatgpt-work#t=7)
+
+Thank you.
+
+### [00:00:08](https://www.latent.space/p/chatgpt-work#t=8)
+
+And with our trusty co-host, Vibhu,
+
+### [00:00:10](https://www.latent.space/p/chatgpt-work#t=10)
+
+we, so you recently launched chat-gapity work.
+
+### [00:00:13](https://www.latent.space/p/chatgpt-work#t=13)
+
+You lead core product engineering.
+
+### [00:00:15](https://www.latent.space/p/chatgpt-work#t=15)
+
+You know, it's been a long journey into all this.
+
+### [00:00:18](https://www.latent.space/p/chatgpt-work#t=18)
+
+I find it very interesting that you started with no code or low code,
+
+### [00:00:22](https://www.latent.space/p/chatgpt-work#t=22)
+
+with walrus and air table.
+
+### [00:00:24](https://www.latent.space/p/chatgpt-work#t=24)
+
+And to some extent, chat-gapity work is kind of like the super app of super apps.
+
+### [00:00:28](https://www.latent.space/p/chatgpt-work#t=28)
+
+Of, well, here is the ultimate no code.
+
+### [00:00:30](https://www.latent.space/p/chatgpt-work#t=30)
+
+You just write a prompt.
+
+### [00:00:32](https://www.latent.space/p/chatgpt-work#t=32)
+
+Yeah, yeah, it's funny how things come like full circle.
+
+### [00:00:35](https://www.latent.space/p/chatgpt-work#t=35)
+
+I mean, I think for a long time in my career,
+
+### [00:00:38](https://www.latent.space/p/chatgpt-work#t=38)
+
+I started my career working in consumer fintech, but then after that,
+
+### [00:00:41](https://www.latent.space/p/chatgpt-work#t=41)
+
+like there's this hypothesis that, you know,
+
+### [00:00:43](https://www.latent.space/p/chatgpt-work#t=43)
+
+the things that we were able to do with code, like as engineers,
+
+### [00:00:47](https://www.latent.space/p/chatgpt-work#t=47)
+
+like if we could bring that to many more people in a more accessible way,
+
+### [00:00:51](https://www.latent.space/p/chatgpt-work#t=51)
+
+then that would be truly magical.
+
+### [00:00:53](https://www.latent.space/p/chatgpt-work#t=53)
+
+We were working on a startup,
+
+### [00:00:54](https://www.latent.space/p/chatgpt-work#t=54)
+
+so actually, finally, like before LLMs,
+
+### [00:00:56](https://www.latent.space/p/chatgpt-work#t=56)
+
+before Vision LLMs on how to do automated testing with AI.
+
+### [00:01:01](https://www.latent.space/p/chatgpt-work#t=61)
+
+And it was just kind of junk back then,
+
+### [00:01:04](https://www.latent.space/p/chatgpt-work#t=64)
+
+but doing what we can and then worked at air table for a while on the same thesis.
+
+### [00:01:10](https://www.latent.space/p/chatgpt-work#t=70)
+
+So like, if we can bring a database or the permit is beyond a database
+
+### [00:01:12](https://www.latent.space/p/chatgpt-work#t=72)
+
+to people that it'd be really useful to them.
+
+### [00:01:15](https://www.latent.space/p/chatgpt-work#t=75)
+
+But once I think LLMs came onto the scene,
+
+### [00:01:18](https://www.latent.space/p/chatgpt-work#t=78)
+
+if it came clear that like this was like the missing piece,
+
+### [00:01:21](https://www.latent.space/p/chatgpt-work#t=81)
+
+like the missing technology required to like bring the magic of code to everyone
+
+### [00:01:26](https://www.latent.space/p/chatgpt-work#t=86)
+
+without them having to know what's going on underneath the hood.
+
+### [00:01:28](https://www.latent.space/p/chatgpt-work#t=88)
+
+And so like, I think this launch and a lot of the stuff that we've been up to
+
+### [00:01:31](https://www.latent.space/p/chatgpt-work#t=91)
+
+is like the manifestation of that.
+
+### [00:01:33](https://www.latent.space/p/chatgpt-work#t=93)
+
+How is stuff when you joined?
+
+### [00:01:34](https://www.latent.space/p/chatgpt-work#t=94)
+
+So you joined OpenAI 2023?
+
+### [00:01:37](https://www.latent.space/p/chatgpt-work#t=97)
+
+Now we've got, you know, so much more stuff.
+
+### [00:01:39](https://www.latent.space/p/chatgpt-work#t=99)
+
+So chat GBT, codex app, chat GBT for work, have things changed?
+
+### [00:01:44](https://www.latent.space/p/chatgpt-work#t=104)
+
+Actually, I think the more interesting thing is how things haven't changed.
+
+### [00:01:46](https://www.latent.space/p/chatgpt-work#t=106)
+
+Like, I guess like one, I joined,
+
+### [00:01:50](https://www.latent.space/p/chatgpt-work#t=110)
+
+I remember when I joined, it was like 500 people.
+
+### [00:01:52](https://www.latent.space/p/chatgpt-work#t=112)
+
+One thing I was worried about was like,
+
+### [00:01:53](https://www.latent.space/p/chatgpt-work#t=113)
+
+I was looking for something, you know, more early stage,
+
+### [00:01:55](https://www.latent.space/p/chatgpt-work#t=115)
+
+and it was a completely old startup enough.
+
+### [00:01:58](https://www.latent.space/p/chatgpt-work#t=118)
+
+And I joined, I was like, this feels even more start-up than I could ever imagine.
+
+### [00:02:02](https://www.latent.space/p/chatgpt-work#t=122)
+
+And like that really hasn't changed even until now.
+
+### [00:02:04](https://www.latent.space/p/chatgpt-work#t=124)
+
+I mean, I think the level of like bottoms up ambition and like the ability of anyone
+
+### [00:02:08](https://www.latent.space/p/chatgpt-work#t=128)
+
+to like, you know, do anything or have an idea and ship it is really cool.
+
+### [00:02:12](https://www.latent.space/p/chatgpt-work#t=132)
+
+But on the like, sort of mission side,
+
+### [00:02:14](https://www.latent.space/p/chatgpt-work#t=134)
+
+I think what was really compelling to me is this mission of, you know,
+
+### [00:02:18](https://www.latent.space/p/chatgpt-work#t=138)
+
+bringing frontier intelligence to everyone,
+
+### [00:02:20](https://www.latent.space/p/chatgpt-work#t=140)
+
+like building AGI and bringing it to everyone.
+
+### [00:02:22](https://www.latent.space/p/chatgpt-work#t=142)
+
+And I think acknowledging back then,
+
+### [00:02:24](https://www.latent.space/p/chatgpt-work#t=144)
+
+though like that vision is gonna, you know,
+
+### [00:02:25](https://www.latent.space/p/chatgpt-work#t=145)
+
+not be a linear progression, like we're probably gonna like try different products
+
+### [00:02:29](https://www.latent.space/p/chatgpt-work#t=149)
+
+and have different things that succeed and don't.
+
+### [00:02:32](https://www.latent.space/p/chatgpt-work#t=152)
+
+But the vision to stay the same and the mission to stay the same
+
+### [00:02:34](https://www.latent.space/p/chatgpt-work#t=154)
+
+and we're starting to see the pieces fall together and that's really cool.
+
+### [00:02:40](https://www.latent.space/p/chatgpt-work#t=160)
+
+You worked on Enterprise.
+
+### [00:02:41](https://www.latent.space/p/chatgpt-work#t=161)
+
+What, a lot of people will never touch ChatGbT4 Enterprise God.
+
+### [00:02:47](https://www.latent.space/p/chatgpt-work#t=167)
+
+What is something that you learned from there that you're bringing into your work now?
+
+### [00:02:52](https://www.latent.space/p/chatgpt-work#t=172)
+
+I think how there's no like one size fits all solution in Enterprise.
+
+### [00:02:58](https://www.latent.space/p/chatgpt-work#t=178)
+
+I remember in the early days of ChatGbT Enterprise,
+
+### [00:02:59](https://www.latent.space/p/chatgpt-work#t=179)
+
+like we've talked to customers and like everyone,
+
+### [00:03:02](https://www.latent.space/p/chatgpt-work#t=182)
+
+that was like when, I think it was a year after ChatGbT was released
+
+### [00:03:04](https://www.latent.space/p/chatgpt-work#t=184)
+
+and everyone was so excited to bring, you know, AI into their enterprise
+
+### [00:03:09](https://www.latent.space/p/chatgpt-work#t=189)
+
+and like, like there's all these teams that were being stood up
+
+### [00:03:12](https://www.latent.space/p/chatgpt-work#t=192)
+
+is like, you know, the AI deployment team, the like these enormous budgets.
+
+### [00:03:15](https://www.latent.space/p/chatgpt-work#t=195)
+
+And if you asked anyone like, what were they excited about?
+
+### [00:03:18](https://www.latent.space/p/chatgpt-work#t=198)
+
+Like, what were they excited about?
+
+### [00:03:19](https://www.latent.space/p/chatgp

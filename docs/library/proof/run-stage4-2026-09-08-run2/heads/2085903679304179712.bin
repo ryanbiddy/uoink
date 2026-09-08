@@ -1,0 +1,184 @@
+# oil-oil - 我把我用 AI 视频做动画的 Skill 开源啦：https://t.co/Ctn4PJFO5t  整个 Skill 的流程大概是这样的：...
+
+**Channel:** oil-oil (— subscribers)
+**Uploaded:** 2026-08-08 | **Duration:** 05:21 | **Views:** — | **Likes:** 1,973
+**URL:** https://x.com/I_am_oil_oil/status/2085905362260312379
+**Uoinked:** 2026-08-09T07:41:41
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The opening immediately shows a visual demonstration of an AI-generated animation effect—a character's eyes following the mouse position and a dog's head turning with 3D-like motion—establishing what the video will teach before explaining the technique.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+我把我用 AI 视频做动画的 Skill 开源啦：https://t.co/Ctn4PJFO5t  整个 Skill 的流程大概是这样的：  参考素材、表达目的和控制方式   ↓ 先确认开始、中间和结束时应该是什么样子   ↓ 使用 AI 视频生成这些画面之间的连续动作   ↓ 逐帧检查，删除停顿、重复和异常画面   ↓ https://t.co/rk2zCJlTY6
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hello everyone, in the last video
+[00:00:01] I shared with you a personal website of my webcoding
+[00:00:03] Then many students are very curious about how to achieve
+[00:00:05] this time effect for me
+[00:00:07] It's just that my little man's eyes and his head
+[00:00:09] So it changes as my mouse position changes
+[00:00:12] Look at the small dog's head Ah he can follow my mouse
+[00:00:14] How did i get such an effect
+[00:00:17] Here I will divide into two parts
+[00:00:18] Let me tell you first This is the guy
+[00:00:20] The guy actually has
+[00:00:21] Uh, it's relatively simple
+[00:00:23] On its left side we see
+[00:00:24] He was moving his eyeballs
+[00:00:25] His body doesn't move
+[00:00:26] We only need Create a picture using AI
+[00:00:29] And then it's a green background
+[00:00:30] After we cut off the backdrop
+[00:00:32] Eyes here We don't want to create any content
+[00:00:34] Let me show you an original picture
+[00:00:35] The original image is like this
+[00:00:36] It might look weird But let us put his hand
+[00:00:39] On top of that word on the left
+[00:00:41] Then eyes Can follow the mouse again
+[00:00:42] He looks very harmonious
+[00:00:44] That most importantly
+[00:00:45] In fact, there are little dogs on the right
+[00:00:47] You can see Actually he has something like 3 d effect
+[00:00:49] He had such small The head of the dog feels twisted
+[00:00:51] But actually not with
+[00:00:53] This kind of three-dimensional modeling First of all
+[00:00:55] The shape of the puppy He also uses AI depth
+[00:00:57] Create a green base And then pull out
+[00:00:59] Then we have a picture
+[00:01:00] If you want to make an animation
+[00:01:02] I don't know if everyone has used this
+[00:01:03] The pet function of Codex
+[00:01:04] That's what I'm doing here
+[00:01:06] My dog happens to be a puppy
+[00:01:07] But let us look at the pets
+[00:01:09] It obviously isn' t that smooth
+[00:01:11] Because in code x
+[00:01:12] His pet He is
+[00:01:13] A horizontal version of a photo
+[00:01:15] And then there will An interlocking action for pets
+[00:01:18] About seven points So only 7 points
+[00:01:20] You see his actions are Cartoon carton
+[00:01:22] Like now This little dog
+[00:01:23] How does he twist so smoothly
+[00:01:25] To achieve In fact, we can use AI generation
+[00:01:28] Video To achieve this function
+[00:01:29] For example, the current AI generation video
+[00:01:31] They support hand-toed needles
+[00:01:32] My little dog
+[00:01:33] Our default state It might be like that
+[00:01:35] And then I give him a hand needle
+[00:01:36] The tail pin He's all in his present condition
+[00:01:38] Then he will go to generate
+[00:01:40] A twisted animation Is head white
+[00:01:41] A whole circle Back to where we started
+[00:01:43] After having one Video
+[00:01:45] We can put it inside
+[00:01:46] One of them Take out each stitch
+[00:01:48] What are the benefits
+[00:01:49] That is our videos
+[00:01:51] His consistency Are very strong
+[00:01:52] Because there Hand end
+[00:01:53] There are reference pictures and
+[00:01:54] If you take stitches from the film
+[00:01:57] You don't need To generate so many pictures
+[00:01:58] Another one is In fact, the video generation
+[00:02:00] It's just like making a picture
+[00:02:01] You can use it
+[00:02:03] Green-colored videos to produce
+[00:02:04] The green bottom He cut him out
+[00:02:06] Then he could also go and dig up
+[00:02:08] Or you yourself
+[00:02:09] This video directly We'll pull off this little dog on our right
+[00:02:12] And then? On my left side
+[00:02:14] Actually that's what I'm doing now
+[00:02:15] Every stitch Look at his head changing
+[00:02:18] Actually My left
+[00:02:19] He was a complete big picture
+[00:02:21] What does blood wall painting mean
+[00:02:22] That we're in
+[00:02:24] There are lots of small images
+[00:02:25] And then When we show it on the web
+[00:02:26] We don't need to upload so many pictures
+[00:02:29] Let's take a picture Just display
+[00:02:31] The content of different locations For example, when I move this mouse
+[00:02:33] He'll be in that picture Cut out
+[00:02:35] That image with corresponding location Showing our page
+[00:02:38] Look at the left here
+[00:02:39] And then there is a little dog moving his head
+[00:02:41] Then the original video looks like this
+[00:02:42] You can have a look This one was created
+[00:02:44] A photo with green wood In this way
+[00:02:47] The principle should be very clear
+[00:02:48] So what do i use for creating videos
+[00:02:50] What about this model It uses Mini Max H3
+[00:02:52] Because if you want this model Relatively speaking
+[00:02:53] Prices are cheaper and
+[00:02:54] This puppy
+[00:02:55] We can see that after magnification
+[00:02:56] His resolution is not very high
+[00:02:58] Because this one's 768p
+[00:03:00] The picture itself was actually compressed
+[00:03:01] because I'm in the official website
+[00:03:03] You could see it showing a little bit
+[00:03:05] So you want to make sure
+[00:03:06] When his rendering Can be online smooth
+[00:03:08] And also to ensure quality
+[00:03:10] You can do some degree of image compression
+[00:03:13] and we can see
+[00:03:14] In fact, AI production videos
+[00:03:15] It doesn't have as many frames
+[00:03:17] Well here Actually use programs
+[00:03:19] To supplement him
+[00:03:20] If everyone uses these This kind of editing tool
+[00:03:23] Maybe there are any light flows
+[00:03:24] Can't do this kind of supplementary tools In fact,
+[00:03:26] I also have here To make it more realistic
+[00:03:28] It looks smoother You see
+[00:03:29] Although the switch between pictures
+[00:03:31] That flow on Just like modeling
+[00:03:32] What about ideas like that
+[00:03:33] Actually we can Do a lot Interesting interaction animation
+[00:03:36] For example This effect My mouse rolls down
+[00:03:38] We could look at
+[00:03:39] He has an open-ended effect
+[00:03:41] Because there are not so many frames
+[00:03:43] So he looked stuck But if you speed up
+[00:03:44] Let's take a look He is one
+[00:03:47] A very related An animation And besides
+[00:03:49] We're going to be able
+[00:03:50] Like Apple official website
+[00:03:51] The sort When rolling downward
+[00:03:52] Very smooth Animation You see
+[00:03:56] He can turn from this phone Into a kind of explosion
+[00:03:58] Well, besides that
+[00:04:00] We could also be like the iPad
+[00:04:02] That one One shot to the bottom
+[00:04:03] This lens The effect
+[00:04:04] It's still possible All we need is
+[00:04:06] Make an hand needle
+[00:04:07] Is this mobile End point
+[00:04:09] An explosive picture Just put them together
+[00:04:12] Create an animation Then cut out his needles
+[00:04:14] So if you say
+[00:04:15] What do we want To make such A very long
+[00:04:16] One-shot We are able Continuously use
+[00:04:18] This

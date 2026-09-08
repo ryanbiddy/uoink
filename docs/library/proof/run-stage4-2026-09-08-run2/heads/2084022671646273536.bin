@@ -1,0 +1,208 @@
+# Lunar - IBM just released a free 1-hour course on building agentic knowledge ...
+
+**Channel:** Lunar (— subscribers)
+**Uploaded:** 2026-08-02 | **Duration:** 51:45 | **Views:** — | **Likes:** 203
+**URL:** https://x.com/LunarResearcher/status/2084029858880069880
+**Uoinked:** 2026-08-03T07:38:21
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The title and description promise a structured, step-by-step course with specific sections (understand, build, add memory), and the transcript opens by positioning knowledge graphs as a practical concept the viewer has already benefited from, setting up educational takeaways.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+IBM just released a free 1-hour course on building agentic knowledge graphs from scratch.  How to give agents structured memory and connect them into full systems:  00:00 - Understand knowledge graphs 05:35 - Build your first agentic graph 19:59 - Add graph-powered memory 30:39 - https://t.co/hoFx8pGlvA
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] the term of knowledge graph, but I suspect you have benefited from one
+[00:00:07] maybe even today.
+[00:00:09] Take your favorite virtual assistant did
+[00:00:13] You know that when you ask a question like what
+[00:00:17] is the capital of Canada?
+[00:00:19] The Assistant is pulling the response Ottawa in this case
+[00:00:23] From information and Knowledge Graphs can be seen as
+[00:00:29] a way of representing semantic information between two entities and
+[00:00:32] what's really cool about them is that modern applications allow almost any
+[00:00:37] entity you could imagine to be described within one.
+[00:00:39] For example we can have Knowledge Graphs for movies, actors or ingredients
+[00:00:44] recipes as well as the steps required to cook them.
+[00:00:48] This means machines are
+[00:00:49] able understand how these entities relate
+[00:00:52] with each other along with their shared attributes
+[00:00:59] and how they relate to each other. So we can see that there's a lot of different things in the world around
+[00:01:00] us now, A Knowledge Graph is made up
+[00:01:03] Of nodes and connected by edges
+[00:01:09] Nodes describe any object or person
+[00:01:14] Or place on an edge defines
+[00:01:16] The relationship between the nodes so for example
+[00:01:20] A node of Ottawa
+[00:01:23] And a Node Canada might be
+[00:01:35] The capital and the thing here is that
+[00:01:41] A pair of nodes they can be connected by more than one relation
+[00:01:45] If two are related in multiple ways so for
+[00:01:49] example let's take another city
+[00:01:51] Let us take Paris.
+[00:01:53] Now Paris
+[00:01:56] Is the Capital
+[00:01:57] Of France
+[00:02:03] But it Is also part
+[00:02:05] Of The Roman Empire
+[00:02:08] Or It used to
+[00:02:09] So In this case
+[00:02:16] Paris to France is Capital
+[00:02:19] And then Paris To Roman Empire
+[00:02:23] Is City of
+[00:02:25] We can see
+[00:02:28] Then how that these nodes
+[00:02:29] Can be connected with multiple edges as we expand this
+[00:02:33] and Knowledge Graphs
+[00:02:34] Can sort Of build different data sources
+[00:02:37] And bind them together
+[00:02:38] To infer missing facts so let's say you're trying
+[00:02:40] To predict the number
+[00:02:42] Of Chinese restaurants in New York city
+[00:02:43] You could use one Data Source
+[00:02:45] Let us Say Census data but
+[00:02:47] It might not tell you the whole story it
+[00:02:49] Might be out of date It might
+[00:02:50] Not classify everything correctly and so forth
+[00:02:53] So if we have a second Data Source like say online reviews
+[00:02:56] About all The different restaurants
+[00:02:58] And put them All in
+[00:02:59] A Knowledge graph Then
+[00:03:01] We can use statistical methods to infer that actually there are 2,900
+[00:03:05] Restaurants serving Chinese food
+[00:03:08] In New York City which may
+[00:03:09] Be A lot Different than what was reported
+[00:03:11] In the census data alone
+[00:03:13] Now Knowledge graphs utilize something called
+[00:03:17] Natural language processing
+[00:03:24] Or abbreviated to NLP
+[00:03:27] To construct a view of nodes and edges through
+[00:03:32] A process called semantic enrichment I can take some unstructured text say
+[00:03:36] A white paper And classify that
+[00:03:39] Text using natural
+[00:03:40] Language Processing To really sort
+[00:03:44] Of create data sets which are correlated
+[00:03:47] And related
+[00:03:49] To That
+[00:03:50] Information And what that builds for me is a knowledge graph
+[00:03:55] and beyond sort of helping with question
+[00:03:57] An answer queries there are
+[00:03:58] A lot Of other commercial applications
+[00:04:00] For Knowledge graphs
+[00:04:02] So For example The recommended videos
+[00:04:04] That Are probably appearing alongside this one in YouTube right now
+[00:04:08] Well They leverage
+[00:04:09] A Knowledge Graph Based on
+[00:04:11] Queries people Are searching
+[00:04:12] For In Other Videos
+[00:04:13] That They Might Enjoy In
+[00:04:15] Insurance You can use
+[00:04:16] Knowledge Graphs To Sort
+[00:04:17] Of Make Sure That
+[00:04:19] Given Claim
+[00:04:21] For damage Is actually
+[00:04:22] A true Claim Or whether it's been
+[00:04:24] One that is reported by a policy holder
+[00:04:26] The fraud And in
+[00:04:29] Retail Knowledge graphs can assist understanding the relationship between products so
+[00:04:33] That companies Can recommend different pairings
+[00:04:35] That might be of interest To customers
+[00:04:36] and I'll leave you here with some
+[00:04:39] Wisdom That I was acutely aware
+[00:04:41] Of last night And
+[00:04:43] All Share
+[00:04:44] In knowledge Graph Form
+[00:04:46] It consists Of
+[00:04:47] Three Nodes There
+[00:04:49] Human Then Is
+[00:04:54] Coffee And Then
+[00:04:58] There Is Sleep and
+[00:05:02] These Nodes Are
+[00:05:03] Connected Of Course By
+[00:05:04] Edges The
+[00:05:06] Edge Between Human
+[00:05:07] And Coffee As
+[00:05:09] Consume the
+[00:05:12] Edge between human
+[00:05:13] And sleep
+[00:05:15] is Needs And
+[00:05:18] What I Learn Last Night
+[00:05:19] The Edge Between coffee
+[00:05:21] And Sleep
+[00:05:24] Prevents Avoid Caffeine
+[00:05:28] After 5 PM Folks
+[00:05:29] If
+[00:05:31] You Have Any Questions Please
+[00:05:32] Drop Us A Line Below
+[00:05:33] And if you Want
+[00:05:34] To See More Videos Like This
+[00:05:35] In The Future Please
+[00:05:37] Like And Subscribe
+[00:05:39] Thanks For Watching Today
+[00:05:42] I'm Going To Show You How
+[00:05:43] To Populate A Knowledge
+[00:05:44] Graph And Query
+[00:05:45] It Using An LLM
+[00:05:47] Graph Retrieval
+[00:05:48] Augmented Generation
+[00:05:50] Or Graf Rag
+[00:05:51] Is Emerging As Powerful
+[00:05:53] Alternative To Vector
+[00:05:54] Search Methods Instead
+[00:05:55] Of Using A Vector Database
+[00:05:57] Graf Rags System
+[00:05:58] Store Data In
+[00:05:59] The Format Of A Knowledge
+[00:06:01] Graph Using A
+[00:06:02] Graph Database
+[00:06:03] In A
+[00:06:04] Knowledge Graph The Relationships
+[00:06:05] Between Data Points Called
+[00:06:07] Edges Are As
+[00:06:08] Meaningful As The
+[00:06:09] Connections Between Datapoints
+[00:06:11] Called Vertices
+[00:06:12] Or Sometimes Nodes
+[00:06:14] A Graf
+[00:06:15] Rag Approach Leverages
+[00:06:16] Structured Nature Of
+[00:06:18] Graf Databases
+[00:06:19] To Give Greater
+[00:06:20] Depth And Context
+[00:06:21] Of Retrieved Information
+[00:06:23] About Network Or
+[00:06:24] Complex Relations
+[00:06:25] Ships The
+[00:06:28] First Step Is Setting Up
+[00:06:30] Our System Is Creating
+[00:06:31] Populating
+[00:06:32] The Knowledge Graph We'll Be Using
+[00:06:34] An LLM To
+[00:06:35] Assist In Creating
+[00:06:36] The Knowledge Graph Given
+[00:06:39] Unstructured
+[00:06:40] Text Data The
+[00:06:41] LLM Will Extract
+[00:06:42] Entities And
+[00:06:44] Relationships
+[00:06:45] From The Data Transforming
+[00:06:47] The Data Into Structure
+[00:06:48] Data Which Can Th

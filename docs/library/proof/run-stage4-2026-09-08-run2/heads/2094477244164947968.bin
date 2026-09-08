@@ -1,0 +1,192 @@
+# Movez - SpaceXAI engineer, Lauren Tan:  "GrokBot is the most powerful agentic...
+
+**Channel:** Movez (— subscribers)
+**Uploaded:** 2026-08-31 | **Duration:** 56:09 | **Views:** — | **Likes:** 4,867
+**URL:** https://x.com/0xMovez/status/2094477810177806468
+**Uoinked:** 2026-09-01T07:52:59
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook opens by establishing the credibility and expertise of Lauren Tan as a SpaceXAI engineer, immediately followed by a powerful claim about GrokBot being 'the most powerful agentic tool' they've built, leveraging her position to validate the statement.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+SpaceXAI engineer, Lauren Tan:  "GrokBot is the most powerful agentic tool we have ever built, but only 1% of users use it correctly  right now I'm running a team of 20+ GrokBot agents. I have a Chief of Staff agent, 3 managers and 16 workers - that's how the team looks like"  In https://t.co/hGiJuygr55
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] It's taken a little bit longer than expected
+[00:00:02] to prepare them for a stable release
+[00:00:04] The reason is that we've taken
+[00:00:06] extra time to make sure the upgrade path
+[00:00:08] meets our high standards for gradual adoption
+[00:00:11] We have an upgrade strategy
+[00:00:12] that delivers on this promise
+[00:00:14] What we found is that nearly all of
+[00:00:16] them just work with our new features without any changes
+[00:00:20] However
+[00:00:20] some of them may require some additional migration
+[00:00:23] effort
+[00:00:24] Although the changes are usually small
+[00:00:25] you still have the ability to make them
+[00:00:27] at your own pace
+[00:00:28] Okay, so I assume you can see my screen?
+[00:00:31] Yes, yeah, we're good. So yeah
+[00:00:33] today, yeah, I think the big theme for me
+[00:00:36] as I've been using agents to write code
+[00:00:39] and I'm sure a lot of you have
+[00:00:40] had the same experience as well
+[00:00:41] is how do you trust it?
+[00:00:44] You know
+[00:00:44] especially if you are an engineer that's been
+[00:00:47] writing code for a very long time
+[00:00:49] you have
+[00:00:50] a lot of
+[00:00:51] opinions and lessons that you've learned
+[00:00:53] about doing good engineering
+[00:00:55] And when you see agents just
+[00:00:57] you know, winging it and, you know, guessing, hallucinating, you know
+[00:01:01] confidently stating that they found the smoking gun
+[00:01:05] for the hundredth time
+[00:01:07] but it's actually not the real problem
+[00:01:09] you lose a lot of trust
+[00:01:11] And when you lose
+[00:01:12] when you don't have much trust in your
+[00:01:13] agents
+[00:01:15] I feel like
+[00:01:15] you really can't get the most out of
+[00:01:17] them
+[00:01:18] And for me, the parallels like with management
+[00:01:21] So if I'm a manager
+[00:01:23] an engineering manager of a team
+[00:01:25] and I have a bunch of
+[00:01:27] you know, I have a team of engineers on my team
+[00:01:30] and I don't trust them
+[00:01:32] then
+[00:01:32] the mode of operation I'm going to be
+[00:01:34] in is going to be like micromanagement
+[00:01:36] right? I'll have to
+[00:01:37] spend a lot of time
+[00:01:38] looking over my report's shoulders and
+[00:01:41] checking that they're doing their work well
+[00:01:44] you know, that they're not shipping bugs to production
+[00:01:48] And so, I drew this chart because
+[00:01:51] it's not, it's not a very scientific chart
+[00:01:52] but, like
+[00:01:53] this is how I imagine
+[00:01:56] myself and my journey through using agents
+[00:01:59] So, you know, like, fast forward or back forward
+[00:02:04] or fast back, fast backwards, like a year or so
+[00:02:09] when, you know, nobody was
+[00:02:10] or not many people were using agents to
+[00:02:12] code
+[00:02:13] I think you
+[00:02:15] you get into this mode where you are
+[00:02:19] In very heavily in the loop with one or several
+[00:02:23] like a handful of agents
+[00:02:25] And you find yourself just constantly fig
+[00:02:28] you know
+[00:02:28] trying to understand what your agents are doing
+[00:02:31] and you're very, very in the loop
+[00:02:32] You're watching every single output
+[00:02:34] You are sitting there prompting
+[00:02:37] and you really can't parallelize beyond that because you don't
+[00:02:41] again, you don't have that trust
+[00:02:43] right? You can't go to a hundred agents
+[00:02:45] like spawn a hundred agents when you don't
+[00:02:47] even trust the output of one agent
+[00:02:51] So, over the past five months
+[00:02:53] I feel like I've really been able to
+[00:02:56] like ascend this trust curve
+[00:02:59] And now I'm at the point where
+[00:03:02] I actually have, this sounds kind of scary to say this
+[00:03:05] and it makes me sound like a slop artist
+[00:03:06] but I, I promise I'm not
+[00:03:08] But I actually have my agents now auto-merging PRs for me
+[00:03:13] which is like a wild thing to say
+[00:03:15] But
+[00:03:16] like I woke up today and there were
+[00:03:18] like 20 PRs landed and I just reviewed them on main
+[00:03:22] like they were already landed
+[00:03:24] And they were good
+[00:03:25] So how did I get to that point?
+[00:03:27] It's basically what I wanted to talk about today
+[00:03:32] And again, like, yeah
+[00:03:32] feel free to jump in if you have questions
+[00:03:34] Colin
+[00:03:36] But, oh yeah, of course
+[00:03:39] I got to show this chart where
+[00:03:45] No, do not trust
+[00:03:48] Someone requested to control my computer
+[00:03:50] probably won't do that
+[00:03:52] but yeah, so this chart, I think, I, I
+[00:03:56] I'm trying this chart not to kind of like flex
+[00:03:58] but to kind of show like the journey
+[00:04:01] Like, so you can see like the curve
+[00:04:02] like it
+[00:04:02] it sort of like inversely matches the
+[00:04:05] contributions I've been able to land at Cursor
+[00:04:08] So I joined five months ago
+[00:04:10] and five months ago
+[00:04:11] like I, you know, my first month
+[00:04:12] I was like not very productive because I was
+[00:04:15] you know, I was learning the code base
+[00:04:17] didn't know what the heck was going on
+[00:04:19] And as I got more confident in
+[00:04:22] in my agents
+[00:04:23] I've really been able to kind of ramp
+[00:04:25] up my productivity
+[00:04:27] and again, like, yeah
+[00:04:28] like last month I shipped a thousand PRs
+[00:04:32] which is ridiculous
+[00:04:34] and then this month
+[00:04:35] we're only on the 12th
+[00:04:36] I'm already at, like, almost 800 PRs landed
+[00:04:41] so the velocity is definitely high
+[00:04:44] and you, you, I, I'm
+[00:04:45] I'm sure a lot of you will definitely be questioning
+[00:04:47] like, how
+[00:04:47] how much of this code is actually good
+[00:04:50] and I think, yeah, like, that's definitely fair to question
+[00:04:55] but, yeah, I think
+[00:04:58] I think if you set up your agents well
+[00:05:01] you can definitely get to
+[00:05:03] a very similar level
+[00:05:06] and so I'm going to talk about how
+[00:05:07] we do that
+[00:05:10] so for me, I think I'm curious
+[00:05:13] like, I guess, calling your experience as well
+[00:05:15] but, for me
+[00:05:17] I think the most important skill
+[00:05:20] that you should have in your toolbox
+[00:05:23] when you work with agents is verification
+[00:05:26] and by verification
+[00:05:27] I mean
+[00:05:27] the ability for an agent to actually run the code
+[00:05:32] or take CPU traces or heap snapshots or
+[00:05:38] you know, open an iOS simulator
+[00:05:40] whatever, you know, however your application is exposed to your users
+[00:05:45] it can do the same thing and
+[00:05:48] run it for real
+[00:05:50] and actually test and verify it don't work
+[00:05:53] Because that's the thing that really
+[00:05:54] closes the loop
+[00:05:56] it doesn't guarantee your agent writes good code
+[00:05:59] but it allows them to at least write correct code
+[00:06:03] which is a big
+[00:06:04] a really big step fo

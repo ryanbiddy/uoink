@@ -1,0 +1,227 @@
+# Dan - HUGE GROK PERFORMANCE 🚨  Built a full Unity space combat game with Gr...
+
+**Channel:** Dan (— subscribers)
+**Uploaded:** 2026-07-24 | **Duration:** — | **Views:** — | **Likes:** 877
+**URL:** https://x.com/Daniel_Farinax/status/2080736332205436952
+**Uoinked:** 2026-07-25T02:04:16
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The opening immediately shows the creator experiencing the remarkable result—a fully built Unity space combat game—and then walks through the creation process, emphasizing the visual and functional demonstration of what Grok can accomplish rather than asking a question or teasing information.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+HUGE GROK PERFORMANCE 🚨  Built a full Unity space combat game with Grok Build + Grok 4.5 all in C#.  CLI agents. MCP into the editor. Batchmode builds.   I didn’t know Unity. I wrote zero code.  Full walkthrough 👇 Audio on. I break down the build 🔊 https://t.co/1ZYoYpP6H7
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Okay, so this is the part that still feels illegal.
+[00:00:03] I didn't write a GDD
+[00:00:05] I did an open blender
+[00:00:06] I didn't spend a weekend hunting assets
+[00:00:09] and fighting Unity import settings like it's 2016
+[00:00:12] I talked to Grok 4.5 inside grok build
+[00:00:16] The agent harness
+[00:00:17] That can actually touch
+[00:00:18] The project Run The editor
+[00:00:20] Rebuild The app
+[00:00:21] Read The logs And try again
+[00:00:23] And It built
+[00:00:24] An island The instructions were almost comically small
+[00:00:28] Make a playable island explorer
+[00:00:30] Make it feel real
+[00:00:31] Use real assets
+[00:00:32] Not fake cone trees
+[00:00:34] Put the ocean back
+[00:00:35] The good one Oh, and the trees are purple
+[00:00:38] Now they're white
+[00:00:39] Some rocks look wrong
+[00:00:41] Some rocks are floating
+[00:00:42] Also, It's slow sometimes
+[00:00:44] Maybe half the size?
+[00:00:47] That was the spec
+[00:00:48] Grok 4.5 didn't just dump code into chat
+[00:00:51] And pray Through grock build
+[00:00:55] Unity project path Built a macOS app
+[00:00:57] Dropped you on the beach with wasters
+[00:00:59] And then iterated like teammate who never sleeps
+[00:01:03] Edit Compile
+[00:01:04] Build Launch
+[00:01:05] Read player dot log
+[00:01:06] Fix Repeat
+[00:01:08] First, The bones Procedural island
+[00:01:10] 1st person controller
+[00:01:11] Sky Ground A build You can actually launch
+[00:01:15] Then the taste pass
+[00:01:16] Throw out primitive trees
+[00:01:18] Pull real CC0 polyhaven models
+[00:01:21] Trees Rocks
+[00:01:22] Fern Coastal cliffs Load them at
+[00:01:25] Sun time with GLT fast
+[00:01:27] Then the ocean Not a flat blue plane pretending to be water
+[00:01:31] Crest FFT waves
+[00:01:33] Foam The kind of Ocean that makes you stop walking and just look
+[00:01:37] And, Of course it broke in classic Unity way
+[00:01:40] Purple materials
+[00:01:41] Classic render pipeline mismatch
+[00:01:43] Shader graph assets on built-in
+[00:01:46] Grock rewired material for Built In RP
+[00:01:49] then white trees & White cliffs
+[00:01:51] Which is somehow worse because
+[00:01:53] White means I loaded
+[00:01:55] Nothing useful Missing shaders in the player build
+[00:01:58] Albedo not bound
+[00:02:00] Metallic defaults turning rock into chrome ghosts
+[00:02:03] So Grock did unglamorous hero work
+[00:02:06] Force right Shaders
+[00:02:07] Into Build Bake textures onto standard materials
+[00:02:11] Verify logs that every prototype actually had albido
+[00:02:16] That's difference between a model
+[00:02:17] Talk good game
+[00:02:19] And harness ships one
+[00:02:21] GROCK BUILD let groc 4.5 close loop
+[00:02:24] On a real Unity player
+[00:02:26] Not code snippet
+[00:02:27] Then the worldcraft notes
+[00:02:29] The island was too round
+[00:02:31] Cookie cutter So height field got irregular coasts
+[00:02:35] Ridges, basins
+[00:02:36] Headlands Not perfect nature
+[00:02:38] But suddenly it felt like place
+[00:02:40] Rock were floating because
+[00:02:42] Polyhaven rock sets are multi-mesh layouts
+[00:02:45] Placed at one heights sample
+[00:02:48] Grock split them into individual boulders
+[00:02:50] Aligned to slope
+[00:02:51] And sank in terrain by bounds
+[00:02:54] Cliffs stopped being random white slabs
+[00:02:57] And became shoreline pieces
+[00:02:59] Facing outward, scaled down
+[00:03:01] Fewer of the multi-million triangle monsters
+[00:03:04] When it got heavy
+[00:03:05] Because of course crest at 2.56
+[00:03:08] Plus a forest of unique draw calls
+[00:03:10] Gets spicy The instruction was simple
+[00:03:13] Lower things half size island
+[00:03:15] Radius 180 to 90
+[00:03:17] Few trees
+[00:03:18] Lighter ocean
+[00:03:20] Softer shadows Same vibe
+[00:03:22] Snappier demo
+[00:03:23] Here's what actually matters
+[00:03:24] This wasn't AI wrote a tutorial cube
+[00:03:27] This was an end-to-end creative loop inside grock build
+[00:03:31] Idea, playable build
+[00:03:33] Visual critique
+[00:03:34] Fix better assets
+[00:03:36] Fix packaging
+[00:03:37] Art direction Performance pass
+[00:03:39] Demo ready With minimal instructions
+[00:03:41] Because the instructions were human
+[00:03:43] Make it real
+[00:03:44] That looks wrong Now It Looks white
+[00:03:46] Ship it Grock 4.5 handled the unity gore
+[00:03:50] Materials, player builds
+[00:03:51] Streaming assets
+[00:03:52] Crest keywords
+[00:03:53] Mesh grounding
+[00:03:55] Mac OS packaging
+[00:03:56] Rebuild Relaunch
+[00:03:58] Checked a log Try again
+[00:03:59] GROCK build was the hands
+[00:04:01] groc4 point 5
+[00:04:03] Was the judgment So if you're wondering what AI
+[00:04:06] coding is getting good at
+[00:04:07] It's not replacing taste
+[00:04:09] Its compresses distance between
+[00:04:11] Taste and thing
+[00:04:12] You can walk around in
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0003.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0004.jpg)
+
+### [00:02:00]
+
+![Screenshot at 00:02:00](screenshots/shot_0005.jpg)
+
+### [00:02:30]
+
+![Screenshot at 00:02:30](screenshots/shot_0006.jpg)
+
+### [00:03:00]
+
+![Screenshot at 00:03:00](screenshots/shot_0007.jpg)
+
+### [00:03:30]
+
+![Screenshot at 00:03:30](screenshots/shot_0008.jpg)
+
+### [00:04:00]
+
+![Screenshot at 00:04:00](screenshots/shot_0009.jpg)
+
+### [00:04:30]
+
+![Screenshot at 00:04:30](screenshots/shot_0010.jpg)
+
+### [00:05:00]
+
+![Screenshot at 00:05:00](screenshots/shot_0011.jpg)
+
+### [00:05:30]
+
+![Screenshot at 00:05:30](screenshots/shot_0012.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Dan:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

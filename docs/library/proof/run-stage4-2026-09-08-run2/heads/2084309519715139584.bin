@@ -1,0 +1,229 @@
+# 0xRafy - Head of Claude Code:  "85% of our engineers are running dozens or hun...
+
+**Channel:** 0xRafy (— subscribers)
+**Uploaded:** 2026-08-03 | **Duration:** 35:12 | **Views:** — | **Likes:** 493
+**URL:** https://x.com/0xRafy/status/2084309854298996853
+**Uoinked:** 2026-08-04T07:52:17
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes credibility by quoting the Head of Claude Code at Anthropic, presenting insider information about how 85% of their engineers use AI agents—a claim that positions the speaker as an expert with firsthand knowledge of cutting-edge practices at a major AI company.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Head of Claude Code:  "85% of our engineers are running dozens or hundreds of agents. The way you do it is graph engineering."  In 40 minutes he explains how a single engineer now does the work of a whole team, how far this has gone inside Anthropic and where it goes next.  This https://t.co/Ilplp9HaG8
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:01] When I joined Anthropic,
+[00:00:02] the model at that time was HANA 3.5
+[00:00:04] and That's the first model that broke through mainstream
+[00:00:07] And it made people realize maybe there is something to
+[00:00:11] this idea of a general
+[00:00:12] Model where if you apply it on particular problems like coding
+[00:00:15] It can be really good
+[00:00:18] For anthropic
+[00:00:19] This has always been in research direction
+[00:00:21] We have always focused
+[00:00:23] safety Security enterprise
+[00:00:27] And coding it's just always been this laser focus and
+[00:00:32] We wanted to build these models for a long time
+[00:00:34] the reason we want a good coating model is because
+[00:00:38] The motto exists as software
+[00:00:39] and As I get some more intelligent
+[00:00:41] The way that interacts with the world
+[00:00:42] Is through your software And so you want the code?
+[00:00:45] That it writes to be good So that it can interact well
+[00:00:47] So that we can study it And make it safer
+[00:00:49] better aligned For
+[00:00:51] You know A while
+[00:00:53] For anthropic We knew Wanted
+[00:00:54] To Build Some Kind Of Coding Product
+[00:00:55] My job Was Figure
+[00:00:56] Out What Is That Product And
+[00:00:58] When I joined Again It was
+[00:00:59] It Was On A 3.5
+[00:01:00] In All The Products
+[00:01:01] At Time They Were Fancy
+[00:01:03] Auto Complete and
+[00:01:05] You Know at the time This Is
+[00:01:06] Cutting Edge And Remember
+[00:01:07] My First Time Using Some
+[00:01:09] Of These Products And It Was Just Amazing
+[00:01:11] And We Fell
+[00:01:14] That Very Soon
+[00:01:15] The Models Are Going To
+[00:01:16] Get To Point Where There Can
+[00:01:18] Be Much More Capable
+[00:01:19] Than Us So For Coding
+[00:01:20] It's Not A Matter Of Completing
+[00:01:21] A Single Line The Model
+[00:01:23] Is Going To Be Able To Write An Entire
+[00:01:24] Function And Entire File
+[00:01:26] In Territory An Entire
+[00:01:27] Project Now I Think
+[00:01:29] By Then This Year They're Gonna Build
+[00:01:30] Entire Businesses
+[00:01:32] And So You Know
+[00:01:33] We Kind Of Saw This
+[00:01:34] Uh You
+[00:01:35] Know That We Call This Exponential
+[00:01:37] And This Just Way
+[00:01:38] That You Know Models Are
+[00:01:39] Developing There's These Scaling
+[00:01:40] Laws That Describe The
+[00:01:41] Way Model Intelligence Goes
+[00:01:43] Up Over Time Somehow The
+[00:01:45] Loss Are Continuing And
+[00:01:46] In Fact It Is Accelerating
+[00:01:48] An You Know Its
+[00:01:49] Empirical Kind Of Observation
+[00:01:51] It S Not Obvious
+[00:01:52] Why It Keep Happening But
+[00:01:53] Seems To Keep Happen Ng So
+[00:01:55] All We Did Is We Kinda Trace
+[00:01:56] This Line Work Alright Right
+[00:01:57] Now The Model Was Here It Gonna
+[00:01:59] Get Clodcode Didn't
+[00:02:10] Work Very Well For
+[00:02:11] You Know The
+[00:02:12] First Six Months It
+[00:02:13] Actually Took Time
+[00:02:14] To Catch Up
+[00:02:16] And It Wasn't
+[00:02:17] Until I Would Say Opus
+[00:02:18] Four In May Of
+[00:02:20] 2025 Where
+[00:02:22] We Really Started
+[00:02:23] To Work Since Then
+[00:02:25] The Growth Has
+[00:02:27] Been Exponential Also
+[00:02:29] It Was Not
+[00:02:30] At 1st But That's When It
+[00:02:31] Became Expon Ential And
+[00:02:34] We've Been Finding More
+[00:02:35] Ways To
+[00:02:36] Use This As Model
+[00:02:39] And Ways To Unlock It In
+[00:02:40] The Product We Launched Clod
+[00:02:41] Tag This
+[00:02:42] Is Kind Of The Latest Iteration
+[00:02:44] Long Running
+[00:02:45] Asynchronous Agent
+[00:02:46] That You Interact With A
+[00:02:47] Coworker Has
+[00:02:48] Great Common Sense When
+[00:02:50] To Jump In Or
+[00:02:51] Not Too So
+[00:02:53] We Are Going
+[00:02:55] To Keep Disrupting
+[00:02:56] Ourselves And Figure Out
+[00:02:58] What Is Next
+[00:02:59] Form Factor You
+[00:03:00] Talk About Sort Of
+[00:03:01] Predicting This Line
+[00:03:04] Of Progress But To
+[00:03:05] Me How Did
+[00:03:07] You Think About
+[00:03:09] Architecting Really
+[00:03:11] Multi Agents
+[00:03:12] And Running These
+[00:03:15] Multiple Agents Can
+[00:03:17] Actually Have Us Rethink
+[00:03:19] How We Implement Our
+[00:03:20] Workflow So I Mean That Is
+[00:03:22] What Has Been Shocking To
+[00:03:23] Me As We Actually Have
+[00:03:25] The Opportunity To Re-Architect
+[00:03:27] Reengineer How
+[00:03:28] All Of Us Are Getting
+[00:03:30] Our Work Done And I
+[00:03:32] Have To Wonder Was
+[00:03:34] This A, Architected
+[00:03:37] Into Your Development
+[00:03:39] Or Is That Sort Of Just
+[00:03:40] A Natural Outcome Of
+[00:03:41] The Capabilities That
+[00:03:43] You Are Developing I
+[00:03:44] Think It's A Little Bit Both If
+[00:03:46] I Think Back A Couple Years
+[00:03:48] How Did We Use Models
+[00:03:49] We Know Like They Do
+[00:03:50] This One Line Autoconfusion
+[00:03:52] And We
+[00:03:53] Had Agentic Workflows Always
+[00:03:54] What Be Called As An Exotic Work
+[00:03:55] Close But He Was
+[00:03:56] Essentially These Deterministic Systems
+[00:03:57] Were A Step At Time
+[00:03:58] Might Call Out To An LLM
+[00:04:00] But Fundamentally The
+[00:04:03] Workflow Was Determan Stick
+[00:04:04] And I Think
+[00:04:05] What's Changed As The Model
+[00:04:06] Got More Intelligent
+[00:04:07] Is We Realized
+[00:04:09] Actually It'S Much Better To
+[00:04:10] Use The Model As The Coordinator
+[00:04:11] For This Work Flow So
+[00:04:14] You Do Is The Model Drives
+[00:04:15] In You
+[00:04:16] Give Tools To Pull In
+[00:04:18] Context You
+[00:04:19] Ask It To Do Something And
+[00:04:23] Let It Figure Out
+[00:04:24] How To Orchestrate This You
+[00:04:25] No Longer Tell It Okay
+[00:04:26] Step One Then Step
+[00:04:27] Two If Not 2 Then
+[00:04:29] This Else This
+[00:04:31] Is Just
+[00:04:32] Not How Works Anymore Give
+[00:04:33] A Goal The Starting
+[00:04:36] Point Access Tools
+[00:04:37] Will Figure It Out
+[00:04:39] As Models Got More
+[00:04:42] Intelligent That Was Overwhelmingly
+[00:04:43] The Reason But I Think
+[00:04:46] Within Cloud Code We
+[00:04:47] Have Also Learned At The
+[00:04:49] Very Beginning We Would Kind
+[00:04:50] Of Spoon Feed The Model
+[00:04:51] Context And Then
+[00:04:53] As The Model Got More Sophisticated
+[00:04:55] We Realized Okay Maybe Actually
+[00:04:56] This Isn't It And We
+[00:04:57] Moved Away From That A Little Bit For
+[00:04:59] Example We Have This File
+[00:05:01] Called Cloud.md
+[00:05:02] Is Loaded For Every Session
+[00:05:04] Anything More In What We
+[00:05:05] Are Seeing With Customers They
+[00:05:06] Moving To
+[00:05:07] Skills And They Were
+[00:05:09] Moving More Tools Because
+[00:05:11] This Way
+[00:05:13] The Model Has A Little Bit
+[00:05:14] More Control Over
+[00:05:15] How To Load The Sun Well
+[00:05:16] I Have Ask You Guys
+[00:05:20] Across Anthropic Are
+[00:05:21] Using Cloud Every Day
+[00:05:23] So Your Customer Number
+[00:05:25] One Before The
+[00:05:26] Rest Of Us See It You

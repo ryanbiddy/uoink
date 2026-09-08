@@ -1,0 +1,237 @@
+# Codez - Google Brain founder, Andrew Ng:   "Prompting will be dead in 6 month...
+
+**Channel:** Codez (— subscribers)
+**Uploaded:** 2026-08-08 | **Duration:** 01:39:39 | **Views:** — | **Likes:** 431
+**URL:** https://x.com/0xCodez/status/2086123800765096116
+**Uoinked:** 2026-08-09T07:47:52
+**Topic:** Developer Marketing
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The title leads with Andrew Ng's provocative claim that 'Prompting will be dead in 6 months,' which directly contradicts the prevailing focus on prompt engineering in the AI community. This contrarian position is designed to challenge viewers' existing assumptions and draw them in to understand what's replacing it.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Google Brain founder, Andrew Ng:   "Prompting will be dead in 6 months. Loops and Graphs are what's replacing it."  In 1 hours at Stanford he shows what the best engineers build instead, and how you start building it today.  Everything a $500 course sells you is in the first 10 https://t.co/8SbhOiZWdx
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Welcome to this NeurIPS tutorial on application development using LLMs.
+[00:00:05] Both EASET OpenAI as well Deep Learning AI Fund have
+[00:00:08] had the privilege of working with many people
+[00:00:11] building large language model applications and so we hope
+[00:00:13] To share some practical tips with you
+[00:00:15] And after our presentation,
+[00:00:18] We also have a distinguished panel
+[00:00:20] Of researchers
+[00:00:22] And builders with Antje, Tatsu, Meredith and Graham
+[00:00:26] That I hope will also deepen everyone's understanding
+[00:00:30] Of how to build applications using LLMs
+[00:00:32] Here is the agenda for today
+[00:00:35] What we hope to do Is help you understand
+[00:00:38] How to build application
+[00:00:39] Using LLMS
+[00:00:40] Because this a new way of building AI
+[00:00:42] Applications that are very powerful
+[00:00:44] And allows you To get things
+[00:00:46] To work much faster
+[00:00:47] Than was ever possible before
+[00:00:48] So The agenda Is talk about
+[00:00:53] Not to teach you how
+[00:00:54] To train an LLM from scratch yourself
+[00:00:56] But make sure You have enough of a
+[00:00:58] Mental working model
+[00:00:59] For how Elements work
+[00:01:00] So that We can use them effectively
+[00:01:03] And then talk about some examples
+[00:01:04] Of applications EASET will
+[00:01:06] Have lots Of insights To share
+[00:01:08] On How They write Prompts
+[00:01:09] And Share Some exciting Cutting-edge
+[00:01:10] Developing Tools For
+[00:01:12] Building Applications Then
+[00:01:14] Let's Talk About Some Practical
+[00:01:15] Tips In Closing Before
+[00:01:19] We go Onto
+[00:01:20] The panel So I
+[00:01:25] Wanted To Take A Quick
+[00:01:27] Look At The
+[00:01:28] LLM And What They
+[00:01:29] Are All About In This
+[00:01:30] Session So Let's
+[00:01:31] These Tools Learning And
+[00:01:32] Enhancing And Training
+[00:01:34] Means That LLMs
+[00:01:36] Are Useful
+[00:01:37] For Numerous
+[00:01:38] Applications So Today
+[00:01:39] There Are Many Businesses
+[00:01:41] Using It For Document Q and
+[00:01:42] A Many Business Is
+[00:01:43] Using This To Build Different
+[00:01:45] Flavors Of Customer
+[00:01:46] Service Bots As
+[00:01:48] Being Used Over
+[00:01:50] And Over To Summarize
+[00:01:51] Messages The Round
+[00:01:52] Message Is Been Using
+[00:01:54] In Verticals Like To Process
+[00:01:55] Legal Documents Or
+[00:01:56] Medical Document I
+[00:01:58] Use It All Time As
+[00:01:59] A Copy Editor There
+[00:02:01] Are Also New Form Of Entertainment
+[00:02:03] Popping Up New Form
+[00:02:04] Of Games Online
+[00:02:06] Companions So This
+[00:02:09] One Technology LLM
+[00:02:10] Is Useful
+[00:02:11] For So Many Different Applications
+[00:02:14] This Is What Think Of AI
+[00:02:15] Stack At The Lowest
+[00:02:17] Level Is Hardware
+[00:02:18] Or Semiconductor Layer
+[00:02:21] And You Know Very
+[00:02:22] Capital Intensive Concentrated
+[00:02:24] But Some
+[00:02:26] Business Are Doing Really
+[00:02:27] Well With
+[00:02:29] Every Wave Of Technology
+[00:02:31] What I Have Seen Is Focused
+[00:02:34] On Infrastructure So A
+[00:02:37] Lot Of Attention Open
+[00:02:38] Eye Google AWS
+[00:02:40] And Every
+[00:02:46] Time Is A
+[00:02:47] New Technological Revolution
+[00:02:49] But It Turns Out That
+[00:02:50] For The People
+[00:02:51] Building Tools And Infra
+[00:02:52] I Run Landing AI
+[00:02:53] Which Does Computed Vision To
+[00:02:55] The Businesses Providing
+[00:02:57] Tools In Infrastructure
+[00:02:58] Be Successful Almost
+[00:02:59] By Definition There's
+[00:03:01] Another Layer That Has
+[00:03:02] Got To Be Even More Successful
+[00:03:03] Which Is The Application
+[00:03:04] Layer Because The Applications
+[00:03:06] Built On Top Of Generate
+[00:03:09] Even More Revenue So
+[00:03:15] Today's Presentation
+[00:03:17] Is Really On
+[00:03:18] How You Can
+[00:03:19] Set Yourself Up
+[00:03:20] To Build Exciting
+[00:03:21] Applications Using
+[00:03:23] LMS First Thing
+[00:03:26] I Want Go Over Is Basics
+[00:03:28] Of LM Some May Be
+[00:03:29] Familiar With This But
+[00:03:32] I Want Everyone To Have
+[00:03:33] Working
+[00:03:34] Mental Model Because
+[00:03:36] That Affects The Decisions
+[00:03:38] Whatever Application On
+[00:03:41] Top Of These LMs
+[00:03:42] Text
+[00:03:45] Completion LLM
+[00:03:47] Will Be If You
+[00:03:48] Give A Prompt And
+[00:03:50] Ask It For Completion
+[00:03:52] Run It Once My
+[00:03:54] Outer Friends That
+[00:03:56] Is The Text Completions
+[00:03:57] This
+[00:03:58] Is Called Base
+[00:03:59] LM Which
+[00:04:01] Mostly Predicts
+[00:04:02] What Is The Next
+[00:04:03] Word On Internet As
+[00:04:06] Observed In Your Training
+[00:04:08] Set With
+[00:04:11] Supervised Learning In
+[00:04:13] Which We Create
+[00:04:14] Data Set Where I Repeatedly
+[00:04:17] Learn To Predict The Next Word
+[00:04:19] So If One
+[00:04:20] Of The Data Sets
+[00:04:21] Has Scraped Off The Internet
+[00:04:22] As Sentence Like My
+[00:04:24] Favorite Food Is A Bagel With
+[00:04:25] Cream Cheese Then This
+[00:04:26] Becomes A
+[00:04:27] Set Of Training
+[00:04:29] Examples With
+[00:04:30] Supervised Learning Where
+[00:04:31] Given The Input My Favourite
+[00:04:32] Fruit Is A Well
+[00:04:34] The Right Answer That
+[00:04:35] The Transformer Tries
+[00:04:37] To Predict Is The Word Bagels
+[00:04:38] My Favorite Set Of
+[00:04:47] The Internet And Other Sources
+[00:04:49] 100 Billion Or
+[00:04:50] A Trillion Words To
+[00:04:52] Create A Data Set
+[00:04:53] And Train A
+[00:04:55] New Network Then This
+[00:04:56] Gives You An LLM Based
+[00:04:57] Model Which
+[00:04:58] Can Be Very Good
+[00:05:00] At Predicting The Next
+[00:05:01] Word On The Internet When
+[00:05:03] You Use ChatGPT
+[00:05:04] They Learn To
+[00:05:08] Follow Instructions So
+[00:05:10] With A Base LM
+[00:05:14] You Give It Prompt
+[00:05:16] Like Once Upon A Time Or Unicorn
+[00:05:18] And It Will Complete The
+[00:05:20] Story For You This
+[00:05:21] Is What GPD2
+[00:05:22] GPT3 Did
+[00:05:24] But
+[00:05:25] If You Give
+[00:05:26] A Prompt Like Capital
+[00:05:28] Of France They
+[00:05:29] Would Try To Predict If
+[00:05:31] I Had Seen This On Internet
+[00:05:32] So Completion
+[00:05:36] Could Be Germany
+[00:05:39] Where Is Mount Fuji
+[00:05:41] Or Taller LLM
+[00:05:47] Follow Instructions
+[00:05:48] Which Is What Many
+[00:05:50] Of The Leading Elements
+[00:05:51] Do These Days Certainly You
+[00:05:52] Know Chat GPT BOD
+[00:05:53] Paint Chat Follow Instruction
+[00:05:54] The Next Step
+[00:05:56] Is Instructure
+[00:05:57] Fine Tuning In
+[00:05:59] Which Would Come Up
+[00:06:00] With A Large Data Set Of
+[00:06:01] Prompts Like Was
+[00:06:03] It Capital South Korea Write
+[00:06:05] Haiku Poem How
+[00:06:08] We Brainstorm Some
+[00:06:09] Fun Museums Visit Bogota
+[00:06:11] As Well
+[00:06:12] Tell Me How To Break
+[00:06:13] Into Fort Knox And 

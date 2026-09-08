@@ -1,0 +1,106 @@
+# How to Train Ultralytics YOLOv8 models on Your Custom Dataset in Google Colab | Episode 3
+
+**Channel:** Ultralytics (24.6K subscribers)
+**Uploaded:** 2023-07-26 | **Duration:** 06:01 | **Views:** 363,966 | **Likes:** 2,415
+**URL:** https://www.youtube.com/watch?v=LNwODJXcvt4
+**Uoinked:** 2026-07-09T19:19:06
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The opening promises a comprehensive tutorial covering specific steps: setting up the environment, labeling the dataset, importing and training the model, and evaluating/validating results. The description explicitly lists '1. Set Up Environment,' '2. Label Your Dataset,' '3. Import and Train,' and '4. Evaluate and Validate,' establishing a clear numbered sequence of takeaways.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Learn how to train Ultralytics YOLOv8 models on your custom dataset using Google Colab in this comprehensive tutorial! 🚀 Join Nicolai as he walks you through every step needed to harness the power of YOLOv8 for real-time object detection. From setting up your environment and labeling your dataset to importing and training the model in Google Colab, this video covers it all.
+
+In this episode, you will:
+1. Set Up Environment: Learn how to configure Google Colab for optimal performance by selecting a GPU and installing Ultralytics with `pip install ultralytics`.
+2. Label Your Dataset: Use tools like Roboflow to label and export your dataset in the YOLOv8 format.
+3. Import and Train: Import your dataset into Google Colab, set paths correctly, and start training your YOLOv8 model. Choose the model variant (e.g., YOLOv8m), set the number of epochs, and monitor training metrics like mean Average Precision (mAP).
+4. Evaluate and Validate: Download the model weights, plot the confusion matrix, and validate the model on unseen images to ensure high performance.
+
+🔗 Colab Notebook: https://colab.research.google.com/github/ultralytics/ultralytics/blob/main/examples/tutorial.ipynb
+
+🌟YOLO Vision 2024 (YV24), our annual hybrid Vision AI event is just days away! Happening on 27th September 2024 at Google for Startups Campus, Madrid.! Watch live on:
+🔗 YouTube: https://youtu.be/XKAcQd4NfG8
+🔗 Bilibili: https://live.bilibili.com/1921503038
+
+For more details on training custom datasets with YOLOv8 in Google Colab, check out the blog:
+https://www.ultralytics.com/blog/training-custom-datasets-with-ultralytics-yolov8-in-google-colab
+
+Don't miss out on enhancing your AI skills with YOLOv8! Like, subscribe, and visit the following Ultralytics resources for more information:
+- 🏠 Ultralytics Home: https://www.ultralytics.com
+- 📚 Ultralytics YOLO: https://www.ultralytics.com/yolo
+- 🚀 Ultralytics HUB: https://www.ultralytics.com/hub
+
+#YOLOv8 #Ultralytics #ObjectDetection #ComputerVision #AI #MachineLearning
+
+Chapters:
+0:00 📌 Introduction
+1:20 🖥️ Setting Up Environment
+3:45 🏷️ Labeling Dataset
+7:10 📂 Importing Dataset
+10:30 🚀 Training Model
+15:00 📊 Evaluating Results
+
+## Tags
+
+AI, Artificial Intelligence, Computer Vision, Custom Dataset, Data Science, Deep Learning, Google Colab, Google Colab Tutorial, ML, Object Detection, Object Tracking, Real-Time Object Detection, Training YOLOv8, Ultralytics, Ultralytics HUB, Webcam Inference, YOLOv8 Accuracy, YOLOv8 Custom Dataset, YOLOv8 Object Detection, YOLOv8 Training, YOLOv8m, how to train yolov8 on custom dataset, how to train yolo object detection models in google colab, custom dataset training yolov8
+
+---
+
+## Transcript
+
+### Chapter: Introduction (00:00:00)
+
+[00:00:00] so in this video here we're going to see how we\h can train a custom object detection model with\h\h
+[00:00:03] YOLOv8 from Ultralytics we're going to see how\h we can set it up we're also going to see how you\h\h
+[00:00:08] can label your data with a specific tool you can\h lose use like whatever tools that you want how can\h\h
+[00:00:13] we act like export it into the YOLOv8 format\h import into a Google Colab notebook and then\h\h
+[00:00:17] we're going to train our own custom optic texting\h model with YOLOv8 so let's now jump straight into\h\h
+[00:00:22] Google Colab notebook let's see how we can set\h it up it will be down in description here under\h\h
+[00:00:26] the video so you can use it on your own custom\h data set so first of all here we're basically\h\h
+[00:00:31] just going to set up our Nvidia SMI just to see\h what GPU we're running on if you want to use the\h\h
+[00:00:36] GPU make sure that you go up to runtime change\h random type and make sure that right like have\h\h
+[00:00:41] chosen a dpu as the hardware accelerator so\h yeah we have done that now we should be able\h\h
+[00:00:45] to call this Nvidia is a my command here we go\h we can see the information about our GPU right\h\h
+[00:00:50] now this is just like the standard GPU in a Google\h Colab notebook again you can use the free version\h\h
+[00:00:55] as well and you can run this fine and train\h your own custom YOLOv8 model from Ultralytics\h\h
+[00:01:01] so now we're just going to pip install Ultralytics\h here so now we can see that we've installed\h\h
+[00:01:05] Ultralytics in our environment now we can go down\h and install YOLOv8 or basically just set that up\h\h
+[00:01:10] so from Ultralytics we're going to import the YOLO\h model there we go now we have imported the YOLO\h\h
+[00:01:15] model from Ultralytics now we basically just need\h our data set so I'm using like roboflow in this\h\h
+
+### Chapter: ️ Setting Up Environment (00:01:20)
+
+[00:01:20] video to go in and label my data set you can use\h whatever tool that you want I have the data set\h\h
+[00:01:24] here let me just go in shortly to show you guys\h that so I just have a data set with a number of\h\h
+[00:01:29] different cups then I've just labeled it here with\h this annotation tool I'm basically just drawing\h\h
+[00:01:34] boundary boxes around it so you can just drag the\h tool draw a bounding box around the object and\h\h
+[00:01:38] then choose whatever class that you want to like\h have your object in after we've done that we can\h\h
+[00:01:44] then go in and Export our data set so I have some\h versions already generated we hit export data set\h\h
+[00:01:49] and then we can select the format we're going to\h go with the YOLOv8 format from Ultralytics then\h\h
+[00:01:54] we can hit show downloadable code so we just get a\h code snippet and we can just copy paste that into\h\h
+[00:02:00] our Google colab notebook so I've already copy\h pasted it here you first of all you just need\h\h
+[00:02:04] to copy paste in your API key then when we run\h this we act like just download our data set and\h\h
+[00:02:09] then we'll have our data set in our Google colab\h environment and then we can just directly train\h\h
+[00:02:14] our yellow V8 model on that so now we can see that\h our data set has been downloaded we should be able\h\h
+[00:02:19] to go over into our folder we can see we have\h this cup detection version two free we can see\h\h
+[00:02:24] we get a test set validation set and also a train\h set so yeah we just have some test images we also\h\h
+[00:02:29] have the labels here so this will basically like\h be the pounding boxes we have the label and then\h\h
+[00:02:34] we also basically have the top left corner and the\h bottom right corner so this is the YOLOv8 format\h\h
+[00:02:38] from Ultralytics if you go down to the data here\h I just want to make sure that we actually have\h\h
+[00:02:42] the correct path because we're using this in a\h Google colab environment and we actually need to\h\h
+[00:02:47] directory for our image just so I'm doing to copy\h paste that there we go and we also have our train
+[00:02:56] you probably also need to do this here because\h we're using a Google home app environment you\h\h
+[00:03:00] can also have your data set in a Google Drive\h and then just connect to your Google Drive then\h\h
+[00:03:04] we basically have the path to our test set train\h set and also our v

@@ -1,0 +1,230 @@
+# Linas Beliūnas - Instead of watching 1 hour of Netflix tonight, watch this ex-Google C...
+
+**Channel:** Linas Beliūnas (— subscribers)
+**Uploaded:** 2026-08-08 | **Duration:** 01:07:09 | **Views:** — | **Likes:** 1,363
+**URL:** https://x.com/linasbeliunas/status/2086168410736546189
+**Uoinked:** 2026-08-09T07:46:18
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The hook opens by presenting a choice with implicit consequences—skip Netflix to watch this lecture instead—framing the video as a high-value use of the viewer's time. It emphasizes what the viewer gains (the clearest explanation of AI engineering) by making this swap.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Instead of watching 1 hour of Netflix tonight, watch this ex-Google Chief Scientist Jeff Dean’s lecture. It’s the clearest explanation I’ve seen of the full AI engineering stack - from building LLMs from scratch all the way to one human coordinating 100 agents.  The best part is https://t.co/GxrxNuj9RU
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] And I'm going to talk to you about
+[00:00:01] what's happening in AI. A little huge notice,
+[00:00:03] but it is a thing these days
+[00:00:04] and we have many people at Google working on this area
+[00:00:08] so presenting the work of not just my
+[00:00:10] work with many, many people like Google
+[00:00:13] and elsewhere. So few observations which may come as
+[00:00:18] a huge surprise for you Machine learning
+[00:00:21] and AI has really changed our expectations
+[00:00:22] of what is possible computers
+[00:00:24] If think back 10-15 years ago
+[00:00:30] they couldn't understand speech all that well They definitely
+[00:00:31] could not understand language very well
+[00:00:32] And now we have tools
+[00:00:34] to enable computers
+[00:00:35] interact with people
+[00:00:36] in a much more natural style
+[00:00:38] because the understanding modalities
+[00:00:40] of what people understand and want
+[00:00:42] to communicate Along the way increasing scale
+[00:00:46] larger amounts compute
+[00:00:47] large amount data
+[00:00:49] and more larger-scale models
+[00:00:51] has delivered better results
+[00:00:54] nearly continuously
+[00:00:55] for last sort 13 or 14 years
+[00:00:58] this is been trend and seems to be holding up even today
+[00:01:03] In addition
+[00:01:04] To scale algorithmic
+[00:01:05] And sort of model architecture improvements
+[00:01:07] have also provided massive
+[00:01:08] Improvements as well
+[00:01:10] I mean these two things multiply together
+[00:01:11] Right if you can Have much larger
+[00:01:13] Scale And Much better
+[00:01:15] Model architectures that are able
+[00:01:16] to learn more Per floating point operation
+[00:01:20] Those Things Together
+[00:01:21] Mean instead Of
+[00:01:23] 20x from Scale
+[00:01:25] You Have 20 X From
+[00:01:26] Scale And 50
+[00:01:27] x From Algorithms Then
+[00:01:28] You End Up With 1000 Ex
+[00:01:29] Better Thing Than You Had Not
+[00:01:31] That Long Ago Also
+[00:01:32] The Kinds
+[00:01:33] Computations We Want To Run
+[00:01:34] And the Hardware
+[00:01:36] In Which we want to run Them Are
+[00:01:37] Changing Dramatically Four
+[00:01:39] Observation S which are Maybe
+[00:01:40] not Surprising First
+[00:01:43] Neural Lens and Gradient
+[00:01:44] Descent These Seem
+[00:01:45] Be Key Building Blocks
+[00:01:46] For How Do You Actually Build
+[00:01:48] Truly Intelligent Computer
+[00:01:50] Systems Um They're
+[00:01:51] Not New Ideas There Things
+[00:01:52] Have Been Around For A Long Time
+[00:01:53] They Were Invented 70s
+[00:01:55] And 80s Um There
+[00:01:56] Was Actually A Lot Of Excitement
+[00:01:58] About Them In The Late Eighties
+[00:01:59] Early Nineties I
+[00:02:00] First Ran Across Them
+[00:02:01] You Know Intro
+[00:02:03] Lecture Where I Introdu To
+[00:02:04] Neural Network Like This
+[00:02:05] Uh We
+[00:02:06] Have Kind Nice
+[00:02:08] Very Abstract
+[00:02:09] Away Version How
+[00:02:11] We Think Real Life
+[00:02:12] Neurons Behave Or
+[00:02:14] You Decide Are
+[00:02:17] Going To Fire Not
+[00:02:23] At The End Week Um And
+[00:02:24] Then Back Propagation
+[00:02:25] Is A Way It Really
+[00:02:26] Nice Algorithm
+[00:02:27] That Enables You To Adjust The
+[00:02:29] Weights On The Edges Of
+[00:02:30] All These Connections In
+[00:02:32] Order To Make Uh
+[00:02:33] Sort Of
+[00:02:34] Um The
+[00:02:36] Model Behave
+[00:02:37] More In The Way That
+[00:02:38] You Want It To Behave Where
+[00:02:39] You Give It A Bunch Of Examples And
+[00:02:41] Back Prop G G Enable
+[00:02:42] You To Make The
+[00:02:43] Model Learn
+[00:02:44] Uh The Behavior
+[00:02:45] You Want So I Saw
+[00:02:48] These And As An Undergrad
+[00:02:49] In 1990 And
+[00:02:50] i Got Super Excited and
+[00:02:51] I Said Oh Wow
+[00:02:52] That Seems Like A Really Good
+[00:02:53] Abstraction Um
+[00:02:55] It Feels Like Its
+[00:02:56] A Trainable Thing And
+[00:02:57] They Can Learn Almost Anything
+[00:02:59] Um At Time We
+[00:03:00] Were Not Using Very Large
+[00:03:01] Neural
+[00:03:02] Networks Because We Had
+[00:03:03] Really Pathetically Wimpy
+[00:03:04] Computers But I
+[00:03:07] Said Oh Maybe If
+[00:03:08] We Use The Parallel
+[00:03:10] Computer In the Department
+[00:03:11] I Could Be Can
+[00:03:12] Train Much Bigger Neural
+[00:03:13] Networks That Would Be Great Maybe Just
+[00:03:14] Need To Use 32 Computers
+[00:03:15] Instead Of One And
+[00:03:16] Then We Could Train Really Impressive
+[00:03:18] Neuronets Now It Be Nice
+[00:03:20] So I Didn Asked
+[00:03:21] A Professor Who Introdu The
+[00:03:22] Neuro Network Topic
+[00:03:23] In Classes Taking
+[00:03:25] If I Could Do A Senior
+[00:03:26] Thesis With Parallel And Data
+[00:03:37] Parallel Training But
+[00:03:39] I Called Them Pattern
+[00:03:40] Partition And Pipeline
+[00:03:42] Approach and These
+[00:03:45] Speed Up Curves
+[00:03:46] Are Interesting but
+[00:03:47] They Taper Off Because
+[00:03:49] I Did The Stupid Thing
+[00:03:50] I Didn't Make The Model
+[00:03:51] Bigger As I Increase
+[00:03:52] The Number Of Browsers I Just Made
+[00:03:53] It Much Harder
+[00:03:55] To Paralyze With
+[00:03:56] A Fixed Size Model But
+[00:03:58] Sort Of Filed That
+[00:03:59] Away Is Like Oh That's 25 Years
+[00:04:10] Okay So Now
+[00:04:12] I'm Going To Give You A Whirlwind
+[00:04:13] Tour Of About Bunch
+[00:04:15] Of Advances In The
+[00:04:16] Field Of ML That Have Happened
+[00:04:17] Last 15 Years They
+[00:04:19] Are Really All Combined
+[00:04:21] Together To Produce
+[00:04:23] Today's Most
+[00:04:24] Sophisticated Models
+[00:04:25] How Did These Today's
+[00:04:27] Models Come Be Well It Was
+[00:04:28] Through Advancements
+[00:04:30] Like The Ones I Describe So
+[00:04:33] The Origin Of My
+[00:04:35] Getting Back Working At
+[00:04:36] Google
+[00:04:37] Was I Bumped
+[00:04:39] Into Andrew Ng Who
+[00:04:40] Is A Stanford Faculty Member And
+[00:04:42] In One Of
+[00:04:43] Our Micro Kitchens So What
+[00:04:44] Are You Doing Here He Said
+[00:04:45] Oh Not Sure Yet Because
+[00:04:47] It Just Started A Week Ago
+[00:04:49] But My
+[00:04:50] Students At Stanford Were Doing
+[00:04:52] Interesting Things With
+[00:04:54] Training Neural Networks
+[00:04:56] For Speech And Vision
+[00:04:57] Like That's Cool
+[00:05:00] We Should Train Really Big
+[00:05:01] Neurals As I Said And
+[00:05:02] So That Was Why Don't Try
+[00:05:08] Training Very
+[00:05:10] Large Neural Network So
+[00:05:12] We Built A
+[00:05:13] Software System That
+[00:05:14] Enabled Us To Express Neurals
+[00:05:15] Of Connectivity Of Those
+[00:05:17] Neuro Network S Do
+[00:05:18] Both Model Data
+[00:05:21] Parallel Training Across
+[00:05:23] Many Computers And
+[00:05:25] That Enable Us To Train
+[00:05:26] Neu R 100 Times
+[00:05:28] Larger Than What
+[00:05:29] We Could Find Anyone
+[00:05:32] Talking About And
+[00:05:34] We Had
+[00:05:37] A Way Of Doing This
+[00:05:39] Where We Have Actually
+[00:05:41] Many Asynchronous
+[00:0

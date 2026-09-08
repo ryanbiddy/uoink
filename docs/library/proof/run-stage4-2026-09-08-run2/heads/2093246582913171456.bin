@@ -1,0 +1,191 @@
+# etn. - FULL INTERVIEW: Head of Research at Silicon Data @stevehou on NVIDIA ...
+
+**Channel:** etn. (— subscribers)
+**Uploaded:** 2026-08-28 | **Duration:** 30:05 | **Views:** — | **Likes:** 10
+**URL:** https://x.com/etnshow/status/2093322710504067333
+**Uoinked:** 2026-08-28T07:52:31
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The video opens by re-introducing Steve, identified as 'Head of Research at Silicon Data,' establishing his credibility and expertise before diving into the discussion of major industry topics like NVIDIA's acquisition and AI trends.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+FULL INTERVIEW: Head of Research at Silicon Data @stevehou on NVIDIA Acquires Hugging Face, Compute as a Financial Analyst, Open Source Vs. Frontier Adoption, Anthropic's $30T TAM, OpenAI Jalapeño Chip, A100 Rental Rates as an Index:   0:23 NVIDIA x Hugging Face Acquisition  5:36 https://t.co/Ef2Cgay2wL
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Let's get Steve back on the show
+[00:00:02] He's back
+[00:00:03] Hey, let's go
+[00:00:05] So good to see you
+[00:00:05] sir. How are you?
+[00:00:07] Yeah
+[00:00:08] very well. Thank you for having me back
+[00:00:09] I feel like I'm at a F1 race
+[00:00:12] But enough room on your shirt
+[00:00:15] We just, these were dropped off
+[00:00:17] then we make it even better
+[00:00:19] Here we go
+[00:00:22] We got blessed by the
+[00:00:24] the Aston Martin F1 team
+[00:00:25] We have wings everywhere in this
+[00:00:26] They gave us a car
+[00:00:27] They even gave us this
+[00:00:30] this bag as well
+[00:00:31] which is, you know, quite nice
+[00:00:36] Very stylish. Not quite a Chanel or a Chanel or a mess bag
+[00:00:40] but. Not the Chanel bag
+[00:00:41] Steve, we got so much to jump in to
+[00:00:44] I mean, where do we even start?
+[00:00:46] maybe we could start with the NVIDIA
+[00:00:48] hugging face acquisition
+[00:00:50] what does this mean for open source AI?
+[00:00:53] it seems that NVIDIA are on a bit
+[00:00:55] of a spree. They paid 80x
+[00:00:58] yeah
+[00:00:58] just walk us through what this means for
+[00:00:59] the space I mean
+[00:01:01] this has been, I think
+[00:01:03] part of a trend that's been happening for a while
+[00:01:05] right? You know
+[00:01:06] it's no secret that NVIDIA and Jensen supports open source
+[00:01:10] and it's also quite clear why
+[00:01:12] right? This is part of that
+[00:01:14] you know, back and forth
+[00:01:16] You know, obviously, you know, we saw last last earnings
+[00:01:19] NVIDIA still has a very strong
+[00:01:21] you know, sort of lock on the entire ecosystem
+[00:01:23] the CUDA
+[00:01:24] system, you know, and they, they guide some, you know
+[00:01:27] insane year-on-year growth for next year
+[00:01:30] Meanwhile, they are obviously seeing
+[00:01:32] you know, all these attempts
+[00:01:33] And obviously, if you are, you know, a customer of NVIDIA
+[00:01:36] you are thinking of all the ways you
+[00:01:37] can improve your margin and
+[00:01:39] go towards some sort of ASIC chip
+[00:01:42] especially for inference, where you can improve margin
+[00:01:44] and that's happened with TPUs
+[00:01:46] that's happened with Tranium. You know
+[00:01:48] that's also obviously going to happen increasingly with
+[00:01:51] you know, the likes of TensorFlow and
+[00:01:53] and now
+[00:01:54] you know, edged, you know, and, and, of course, this, this chip
+[00:01:58] jalapeno from OpenAI So from NVIDIA's point of view
+[00:02:02] they want to then
+[00:02:04] you know, loosen that concentration of demand and create
+[00:02:08] you know, because at the end of the day
+[00:02:10] if you have open models
+[00:02:12] open models also consume compute
+[00:02:13] right? The same way closed models do
+[00:02:15] and
+[00:02:16] that creates the diversification of
+[00:02:18] sources of demand for compute
+[00:02:19] And also when you're coming in as an open model
+[00:02:23] you know, provider, you know
+[00:02:24] your the model architecture for a lot of these leading
+[00:02:28] you know
+[00:02:28] open models is such that
+[00:02:30] it probably benefits the type of interconnects that NV 72
+[00:02:34] like the type of
+[00:02:34] you know
+[00:02:35] connection efficiency that NVIDIA ecosystem has and
+[00:02:38] it has on your margin
+[00:02:40] So, whereas these large labs may
+[00:02:42] or even a hyperscale
+[00:02:44] the luxury of creating an ASIC
+[00:02:46] these, you know, other players will come in and likely adopt
+[00:02:49] you know, NVIDIA chips. So, this is a very sensible acquisition
+[00:02:53] you know, and at the end of the day
+[00:02:55] you know, it sounds like a big number
+[00:02:56] $12 billion is like
+[00:02:57] what, two weeks runway for Yeah
+[00:03:00] you're not wrong. It's nothing
+[00:03:02] And when I wait
+[00:03:06] for like, Jensen
+[00:03:07] Jensen goes to Taiwan for like
+[00:03:09] beef noodles and comes back with that
+[00:03:10] So it comes back with hugging face
+[00:03:11] Can we, can we ask just generally about the
+[00:03:13] oh no, sorry, specifically about, the, the, the multiple
+[00:03:17] you'll have more, more insight than, than I will about
+[00:03:21] like how do you get to that multiple?
+[00:03:23] obviously, the, the growth of Hugging Face's revenue has
+[00:03:27] you know, I think, not doubled, probably like it's grown from
+[00:03:32] well, a hundred and, hundred million to a hundred and fifty
+[00:03:34] I think, in like a few months
+[00:03:35] So like, obviously accelerating revenue very
+[00:03:38] very quickly
+[00:03:39] but what does that do to the multiple?
+[00:03:41] Like how have they landed on the number
+[00:03:42] 80?
+[00:03:44] I have no idea. I
+[00:03:45] I, I, if I were to guess
+[00:03:47] I suspect
+[00:03:48] that's not really the number that will come
+[00:03:49] crashing over anyway
+[00:03:51] you know, we just saw Stripe buying
+[00:03:53] you know, OpenRouter, right? And
+[00:03:56] that was whatever multiple that was
+[00:03:57] I think it comes down to a little bit like
+[00:03:59] it reminds me of like the Lakers being bought by
+[00:04:02] I think recently Kushner and
+[00:04:04] like they're, like, there's a number of these finite
+[00:04:07] unique, you know
+[00:04:08] assets that are already
+[00:04:09] built themselves to a position where they have
+[00:04:11] the scale
+[00:04:12] They are the lending place
+[00:04:13] so, you know
+[00:04:13] OpenRouter obviously is where a lot of the
+[00:04:15] models are going to be
+[00:04:16] you know, routed and hugging phase
+[00:04:17] Similarly, you know, sort of depository for open models and
+[00:04:21] you know, they are unique, I think
+[00:04:23] assets that have scale to the network X analysis
+[00:04:26] And
+[00:04:28] I think that is something I think truly
+[00:04:29] valuable. I don't know
+[00:04:30] how you can actually very easily price it
+[00:04:32] certainly not on like a multiple
+[00:04:34] basis. So if you see this as a
+[00:04:37] a very strategic piece of asset that will
+[00:04:39] more than anything help
+[00:04:40] the development of
+[00:04:42] open source models in the US Open models in the US
+[00:04:45] and if you are a strong believer such as Jensen is
+[00:04:48] I can see why he might want to place
+[00:04:50] you know, a premium on it
+[00:04:52] I couldn't tell you why 80 times sales
+[00:04:55] but
+[00:04:56] I suspect that's also not how they actually
+[00:04:58] thought about it
+[00:04:59] Yeah, yeah, maybe they
+[00:05:00] 80 times wasn't even like in the conversation
+[00:05:03] It was just the fact that
+[00:05:04] you know, the report is
+[00:05:05] Exactly
+[00:05:06] It depends a lot on your faith and
+[00:05:08] your belief about what the future growth of
+[00:05:11] open models will be. And obviously
+[00:05:13] there's a very diverging wide range of opinions
+[00:05:15] Some people think that open models are
+[00:05:18] kind of like dead end
+[00:05:18] that you're never going to work
+[00:05:19] and it's goin

@@ -1,0 +1,76 @@
+# May 21 — Google I/O 2026 Deep Dive, OpenAI Solves 80-Year Math Problem, Cursor Composer 2.5
+
+**Channel:** Alex Volkov from ThursdAI (42.8K subscribers)
+**Uploaded:** 2026-05-21 | **Duration:** 01:49:18 | **Views:** 168 | **Likes:** 3
+**URL:** https://www.youtube.com/watch?v=0FrcYhnHmLg
+**Uoinked:** 2026-05-27T11:04:29
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 33s for this video (duration 109m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes credibility by mentioning attendance at Google I/O for the third consecutive year, breakfast with Jeff Dean, and having a special guest from Google DeepMind (Logan Kilpatrick) join live. This immediately signals insider access and expertise.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Hey everyone, Alex here 👋
+
+Google I/O week dominated the AI world, and we went DEEP — I attended in person for the third year in a row, had breakfast with Jeff Dean, and Logan Kilpatrick from Google DeepMind joined us live to break down the launches. Plus, OpenAI quietly dropped one of the most important AI milestones ever: autonomously solving an 80-year-old open math problem.
+
+Joining me this week: Wolfram Ravenwolf, LDJ, Nisten Tahiraj, and special guest Logan Kilpatrick (MTS, Google DeepMind).
+
+0:00 Introduction & Co-host Banter
+0:45 Google I/O Overview & Gemini User Growth
+8:11 Antigravity & Agentic Coding at Google
+13:02 Google Spark & Agentic Agents
+16:52 OpenAI Codex Mobile & Agent Workflows
+20:29 TLDR — Weekly AI News Roundup
+38:33 Google Gemini Omni — Multimodal AI
+46:22 Jeff Dean on Omni Architecture
+49:24 Cursor Composer 2.5
+59:15 Anthropic & xAI / Colossus Infrastructure
+60:52 Data Center Water Usage Debate
+65:12 This Week's Buzz — Weights & Biases
+70:35 Logan Kilpatrick Interview — Google AI Studio
+75:19 ↳ Google's Product-AI Integration
+78:00 ↳ Antigravity as Google's Agent Harness
+80:52 ↳ Managed Agents & Interactions API
+86:50 ↳ Flash 3.5 — Built for the Agentic Era
+91:48 Gemini 3.5 Flash Discussion
+95:13 OpenAI Solves Erdős Math Problem
+104:22 Closing — Foothills of the Singularity
+
+
+🔗 Subscribe on Spotify: thursdai.news/spotify
+🔗 Apple: thursdai.news/apple
+🔗 Youtube: thursdai.news/yt
+
+And for the full show notes and links visit
+👉 thursdai.news/may-21 👈
+
+## Tags
+
+Descript
+
+---
+
+## Transcript
+
+### Chapter: Introduction & Co-host Banter (00:00:00)
+
+[00:00:27] Hello and welcome to Thursday eye for May 21st. My name is Alex Vulov. I'm an EI evangelist with Weights and Biases from Core. I'm super excited about this week. I'm super excited to tell about all about the Google IO week. Google heavy week to this week. I went to Google IO for the third time in a row. What is happening? Okay, there we go. Uh I went to Google IO for the third time in a row to to cover the Google IO conference. Shout out to the DeepMind team for the invitation. We also went live from there and I can't wait to tell you all about this. With me to cover the show is LDJ and Wolf from so hopefully we'll bring them back up. LDJ, how are you doing, sir?
+
+### Chapter: Google I/O Overview & Gemini User Growth (00:00:45)
+
+[00:01:08] sir? >> I'm doing great. >> Yeah. What what is the standout kind of thing that that you saw >> on from the Google experience? >> Gemini Omni is probably the the most interesting thing. Of course, 3.5 Flash is actually there's a lot of things to say on Gemini Flash, both good and bad, but definitely interesting. >> Yeah, we'll definitely have to chat about Gemini 3.5 Flash and I know the Wolf from already ran some tests. Wolfrram, welcome. How are you? >> My favorite this week is basically the Flash model, Flash 3.5, which is a big jump from 3.0. And with the release, Google
+[00:01:44] Google not just released a new model, it also means that everybody who is using Google search or is using Android and the Gemini assistant now has a much more capable AI at their fingertips. So that is millions billions of users and basically that means the whole intelligence that is available has basically the bar has been risen. So that was the big news for me. >> I think that my feelings are the same. So I was sitting with this after the Google IO release and I see some comments as well that Google ship misses etc. This was less about model capability on its own and more about like wolform saying a general uplift over all of Google surfaces in terms of how much intelligence everybody gets. I think that this is the point that I haven't seen talked about. Definitely very happy to chat with you Wolf. I know you're very heavy into the Google ecosystem. Google said that the Gemini app on its own has 900 million users. Do you guys see this? This is like rivaling Chad GPT where as far as I remember LJ, please correct me if I'm wrong, but as far as I remember, JPT kind of like plateaued around 900 900 million. We didn't see like a 1 billion mark cross from Chad GPT. So, it seems like it stopped growing and now they're switching kind of the direction towards Codex growth. Gemini has caught up in terms of just you know weekly users but in addition to this Gemini is everywhere. Gemini is sitting inside the AI overview and AI mode on search which is I don't know how many people use search but three plus three and a half billion users. Gemini is going to come to YouTube. Do you guys see this with ask YouTube feature where you could like chat and like go directly into YouTube. So that's three billion. They had this chart in the beginning where like how many apps of Google are being used by over one billion people and it's like seven or eight and then they said how many are used by three billion plus and there's like five apps you know Gmail drive YouTube and all of them and I think that this is like the biggest deal there most of these apps would use Gemini and all of these apps got a speed improvement significant speed improvement we're going to have to talk about the speed of of Gemini in addition to a a intelligence improvement. So, while I did see a lot of commentary about the price of Gemini 3.5 flash and the fact that it's like token hungry, I think that like I I think that just some of these folks on Reddit and X are missing the point a little bit. I will have to say this out loud. For some reason, and this is maybe my take on the X ecosystem and commentary about AI, the the latest algorithm just loves loves loves highlighting negative views and takes. So, I've seen just a lot of those just out of the blue with accounts that I don't follow with minimum engagement just like show up. And I started noticing a little bit of like, hey, I'm getting a little bit of a this feels different than before. So like all of them, the second you like dunk on something, you get you get views. So I think this has to do with with that as well. LJ, comments on anything that we that we just covered. Would love to hear from you what you're seeing. We want to give our folks here like an honest full review of of of releases. >> Yes. So when it comes to the the Gemini user growth, I am a bit skeptical of what they're reporting and how they're reporting it because they do have Google search, they have like you mentioned YouTube and Gemini increasingly being >> So when they say Gemini user girl specifically, they talk about the Gemini kind of interface for the model. So Gemini Google.com or the actual app on iOS and Android, not like everyone who uses the model across Google. This is like literally the Gemini app. >> Okay. And they're saying they have like million 900. Wow. Okay. Yeah, that's that's impressive. That's more than I thought it would be. Yeah. >> Well, I told my fiance about this. She's like, I I don't know any one person who uses Gemini. I I use Gemini all the time. I need something. I just like Gemini.
+[00:05:42] Gemini. >> And sorry, is that a monthly active users?
+[00:05:44] users? >> I think monthly. >> Monthly. Okay. Interesting. Because chatbt is their 900 million was reported as weekly active

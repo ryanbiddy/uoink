@@ -1,0 +1,233 @@
+# Movez - Creator of Claude Code:      “80% of our engineers are using self‑imp...
+
+**Channel:** Movez (— subscribers)
+**Uploaded:** 2026-07-29 | **Duration:** 34:27 | **Views:** — | **Likes:** 358
+**URL:** https://x.com/0xMovez/status/2082499439038537753
+**Uoinked:** 2026-07-30T07:43:38
+**Topic:** Social Media Research
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook opens by establishing the creator's credibility through a specific statistic ('80% of our engineers are using self‑improving loops') and positioning them as an insider who understands where AI development is headed. This immediately signals expertise and insider knowledge about an emerging trend.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Creator of Claude Code:      “80% of our engineers are using self‑improving loops. Now everyone is building agentic Graphs"       in 3-6 months, we’ll all be building graphs to orchestrate self‑improving agents. No more prompting.”  In a 40-minute podcast, Boris Cherny reveals https://t.co/XB87UGp87s
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] And I remember my first time,
+[00:00:01] you know using some of these products and it was just amazing.
+[00:00:05] We felt that very soon the models are going to get
+[00:00:09] To a point where they're gonna be much more capable than us
+[00:00:12] So for coding
+[00:00:13] It's not A matter Of completing
+[00:00:14] A single line The model is
+[00:00:16] Going Be able To write An entire Function
+[00:00:17] An Entire File Entire
+[00:00:19] Feature An Entire Project
+[00:00:21] Now i think by
+[00:00:22] The end Of this Year They're Gonna Be Able
+[00:00:23] Build Entire Businesses
+[00:00:24] And so you know we kind of saw this uh
+[00:00:28] You Know that We call
+[00:00:29] This the Exponential and This is just
+[00:00:30] The way That You Know The Models
+[00:00:31] Are Developing There's These
+[00:00:33] Scaling Laws That Describe
+[00:00:34] The Way That Model Intelligence
+[00:00:35] Goes Up Over Time Somehow
+[00:00:38] The laws are Continuing And in
+[00:00:40] Fact It's Accelerating And
+[00:00:41] You Know it's An Empirical
+[00:00:43] Kind Of Observation
+[00:00:44] It's Not Obvious
+[00:00:45] Why It Keeps Happening But
+[00:00:46] It Seems To Keep Happen And So
+[00:00:48] We Wanted Something
+[00:01:00] That Was Purely Agentic
+[00:01:01] And Honestly Quad
+[00:01:02] Code Didn't Work
+[00:01:03] Very Well For
+[00:01:05] You Know The First Six Months
+[00:01:06] It Actually Took
+[00:01:07] Time To Catch
+[00:01:09] Up and it Wasn't
+[00:01:10] Until I Would Say Opus
+[00:01:12] Four In May Of
+[00:01:14] 2025 Where
+[00:01:15] It Really Started
+[00:01:16] to work And You Know
+[00:01:18] Like Since Then The Growth For
+[00:01:20] The Product Has
+[00:01:21] Been Exponential Also
+[00:01:23] It Was Not At First But
+[00:01:24] That's When It Became Exponential
+[00:01:25] And We've Been
+[00:01:28] Finding More And More Ways
+[00:01:29] To Use This As The
+[00:01:30] Model Gets More Sophisticated
+[00:01:32] We Figure Out More Ways To
+[00:01:33] Unlock In The Product We
+[00:01:34] Launch Quad Tag and
+[00:01:36] this Is Kind Of The Latest
+[00:01:37] Iteration Long Running
+[00:01:39] Synchronous Agent
+[00:01:48] We'll Just Keep Happening We're Going
+[00:01:49] To Keep Disrupting
+[00:01:50] Ourselves So Are Gonna Keep
+[00:01:51] Figuring Out What Is The
+[00:01:52] Next Form Factor You
+[00:01:54] Talk About Predicting
+[00:01:55] This Line Of
+[00:01:58] Progress But To Me
+[00:01:59] How
+[00:02:00] Did Think About
+[00:02:03] Architect Really Multi
+[00:02:06] Agents And Running
+[00:02:08] Multiple Agent
+[00:02:10] Can Have Us Rethink
+[00:02:13] How We Implement
+[00:02:14] Workflows It Was
+[00:02:17] Shocking To Me Is We
+[00:02:19] Actually Have The Opportunity
+[00:02:20] To Re-Architect Re
+[00:02:21] Engineer How
+[00:02:22] All Of Us Are Getting
+[00:02:24] Our Work Done And I
+[00:02:26] Have To Wonder Did
+[00:02:28] This Was
+[00:02:29] That Architected
+[00:02:31] Into Your Development
+[00:02:33] Or Is That Sort Just A
+[00:02:34] Natural Outcome Of
+[00:02:36] The Capabilities That
+[00:02:37] You Were Developing I
+[00:02:38] Think It's Little Bit Both If
+[00:02:40] I Think Back A Couple Years
+[00:02:42] How Do How Did Use Models
+[00:02:43] We Know Like They Did
+[00:02:45] This Like One Line Autoconflict
+[00:02:46] And We
+[00:02:47] Had Workflows Always
+[00:02:48] What We Called Workflow
+[00:02:49] But It Was Essentially
+[00:02:51] These Deterministic Systems
+[00:02:52] Where A Step At Time
+[00:02:53] Might Call Out To An
+[00:02:54] LLM To Do
+[00:02:55] Some Bit Of Computation Fundamentally
+[00:02:57] The Workflow Is
+[00:02:58] Determine Stick I
+[00:02:59] Think What's Changed
+[00:03:00] As The Model Got More
+[00:03:01] Intelligent Is We
+[00:03:03] Realized Actually It'S Much
+[00:03:04] Better To Use The Model As
+[00:03:05] The Coordinator For This
+[00:03:06] Workflow And So What
+[00:03:08] You Do Is The Model Drives
+[00:03:10] An U Give
+[00:03:11] It Tools To
+[00:03:12] Pull In Context You
+[00:03:14] Get A Tool St Interact
+[00:03:15] With Outside World You Ask
+[00:03:17] It To Something Then Let
+[00:03:18] It Figure Out How To Orchestrate
+[00:03:19] These You No Longer Tell
+[00:03:21] It Okay You Step One
+[00:03:22] Than Step Two If Not
+[00:03:23] Too Then You Know This
+[00:03:24] Else This It's
+[00:03:27] Just Not How Think As
+[00:03:41] The Model Got More Sophisticated
+[00:03:50] We Realized Okay Maybe Actually
+[00:03:51] This Isn't It And We Moved
+[00:03:53] Away From That A Little Bit And
+[00:03:54] You Know Like For Example
+[00:03:55] We Have This Like File Called
+[00:03:56] Cloud.md It's
+[00:03:58] Loaded For Every Session Anything
+[00:03:59] More And More What We're Seeing
+[00:04:01] With Customers Is They
+[00:04:02] Moving Moving To Skills And
+[00:04:04] They Are Moving More Tools And More
+[00:04:06] To MCPs Because
+[00:04:08] This Way The Model Has
+[00:04:09] A Little Bit More Control Over
+[00:04:10] How To Load The Sun Well
+[00:04:12] I Have Ask I
+[00:04:13] Mean You Guys Across
+[00:04:16] Anthropic Are Using
+[00:04:17] Cloud Every Day I
+[00:04:18] Mean So Your Customer
+[00:04:19] Number One Like
+[00:04:20] Before The Rest Of Us
+[00:04:22] See It You Know
+[00:04:23] You're Making Sure
+[00:04:25] That Accomplishes
+[00:04:26] What You Need Tell Us
+[00:04:27] About Your Typical
+[00:04:30] Day Is Claude
+[00:04:34] An Extension
+[00:04:35] Of Your Body
+[00:04:36] Is Your As
+[00:04:37] You're Creating Work Output
+[00:04:39] Yeah This
+[00:04:40] Is Sort Of The Weird
+[00:04:41] Thing About How Anthropic Works
+[00:04:42] At Anthropic Claude
+[00:04:43] Is At Center Of Everything
+[00:04:45] That We Do It's Every
+[00:04:47] Single Business Process
+[00:04:48] Every Single Bit
+[00:04:49] Of Everything Everyone Does
+[00:04:50] Throughout A Day Quad Just At
+[00:04:51] The Centre Of It A
+[00:04:53] Way I Sometimes Describe It
+[00:04:54] Is Let'S Say You'Re New
+[00:04:56] Hire And Onboarding
+[00:04:57] At Anthropik Typically If
+[00:05:06] You Ask
+[00:05:07] A Co-Worker At
+[00:05:08] Anthropik You
+[00:05:10] Ask Quad If
+[00:05:11] You Have The Question Like Where Is
+[00:05:12] Code Base And How Do I Get
+[00:05:13] Access To It Again Don't
+[00:05:15] Go Wiki But Go
+[00:05:16] To Quad And Ask Quad If
+[00:05:18] Your Questions Are Like Took
+[00:05:19] Trip Or Expense
+[00:05:20] Report How Do File That Expence
+[00:05:22] Report In This Is
+[00:05:23] How It Begins But
+[00:05:25] Then As You Kind Of
+[00:05:26] Get Deep Into Work What
+[00:05:28] Remains At The Center
+[00:05:29] Of Everything And
+[00:05:30] So You Know Quad
+[00:05:31] Writes The Code It
+[00:05:32] Does The Coder
+[00:05:33] View It Does The Security
+[00:05:35] Review It Brainstorms
+[00:05:37] Comes Up With
+[00:05:39] New Product Ideas
+[00:05:40] It Aggregates
+[00:05:41] User Feedback In Triage
+[00:05:42] Incidents Every
+[00:05:44] Single Part Of Engineering St

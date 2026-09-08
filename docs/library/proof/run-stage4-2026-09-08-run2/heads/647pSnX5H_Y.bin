@@ -1,0 +1,135 @@
+# You're Wasting 40% Of Your AI Time On Something Fixable
+
+**Channel:** AI News & Strategy Daily | Nate B Jones (286.0K subscribers)
+**Uploaded:** 2026-05-09 | **Duration:** 27:13 | **Views:** 47,308 | **Likes:** 1,789
+**URL:** https://www.youtube.com/watch?v=647pSnX5H_Y
+**Yoinked:** 2026-05-11T12:40:03
+**Topic:** AI and ML
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Full article w/ the Ultimate Codex Plugin Guide: https://natesnewsletter.substack.com/p/codex-plugins-bottleneck-moved?r=1z4sm5&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true
+___________________
+What's really happening with codex plugins, skills, prompts, and MCPs as agents start doing real work? The common story is that plugins are just app store add-ons — but the reality is more complicated.
+
+In this video, I share the inside scoop on the agentic scaffolding that actually makes AI useful:
+ • Why prompts work for one-offs but break under repeated workflows
+ • How skills encode your house style across any LLM you use
+ • What plugins package up and why they're bigger than MCPs
+ • Where hooks, scripts, and connectors fit inside the larger system
+
+For operators and builders, the leverage in 2026 lives in knowing which part of your workflow belongs in a prompt, a skill, a plugin, or an MCP — and packaging the right ones so your team can actually reuse them.
+
+Chapters
+0:00 Why most people get stuck on the agent scaffolding layer
+2:34 The mech suit metaphor — what actually surrounds an LLM
+5:39 The map: prompts, skills, plugins, MCPs, hooks, scripts
+9:42 Why now — GPT 5.5 and messy multi-part work
+11:38 Prompts: when one-offs are the right call
+13:30 Skills: teaching a tool your house style
+17:22 Plugins: packaging a whole workflow your team can install
+21:12 MCPs and app connectors: live access to where work lives
+23:06 Hooks and scripts: the deterministic parts you don't trust the model with
+25:27 Why the app store analogy undersells what plugins really are
+
+Subscribe for daily AI strategy and news.
+For deeper playbooks and analysis: https://natesnewsletter.substack.com/
+
+Listen to this video as a podcast.
+ • Spotify: https://open.spotify.com/show/0gkFdjd1wptEKJKLu9LbZ4
+ • Apple Podcasts: https://podcasts.apple.com/us/podcast/ai-news-strategy-daily-with-nate-b-jones/id1877109372
+
+## Tags
+
+nate b jones, nate jones, artificial intelligence, AI, AI news, AI tools, machine learning, generative AI, ChatGPT, Claude, AI prompts, AI strategy, tech news, codex plugins, AI agents, MCP servers, agentic workflows, prompt engineering, AI for non-engineers, AI workflow automation, codex, plugins
+
+---
+
+## Transcript
+
+### Chapter: Why most people get stuck on the agent scaffolding layer (00:00:00)
+
+[00:00:01] What do you do when you get underneath
+[00:00:01] What do you do when you get underneath an agent's skin and understand how it
+[00:00:03] an agent's skin and understand how it
+[00:00:03] an agent's skin and understand how it works? It's not just an LLM. I talk a
+[00:00:05] works? It's not just an LLM. I talk a
+[00:00:05] works? It's not just an LLM. I talk a lot about these other components and it
+[00:00:06] lot about these other components and it
+[00:00:06] lot about these other components and it feels really abstract. I talk about
+[00:00:08] feels really abstract. I talk about
+[00:00:08] feels really abstract. I talk about prompts and skills and MCPs and
+[00:00:10] prompts and skills and MCPs and
+[00:00:10] prompts and skills and MCPs and connectors and hooks and scripts and all
+[00:00:12] connectors and hooks and scripts and all
+[00:00:12] connectors and hooks and scripts and all of this stuff. And if you're deep in the
+[00:00:13] of this stuff. And if you're deep in the
+[00:00:13] of this stuff. And if you're deep in the engineering world, these are
+[00:00:15] engineering world, these are
+[00:00:15] engineering world, these are shortorthhands. These are words that you
+[00:00:16] shortorthhands. These are words that you
+[00:00:16] shortorthhands. These are words that you understand that it's easy to make sense
+[00:00:18] understand that it's easy to make sense
+[00:00:18] understand that it's easy to make sense of. But for most people, it feels like a
+[00:00:21] of. But for most people, it feels like a
+[00:00:21] of. But for most people, it feels like a foggy middle layer between the model is
+[00:00:23] foggy middle layer between the model is
+[00:00:23] foggy middle layer between the model is smart and the work got done. And how do
+[00:00:25] smart and the work got done. And how do
+[00:00:25] smart and the work got done. And how do you set up your model to do that is one
+[00:00:27] you set up your model to do that is one
+[00:00:28] you set up your model to do that is one of the most common questions I get. Not
+[00:00:30] of the most common questions I get. Not
+[00:00:30] of the most common questions I get. Not because codeex in particular can connect
+[00:00:32] because codeex in particular can connect
+[00:00:32] because codeex in particular can connect to lots of apps, although that is
+[00:00:34] to lots of apps, although that is
+[00:00:34] to lots of apps, although that is certainly a useful thing. Claude does
+[00:00:36] certainly a useful thing. Claude does
+[00:00:36] certainly a useful thing. Claude does that too. Not because everybody suddenly
+[00:00:38] that too. Not because everybody suddenly
+[00:00:38] that too. Not because everybody suddenly needs to become a plug-in developer,
+[00:00:40] needs to become a plug-in developer,
+[00:00:40] needs to become a plug-in developer, although you can if you want. It's never
+[00:00:41] although you can if you want. It's never
+[00:00:42] although you can if you want. It's never been easier. And not even because the
+[00:00:43] been easier. And not even because the
+[00:00:43] been easier. And not even because the plug-in directory is the most exciting
+[00:00:46] plug-in directory is the most exciting
+[00:00:46] plug-in directory is the most exciting part of codeex. The real reason why you
+[00:00:49] part of codeex. The real reason why you
+[00:00:49] part of codeex. The real reason why you should care about this is because you
+[00:00:52] should care about this is because you
+[00:00:52] should care about this is because you need to understand how the secret sauce
+[00:00:56] need to understand how the secret sauce
+[00:00:56] need to understand how the secret sauce for an AI agent works. What is the
+[00:00:58] for an AI agent works. What is the
+[00:00:58] for an AI agent works. What is the scaffolding that you put an AI agent
+[00:01:01] scaffolding that you put an AI agent
+[00:01:01] scaffolding that you put an AI agent inside of? So, it actually works. It's
+[00:01:02] inside of? So, it actually works. It's
+[00:01:02] inside of? So, it actually works. It's like Darth Vader has a mech suit, right?
+[00:01:05] like Darth Vader has a mech suit, right?
+[00:01:05] like Darth Vader has a mech suit, right? And that's how Darth Vader works. Or
+[00:01:06] And that's how Darth Vader works. Or
+[00:01:06] And that's how Darth Vader works. Or Transformers have these huge metal suits
+[00:01:08] Transformers have these huge metal suits
+[00:01:08] Transformers have these huge metal suits and that's how they get the job done.
+[00:01:10] and that's how they get the job done.
+[00:01:10] and that's how they get the job done. This is how LLMs work. They have these
+[00:01:12] This is how LLMs work. They have these
+[00:01:12] This is how LLMs work. They have these suits around them that help them get
+[00:01:13] suits around them that help them get
+[00:01:13] suits around them that help them get work done. And codec plugins are a
+[00:01:16] work done. And codec plugins are a
+[00:01:16] work done. And codec plugins are a really handy way to understand that. And
+[00:01:17] really handy way to understand that. And
+[00:01:17] really handy way to understand that. And so the story is not that 5.5 GPT 5.5
+[00:01:21] so the story is not that 5.5 GPT 5.5
+[00:01:21] so the story is not that 5.5 GPT 5.

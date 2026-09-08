@@ -1,0 +1,236 @@
+# Mahax - Ex-Google Jeff Dean just dropped a 1-hour lecture on full AI engineer...
+
+**Channel:** Mahax (— subscribers)
+**Uploaded:** 2026-08-15 | **Duration:** 01:15:23 | **Views:** — | **Likes:** 348
+**URL:** https://x.com/Mahaximus_/status/2088693280674291785
+**Uoinked:** 2026-08-16T07:35:47
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by leading with 'Ex-Google Jeff Dean' and emphasizes his 27 years of AI expertise at Google, positioning him as a recognized authority before presenting the lecture content.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Ex-Google Jeff Dean just dropped a 1-hour lecture on full AI engineering: from LLMs to Graphs  1:45 - LLM from scratch 17:22 - How to use AI models 30:03 - Prompt engineering 52:35 - One human coordinating 100 agents  27 years of building AI at Google, compressed into one hour. https://t.co/HBcyP7dkbK
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] So I'm delighted to be here. And,
+[00:00:02] you know what's happening in AI?
+[00:00:05] I don't if you've noticed but it is
+[00:00:07] a thing these days and we have many people at
+[00:00:10] Google working on this area
+[00:00:12] so presenting the work of not just my
+[00:00:14] works but many other people at Google
+[00:00:17] and elsewhere A few observations which may
+[00:00:22] come as no surprise for you
+[00:00:25] Machine learning and AI have really changed our expectations
+[00:00:28] of what is possible with computers.
+[00:00:30] You know if you think back 10, 15 years ago
+[00:00:32] you know computers couldn't see very well
+[00:00:34] they couldnt' understand speech all that
+[00:00:36] Well They definitely couldn't
+[00:00:38] Understand language very And now we
+[00:00:40] Have tools That enable computers to interact
+[00:00:42] With people in a much more natural
+[00:00:44] Style because They
+[00:00:46] Understand the modalities
+[00:00:47] The People Understand Want
+[00:00:50] To Communicate Along
+[00:00:52] The way increasing scale
+[00:00:55] Of Larger
+[00:00:56] Amount To compute Larger amounts of data and more
+[00:00:59] larger scale models
+[00:01:01] Have delivered better results
+[00:01:03] Nearly continuously
+[00:01:04] For the last sort
+[00:01:06] Of 13 or 14 years
+[00:01:07] This has been The trend
+[00:01:09] And seems to be holding up even
+[00:01:11] Even today Um
+[00:01:12] In addition
+[00:01:14] To Scale Algorithmic
+[00:01:16] And Sort Of model
+[00:01:17] Architecture Improvements
+[00:01:18] have also provided massive improvements
+[00:01:20] As well I mean these two things multiply together
+[00:01:23] Right if you can Have much
+[00:01:25] Larger Scale An
+[00:01:26] And much better model architectures that are able to learn more
+[00:01:30] You know per floating point operation
+[00:01:32] Those things together mean instead of you
+[00:01:35] Know 20x from scale
+[00:01:37] You have 20 x
+[00:01:39] From Scale and 50
+[00:01:40] X From algorithms Then
+[00:01:42] You end up with a thousand Next
+[00:01:43] Better thing than You had
+[00:01:44] Not That long
+[00:01:45] Ago Also the kinds
+[00:01:47] Of computations we want
+[00:01:48] To run In The hardware in which
+[00:01:50] We Want Run Them Are
+[00:01:51] Changing dramatically Four observations
+[00:01:54] Which Maybe Not
+[00:01:55] Surprising First
+[00:01:58] Neural Nets And Gradient
+[00:01:59] Descent These Are Seem
+[00:02:01] To Be Key Building Blocks
+[00:02:02] For How Do You Actually Build
+[00:02:04] Truly Intelligent
+[00:02:05] Computer Systems Um
+[00:02:07] and They're Not New Ideas
+[00:02:08] There Things That Have Been Around
+[00:02:09] A long Time they Were Invented
+[00:02:11] in The 70s
+[00:02:12] 80's um And
+[00:02:13] there Was actually a lot Of Excitement
+[00:02:15] About Them In the Late
+[00:02:16] Eighties Early Nineties
+[00:02:17] I first Ran Across
+[00:02:18] them you know
+[00:02:20] Intro Lecture Where I
+[00:02:21] Was Introduced To Neural Networks
+[00:02:22] Roughly Like This you
+[00:02:24] know We Have
+[00:02:25] this Kind Of Nice Very
+[00:02:27] Abstracted
+[00:02:28] Away Version of
+[00:02:30] How we Think Real Life
+[00:02:31] neurons Behave
+[00:02:32] where You have A Bunch
+[00:02:33] Input Do Some
+[00:02:35] Processing and Decide
+[00:02:36] Are You Going to Fire
+[00:02:37] Or Not And What
+[00:02:38] Strength You're Gonna Fire And
+[00:02:41] You Have Connections
+[00:02:42] Of These Things Um
+[00:02:44] Then Back Propagation
+[00:02:46] Is The Weights
+[00:02:51] On the Edges Of All These
+[00:02:53] Connections In
+[00:02:54] Order To Make Sort
+[00:02:56] of The Model
+[00:02:58] Behave More in
+[00:02:59] The Way That You Want It to
+[00:03:00] Behave Where you Give it
+[00:03:02] A Bunch Of Examples And Back
+[00:03:04] Propagation Enables You
+[00:03:05] To make Learn The
+[00:03:08] Behavior You Want So I
+[00:03:11] Saw This As An
+[00:03:12] Undergrad In 1990 and
+[00:03:14] i Got Super Excited
+[00:03:15] And I Said Oh
+[00:03:16] Wow that Seems Like
+[00:03:17] A Really Good Abstraction
+[00:03:18] It
+[00:03:19] Feels Like Its Trainable
+[00:03:21] Thing And Can Learn
+[00:03:22] Almost Anything At
+[00:03:24] That Time We Were
+[00:03:25] Not Using Very Large
+[00:03:26] Neural
+[00:03:27] Networks Because Had
+[00:03:28] Pathetically Wimpy Computers
+[00:03:30] But
+[00:03:31] I
+[00:03:32] Said Oh Maybe
+[00:03:33] If We Use
+[00:03:34] The Parallel
+[00:03:36] Computer In The Department
+[00:03:37] Could Train
+[00:03:38] Much Biger Neur Network
+[00:03:39] So That Would Be Great Maybe
+[00:03:40] Just Need To Use 32
+[00:03:41] Computers Instead Of
+[00:03:42] One Then
+[00:03:43] We Could Train Really Impressive
+[00:03:45] Neural Nets That
+[00:03:46] Would Be Nice So
+[00:03:47] I Didn't Ask The
+[00:03:49] Professor Who Introduced
+[00:03:50] The Neur Networks Topic
+[00:03:51] In One Of Classes I Was
+[00:03:52] Taking If I Could Do A Senior
+[00:03:54] Thesis With Him And He
+[00:03:57] Said Sure So I Played
+[00:03:59] Around With Two Different Approaches
+[00:04:00] For Training Your Own Network
+[00:04:02] Parallel This Is
+[00:04:04] What You Now Call
+[00:04:06] Model Paralle On Data
+[00:04:07] Parallel Training But
+[00:04:09] I Called Them Pattern
+[00:04:10] Partition And Pipeline
+[00:04:12] Approach These
+[00:04:15] Speed Up Curves
+[00:04:17] Are Interesting But
+[00:04:18] They Taper Off Because
+[00:04:19] I Did The Stupid Thing
+[00:04:20] Didn't Make The Model
+[00:04:22] Bigger As I
+[00:04:23] Increase The Number Of Browsers
+[00:04:24] Just Made It Much
+[00:04:25] Harder To Parallelize
+[00:04:27] With A
+[00:04:28] Fixed Size Model
+[00:04:30] But I Sort
+[00:04:31] Of Filed That Away Oh That's
+[00:04:32] An Interesting Abstraction
+[00:04:34] And Seems Like
+[00:04:35] Something I Should Pay
+[00:04:36] Attention To But Then
+[00:04:37] I Ignored It For The
+[00:04:39] Next 25 Years
+[00:04:43] Okay So Now
+[00:04:45] I'm Going Give You A Whirlwind
+[00:04:47] Tour Of About
+[00:04:48] Bunch Of Advances
+[00:04:50] In The Field With
+[00:04:51] ML That Have Happened Last 15
+[00:04:52] Years That Are Really All
+[00:04:56] Combined Together To
+[00:04:57] Produce Today's
+[00:04:58] Most Sophisticated
+[00:04:59] Models How Did These
+[00:05:02] Todays Models Come
+[00:05:03] Be Well It Was Through
+[00:05:05] Advancements Like The Ones
+[00:05:06] I Am Described Here
+[00:05:09] The Origin
+[00:05:10] Of My Getting
+[00:05:12] Back To Working On
+[00:05:13] Neural Nets At Google
+[00:05:14] Was I Bumped
+[00:05:15] Into Andrew Ng Who
+[00:05:17] Is A Stanford Faculty Member
+[00:05:18] And In One Of Our
+[00:05:20] Micro Kitchen Then I Said Oh
+[00:05:21] What Are You Doing Here He's
+[00:05:23] Like I'm Not Sure Yet Because
+[00:05:25] Just Started A Week Ago
+[00:05:27] But My Students At
+[00:05:29] Standford Or Do
+[00:05:30] Interesting Things With
+[00:05:32] Training Neuro Networks
+[00:05:34] For Speech And
+[00:05:36] Vision I'm
+[00:05:37] Like Oh That's Cool We
+[

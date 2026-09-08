@@ -1,0 +1,234 @@
+# Lunar - OpenAI pays FDE engineers up to $785K/year.  In this 40-minute talk, ...
+
+**Channel:** Lunar (— subscribers)
+**Uploaded:** 2026-07-31 | **Duration:** 38:55 | **Views:** — | **Likes:** 85
+**URL:** https://x.com/LunarResearcher/status/2083317178711921133
+**Uoinked:** 2026-08-01T07:52:14
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by leading with a specific, impressive credential (OpenAI pays FDE engineers up to $785K/year) and positioning the guest as an authority figure (OpenAI's Head of FDE). This immediately signals expertise and insider knowledge to the viewer.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+OpenAI pays FDE engineers up to $785K/year.  In this 40-minute talk, OpenAI's Head of FDE revealed how they deploy AI inside real companies:  02:46 - Why Morgan Stanley became their first FDE case 09:05 - Build with eval-driven development 16:01 - Watch an LLM reroute a supply https://t.co/MwH7jzvnxZ
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Today I'm joined by Colin Jarvis,
+[00:00:01] Head of Forward Deployed Engineering at OpenAI.
+[00:00:04] Colin thanks for doing it.
+[00:00:05] Yeah, thanks for having me. I am so
+[00:00:06] thrilled to be doing this with you
+[00:00:07] You are actually somebody...
+[00:00:09] ...I was talking a little bit
+[00:00:10] but you were joining in November 2022
+[00:00:12] the month of Chad GPT
+[00:00:13] Back In The Day Back In The day
+[00:00:15] I think Open AI was like less than 200 people back in
+[00:00:17] back in that Yes something like that
+[00:00:18] yeah I think I was one or two
+[00:00:20] three people in Europe Wow
+[00:00:21] when we started wow Well
+[00:00:23] I'm so thrilled To do This
+[00:00:25] For A couple Of reasons
+[00:00:26] One I started my own career as a Forward Deployed Engineer
+[00:00:28] at Palantir about A decade ago
+[00:00:30] Super cool And second
+[00:00:31] you know there's this whole narrative out
+[00:00:33] There About AI being
+[00:00:34] A bubble The MIT study
+[00:00:35] That 95%
+[00:00:37] Of Enterprise deployments don't work
+[00:00:38] You are the 5 percent
+[00:00:40] Making them Work that is
+[00:00:42] Certainly what we say in ours
+[00:00:43] Yeah, yeah Definitely Yeah
+[00:00:45] We've been working with enterprises for awhile
+[00:00:47] So so Maybe
+[00:00:48] maybe it starts from From start
+[00:00:49] You Know The origin story
+[00:00:51] of forward deployed engineering
+[00:00:52] At OpenAI How did You guys
+[00:00:53] Come up With This What was
+[00:00:54] The motivation Take us
+[00:00:56] Back Totally Yeah
+[00:00:57] Definitely And like When it started in 2002
+[00:00:59] I think There was Like
+[00:01:00] It Was Like You know Chat dbt
+[00:01:01] Came out there Was tons Of hype
+[00:01:02] and people Were really Excited
+[00:01:03] But It Was Also
+[00:01:04] Kind of Hard
+[00:01:05] To get Value From the Models
+[00:01:07] At that Point People Had Copywriting
+[00:01:08] As The Big Use Case
+[00:01:09] I Just Like You Could Write
+[00:01:11] Papers With It
+[00:01:12] And i
+[00:01:13] Think What We
+[00:01:15] Are Exciting About Forward
+[00:01:16] Deployed Engineering Is
+[00:01:17] Over Those Couple
+[00:01:18] Of Years Following Chat dbt We
+[00:01:20] Were Able To Get Customers
+[00:01:21] In Production But It
+[00:01:22] Was Pretty Inconsistent And
+[00:01:23] Took A Ton Every Time
+[00:01:25] The Thing That
+[00:01:26] Was Consistently
+[00:01:27] Successful
+[00:01:28] Getting Those Folks To Production Is
+[00:01:30] Just Sort Of Embedding
+[00:01:31] With Them Understanding
+[00:01:32] Their Domain
+[00:01:33] Really Deeply Sitting
+[00:01:34] With Users On
+[00:01:35] Ground And Getting Them To
+[00:01:36] Properly Adopt Technology
+[00:01:38] I Think
+[00:01:39] Our Previous
+[00:01:41] Hands-Off Technical
+[00:01:42] Support Model Was
+[00:01:44] Not A So That
+[00:01:49] We Could Get These
+[00:01:51] Enterprises To Production Makes
+[00:01:53] A Ton Of Sense And
+[00:01:54] Maybe Double
+[00:01:55] Clicking What Does Forward
+[00:01:57] Deployed Engineering Actually
+[00:01:58] Do It Would Help If
+[00:01:59] I Kind Ground
+[00:02:00] This In An Example
+[00:02:02] One Of The Customer
+[00:02:04] Examples Led Us
+[00:02:05] To Want To
+[00:02:06] Set Up Before Our Practice
+[00:02:07] Was Morgan
+[00:02:09] Stanley Who Were First
+[00:02:11] Enterprise
+[00:02:12] Customer With GPT-4
+[00:02:14] They Use
+[00:02:16] Case For Them Is That They Wanted
+[00:02:18] To Take Their Wealth
+[00:02:19] Management Practice And
+[00:02:20] This Is Kind Of A Consistent
+[00:02:21] Feature That People Who
+[00:02:23] Are Successful Deploying
+[00:02:24] Gen AI Don't Do
+[00:02:25] An Edge Case
+[00:02:26] Over The Side Of
+[00:02:28] The Company Pick Something
+[00:02:29] With High Stakes
+[00:02:30] In Morgan Stanley Wealt
+[00:02:31] Management One Of
+[00:02:33] Big Parts
+[00:02:34] Business What
+[00:02:35] Were Trying To
+[00:02:36] Put Their
+[00:02:37] Research In
+[00:02:39] All Of The
+[00:02:40] Weal Advisors So It
+[00:02:42] Would Have More Easy
+[00:02:45] Access And Be Able
+[00:02:46] To Give More Actionable
+[00:02:47] Insights So What
+[00:02:49] We Did Was The
+[00:02:51] Problems Were
+[00:02:52] Twofold At
+[00:02:53] That Stage RAG
+[00:02:54] Wasn't A Thing Yet It
+[00:02:55] Was Kind Of Like We Have Research
+[00:02:56] Reports In
+[00:02:57] The Hands
+[00:02:58] Of The Wealth Advisors And
+[00:02:59] Trust Them
+[00:03:01] So What
+[00:03:02] We Did Is We Embedded With
+[00:03:03] Morgan Stanley First Of
+[00:03:05] All Retrieval Tuning Where
+[00:03:07] We Could Trust
+[00:03:09] Output Of The Research
+[00:03:10] Reports And Eventually
+[00:03:16] Got Them To The Point Where
+[00:03:17] They Kind Of Trusted Insights
+[00:03:19] And Started Using Them To
+[00:03:20] Give Their Customers I
+[00:03:21] Think That Is A Key
+[00:03:23] Thing With Them Like The
+[00:03:24] Main Technical Hurdle Was
+[00:03:25] Probably Solved Within 6-8
+[00:03:27] Weeks But It Took
+[00:03:28] 4 Months Of Doing
+[00:03:30] Pilots Collecting
+[00:03:31] Eval And Iterating
+[00:03:33] To Get To The Point When Advisors
+[00:03:34] Actually Trusted In Anger
+[00:03:38] But The Outcome
+[00:03:39] Was Amount Of Usage
+[00:03:46] In Their Research Reports So
+[00:03:47] Like Wow Six
+[00:03:48] Months To
+[00:03:49] Effectively Build Trust
+[00:03:51] Yeah But The
+[00:03:52] Original Product Was Working Within
+[00:03:53] A Couple Weeks As You Said Yeah
+[00:03:54] I Would Say Probably
+[00:03:55] Within 6-8
+[00:03:56] Weeks We Had Out We Have Some
+[00:03:57] Pipeline And Guard Rails
+[00:03:59] We Tuned The Search
+[00:04:02] Enough That Getting Decent
+[00:04:03] Results It's Almost How
+[00:04:05] Good Is Good Enough
+[00:04:07] For Production With These Enterprises
+[00:04:08] And Especially Morgan Stanley
+[00:04:09] Working In A Regulated Environment
+[00:04:10] Like There's Very High
+[00:04:12] I Guess Need
+[00:04:13] For Accuracy But
+[00:04:14] Also This Is The Probabilistic
+[00:04:16] Technology Let You
+[00:04:17] Do Just Have To Build The
+[00:04:18] Right Kind Of Framework Then
+[00:04:19] Get Users To
+[00:04:21] Trust It Give
+[00:04:22] Them Tools To Verify Where
+[00:04:23] They Don't So Yeah Yeah
+[00:04:24] So That Was 2023 Yep
+[00:04:26] Fast Forward Today Two
+[00:04:27] And Half Three Years In
+[00:04:28] Forward Deployed
+[00:04:44] Engineering Teams Really Wide
+[00:04:46] Range Means A Lot
+[00:04:47] Of Different Things To Different People
+[00:04:49] Different Use Cases But
+[00:04:50] Maybe We Can Start
+[00:04:51] With The Use Case Where
+[00:04:53] Forward Deploying Engineering Has Been
+[00:04:54] Particularly Useful Yeah
+[00:04:56] Take Us
+[00:04:57] Deep On
+[00:04:59] An Example
+[00:05:00] Or Two Where You Have Moved
+[00:05:01] The Needle And Deliver Like Tangible
+[00:05:03] Roi Totally Yeah
+[00:05:04] I Be Thinking Through
+[00:05:05] So Probably Um
+[00:05:06] One Of Our Biggest Projects
+[00:05:08] Right Now I
