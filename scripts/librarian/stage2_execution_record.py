@@ -150,7 +150,8 @@ def main(argv=None) -> int:
                                  labelling_packet_note=stage["packet_note"]),
         sealed_labels_and_mapping=dict(
             gold=file_identity(files["gold"]["path"]), mapping=file_identity(files["mapping"]["path"]),
-            adjudicated=dict(path=mapping["adjudicated_file"], sha256=mapping["adjudicated_sha256"]),
+            adjudicated=dict(path=mapping.get("adjudicated_file") or files.get("adjudication", {}).get("path"),
+                             sha256=mapping["adjudicated_sha256"]),
             gold_items=len(gold), sealed=all(item.get("sealed") is True for item in gold),
             scorable=sum(1 for row in mapping["items"].values() if row["scorable"]),
             labellers=stage["labellers"],
