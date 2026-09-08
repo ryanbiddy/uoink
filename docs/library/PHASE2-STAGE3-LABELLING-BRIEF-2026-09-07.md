@@ -10,7 +10,7 @@ Astra's [audit 15](INDUCTION-AUDIT-15-2026-09-07.md) froze hold-out v3
 (`docs/library/proof/holdout-v3-2026-09-07.json`, 47 timed and 13 text-only, zero overlap
 with the 225, the old 60 and hold-out v2; `--verify-stage3-freezes` passes), wrote
 [`STAGE3-GATE-2026-09-07.md`](STAGE3-GATE-2026-09-07.md), and rejected the v3 candidate on
-three exact repairs. All three are applied (commit named in the codex section):
+three exact repairs. All three are applied (commit `20608ae`):
 
 - AI-R1: the three truncated development ids are full identities; every edit carries a
   `rules` list and its `development_cases` are the union of those rules' cases; R2b is in
