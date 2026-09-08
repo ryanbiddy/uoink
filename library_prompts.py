@@ -527,10 +527,13 @@ def _reshelve_review(reader: LibraryReader, work_service, args: dict[str, str]) 
                     _, _, summary_rechecked = work_service._recheck_preview(conn, preview, args_check)
             except ResourceError:
                 raise
-            except Exception as exc:
+            except Exception:
+                # AW-D04: refusals name a fixed category only; never str(exc)
+                # or attacker-controlled path/sentinel text.
                 raise ResourceError("revision_unavailable", details={
-                    "reason": "preview_invalidated", "next_step": "apply_reshelving mode=preview",
-                    "error": str(exc)}) from exc
+                    "reason": "preview_invalidated",
+                    "next_step": "apply_reshelving mode=preview",
+                }) from None
         else:
             if binding.get("run_revision") is not None and run.get("run_revision") != binding.get("run_revision"):
                 raise ResourceError("revision_unavailable", details={

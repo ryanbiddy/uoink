@@ -15,10 +15,14 @@ Contract rules this module does not implement exactly, and why
    serialization (``LibraryReader.assert_within_deadline``) are all charged
    to that admission. ``request()`` keeps one admission and one deadline for
    a prompt's fan-out. The one deadline is carried into backend acquisition:
-   every index-lock acquisition (``_lock``) waits at most the time left
-   before it and otherwise refuses ``deadline_exceeded`` at once, so a held
-   index lock yields the refusal by the deadline rather than after the
-   blocked read finishes. Corpus hashing checks the deadline per block.
+   ``_bind_index`` passes the remaining time to the index factory, and
+   ``server._get_existing_index`` waits on ``_index_open_lock`` for at most
+   that remainder. Every index-lock acquisition (``_lock``) and SQLite
+   busy/query wait is likewise bounded by the time left and otherwise
+   refuses ``deadline_exceeded`` at once, so a held open lock, index lock
+   or exclusive SQLite writer yields the refusal by the deadline rather
+   than after the blocked read finishes. Corpus hashing checks the
+   deadline per block.
 2. ``shelf_revision`` (AV-1r ruling D2, implemented; AW-D02) binds the shelf
    definition, taxonomy/projection revisions, live deletion state, displayed
    metadata and, for **every** ordered nondeleted member (not only the
@@ -38,7 +42,10 @@ Contract rules this module does not implement exactly, and why
    be unchanged and the item undeleted, or the card is refused
    (``resource_deleted`` / ``revision_unavailable``) instead of served from
    the snapshot it was built from; card and excerpt reads recheck once more
-   immediately before serving.
+   immediately before serving. ``get_item`` builds and checks its card and
+   performs corpus admission against that same snapshot, then rechecks
+   before delivery so a concurrent deletion or rewrite during admission
+   refuses rather than returning the stale card.
 3. Duplicate JSON keys cannot be detected on stdio: the SDK hands handlers
    parsed objects. The HTTP ``/tools/*`` route (Fable) rejects them from raw
    bytes; here strictness covers unknown fields, types, nulls, booleans used
@@ -61,9 +68,11 @@ Contract rules this module does not implement exactly, and why
    covers the known runtime paths (the item's corpus and sidecar paths,
    their folder, ``data_root``) and any complete explicit absolute local
    path in the text: Windows drive paths, UNC paths, POSIX absolute paths
-   (including one-component paths such as ``/secret``) and ``file:`` URIs.
-   A path written inside straight double or single quotes is recognised to
-   the closing quote, so quoted paths containing spaces are redacted whole.
+   (including one-component paths such as ``/secret``, digit-led ``/7secret``
+   and non-ASCII ``/私密``) and ``file:`` URIs. A path written inside
+   straight double or single quotes is recognised to the matching closing
+   quote, so quoted paths containing spaces or the other quote (including
+   double-quoted drive paths with an apostrophe) are redacted whole.
    Validated public HTTP(S) destinations are never redacted. Spans report
    code-point offsets of the full redacted span into the chunk text and a
    ``kind``; byte offsets and the corpus hash are those of the unredacted
@@ -284,24 +293,41 @@ _WS_RE = re.compile(r"\s+")
 # "and/or" never match; HTTP(S) destinations are additionally excluded below.
 _PATH_CHAR = r"[^\s\"'<>|*?\x00-\x1f]"
 _SEGMENT_CHAR = r"[^\s\"'<>|*?/\\\x00-\x1f]"
-# A one-component POSIX path ("/secret") must not follow an identifier
-# character, a closing-tag "<", a dot or another separator, so "and/or",
-# "km/h", "1/2", "</tag>", "../x" and "http://" never match.
-_POSIX_HEAD = r"(?<![A-Za-z0-9_./:\\<>-])/[A-Za-z_.]" + _SEGMENT_CHAR + r"*"
+# A one-component POSIX path ("/secret", "/7secret", "/私密") must not
+# follow an identifier character, a closing-tag "<", a dot or another
+# separator, so "and/or", "km/h", "1/2", "</tag>", "../x" and "http://"
+# never match. The first component character is a word character (ASCII
+# letter/digit/underscore or non-ASCII letter) or a dot.
+_POSIX_FIRST = r"[\w.]"
+_POSIX_HEAD = r"(?<![A-Za-z0-9_./:\\<>-])/" + _POSIX_FIRST + _SEGMENT_CHAR + r"*"
 _LOCAL_PATH_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
     ("file_uri", re.compile(r"(?<![A-Za-z0-9])file:/{2,3}" + _PATH_CHAR + r"+", re.IGNORECASE)),
     ("unc_path", re.compile(r"(?<![A-Za-z0-9\\])\\\\" + _SEGMENT_CHAR + r"+\\" + _PATH_CHAR + r"*")),
     ("drive_path", re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/]" + _PATH_CHAR + r"*")),
     ("posix_path", re.compile(_POSIX_HEAD + r"(?:/" + _SEGMENT_CHAR + r"*)*")),
 )
-# The same forms written between straight quotes extend to the closing
-# quote, so a quoted path containing spaces is one complete path (AW-D03).
-_QUOTED_CHAR = r"[^\"'<>|\x00-\x1f]"
+
+
+def _quoted_path_patterns(quote: str, body: str) -> tuple[tuple[str, re.Pattern], ...]:
+    """Explicit paths between matching quotes (AW-D03). ``body`` is the
+    interior character class; it includes the other quote so a double-quoted
+    drive or POSIX path may contain an apostrophe, and vice versa."""
+    q = re.escape(quote)
+    look, ahead = rf"(?<={q})", rf"(?={q})"
+    return (
+        ("file_uri", re.compile(look + r"file:/{2,3}" + body + r"+" + ahead, re.IGNORECASE)),
+        ("unc_path", re.compile(look + r"\\\\" + body + r"+" + ahead)),
+        ("drive_path", re.compile(look + r"[A-Za-z]:[\\/]" + body + r"*" + ahead)),
+        ("posix_path", re.compile(look + r"/" + _POSIX_FIRST + body + r"*" + ahead)),
+    )
+
+
+# Double-quoted content may include apostrophes; single-quoted may include '"'.
+_DQ_CHAR = r"[^\"<>|\x00-\x1f]"
+_SQ_CHAR = r"[^'<>|\x00-\x1f]"
 _QUOTED_PATH_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
-    ("file_uri", re.compile(r"(?<=[\"'])file:/{2,3}" + _QUOTED_CHAR + r"+(?=[\"'])", re.IGNORECASE)),
-    ("unc_path", re.compile(r"(?<=[\"'])\\\\" + _QUOTED_CHAR + r"+(?=[\"'])")),
-    ("drive_path", re.compile(r"(?<=[\"'])[A-Za-z]:[\\/]" + _QUOTED_CHAR + r"*(?=[\"'])")),
-    ("posix_path", re.compile(r"(?<=[\"'])/[A-Za-z_.]" + _QUOTED_CHAR + r"*(?=[\"'])")),
+    *_quoted_path_patterns('"', _DQ_CHAR),
+    *_quoted_path_patterns("'", _SQ_CHAR),
 )
 _PUBLIC_URL_RE = re.compile(r"(?<![A-Za-z0-9])https?://[^\s<>\"']+", re.IGNORECASE)
 _PATH_TRAILING = ".,;:!?)]}'\""
@@ -738,12 +764,21 @@ class _BoundedLock:
             raise ResourceError("deadline_exceeded", details={
                 "deadline_s": self.reader.deadline_s, "reason": "lock_wait"})
         self.held = True
+        try:
+            self.reader._arm_sqlite_deadline(self.deadline_at)
+        except BaseException:
+            self.held = False
+            self.lock.release()
+            raise
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        if self.held:
-            self.held = False
-            self.lock.release()
+        try:
+            self.reader._disarm_sqlite_deadline()
+        finally:
+            if self.held:
+                self.held = False
+                self.lock.release()
         return False
 
 
@@ -778,7 +813,7 @@ class LibraryReader:
                  wall_clock: Callable[[], float] | None = None, deadline_s: float = 2.0,
                  max_active: int = 2, admissions_per_minute: int = 60,
                  guard: ReadGuard | None = None,
-                 index_factory: Callable[[], Any] | None = None):
+                 index_factory: Callable[..., Any] | None = None):
         # ``index`` may be None when ``index_factory`` binds storage lazily:
         # the binding then runs inside the first admitted operation so backend
         # acquisition is charged to that request's deadline (D1, D7).
@@ -793,6 +828,9 @@ class LibraryReader:
         # Deadline of the most recent admission; ``assert_within_deadline``
         # lets an adapter charge its own serialization to the same request.
         self._deadline_at: float | None = None
+        self._sqlite_deadline_at: float | None = None
+        self._sqlite_deadline_depth = 0
+        self._sqlite_busy_previous: int | None = None
 
     # ---- clocks --------------------------------------------------------
     def wall_time(self) -> float:
@@ -819,18 +857,36 @@ class LibraryReader:
         finally:
             self.guard.release()
 
+    def _call_index_factory(self, remaining: float):
+        """Pass the remaining deadline into the factory (AW-D01). A double
+        that does not accept ``timeout_s`` is invoked with no arguments."""
+        factory = self._index_factory
+        try:
+            return factory(timeout_s=remaining)
+        except TypeError:
+            return factory()
+
     def _bind_index(self, op: _Operation) -> None:
         """Bind storage lazily and only to what already exists: the factory
         (``server._get_existing_index``) never creates, quarantines or
-        recovers a database; any failure is ``library_unavailable``."""
+        recovers a database; any failure is ``library_unavailable``. The
+        remaining deadline is passed so ``_index_open_lock`` cannot wait
+        past it (AW-D01)."""
         if self.index is not None:
             return
         if self._index_factory is None:
             raise ResourceError("library_unavailable", details={"storage": "no_index"})
+        remaining = op.remaining()
+        if remaining <= 0:
+            raise ResourceError("deadline_exceeded", details={
+                "deadline_s": self.deadline_s, "reason": "index_open"})
         try:
-            index = self._index_factory()
+            index = self._call_index_factory(remaining)
         except ResourceError:
             raise
+        except TimeoutError:
+            raise ResourceError("deadline_exceeded", details={
+                "deadline_s": self.deadline_s, "reason": "index_open"}) from None
         except Exception as exc:
             log.warning("library storage binding failed: %s", type(exc).__name__)
             raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
@@ -890,15 +946,94 @@ class LibraryReader:
             return lock
         return _BoundedLock(self, lock, deadline_at)
 
-    def _storage(self, fn: Callable[[], Any]):
+    def _arm_sqlite_deadline(self, deadline_at: float) -> None:
+        """Bound this connection's busy wait and query progress to the
+        remaining request deadline (AW-D01). Nested lock holds reuse the
+        armed handler; the wait is shortened if less time remains."""
+        remaining = deadline_at - float(self._clock())
+        if remaining <= 0:
+            raise ResourceError("deadline_exceeded", details={
+                "deadline_s": self.deadline_s, "reason": "sqlite_busy"})
+        self._sqlite_deadline_depth += 1
+        self._sqlite_deadline_at = deadline_at
+        conn = getattr(self.index, "_conn", None)
+        if conn is None or not hasattr(conn, "execute"):
+            return
+        # Fail-fast on SQLITE_BUSY: Windows overshoots PRAGMA busy_timeout
+        # (2 s becomes ~3 s), so `_storage` retries until the deadline.
+        if self._sqlite_deadline_depth == 1:
+            self._sqlite_busy_previous = 5000
         try:
-            return fn()
-        except sqlite3.Error as exc:
-            log.warning("library storage failure: %s", type(exc).__name__)
-            raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
-        except OSError as exc:
-            log.warning("library storage OS failure: %s", type(exc).__name__)
-            raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
+            conn.execute("PRAGMA busy_timeout=0")
+        except sqlite3.Error:
+            pass
+        if self._sqlite_deadline_depth == 1:
+            clock = self._clock
+
+            def progress():
+                return 1 if float(clock()) > deadline_at else 0
+
+            try:
+                conn.set_progress_handler(progress, 64)
+            except (AttributeError, sqlite3.Error, TypeError):
+                pass
+
+    def _disarm_sqlite_deadline(self) -> None:
+        if self._sqlite_deadline_depth <= 0:
+            return
+        self._sqlite_deadline_depth -= 1
+        if self._sqlite_deadline_depth > 0:
+            return
+        conn = getattr(self.index, "_conn", None)
+        self._sqlite_deadline_at = None
+        if conn is None:
+            self._sqlite_busy_previous = None
+            return
+        try:
+            conn.set_progress_handler(None)
+        except (AttributeError, sqlite3.Error, TypeError):
+            pass
+        previous = self._sqlite_busy_previous
+        self._sqlite_busy_previous = None
+        if previous is None:
+            return
+        try:
+            conn.execute(f"PRAGMA busy_timeout={int(previous)}")
+        except sqlite3.Error:
+            pass
+
+    def _storage(self, fn: Callable[[], Any]):
+        wall_start: float | None = None
+        wall_budget = 0.0
+        while True:
+            try:
+                return fn()
+            except sqlite3.OperationalError as exc:
+                deadline_at = self._deadline_at
+                text = str(exc).lower()
+                interrupted = "interrupt" in text
+                waited = ("locked" in text) or ("busy" in text)
+                remaining = (deadline_at - float(self._clock())) if deadline_at is not None else -1.0
+                if interrupted or (waited and deadline_at is not None and remaining <= 0):
+                    raise ResourceError("deadline_exceeded", details={
+                        "deadline_s": self.deadline_s, "reason": "sqlite_busy"}) from None
+                if waited and deadline_at is not None and remaining > 0:
+                    if wall_start is None:
+                        wall_start = time.monotonic()
+                        wall_budget = min(self.deadline_s, remaining)
+                    if (time.monotonic() - wall_start) >= wall_budget:
+                        raise ResourceError("deadline_exceeded", details={
+                            "deadline_s": self.deadline_s, "reason": "sqlite_busy"}) from None
+                    time.sleep(min(0.02, remaining))
+                    continue
+                log.warning("library storage failure: %s", type(exc).__name__)
+                raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
+            except sqlite3.Error as exc:
+                log.warning("library storage failure: %s", type(exc).__name__)
+                raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
+            except OSError as exc:
+                log.warning("library storage OS failure: %s", type(exc).__name__)
+                raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
 
     def _index_call(self, op: _Operation | None, fn: Callable[[], Any]):
         """One index method call under the bounded lock (D1) with storage
@@ -1788,14 +1923,19 @@ class LibraryReader:
         corpus = None
         corpus_admission: dict = {"ok": True}
         try:
+            # Admit the snapshot's corpus file; do not re-read a different row.
             _path, digest, size, _sig = self._admit_corpus(op, item)
             corpus = corpus_uri(item_id, digest, 0, LIMITS["suggested_corpus_chunk_bytes"])
             corpus_admission = {"ok": True, "corpus_revision": digest, "total_bytes": size,
                                 "suggested_length": LIMITS["suggested_corpus_chunk_bytes"]}
         except ResourceError as exc:
-            if exc.code in ("deadline_exceeded", "rate_limited"):
+            if exc.code in ("deadline_exceeded", "rate_limited",
+                            "revision_unavailable", "resource_deleted"):
                 raise
             corpus_admission = {"ok": False, "error": exc.envelope()["error"]}
+        # AW-D02: card build/check and admission share this snapshot; a
+        # concurrent change during remaining I/O must not be served.
+        self._recheck_sources(op, bundle)
         result = _success(
             item_id=item_id,
             card=card,
@@ -2071,7 +2211,7 @@ def call_tool(name: str, args, reader: LibraryReader, *, client_identity: str = 
         return ResourceError("internal_error").envelope()
 
 
-def _existing_index_factory(backend) -> Callable[[], Any]:
+def _existing_index_factory(backend) -> Callable[..., Any]:
     """The noncreating, nonrecovering storage acquisition path (D7).
 
     Prefers ``backend._get_existing_index`` (``server.py``: returns the open
@@ -2079,24 +2219,39 @@ def _existing_index_factory(backend) -> Callable[[], Any]:
     A backend without that seam is bound through ``_get_index`` only when its
     ``INDEX_PATH`` is an existing regular file; without an ``INDEX_PATH``
     attribute the backend is a test double and ``_get_index`` is trusted.
+    The returned factory accepts ``timeout_s`` (remaining deadline) and
+    forwards it when the backend seam does.
     """
     existing = getattr(backend, "_get_existing_index", None)
     if callable(existing):
-        return existing
+        def factory(timeout_s: float | None = None):
+            try:
+                return existing(timeout_s=timeout_s)
+            except TypeError:
+                return existing()
+        return factory
     legacy = getattr(backend, "_get_index", None)
     if not callable(legacy):
-        def unavailable():
+        def unavailable(timeout_s: float | None = None):
             raise ResourceError("library_unavailable", details={"storage": "no_backend"})
         return unavailable
     index_path = getattr(backend, "INDEX_PATH", None)
     if index_path is None:
-        return legacy
+        def legacy_factory(timeout_s: float | None = None):
+            try:
+                return legacy(timeout_s=timeout_s)
+            except TypeError:
+                return legacy()
+        return legacy_factory
 
-    def guarded():
+    def guarded(timeout_s: float | None = None):
         path = Path(index_path)
         if not path.is_file():
             raise ResourceError("library_unavailable", details={"storage": "missing_index"})
-        return legacy()
+        try:
+            return legacy(timeout_s=timeout_s)
+        except TypeError:
+            return legacy()
     return guarded
 
 

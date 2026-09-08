@@ -390,7 +390,12 @@ class TestP410EditsAndAtomicity:
         assert not (file_path.parent / f"{file_path.stem}.conflict.md").exists()
 
     def test_crash_before_replacement_preserves_old_file(self, tmp_path: Path):
-        """Crash before atomic replacement leaves existing destination file intact and removes .tmp files."""
+        """Crash before atomic replacement leaves the existing destination intact.
+
+        AW-2 ruling D11/D12 (PHASE4-ACCEPTANCE-2-2026-09-08): the mirror deletes only the
+        temporary artifact it recorded for an intent; a stem ``.tmp`` whose name or bytes
+        merely look interrupted is not owned and is retained.
+        """
         h = MirrorTestHarness(tmp_path, enabled=True)
         vid = "vid-standard-01"
         h.mirror.on_committed_event("capture", video_id=vid)
@@ -409,8 +414,9 @@ class TestP410EditsAndAtomicity:
 
         # Original file intact
         assert _compute_file_sha256(file_path) == orig_hash
-        # Temporary file cleaned up
-        assert not tmp_file.exists()
+        # Unowned temporary file retained (D12: ownership is never inferred from name or text)
+        assert tmp_file.exists()
+        assert tmp_file.read_text(encoding="utf-8") == "Interrupted partial write"
 
     def test_two_writers_serialized(self, tmp_path: Path):
         """Two concurrent writers per destination serialize safely without corrupted manifests or lost files."""
@@ -515,6 +521,13 @@ class TestP410EditsAndAtomicity:
 # Gate P4-11 Tests: Deletion
 # ============================================================================
 
+def _mark_deleted(idx, video_id: str, deleted_at):
+    """Set or clear the index's deletion stamp; the mirror rechecks it per action (AW-2 D11)."""
+    with idx._lock:
+        idx._conn.execute("UPDATE yoinks SET deleted_at=? WHERE video_id=?", (deleted_at, video_id))
+        idx._conn.commit()
+
+
 class TestP411Deletion:
     """Gate P4-11: Soft delete tombstones, hard purge, replay/restore, purge_blocked_user_edit, disconnected vault."""
 
@@ -530,7 +543,9 @@ class TestP411Deletion:
         orig_content = f.read_text(encoding="utf-8")
         assert "Standard Analysis Video" in orig_content
 
-        # Soft delete
+        # Soft delete: the index is authoritative (AW-2 D11: a tombstone replaces source
+        # text only when the item is actually deleted; the event alone is a hint).
+        _mark_deleted(h.idx, vid, "2026-09-08T12:00:00")
         h.mirror.on_committed_event("soft_delete", video_id=vid)
         h.mirror.resync()
 
@@ -570,13 +585,15 @@ class TestP411Deletion:
         h.mirror.on_committed_event("capture", video_id=vid)
         h.mirror.resync()
 
-        # Soft delete
+        # Soft delete (AW-2 D11: the index says deleted before the tombstone is written)
+        _mark_deleted(h.idx, vid, "2026-09-08T12:00:00")
         h.mirror.on_committed_event("soft_delete", video_id=vid)
         h.mirror.resync()
         f = h.item_file_path(vid)
         assert "deleted: true" in f.read_text(encoding="utf-8").lower()
 
-        # Restore
+        # Restore: the index restores first, then the mirror replaces the tombstone
+        _mark_deleted(h.idx, vid, None)
         h.mirror.on_committed_event("restore", video_id=vid)
         h.mirror.resync()
 

@@ -1511,7 +1511,8 @@ def _mirror_event(kind, *, video_id=None, shelf_id=None, brief_hash=None):
     """
     try:
         settings = _read_settings()
-        if settings.get("library_mirror_enabled") is not True:
+        enabled = settings.get("library_mirror_enabled") is True
+        if not enabled and kind not in ("soft_delete", "hard_purge"):
             return
         mirror = _library_mirror()
         if mirror is None:
@@ -2107,7 +2108,7 @@ def _get_index() -> "index.Index":
         return _index_singleton
 
 
-def _get_existing_index() -> "index.Index":
+def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
     """Phase 4 bounded reads (``library_resources.make_reader``; AV-1r ruling
     D7, 2026-09-08): bind to storage that already exists. Returns the open
     process handle when there is one; otherwise opens INDEX_PATH only when it
@@ -2116,14 +2117,31 @@ def _get_existing_index() -> "index.Index":
     unreadable index.db raises (FileNotFoundError / sqlite3.DatabaseError /
     OSError) for the reader to refuse ``library_unavailable``, and the file is
     left exactly as found. Legacy callers keep ``_get_index`` and its
-    open_or_recover behaviour. Nothing else in the process changes."""
+    open_or_recover behaviour. Nothing else in the process changes.
+
+    ``timeout_s`` is the remaining request deadline (AW-D01). The wait on
+    ``_index_open_lock`` is bounded by it; an expired or failed acquisition
+    raises ``TimeoutError`` so the reader can refuse ``deadline_exceeded``
+    by the deadline instead of after the lock holder finishes. Omit it for
+    a blocking wait (legacy callers)."""
     global _index_singleton
-    with _index_open_lock:
+    if timeout_s is None:
+        acquired = _index_open_lock.acquire()
+    else:
+        remaining = max(0.0, float(timeout_s))
+        if remaining <= 0:
+            raise TimeoutError("index_open_deadline")
+        acquired = _index_open_lock.acquire(timeout=remaining)
+    if not acquired:
+        raise TimeoutError("index_open_deadline")
+    try:
         if _index_singleton is None:
             if not INDEX_PATH.is_file():
                 raise FileNotFoundError(str(INDEX_PATH))
             _index_singleton = index.Index.open(INDEX_PATH)
         return _index_singleton
+    finally:
+        _index_open_lock.release()
 
 
 def _library_health_payload() -> dict:
@@ -9960,6 +9978,7 @@ def _purge_trash() -> int:
             trash = _trash_folder_for(row)
             if trash.exists():
                 shutil.rmtree(trash, ignore_errors=True)
+            _add_pending_brief_purge(video_id)
             idx.delete_yoink(video_id)
             # Local brief cleanup independent of mirror consent/availability (AW-D08)
             if brief_store is not None:
@@ -9967,7 +9986,6 @@ def _purge_trash() -> int:
                     brief_store.purge_dependents(video_id)
                     _remove_pending_brief_purge(video_id)
                 except Exception:
-                    _add_pending_brief_purge(video_id)
                     log.warning("trash purge: brief cleanup failed for %s, scheduled retry", video_id)
             _mirror_event("hard_purge", video_id=video_id)  # seam: hard_purge
             purged += 1

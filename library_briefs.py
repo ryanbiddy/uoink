@@ -1017,9 +1017,16 @@ class BriefStore:
             _write_json_atomic(tmp / "citations.json", citations)
             _write_json_atomic(tmp / "packet.json", packet)
             _write_json_atomic(tmp / "manifest.json", manifest)
-            # Recheck every source/queue/run/taxonomy/projection binding at the atomic publication step
-            self._recheck_publication_bindings(op, packet, manifest)
-            os.replace(tmp, final)
+            if op is None:
+                with self.reader._operation() as fresh_op:
+                    with self.reader._lock(fresh_op):
+                        self._recheck_publication_bindings(fresh_op, packet, manifest)
+                        os.replace(tmp, final)
+            else:
+                with self.reader._lock(op):
+                    # Recheck every source/queue/run/taxonomy/projection binding at the atomic publication step
+                    self._recheck_publication_bindings(op, packet, manifest)
+                    os.replace(tmp, final)
         except ResourceError:
             with contextlib.suppress(OSError):
                 shutil.rmtree(tmp, ignore_errors=True)
@@ -1208,6 +1215,14 @@ class BriefStore:
                         raise ResourceError("revision_unavailable", details={
                             "reason": "run_changed", "next_step": "get_library_brief_input"})
 
+            if "queue_digest" in bindings and self._has_tables(("library_work", "library_manifest")):
+                run_id = bound_run.get("run_id") or packet.get("run_id")
+                if run_id:
+                    queue = self._sql("SELECT work_id, video_id, state, packet_generation, packet_hash, attempts, priority, created_at, updated_at FROM library_work WHERE run_id=? ORDER BY state, priority, created_at, work_id", (run_id,))
+                    manifest_rows = self._sql("SELECT video_id, source_revision, disposition, reason FROM library_manifest WHERE run_id=? ORDER BY video_id", (run_id,))
+                    if digest({"work": queue, "manifest": manifest_rows}) != bindings.get("queue_digest"):
+                        raise ResourceError("revision_unavailable", details={"reason": "queue_changed", "next_step": "get_library_brief_input"})
+
     def _render(self, op, date: str, brief_hash: str) -> tuple[dict, str]:
         self._require_root()
         manifest, document, citations, packet = self._load_artifact(date, brief_hash)
@@ -1299,6 +1314,8 @@ class BriefStore:
                         depends = True
                     if depends:
                         shutil.rmtree(entry, ignore_errors=True)
+                        if entry.exists():
+                            raise ResourceError("library_unavailable", details={"storage": "purge_incomplete"})
                         interrupted += 1
                     continue
                 if not _HEX64_RE.match(entry.name):

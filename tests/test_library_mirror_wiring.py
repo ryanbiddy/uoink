@@ -510,7 +510,10 @@ def test_each_seam_fires_once_when_enabled_and_never_when_disabled(tmp_path, mon
                  "hard_purge", "pin", "apply", "undo"):
         assert kinds().count(kind) == 1, (kind, kinds())
 
-    # --- disabled: none of the seams reach the mirror ---
+    # --- disabled: only deletion seams reach the mirror ---
+    # AW-2 ruling D11 (PHASE4-ACCEPTANCE-2-2026-09-08): soft_delete and hard_purge are
+    # delivered independently of export enablement so the mirror's pending-delete ledger
+    # never misses a deletion; every other seam stays suppressed while disabled.
     _enable_settings(monkeypatch, tmp_path, fake, enabled=False)
     fake.events.clear()
     monkeypatch.setattr(server, "_get_index", lambda: idx)
@@ -525,7 +528,7 @@ def test_each_seam_fires_once_when_enabled_and_never_when_disabled(tmp_path, mon
     svc._emit_mirror_event("pin", video_id="vid_pin_wire", shelf_id="shelf_alpha")
     svc._emit_mirror_event("undo")
     server._mirror_event("capture", video_id="nope")
-    assert fake.events == []
+    assert [k for k, _ in fake.events] == ["soft_delete", "hard_purge"], fake.events
 
 
 def test_library_work_default_event_hook_is_noop(tmp_path):
