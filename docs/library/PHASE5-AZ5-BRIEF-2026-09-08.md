@@ -46,3 +46,17 @@ python -B -m pytest -q -p no:cacheprovider tests/test_c01_mcp_stdio.py tests/tes
 ```
 
 Dashboard runs also: `tests/test_dashboard_sources_api.py tests/test_dashboard_sources_ui.py tests/test_dashboard_v324_ui.py`.
+
+## Addendum (2026-09-08 ~15:45 PDT): AZ-5a result and AZ-5a2
+
+Gemini's AZ-5a session (run `07ba7be3`) closed all of its BA-01/BA-03 reproductions (18
+pass) but its evidence descriptors are inlined into the mandatory response: an empty
+31-day interval that serialised to 40,751 bytes at HEAD now exceeds the 65,536-byte wire
+cap (`resource_too_large`), and summary-row shedding drops to 10 rows where 20 fit before
+(`tests/test_library_analysis_fixtures.py::test_activity_interval_half_open_utc` and
+`::test_activity_denominator_and_pagination`). That is a BA-10 regression, so the diff is
+retained unapplied as `docs/library/patches/az5a-gemini-2026-09-08.patch`.
+
+| Run | Engine | Task |
+|---|---|---|
+| AZ-5a2 | claude | Apply `docs/library/patches/az5a-gemini-2026-09-08.patch` with `git apply --3way` (it was cut against `4ee63d7`; `library_analysis.py` has since taken AZ-5c), then make every mandatory evidence descriptor compact: a metric-to-support relation *reference* (metric id, relation id, support/sample counts, canonical observation hash, scope, clock) rather than inline observation lists; per-bucket, per-shelf and per-source supporting rows live only on the paged evidence endpoint. Both fixture tests above and the whole BA-3 AZ-5a set must pass; the empty 31-day interval must stay well under the cap (report its byte count). Budget rule: no subagents; targeted searches; write early. |

@@ -1,0 +1,814 @@
+diff --git a/library_analysis.py b/library_analysis.py
+index f8c89dc..4d0abb4 100644
+--- a/library_analysis.py
++++ b/library_analysis.py
+@@ -538,6 +538,7 @@ def _ratio_metric(
+     scope_ref: str,
+     *,
+     reason: Optional[str] = None,
++    denominator_metric_id: Optional[str] = None,
+ ) -> dict:
+     percent: Optional[float] = None
+     res_reason = reason
+@@ -551,7 +552,7 @@ def _ratio_metric(
+             Decimal("0.01"), rounding=ROUND_HALF_UP
+         )
+         percent = float(pct)
+-    return {
++    m = {
+         "metric_id": metric_id,
+         "value": numerator if denominator > 0 else 0,
+         "unit": "ratio",
+@@ -562,6 +563,9 @@ def _ratio_metric(
+         "reason": res_reason,
+         "evidence": {"metric_id": metric_id, "role": "numerator"},
+     }
++    if denominator_metric_id:
++        _attach_denominator_evidence(m, denominator_metric_id, denominator)
++    return m
+ 
+ 
+ class CountMetric(dict):
+@@ -647,11 +651,17 @@ def _attach_sample_counts(metric: dict, row_n: int) -> None:
+         ev["has_more"] = n > 20
+ 
+ 
+-def _attach_denominator_evidence(metric: dict, denom_metric_id: str) -> None:
++def _attach_denominator_evidence(metric: dict, denom_metric_id: str, denom_count: Optional[int] = None) -> None:
+     """BA-01: distinct addressable denominator relation."""
+     ev = metric.setdefault("evidence", {})
+     if isinstance(ev, dict):
+-        ev["denominator"] = {"metric_id": denom_metric_id, "role": "denominator"}
++        d_dict = {"metric_id": denom_metric_id, "role": "denominator"}
++        if denom_count is not None:
++            n = max(0, int(denom_count))
++            d_dict["row_count"] = n
++            d_dict["sample_count"] = min(20, n)
++            d_dict["has_more"] = n > 20
++        ev["denominator"] = d_dict
+ 
+ 
+ def _mark_no_history(metric: Optional[dict]) -> None:
+@@ -659,8 +669,7 @@ def _mark_no_history(metric: Optional[dict]) -> None:
+         return
+     metric["value"] = None
+     metric["recorded_count"] = 0
+-    if "row_count" in metric:
+-        _attach_sample_counts(metric, 0)
++    _attach_sample_counts(metric, 0)
+ 
+ 
+ def _truncate_label(label: str) -> str:
+@@ -913,6 +922,7 @@ def _execute_activity(
+             else:
+                 tombstone_yoinks.append(row_dict)
+         live_survivor_ids = {item["video_id"] for item in live_yoinks}
++        tombstone_ids = {item["video_id"] for item in tombstone_yoinks}
+ 
+         # Q2a podcast episodes
+         c_episodes = conn.execute(
+@@ -1196,7 +1206,15 @@ def _execute_activity(
+                 if baseline_proved:
+                     for vid, rows in f_items.items():
+                         if vid in live_survivor_ids:
+-                            projected_state[vid] = {r["shelf_id"]: r for r in rows}
++                            shelf_dict = {}
++                            for r in rows:
++                                r_entry = dict(r)
++                                r_entry["apply_id"] = app_id
++                                r_entry["operation_sequence"] = op_seq
++                                r_entry["created_at"] = c_at
++                                r_entry["record_hash"] = auth_hash
++                                shelf_dict[r["shelf_id"]] = r_entry
++                            projected_state[vid] = shelf_dict
+ 
+             # Interval applies accounting
+             if dt_apply is not None and dt_start <= dt_apply < dt_end:
+@@ -1211,6 +1229,10 @@ def _execute_activity(
+                 apply_additions = 0
+                 apply_removals = 0
+                 apply_affected: Set[str] = set()
++                apply_shelf_additions: Dict[str, int] = {}
++                apply_shelf_removals: Dict[str, int] = {}
++                apply_item_changes: List[dict] = []
++                has_deleted_item = False
+ 
+                 for vid in all_vids:
+                     f_rows = f_items.get(vid, [])
+@@ -1227,9 +1249,26 @@ def _execute_activity(
+                     for s in added:
+                         shelf_additions[s] = shelf_additions.get(s, 0) + 1
+                         apply_additions += 1
++                        apply_shelf_additions[s] = apply_shelf_additions.get(s, 0) + 1
+                     for s in removed:
+                         shelf_removals[s] = shelf_removals.get(s, 0) + 1
+                         apply_removals += 1
++                        apply_shelf_removals[s] = apply_shelf_removals.get(s, 0) + 1
++
++                    is_del = vid in tombstone_ids
++                    if is_del:
++                        has_deleted_item = True
++
++                    ch_entry = {
++                        "video_id": vid,
++                        "before_shelves": sorted(i_shelves),
++                        "after_shelves": sorted(f_shelves),
++                        "added_shelves": sorted(added),
++                        "removed_shelves": sorted(removed),
++                    }
++                    if is_del:
++                        ch_entry["item_deleted"] = True
++                    apply_item_changes.append(ch_entry)
+ 
+                     if f_shelves != i_shelves or f_prim != i_prim:
+                         interval_affected_items.add(vid)
+@@ -1277,6 +1316,10 @@ def _execute_activity(
+                     "additions": apply_additions,
+                     "removals": apply_removals,
+                     "affected_vids": apply_affected,
++                    "shelf_additions": apply_shelf_additions,
++                    "shelf_removals": apply_shelf_removals,
++                    "item_changes": apply_item_changes,
++                    "has_deleted_item": has_deleted_item,
+                 })
+ 
+             del f_delta
+@@ -1665,7 +1708,9 @@ def _execute_activity(
+         for t_name, count in sorted(type_counts.items(), key=lambda x: (-x[1], x[0])):
+             m_id = f"items.by_source_type.{t_name}"
+             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
+-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
++            _attach_sample_counts(c_metric, count)
++            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
++            _attach_sample_counts(s_metric, count)
+             by_source_type_rows.append({
+                 "source_type": t_name,
+                 "count": c_metric,
+@@ -1678,7 +1723,9 @@ def _execute_activity(
+             key_hash = hashlib.sha256(json.dumps(list(c_tuple), ensure_ascii=False).encode("utf-8")).hexdigest()
+             m_id = f"items.by_creator_hint.{key_hash}"
+             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
+-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
++            _attach_sample_counts(c_metric, count)
++            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
++            _attach_sample_counts(s_metric, count)
+             display_hint, hint_truncated = _display_hint(p_val)
+             by_creator_rows.append({
+                 "platform": p_plat,
+@@ -1696,7 +1743,9 @@ def _execute_activity(
+             j_hash = hashlib.sha256(json.dumps(list(j_tuple), ensure_ascii=False).encode("utf-8")).hexdigest()
+             m_id = f"items.by_type_creator_hint.{j_hash}"
+             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
+-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
++            _attach_sample_counts(c_metric, count)
++            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
++            _attach_sample_counts(s_metric, count)
+             display_hint, hint_truncated = _display_hint(p_val)
+             by_joint_rows.append({
+                 "source_type": j_stype,
+@@ -1714,7 +1763,9 @@ def _execute_activity(
+             b_hash = hashlib.sha256(f"{b_s}_{b_e}".encode("utf-8")).hexdigest()[:16]
+             m_id = f"items.daily_buckets.{b_hash}"
+             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
+-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
++            _attach_sample_counts(c_metric, count)
++            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
++            _attach_sample_counts(s_metric, count)
+             daily_rows.append({
+                 "bucket_start": b_s,
+                 "bucket_end": b_e,
+@@ -1722,28 +1773,47 @@ def _execute_activity(
+                 "share": s_metric,
+             })
+ 
++        live_pop_m = _count_metric("items.live_population", len(live_yoinks), "saved_items", "scope_items_capture")
++        _attach_sample_counts(live_pop_m, len(live_yoinks))
++
++        cap_avail_m = _count_metric("items.capture_time_available", capture_available_count, "saved_items", "scope_items_capture")
++        _attach_sample_counts(cap_avail_m, capture_available_count)
++
++        cap_unavail_m = _count_metric("items.capture_time_unavailable", capture_unavailable_count, "saved_items", "scope_items_capture")
++        _attach_sample_counts(cap_unavail_m, capture_unavailable_count)
++
++        pub_avail_m = _count_metric("items.publication_time_available", pub_available_count, "saved_items", "scope_items_publication")
++        _attach_sample_counts(pub_avail_m, pub_available_count)
++
++        pub_unavail_m = _count_metric("items.publication_time_unavailable", sum(pub_unavailable_by_reason.values()), "saved_items", "scope_items_publication")
++        _attach_sample_counts(pub_unavail_m, sum(pub_unavailable_by_reason.values()))
++
++        pub_reason_metrics = {}
++        for reason, count in pub_unavailable_by_reason.items():
++            pr_m = _count_metric(f"items.publication_unavailable_by_reason.{reason}", count, "saved_items", "scope_items_publication")
++            _attach_sample_counts(pr_m, count)
++            pub_reason_metrics[reason] = pr_m
++
++        del_excl_m = _count_metric("items.deleted_items_excluded", tombstones_in_interval, "saved_items", "scope_items_tombstones")
++        _attach_sample_counts(del_excl_m, tombstones_in_interval)
++
++        del_unloc_m = _count_metric("items.deleted_items_unlocated", tombstones_unlocated, "saved_items", "scope_items_tombstones")
++        _attach_sample_counts(del_unloc_m, tombstones_unlocated)
++
+         items_family = {
+             "total": items_total_metric,
+             "by_source_type": by_source_type_rows,
+             "by_creator_hint": by_creator_rows[:20],
+             "by_type_creator_hint": by_joint_rows[:20],
+             "daily_buckets": daily_rows,
+-            "live_population": _count_metric("items.live_population", len(live_yoinks), "saved_items", "scope_items_capture"),
+-            "capture_time_available": _count_metric("items.capture_time_available", capture_available_count, "saved_items", "scope_items_capture"),
+-            "capture_time_unavailable": _count_metric("items.capture_time_unavailable", capture_unavailable_count, "saved_items", "scope_items_capture"),
+-            "publication_time_available": _count_metric("items.publication_time_available", pub_available_count, "saved_items", "scope_items_publication"),
+-            "publication_time_unavailable": _count_metric("items.publication_time_unavailable", sum(pub_unavailable_by_reason.values()), "saved_items", "scope_items_publication"),
+-            "publication_unavailable_by_reason": {
+-                reason: _count_metric(
+-                    f"items.publication_unavailable_by_reason.{reason}",
+-                    count,
+-                    "saved_items",
+-                    "scope_items_publication",
+-                )
+-                for reason, count in pub_unavailable_by_reason.items()
+-            },
+-            "deleted_items_excluded": _count_metric("items.deleted_items_excluded", tombstones_in_interval, "saved_items", "scope_items_capture"),
+-            "deleted_items_unlocated": _count_metric("items.deleted_items_unlocated", tombstones_unlocated, "saved_items", "scope_items_capture"),
++            "live_population": live_pop_m,
++            "capture_time_available": cap_avail_m,
++            "capture_time_unavailable": cap_unavail_m,
++            "publication_time_available": pub_avail_m,
++            "publication_time_unavailable": pub_unavail_m,
++            "publication_unavailable_by_reason": pub_reason_metrics,
++            "deleted_items_excluded": del_excl_m,
++            "deleted_items_unlocated": del_unloc_m,
+             "coverage_ref": "cov_capture" if date_basis == "capture_time" else "cov_publication",
+         }
+ 
+@@ -1780,12 +1850,13 @@ def _execute_activity(
+             changed_baseline_vids = baseline_assigned_vids.intersection(interval_affected_items)
+             churn_num = len(changed_baseline_vids)
+             if churn_denom == 0:
+-                churn_metric = _ratio_metric("shelf_activity.churn", 0, 0, "scope_shelf_baseline", reason="empty_population")
++                churn_metric = _ratio_metric("shelf_activity.churn", 0, 0, "scope_shelf_baseline", reason="empty_population", denominator_metric_id="shelf_activity.churn.denominator")
+                 churn_metric["initial_filing"] = True
++                _attach_sample_counts(churn_metric, 0)
+             else:
+-                churn_metric = _ratio_metric("shelf_activity.churn", churn_num, churn_denom, "scope_shelf_baseline")
++                churn_metric = _ratio_metric("shelf_activity.churn", churn_num, churn_denom, "scope_shelf_baseline", denominator_metric_id="shelf_activity.churn.denominator")
+                 churn_metric["initial_filing"] = False
+-            _attach_denominator_evidence(churn_metric, "shelf_activity.churn.denominator")
++                _attach_sample_counts(churn_metric, churn_num)
+ 
+             # Initial filing items: live survivors assigned in interval that were not assigned at start
+             initial_filing_vids = [
+@@ -1851,8 +1922,8 @@ def _execute_activity(
+                 s_end = sum(1 for vid, shelves in end_state.items() if s_id in shelves)
+                 start_members = {vid for vid, shelves in start_state.items() if s_id in shelves}
+                 s_churn_num = len(start_members.intersection(interval_affected_items))
+-                s_churn = _ratio_metric(f"shelf_activity.shelves.{s_id}.churn", s_churn_num, s_start, "scope_shelf_baseline")
+-                _attach_denominator_evidence(s_churn, f"shelf_activity.shelves.{s_id}.churn.denominator")
++                s_churn = _ratio_metric(f"shelf_activity.shelves.{s_id}.churn", s_churn_num, s_start, "scope_shelf_baseline", denominator_metric_id=f"shelf_activity.shelves.{s_id}.start_size")
++                _attach_sample_counts(s_churn, s_churn_num)
+             else:
+                 s_start = None
+                 s_end = None
+@@ -1868,41 +1939,105 @@ def _execute_activity(
+                     "evidence": {
+                         "metric_id": f"shelf_activity.shelves.{s_id}.churn",
+                         "role": "numerator",
+-                        "denominator": {"metric_id": f"shelf_activity.shelves.{s_id}.churn.denominator", "role": "denominator"},
++                        "denominator": {"metric_id": f"shelf_activity.shelves.{s_id}.start_size", "role": "denominator"},
+                     },
+                 }
+ 
++            c_size_m = _count_metric(f"shelf_activity.shelves.{s_id}.current_size", c_size, "items", "scope_shelf_current")
++            _attach_sample_counts(c_size_m, c_size)
++
++            s_start_m = None
++            if s_start is not None:
++                s_start_m = _count_metric(f"shelf_activity.shelves.{s_id}.start_size", s_start, "items", "scope_shelf_baseline")
++                _attach_sample_counts(s_start_m, s_start)
++
++            s_end_m = None
++            if s_end is not None:
++                s_end_m = _count_metric(f"shelf_activity.shelves.{s_id}.end_size", s_end, "items", "scope_shelf_baseline")
++                _attach_sample_counts(s_end_m, s_end)
++
++            n_added_applies = len([app for app in interval_applies if app.get("shelf_additions", {}).get(s_id)])
++            added_m = _journal_count(f"shelf_activity.shelves.{s_id}.added", added, "mutations")
++            _attach_sample_counts(added_m, n_added_applies)
++
++            n_removed_applies = len([app for app in interval_applies if app.get("shelf_removals", {}).get(s_id)])
++            removed_m = _journal_count(f"shelf_activity.shelves.{s_id}.removed", removed, "mutations")
++            _attach_sample_counts(removed_m, n_removed_applies)
++
++            n_net_applies = len([app for app in interval_applies if app.get("shelf_additions", {}).get(s_id) or app.get("shelf_removals", {}).get(s_id)])
++            net_m = _journal_count(f"shelf_activity.shelves.{s_id}.net", net, "mutations")
++            _attach_sample_counts(net_m, n_net_applies)
++
+             shelves_rows.append({
+                 "shelf_id": s_id,
+                 "name": s_name,
+                 "label": s_name,
+                 "active_name": active_name,
+                 "active_label": active_name,
+-                "current_size": _count_metric(f"shelf_activity.shelves.{s_id}.current_size", c_size, "items", "scope_shelf_current"),
+-                "start_size": _count_metric(f"shelf_activity.shelves.{s_id}.start_size", s_start, "items", "scope_shelf_baseline") if s_start is not None else None,
+-                "end_size": _count_metric(f"shelf_activity.shelves.{s_id}.end_size", s_end, "items", "scope_shelf_baseline") if s_end is not None else None,
+-                "added": _journal_count(f"shelf_activity.shelves.{s_id}.added", added, "mutations"),
+-                "removed": _journal_count(f"shelf_activity.shelves.{s_id}.removed", removed, "mutations"),
+-                "net": _journal_count(f"shelf_activity.shelves.{s_id}.net", net, "mutations"),
++                "current_size": c_size_m,
++                "start_size": s_start_m,
++                "end_size": s_end_m,
++                "added": added_m,
++                "removed": removed_m,
++                "net": net_m,
+                 "churn": s_churn,
+             })
+ 
++        app_ops_m = _journal_count("shelf_activity.applied_operations", applied_ops_count, "operations")
++        _attach_sample_counts(app_ops_m, len(interval_applies))
++
++        memb_adds_m = _journal_count("shelf_activity.membership_additions", total_membership_additions, "mutations")
++        _attach_sample_counts(memb_adds_m, len([app for app in interval_applies if app.get("additions")]))
++
++        memb_rems_m = _journal_count("shelf_activity.membership_removals", total_membership_removals, "mutations")
++        _attach_sample_counts(memb_rems_m, len([app for app in interval_applies if app.get("removals")]))
++
++        memb_muts_m = _journal_count("shelf_activity.membership_mutations", total_membership_mutations, "mutations")
++        _attach_sample_counts(memb_muts_m, len([app for app in interval_applies if app.get("additions") or app.get("removals")]))
++
++        aff_items_m = _journal_count("shelf_activity.affected_items", len(interval_affected_items), "saved_items")
++        _attach_sample_counts(aff_items_m, len([app for app in interval_applies if app.get("affected_vids")]))
++
++        item_chg_m = _journal_count("shelf_activity.item_change_events", item_change_events, "events")
++        _attach_sample_counts(item_chg_m, len([app for app in interval_applies if app.get("item_change_count")]))
++
++        prim_chg_m = _journal_count("shelf_activity.primary_change_events", primary_change_events, "events")
++        _attach_sample_counts(prim_chg_m, len([app for app in interval_applies if app.get("primary_change_count")]))
++
++        meta_only_m = _journal_count("shelf_activity.metadata_only_item_events", metadata_only_events, "events")
++        _attach_sample_counts(meta_only_m, len([app for app in interval_applies if app.get("metadata_only_count")]))
++
++        pol_chg_m = _journal_count("shelf_activity.policy_change_events", policy_change_events, "events")
++        _attach_sample_counts(pol_chg_m, len([app for app in interval_applies if app.get("policy_change_count")]))
++
++        act_ev_m = _journal_count("shelf_activity.activation_events", activation_events, "events")
++        _attach_sample_counts(act_ev_m, len([app for app in interval_applies if app.get("activation")]))
++
++        curr_asgn_m = _count_metric("shelf_activity.current_assigned_items", distinct_current_assigned, "saved_items", "scope_shelf_current")
++        _attach_sample_counts(curr_asgn_m, distinct_current_assigned)
++
++        curr_memb_m = _count_metric("shelf_activity.current_memberships", total_current_memberships, "memberships", "scope_shelf_current")
++        _attach_sample_counts(curr_memb_m, total_current_memberships)
++
++        init_filing_m = _count_metric("shelf_activity.initial_filing_items", initial_filing_count, "saved_items", "scope_shelf_baseline")
++        _attach_sample_counts(init_filing_m, initial_filing_count if initial_filing_count is not None else 0)
++
+         shelf_family = {
+-            "applied_operations": _journal_count("shelf_activity.applied_operations", applied_ops_count, "operations"),
+-            "membership_additions": _journal_count("shelf_activity.membership_additions", total_membership_additions, "mutations"),
+-            "membership_removals": _journal_count("shelf_activity.membership_removals", total_membership_removals, "mutations"),
+-            "membership_mutations": _journal_count("shelf_activity.membership_mutations", total_membership_mutations, "mutations"),
+-            "affected_items": _journal_count("shelf_activity.affected_items", len(interval_affected_items), "saved_items"),
+-            "item_change_events": _journal_count("shelf_activity.item_change_events", item_change_events, "events"),
+-            "primary_change_events": _journal_count("shelf_activity.primary_change_events", primary_change_events, "events"),
+-            "metadata_only_item_events": _journal_count("shelf_activity.metadata_only_item_events", metadata_only_events, "events"),
+-            "policy_change_events": _journal_count("shelf_activity.policy_change_events", policy_change_events, "events"),
+-            "activation_events": _journal_count("shelf_activity.activation_events", activation_events, "events"),
+-            "current_assigned_items": _count_metric("shelf_activity.current_assigned_items", distinct_current_assigned, "saved_items", "scope_shelf_current"),
+-            "current_memberships": _count_metric("shelf_activity.current_memberships", total_current_memberships, "memberships", "scope_shelf_current"),
++            "applied_operations": app_ops_m,
++            "membership_additions": memb_adds_m,
++            "membership_removals": memb_rems_m,
++            "membership_mutations": memb_muts_m,
++            "affected_items": aff_items_m,
++            "item_change_events": item_chg_m,
++            "primary_change_events": prim_chg_m,
++            "metadata_only_item_events": meta_only_m,
++            "policy_change_events": pol_chg_m,
++            "activation_events": act_ev_m,
++            "current_assigned_items": curr_asgn_m,
++            "current_memberships": curr_memb_m,
+             "shelves": shelves_rows[:20],
+             "churn": churn_metric,
+-            "initial_filing_items": _count_metric("shelf_activity.initial_filing_items", initial_filing_count, "saved_items", "scope_shelf_baseline"),
++            "initial_filing_items": init_filing_m,
+             "coverage_ref": "cov_shelf_activity",
+         }
+ 
+@@ -2013,22 +2148,31 @@ def _execute_activity(
+                 last_obs_dt = parse_epoch_ms(max(ls_list))[0] if ls_list else None
+                 obs_no_history = new_obs_count == 0 and (first_obs_dt is None or first_obs_dt >= dt_end)
+ 
++                cap_m = _count_metric(f"sources.{s_id}.captures", captures_in_int, "saved_items", "scope_source_captures")
++                _attach_sample_counts(cap_m, captures_in_int)
++
++                if obs_no_history:
++                    new_obs_m = _count_metric(f"sources.{s_id}.new_observations", None, "entries", "scope_sources", recorded_count=0)
++                    _attach_sample_counts(new_obs_m, 0)
++                else:
++                    new_obs_m = _count_metric(f"sources.{s_id}.new_observations", new_obs_count, "entries", "scope_sources")
++                    _attach_sample_counts(new_obs_m, new_obs_count)
++
++                st_metrics = {}
++                for st, c in state_counts.items():
++                    stm = _count_metric(f"sources.{s_id}.new_observations_by_state.{st}", c, "entries", "scope_sources")
++                    _attach_sample_counts(stm, c)
++                    st_metrics[st] = stm
++
+                 active_source_rows.append({
+                     "source_id": s_id,
+                     "identity_kind": "subscription",
+                     "kind": kind,
+                     "canonical_url": url,
+                     "display_name": _truncate_label(d_name),
+-                    "captures_in_interval": _count_metric(f"sources.{s_id}.captures", captures_in_int, "saved_items", "scope_source_captures"),
+-                    "new_observations": (
+-                        _count_metric(f"sources.{s_id}.new_observations", None, "entries", "scope_sources", recorded_count=0)
+-                        if obs_no_history
+-                        else _count_metric(f"sources.{s_id}.new_observations", new_obs_count, "entries", "scope_sources")
+-                    ),
+-                    "new_observations_by_state": {
+-                        st: _count_metric(f"sources.{s_id}.new_observations_by_state.{st}", c, "entries", "scope_sources")
+-                        for st, c in state_counts.items()
+-                    },
++                    "captures_in_interval": cap_m,
++                    "new_observations": new_obs_m,
++                    "new_observations_by_state": st_metrics,
+                     "observation_window": {
+                         "first_observed_at": format_canonical_utc(first_obs_dt) if first_obs_dt else None,
+                         "last_item_seen_at": format_canonical_utc(last_obs_dt) if last_obs_dt else None,
+@@ -2069,6 +2213,8 @@ def _execute_activity(
+             cap_dts = [it["capture_dt"] for it in group_items if it.get("capture_dt")]
+             min_cap = min(cap_dts) if cap_dts else None
+             max_cap = max(cap_dts) if cap_dts else None
++            hg_cap_m = _count_metric(f"sources.hint.{h_hash}.captures", len(group_items), "saved_items", "scope_source_captures")
++            _attach_sample_counts(hg_cap_m, len(group_items))
+             unlinked_hint_rows.append({
+                 "source_id": None,
+                 "identity_kind": "creator_hint",
+@@ -2077,7 +2223,7 @@ def _execute_activity(
+                 "hint": display_hint,
+                 "hint_truncated": hint_truncated,
+                 "display_name": display_hint,
+-                "captures_in_interval": _count_metric(f"sources.hint.{h_hash}.captures", len(group_items), "saved_items", "scope_source_captures"),
++                "captures_in_interval": hg_cap_m,
+                 "retained_capture_span": {
+                     "earliest_captured_at": format_canonical_utc(min_cap) if min_cap else None,
+                     "latest_captured_at": format_canonical_utc(max_cap) if max_cap else None,
+@@ -2102,11 +2248,23 @@ def _execute_activity(
+         else:
+             support_level = "unresolved"
+ 
++        act_src_m = _count_metric("sources.active_sources_count", len(active_source_rows), "sources", "scope_sources")
++        _attach_sample_counts(act_src_m, len(active_source_rows))
++
++        unlnk_hints_m = _count_metric("sources.unlinked_hint_groups_count", len(unlinked_hint_groups), "creator_hints", "scope_sources")
++        _attach_sample_counts(unlnk_hints_m, len(unlinked_hint_groups))
++
++        lnk_cap_m = _count_metric("sources.linked_capture_union_count", len(linked_captured_vids), "saved_items", "scope_source_captures")
++        _attach_sample_counts(lnk_cap_m, len(linked_captured_vids))
++
++        multi_cap_m = _count_metric("sources.multiply_linked_capture_count", len(multi_linked_captured_vids), "saved_items", "scope_source_captures")
++        _attach_sample_counts(multi_cap_m, len(multi_linked_captured_vids))
++
+         sources_family = {
+-            "active_sources_count": _count_metric("sources.active_sources_count", len(active_source_rows), "sources", "scope_sources"),
+-            "unlinked_hint_groups_count": _count_metric("sources.unlinked_hint_groups_count", len(unlinked_hint_groups), "creator_hints", "scope_sources"),
+-            "linked_capture_union_count": _count_metric("sources.linked_capture_union_count", len(linked_captured_vids), "saved_items", "scope_source_captures"),
+-            "multiply_linked_capture_count": _count_metric("sources.multiply_linked_capture_count", len(multi_linked_captured_vids), "saved_items", "scope_source_captures"),
++            "active_sources_count": act_src_m,
++            "unlinked_hint_groups_count": unlnk_hints_m,
++            "linked_capture_union_count": lnk_cap_m,
++            "multiply_linked_capture_count": multi_cap_m,
+             "details": all_source_details[:20],
+             "coverage_ref": "cov_sources",
+         }
+@@ -2131,9 +2289,15 @@ def _execute_activity(
+             if dt_r and dt_start <= dt_r < dt_end:
+                 runs_created += 1
+ 
++        tax_v_m = _count_metric("revisions.taxonomy_versions_created", tax_versions_created, "revisions", "scope_revisions")
++        _attach_sample_counts(tax_v_m, tax_versions_created if tax_versions_created is not None else 0)
++
++        runs_c_m = _count_metric("revisions.runs_created", runs_created, "runs", "scope_revisions")
++        _attach_sample_counts(runs_c_m, runs_created if runs_created is not None else 0)
++
+         revisions_family = {
+-            "taxonomy_versions_created": _count_metric("revisions.taxonomy_versions_created", tax_versions_created, "revisions", "scope_revisions"),
+-            "runs_created": _count_metric("revisions.runs_created", runs_created, "runs", "scope_revisions"),
++            "taxonomy_versions_created": tax_v_m,
++            "runs_created": runs_c_m,
+             "coverage_ref": "cov_revisions",
+         }
+ 
+@@ -2239,8 +2403,11 @@ def _execute_activity(
+         total_events_count = len(cleaned_events)
+         events_summary_rows = cleaned_events[:20]
+ 
++        events_total_m = _count_metric("events.total", total_events_count, "events", "scope_events")
++        _attach_sample_counts(events_total_m, total_events_count)
++
+         events_family = {
+-            "total": _count_metric("events.total", total_events_count, "events", scope_items_ref),
++            "total": events_total_m,
+             "rows": events_summary_rows,
+             "returned_rows": len(events_summary_rows),
+             "omitted_rows": max(0, total_events_count - len(events_summary_rows)),
+@@ -2267,6 +2434,24 @@ def _execute_activity(
+                 "revision_ref": report_revision,
+                 "coverage_ref": "cov_capture",
+             },
++            "scope_items_tombstones": {
++                "population": "tombstone_saved_items",
++                "clock": "capture_time",
++                "interval": canonical_interval,
++                "query_id": "Q1",
++                "query_version": CONTRACT_VERSION,
++                "revision_ref": report_revision,
++                "coverage_ref": "cov_capture",
++            },
++            "scope_events": {
++                "population": "combined_events",
++                "clock": "applied_journal_time",
++                "interval": canonical_interval,
++                "query_id": "Q1_Q3",
++                "query_version": CONTRACT_VERSION,
++                "revision_ref": report_revision,
++                "coverage_ref": "cov_shelf_activity",
++            },
+             "scope_items_publication": {
+                 "population": "current_live_saved_items",
+                 "clock": "publication_time",
+@@ -2950,6 +3135,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
+                 "item_id": entry["item_id"],
+                 "published_at_ms": raw_clock,
+                 "author": item.get("author"),
++                "ch": item.get("channel"),
+             }
+             row_details = {
+                 "video_id": item["video_id"],
+@@ -2978,7 +3164,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
+         if pub_tier == "direct_episode_parse" and item.get("selected_pub_entry"):
+             ep = item["selected_pub_entry"]
+             raw_clock = ep["published_at"]
+-            obs_dict = {"id": ep["id"], "published_at": raw_clock, "author": item.get("author")}
++            obs_dict = {"id": ep["id"], "published_at": raw_clock, "author": item.get("author"), "ch": item.get("channel")}
+             return {
+                 "row_id": str(ep["id"]),
+                 "source_table": "podcast_episodes",
+@@ -3004,6 +3190,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
+             "observation_hash": canonical_json_hash({
+                 "v": item["video_id"],
+                 "a": item.get("author"),
++                "ch": item.get("channel"),
+                 "c": raw_clock,
+             }),
+             "details": {
+@@ -3019,6 +3206,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
+         "t": item.get("source_type"),
+         "p": item.get("platform"),
+         "a": item.get("author"),
++        "ch": item.get("channel"),
+         "c": raw_clock,
+     }
+     return {
+@@ -3147,17 +3335,8 @@ def _lookup_evidence(
+ 
+     if metric_id == "items.publication_time_available":
+         for item in live_yoinks:
+-            if item["pub_dt"] is not None:
+-                dt_ev = item["pub_dt"]
+-                rows.append({
+-                    "row_id": item["video_id"],
+-                    "source_table": "yoinks",
+-                    "source_key": item["video_id"],
+-                    "event_time": format_canonical_utc(dt_ev),
+-                    "original_clock_encoding": str(item["raw_pub_clock"]),
+-                    "observation_hash": canonical_json_hash({"v": item["video_id"], "pub": True}),
+-                    "details": {"video_id": item["video_id"], "tier": item["pub_tier"]},
+-                })
++            if item.get("pub_dt") is not None:
++                rows.append(_selected_observation_row(item, "publication_time"))
+         return rows
+ 
+     if metric_id == "items.publication_time_unavailable" or metric_id.startswith("items.publication_unavailable_by_reason."):
+@@ -3319,6 +3498,32 @@ def _lookup_evidence(
+     # 7. Shelf activity
+     live_vid_set = {it["video_id"] for it in live_yoinks}
+ 
++    def _apply_row(app: dict, s_id: Optional[str] = None) -> dict:
++        dt_ev = app["created_at_dt"]
++        assert dt_ev is not None
++        details = {
++            "apply_id": app["apply_id"],
++            "operation_sequence": app["operation_sequence"],
++            "kind": app["kind"],
++            "before_revision": app["before_revision"],
++            "after_revision": app["after_revision"],
++            "undo_of": app["undo_of"],
++            "item_changes": app.get("item_changes", []),
++        }
++        if s_id is not None:
++            details["shelf_id"] = s_id
++        if app.get("has_deleted_item"):
++            details["item_deleted"] = True
++        return {
++            "row_id": app["apply_id"],
++            "source_table": "library_applies",
++            "source_key": app["operation_sequence"],
++            "event_time": format_canonical_utc(dt_ev),
++            "original_clock_encoding": str(app["raw_created_at"]),
++            "observation_hash": app["authoritative_record_hash"],
++            "details": details,
++        }
++
+     if metric_id == "shelf_activity.current_assigned_items":
+         assigned_vids = sorted({r[0] for r in all_item_shelves if r[0] in live_vid_set})
+         for vid in assigned_vids:
+@@ -3389,51 +3594,86 @@ def _lookup_evidence(
+                 state = start_state if metric_kind == "start_size" else end_state
+                 for vid, shelves in sorted(state.items()):
+                     if s_id in shelves:
++                        info = shelves[s_id]
++                        app_id = info.get("apply_id") if isinstance(info, dict) else None
++                        source_table = "library_applies" if app_id else "item_shelves"
++                        source_key = app_id if app_id else f"{vid}_{s_id}"
++                        dt_time = dt_start if metric_kind == "start_size" else dt_end
++                        det = {
++                            "video_id": vid,
++                            "shelf_id": s_id,
++                            "role": metric_kind,
++                        }
++                        if app_id:
++                            det["apply_id"] = app_id
++                            if isinstance(info, dict) and "operation_sequence" in info:
++                                det["operation_sequence"] = info["operation_sequence"]
+                         rows.append({
+                             "row_id": vid,
+-                            "source_table": "item_shelves",
+-                            "source_key": f"{vid}_{s_id}",
+-                            "event_time": format_canonical_utc(dt_start) if metric_kind == "start_size" else format_canonical_utc(dt_end),
+-                            "original_clock_encoding": None,
+-                            "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": metric_kind}),
+-                            "details": {"video_id": vid, "shelf_id": s_id, "role": metric_kind},
++                            "source_table": source_table,
++                            "source_key": source_key,
++                            "event_time": format_canonical_utc(dt_time),
++                            "original_clock_encoding": str(info.get("created_at")) if (isinstance(info, dict) and info.get("created_at")) else None,
++                            "observation_hash": (info.get("record_hash") if isinstance(info, dict) and info.get("record_hash") else None) or canonical_json_hash({"v": vid, "s": s_id, "role": metric_kind}),
++                            "details": det,
+                         })
+                 return rows
+             elif metric_kind in ("churn", "added", "removed", "net"):
+-                if metric_kind == "churn" and metric_id.endswith(".denominator"):
+-                    for vid, shelves in sorted(start_state.items()):
+-                        if s_id in shelves:
+-                            rows.append({
+-                                "row_id": vid,
+-                                "source_table": "item_shelves",
+-                                "source_key": f"{vid}_{s_id}",
+-                                "event_time": format_canonical_utc(dt_start),
+-                                "original_clock_encoding": None,
+-                                "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": "denominator"}),
+-                                "details": {"video_id": vid, "shelf_id": s_id, "role": "denominator"},
+-                            })
+-                    return rows
+-                for app in interval_applies:
+-                    if s_id in app.get("referenced_shelves", set()):
+-                        if metric_kind == "added" and not app.get("additions"):
+-                            continue
+-                        if metric_kind == "removed" and not app.get("removals"):
+-                            continue
+-                        dt_ev = app["created_at_dt"]
+-                        assert dt_ev is not None
++                if metric_kind == "churn":
++                    if metric_id.endswith(".denominator"):
++                        for vid, shelves in sorted(start_state.items()):
++                            if s_id in shelves:
++                                info = shelves[s_id]
++                                app_id = info.get("apply_id") if isinstance(info, dict) else None
++                                source_table = "library_applies" if app_id else "item_shelves"
++                                source_key = app_id if app_id else f"{vid}_{s_id}"
++                                det = {"video_id": vid, "shelf_id": s_id, "role": "denominator"}
++                                if app_id:
++                                    det["apply_id"] = app_id
++                                    if isinstance(info, dict) and "operation_sequence" in info:
++                                        det["operation_sequence"] = info["operation_sequence"]
++                                rows.append({
++                                    "row_id": vid,
++                                    "source_table": source_table,
++                                    "source_key": source_key,
++                                    "event_time": format_canonical_utc(dt_start),
++                                    "original_clock_encoding": str(info.get("created_at")) if (isinstance(info, dict) and info.get("created_at")) else None,
++                                    "observation_hash": (info.get("record_hash") if isinstance(info, dict) and info.get("record_hash") else None) or canonical_json_hash({"v": vid, "s": s_id, "role": "denominator"}),
++                                    "details": det,
++                                })
++                        return rows
++                    start_members = {vid for vid, shelves in start_state.items() if s_id in shelves}
++                    s_changed_vids = sorted(start_members.intersection(changed_baseline_vids))
++                    for vid in s_changed_vids:
++                        info = start_state.get(vid, {}).get(s_id)
++                        app_id = info.get("apply_id") if isinstance(info, dict) else None
++                        source_table = "library_applies" if app_id else "item_shelves"
++                        source_key = app_id if app_id else f"{vid}_{s_id}"
++                        det = {"video_id": vid, "shelf_id": s_id, "role": "churn"}
++                        if app_id:
++                            det["apply_id"] = app_id
++                            if isinstance(info, dict) and "operation_sequence" in info:
++                                det["operation_sequence"] = info["operation_sequence"]
+                         rows.append({
+-                            "row_id": app["apply_id"],
+-                            "source_table": "library_applies",
+-                            "source_key": app["operation_sequence"],
+-                            "event_time": format_canonical_utc(dt_ev),
+-                            "original_clock_encoding": str(app["raw_created_at"]),
+-                            "observation_hash": app["authoritative_record_hash"],
+-                            "details": {
+-                                "apply_id": app["apply_id"],
+-                                "shelf_id": s_id,
+-                                "operation_sequence": app["operation_sequence"],
+-                            },
++                            "row_id": vid,
++                            "source_table": source_table,
++                            "source_key": source_key,
++                            "event_time": format_canonical_utc(dt_start),
++                            "original_clock_encoding": str(info.get("created_at")) if (isinstance(info, dict) and info.get("created_at")) else None,
++                            "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": "churn"}),
++                            "details": det,
+                         })
++                    return rows
++                for app in interval_applies:
++                    sh_adds = app.get("shelf_additions", {})
++                    sh_rems = app.get("shelf_removals", {})
++                    if metric_kind == "added" and not sh_adds.get(s_id):
++                        continue
++                    if metric_kind == "removed" and not sh_rems.get(s_id):
++                        continue
++                    if metric_kind == "net" and not (sh_adds.get(s_id) or sh_rems.get(s_id)):
++                        continue
++                    rows.append(_apply_row(app, s_id=s_id))
+                 return rows
+ 
+     if metric_id == "shelf_activity.churn.denominator" or metric_id.endswith(".denominator") and metric_id.startswith("shelf_activity.churn"):
+@@ -3476,26 +3716,6 @@ def _lookup_evidence(
+         return rows
+ 
+     if metric_id.startswith("shelf_activity."):
+-        def _apply_row(app: dict) -> dict:
+-            dt_ev = app["created_at_dt"]
+-            assert dt_ev is not None
+-            return {
+-                "row_id": app["apply_id"],
+-                "source_table": "library_applies",
+-                "source_key": app["operation_sequence"],
+-                "event_time": format_canonical_utc(dt_ev),
+-                "original_clock_encoding": str(app["raw_created_at"]),
+-                "observation_hash": app["authoritative_record_hash"],
+-                "details": {
+-                    "apply_id": app["apply_id"],
+-                    "operation_sequence": app["operation_sequence"],
+-                    "kind": app["kind"],
+-                    "before_revision": app["before_revision"],
+-                    "after_revision": app["after_revision"],
+-                    "undo_of": app["undo_of"],
+-                },
+-            }
+-
+         filtered = interval_applies
+         if metric_id == "shelf_activity.metadata_only_item_events":
+             filtered = [a for a in interval_applies if a.get("metadata_only_count")]
+@@ -3594,6 +3814,34 @@ def _lookup_evidence(
+                     })
+             return rows
+ 
++        if len(parts) >= 4 and parts[2] == "new_observations_by_state":
++            s_id = parts[1]
++            target_st = parts[3]
++            obs_list = source_obs_in_interval.get(s_id, [])
++            seen_entries = set()
++            for o in obs_list:
++                if o[7] != target_st:
++                    continue
++                e_id = o[2]
++                if e_id not in seen_entries:
++                    seen_entries.add(e_id)
++                    dt_fs, _ = parse_epoch_ms(o[5])
++                    rows.append({
++                        "row_id": e_id,
++                        "source_table": "source_items",
++                        "source_key": o[0],
++                        "event_time": format_canonical_utc(dt_fs) if dt_fs else None,
++                        "original_clock_encoding": str(o[5]),
++                        "observation_hash": hashlib.sha256(f"{o[0]}_{o[5]}_{target_st}".encode("utf-8")).hexdigest(),
++                        "details": {
++                            "entry_id": e_id,
++                            "source_id": s_id,
++                            "item_id": o[0],
++                            "state": target_st,
++                        },
++                    })
++            return rows
++
+         # Aggregate source counts
+         s_name = parts[1] if len(parts) >= 2 else None
+         if s_name in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
