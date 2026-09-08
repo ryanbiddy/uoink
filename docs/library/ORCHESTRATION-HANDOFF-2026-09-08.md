@@ -55,15 +55,15 @@ takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and t
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 ~15:15 PDT; not pushed)
+## State at handoff (updated 2026-09-08 ~16:20 PDT; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-| 3 | AS-02b repaired (`d2ec84a`); C20 full browser matrix receipt (`56c1c86`, `PHASE3-S20-MATRIX-RECEIPT`); C21 per-item waiting-for-client surface (`867605b`); two dashboard defects fixed (`12339c3`) | AS-7 DISPATCHED (codex, brief `PHASE3-ACCEPTANCE-7-BRIEF`) | Integrate the AS-7 verdict; C22 Inno is Ryan's |
-| 4 | AV-4r (grok) + AV-4m (gemini) integrated (`6559a71`): AW-2 set 28/28, AW set 32/32; two legacy tests aligned to D11/D12 | AW-3 DISPATCHED (codex, brief `PHASE4-ACCEPTANCE-3-BRIEF`) | Integrate the AW-3 verdict; real-client rerun (Fable) when Astra names it |
-| 5 | BA-3 NOT ACCEPTED (`b67b836`): 62 new reproductions, 12 items open | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a (gemini), AZ-5c (claude), AZ-5e (grok) DISPATCHED from `PHASE5-AZ5-BRIEF`; then AZ-5b, AZ-5d (grok), AZ-5f (claude), AZ-5g (gemini) in the brief's order; then BA-4 |
-| 6 | BC-2 integrated (`fd1825c`, 19/19 + 11/11); study inputs sealed (`d83e6d7`, 25 eligible items) | BD DISPATCHED (codex, brief `PHASE6-BD-BRIEF`) | Integrate the BD verdict; execute the one player observation Astra names; speaker gate is Ryan's |
+| 3 | AS-7 (`229ea90`): AS-02b closed; repairs landed (`1d9e438` pill pagination + accepted label + fetch strip; scenario 03 rerun with the frozen complete state package) and the replacement S21 run at7 (`3d930e5`: executed launcher bytes, exit 0, nine artifacts, database, bound browser observation, `SUPERSESSION-at7.md`) | AS-8 DISPATCHED (codex, brief `PHASE3-ACCEPTANCE-8-BRIEF`) | Integrate AS-8; if accepted subject to C22, Phase 3 waits only on Ryan's Inno receipt |
+| 4 | AW-3 (`f7a6e69`) NOT ACCEPTED: D04/D11/D16 closed, 11 open, 16 reproductions in `test_phase4_aw3_acceptance.py`; real-client rerun requirements listed in AW-3 (five numbered items) | `PHASE4-ACCEPTANCE-3-2026-09-08.md` | AV-5r (grok D01-03) and AV-5m1 (gemini D07-10) DISPATCHED from `PHASE4-AV5-BRIEF`; then AV-5m2 (grok D12-15), AW-4, then Fable's real-client rerun |
+| 5 | AZ-5c (claude) + AZ-5e (grok) integrated (`46163a4`): 17 of 62 BA-3 reproductions closed; AZ-5a (gemini) retained as `docs/library/patches/az5a-gemini-2026-09-08.patch` (closes 18 but breaks the 64 KiB cap) | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a2 (claude: apply the patch, compact descriptors), AZ-5b (grok BA-04/07), AZ-5f (gemini BA-13) DISPATCHED; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 |
+| 6 | BD (`9e6af04`) withheld with BD-01..09 (14 reproductions); navigation study PASSED numerically (50 tasks, baseline MAE 72.06 s -> 0 s); player observation BD-27 PARTIAL (`65f2301`: player at 0:34, media 503); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | BC-3b (grok BD-02/07) DISPATCHED from `PHASE6-BC3-BRIEF`; BC-3a (claude/gemini BD-01/03/05/06) and BC-3c (gemini BD-04/08/09) next; retry the BD-27 observation; then BD-2 |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21, S22, AW, process
@@ -72,25 +72,33 @@ recovery, BD study inputs). Full legacy tree last run at `fd1825c`: 1,279 passed
 
 ## Queue (in order; each item names its brief or how to write it)
 
-1. AS-7 (Phase 3): DISPATCHED to codex (run started ~14:46 PT). Integrate; if NOT ACCEPTED,
-   write the round-8 brief from its defect table and dispatch grok.
-2. AW-3 (Phase 4): DISPATCHED to codex (~14:52 PT). Integrate; if open items remain, group
-   them (3-5 per session) for gemini/grok; then the real-client rerun Astra specifies.
-3. AZ-5a (gemini), AZ-5c (claude), AZ-5e (grok): DISPATCHED (~15:00 PT) from
-   `PHASE5-AZ5-BRIEF-2026-09-08.md`. Integrate each (3-way apply; `library_analysis.py` is
-   shared by 5a and 5c, keep both sides), run the Phase 5 suites, then dispatch AZ-5b (grok),
-   then AZ-5d (grok), AZ-5f (claude after 5c), AZ-5g (gemini after 5d), then BA-4 (codex).
-4. BD (Phase 6): DISPATCHED to codex (~15:12 PT). Integrate the verdict and study; execute
-   the player observation it names (Chrome); if open items remain, brief BC-3.
+Running now (dispatched ~15:55-16:15 PT): AS-8 (codex), AZ-5a2 (claude), AZ-5b (grok),
+AZ-5f (gemini), AV-5r (grok), AV-5m1 (gemini), BC-3b (grok). Integrate each as it lands
+(worktree diff, `git apply --3way`, the suites named in its brief), commit, then:
+
+1. Phase 3: AS-8 verdict. If accepted subject to C22, record that in this file and the
+   memory; C22 = Ryan's installed Inno receipt (AS-7 lists its contents).
+2. Phase 5: after AZ-5a2 and AZ-5b land, dispatch AZ-5d (grok) from `PHASE5-AZ5-BRIEF`;
+   after AZ-5d, AZ-5g (gemini); then BA-4 (codex) on the integrated candidate.
+3. Phase 4: after AV-5m1 lands, dispatch AV-5m2 (grok) from `PHASE4-AV5-BRIEF`; then AW-4
+   (codex); then Fable's real-client rerun per AW-3's five requirements (claude -p, no paid
+   API).
+4. Phase 6: dispatch BC-3a and BC-3c from `PHASE6-BC3-BRIEF` when claude/gemini free; retry
+   the BD-27 player observation (https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s, record
+   the player clock and onset; attempt 1 hit CDN 503); then BD-2 (codex).
 5. Integration candidate and release notes; Ryan's gates.
 
-Control Room note: a brief that names a path in backticks makes that path a required
-committed input; never write `_scratch/` or another untracked path in backticks in a brief.
+Control Room notes: a brief that names a path in backticks makes that path a required
+committed input (never write `_scratch/` in backticks); `git config --global core.longpaths
+true` is required because the retained S21 artifact archive has paths over 260 characters
+inside worktrees (set 2026-09-08 ~16:00 PT).
 
 ## Blockers for Ryan (unchanged)
 
 - Phase 2: keep 0.90 strict, change the rule, or ship with owner review.
 - Installed Inno package receipts (Phase 3 C22, Phase 4).
-- Phase 6 measured study: navigation study feasible from existing metadata; the speaker
-  gate needs diarization runs that do not exist (a fetch/transcription scope decision).
+- Phase 6: the navigation study passed numerically; the speaker gate is blocked on already-held
+  diarization output plus independent human annotations for 30 passages across five items
+  (BD lists the exact requirement); the BD-27 player observation needs a network session where
+  googlevideo streams load (attempt 1 hit 503).
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
