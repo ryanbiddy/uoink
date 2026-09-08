@@ -503,9 +503,9 @@ class BriefStore:
         brief_hash = _hash_field(brief_hash, "brief_hash")
         with self.reader._operation() as op:
             self._require_root()
-            manifest, _document, _citations, _packet = self._load_artifact(date, brief_hash)
+            manifest, _document, _citations, packet = self._load_artifact(date, brief_hash)
             op.check()
-            self._check_dependencies(op, manifest)
+            self._check_dependencies(op, manifest, packet=packet)
             return [d["item_id"] for d in manifest.get("dependencies") or [] if isinstance(d, dict) and d.get("item_id")]
 
     def latest_valid(self, utc_date: str) -> dict | None:
@@ -563,6 +563,10 @@ class BriefStore:
         return self.reader._has_tables(names)
 
     def _build_packet(self, op, date: str, run_id: str, as_of: _dt.datetime) -> dict:
+        with self.reader._lock(op):
+            return self._locked_build_packet(op, date, run_id, as_of)
+
+    def _locked_build_packet(self, op, date: str, run_id: str, as_of: _dt.datetime) -> dict:
         day_start, day_end = self._day_bounds(date)
 
         def covered(moment: _dt.datetime | None) -> bool:
@@ -928,7 +932,7 @@ class BriefStore:
         brief_hash = digest({"manifest": manifest, "document": document, "citations": bound_citations,
                              "packet": body})
         manifest["brief_hash"] = brief_hash
-        self._write_artifact(date, brief_hash, manifest, document, bound_citations, body)
+        self._write_artifact(date, brief_hash, manifest, document, bound_citations, body, op=op)
         receipt = self._receipt_from_manifest(manifest)
         self._save_records(request, receipt)
         op.check()
@@ -1001,7 +1005,7 @@ class BriefStore:
         }
 
     def _write_artifact(self, date: str, brief_hash: str, manifest: dict, document: str,
-                        citations: list[dict], packet: dict) -> None:
+                        citations: list[dict], packet: dict, op=None) -> None:
         root = self._require_root()
         final = root / date / brief_hash
         if final.is_dir() and (final / "manifest.json").is_file():
@@ -1013,13 +1017,87 @@ class BriefStore:
             _write_json_atomic(tmp / "citations.json", citations)
             _write_json_atomic(tmp / "packet.json", packet)
             _write_json_atomic(tmp / "manifest.json", manifest)
+            # Recheck every source/queue/run/taxonomy/projection binding at the atomic publication step
+            self._recheck_publication_bindings(op, packet, manifest)
             os.replace(tmp, final)
+        except ResourceError:
+            with contextlib.suppress(OSError):
+                shutil.rmtree(tmp, ignore_errors=True)
+            raise
         except OSError as exc:
             with contextlib.suppress(OSError):
                 shutil.rmtree(tmp, ignore_errors=True)
             if final.is_dir() and (final / "manifest.json").is_file():
                 return
             raise ResourceError("library_unavailable", details={"storage": type(exc).__name__}) from exc
+
+    def _recheck_publication_bindings(self, op, packet: dict, manifest: dict) -> None:
+        """Recheck all source/queue/run/taxonomy/projection bindings immediately before atomic publication."""
+        if op is None:
+            with self.reader._operation() as fresh_op:
+                return self._recheck_publication_bindings(fresh_op, packet, manifest)
+
+        with self.reader._lock(op):
+            # 1. Recheck every source card dependency
+            for dependency in manifest.get("dependencies") or []:
+                op.check()
+                item_id = dependency.get("item_id")
+                try:
+                    self.reader._snapshot_item(op, item_id)
+                except ResourceError:
+                    raise ResourceError("stale_brief", details={
+                        "reason": "source_deleted", "item_id": item_id, "next_step": "get_library_brief_input"})
+                if hasattr(op, "cache"):
+                    op.cache.pop(("bundle", item_id), None)
+                bundle = self.reader._bundle(op, item_id)
+                if bundle.error is not None:
+                    raise ResourceError("stale_brief", details={
+                        "reason": "source_deleted", "item_id": item_id, "next_step": "get_library_brief_input"})
+                card = bundle.card
+                if (card.get("card_hash") != dependency.get("card_hash")
+                        or card.get("source_revision") != dependency.get("source_revision")):
+                    raise ResourceError("stale_brief", details={
+                        "reason": "source_changed", "item_id": item_id, "next_step": "get_library_brief_input"})
+
+            # 2. Phase 2 bindings
+            bindings = packet.get("bindings") or {}
+            phase2 = ("library_meta", "shelf_versions", "library_runs", "library_work", "library_manifest", "library_applies")
+            if self._has_tables(phase2):
+                meta = self._sql("SELECT projection_revision, active_version_id, last_operation_sequence, recovery_state FROM library_meta WHERE singleton=1")
+                meta_row = meta[0] if meta else {}
+                if int(meta_row.get("projection_revision") or 0) != bindings.get("projection_revision"):
+                    raise ResourceError("stale_brief", details={"reason": "projection_changed", "next_step": "get_library_brief_input"})
+                if meta_row.get("active_version_id") != bindings.get("active_version_id"):
+                    raise ResourceError("stale_brief", details={"reason": "active_version_changed", "next_step": "get_library_brief_input"})
+                if meta_row.get("recovery_state") != bindings.get("recovery_state"):
+                    raise ResourceError("stale_brief", details={"reason": "recovery_state_changed", "next_step": "get_library_brief_input"})
+
+                taxonomy_revision = None
+                if meta_row.get("active_version_id"):
+                    version = self._sql("SELECT revision_hash FROM shelf_versions WHERE version_id=?", (meta_row["active_version_id"],))
+                    taxonomy_revision = version[0]["revision_hash"] if version else None
+                if taxonomy_revision != bindings.get("taxonomy_revision"):
+                    raise ResourceError("stale_brief", details={"reason": "taxonomy_changed", "next_step": "get_library_brief_input"})
+
+                run_id = packet.get("run_id")
+                run = self._sql("SELECT run_id, version_id, manifest_hash, run_revision, state FROM library_runs WHERE run_id=?", (run_id,))
+                bound_run = bindings.get("run") or {}
+                if bound_run.get("found"):
+                    if not run:
+                        raise ResourceError("stale_brief", details={"reason": "run_deleted", "next_step": "get_library_brief_input"})
+                    if (int(run[0]["run_revision"]) != bound_run.get("run_revision") or
+                            run[0]["manifest_hash"] != bound_run.get("manifest_hash") or
+                            run[0]["state"] != bound_run.get("state") or
+                            run[0]["version_id"] != bound_run.get("version_id")):
+                        raise ResourceError("stale_brief", details={"reason": "run_changed", "next_step": "get_library_brief_input"})
+                else:
+                    if run:
+                        raise ResourceError("stale_brief", details={"reason": "run_created", "next_step": "get_library_brief_input"})
+
+                queue = self._sql("SELECT work_id, video_id, state, packet_generation, packet_hash, attempts, priority, created_at, updated_at FROM library_work WHERE run_id=? ORDER BY state, priority, created_at, work_id", (run_id,))
+                manifest_rows = self._sql("SELECT video_id, source_revision, disposition, reason FROM library_manifest WHERE run_id=? ORDER BY video_id", (run_id,))
+                if digest({"work": queue, "manifest": manifest_rows}) != bindings.get("queue_digest"):
+                    raise ResourceError("stale_brief", details={"reason": "queue_changed", "next_step": "get_library_brief_input"})
 
     # ---- reading ---------------------------------------------------------
     def _manifests(self, date: str) -> list[dict]:
@@ -1065,8 +1143,8 @@ class BriefStore:
             raise ResourceError("internal_error", details={"reason": "artifact_integrity"})
         return manifest, document, citations, packet
 
-    def _check_dependencies(self, op, manifest: dict) -> None:
-        """Source deletion or a changed card makes the brief unavailable now."""
+    def _check_dependencies(self, op, manifest: dict, packet: dict | None = None) -> None:
+        """Source deletion, changed card, or changed projection revision makes the brief unavailable now."""
         for dependency in manifest.get("dependencies") or []:
             op.check()
             item_id = dependency.get("item_id")
@@ -1084,11 +1162,57 @@ class BriefStore:
                 raise ResourceError("revision_unavailable", details={"reason": "dependency_changed",
                                                                      "next_step": "get_library_brief_input"})
 
+        if packet is None:
+            try:
+                date = manifest.get("date")
+                b_hash = manifest.get("brief_hash")
+                if date and b_hash:
+                    packet = _read_json(self._artifact_dir(date, b_hash) / "packet.json")
+            except Exception:
+                packet = None
+
+        if isinstance(packet, dict):
+            bindings = packet.get("bindings") or {}
+            bound_proj = bindings.get("projection_revision")
+            if bound_proj is not None and self._has_tables(("library_meta",)):
+                meta = self._sql("SELECT projection_revision FROM library_meta WHERE singleton=1")
+                if meta:
+                    curr_proj = int(meta[0]["projection_revision"])
+                    if curr_proj != bound_proj:
+                        raise ResourceError("revision_unavailable", details={
+                            "reason": "projection_changed", "expected": bound_proj,
+                            "actual": curr_proj, "next_step": "get_library_brief_input"})
+            bound_tax = bindings.get("taxonomy_revision")
+            if bound_tax is not None and self._has_tables(("library_meta", "shelf_versions")):
+                meta = self._sql("SELECT active_version_id FROM library_meta WHERE singleton=1")
+                if meta and meta[0].get("active_version_id"):
+                    version = self._sql("SELECT revision_hash FROM shelf_versions WHERE version_id=?",
+                                        (meta[0]["active_version_id"],))
+                    curr_tax = version[0]["revision_hash"] if version else None
+                    if curr_tax != bound_tax:
+                        raise ResourceError("revision_unavailable", details={
+                            "reason": "taxonomy_changed", "expected": bound_tax,
+                            "actual": curr_tax, "next_step": "get_library_brief_input"})
+            bound_run = bindings.get("run") or {}
+            if bound_run.get("found") and self._has_tables(("library_runs",)):
+                run_id = bound_run.get("run_id") or packet.get("run_id")
+                if run_id:
+                    run = self._sql("SELECT run_id, run_revision, manifest_hash, state, version_id FROM library_runs WHERE run_id=?", (run_id,))
+                    if not run:
+                        raise ResourceError("revision_unavailable", details={
+                            "reason": "run_deleted", "next_step": "get_library_brief_input"})
+                    if (int(run[0]["run_revision"]) != bound_run.get("run_revision") or
+                            run[0]["manifest_hash"] != bound_run.get("manifest_hash") or
+                            run[0]["state"] != bound_run.get("state") or
+                            run[0]["version_id"] != bound_run.get("version_id")):
+                        raise ResourceError("revision_unavailable", details={
+                            "reason": "run_changed", "next_step": "get_library_brief_input"})
+
     def _render(self, op, date: str, brief_hash: str) -> tuple[dict, str]:
         self._require_root()
-        manifest, document, citations, _packet = self._load_artifact(date, brief_hash)
+        manifest, document, citations, packet = self._load_artifact(date, brief_hash)
         op.check()
-        self._check_dependencies(op, manifest)
+        self._check_dependencies(op, manifest, packet=packet)
         rendered_citations = []
         for citation in citations:
             item_id = citation.get("item_id")

@@ -9802,6 +9802,69 @@ def _trash_folder_for(row: dict) -> Path:
 _TRASH_PURGE_INTERVAL_SEC = 24 * 60 * 60
 
 
+# Pending incomplete brief cleanup tracking across passes and restarts (AW-D08)
+_pending_brief_purges_lock = threading.Lock()
+
+
+def _pending_brief_purges_file() -> Path | None:
+    if DATA_ROOT is None:
+        return None
+    return Path(DATA_ROOT) / "reach" / "briefs" / ".pending_purges.json"
+
+
+def _get_pending_brief_purges() -> set[str]:
+    with _pending_brief_purges_lock:
+        purges: set[str] = set()
+        p = _pending_brief_purges_file()
+        if p is not None and p.is_file():
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    purges.update(str(x) for x in data)
+            except Exception:
+                pass
+        return purges
+
+
+def _add_pending_brief_purge(video_id: str) -> None:
+    with _pending_brief_purges_lock:
+        p = _pending_brief_purges_file()
+        if p is None:
+            return
+        purges: set[str] = set()
+        if p.is_file():
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    purges.update(str(x) for x in data)
+            except Exception:
+                pass
+        purges.add(video_id)
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(sorted(purges)), encoding="utf-8")
+        except Exception:
+            pass
+
+
+def _remove_pending_brief_purge(video_id: str) -> None:
+    with _pending_brief_purges_lock:
+        p = _pending_brief_purges_file()
+        if p is None or not p.is_file():
+            return
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                purges = set(str(x) for x in data)
+                purges.discard(video_id)
+                if purges:
+                    p.write_text(json.dumps(sorted(purges)), encoding="utf-8")
+                else:
+                    p.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
 def _purge_trash() -> int:
     """One trash-purge pass: hard-delete every soft-deleted yoink past the
     30-day retention window -- both its _yoink-trash/ folder and its index
@@ -9813,6 +9876,25 @@ def _purge_trash() -> int:
     except Exception as e:
         log.warning("trash purge: could not query the index: %s", e)
         return 0
+
+    brief_store = None
+    try:
+        import library_briefs
+        svc = idx.library_service() if hasattr(idx, "library_service") else None
+        brief_store = library_briefs.BriefStore(idx, svc, data_root=DATA_ROOT)
+    except Exception as e:
+        log.warning("trash purge: could not initialize BriefStore: %s", e)
+        brief_store = None
+
+    # Retry any previously incomplete brief cleanups independently of mirror consent/availability (AW-D08)
+    if brief_store is not None:
+        for vid in _get_pending_brief_purges():
+            try:
+                brief_store.purge_dependents(vid)
+                _remove_pending_brief_purge(vid)
+            except Exception:
+                log.warning("trash purge: retry brief cleanup failed for %s", vid)
+
     purged = 0
     for video_id in stale:
         row = idx.get_yoink(video_id)
@@ -9823,6 +9905,14 @@ def _purge_trash() -> int:
             if trash.exists():
                 shutil.rmtree(trash, ignore_errors=True)
             idx.delete_yoink(video_id)
+            # Local brief cleanup independent of mirror consent/availability (AW-D08)
+            if brief_store is not None:
+                try:
+                    brief_store.purge_dependents(video_id)
+                    _remove_pending_brief_purge(video_id)
+                except Exception:
+                    _add_pending_brief_purge(video_id)
+                    log.warning("trash purge: brief cleanup failed for %s, scheduled retry", video_id)
             _mirror_event("hard_purge", video_id=video_id)  # seam: hard_purge
             purged += 1
         except Exception:

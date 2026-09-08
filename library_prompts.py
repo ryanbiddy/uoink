@@ -510,7 +510,41 @@ def _reshelve_review(reader: LibraryReader, work_service, args: dict[str, str]) 
             except ValueError:
                 return {}
         binding = decode(preview.get("binding_json"))
-        summary = decode(preview.get("summary_json"))
+
+        # AW-D05: Pure report recheck of preview bindings (run, taxonomy, evidence, delta).
+        # Reuses Phase 2's preview-binding checks without minting previews, approving, applying or reaping leases.
+        summary_rechecked = None
+        if hasattr(work_service, "_recheck_preview"):
+            try:
+                with scope.locked():
+                    conn = getattr(reader.index, "_conn", None)
+                    if conn is None:
+                        raise ResourceError("library_unavailable", details={"storage": "no_connection"})
+                    args_check = {
+                        "expected_projection_revision": int(preview["expected_projection_revision"]),
+                        "delta_hash": preview["delta_hash"],
+                    }
+                    _, _, summary_rechecked = work_service._recheck_preview(conn, preview, args_check)
+            except ResourceError:
+                raise
+            except Exception as exc:
+                raise ResourceError("revision_unavailable", details={
+                    "reason": "preview_invalidated", "next_step": "apply_reshelving mode=preview",
+                    "error": str(exc)}) from exc
+        else:
+            if binding.get("run_revision") is not None and run.get("run_revision") != binding.get("run_revision"):
+                raise ResourceError("revision_unavailable", details={
+                    "reason": "preview_invalidated", "next_step": "apply_reshelving mode=preview"})
+            if binding.get("manifest_hash") is not None and run.get("manifest_hash") != binding.get("manifest_hash"):
+                raise ResourceError("revision_unavailable", details={
+                    "reason": "preview_invalidated", "next_step": "apply_reshelving mode=preview"})
+            if binding.get("taxonomy_revision") is not None:
+                tax_rows = scope.sql("SELECT revision_hash FROM shelf_versions WHERE version_id=?", (run.get("version_id"),))
+                if not tax_rows or tax_rows[0].get("revision_hash") != binding.get("taxonomy_revision"):
+                    raise ResourceError("revision_unavailable", details={
+                        "reason": "preview_invalidated", "next_step": "apply_reshelving mode=preview"})
+
+        summary = summary_rechecked if summary_rechecked is not None else decode(preview.get("summary_json"))
         forward_hash = hashlib.sha256((preview.get("forward_json") or "").encode("utf-8")).hexdigest()
         expires = _dt.datetime.fromtimestamp(int(preview["expires_ms"]) / 1000.0, tz=_dt.timezone.utc)
         body = _body(
