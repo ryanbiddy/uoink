@@ -82,7 +82,12 @@ def run(hold_seconds=0):
         return original_db(path, *args, **kwargs)
 
     class NoModels(importlib.abc.MetaPathFinder):
+        availability_probe = False
+
         def find_spec(self, fullname, path=None, target=None):
+            if fullname == 'whisperx' and self.availability_probe:
+                # Fail the cold-boot probe without loading a model runtime.
+                raise ModuleNotFoundError('WhisperX disabled for the S21 availability probe', name=fullname)
             if fullname.split('.')[0] in {'torch', 'whisperx', 'faster_whisper', 'transformers', 'anthropic', 'openai'}:
                 model_denied()
             return None
@@ -115,6 +120,13 @@ def run(hold_seconds=0):
             import _platform
             stack.enter_context(patch.object(_platform, 'user_data_dir', lambda: root))
             stack.enter_context(patch.object(_platform, 'desktop_dir', lambda: root / 'output'))
+            # Only this import-time availability check is exempt from model-call
+            # accounting. All guards stay installed, including the runtime block.
+            model_guard.availability_probe = True
+            try:
+                import whisper_runner
+            finally:
+                model_guard.availability_probe = False
             spec = importlib.util.spec_from_file_location('server', helper_root / 'server.py')
             server = importlib.util.module_from_spec(spec)
             sys.modules['server'] = server
@@ -122,7 +134,6 @@ def run(hold_seconds=0):
             import index
             import podcasts
             import source_subscriptions as ss
-            import whisper_runner
             from library_work import RequestContext
 
             # The production address checks remain active for every other host.
