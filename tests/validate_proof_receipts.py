@@ -1274,6 +1274,11 @@ def check_stage4_references(manifest, documents):
                 require(row["source_revision"] == binding["source_revision"] and row["card_hash"] == binding["new_card_hash"],
                         f"Stage 4 {label} stale card reference: {vid}")
                 support = row.get("evidence")
+                if row.get("outcome") == "unsupported":
+                    # The labelling rules define unsupported as "no admissible excerpt with usable
+                    # text"; such a row carries no quote. The sketch preserves these rows as-is.
+                    require(not support, f"Stage 4 {label} unsupported row carries evidence: {vid}")
+                    continue
                 require(isinstance(support, dict), f"Stage 4 {label} lacks excerpt support: {vid}")
                 _check_support(dict(support, video_id=vid, source_revision=row["source_revision"], card_hash=row["card_hash"]),
                                manifest["card_payloads"], manifest["cards"])
