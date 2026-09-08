@@ -230,7 +230,7 @@ def main(argv=None) -> int:
             return 1
         gold, mapping = seal(adjudicated, packet, cards, taxonomy)
         gold_text = json.dumps(gold, ensure_ascii=False, indent=2) + "\n"
-        mapping_doc = dict(schema_version=1, kind="holdout-v2-mapping", holdout_version="holdout-v2-2026-09-05",
+        mapping_doc = dict(schema_version=1, kind="holdout-mapping", holdout_version=packet["holdout_version"],
                            taxonomy_version_id=taxonomy["version_id"], taxonomy_revision_hash=taxonomy["revision_hash"],
                            adjudicated_file=str(args.seal.resolve().relative_to(ROOT)).replace("\\", "/"),
                            adjudicated_sha256=sha(args.seal.read_bytes()), gold_sha256=sha(gold_text.encode("utf-8")),

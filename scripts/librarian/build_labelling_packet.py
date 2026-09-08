@@ -26,8 +26,10 @@ def main(argv=None) -> int:
     parser.add_argument("--proposal", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--status", default="candidate; approval pending Astra audit of the induction receipts")
+    parser.add_argument("--holdout", type=Path, default=HOLDOUT, help="Frozen hold-out file (default: hold-out v2)")
     args = parser.parse_args(argv)
-    holdout = json.loads(HOLDOUT.read_text(encoding="utf-8"))
+    holdout_path = args.holdout
+    holdout = json.loads(holdout_path.read_text(encoding="utf-8"))
     rows = {row["video_id"]: (stratum, row) for stratum, entries in holdout["strata"].items() for row in entries}
     archive_raw = ARCHIVE.read_bytes()
     archived = json.loads(archive_raw.decode("utf-8"))
@@ -52,15 +54,15 @@ def main(argv=None) -> int:
         cards.append(dict(video_id=vid, stratum=stratum, card=card))
     packet = dict(
         schema_version=1, kind="holdout-v2-labelling-packet", holdout_version=holdout["version"],
-        holdout_file_sha256=hashlib.sha256(HOLDOUT.read_bytes()).hexdigest(),
+        holdout_file_sha256=hashlib.sha256(holdout_path.read_bytes()).hexdigest(),
         archived_receipts_sha256=hashlib.sha256(archive_raw).hexdigest(),
         card_source="Last archived attempt packet card per selected identity; card_hash and source_revision equal the frozen holdout rows",
         taxonomy_candidate=dict(version_id=proposal["version_id"], parent_version_id=proposal["parent_version_id"],
                                 status=args.status,
                                 proposal_path=str(args.proposal.resolve().relative_to(ROOT)).replace("\\", "/"),
                                 proposal_sha256=hashlib.sha256(proposal_raw).hexdigest(),
-                                nodes=[{k: node[k] for k in ("shelf_id", "path", "definition", "include", "exclude", "sibling_cues")}
-                                       for node in proposal["nodes"]]),
+                                nodes=[{k: node[k] for k in ("shelf_id", "path", "definition", "include", "exclude", "sibling_cues")
+                                        if k in node} for node in proposal["nodes"]]),
         counts={stratum: len(entries) for stratum, entries in holdout["strata"].items()}, cards=cards)
     text = json.dumps(packet, ensure_ascii=False, indent=1) + "\n"
     if args.out.exists() and args.out.read_text(encoding="utf-8") != text:

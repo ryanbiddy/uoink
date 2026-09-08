@@ -1,0 +1,438 @@
+{
+  "schema_version": 1,
+  "freeze_status": "frozen",
+  "kind": "holdout",
+  "version": "holdout-v3-2026-09-07",
+  "labels_status": "sealed-labels-pending",
+  "archived_receipts_sha256": "294941ba84eec02bf607aa7044ed45454634f99b8dcbf0b4adc9fe35349017b4",
+  "archived_receipts_path": "docs/library/proof/run-stage2-2026-09-06/receipts.json",
+  "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "source_manifest_sha256": "7d5212dfce0bf005bfda693537a4fe2dcd5ac1915d2fd08326bdb386b5cc3056",
+  "selection": {
+    "algorithm": "CPython random.Random(seed).sample; one RNG; timed_evidence then text_only; sort each pool and selected stratum by video_id (Unicode code-point order); sample all timed identities if fewer than 47",
+    "seed_hex": "0x294941ba84eec02b",
+    "seed_integer": 2974981298204885035,
+    "pool_count": 226,
+    "pool_counts": {
+      "timed_evidence": 58,
+      "text_only": 168
+    },
+    "pool_ids_sha256": "146a0f26e26573c9a2e1579a8c99a297b0b414928cf2c3debe5ec7d03778e857",
+    "requested_counts": {
+      "timed_evidence": 47,
+      "text_only": 13
+    },
+    "selected_counts": {
+      "timed_evidence": 47,
+      "text_only": 13
+    },
+    "shortfall_counts": {
+      "timed_evidence": 0,
+      "text_only": 0
+    },
+    "excluded_induction_count": 225,
+    "excluded_old_holdout_count": 60,
+    "excluded_holdout_v2_count": 60,
+    "excluded_union_count": 322,
+    "induction_manifest_sha256": "9a759f68890a30e9e8403e2f1364cfb9464f335e342e0a70f75e4ddc6dab422d",
+    "old_holdout_sha256": "b3579403434952a95aec54833f473c71d0a31f9f8c4b205583ec893d9675e4a4",
+    "holdout_v2_sha256": "0d5be9a11c8589dcbde79a7b2bbb08a23ad6e9e299a6da2f224439583772b309",
+    "development_overlap_counts": {
+      "induction": 0,
+      "old_holdout": 0,
+      "holdout_v2": 0
+    },
+    "selected_ids_sha256": "e4a84244f73f934fa30d3331f83e29e32d7da3acfad788e129902697a6a0d27d"
+  },
+  "target_count": 60,
+  "strata": {
+    "timed_evidence": [
+      {
+        "video_id": "-JXwa-WlkU8",
+        "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+        "card_hash": "ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2079336900192595969",
+        "source_revision": "e1795970a788f515e326e3c48e203ce8231d53a52bb00381fe250ab993585206",
+        "card_hash": "ea60181891b26a0f1748ed3375a46b90b1949aee1898547c8e12f94913b114d0",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2079405880332664832",
+        "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+        "card_hash": "4209f457c4c25a2051d755465a733a03378949db6dbc779c21b1203997a05461",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2080368030136107009",
+        "source_revision": "5be5d7b5143ceed31d83f2630734c06c50df3074091c7c0484aaec5ac45406c4",
+        "card_hash": "f2a399f4894fb9e2f0a6b15d2914999d8bf862e248cfec83bdb3bb989d6c2d1c",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2080739568429494272",
+        "source_revision": "88eaa7ab1868ef6a82ab4ca64164313a8f2be873893c2bcbdc00c29fa4d5492c",
+        "card_hash": "f82d75d519e07b607f19b0a469023e04f440e948847999bbeec8aabea5969067",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2080788252425150535",
+        "source_revision": "9ab01283c8aaf7f7c27f1ca66e5b4abbac211c2d418a94062f2f35ea786c8c17",
+        "card_hash": "36c403507c8471163a34fdf0cd7ddab981fd6312f804a5da730a03875cb47f88",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2081031860679770112",
+        "source_revision": "afbcfbea425472c1b0eca7de4c2bb2de5bdf2800402062f94e30f0d580e2c1c8",
+        "card_hash": "a70e8132727f4890d2017121fe71b6d0f975f02dc1f0ef1ee5206653a1254b45",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2081060018053369942",
+        "source_revision": "8b05a11557418c4263a2bb9c01038caa6ceff6524d11caa6ae0378c822911118",
+        "card_hash": "e4c41a27c067cc49073673c8527ca6130a5fed87cd3959333cb131012ef93b46",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2081149998704521712",
+        "source_revision": "9bfe40969ded7c4a5d3f10ccbdebe2a7bb7f0e20c49749a0d5d2fba6f9abf569",
+        "card_hash": "8e59f749c46b8bd79b714bda8d42970a04bc59d00784cea4e16ae25b68a8c612",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2081807471145029632",
+        "source_revision": "d6782054eb968af11a2a3e160bf24ab389e723a1518a5040cc4fe20b1f8bc9fb",
+        "card_hash": "5d1ae27ce8c63fe8cf74c1108313ed1fb25abdeebb004c888f2021821ccf2718",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2083597581263769600",
+        "source_revision": "61508420cace9c8aa4b308f457730514eefd13f4bde215c1f55d969d1762bdbd",
+        "card_hash": "a758069c5f674bf077bc30f7667328e129e9f214cd9a6a727126442c6ae5f328",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084009513531703296",
+        "source_revision": "f8c48eaeea8ba67ea6f2b43043584d539f55344203d68ee166740d68064bbfea",
+        "card_hash": "d27cb23ea1a0b8a0055bb3fcccbaae55e2422527599f4041e37e9232304ff30f",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084022671646273536",
+        "source_revision": "47e3110dad980efc8d0fd681d15a2b8fe596afd3bfeb2ee48884425e56bad41a",
+        "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084284247058382974",
+        "source_revision": "3a4a59cf1044bf0452651fb76891798b60b9a1d683d184415326e4abae50f9b3",
+        "card_hash": "cb35298f975af7964da4b8eea9189cc512cc8daca21290e9adccc38793ff21e2",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084345349293166592",
+        "source_revision": "1d77af40b45c439f853f62f50f4088687cc61966e6e1cf1d37ddfe8a536e5e72",
+        "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084651855372808192",
+        "source_revision": "7b5c86cc28496808700207622ac2730c42116f78af03329a939eff0c7702ac4c",
+        "card_hash": "a06686ca137988f96dc29a1ab73403ca744f8ae9d4f9bdb39988c8aeb397c38f",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2084670556981338112",
+        "source_revision": "a81b44ca734b1fc3f74cedf2fe0c70d71dcbad0d7f3dbb829a6a2a5f9842fe35",
+        "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2085020353986785281",
+        "source_revision": "6a26fee503942e6fcbfd85bf83e64831f00b0c7c4f3ae732cea8532e7a40bc6a",
+        "card_hash": "658fb64f2a3851213f7b4612c2a6a858403b0914031d32ff620e363b0f29f547",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2085065022733205504",
+        "source_revision": "12db6b7bcd6d09b8379ef4f76d5de1a259acd4278981051f30926c66a569808c",
+        "card_hash": "4f06f4f96bfc4691e99548830f84a368daedea925908234f61340eb664aea04a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2085398091726041088",
+        "source_revision": "1765d0783ccdf11b94c36b1468887925ae2f88037236efd14eb8681dbbbe3435",
+        "card_hash": "728622224feb03bea2c1e12f85fcee42e5f43c7fd33705fd2f3afd75e1ce408c",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2085409224574545920",
+        "source_revision": "f1dc4127f1b8d182c90d0cdaf2dbbafe2dbfbf1edd84b61bd7b908e33bccd5e6",
+        "card_hash": "f40c8a70cb5fda7749ec7ab41ab4d94d120e42874a2cea1df1134e2f47c9777e",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2085459208485359617",
+        "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+        "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2086124560861270016",
+        "source_revision": "5cbfc38a4cf3d4a035e59455ab4f42703acb4167d8a7d2d8c95623b50ba4f6d0",
+        "card_hash": "dc88a0f71dcbbd98fb66fcba93f0ee7e0170ebf81c4523992153d7d64ea9db0a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2086224231277216132",
+        "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+        "card_hash": "a84c57d388d28118d3f98f07fa81904ec8c8ddde1366e944f45e582c8eb5acc6",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2087207632528719872",
+        "source_revision": "e7dfc0d8c06087f521414d1b184e7a7803a75c6e51f9b8d00b071e796db34982",
+        "card_hash": "983ccf62732fe83126b90a1bd87c370c41aed01bbad35387be98d0609fe84a9a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2088677333066465280",
+        "source_revision": "729d19f3269d602a83facf837d19a6b421f052771d0da8dfd37eda2dfe0dcc69",
+        "card_hash": "79d110d2758584011760f8e0d6cb03d64daea298faf2fb00d48acbe7282487fc",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2089007841277276160",
+        "source_revision": "f21a4a2b13db04f44e7855ace8ab57d993f6c289f4531b84625abd7ef092fb22",
+        "card_hash": "c1e42cf15672f769d15c525850deb4c734c54c826aaa8170b1733c4054ad8084",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2090844215756419072",
+        "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+        "card_hash": "6176811efe42278ba84e5efb936e7df69b64bb8c369490c0a210b0ec0a9be462",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2090953710696329216",
+        "source_revision": "2f05c77ccdbb5c062ba4f98498553bf69f612ae2873a1b9be0f2846df97b0a53",
+        "card_hash": "17023b63651467ce9bdc1d22a5f1c8d7619a8254fb2b6f972e16074252084fc1",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2091546907713662977",
+        "source_revision": "8136abb8999b524f796d7c037551adb8b34b58a6902352745da0ed67e96c6d81",
+        "card_hash": "3aef07ce9cbc01ebc93762a581fb711f3997bb904f922672bec30672028b7444",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2091979655037300736",
+        "source_revision": "72d794f765ef6ca7ea70bfb0def73a2446d1b5cba9344eb82039eb0300a7cc82",
+        "card_hash": "202e4c03b2dbde12f6d56fbfcbe64c9244b1b8f466652a4ed062a63c26761466",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2091993721768116224",
+        "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+        "card_hash": "103137e15a75e7f70b8f945e65259513df6eca745aa24bed8e444c39fb460c8a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2092386459282182144",
+        "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+        "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2092646578058412032",
+        "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+        "card_hash": "6095117f568cf563a2c86f1d254514e69e8b98afcacecdfbd60dcde3e02ecaa9",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2093359169139326976",
+        "source_revision": "ed0223fd0ff2744eac3056bd1c90b3dfda85b01e70caa6cb7d94a4fc9016bea9",
+        "card_hash": "90316740795261b5222c743c437cedcf9102b998ecb468a8557882184a9150d0",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2093715067636154369",
+        "source_revision": "6130553b9b9a31855a03be21d7f983c3e0ec5c1be8edb41684f1e337c061a067",
+        "card_hash": "bb2a241d9693d9f876fdd0275f4ef2d9055a359c9634333da08c0a088e0f15f1",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2094027052739592192",
+        "source_revision": "a32e10e0cd53ebe3459bf814778d20526e21885d71e2618b4dd38460228edc71",
+        "card_hash": "1c563b9889689d436b60dacdd1d59dd5c76b13fc7d4da4158c1b1667190d4d51",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2094362669444648960",
+        "source_revision": "b35260e348156f9d656d9ca2d886b9c49dd4aa3d33b77205b7f23ec06a9cc3b4",
+        "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2094462045219438592",
+        "source_revision": "31cf501d6dd914576ff164685f61db67df6f0ea25a29294d05b9baad33dcdfc9",
+        "card_hash": "0f4ca0fbdd16f88f102169b4496e0cc04c28d387a36e5eefa595cc6ef32c1c7b",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "2094843633572659200",
+        "source_revision": "c3a2d04c7b7b9a24975a0b828243389addbcabb69445987aa3ea6cec4a7ffa49",
+        "card_hash": "57da78c9d44fe122ede8c681e6a0fd519d2aa9fdc1ecf30f6bb525946ffd905a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "G2GEUhe2ro8",
+        "source_revision": "d011455021187a1150e9d6536fe4ae63901639a1a90100d18cfb2e943d5670d0",
+        "card_hash": "06f5ecf4192c093762afddcd36c501687f4ce7b1dac398f37c98ee335607228a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "JmCXZQ2xiZo",
+        "source_revision": "e622bcf3aff29f649041776834d9b51c665a139c53f54cd30f6076a6df31bf00",
+        "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "Vh4O04Bpovw",
+        "source_revision": "41b126f9d4d797db89f22bb3d500d7528ac9a042b8fa67df7d65bca50a3b4bdf",
+        "card_hash": "368000bccecef12aedd4e36211d622e8bd65b31a438b54101aafbf4764faf3f5",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "WgPbbWmnXJ8",
+        "source_revision": "bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825",
+        "card_hash": "08ca7ba3b4f0d1654af0203f3e40d9e0848638a04d81d0927b91f4a768e6d5dd",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "hPJYSxsHDtQ",
+        "source_revision": "840e7af5396322a5a75c2cbe87acd03201ee28509673a6ebca83619ac66eb7dd",
+        "card_hash": "acb7ffda8ba634e40b2585cbad618e4ba4ae887846dd4e0d7e365d921782652a",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "pFlLqO3oUoc",
+        "source_revision": "aefdb286764dff4bdfd12adf0787920c5fd67a03680ca4865f9a14578c1dd7c5",
+        "card_hash": "029519909080c1c90526d3ccb6fd64f52eabb000bc5666f83bfda1c12f838293",
+        "stratum": "timed_evidence"
+      },
+      {
+        "video_id": "pI_WARqK_X4",
+        "source_revision": "db4d3af0519b88345dfbf00142cc560b37083852e9bd8d881d408d9a06b0674e",
+        "card_hash": "3dd4403ba3964165ddf3c4e97f11f143c34e3dfda5d0caa81071a101b87a4fe0",
+        "stratum": "timed_evidence"
+      }
+    ],
+    "text_only": [
+      {
+        "video_id": "2080274574113947649",
+        "source_revision": "ad9e6072bc7bc8a60511cbeb814da6c096c9bc797e0b86cbcc0cf2597a95aae8",
+        "card_hash": "2f911367443ccd741ae196f6b852937027bfe4deafd068447cef4851f5439d59",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2080394147458846720",
+        "source_revision": "81702850f80357a6bcbd347c431a508e94f241026de9494af285c7b83aa75df4",
+        "card_hash": "ebb6783268c2614a5cf3bfe43d72d64cbfd8878b63981504a2899d2de1240618",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2081715828459028480",
+        "source_revision": "86f2e7d544dd0e277107deb3c845615e9ef1d6cf70e866aa167c026dcea6f6e9",
+        "card_hash": "8b53dda43f339b14899c694cf4d9085fabd311ca06cf47d4e8e90e272c4035f4",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2086879775277125633",
+        "source_revision": "21dcae88d8fba8ff742591fa33d39426744ac51bb4f28f454c888fb4e7d58d54",
+        "card_hash": "b8ce4cd4bbba67a06820e6893c93f8514bf86366162057232de481a39e88aabc",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2088367256468164608",
+        "source_revision": "c567eebc4b177b6210e8c341fdabbee00a3fd661c61fc82ead7c06b9b0fef83d",
+        "card_hash": "a30805230ea5c93324a471a0882b241f96fd382da60cd6384c3f71d4708d74cf",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2088390532988891136",
+        "source_revision": "c0ddb72400ccd31a20e6a563cc6c07c1ac5db906ff6d9d849b52cb47bd61ea7d",
+        "card_hash": "d7bea7c64b59d157cb2abcf4fcfa40e9334ce3c5d801a4282b86bbb2ecafab2c",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2088397814267080704",
+        "source_revision": "4fc0ba7fcf4aed9bff45038fac45c39a21317dbd4adedc372d6f493a9fedbc45",
+        "card_hash": "30b35b74d7fee1965a9b65af4de5a93042e2004433fedbd5618fd700852f8929",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2088703526553968640",
+        "source_revision": "d6d2cfb07bff878b9fb907b0e1b0aba588b20cf55d2193e2ec2fe20cfbf93973",
+        "card_hash": "10499cf352c450e0a15c4a4adfa29301c4c803a8acd4dd3acae813ffc006beb7",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2090106310385688577",
+        "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+        "card_hash": "01926dd30685a9ebbc4b27ea393f991f33bf030ad096a0662b4c87b245625c26",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2090852806257422336",
+        "source_revision": "28f316df0bf6a954d035577f2a7db8286da21a885c24afe7d0955f0c15159ae1",
+        "card_hash": "5860ee479dbb81f6d4034c0bd43ceeb53a330b89b5ae15b868bb0e7821ecf0f9",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2091957857650716672",
+        "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+        "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2092658884297334784",
+        "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+        "card_hash": "751e34f3613f149acd066dcc16f77d202cd681c6ec3087fb9b4812c5eb15bcb7",
+        "stratum": "text_only"
+      },
+      {
+        "video_id": "2092919679475941376",
+        "source_revision": "e4bcbc4f62823cc9da50b8667f5a1ec91e63311ea5cf01b4f9c3d21d631540dd",
+        "card_hash": "ae9a428c318b8ca6ea41d2fa21239e80bc676f6a5a8b730137ac26460544b761",
+        "stratum": "text_only"
+      }
+    ]
+  },
+  "feasibility": {
+    "ineligible_source_ids": [],
+    "rule": "Nonempty timed evidence, or nonempty original prose from page/x_article/x_thread/reddit_thread/note; this is only an evidence-availability ceiling",
+    "eligible_counts": {
+      "timed_evidence": 47,
+      "text_only": 13
+    },
+    "assignment_ceiling": {
+      "timed_evidence": {
+        "denominator": 47,
+        "max_assignable": 47,
+        "max_coverage": 1.0,
+        "required_assignments": 38,
+        "coverage_gate_feasible": true
+      },
+      "text_only": {
+        "denominator": 13,
+        "max_assignable": 13,
+        "max_coverage": 1.0,
+        "required_assignments": 11,
+        "coverage_gate_feasible": true
+      }
+    }
+  }
+}

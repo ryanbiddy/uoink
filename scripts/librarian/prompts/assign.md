@@ -46,7 +46,7 @@ Each item is provided as an evidence card with the following fields:
    - For each membership, be able to name the include cue the excerpt satisfies.
 5. **Sibling Cues, Precedence and the Dominant Subject**:
    - Include and exclude cues rendered in the taxonomy are the boundary rules; an exclude cue of the form `"<what> -> <shelf path>"` sends that case to the named shelf, and an include cue marked "takes precedence over ..." wins that case.
-   - When an excerpt covers two shelves, the dominant subject decides (what most of the quoted words are about), not the more specific-sounding shelf. A tutorial, workshop or step-by-step walkthrough is about teaching even when it uses a tool or model.
+   - When the supplied excerpts support two shelves, apply the taxonomy's explicit precedence and exclusions first. Otherwise choose the primary from the dominant subject of all supplied excerpts, before choosing a supporting quote. Judge what the excerpt set teaches, describes or evaluates; do not count words in the selected evidence quote. Teaching takes precedence over Developer Tools and Frontier Models when that is the excerpt set's purpose, including conceptual explanations, tutorials, workshops and step-by-step walkthroughs.
 6. **Refusal and Unmapped Rules**:
    - If a valid source excerpt fits no approved concept in the taxonomy:
      - Set `outcome: "unmapped"`.

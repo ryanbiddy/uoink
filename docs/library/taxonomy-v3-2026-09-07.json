@@ -10,7 +10,7 @@
     "approved_by": null,
     "approval_record": null,
     "decision_path": "docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json",
-    "decision_sha256": "db0a84c4fcce3701478d7e09b588e64010a3519f2ec22bdc590a779821779c66",
+    "decision_sha256": "ee16c1426287f3c2271dbe37bb67c7eae9dc091f7fe9eb0bfd7855c5fd575589",
     "modified_shelf_ids": [
       "ai-and-ml",
       "ai-industry-and-business",
@@ -28,7 +28,7 @@
     ]
   },
   "parent_revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
-  "revision_hash": "f0a2d53384b2559847f92313511b15173a7cdac3c079ab24c133593e615d56f6",
+  "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
   "nodes": [
     {
       "shelf_id": "ai-and-ml",
@@ -193,7 +193,7 @@
         "mathematical foundations",
         "step-by-step technical tutorials",
         "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
-        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples"
+        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
       ],
       "exclude": [
         "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
@@ -220,7 +220,7 @@
         "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
       ],
       "exclude": [
-        "a tutorial or explanation whose purpose is to teach, with brief performance claims -> AI and ML / Education",
+        "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
         "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
         "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
         "routine fine-tuning on niche tasks",

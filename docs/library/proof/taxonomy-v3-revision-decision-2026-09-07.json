@@ -17,6 +17,7 @@
     "rules": {
       "R1": "Education over Developer Tools/Frontier when the purpose is to teach",
       "R2": "child requires its subject established; otherwise the parent",
+      "R2b": "Industry subject established by adoption/labour/task economics or accelerator competition; child over parent",
       "R3": "Industry vs Frontier: dominant subject decides",
       "R4": "Security includes catastrophic AI-safety warnings",
       "R5": "Developer Tools sends non-engineer personal assistance to Agents"
@@ -33,13 +34,16 @@
   "edits": [
     {
       "rule": "R1",
+      "rules": [
+        "R1"
+      ],
       "shelf_id": "education",
       "field": "definition",
       "op": "replace",
       "before": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
       "after": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, workshops and step-by-step walkthroughs whose purpose is to teach machine learning or how to build with AI, even when they use or name a specific tool, model or product.",
       "development_cases": [
-        "2086120621734326",
+        "2086120621734326272",
         "2089011298621399260",
         "2091208884786520487",
         "ub2xbSlay7g"
@@ -47,6 +51,9 @@
     },
     {
       "rule": "R1",
+      "rules": [
+        "R1"
+      ],
       "shelf_id": "education",
       "field": "include",
       "op": "append",
@@ -64,10 +71,10 @@
         "mathematical foundations",
         "step-by-step technical tutorials",
         "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
-        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples"
+        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
       ],
       "development_cases": [
-        "2086120621734326",
+        "2086120621734326272",
         "2089011298621399260",
         "2091208884786520487",
         "ub2xbSlay7g"
@@ -75,6 +82,9 @@
     },
     {
       "rule": "R1",
+      "rules": [
+        "R1"
+      ],
       "shelf_id": "education",
       "field": "exclude",
       "op": "replace",
@@ -89,7 +99,7 @@
         "opinion pieces without pedagogical content"
       ],
       "development_cases": [
-        "2086120621734326",
+        "2086120621734326272",
         "2089011298621399260",
         "2091208884786520487",
         "ub2xbSlay7g"
@@ -97,13 +107,16 @@
     },
     {
       "rule": "R1",
+      "rules": [
+        "R1"
+      ],
       "shelf_id": "developer-tools",
       "field": "definition",
       "op": "replace",
       "before": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
       "after": "Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows, described as products, capabilities, comparisons or workflows rather than taught.",
       "development_cases": [
-        "2086120621734326",
+        "2086120621734326272",
         "2089011298621399260",
         "2091208884786520487",
         "ub2xbSlay7g"
@@ -111,6 +124,11 @@
     },
     {
       "rule": "R1",
+      "rules": [
+        "R1",
+        "R2",
+        "R5"
+      ],
       "shelf_id": "developer-tools",
       "field": "exclude",
       "op": "replace",
@@ -128,14 +146,20 @@
         "non-technical end-user products"
       ],
       "development_cases": [
-        "2086120621734326",
+        "2083664004506145276",
+        "2086120621734326272",
         "2089011298621399260",
         "2091208884786520487",
+        "2091537085874520064",
+        "2094227178032599040",
         "ub2xbSlay7g"
       ]
     },
     {
       "rule": "R3",
+      "rules": [
+        "R3"
+      ],
       "shelf_id": "frontier-models",
       "field": "include",
       "op": "append",
@@ -160,6 +184,11 @@
     },
     {
       "rule": "R3",
+      "rules": [
+        "R1",
+        "R2",
+        "R3"
+      ],
       "shelf_id": "frontier-models",
       "field": "exclude",
       "op": "replace",
@@ -169,7 +198,7 @@
         "general AI business news"
       ],
       "after": [
-        "a tutorial or explanation whose purpose is to teach, with brief performance claims -> AI and ML / Education",
+        "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
         "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
         "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
         "routine fine-tuning on niche tasks",
@@ -177,11 +206,21 @@
         "general AI business news"
       ],
       "development_cases": [
-        "2095783502306545664"
+        "2083664004506145276",
+        "2086120621734326272",
+        "2089011298621399260",
+        "2091208884786520487",
+        "2094227178032599040",
+        "2095783502306545664",
+        "ub2xbSlay7g"
       ]
     },
     {
       "rule": "R2b",
+      "rules": [
+        "R2b",
+        "R3"
+      ],
       "shelf_id": "ai-industry-and-business",
       "field": "include",
       "op": "append",
@@ -202,12 +241,17 @@
         "AI accelerator or chip competition and its implications for chip and model companies"
       ],
       "development_cases": [
-        "2091248592774369",
-        "2094184640873373"
+        "2091248592774369280",
+        "2094184640873373696",
+        "2095783502306545664"
       ]
     },
     {
       "rule": "R3",
+      "rules": [
+        "R2",
+        "R3"
+      ],
       "shelf_id": "ai-industry-and-business",
       "field": "exclude",
       "op": "append",
@@ -228,11 +272,16 @@
         "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a capability with no business analysis -> AI and ML"
       ],
       "development_cases": [
+        "2083664004506145276",
+        "2094227178032599040",
         "2095783502306545664"
       ]
     },
     {
       "rule": "R4",
+      "rules": [
+        "R4"
+      ],
       "shelf_id": "security",
       "field": "include",
       "op": "append",
@@ -259,6 +308,9 @@
     },
     {
       "rule": "R2",
+      "rules": [
+        "R2"
+      ],
       "shelf_id": "ai-and-ml",
       "field": "definition",
       "op": "replace",
@@ -271,6 +323,9 @@
     },
     {
       "rule": "R2",
+      "rules": [
+        "R2"
+      ],
       "shelf_id": "ai-and-ml",
       "field": "include",
       "op": "append",
@@ -463,7 +518,7 @@
         "mathematical foundations",
         "step-by-step technical tutorials",
         "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
-        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples"
+        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)"
       ],
       "exclude": [
         "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
@@ -490,7 +545,7 @@
         "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
       ],
       "exclude": [
-        "a tutorial or explanation whose purpose is to teach, with brief performance claims -> AI and ML / Education",
+        "a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses a specific model, architecture or capability evaluation -> AI and ML / Education",
         "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
         "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
         "routine fine-tuning on niche tasks",
@@ -576,5 +631,5 @@
       "parent_shelf_id": "space-and-science"
     }
   ],
-  "revision_hash": "f0a2d53384b2559847f92313511b15173a7cdac3c079ab24c133593e615d56f6"
+  "revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04"
 }

@@ -44,14 +44,16 @@ from taxonomy_from_proposal import project_nodes, revision_hash, CONTRACT_FIELDS
 
 V2 = ROOT / "docs/library/taxonomy-v2-2026-09-05.json"
 DEV_CASES = {
-    "R1": ["2086120621734326", "2089011298621399260", "2091208884786520487", "ub2xbSlay7g"],
+    "R1": ["2086120621734326272", "2089011298621399260", "2091208884786520487", "ub2xbSlay7g"],
     "R2": ["2083664004506145276", "2094227178032599040"],
-    "R2b": ["2091248592774369", "2094184640873373"],
+    "R2b": ["2091248592774369280", "2094184640873373696"],
     "R3": ["2095783502306545664"],
     "R4": ["FLcrvMfHUJM"],
     "R5": ["2091537085874520064"],
 }
 VERSION_ID = "taxonomy-v3-2026-09-07"
+HOLDOUT_V2 = ROOT / "docs/library/proof/holdout-v2-2026-09-05.json"
+ARCHIVE = ROOT / "docs/library/proof/run-2026-09-05/receipts.json"
 
 EDITS = [
     # R1 Education
@@ -63,7 +65,9 @@ EDITS = [
          after=["hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes "
                 "precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose "
                 "is to teach)",
-                "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples"]),
+                "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples "
+                "(takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's "
+                "purpose is to teach)"]),
     dict(rule="R1", shelf_id="education", field="exclude", op="replace",
          after=["product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / "
                 "Developer Tools or AI and ML / Frontier Models",
@@ -74,7 +78,7 @@ EDITS = [
          after="Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, "
                "and developer-focused workflows, described as products, capabilities, comparisons or workflows rather "
                "than taught."),
-    dict(rule="R1", shelf_id="developer-tools", field="exclude", op="replace",
+    dict(rule="R1", rules=["R1", "R2", "R5"], shelf_id="developer-tools", field="exclude", op="replace",
          after=["a tutorial, workshop or lecture whose purpose is to teach, even when it uses a developer tool -> AI and ML / Education",
                 "personal assistant or agent acting for a non-engineer user (speech, screen or task help) -> AI and ML / AI Agents and Automation",
                 "generic model comparison or model task-fit talk with no coding task, SDK or IDE -> AI and ML",
@@ -85,18 +89,19 @@ EDITS = [
     dict(rule="R3", shelf_id="frontier-models", field="include", op="append",
          after=["model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence "
                 "over AI and ML / AI Industry and Business when economics is secondary)"]),
-    dict(rule="R3", shelf_id="frontier-models", field="exclude", op="replace",
-         after=["a tutorial or explanation whose purpose is to teach, with brief performance claims -> AI and ML / Education",
+    dict(rule="R3", rules=["R1", "R2", "R3"], shelf_id="frontier-models", field="exclude", op="replace",
+         after=["a tutorial, workshop, lecture or conceptual explanation whose purpose is to teach, even when it discusses "
+                "a specific model, architecture or capability evaluation -> AI and ML / Education",
                 "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
                 "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
                 "routine fine-tuning on niche tasks",
                 "end-user application tutorials",
                 "general AI business news"]),
     # R2b + R3 Industry
-    dict(rule="R2b", shelf_id="ai-industry-and-business", field="include", op="append",
+    dict(rule="R2b", rules=["R2b", "R3"], shelf_id="ai-industry-and-business", field="include", op="append",
          after=["AI's effect on enterprise adoption, labour, task economics or economic growth as the subject",
                 "AI accelerator or chip competition and its implications for chip and model companies"]),
-    dict(rule="R3", shelf_id="ai-industry-and-business", field="exclude", op="append",
+    dict(rule="R3", rules=["R2", "R3"], shelf_id="ai-industry-and-business", field="exclude", op="append",
          after=["model scaling, post-training or training pipelines as the dominant subject, with economics secondary -> AI and ML / Frontier Models",
                 "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a "
                 "capability with no business analysis -> AI and ML"]),
@@ -117,7 +122,21 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _validate_cases() -> None:
+    """Every development id is a frozen hold-out v2 identity with an archived card, and every
+    declared rule occurs in at least one edit (AI-R1)."""
+    v2_ids = {row["video_id"] for rows in json.loads(HOLDOUT_V2.read_text(encoding="utf-8"))["strata"].values() for row in rows}
+    archived = {a["video_id"] for a in json.loads(ARCHIVE.read_text(encoding="utf-8"))["attempts"]}
+    for rule, ids in DEV_CASES.items():
+        for vid in ids:
+            v.require(vid in v2_ids, f"{rule}: {vid} is not a hold-out v2 identity")
+            v.require(vid in archived, f"{rule}: {vid} has no archived card")
+    used = {r for spec in EDITS for r in spec.get("rules", [spec["rule"]])}
+    v.require(set(DEV_CASES) <= used, f"Declared rules without an edit: {sorted(set(DEV_CASES) - used)}")
+
+
 def compose() -> tuple[dict, dict]:
+    _validate_cases()
     raw2 = V2.read_bytes()
     v2 = json.loads(raw2.decode("utf-8"))
     nodes = {n["shelf_id"]: copy.deepcopy(n) for n in v2["nodes"]}
@@ -133,8 +152,10 @@ def compose() -> tuple[dict, dict]:
             after = spec["after"]
         v.require(before != after, f"{spec['shelf_id']}.{field}: edit changes nothing")
         node[field] = copy.deepcopy(after)
-        edits.append(dict(rule=spec["rule"], shelf_id=spec["shelf_id"], field=field, op=op, before=before, after=after,
-                          development_cases=DEV_CASES.get(spec["rule"], [])))
+        rules = list(spec.get("rules", [spec["rule"]]))
+        cases = sorted({vid for r in rules for vid in DEV_CASES.get(r, [])})
+        edits.append(dict(rule=spec["rule"], rules=rules, shelf_id=spec["shelf_id"], field=field, op=op, before=before,
+                          after=after, development_cases=cases))
     contract_nodes = [{k: node[k] for k in CONTRACT_FIELDS} for node in nodes.values()]
     projected = project_nodes(contract_nodes)
     v2_projected = project_nodes([{k: n[k] for k in CONTRACT_FIELDS} for n in v2["nodes"]])
@@ -156,6 +177,7 @@ def compose() -> tuple[dict, dict]:
                       development_labels="docs/library/proof/labels/holdout-v2-gold-2026-09-05.json",
                       rules=dict(R1="Education over Developer Tools/Frontier when the purpose is to teach",
                                  R2="child requires its subject established; otherwise the parent",
+                                 R2b="Industry subject established by adoption/labour/task economics or accelerator competition; child over parent",
                                  R3="Industry vs Frontier: dominant subject decides",
                                  R4="Security includes catastrophic AI-safety warnings",
                                  R5="Developer Tools sends non-engineer personal assistance to Agents")),

@@ -23,3 +23,4 @@ docs/library/proof/taxonomy-v2-*.json -text
 docs/library/proof/audit-*-measurements-*.json -text
 docs/library/taxonomy-v3-*.json -text
 docs/library/proof/taxonomy-v3-*.json -text
+docs/library/proof/holdout-v3-*.json -text

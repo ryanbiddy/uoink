@@ -31,6 +31,9 @@ MANIFEST = ROOT / "docs/library/proof/manifest-2026-09-05.json"
 ARCHIVE = ROOT / "docs/library/proof/run-2026-09-05/receipts.json"
 ARCHIVE_SHA256 = "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c"
 HOLDOUT_V2 = ROOT / "docs/library/proof/holdout-v2-2026-09-05.json"
+HOLDOUT_V3 = ROOT / "docs/library/proof/holdout-v3-2026-09-07.json"
+STAGE2_ARCHIVE = ROOT / "docs/library/proof/run-stage2-2026-09-06/receipts.json"
+STAGE2_ARCHIVE_SHA256 = "294941ba84eec02bf607aa7044ed45454634f99b8dcbf0b4adc9fe35349017b4"
 INDUCTION_MANIFEST = ROOT / "docs/library/proof/induction-manifest-2026-09-05.json"
 MANIFEST_STAGE2 = ROOT / "docs/library/proof/manifest-stage2-2026-09-05.json"
 MANIFEST_STAGE3 = ROOT / "docs/library/proof/manifest-stage3-2026-09-07.json"
@@ -175,6 +178,101 @@ def verify_stage2_freezes():
     require(read_json(INDUCTION_MANIFEST) == induction, "Induction freeze differs from archive")
     return dict(status="STAGE2_FREEZES_VALID", holdout_count=60, induction_count=225,
                 holdout_sha256=sha(HOLDOUT_V2.read_bytes()), induction_sha256=sha(INDUCTION_MANIFEST.read_bytes()),
+                feasibility=holdout["feasibility"])
+
+
+def stage3_freezes():
+    """Reserve v3 from bound archive cards; no labels, predictions or external paths."""
+    verify_stage2_freezes()
+    manifest = read_json(MANIFEST)
+    raw = STAGE2_ARCHIVE.read_bytes()
+    require(sha(raw) == STAGE2_ARCHIVE_SHA256, "Stage 2 source archive changed")
+    archived = decode_json(raw)
+    ids = [pair[0] for pair in manifest["items"]]
+    require(archived["target_ids"] == ids and len(ids) == len(set(ids)) == 548,
+            "Stage 2 archive target mismatch")
+    cards = {}
+    for attempt in archived["attempts"]:
+        vid, card = attempt["video_id"], attempt["packet"]["card"]
+        require(vid in manifest["cards"] and card["video_id"] == vid and
+                card["source_revision"] == manifest["cards"][vid]["source_revision"] and
+                card["card_hash"] == manifest["cards"][vid]["card_hash"] ==
+                library_cards._hash({k: value for k, value in card.items() if k != "card_hash"}),
+                "Stage 2 archive card binding mismatch")
+        require(vid not in cards or cards[vid] == card, "Stage 2 archive card changed between attempts")
+        cards[vid] = card
+    require(set(cards) == set(ids), "Stage 2 archive is missing an attempted target")
+
+    def row(vid):
+        card = cards[vid]
+        stratum = "timed_evidence" if any(e["evidence_kind"] == "timed_clip" for e in card["excerpts"]) else "text_only"
+        require(stratum == manifest["cards"][vid]["stratum"], "Stage 2 archive stratum mismatch")
+        return dict(video_id=vid, source_revision=card["source_revision"], card_hash=card["card_hash"], stratum=stratum)
+
+    old_path = ROOT / "docs/library/holdout-split-2026-09-04.json"
+    exclusions = {
+        "induction": {r["video_id"] for r in read_json(INDUCTION_MANIFEST)["items"]},
+        "old_holdout": {r["video_id"] for rows in read_json(old_path)["strata"].values() for r in rows},
+        "holdout_v2": {r["video_id"] for rows in read_json(HOLDOUT_V2)["strata"].values() for r in rows},
+    }
+    require({key: len(value) for key, value in exclusions.items()} ==
+            dict(induction=225, old_holdout=60, holdout_v2=60), "Stage 3 exclusion counts changed")
+    excluded = set().union(*exclusions.values())
+    require(excluded <= set(ids), "Stage 3 exclusion identity is outside the frozen corpus")
+    pool = sorted(set(ids) - excluded)
+    require(len(pool) == 226, "Stage 3 evaluation pool changed")
+    requested = dict(timed_evidence=47, text_only=13)
+    pools = {s: [vid for vid in pool if row(vid)["stratum"] == s] for s in requested}
+    counts = {s: len(values) for s, values in pools.items()}
+    require(counts["text_only"] >= requested["text_only"], "Stage 3 text-only pool is short; new dispatch required")
+    selected_counts = {s: min(counts[s], n) for s, n in requested.items()}
+    seed = int(STAGE2_ARCHIVE_SHA256[:16], 16)
+    rng = random.Random(seed)
+    strata = {s: [row(vid) for vid in sorted(rng.sample(pools[s], selected_counts[s]))] for s in requested}
+    selected = [r["video_id"] for rows in strata.values() for r in rows]
+    require(len(selected) == len(set(selected)), "Duplicate stage 3 identity")
+    overlaps = {key: len(set(selected) & values) for key, values in exclusions.items()}
+    require(not any(overlaps.values()), "Stage 3 holdout overlaps development data")
+    infeasible = []
+    for vid in selected:
+        card = cards[vid]
+        usable = any(normalize_quote(e["text"]) and
+                     (e["evidence_kind"] == "timed_clip" or card.get("source_type") in
+                      {"page", "x_article", "x_thread", "reddit_thread", "note"}) for e in card["excerpts"])
+        if not usable:
+            infeasible.append(vid)
+    eligible = {s: sum(r["video_id"] not in infeasible for r in rows) for s, rows in strata.items()}
+    return dict(schema_version=1, freeze_status="frozen", kind="holdout", version="holdout-v3-2026-09-07",
+                labels_status="sealed-labels-pending", archived_receipts_sha256=STAGE2_ARCHIVE_SHA256,
+                archived_receipts_path=str(STAGE2_ARCHIVE.relative_to(ROOT)).replace("\\", "/"),
+                source_sha256=SOURCE_SHA256, source_manifest_sha256=sha(MANIFEST.read_bytes()),
+                selection=dict(
+                    algorithm="CPython random.Random(seed).sample; one RNG; timed_evidence then text_only; sort each pool and selected stratum by video_id (Unicode code-point order); sample all timed identities if fewer than 47",
+                    seed_hex="0x" + STAGE2_ARCHIVE_SHA256[:16], seed_integer=seed,
+                    pool_count=len(pool), pool_counts=counts, pool_ids_sha256=digest(pool),
+                    requested_counts=requested, selected_counts=selected_counts,
+                    shortfall_counts={s: requested[s] - selected_counts[s] for s in requested},
+                    excluded_induction_count=225, excluded_old_holdout_count=60, excluded_holdout_v2_count=60,
+                    excluded_union_count=len(excluded), induction_manifest_sha256=sha(INDUCTION_MANIFEST.read_bytes()),
+                    old_holdout_sha256=sha(old_path.read_bytes()), holdout_v2_sha256=sha(HOLDOUT_V2.read_bytes()),
+                    development_overlap_counts=overlaps, selected_ids_sha256=digest(selected)),
+                target_count=len(selected), strata=strata,
+                feasibility=dict(
+                    ineligible_source_ids=sorted(infeasible),
+                    rule="Nonempty timed evidence, or nonempty original prose from page/x_article/x_thread/reddit_thread/note; this is only an evidence-availability ceiling",
+                    eligible_counts=eligible,
+                    assignment_ceiling={s: dict(denominator=n, max_assignable=eligible[s],
+                        max_coverage=eligible[s] / n if n else None, required_assignments=(4 * n + 4) // 5,
+                        coverage_gate_feasible=n > 0 and eligible[s] >= (4 * n + 4) // 5)
+                        for s, n in selected_counts.items()}))
+
+
+def verify_stage3_freezes():
+    holdout = stage3_freezes()
+    require(read_json(HOLDOUT_V3) == holdout, "Holdout v3 differs from deterministic reservation")
+    return dict(status="STAGE3_FREEZES_VALID", holdout_count=holdout["target_count"],
+                holdout_sha256=sha(HOLDOUT_V3.read_bytes()), selected_counts=holdout["selection"]["selected_counts"],
+                development_overlap_counts=holdout["selection"]["development_overlap_counts"],
                 feasibility=holdout["feasibility"])
 
 
@@ -327,9 +425,6 @@ V2_RECEIPT_SCHEMA["properties"].update(
          "source", "upgraded", "corpus_heads")}),
     accounting=JSON_OBJECT)
 V2_RECEIPT_SCHEMA["required"] += ["calls", "completion_order", "http_history", "execution", "state_artifacts", "accounting"]
-# Stage 3 declared execution variable: optional so stage 1/2 receipts stay valid.
-for _schema in (LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA):
-    _schema["properties"]["config"]["properties"]["effort"] = dict(anyOf=[ID, dict(type="null")])
 RECEIPT_SCHEMA = dict(oneOf=[LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA],
                       **{"$schema": "https://json-schema.org/draft/2020-12/schema"})
 
@@ -1555,8 +1650,11 @@ def main(argv=None):
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--schema", action="store_true", help="Print the machine-readable JSON Schema")
     parser.add_argument("--receipt-kind", choices=["proof", "induction"], default="proof")
-    parser.add_argument("--freeze-stage2", action="store_true", help="Freeze induction and evaluation identities from archive only")
-    parser.add_argument("--verify-stage2-freezes", action="store_true")
+    identity_action = parser.add_mutually_exclusive_group()
+    identity_action.add_argument("--freeze-stage2", action="store_true", help="Freeze induction and evaluation identities from archive only")
+    identity_action.add_argument("--verify-stage2-freezes", action="store_true")
+    identity_action.add_argument("--freeze-stage3", action="store_true", help="Freeze hold-out v3 identities from archive only")
+    identity_action.add_argument("--verify-stage3-freezes", action="store_true")
     parser.add_argument("--verify-inputs", action="store_true")
     parser.add_argument("--require-real", action="store_true", help="Reject mock evidence; never executes a model")
     parser.add_argument("--mock", action="store_true", help="Require fixture receipts")
@@ -1583,6 +1681,18 @@ def main(argv=None):
             return 0
         if args.verify_stage2_freezes:
             print(json.dumps(verify_stage2_freezes()))
+            return 0
+        if args.freeze_stage3:
+            require(args.mock, "Identity freeze requires --mock; no model or database is opened")
+            text = json.dumps(stage3_freezes(), ensure_ascii=False, indent=2) + "\n"
+            require(not HOLDOUT_V3.exists() or HOLDOUT_V3.read_text(encoding="utf-8") == text,
+                    "Existing freeze differs; do not overwrite")
+            if not HOLDOUT_V3.exists():
+                HOLDOUT_V3.write_text(text, encoding="utf-8", newline="\n")
+            print(json.dumps(verify_stage3_freezes()))
+            return 0
+        if args.verify_stage3_freezes:
+            print(json.dumps(verify_stage3_freezes()))
             return 0
         if args.schema:
             print(json.dumps(INDUCTION_RECEIPT_SCHEMA if args.receipt_kind == "induction" else RECEIPT_SCHEMA, indent=2))
