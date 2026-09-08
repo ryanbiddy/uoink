@@ -60,8 +60,8 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; AW-3 has 10 passing cases including the control, seven open | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; integrator combined checkout suites: 203 passed, seven D12-D15 failures | Dispatch AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
-| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | Write AZ-5a3 with measured byte counts and preserve AZ-5a2 unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass, five BD-01/03/05/06 cases open. BC-3a failed quota/partial and is rejected | `PHASE6-BD-2026-09-08.md`; BC-3c worker and checkout each 156 passed / five open, including 147 companion passes | Dispatch BC-3a2 on Grok from `PHASE6-BC3A2-BRIEF-2026-09-08.md`; then BD-2 (codex). Navigation study passed numerically; BD-27 partial twice and speaker material remain Ryan gates |
+| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | AZ-5a3g RUNNING (grok `54108a1f`); AZ-5a2 retained unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
+| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass, five BD-01/03/05/06 cases open. BC-3a failed quota/partial and is rejected | `PHASE6-BD-2026-09-08.md`; BC-3c worker and checkout each 156 passed / five open, including 147 companion passes | BC-3a2 RUNNING (grok `5aca8450`) from `PHASE6-BC3A2-BRIEF-2026-09-08.md`; then BD-2 (codex). Navigation study passed numerically; BD-27 partial twice and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -74,14 +74,14 @@ Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e9
 finished but rejected; AV-5m1 gemini `b31e890f` integrated at `9489141`.
 BC-3c grok `ff01d490` integrated at `c8ddf9b`. BC-3a gemini `eb0f138e` failed on quota
 with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no diff.
-AV-5m2 grok `6b5e5f1e` is running at `633eb99`. Route AZ-5a3g and BC-3a2 to Grok.
+AV-5m2 grok `6b5e5f1e` is running at `633eb99`. AZ-5a3g grok `54108a1f` and BC-3a2 grok `5aca8450` are running at `fc544f2`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a2 (Phase 5) rejected and retained as `patches/az5a2-claude-2026-09-08.patch`.
-   Dispatch `PHASE5-AZ5A3-BRIEF-2026-09-08.md` as AZ-5a3g on Grok; it records
+   Verify AZ-5a3g (grok `54108a1f`) from `PHASE5-AZ5A3-BRIEF-2026-09-08.md`; it records
    the measured byte counts and requires all 18 BA-01/BA-03 cases and the 28 fixture tests.
    Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
@@ -89,7 +89,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: BC-3c is integrated. Dispatch BC-3a2 from `PHASE6-BC3A2-BRIEF-2026-09-08.md`
+4. Phase 6: BC-3c is integrated. Verify BC-3a2 (grok `5aca8450`) from `PHASE6-BC3A2-BRIEF-2026-09-08.md`
    on Grok; preserve BC-3a's failed partial diff and the quota failure.
    Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
@@ -193,3 +193,12 @@ The local environment is `_scratch/ig-runtime`; set IG_FORBIDDEN_LIVE before lau
 its interpreter. Its .pth resolves installed dependencies and carries the guard into
 children even when tests replace PYTHONPATH or use isolated Python. No global package
 or test change was required. See `_scratch/ig-env-repair` for commands and output.
+
+### 2026-09-08 16:43 PDT — Active work after provider rerouting
+
+Three independent Grok worktrees are active: AV-5m2 `6b5e5f1e` at `633eb99`,
+AZ-5a3g `54108a1f` and BC-3a2 `5aca8450` at `fc544f2`. Their files are separate
+across phases; integrate one verified result at a time. Gemini's quota reset
+was reported around 17:50 PDT; no new Gemini retry is planned before then.
+Claude workers share Fable's nearly spent subscription. Codex remains available
+for the AW-4, BA-4 and BD-2 reviews when their repaired candidates are ready.
