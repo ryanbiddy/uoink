@@ -1,0 +1,89 @@
+{
+ "id": "v3Fr2JR47KA",
+ "title": "The Future of MCP — David Soria Parra, Anthropic",
+ "webpage_url": "https://www.youtube.com/watch?v=v3Fr2JR47KA",
+ "uploader": "AI Engineer",
+ "channel": "AI Engineer",
+ "duration": 1125,
+ "upload_date": "20260419",
+ "release_timestamp": 1776610806,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction and the vision for MCP applications",
+   "end_time": 94.0
+  },
+  {
+   "start_time": 94.0,
+   "title": "Looking back at the evolution of the MCP ecosystem over the last 18 months",
+   "end_time": 150.0
+  },
+  {
+   "start_time": 150.0,
+   "title": "Ecosystem growth and adoption milestones",
+   "end_time": 226.0
+  },
+  {
+   "start_time": 226.0,
+   "title": "Moving from exploration in 2025 to production in 2026",
+   "end_time": 307.0
+  },
+  {
+   "start_time": 307.0,
+   "title": "The 2026 connectivity stack: Skills, MCP, and CLI/Computer use",
+   "end_time": 467.0
+  },
+  {
+   "start_time": 467.0,
+   "title": "Improving client harnesses: Progressive Discovery",
+   "end_time": 579.0
+  },
+  {
+   "start_time": 579.0,
+   "title": "Programmatic tool calling and agent orchestration",
+   "end_time": 720.0
+  },
+  {
+   "start_time": 720.0,
+   "title": "Best practices for designing agents and server authors",
+   "end_time": 822.0
+  },
+  {
+   "start_time": 822.0,
+   "title": "Future roadmap for the MCP protocol and core improvements",
+   "end_time": 923.0
+  },
+  {
+   "start_time": 923.0,
+   "title": "Strategic integrations and enterprise features",
+   "end_time": 992.0
+  },
+  {
+   "start_time": 992.0,
+   "title": "Upcoming extension mechanisms and skills over MCP",
+   "end_time": 1035.0
+  },
+  {
+   "start_time": 1035.0,
+   "title": "Conclusion and call for community feedback",
+   "end_time": 1125
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "fff0f93763feb23b5acb61d4972304338fe757979b9fa5a816587e7dcedc5fb8",
+  "source_bytes": 696866,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

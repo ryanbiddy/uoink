@@ -1,0 +1,214 @@
+{
+ "id": "0NBILspM4c4",
+ "title": "NVIDIA Live at CES with CEO Jensen Huang",
+ "webpage_url": "https://www.youtube.com/watch?v=0NBILspM4c4",
+ "uploader": "NVIDIA",
+ "channel": "NVIDIA",
+ "duration": 5500,
+ "upload_date": "20260105",
+ "release_timestamp": 1767641426,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "The Rise of AI: NVIDIA Live at CES 2026 Opening Video",
+   "end_time": 243.0
+  },
+  {
+   "start_time": 243.0,
+   "title": "Intro: Platform Shift",
+   "end_time": 443.0
+  },
+  {
+   "start_time": 443.0,
+   "title": "AI Scales Beyond LLMs",
+   "end_time": 635.0
+  },
+  {
+   "start_time": 635.0,
+   "title": "Open Models Really Took Off Last Year",
+   "end_time": 737.0
+  },
+  {
+   "start_time": 737.0,
+   "title": "NVIDIA Leads Open Model Ecosystem",
+   "end_time": 925.0
+  },
+  {
+   "start_time": 925.0,
+   "title": "NVIDIA Tops Leaderboards",
+   "end_time": 976.0
+  },
+  {
+   "start_time": 976.0,
+   "title": "Agents Are Multi-Model, Multi-Cloud, and Hybrid Cloud",
+   "end_time": 1302.0
+  },
+  {
+   "start_time": 1302.0,
+   "title": "Video: Build Your Own AI Assistant with Hugging Face on NVIDIA DGX Spark",
+   "end_time": 1446.0
+  },
+  {
+   "start_time": 1446.0,
+   "title": "Enterprise Platforms Adopt NVIDIA AI",
+   "end_time": 1616.0
+  },
+  {
+   "start_time": 1616.0,
+   "title": "NVIDIA Full-Stack Physical AI Platform",
+   "end_time": 1822.0
+  },
+  {
+   "start_time": 1822.0,
+   "title": "Compute Is Data",
+   "end_time": 1884.0
+  },
+  {
+   "start_time": 1884.0,
+   "title": "Video: The Breakthrough Moment for Physical AI, Powered by NVIDIA Cosmos",
+   "end_time": 2013.0
+  },
+  {
+   "start_time": 2013.0,
+   "title": "Announcing NVIDIA Alpamayo",
+   "end_time": 2193.0
+  },
+  {
+   "start_time": 2193.0,
+   "title": "Level 2++ Autonomous Driving in San Francisco With NVIDIA DRIVE AV",
+   "end_time": 2364.0
+  },
+  {
+   "start_time": 2364.0,
+   "title": "NVIDIA Ships Full-Stack AV on 2025 Mercedes-Benz CLA",
+   "end_time": 2667.0
+  },
+  {
+   "start_time": 2667.0,
+   "title": "Global L4 and Robotaxi Ecosystem Building on NVIDIA",
+   "end_time": 2816.0
+  },
+  {
+   "start_time": 2816.0,
+   "title": "Video: Robotics Learning Simulator",
+   "end_time": 2878.0
+  },
+  {
+   "start_time": 2878.0,
+   "title": "Robotics Enters the Real World",
+   "end_time": 2940.0
+  },
+  {
+   "start_time": 2940.0,
+   "title": "Cadence + NVIDIA (AI-Accelerated Design and Simulation)",
+   "end_time": 3002.0
+  },
+  {
+   "start_time": 3002.0,
+   "title": "Synopsys + NVIDIA (System-Scale Design and Emulation)",
+   "end_time": 3070.0
+  },
+  {
+   "start_time": 3070.0,
+   "title": "Siemens CUDA-X Integration",
+   "end_time": 3192.0
+  },
+  {
+   "start_time": 3192.0,
+   "title": "Video: The Next Generation of Industrial AI With Siemens and NVIDIA",
+   "end_time": 3297.0
+  },
+  {
+   "start_time": 3297.0,
+   "title": "NVIDIA Leads Open Model Ecosystem pt. 2",
+   "end_time": 3326.0
+  },
+  {
+   "start_time": 3326.0,
+   "title": "Announcing NVIDIA Vera Rubin",
+   "end_time": 3560.0
+  },
+  {
+   "start_time": 3560.0,
+   "title": "Video: The NVIDIA Rubin Platform: Six New Chips, One AI Supercomputer",
+   "end_time": 3762.0
+  },
+  {
+   "start_time": 3762.0,
+   "title": "NVIDIA Vera Rubin CPU",
+   "end_time": 3930.0
+  },
+  {
+   "start_time": 3930.0,
+   "title": "NVIDIA Vera Rubin GPU",
+   "end_time": 4072.0
+  },
+  {
+   "start_time": 4072.0,
+   "title": "NVIDIA ConnectX-9 SuperNIC",
+   "end_time": 4242.0
+  },
+  {
+   "start_time": 4242.0,
+   "title": "NVIDIA BlueField-4",
+   "end_time": 4362.0
+  },
+  {
+   "start_time": 4362.0,
+   "title": "NVIDIA NVLink 6 Switch",
+   "end_time": 4436.0
+  },
+  {
+   "start_time": 4436.0,
+   "title": "NVIDIA Vera Rubin NVL72",
+   "end_time": 4618.0
+  },
+  {
+   "start_time": 4618.0,
+   "title": "NVIDIA Spectrum-X Ethernet with Co-Packaged Optics",
+   "end_time": 4686.0
+  },
+  {
+   "start_time": 4686.0,
+   "title": "Context Is the New Bottleneck",
+   "end_time": 4876.0
+  },
+  {
+   "start_time": 4876.0,
+   "title": "NVIDIA Context Memory Storage Platform",
+   "end_time": 4926.0
+  },
+  {
+   "start_time": 4926.0,
+   "title": "Six New Chips — One Giant Leap to the Next Frontier",
+   "end_time": 5135.0
+  },
+  {
+   "start_time": 5135.0,
+   "title": "NVIDIA — One Platform for Every AI",
+   "end_time": 5293.0
+  },
+  {
+   "start_time": 5293.0,
+   "title": "Close",
+   "end_time": 5500
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "7c7eedef314c61f9084c0fb492c194629f704dace3d9a8db59e41b50cade8019",
+  "source_bytes": 725361,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

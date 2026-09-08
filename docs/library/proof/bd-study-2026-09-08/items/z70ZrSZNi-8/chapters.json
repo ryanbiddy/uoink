@@ -1,0 +1,59 @@
+{
+ "id": "z70ZrSZNi-8",
+ "title": "How to Run YOLO Object Detection Models on the Raspberry Pi",
+ "webpage_url": "https://www.youtube.com/watch?v=z70ZrSZNi-8",
+ "uploader": "Edje Electronics",
+ "channel": "Edje Electronics",
+ "duration": 556,
+ "upload_date": "20250205",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 63.0
+  },
+  {
+   "start_time": 63.0,
+   "title": "Install Ultralytics",
+   "end_time": 205.0
+  },
+  {
+   "start_time": 205.0,
+   "title": "Set up YOLO11 Model",
+   "end_time": 328.0
+  },
+  {
+   "start_time": 328.0,
+   "title": "Run Inference",
+   "end_time": 446.0
+  },
+  {
+   "start_time": 446.0,
+   "title": "Smart Lamp Example",
+   "end_time": 517.0
+  },
+  {
+   "start_time": 517.0,
+   "title": "Conclusion",
+   "end_time": 556
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "48adb0a918ab001016f080b3844cbcbc966554f458a70ff67b6b825575e47648",
+  "source_bytes": 671946,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

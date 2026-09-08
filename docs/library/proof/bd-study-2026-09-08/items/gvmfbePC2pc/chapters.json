@@ -1,0 +1,49 @@
+{
+ "id": "gvmfbePC2pc",
+ "title": "9. Constraints: Visual Object Recognition",
+ "webpage_url": "https://www.youtube.com/watch?v=gvmfbePC2pc",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 3092,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 240.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 240.0,
+   "title": "Primal Sketch",
+   "end_time": 422.0
+  },
+  {
+   "start_time": 422.0,
+   "title": "Alignment Theory",
+   "end_time": 2472.0
+  },
+  {
+   "start_time": 2472.0,
+   "title": "Demonstration",
+   "end_time": 3092
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "923578533dd10fe4abd2125ac50256a9eb5cd0a22a4ac800378e9a903461ec00",
+  "source_bytes": 670155,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

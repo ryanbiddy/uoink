@@ -1,0 +1,99 @@
+{
+ "id": "WgPbbWmnXJ8",
+ "title": "Object Detection 101 Course - Including 4xProjects | Computer Vision",
+ "webpage_url": "https://www.youtube.com/watch?v=WgPbbWmnXJ8",
+ "uploader": "Murtaza's Workshop - Robotics and AI",
+ "channel": "Murtaza's Workshop - Robotics and AI",
+ "duration": 16427,
+ "upload_date": "20230210",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 128.0
+  },
+  {
+   "start_time": 128.0,
+   "title": "Chapter 1 - What is Object Detection?",
+   "end_time": 210.0
+  },
+  {
+   "start_time": 210.0,
+   "title": "Chapter 2 - A Brief History",
+   "end_time": 376.0
+  },
+  {
+   "start_time": 376.0,
+   "title": "Chapter 3 - Performance Evaluation Metrics",
+   "end_time": 547.0
+  },
+  {
+   "start_time": 547.0,
+   "title": "Chapter 4 - Installations",
+   "end_time": 1163.0
+  },
+  {
+   "start_time": 1163.0,
+   "title": "Chapter 4.1 - Package Installations",
+   "end_time": 1545.0
+  },
+  {
+   "start_time": 1545.0,
+   "title": "Chapter 5 - Running Yolo",
+   "end_time": 2234.0
+  },
+  {
+   "start_time": 2234.0,
+   "title": "Chapter 6 - Yolo with Webcam",
+   "end_time": 4097.0
+  },
+  {
+   "start_time": 4097.0,
+   "title": "Chapter 7 - Yolo with GPU",
+   "end_time": 4899.0
+  },
+  {
+   "start_time": 4899.0,
+   "title": "Premium Courses",
+   "end_time": 5031.0
+  },
+  {
+   "start_time": 5031.0,
+   "title": "Project 1 - Car Counter",
+   "end_time": 8278.0
+  },
+  {
+   "start_time": 8278.0,
+   "title": "Project 2 - People Counter",
+   "end_time": 9101.0
+  },
+  {
+   "start_time": 9101.0,
+   "title": "Project 3 - PPE Detection (Custom Training)",
+   "end_time": 11179.0
+  },
+  {
+   "start_time": 11179.0,
+   "title": "Project 4 - Poker Hand Detector",
+   "end_time": 16427
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "edec2bfdb45e65eefd6014402e1fda2d5659140e394b45a5b530ed1409f0869b",
+  "source_bytes": 779813,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

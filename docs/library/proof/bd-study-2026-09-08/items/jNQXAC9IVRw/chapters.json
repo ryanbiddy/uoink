@@ -1,0 +1,44 @@
+{
+ "id": "jNQXAC9IVRw",
+ "title": "Me at the zoo",
+ "webpage_url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+ "uploader": "jawed",
+ "channel": "jawed",
+ "duration": 19,
+ "upload_date": "20050424",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Intro",
+   "end_time": 5.0
+  },
+  {
+   "start_time": 5.0,
+   "title": "The cool thing",
+   "end_time": 17.0
+  },
+  {
+   "start_time": 17.0,
+   "title": "End",
+   "end_time": 19
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "318e0a6d793f61ab826a81cba62a3381530b0decc71e562d68ccf38f56b58380",
+  "source_bytes": 65088,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

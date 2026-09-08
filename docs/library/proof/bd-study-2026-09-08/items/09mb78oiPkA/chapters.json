@@ -1,0 +1,79 @@
+{
+ "id": "09mb78oiPkA",
+ "title": "10. Introduction to Learning, Nearest Neighbors",
+ "webpage_url": "https://www.youtube.com/watch?v=09mb78oiPkA",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2995,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 345.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 345.0,
+   "title": "Regularity Based Learning",
+   "end_time": 976.0
+  },
+  {
+   "start_time": 976.0,
+   "title": "The Example of Cell Identification",
+   "end_time": 1331.0
+  },
+  {
+   "start_time": 1331.0,
+   "title": "Measure the Angle between the Vectors",
+   "end_time": 1454.0
+  },
+  {
+   "start_time": 1454.0,
+   "title": "Robotic Arm Control",
+   "end_time": 1505.0
+  },
+  {
+   "start_time": 1505.0,
+   "title": "Kinematic Problem",
+   "end_time": 1592.0
+  },
+  {
+   "start_time": 1592.0,
+   "title": "Coriolis Force",
+   "end_time": 2163.0
+  },
+  {
+   "start_time": 2163.0,
+   "title": "How Many Neurons Do We Have in Our Brain",
+   "end_time": 2350.0
+  },
+  {
+   "start_time": 2350.0,
+   "title": "Normalize the Data",
+   "end_time": 2550.0
+  },
+  {
+   "start_time": 2550.0,
+   "title": "Explanation Based Learning",
+   "end_time": 2995
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "599c994ce355283d7e62f857637cd99238add0b806929dcf9972f333ad4a1c3a",
+  "source_bytes": 636233,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

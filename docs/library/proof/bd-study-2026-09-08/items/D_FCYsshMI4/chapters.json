@@ -1,0 +1,59 @@
+{
+ "id": "D_FCYsshMI4",
+ "title": "Computer use in Codex",
+ "webpage_url": "https://www.youtube.com/watch?v=D_FCYsshMI4",
+ "uploader": "OpenAI",
+ "channel": "OpenAI",
+ "duration": 685,
+ "upload_date": "20260512",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 34.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 34.0,
+   "title": "Why computer use",
+   "end_time": 126.0
+  },
+  {
+   "start_time": 126.0,
+   "title": "Codex works across local apps",
+   "end_time": 221.0
+  },
+  {
+   "start_time": 221.0,
+   "title": "Multiple apps at once",
+   "end_time": 314.0
+  },
+  {
+   "start_time": 314.0,
+   "title": "Screenshots plus accessibility data",
+   "end_time": 515.0
+  },
+  {
+   "start_time": 515.0,
+   "title": "App-by-app permissions",
+   "end_time": 685
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "477d9a632eab93e433cff1f5df41ba83984d7c0e1e93ec8a60b68b3cbcaec5e9",
+  "source_bytes": 670932,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

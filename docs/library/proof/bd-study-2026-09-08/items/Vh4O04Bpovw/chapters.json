@@ -1,0 +1,74 @@
+{
+ "id": "Vh4O04Bpovw",
+ "title": "I Explored A $200,000,000 Forgotten Space Colony",
+ "webpage_url": "https://www.youtube.com/watch?v=Vh4O04Bpovw",
+ "uploader": "Yes Theory",
+ "channel": "Yes Theory",
+ "duration": 969,
+ "upload_date": "20200730",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Exploring Biosphere 2",
+   "end_time": 64.0
+  },
+  {
+   "start_time": 64.0,
+   "title": "Welcoming a special guest",
+   "end_time": 133.0
+  },
+  {
+   "start_time": 133.0,
+   "title": "Symphony's challenging past",
+   "end_time": 205.0
+  },
+  {
+   "start_time": 205.0,
+   "title": "Inside the closed system",
+   "end_time": 372.0
+  },
+  {
+   "start_time": 372.0,
+   "title": "Problems with the experiment",
+   "end_time": 446.0
+  },
+  {
+   "start_time": 446.0,
+   "title": "Modern research at the site",
+   "end_time": 500.0
+  },
+  {
+   "start_time": 500.0,
+   "title": "The lung and the ocean",
+   "end_time": 662.0
+  },
+  {
+   "start_time": 662.0,
+   "title": "Reflecting on resilience",
+   "end_time": 836.0
+  },
+  {
+   "start_time": 836.0,
+   "title": "A life-changing surprise",
+   "end_time": 969
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "8594a8dcb2b78be7a4083cb64c0c7c8ae4c312c2a21255f9235beb9f963b1535",
+  "source_bytes": 675032,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

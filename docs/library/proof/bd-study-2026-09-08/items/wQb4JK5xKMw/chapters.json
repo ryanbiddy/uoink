@@ -1,0 +1,109 @@
+{
+ "id": "wQb4JK5xKMw",
+ "title": "📆 ThursdAI - GLM 5, MiniMax 2.5, Seedance 2, Gemini 3 Deep Think, Codex Spark 100tps & more AI news",
+ "webpage_url": "https://www.youtube.com/watch?v=wQb4JK5xKMw",
+ "uploader": "Alex Volkov from ThursdAI",
+ "channel": "Alex Volkov from ThursdAI",
+ "duration": 5295,
+ "upload_date": "20260213",
+ "release_timestamp": 1770952316,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Intro & Highlights of the Week",
+   "end_time": 393.0
+  },
+  {
+   "start_time": 393.0,
+   "title": "TLDR - This Week's AI News Rundown",
+   "end_time": 694.0
+  },
+  {
+   "start_time": 694.0,
+   "title": "Interview: Lou from ZAI on GLM-5",
+   "end_time": 1184.0
+  },
+  {
+   "start_time": 1184.0,
+   "title": "Panel Discussion: GLM-5 Reactions",
+   "end_time": 1597.0
+  },
+  {
+   "start_time": 1597.0,
+   "title": "BREAKING: Minimax M-2.5 Drops Live",
+   "end_time": 1612.0
+  },
+  {
+   "start_time": 1612.0,
+   "title": "Interview: Olive Song from Minimax on M-2.5",
+   "end_time": 2671.0
+  },
+  {
+   "start_time": 2671.0,
+   "title": "Panel Discussion: Minimax & Open Source Momentum",
+   "end_time": 3260.0
+  },
+  {
+   "start_time": 3260.0,
+   "title": "This Week's Buzz - W&B Inference",
+   "end_time": 3349.0
+  },
+  {
+   "start_time": 3349.0,
+   "title": "XAI Restructuring & SpaceX Acquisition",
+   "end_time": 3670.0
+  },
+  {
+   "start_time": 3670.0,
+   "title": "Matt Schumer's Viral AI Article & The Acceleration",
+   "end_time": 4058.0
+  },
+  {
+   "start_time": 4058.0,
+   "title": "BREAKING: Gemini 3 Deep Think - 84% on ARC-AGI-2",
+   "end_time": 4274.0
+  },
+  {
+   "start_time": 4274.0,
+   "title": "BREAKING: GPT 5.3 Codex Spark on Cerebras",
+   "end_time": 4282.0
+  },
+  {
+   "start_time": 4282.0,
+   "title": "Seedance 2 - ByteDance's Mind-Bending Video Model",
+   "end_time": 4509.0
+  },
+  {
+   "start_time": 4509.0,
+   "title": "Agent Psychosis & The Sleep Problem",
+   "end_time": 4856.0
+  },
+  {
+   "start_time": 4856.0,
+   "title": "Bytedance SeeDance 2.0 - shattering reality",
+   "end_time": 5121.0
+  },
+  {
+   "start_time": 5121.0,
+   "title": "Wrap-Up & Goodbye",
+   "end_time": 5295
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "2dc27316176c509a88400a32ec7b5d1b3739fc4fd750aeee15fcf43d729614b7",
+  "source_bytes": 704456,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

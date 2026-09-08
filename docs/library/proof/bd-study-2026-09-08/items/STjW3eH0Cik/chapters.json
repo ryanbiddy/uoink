@@ -1,0 +1,84 @@
+{
+ "id": "STjW3eH0Cik",
+ "title": "6. Search: Games, Minimax, and Alpha-Beta",
+ "webpage_url": "https://www.youtube.com/watch?v=STjW3eH0Cik",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2896,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 312.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 312.0,
+   "title": "Look Ahead and Evaluate",
+   "end_time": 491.0
+  },
+  {
+   "start_time": 491.0,
+   "title": "British Museum Algorithm",
+   "end_time": 517.0
+  },
+  {
+   "start_time": 517.0,
+   "title": "Vocabulary",
+   "end_time": 635.0
+  },
+  {
+   "start_time": 635.0,
+   "title": "Chess",
+   "end_time": 727.0
+  },
+  {
+   "start_time": 727.0,
+   "title": "How Many Atoms Are There in the Universe",
+   "end_time": 992.0
+  },
+  {
+   "start_time": 992.0,
+   "title": "Game Tree",
+   "end_time": 1130.0
+  },
+  {
+   "start_time": 1130.0,
+   "title": "Minimax Algorithm",
+   "end_time": 2489.0
+  },
+  {
+   "start_time": 2489.0,
+   "title": "Progressive Deepening",
+   "end_time": 2524.0
+  },
+  {
+   "start_time": 2524.0,
+   "title": "Is Alpha Beta a Alternative to Minimax",
+   "end_time": 2703.0
+  },
+  {
+   "start_time": 2703.0,
+   "title": "Even Tree Development",
+   "end_time": 2896
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "65f13d0232e5500334c1282918e03c31ffc86ff25f85ff1ce4e1f8fc20db54ab",
+  "source_bytes": 700478,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

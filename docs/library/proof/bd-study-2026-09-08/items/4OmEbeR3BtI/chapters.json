@@ -1,0 +1,79 @@
+{
+ "id": "4OmEbeR3BtI",
+ "title": "The 'Do-Not-Hire List' Is Real. Here's What Actually Gets You On It.",
+ "webpage_url": "https://www.youtube.com/watch?v=4OmEbeR3BtI",
+ "uploader": "A Life After Layoff",
+ "channel": "A Life After Layoff",
+ "duration": 1003,
+ "upload_date": "20260702",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Start",
+   "end_time": 53.0
+  },
+  {
+   "start_time": 53.0,
+   "title": "How the list works",
+   "end_time": 89.0
+  },
+  {
+   "start_time": 89.0,
+   "title": "Amazon's hiring process",
+   "end_time": 225.0
+  },
+  {
+   "start_time": 225.0,
+   "title": "How to get on the do-not-hire list",
+   "end_time": 264.0
+  },
+  {
+   "start_time": 264.0,
+   "title": "Other things that get you flagged",
+   "end_time": 449.0
+  },
+  {
+   "start_time": 449.0,
+   "title": "The innocent reason you end up on the list",
+   "end_time": 527.0
+  },
+  {
+   "start_time": 527.0,
+   "title": "Misconceptions about the list",
+   "end_time": 693.0
+  },
+  {
+   "start_time": 693.0,
+   "title": "How to know if you're on the list",
+   "end_time": 753.0
+  },
+  {
+   "start_time": 753.0,
+   "title": "What can you do if you think you're on this list?",
+   "end_time": 904.0
+  },
+  {
+   "start_time": 904.0,
+   "title": "Staying off the list",
+   "end_time": 1003
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "6aee159548d55777d9d0d4621d2b59d43c77ca8e956e95e0acd1fa9f143ea934",
+  "source_bytes": 690860,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

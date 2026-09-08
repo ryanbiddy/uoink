@@ -1,0 +1,79 @@
+{
+ "id": "zFXscjUoDDA",
+ "title": "Vercel Product Walkthrough (2026)",
+ "webpage_url": "https://www.youtube.com/watch?v=zFXscjUoDDA",
+ "uploader": "Vercel",
+ "channel": "Vercel",
+ "duration": 611,
+ "upload_date": "20260316",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Self-driving infrastructure",
+   "end_time": 41.0
+  },
+  {
+   "start_time": 41.0,
+   "title": "Speed run",
+   "end_time": 77.0
+  },
+  {
+   "start_time": 77.0,
+   "title": "Importing into Vercel",
+   "end_time": 169.0
+  },
+  {
+   "start_time": 169.0,
+   "title": "Analytics and insights",
+   "end_time": 214.0
+  },
+  {
+   "start_time": 214.0,
+   "title": "AI summarization feature",
+   "end_time": 361.0
+  },
+  {
+   "start_time": 361.0,
+   "title": "Using Claude Code",
+   "end_time": 437.0
+  },
+  {
+   "start_time": 437.0,
+   "title": "Collaborate with your team",
+   "end_time": 466.0
+  },
+  {
+   "start_time": 466.0,
+   "title": "Update with v0",
+   "end_time": 546.0
+  },
+  {
+   "start_time": 546.0,
+   "title": "Security",
+   "end_time": 590.0
+  },
+  {
+   "start_time": 590.0,
+   "title": "Conclusion",
+   "end_time": 611
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "53c1b769aa6031abb7c2cf288a9608a067db9841346b9e86cad42b4d1be93c7a",
+  "source_bytes": 670363,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

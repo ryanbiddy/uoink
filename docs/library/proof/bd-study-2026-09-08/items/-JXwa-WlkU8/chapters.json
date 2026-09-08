@@ -1,0 +1,89 @@
+{
+ "id": "-JXwa-WlkU8",
+ "title": "How to Use Ultralytics YOLO11 for Object Detection and Tracking| How to Benchmark | YOLO11 RELEASED🚀",
+ "webpage_url": "https://www.youtube.com/watch?v=-JXwa-WlkU8",
+ "uploader": "Ultralytics",
+ "channel": "Ultralytics",
+ "duration": 511,
+ "upload_date": "20241004",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction: We're exploring the new features of YOLO11 and why it's a major update!",
+   "end_time": 23.0
+  },
+  {
+   "start_time": 23.0,
+   "title": "Ultralytics YOLO11 Blog Overview: A brief look at the official YOLO11 blog and its resources.",
+   "end_time": 53.0
+  },
+  {
+   "start_time": 53.0,
+   "title": "Highlights of YOLO11 Model: Key updates that make YOLO11 stand out.",
+   "end_time": 75.0
+  },
+  {
+   "start_time": 75.0,
+   "title": "Benchmarks of YOLO11 vs. Other Models: See how YOLO11 performs against other models.",
+   "end_time": 124.0
+  },
+  {
+   "start_time": 124.0,
+   "title": "YOLO11 Model Features and Documentation Walkthrough: Detailed breakdown of YOLO11’s new features.",
+   "end_time": 137.0
+  },
+  {
+   "start_time": 137.0,
+   "title": "Key Features of Ultralytics YOLO11: Why this release is a big improvement.",
+   "end_time": 158.0
+  },
+  {
+   "start_time": 158.0,
+   "title": "YOLO11 Supported Tasks and Modes: Learn about the different tasks and modes YOLO11 supports.",
+   "end_time": 179.0
+  },
+  {
+   "start_time": 179.0,
+   "title": "YOLO11 Models Usage Examples: Real-world examples to get you up and running in no time!",
+   "end_time": 232.0
+  },
+  {
+   "start_time": 232.0,
+   "title": "How to Use YOLO11 Models in Python: A step-by-step guide for using YOLO11 like a pro.",
+   "end_time": 331.0
+  },
+  {
+   "start_time": 331.0,
+   "title": "Ultralytics Package Upgrade: Make sure to update your Ultralytics package to use YOLO11.",
+   "end_time": 441.0
+  },
+  {
+   "start_time": 441.0,
+   "title": "Object Tracking with YOLO11 Models: Easily add tracking to your models for better results.",
+   "end_time": 491.0
+  },
+  {
+   "start_time": 491.0,
+   "title": "Conclusion and Summary: Quick recap and what’s coming next for YOLO11.",
+   "end_time": 511
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "f84f30a96cf0f8e9df1099f1ede81788549d200e32b31623a1446f1b67727f11",
+  "source_bytes": 683491,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

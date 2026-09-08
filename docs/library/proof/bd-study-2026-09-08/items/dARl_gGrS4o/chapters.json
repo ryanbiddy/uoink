@@ -1,0 +1,59 @@
+{
+ "id": "dARl_gGrS4o",
+ "title": "8. Constraints: Search, Domain Reduction",
+ "webpage_url": "https://www.youtube.com/watch?v=dARl_gGrS4o",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2706,
+ "upload_date": "20210423",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 203.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 203.0,
+   "title": "Constraint Propagation",
+   "end_time": 530.0
+  },
+  {
+   "start_time": 530.0,
+   "title": "Vocabulary",
+   "end_time": 1243.0
+  },
+  {
+   "start_time": 1243.0,
+   "title": "The Domain Reduction Algorithm",
+   "end_time": 1247.0
+  },
+  {
+   "start_time": 1247.0,
+   "title": "Domain Reduction Algorithm",
+   "end_time": 1425.0
+  },
+  {
+   "start_time": 1425.0,
+   "title": "Propagate through Variables with Reduced Domains",
+   "end_time": 2706
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "0c8a256f8789bea5a408d67fae44bd6d10ddac927253b9b2ced702e443b8a8fd",
+  "source_bytes": 639448,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

@@ -1,0 +1,79 @@
+{
+ "id": "0FrcYhnHmLg",
+ "title": "May 21 — Google I/O 2026 Deep Dive, OpenAI Solves 80-Year Math Problem, Cursor Composer 2.5",
+ "webpage_url": "https://www.youtube.com/watch?v=0FrcYhnHmLg",
+ "uploader": "Alex Volkov from ThursdAI",
+ "channel": "Alex Volkov from ThursdAI",
+ "duration": 6558,
+ "upload_date": "20260521",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction & Co-host Banter",
+   "end_time": 45.0
+  },
+  {
+   "start_time": 45.0,
+   "title": "Google I/O Overview & Gemini User Growth",
+   "end_time": 491.0
+  },
+  {
+   "start_time": 491.0,
+   "title": "Antigravity & Agentic Coding at Google",
+   "end_time": 782.0
+  },
+  {
+   "start_time": 782.0,
+   "title": "Google Spark & Agentic Agents",
+   "end_time": 1012.0
+  },
+  {
+   "start_time": 1012.0,
+   "title": "OpenAI Codex Mobile & Agent Workflows",
+   "end_time": 1229.0
+  },
+  {
+   "start_time": 1229.0,
+   "title": "TLDR — Weekly AI News Roundup",
+   "end_time": 2313.0
+  },
+  {
+   "start_time": 2313.0,
+   "title": "Google Gemini Omni — Multimodal AI",
+   "end_time": 2782.0
+  },
+  {
+   "start_time": 2782.0,
+   "title": "Jeff Dean on Omni Architecture",
+   "end_time": 2964.0
+  },
+  {
+   "start_time": 2964.0,
+   "title": "Cursor Composer 2.5",
+   "end_time": 3555.0
+  },
+  {
+   "start_time": 3555.0,
+   "title": "Anthropic & xAI / Colossus Infrastructure",
+   "end_time": 6558
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "a5dce849090f91c69f6d31e9bde3aba2e1cb44f4887fb816dcc5974f09f625b9",
+  "source_bytes": 707912,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

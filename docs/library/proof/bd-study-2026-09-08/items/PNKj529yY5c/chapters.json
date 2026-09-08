@@ -1,0 +1,74 @@
+{
+ "id": "PNKj529yY5c",
+ "title": "2. Reasoning: Goal Trees and Problem Solving",
+ "webpage_url": "https://www.youtube.com/watch?v=PNKj529yY5c",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2758,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 214.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 214.0,
+   "title": "Problem Reduction",
+   "end_time": 265.0
+  },
+  {
+   "start_time": 265.0,
+   "title": "Educational Philosophy",
+   "end_time": 786.0
+  },
+  {
+   "start_time": 786.0,
+   "title": "Heuristic Transformations",
+   "end_time": 826.0
+  },
+  {
+   "start_time": 826.0,
+   "title": "Trig Substitution",
+   "end_time": 832.0
+  },
+  {
+   "start_time": 832.0,
+   "title": "Heuristic Transformation",
+   "end_time": 1107.0
+  },
+  {
+   "start_time": 1107.0,
+   "title": "Eristic Transformations",
+   "end_time": 1345.0
+  },
+  {
+   "start_time": 1345.0,
+   "title": "Method of Problem Reduction",
+   "end_time": 1592.0
+  },
+  {
+   "start_time": 1592.0,
+   "title": "Measure the Depth of Function Composition",
+   "end_time": 2758
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "8940541c920c14b7c6bd241873aeb41cd038e7f740f6c38e8ea2e1aded90a18d",
+  "source_bytes": 683718,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

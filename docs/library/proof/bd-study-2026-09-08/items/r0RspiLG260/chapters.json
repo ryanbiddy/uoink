@@ -1,0 +1,59 @@
+{
+ "id": "r0RspiLG260",
+ "title": "How to Train YOLO Object Detection Models in Google Colab (YOLO26, YOLO11, YOLOv8)",
+ "webpage_url": "https://www.youtube.com/watch?v=r0RspiLG260",
+ "uploader": "Edje Electronics",
+ "channel": "Edje Electronics",
+ "duration": 1285,
+ "upload_date": "20250108",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 57.0
+  },
+  {
+   "start_time": 57.0,
+   "title": "Gather Images",
+   "end_time": 133.0
+  },
+  {
+   "start_time": 133.0,
+   "title": "Label Images",
+   "end_time": 525.0
+  },
+  {
+   "start_time": 525.0,
+   "title": "Train YOLO11 Model",
+   "end_time": 983.0
+  },
+  {
+   "start_time": 983.0,
+   "title": "Deploy Model on PC",
+   "end_time": 1235.0
+  },
+  {
+   "start_time": 1235.0,
+   "title": "Conclusion",
+   "end_time": 1285
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "df12f5d7809b18a91b1f2fb33c3bcd6864329fbef941eb1ee87ef71918c1bef5",
+  "source_bytes": 677822,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

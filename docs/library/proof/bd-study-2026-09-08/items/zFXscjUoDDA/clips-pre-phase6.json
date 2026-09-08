@@ -1,0 +1,112 @@
+[
+ {
+  "clip_id": 3192,
+  "video_id": "zFXscjUoDDA",
+  "seq": 0,
+  "start": 2.149,
+  "end": 70.71,
+  "text": "Millions of developers have built on Verscell's front-end cloud for over a decade. And we've all been using Verscell to deploy everything from personal projects to enterprise software. And when you're building agents and AI features to reduce friction for your users or your team, the last thing you want is something complicated to maintain in production. Verscell's self-driving infrastructure makes DevOps as easy as deployment. You generate code and build agents. Then Verscell autonomously optimizes for global scale performance, provisions compute, orchestrates AI workflows, and even investigates anomalies, all with no configuration required. Now, let me show you what I mean with a speedrun. Let's take on the challenge of migrating an existing web app. Now, this is a demo app of a hiring platform for a midsize coffee company that has a roastery and cafes. It's a simple app with a front end, a database to sore job applications and resumes, and a back-end service that summarizes cover letters for faster application review. Now, it's on an ancient hosting provider. I'm not going to tell you which one, but we definitely want to modernize it. So, let's do that.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=2s",
+  "cue_count": 31
+ },
+ {
+  "clip_id": 3193,
+  "video_id": "zFXscjUoDDA",
+  "seq": 1,
+  "start": 70.71,
+  "end": 131.35,
+  "text": "want to modernize it. So, let's do that. We'll migrate to Verscell, which is going to speed up feature development, deployment, and collaboration. Now, let's import this app into Verscell. I'll start with the backend which is a basic fast API Python service. I'll start by clicking add new. I've already connected my git account and I can see that my repositories are here. I'll click import on the API repo. Now import is fully configurable including build and output configs, but Versell supports fast API and other backend frameworks out of the box. So I can just click deploy and it's going to work. And within a few seconds, my Python backend service is deployed and running on Verscell. Now, Verscell automatically generated a URL for this project. I'm going to copy it so that I can add it as an environment variable for the next app. I'll add another new project. Click import on the next app and I'm going to import my environment variables for this app so that it can talk to Superbase.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=70s",
+  "cue_count": 26
+ },
+ {
+  "clip_id": 3194,
+  "video_id": "zFXscjUoDDA",
+  "seq": 2,
+  "start": 131.35,
+  "end": 199.35,
+  "text": "app so that it can talk to Superbase. Great. Now my app can talk to Subabase. And for the fast API variable, I'll add the URL I just copied and I'll deploy the app. Verscel is building and deploying the project. And this will run on the same infrastructure that powers millions of websites and apps. Now, Verscell's 126 points of global presence automatically locates content close to the user, which means it will always be super fast. And here we can see that the app has deployed successfully. Let's take a look at it. I can see the jobs and I can see in the dashboard uh the back end with our Python summary feature. Now once this is in production, I'll be able to monitor the entire app. But for now, I'll jump into another project where we can see some live data. I can get the full picture with web analytics, speed insights, logs, and a queryable observability dashboard. For example, here are the analytics for our website skills.sh where people go to find agent skills. I can find detailed traffic and referral information including referral sites. If I click over here on speed insights, it shows me core web vitals.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=131s",
+  "cue_count": 30
+ },
+ {
+  "clip_id": 3195,
+  "video_id": "zFXscjUoDDA",
+  "seq": 3,
+  "start": 199.35,
+  "end": 245.99,
+  "text": "insights, it shows me core web vitals. And this way I can diagnose and fix any speed or load issues. And if I click on observability, I get the dashboard which enables me to explore and query any diagnostic from my app from logs to functions to edge requests to data transfer. All right. Now I want to make the summarization feature more useful to hiring managers. Currently, Fast API just summarizes the cover letter with a Python library. But we can build a simple agent to analyze both the cover letter and the PDF resume, compare them to the job description, make an initial evaluation of the candidate, and generate an email for the hiring manager to send. I already have the repo cloned locally, so I'll jump into the directory and install the tools that I need. Now, I'm going to use the Verscell CLI to connect my local project to Verscell.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=199s",
+  "cue_count": 22
+ },
+ {
+  "clip_id": 3196,
+  "video_id": "zFXscjUoDDA",
+  "seq": 4,
+  "start": 245.99,
+  "end": 312.79,
+  "text": "connect my local project to Verscell. The CLI makes it easy for me to control the Verscell platform right from my command line. I'll start with Verscell link. Yeah, I'm going to link this local project. It'll be the Vcel demo or the coffee shop jobs project. I already found it. And we'll pull the environment variables. There we go. I can also run the app locally with Verscell dev, which replicates the Verscell deployment environment locally. Try that. Verseldev. Start up the server. Let's just go ahead and test it. And there we go. Pretty cool. Now, let's install the AI tools we'll need to build the agent. Purscell gives me all of the AI tools I need to build features and agents. First, I need to integrate an actual AI model for summarization. I can use hundreds of different models through the Verscell AI gateway. And running Verscell dev gives me automatic access with OIDC tokens, which is pretty cool. Next, I'll install the AI SDK, which gives me a full set of AI primitives for things like summarizing text. Let's do npm install AI.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=245s",
+  "cue_count": 29
+ },
+ {
+  "clip_id": 3197,
+  "video_id": "zFXscjUoDDA",
+  "seq": 5,
+  "start": 312.79,
+  "end": 360.23,
+  "text": "install AI. Great. After that, I'm going to install the workflow devkit, which will durably orchestrate each step the agent takes. If my app was generating code, I could also use the Vcel sandbox to run it safely. But this is a simple summarization agent, so I don't need sandbox for it. All right, last but not least, the front end is Next.js, so I'll add the React best practices skill to my project to ensure the front end is clean and fast. I'm going to use skills.sh. Head on over here. Search for React best practices. Going to copy the command to install it. And there we go. Let's make sure to install it for cloud code and a few other things globally. I like the Sim Link version.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=312s",
+  "cue_count": 20
+ },
+ {
+  "clip_id": 3198,
+  "video_id": "zFXscjUoDDA",
+  "seq": 6,
+  "start": 360.23,
+  "end": 407.35,
+  "text": "Link version. And it's installed. Now, let's build out the agent. It's pretty simple. So, I'm just going to prompt Cloud Code. This is the prompt that I started with. It tells Cloud Code to build the agent to summarize the cover letter and PDF resume, combine the summaries, and compare the job description, make an initial recommendation, and generate a follow-up email. But of course, I spent some time with Claude refining this into a oneshot prompt, which I'm going to paste now into Cloud Code and just let it rip. Through the magic of video demos, let's assume I yoloed my way through the cloud prompts, which of course I did. And I'll just bring up the other directory with that output. All right, let's deploy. I'm going to commit the changes and push the branch that I'm working on.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=360s",
+  "cue_count": 22
+ },
+ {
+  "clip_id": 3199,
+  "video_id": "zFXscjUoDDA",
+  "seq": 7,
+  "start": 407.35,
+  "end": 472.87,
+  "text": "branch that I'm working on. Now, Verscell's self-driving infrastructure is going to automatically recognize the AI workloads and provision infrastructure for those compute jobs and active compute pricing is really great here. I'm only going to be charged for the actual compute, not the roundtrip time while we're waiting on the model API to respond. All right, now I can see the app and let's go into the dashboard and check out that new feature and view an application. And in fact, there we have the rejection text for this application and the generated reject email. Now, the best part about preview environments, I think, is that anyone on my team can make any comment on any part of the app. I'm going to do that right now. And I'm just going to ask Eric to add a button. Cool. And that's just one feature of the Versel toolbar. You can test flags, run accessibility audits, run traces, and more. Now the preview environment runs on the same infrastructure as production. So what I test here is exactly what my end users will see in prod. Okay, we've added an agent to the app, but I want other people on the team to be able to iterate on the UI as well.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=407s",
+  "cue_count": 31
+ },
+ {
+  "clip_id": 3200,
+  "video_id": "zFXscjUoDDA",
+  "seq": 8,
+  "start": 472.87,
+  "end": 519.029,
+  "text": "to be able to iterate on the UI as well. A vzero makes it easy for other people to work on the project in a web-based dev environment, but keeps everything version controlled and safe through Git workflows. This is really cool. I'm going to import the GitHub project. choose main as the base branch and vzero will set up the project. And as you can see, my environment variables were imported as well. And now in less than a minute, my app is running in Vzero. Because this is an existing project, Vzero spins up a sandbox to run the code. It's the exact same sandbox primitive that we can use on Verscell to spin up isolated environments. And if I click on get, you can see that Vzero has automatically created a new branch for me to work on.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=472s",
+  "cue_count": 20
+ },
+ {
+  "clip_id": 3201,
+  "video_id": "zFXscjUoDDA",
+  "seq": 9,
+  "start": 519.029,
+  "end": 612.08,
+  "text": "created a new branch for me to work on. I want to adjust the jobs page design just a bit. This might be crazy, but let's make the job cards full width on the page. Vzero cooked on that. And huh, I don't love that choice that I've made, but let's see what the design team thinks. I can send this vzero chat to my team so they can continue to iterate or I can open a PR and share the preview environment for collaboration. Once I deploy my app and it's being served at global scale, Verscell ensures that it's secure by default. The same self-driving infrastructure that runs my app also protects it at the edge. Now this is the firewall view for our Nex.js site. It gets a lot of traffic and not all of it is good. Purscell's web application firewall automatically inspects and filters malicious requests at the edge before they ever reach your app. app. Bot ID quietly distinguishes real users from automated traffic, blocking abusive bots without adding friction like captures. Verscel's global edge network automatically detects and mitigates large-scale attacks, keeping your app responsive under load. Now everything you just saw, migration, AI workflows, collaboration, security, ran on one platform with zero infrastructure configuration. That's what self-driving means. The platform gets out of the way so you can focus on shipping. We're at 11 million projects and counting. Yours is next.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=zFXscjUoDDA&t=519s",
+  "cue_count": 40
+ }
+]

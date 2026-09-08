@@ -1,0 +1,79 @@
+{
+ "id": "l-tzjenXrvI",
+ "title": "7. Constraints: Interpreting Line Drawings",
+ "webpage_url": "https://www.youtube.com/watch?v=l-tzjenXrvI",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2952,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 150.0
+  },
+  {
+   "start_time": 150.0,
+   "title": "Two Ways",
+   "end_time": 205.0
+  },
+  {
+   "start_time": 205.0,
+   "title": "Aldo Guzman",
+   "end_time": 405.0
+  },
+  {
+   "start_time": 405.0,
+   "title": "Two Link Theory",
+   "end_time": 785.0
+  },
+  {
+   "start_time": 785.0,
+   "title": "Four Kinds of Lines",
+   "end_time": 1210.0
+  },
+  {
+   "start_time": 1210.0,
+   "title": "Three Options",
+   "end_time": 1552.0
+  },
+  {
+   "start_time": 1552.0,
+   "title": "Example",
+   "end_time": 1894.0
+  },
+  {
+   "start_time": 1894.0,
+   "title": "Huffman and Waltz",
+   "end_time": 2090.0
+  },
+  {
+   "start_time": 2090.0,
+   "title": "DepthFirst Search",
+   "end_time": 2273.0
+  },
+  {
+   "start_time": 2273.0,
+   "title": "Walters Algorithm",
+   "end_time": 2952
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "712f1a7b9d0d8970e8b3b1176c92a8f960b59200dc9fd9ed13b186781c416de9",
+  "source_bytes": 651772,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

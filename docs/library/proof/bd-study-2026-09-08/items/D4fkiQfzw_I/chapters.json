@@ -1,0 +1,89 @@
+{
+ "id": "D4fkiQfzw_I",
+ "title": "How I Work: $77K/Month Solopreneur",
+ "webpage_url": "https://www.youtube.com/watch?v=D4fkiQfzw_I",
+ "uploader": "Starter Story",
+ "channel": "Starter Story",
+ "duration": 639,
+ "upload_date": "20260426",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Meet Marc Lou",
+   "end_time": 52.0
+  },
+  {
+   "start_time": 52.0,
+   "title": "Morning routine",
+   "end_time": 96.0
+  },
+  {
+   "start_time": 96.0,
+   "title": "Deep work",
+   "end_time": 154.0
+  },
+  {
+   "start_time": 154.0,
+   "title": "Shipping 35 startups",
+   "end_time": 217.0
+  },
+  {
+   "start_time": 217.0,
+   "title": "How Marc finds ideas",
+   "end_time": 312.0
+  },
+  {
+   "start_time": 312.0,
+   "title": "Ship list",
+   "end_time": 357.0
+  },
+  {
+   "start_time": 357.0,
+   "title": "The biggest barrier to success",
+   "end_time": 410.0
+  },
+  {
+   "start_time": 410.0,
+   "title": "Validating ideas",
+   "end_time": 471.0
+  },
+  {
+   "start_time": 471.0,
+   "title": "Evening routine",
+   "end_time": 511.0
+  },
+  {
+   "start_time": 511.0,
+   "title": "Bed routine",
+   "end_time": 552.0
+  },
+  {
+   "start_time": 552.0,
+   "title": "Advice to all builders",
+   "end_time": 603.0
+  },
+  {
+   "start_time": 603.0,
+   "title": "Don't you dare give up",
+   "end_time": 639
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "4453d6e20ef2d6e2d53cee856600bdf46f7ff074da4d31b048ff2e86f50114e4",
+  "source_bytes": 691343,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

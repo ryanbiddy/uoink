@@ -1,0 +1,99 @@
+{
+ "id": "j1H3jAAGlEA",
+ "title": "4. Search: Depth-First, Hill Climbing, Beam",
+ "webpage_url": "https://www.youtube.com/watch?v=j1H3jAAGlEA",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2922,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0,
+   "end_time": 257.0,
+   "title": "<Untitled Chapter 1>"
+  },
+  {
+   "start_time": 257.0,
+   "title": "British Museum Approach",
+   "end_time": 485.0
+  },
+  {
+   "start_time": 485.0,
+   "title": "Depth-First Search",
+   "end_time": 594.0
+  },
+  {
+   "start_time": 594.0,
+   "title": "Backtracking",
+   "end_time": 655.0
+  },
+  {
+   "start_time": 655.0,
+   "title": "Breadth-First Search",
+   "end_time": 764.0
+  },
+  {
+   "start_time": 764.0,
+   "title": "Breadth-First Search",
+   "end_time": 905.0
+  },
+  {
+   "start_time": 905.0,
+   "title": "Extend First Half on the Cube",
+   "end_time": 1561.0
+  },
+  {
+   "start_time": 1561.0,
+   "title": "Informed Search",
+   "end_time": 1656.0
+  },
+  {
+   "start_time": 1656.0,
+   "title": "Hill-Climbing Search",
+   "end_time": 1778.0
+  },
+  {
+   "start_time": 1778.0,
+   "title": "Hill Climbing",
+   "end_time": 1899.0
+  },
+  {
+   "start_time": 1899.0,
+   "title": "Beam Search",
+   "end_time": 2154.0
+  },
+  {
+   "start_time": 2154.0,
+   "title": "Best First Search",
+   "end_time": 2230.0
+  },
+  {
+   "start_time": 2230.0,
+   "title": "Hill Climbing in Continuous Space",
+   "end_time": 2720.0
+  },
+  {
+   "start_time": 2720.0,
+   "title": "Pyrrhic Victory",
+   "end_time": 2922
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "82bc4273ceca4069926c58c5135cab690e8297ab07c45ce5e64da7a6c0e5768d",
+  "source_bytes": 668894,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

@@ -1,0 +1,94 @@
+{
+ "id": "etjkjZoG2F0",
+ "title": "YOLOv11: How to Train for Object Detection on a Custom Dataset | Step-by-step guide",
+ "webpage_url": "https://www.youtube.com/watch?v=etjkjZoG2F0",
+ "uploader": "Roboflow",
+ "channel": "Roboflow",
+ "duration": 4308,
+ "upload_date": "20241017",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction to YOLOv11",
+   "end_time": 55.0
+  },
+  {
+   "start_time": 55.0,
+   "title": "Finding Free Annotated Datasets for YOLOv11",
+   "end_time": 134.0
+  },
+  {
+   "start_time": 134.0,
+   "title": "Image Labeling for YOLOv11",
+   "end_time": 545.0
+  },
+  {
+   "start_time": 545.0,
+   "title": "Setting Up Your Local YOLOv11 Training Environment",
+   "end_time": 944.0
+  },
+  {
+   "start_time": 944.0,
+   "title": "Understanding YOLO Annotation Formats",
+   "end_time": 1642.0
+  },
+  {
+   "start_time": 1642.0,
+   "title": "Training YOLOv11 Locally",
+   "end_time": 2043.0
+  },
+  {
+   "start_time": 2043.0,
+   "title": "YOLOv11Training Hyperparameters",
+   "end_time": 2284.0
+  },
+  {
+   "start_time": 2284.0,
+   "title": "Evaluating Your YOLOv11 Model's Performance",
+   "end_time": 2610.0
+  },
+  {
+   "start_time": 2610.0,
+   "title": "Running Inference with Your Trained YOLOv11 Model",
+   "end_time": 2899.0
+  },
+  {
+   "start_time": 2899.0,
+   "title": "YOLOv11 Training in Google Colab",
+   "end_time": 3641.0
+  },
+  {
+   "start_time": 3641.0,
+   "title": "Saving Your Fine-Tuned YOLOv11 Model Weights",
+   "end_time": 3872.0
+  },
+  {
+   "start_time": 3872.0,
+   "title": "Deploying Your YOLOv11 Model",
+   "end_time": 4267.0
+  },
+  {
+   "start_time": 4267.0,
+   "title": "Conclusion",
+   "end_time": 4308
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "0d36fd50faa127ae82ee02e9d197ecd5de964ca8b7c72a246b90a053126eb59c",
+  "source_bytes": 695507,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

@@ -1,0 +1,84 @@
+{
+ "id": "ZRb7D6R64hM",
+ "title": "Every Level of Claude Explained in 21 Minutes",
+ "webpage_url": "https://www.youtube.com/watch?v=ZRb7D6R64hM",
+ "uploader": "Nate Herk | AI Automation",
+ "channel": "Nate Herk | AI Automation",
+ "duration": 1302,
+ "upload_date": "20260512",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "400 hours in",
+   "end_time": 12.0
+  },
+  {
+   "start_time": 12.0,
+   "title": "Level 1",
+   "end_time": 63.0
+  },
+  {
+   "start_time": 63.0,
+   "title": "Level 2",
+   "end_time": 133.0
+  },
+  {
+   "start_time": 133.0,
+   "title": "Hidden artifacts",
+   "end_time": 215.0
+  },
+  {
+   "start_time": 215.0,
+   "title": "Office takeover",
+   "end_time": 294.0
+  },
+  {
+   "start_time": 294.0,
+   "title": "Level 3",
+   "end_time": 441.0
+  },
+  {
+   "start_time": 441.0,
+   "title": "Figma killer?",
+   "end_time": 564.0
+  },
+  {
+   "start_time": 564.0,
+   "title": "Level 4",
+   "end_time": 640.0
+  },
+  {
+   "start_time": 640.0,
+   "title": "Shift tab twice",
+   "end_time": 834.0
+  },
+  {
+   "start_time": 834.0,
+   "title": "Slash rewind",
+   "end_time": 956.0
+  },
+  {
+   "start_time": 956.0,
+   "title": "Level 5",
+   "end_time": 1302
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "b98444227304cbf3950932f23592f0b1a18e0b0e99f1086ae6941fcb9f01f4cc",
+  "source_bytes": 672100,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

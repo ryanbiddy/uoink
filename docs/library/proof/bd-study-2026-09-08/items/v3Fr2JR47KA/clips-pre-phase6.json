@@ -1,0 +1,134 @@
+[
+ {
+  "clip_id": 3066,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 0,
+  "start": 16.75,
+  "end": 94.75,
+  "text": ">> Well, welcome. Let's get started. This is an MCP application. That's an agent shipping its own interface not through like a plugin, not through an SDK, not rendered on the fly by the model on the client side, or hardcoded into the product. That is something that is served over an MCP server, and you can take the server, put it into cloud, you can put it into ChatGPT, you can put it into VS Code Cursor, and it will just work. And that I think it's kind of cool because for doing that, you need something that a lot of things that we're want in the ecosystem do not offer. You need semantics, you need to have both sides, client and the server, to understand what each side is talking, to understand how you render this, understand that there's a UI coming. And for that, you need a protocol. And the best part about this, an MCP server doesn't just ship an app, or can ship an app, it can also ship tools with it, and so you can interact with it with the application as a human, and you can have the model interact with it through tools, which is I think a very unique thing that I think we have not explored much just yet.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=16s",
+  "cue_count": 4
+ },
+ {
+  "clip_id": 3067,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 1,
+  "start": 94.76,
+  "end": 150.15,
+  "text": "just yet. Okay. But, let's quickly rewind a little bit from this what I think is a really cool glimpse into the future of MCP into over a year ago, 18 months, an eternity in AI life cycle, um all of this did not exist. There was just a little spec document, a few SDKs, uh mostly written by Claude, local only with little more than just tools. And in that last 18 or 12 months, you guys have been absolutely crazy building stuff, um building servers, building um an crazy ecosystem around this, and we on our side have been busy busy taking this local only thing, added remote capabilities, added centralized authorization, added new primitive like elicitation and tasks, and last but not least, added new experimental features to the protocol like the MCP applications that you've just seen.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=94s",
+  "cue_count": 2
+ },
+ {
+  "clip_id": 3068,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 2,
+  "start": 152.03,
+  "end": 200.11,
+  "text": "And in the meantime, we have reached, I think, a really cool milestone because again, you all of you have been absolutely crazy building, building, and building. Of course, luckily with the help of a a bunch of agents. Um we're now like at 110 million monthly downloads. And that's just, of course, not us using it in our clients and servers. That's like OpenAI's agent SDK, that's Google's ADK, that's LangChain, thousands of frameworks and tools that you might have never ever heard of it pulling it as a as a dependency, which means there's one common standard that all of us have at our disposal to speak to each other. Um just a bit for context, uh React, one of the most successful um open source projects probably of the last decades, took roughly double the amount of time to reach that download volume.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=152s",
+  "cue_count": 2
+ },
+ {
+  "clip_id": 3069,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 3,
+  "start": 200.12,
+  "end": 359.07,
+  "text": "volume. And in the meantime, of course, you all have been building really, really cool servers from like little toy projects of WhatsApp servers and Blender servers, uh to building SAS integrations like Linear, Slack, and Notion that are really powering what everyone does every day when they use MCPs. But most importantly, the vast majority of MCP server most of all of us have built are behind closed doors uh connecting company systems to agents uh and AI applications. But I still think this is just the absolute beginning of where we are. Because I think 2025 was all about exploring, and 2026 is all about putting these agents into production. Because if you really think about it, in my mind, 2024, we just built a bunch of like demos and showed some cool stuff to people, and there was a little bit of a buzz there. 2025 was really all about coding agents. But coding agent, if you really think about it, are the most ideal scenario for an agent. It's local, it's verifiable, you can call a compiler, like you have a developer who can fix if it goes wrong in front of the in front of the computer, uh and you can display a UI interface, and the user's quite happy. But I think now with the capabilities of the model increasing, we're going into a new era, which I think this year will be we will see the start, where we're not just doing coding agents, we're going to have general agents that will do real knowledge worker stuff, like things a financial analysis analyst want to do, uh a marketing person want to do. And they need one thing in particular. They don't need a local agent that calls a compiler. What they need is something that could connect to like five SAS applications and a and a shared drive because the most important part for them for an agent is connectivity. And in my mind, connectivity is not one thing. If one if someone tells you there's one solution to all your connectivity problem, be it computer use, be it CLIs, be it MCP, they are probably pretty wrong because the right because the right thing, of course, is that it always means it depends, and there's a real a big connectivity stack, and there's a right tool for the right job. And in my mind, there are three major things that you want to consider building an agent in 2026. It's skills, MCP, and of course, like CLI or computer use depending on your use case. And they have three very distinct things that they can do in three different things you want to consider when you build your agent. Number one, skills, of course, is just like domain knowledge, it's just like capture-specific capabilities put into a very simple file, and it's mostly reusable. There are some minor differences between the different platform.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=200s",
+  "cue_count": 1
+ },
+ {
+  "clip_id": 3070,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 4,
+  "start": 359.08,
+  "end": 432.11,
+  "text": "platform. Of course, CLIs very popular when local coding agents. It's an amazing tool to get simply started, to have something that you can pose in a bash, that you that automatically discover where the model can automatically discover what the CLI is capable of. And most importantly, if you have things that are like CLIs, like GitHub, Git, and other things that are in pre-training, CLI is an amazing solution for your connectivity part, and they're particularly good when you have a local agent where you can assume a sandbox, where you can assume a code execution environment. But if you don't have this, if you need rich semantics, when you need a UI that can display long-running tasks, when you can have when you need things like resources, when you need to build something that is full decoupled and needs platform independence, or you don't have a sandbox, when you need things like authorization, governance, policies, or short to say boring enter boring but important enterprise stuff, or if you want to have experiments like MCP applications or what comes soon, skills over MCP, then I think MCP is just like additional connective tissue that is just yet another tool in the toolbox for you to build an amazing agent.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=359s",
+  "cue_count": 1
+ },
+ {
+  "clip_id": 3071,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 5,
+  "start": 432.12,
+  "end": 484.67,
+  "text": "agent. And so this is all to say that I think in 2026, we're going to start building agents that use all of it. They don't use one thing, they use all of it, and they use them quite seamlessly together. But I don't think we're quite there just yet. Because we need to build a lot of stuff partially um because our agents kind of still suck. Um and partially because I think we just haven't talked enough about like some of the techniques you can do uh to really put this connective tissue together. The number one thing that we need to go and start building is on the client side, on the on the agent harness side, on the things that powers the connective parts, that be it a cloud code, uh be it a pie, be it whatever application you're going to build.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=432s",
+  "cue_count": 3
+ },
+ {
+  "clip_id": 3072,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 6,
+  "start": 485.67,
+  "end": 620.51,
+  "text": "And the number one thing we're going to do there, and what we all have to do, and something I want to really get across today, is that we need to go and start building something called progressive discovery. Most people when they think about like, \"Oh, I MCP,\" they can't think about like context load. But if you really consider what a protocol does, the protocol just puts information across the wire, but the client is responsible for dealing with that information. And what everybody so far has done because we're in this very early experimentation phase, is to simply put all the tools into the context window, and then be quite surprised that maybe the context window gets large. Um but what you can do instead, and what you should do instead, you should start using this progressive discovery pattern, which is to say, use something like tool search to defer the loading of the tools, and start loading the tools when the model needs it. And we have this in the Anthropic API, and people can use this uh on on competitors' APIs as well. But also, you can just build this in yourself where you just download the tool directly, and the moment you give the you give the model a tool loading tool, basically, and the model goes like, \"Ah, maybe I need a tool now. Let me look up what tools I need.\" And then you load them on demand. And here in this example, what you're seeing is on the left side is uh Claude Code before we added this to Claude Code, and then after it uh to Claude Code. So you see a massive reduction in tool uh use uh tool context usage. The second part of that is is something called programmatic tool calling, or what other people usually refer to um to code mode. Um this is the idea that one thing that you really want to do is you want to compose things together. You don't want the model to go call a tool, take the result, then go and talk, call another tool, take the result, call another tool. Because what you're effectively doing is you're letting the model orchestrate things together, and in that orchestration, you're using inference, you're it's it's latency sensitive, and all of it stuff could be done way more effective if you would instead write a script.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=485s",
+  "cue_count": 6
+ },
+ {
+  "clip_id": 3073,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 7,
+  "start": 620.52,
+  "end": 686.11,
+  "text": "a script. Um and in fact, that's actually what you constantly do and what you constantly see things like hard code do when it writes the bash command. But you can of course do this with everything, and you can do this with MCP, and you should do this with MCP. So, what does this mean? So, what you want instead of having one tool at another, you want to give the model a repple tool, provide like a like a execution environment, like a V8 isolate or a monty or something like that, or a lua interpreter, and just have the model write the code for you, and the model just executes that code, and then composes them together. And there's a neat little feature in MCP called structured output that tells you what the return value of the output will be, and the model can use this information to to figure out type information, which then mean it can really nicely compose these things together. And in this example here, instead of doing two different calls, you do one call, and you can filter that the model will automatically remove things from a JSON and just continue.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=620s",
+  "cue_count": 2
+ },
+ {
+  "clip_id": 3074,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 8,
+  "start": 686.12,
+  "end": 760.31,
+  "text": "continue. Of course, if you don't have uh structured output, you can always just ask the model to give you structured output um uh by just extracting it and saying, \"Hey, call us cheap model and say, 'I want this expected type, give it back to me.'\" And bam, you have a type, the model can compose things together, and I think this is something we're just not doing enough yet, and this is I think something where we can improve our agent harnesses. And then last but not least, of course, you can just compile compose these things together with executables, like with CLIs, with other components, with APIs as well. Um next, what we need to do besides the client work, which is progressive discovery and um programmatic tool calling, we need to go and start building properly for agents. And that means we all need to stop taking rest APIs and put them one-to-one into uh an MCP server. Every time I see someone building another rest to MCP server a conversion tool, I'm it's a bit cringe because I think it's just it just results in horrible things. Um and what you should do instead, you should design for an agent. Or basically, you can start designing for you as a human, how you would want to interact with this, because that's actually a very, very good start for an agent.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=686s",
+  "cue_count": 6
+ },
+ {
+  "clip_id": 3075,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 9,
+  "start": 760.32,
+  "end": 844.949,
+  "text": "agent. If you want to orchestrate things together, you should reach, of course, for programmatic tool calling, and you can do this on the client side, as I said before, but you can also do this on the server side. The Cloudflare MCP server and others like that are great examples how you can have, instead of providing tools, provide an execution environment to the model and then just have them orchestrate things together, which again cuts on token usages, cuts on latency, and is way more powerful in its composition. And then last but not least, you should start and we should start as server authors to use this rich semantics that MCP offers over alternatives. This means shipping MCP applications, it means shipping skills over MCP, it means um using things like task and other aspects that the protocol offers that we're currently slightly underused, or things like elicitations. Things that only MCP can do for you. And of course, that's all the work you all need to do, and maybe some of our product people need to do, we also need to do a lot of work on MCP itself. And there's a few things down the line that we're going to go and have to go and solve. The number one thing is we need to improve the core. There's a few things that, as we have developed the protocol over the last year, that are just not in a good shape. Number one is that the current streamable HTTP is very hard to scale if you're a large hyperscaler.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=760s",
+  "cue_count": 1
+ },
+ {
+  "clip_id": 3076,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 10,
+  "start": 844.96,
+  "end": 1017.87,
+  "text": ">> [snorts] >> And so, we have a proposal from our friends at Google, who are working on something called a stateless transport protocol, which make it significantly easier to just treat MCP servers like you know, another stateless uh rest server or something like that and we are used to know how to deploy to like cloud runs or kubernetes and so on. So, that's coming down in June and hopefully lining in the SDKs very soon. In addition, we need to improve our asynchronous task primitive, which basically is a very fancy way to say we just want to have agent-to-agent communication. We have a very experimental version of the protocol that very few clients support, so we're going to start building more clients out like that, and most importantly, we are improving some of the little semantics that we need to do. We're going to ship a TypeScript version SDK version two and Python SDK version two based on a lot of the lessons learned over the last year. There's a there's a SDK called fast MCP. Who's using fast MCP? Yeah. It's just way better than Python SDK that we're shipping, right? And that's on me because I wrote the Python SDK. Um and and so, I have a bunch of people who are way better Python developers than me help me write it better. Um the second part is we need to start integrating everywhere. We're going to ship for particularly for enterprises something called cross-app access. It's a new thing that we're working closely together with identity providers, which just allows you It's a very fancy way to say once you log in once with your local company identity provider, be it a Google, be it an Okta, you will be able to just use MCP servers without having to re-login. So, it's a bit more smoothness. Um in addition, we're going to add something called a server discovery by by specifying how you can discover servers on well-known URLs automatically. So, crawlers, browsers, um agents can just go to a website and say, \"Oh, I'm instead of just parsing the website, is there also an MCP server I can use?\" And we will be able to automatically discover this. This is a really cool thing that will come down also in June when we launch the next specification and will be supported there. And then last but not least, we're starting to use our extension mechanisms in in MCP, which means that some clients will support this, like for example, MCP applications will only be supported by web-based interfaces, because if you're a CLI, you just have a hard time rendering HTML, right? Um and we will do more of these extensions. One of the most exciting extensions that I think is is cool, we're just going to ship skills over MCP, because it's very obvious that if you have a large MCP server with tons and tons of tools, you just want to ship the main knowledge with it and say, \"Oh, this is how you're supposed to use this. This is how you're supposed to use this.\" And it allows you as a server author to continuously ship updated skills without having to rely on plugin mechanisms on registries and other stuff.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=844s",
+  "cue_count": 3
+ },
+ {
+  "clip_id": 3077,
+  "video_id": "v3Fr2JR47KA",
+  "seq": 11,
+  "start": 1017.88,
+  "end": 1118.087,
+  "text": "stuff. So, that's coming down. Um there's a lot a lot of experimentation from people already in that space. You can already do some of that today if you just give the model a load skills tool. Like there you can you can build primitives or versions of this today without having to rely on the semantics, but of course, we're going to define the semantics. Okay. So, that's for me a long-winded way to think to say that I think MCP is actually in a really good shape, and I think in this year, we're going to push uh agents to full connectivity, um MCP will continue to play a major, major, major role. And we want, of course, your feedback. We are very open community. We are just have created a foundation. We're mostly running as an open-source community with a discord, with issues. Um just come to us and tell us where the are we wrong, what are we getting right, um so that we can improve this on a continuous basis. So, 2026, I think is all about connectivity, and the best agents use every available method. Like they will use computer use, they will use CLIs, they will use MCPs, and they will use will use skills. Because they want to have a wide variety of things they can do, and then they can ship cool stuff like this, um which is um one of the product features we shipped recently. recently. Uh under the hood, it's nothing but an MCP application um that renders stuff, right? Cool. So, we can now look at uh the model writing graphs. Anyway, thank you.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=v3Fr2JR47KA&t=1017s",
+  "cue_count": 10
+ }
+]

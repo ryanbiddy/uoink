@@ -1,0 +1,99 @@
+{
+ "id": "_3GaXHNSP2I",
+ "title": "📅 Apr 2 - Claude Code's Source Code LEAKED 😱 Gemma 4, $122B OpenAI, 1-Bit Models & AI Emotions",
+ "webpage_url": "https://www.youtube.com/watch?v=_3GaXHNSP2I",
+ "uploader": "Alex Volkov from ThursdAI",
+ "channel": "Alex Volkov from ThursdAI",
+ "duration": 5463,
+ "upload_date": "20260403",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Intro",
+   "end_time": 142.0
+  },
+  {
+   "start_time": 142.0,
+   "title": "TL;DR — This Week in AI",
+   "end_time": 497.0
+  },
+  {
+   "start_time": 497.0,
+   "title": "Claude Code Leak",
+   "end_time": 1432.0
+  },
+  {
+   "start_time": 1432.0,
+   "title": "Claude Code Session Gate",
+   "end_time": 1704.0
+  },
+  {
+   "start_time": 1704.0,
+   "title": "Gemma 4 Breaking News",
+   "end_time": 1882.0
+  },
+  {
+   "start_time": 1882.0,
+   "title": "OpenAI $122B Funding Round",
+   "end_time": 2090.0
+  },
+  {
+   "start_time": 2090.0,
+   "title": "Microsoft AI Models",
+   "end_time": 2199.0
+  },
+  {
+   "start_time": 2199.0,
+   "title": "Gemma 4 with Omar Sanseviero",
+   "end_time": 2260.0
+  },
+  {
+   "start_time": 2260.0,
+   "title": "Gemma 4 — Google's Open Source Strategy",
+   "end_time": 2581.0
+  },
+  {
+   "start_time": 2581.0,
+   "title": "Gemma 4 — Agentic Capabilities & Local Models",
+   "end_time": 2918.0
+  },
+  {
+   "start_time": 2918.0,
+   "title": "Gemma 4 — Recap & Community Features",
+   "end_time": 2989.0
+  },
+  {
+   "start_time": 2989.0,
+   "title": "Gemma 4 — Community Reactions",
+   "end_time": 3298.0
+  },
+  {
+   "start_time": 3298.0,
+   "title": "This Week's Buzz — Ralph Hackathon",
+   "end_time": 3489.0
+  },
+  {
+   "start_time": 3489.0,
+   "title": "Wolf Bench — Hermes Agent Results",
+   "end_time": 5463
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "b7421a8b99d2905d0f7b4ae10af4bf43a50d6640761255c4337350a02b61efc2",
+  "source_bytes": 717621,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

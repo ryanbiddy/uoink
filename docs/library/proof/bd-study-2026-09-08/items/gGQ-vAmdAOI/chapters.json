@@ -1,0 +1,84 @@
+{
+ "id": "gGQ-vAmdAOI",
+ "title": "5. Search: Optimal, Branch and Bound, A*",
+ "webpage_url": "https://www.youtube.com/watch?v=gGQ-vAmdAOI",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2917,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Route 66",
+   "end_time": 221.0
+  },
+  {
+   "start_time": 221.0,
+   "title": "Heuristic Distance",
+   "end_time": 413.0
+  },
+  {
+   "start_time": 413.0,
+   "title": "Path Length",
+   "end_time": 685.0
+  },
+  {
+   "start_time": 685.0,
+   "title": "Extending Path Length",
+   "end_time": 900.0
+  },
+  {
+   "start_time": 900.0,
+   "title": "Branch and Bound",
+   "end_time": 1112.0
+  },
+  {
+   "start_time": 1112.0,
+   "title": "Extended List",
+   "end_time": 1469.0
+  },
+  {
+   "start_time": 1469.0,
+   "title": "Dead Horse Principle",
+   "end_time": 1604.0
+  },
+  {
+   "start_time": 1604.0,
+   "title": "Simulation",
+   "end_time": 1664.0
+  },
+  {
+   "start_time": 1664.0,
+   "title": "Airline Distances",
+   "end_time": 1874.0
+  },
+  {
+   "start_time": 1874.0,
+   "title": "In admissible heuristics",
+   "end_time": 2457.0
+  },
+  {
+   "start_time": 2457.0,
+   "title": "Simulating a star",
+   "end_time": 2917
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "f165eb2fb78b000d910a823042fe8eabf1302538b5577ae00e1d6a679ecda6b5",
+  "source_bytes": 652525,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

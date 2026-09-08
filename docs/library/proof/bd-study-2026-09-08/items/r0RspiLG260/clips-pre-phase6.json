@@ -1,0 +1,211 @@
+[
+ {
+  "clip_id": 3018,
+  "video_id": "r0RspiLG260",
+  "seq": 0,
+  "start": 13.6,
+  "end": 77.48,
+  "text": "Hey everyone, today we're going to walk through\\h training a YOLO model inside Google Colab. I'll\\h\\h go through the process of gathering a data set\\h training the model in Colab and then running it\\h\\h locally on your PC with a custom Python script.\\h We'll show how to train a candy detection model\\h\\h that can detect and identify different popular\\h types of candies. You can follow along and use\\h\\h my candy data set as an example or you can\\h bring your own data set. We'll work inside\\h\\h a Google Colab notebook I wrote for training\\h YOLO models. It works with YOLO11, YOLOv8,\\h\\h and YOLOv5. if you want to train your models\\h on a local PC instead, I wrote an article that\\h\\h shows how to do so. You can find it in the video\\h description below. All right let's get started!\\h The first step to training a custom model\\h is to create a data set. A good starting\\h\\h point for a proof of concept model\\h is 100 to 200 images. The training\\h\\h images should show the objects in a\\h variety of backgrounds, perspectives,\\h\\h and lighting conditions that are similar to what\\h the model will see in the actual application.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=13s",
+  "cue_count": 12
+ },
+ {
+  "clip_id": 3019,
+  "video_id": "r0RspiLG260",
+  "seq": 1,
+  "start": 77.48,
+  "end": 132.68,
+  "text": "The best way to build a data set is to\\h manually take pictures of your objects\\h\\h in a variety of conditions.\\h For my candy detection model,\\h\\h I took pictures of candy in various locations\\h around my house using my phone and a webcam.\\h\\h You can also use online sources like Roboflow\\h Universe, Kaggle, or Google's Open Images V7 data\\h\\h set to find pre-labeled images of your objects. For tips and best practices on building an\\h\\h effective data set see my video on how to capture\\h and label training data. Once you finished taking\\h\\h pictures or downloading them from the internet,\\h move all of the images to a single folder on your\\h\\h computer. I'll create a folder called YOLO in\\h my Documents folder, and another folder inside\\h\\h that called candy-images. Then I'll move all the\\h photos from my phone into the candy images folder.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=77s",
+  "cue_count": 9
+ },
+ {
+  "clip_id": 3020,
+  "video_id": "r0RspiLG260",
+  "seq": 2,
+  "start": 132.68,
+  "end": 192.56,
+  "text": "Now that you've got your training images gathered\\h and saved on your PC, it's time to label them.\\h\\h We'll use an open-source tool called Label Studio\\h to label our images. I like Label Studio because\\h\\h it offers a simple workflow while providing\\h advanced features like automated labeling. Best\\h\\h of all it's free and open source. Because I like\\h Label Studio, I reached out to them and asked if\\h\\h they would sponsor this video and they agreed to\\h it. So, this video is sponsored by HumanSignal,\\h\\h the team that developed Label Studio. If you\\h want to learn more about their tool, click the\\h\\h first link in the video description below. To install Label Studio we first need\\h\\h to install Anaconda, which is a tool for\\h creating and managing Python environments.\\h\\h Go to anaconda.com/download and click the\\h skip registration button and then download\\h\\h download the package for your OS. When it's\\h finished downloading, run the installer and\\h\\h click through the installation steps you can\\h use the default options for installation.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=132s",
+  "cue_count": 11
+ },
+ {
+  "clip_id": 3021,
+  "video_id": "r0RspiLG260",
+  "seq": 3,
+  "start": 192.56,
+  "end": 239.72,
+  "text": "Once it's installed, run Anaconda Prompt by\\h searching for it on the Start bar and clicking\\h\\h on it. This opens a command window that we'll\\h run our commands from. Let's create a new Python\\h\\h environment for installing Label Studio and the\\h other libraries we need for running YOLO models.\\h Create a new environment by issuing \"conda\\h create --name yolo-env1 python=3.12\" . When it's finished creating the environment\\h activate it by issuing \"conda activate yolo-env1\". Now we can install label Studio by\\h issuing \"pip install label-studio\".\\h\\h Depending on your internet connection,\\h it'll take a few minutes to install.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=192s",
+  "cue_count": 7
+ },
+ {
+  "clip_id": 3022,
+  "video_id": "r0RspiLG260",
+  "seq": 4,
+  "start": 243.84,
+  "end": 334.4,
+  "text": "Once it's installed start Label Studio\\h by issuing \"label-studio start\". After a few seconds, Label Studio will start in\\h a new web browser window. Label Studio runs on\\h\\h a server that's hosted locally on your computer,\\h and you interact with it through your web browser.\\h\\h Even though it's in a web browser, all the\\h accounts files and label data you create are\\h\\h stored entirely on your computer and not on the\\h web (unless you want to set it up that way). To\\h\\h start with, you'll need to make an account for\\h your local Label Studio server. Again, this is\\h\\h all hosted on your local computer so you aren't\\h actually creating a web account. Click the sign\\h\\h up link and then enter a fake email address and\\h password. I'll use fake@fake.com and fakepassword.\\h\\h Click create account to continue. You'll enter\\h the project page for Label Studio click the Create\\h\\h Project button to start a new project. Enter a\\h project name like candy images and then click\\h\\h the data import tab. On this screen, you can\\h drag and drop images from your folder on your\\h\\h computer into the web browser to import them. If\\h you try and import more than a 100 images at once,\\h\\h you'll get an error about exceeding a max\\h number of files. But, you can get around it\\h\\h by just making sure you only import 100 images at\\h a time, and then going to the next 100 and so on.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=243s",
+  "cue_count": 14
+ },
+ {
+  "clip_id": 3023,
+  "video_id": "r0RspiLG260",
+  "seq": 5,
+  "start": 334.4,
+  "end": 387.28,
+  "text": "If you have more than a thousand images to\\h label, it's strongly recommended to link a\\h\\h local storage folder or cloud account to the\\h project. See the Label Studio documentation on\\h\\h adding project storage for more information on\\h how to do so. Finally, click the Labeling Setup\\h\\h tab and then click the object detection option.\\h This opens a configuration page for the labeling\\h\\h interface. To start with, delete the airplane\\h and car labels. In the Add Label Names window,\\h\\h type your own class names. I'm labeling\\h pictures of candy, so I'll add each of the\\h\\h candy brands like AirHeads, Nerds, Skittles,\\h and so on with a enter after each line. Once\\h\\h all the classes are typed out, click Add.\\h Click Save to finish creating the project.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=334s",
+  "cue_count": 8
+ },
+ {
+  "clip_id": 3024,
+  "video_id": "r0RspiLG260",
+  "seq": 6,
+  "start": 387.28,
+  "end": 466.16,
+  "text": "Okay, we're ready to start labeling! Click\\h the first image in the list to open the\\h\\h labeling interface. Create a new bounding\\h box by clicking a class at the bottom of\\h\\h the window and clicking a dragging a\\h box around the object in the image,\\h\\h like this Starburst for example. You can click\\h the box and adjust it as needed. You can also\\h\\h use class hotkeys to create a new box. So for\\h example I can press one to create a bounding\\h\\h box for the Airheads in this in this image, and\\h I can press eight to label the peanut M&M's. Once you've labeled all the objects in the image,\\h click Submit and then click the next image in the\\h\\h list. On this image, let's zoom in a little to\\h draw tighter bounding boxes around the objects.\\h\\h We'll start with these gummy worms and get a\\h nice tight bounding box. Okay Three Musketeers,\\h\\h Snickers, and Milky Way. Okay, and\\h then when you're done with the image,\\h\\h click Submit to save the labels. Continue working through each image\\h\\h if you need tips on best practices for labeling\\h images, check out my object detection labeling\\h\\h video. Labeling takes a while, so grab a drink\\h and put on some music while you're working.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=387s",
+  "cue_count": 13
+ },
+ {
+  "clip_id": 3025,
+  "video_id": "r0RspiLG260",
+  "seq": 7,
+  "start": 466.16,
+  "end": 553.44,
+  "text": "Once you've labeled all your images,\\h it's time to export them. Click the\\h\\h project name at the top of the window and\\h then click the Export button. Scroll down\\h\\h and select the YOLO export option and then\\h click Export. Label Studio will package\\h\\h the images and label data into a zip file\\h and download it through your web browser. The files are organized in a directory structure\\h required for training YOLO models, with the images\\h\\h and an images folder and the labels in a labels\\h folder. It also generates a classes.txt labelmap\\h\\h file which lists all the classes in your data\\h set. Let's move that downloaded file back\\h\\h into the YOLO folder in Documents and rename\\h it to data.zip. We'll upload this file to the\\h\\h Google Colab training notebook later. Now, we're ready to start training our\\h\\h YOLO model. We'll train our model in Google\\h Colab, a service from Google that allows\\h\\h you to write and run Python code in your web\\h browser on a free GPU. Click the Colab link\\h\\h in the video description below to get started. This is the Colab notebook where we'll upload\\h\\h our data set and train our custom YOLO\\h model. First, go to Runtime and Change\\h\\h Runtime Type and make sure that a T4 GPU\\h is selected. Click Save then click Connect.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=466s",
+  "cue_count": 14
+ },
+ {
+  "clip_id": 3026,
+  "video_id": "r0RspiLG260",
+  "seq": 8,
+  "start": 553.44,
+  "end": 619.68,
+  "text": "Once it's connected, scroll down and click\\h play on this !nvidia-smi block. You can just\\h\\h click Run Anyway on that window that appears.\\h Verify that it reports a Tesla T4 or similar\\h\\h GPU is available. We've already gathered\\h our images so, we can scroll past Step 1.\\h Next, we'll upload our data.zip file into this\\h Colab instance. Click the folder icon on the left\\h\\h and then drag and drop your data.zip file in into\\h the sidebar. This little blue circle will show\\h\\h the upload progress. You can also upload data to\\h Google Drive and copy it from there, which goes\\h\\h a little faster. See these instructions on how to\\h do so. If you got your data set from a different\\h\\h source like Roboflow Universe, make sure it has\\h the correct folder structure shown here. Again,\\h\\h all the images are in the images folder, the\\h labels are in the labels folder, and there should\\h\\h be a classes.txt file that lists every class. You\\h can just ignore this notes file. You may have to\\h\\h move the files around or create the classes\\h file manually to match this data structure.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=553s",
+  "cue_count": 11
+ },
+ {
+  "clip_id": 3027,
+  "video_id": "r0RspiLG260",
+  "seq": 9,
+  "start": 619.68,
+  "end": 667.08,
+  "text": "If you just want to test the training\\h process on a pre-made data set,\\h\\h you can use my candy data set or my coin data\\h set. Click this block here to download it.\\h\\h Next unzip the data set by\\h clicking this code block. Now that the files are set up, we're ready to\\h split them into train and validation folders.\\h\\h The train folder will contain the actual\\h images that are used to train the model,\\h\\h while the validation folder has images that are\\h used to check the model's performance after each\\h\\h training epoch. I wrote a Python script that\\h automatically creates the folder structure\\h\\h required for training and will randomly move\\h 90% of the data set to the train folder and\\h\\h 10% to the validation folder. Run this code\\h block to download and execute the script.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=619s",
+  "cue_count": 9
+ },
+ {
+  "clip_id": 3028,
+  "video_id": "r0RspiLG260",
+  "seq": 10,
+  "start": 667.08,
+  "end": 715.84,
+  "text": "When script finishes, all the images\\h will be in a data folder where the\\h\\h train and validation images and labels are\\h each in their respective folders. Next,\\h\\h we'll install the Ultralytics library,\\h which is the Python library we'll be\\h\\h using to train the YOLO model. Click\\h play to run the pip install command. Before we can run training, we need\\h to create a training configuration\\h\\h file. This file sets the location of the\\h train and validation folders and defines\\h\\h the model's classes. Here's an example of\\h what it looks like. Run the next code block\\h\\h to automatically generate the data.yaml\\h config file. When it finishes running,\\h\\h it'll display the contents of the file.\\h Double-check that everything looks correct.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=667s",
+  "cue_count": 9
+ },
+ {
+  "clip_id": 3029,
+  "video_id": "r0RspiLG260",
+  "seq": 11,
+  "start": 715.84,
+  "end": 804.36,
+  "text": "Okay, we're finally ready to run training! But\\h there's a few important parameters we need to\\h\\h decide on first. We need to pick which YOLO\\h model we want to use. There's a variety of\\h\\h YOLO architectures and model sizes. YOLO11 is the\\h latest architecture and has the best performance,\\h\\h but YOLOv8 and YOLOv5 are more mature and have\\h broader support on hardware platforms. Model sizes\\h\\h range from nano to extra large. I made a quick\\h YouTube video comparing YOLO model performance\\h\\h on a Raspberry Pi 5 and a laptop equipped with an\\h RTX 4050 GPU. You can watch this video to get a\\h\\h sense of the frame rates and accuracy you'll\\h get with different YOLO models. Generally,\\h\\h you want to choose a model that's small enough to\\h meet the speed requirements for your application,\\h\\h while still being accurate enough to detect your\\h objects. If you aren't sure which model to use,\\h\\h the YOLO11s model is a good starting point. For\\h my candy model, I'll use YOLO11s. Next, the number\\h\\h of epochs sets how long the model will train\\h for. If your data set has less than 200 images,\\h\\h a good starting point is 60 epochs. If\\h your data set has more than 200 images,\\h\\h a good starting point is 40 epochs. Resolution is\\h another parameter we can tweak, but generally it's\\h\\h safe to use the default resolution of 640x 640.\\h However, if you want your model to run faster or\\h\\h if you know you'll be working with low resolution\\h images, try using a lower resolution like 480x480.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=715s",
+  "cue_count": 15
+ },
+ {
+  "clip_id": 3030,
+  "video_id": "r0RspiLG260",
+  "seq": 12,
+  "start": 804.36,
+  "end": 869.04,
+  "text": "With the parameters decided, it's time to run\\h training. I've got the notebook set up to train\\h\\h a yolo11s model for 60 epochs at a 640x 640\\h resolution. You can change the parameters\\h\\h of this command if you want to try something\\h different. Click play to start training. The\\h\\h training algorithm will parse the images\\h in the train and validation directories\\h\\h and then start training the model. At the end\\h of each training epoch, the script runs the\\h\\h model on the validation data set and reports the\\h resulting mAP, precision, and recall. mAP is a\\h\\h general measure of model accuracy. As training\\h continues, the mAP should generally increase\\h\\h with each epoch. Training will end once it goes\\h through the specified number of epochs. Depending\\h\\h on how big your data set is and the number of\\h epochs used, training can take anywhere from 5\\h\\h minutes to a few hours. Be careful though, because\\h the Colab instance will time out and disconnect\\h\\h after about 5 hours. If you want more time\\h for training, consider upgrading to Colab Pro.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=804s",
+  "cue_count": 11
+ },
+ {
+  "clip_id": 3031,
+  "video_id": "r0RspiLG260",
+  "seq": 13,
+  "start": 872.88,
+  "end": 994.4,
+  "text": "When training finishes, the best\\h model weights will be saved in\\h\\h runs/detect/train/weights/best.pt. The results.png\\h file shows how metrics like loss, precision,\\h\\h recall, and mAP progressed over each training\\h epoch. Let's make that a little bigger. Generally,\\h\\h mAP should increase and then begin to\\h flatten out by the end of training. Now that the model's finished training,\\h let's test it! Run this first code block\\h\\h to perform inference on all the\\h images in the validation folder. Then, run the next code block to display the\\h results for the first 10 images. The model\\h\\h should draw a box around each object of interest\\h in each image. My model is doing a pretty good\\h\\h job of identifying each of the types of candy in\\h these images. Looks like it's getting them mostly\\h\\h right. If your model isn't very accurate, there's\\h a couple things you can try. First, double-check\\h\\h your data set to make sure there's no label\\h errors. You can also try increasing the number of\\h\\h training epochs or using a larger model. Okay, now\\h we've got a trained model, so what can we do with\\h\\h it? Drawing boxes on images is great, but it isn't\\h very useful in itself. It's also not very helpful\\h\\h to just run the model inside a Colab notebook, so\\h let's download and run it locally on our computer\\h\\h with a custom Python script. First zip and\\h download the trained model by running this code\\h\\h block. It will rename the model to my_model.pt,\\h move it to a folder named my_model, and zip it.\\h\\h It also zips the training results in case you want\\h to reference them later. Then you can download the\\h\\h my_model.zip file from the sidebar. Now we'll\\h walk through instructions for setting it up on\\h\\h your PC. Once the download is finished, move the\\h downloaded zip file back into the YOLO folder that\\h\\h",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=872s",
+  "cue_count": 19
+ },
+ {
+  "clip_id": 3032,
+  "video_id": "r0RspiLG260",
+  "seq": 14,
+  "start": 994.4,
+  "end": 1056.6,
+  "text": "we were working in and extract it. We'll work\\h inside this extracted folder to run our model. Go back to the Anaconda Prompt window. If it's\\h still running Label Studio, press CTRL+C a couple\\h\\h times to stop it. Or, if you've already closed\\h the window, you can re-open it, re-activate the\\h\\h environment by issuing \"conda activate yolo-env1\"\\h and then copy the path to the my_model folder and\\h\\h do \"cd\" and enter the path to the folder to move\\h into it. We'll use the Ultralytics library to run\\h\\h inference with our model. Install it by issuing\\h \"pip install ultralytics\". This also installs\\h\\h other important libraries like OpenCV-Python,\\h Numpy, and PyTorch, so it may take a few minutes.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=994s",
+  "cue_count": 7
+ },
+ {
+  "clip_id": 3033,
+  "video_id": "r0RspiLG260",
+  "seq": 15,
+  "start": 1056.6,
+  "end": 1103.68,
+  "text": "If you have an NVIDIA GPU, you can install the GPU\\h enabled version of PyTorch by going to the PyTorch\\h\\h Get Started page at pytorch.or/get-started-locally\\h and scrolling down, selecting your operating\\h\\h system, and the latest version of CUDA. Copy the\\h installation command and paste it in your Anaconda\\h\\h Prompt window. Make sure to add \"--upgrade\"\\h after install so that it upgrades the existing\\h\\h installation. Hit enter to run the command. This\\h automatically installs the CUDA and cuDNN drivers\\h\\h needed for running inference on GPU. They're\\h pretty big drivers, so it may take a while.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=1056s",
+  "cue_count": 6
+ },
+ {
+  "clip_id": 3034,
+  "video_id": "r0RspiLG260",
+  "seq": 16,
+  "start": 1103.68,
+  "end": 1164.56,
+  "text": "Now we're ready to run the model! I wrote a custom\\h Python script that shows how to load the model,\\h\\h run inference on an image, and parse\\h the inference results. The intent for\\h\\h this script is to show you how to work\\h with Ultralytics YOLO models in Python,\\h\\h and it can be used as a starting point\\h for other applications. Download the\\h\\h script by issuing \"curl -o yolo_detect.py\\h https://www.ejtech.io/yolo_detect.py\" . You can run the script by entering the path to\\h your model and an image source. For example,\\h\\h to run inference on a USB camera\\h at 1280x720 resolution, I can issue\\h\\h \"python yolo_detect.py --model my_model.pt\\h --source usb0 --resolution 1280x720\".",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=1103s",
+  "cue_count": 8
+ },
+ {
+  "clip_id": 3035,
+  "video_id": "r0RspiLG260",
+  "seq": 17,
+  "start": 1164.56,
+  "end": 1215.56,
+  "text": "All right, so your camera view will appear and\\h the model will draw boxes around the different\\h\\h objects of interest in each frame. So as you\\h can see my, candy model doesn't do too bad\\h\\h at detecting different types of candy here. And\\h since it's a YOLO11s model, it runs pretty fast\\h\\h on my NVIDIA 4050 graphics card. So, not\\h bad! You can press Q to quit the program. You can also run the model on a video file\\h image or folder of images. For example,\\h\\h I'll move a video file into\\h the folder and run the script\\h\\h on it by issuing \"python yolo_detect.py\\h --model my_model.pt --source test1.mov\" .",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=1164s",
+  "cue_count": 7
+ },
+ {
+  "clip_id": 3036,
+  "video_id": "r0RspiLG260",
+  "seq": 18,
+  "start": 1215.56,
+  "end": 1285.598,
+  "text": "Again, a window will appear\\h showing detection results. To see a full description of how to use\\h yolo_detect.py, see the readme file in\\h\\h the Train-YOLO-Models GitHub repository\\h linked in the video description below. Okay, congratulations! You successfully\\h trained a YOLO model. Next, see if you\\h\\h can extend the application beyond just\\h drawing boxes on the screen and counting\\h\\h the number of objects. As an example, I\\h created a candy calorie counter app that\\h\\h will tell you the number of calories and the\\h amount of sugar and a handful of candy. You\\h\\h can check out the source code for it in the\\h video description below. I'll be adding more\\h\\h examples to the GitHub repository that show\\h cool ways you can use these YOLO models. Also,\\h\\h keep an eye on my channel for more guides, like\\h a guide showing how to run YOLO models on the\\h\\h Raspberry Pi. Thanks so much for watching,\\h and as always good luck with your projects! [Music]",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=r0RspiLG260&t=1215s",
+  "cue_count": 12
+ }
+]

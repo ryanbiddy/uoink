@@ -1,0 +1,57 @@
+[
+ {
+  "clip_id": 3187,
+  "video_id": "z70ZrSZNi-8",
+  "seq": 0,
+  "start": 15.509,
+  "end": 160.55,
+  "text": "[Music] hey everyone in this video we'll walk through the process of setting up the Raspberry Pi to run YOLO object detection models the Raspberry Pi is just powerful enough to run lightweight YOLO models in real time making it great for controlling real world systems that on visual data from the world around them you can use it to make cool applications like this smart reading lamp that turns on whenever I sit in my favorite reading spot on the couch in this video I'll show how to install Ultra litics on the pie set up a yellow 11 detection model and use it to run inference on a live camera feed with a custom python script the instructions in this video should work for a Raspberry Pi 4 or five running the latest version of 64-bit Raspberry Pi OS all right let's get started set up your Raspberry Pi power it on and connect it to the internet once you're on the home screen open a terminal and issue pseudo apt update and and pseudo apt upgrade Dy this will update the pi depending on how many updates it needs to install it can take anywhere from a few minutes to half an hour [Applause] next create a new directory called YOLO and move into it by issuing make dear YOLO and CD YOLO now we need to create a virtual environment to install our python libraries in using a virtual environment allows us to avoid version conflicts with existing python libraries on the operating system create an environment named VM by issuing python 3-m vm-- system site packages and then VM then activate it by issuing Source vmb activate when the environment is active VM will appear in front of the command prompt if you ever close and reopen the terminal window then you'll need to reactivate the environment by moving into the YOLO folder and using Source vmb activate next let's install the ultral litics and ncnn libraries that we'll use for running YOLO issue pip install ultral litic and",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=z70ZrSZNi-8&t=15s",
+  "cue_count": 8
+ },
+ {
+  "clip_id": 3188,
+  "video_id": "z70ZrSZNi-8",
+  "seq": 1,
+  "start": 160.56,
+  "end": 282.39,
+  "text": "litic and ncnn this command downloads a lot of libraries so it can take up to 15 minutes to complete if it gets stuck for more than 15 minutes or if you get errors try running the PIP install command again until it finishes successfully it helps to make sure you have a good internet connection when you're installing the libraries [Applause] if you haven't already plug your camera into the Raspberry Pi most USB webcam should work you can issue lsdev videoo star and confirm you see video Z or video One appear when the camera's plugged in if you're using a pi camera make sure to power the Raspberry Pi off before plugging in the ribbon cable all right now let's set up the YOLO model you can use an off-the-shelf sample model that's been trained on the Coco data set to detect 80 common objects or you can use a custom model you've trained yourself to use an off-the-shelf model download it by issuing YOLO detect predict model equal YOLO 11n PT you can also use YOLO 11s or YOLO 11 L here but they don't run as fast on the pi see my YOLO comparison video to get an idea of the detection frame rate you can get with each model when the model's finished downloading you'll have a YOLO 11n PT file inside your YOLO folder if you want to use a custom model you can just move the model file into the YOLO folder on the pi for example I'll transfer my custom candy. PT file which contains a candy detection model into the YOLO folder if you want to train your own custom detection model check out my previous YouTube video that gives stepbystep instructions on how to do so it's linked in the video description below whether you're using an off-the-shelf model or a custom model you should now have a model. PT file in your YOLO",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=z70ZrSZNi-8&t=160s",
+  "cue_count": 3
+ },
+ {
+  "clip_id": 3189,
+  "video_id": "z70ZrSZNi-8",
+  "seq": 2,
+  "start": 282.4,
+  "end": 347.11,
+  "text": "your YOLO folder by default ultral ltic YOLO models are stored in the pytorch format we'll take this and convert it to ncnn format which is optimized for running on arm CPUs like the one on the Raspberry Pi ncnn is a bit faster than other formats like tensorflow light or onnx convert the model to ncnn format by issuing YOLO export model equal YOLO 11n PT format equal ncnn if your model file has a different name than YOLO 11n use that [Applause] instead when the conversion is complete the new model files will be saved in a folder called YOLO 11 ncnn model we'll use this for running inference I wrote a basic python script called YOLO detect. that shows how to load a model run inference on an image parse the results and display detection boxes around each object in the image download the script by issuing WG https ed.",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=z70ZrSZNi-8&t=282s",
+  "cue_count": 3
+ },
+ {
+  "clip_id": 3190,
+  "video_id": "z70ZrSZNi-8",
+  "seq": 3,
+  "start": 347.12,
+  "end": 493.589,
+  "text": "ed. codolo detect. run the script by entering the path to your model the index of your USB camera and the resolution you want to run at for example you can use python YOLO detect. pi-- model equals YOLO 11n ncnn model Source equals USB 0 resolution equals 1280 x 720 a window will appear showing live detection results from the camera the yolu 11n model runs about 6 or seven FPS on my Raspberry Pi 5 and it does a decent job at detecting objects not bad you can press Q to quit the program you can also run the script on a video file image or folder of images for example I have a folder of candy pictures that I'll move into the YOLO folder then I can run detection on that folder using python YOLO detect. py and then this time I'll point it at my candy detection model instead of the YOLO model and the source is candy pick folder it'll load each image and run inference on it and show the results for each image to see other options for running the YOLO detection script use Python YOLO detect. py help this script can be used as a start starting point for other cool applications the Raspberry Pi's gpio can be used to control a wide range of Hardware devices and Trigger actions when certain events occur as an example I created a smart reading lamp that turns on whenever I sit in my favorite reading spot on the couch the application uses the Raspberry Pi a camera and an AC power control relay the camera is set up to watch the couch it's plugged into the pi which controls the power relay through the Raspberry Pi's gpio whenever a person is detected on the couch it sets the gpio high which causes the power relay to turn the lamp on when the person leaves it turns the lamp back",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=z70ZrSZNi-8&t=347s",
+  "cue_count": 7
+ },
+ {
+  "clip_id": 3191,
+  "video_id": "z70ZrSZNi-8",
+  "seq": 4,
+  "start": 496.07,
+  "end": 557.63,
+  "text": "off I've shared the code and set up instructions for this example in my train and deploy YOLO models repository on GitHub the instructions walk through how to wire up the P to the power relay and how to run the program I left a lot of comments in the code to explain how it decides when to turn the lamp on and off check out the link to the example in the video description below all right at this point you should have a YOLO model up and running on your Raspberry Pi nice work now see if you can build more functionality Beyond just detecting objects there's a ton of creative ways that you can use the Raspberry Pi and YOLO to build cool computer vision applications check out my YOLO GitHub repository Linked In the description below for more code examples and and keep an eye on my YouTube channel for more tutorial videos as always thank you for watching this video and good luck with your projects see you next time [Music]",
+  "speaker": null,
+  "source_deep_link": "https://youtube.com/watch?v=z70ZrSZNi-8&t=496s",
+  "cue_count": 2
+ }
+]

@@ -1,0 +1,64 @@
+{
+ "id": "m9fH9OWn8YM",
+ "title": "Train Yolov8 object detection on a custom dataset | Step by step guide | Computer vision tutorial",
+ "webpage_url": "https://www.youtube.com/watch?v=m9fH9OWn8YM",
+ "uploader": "Felipe Tambasco",
+ "channel": "Felipe Tambasco",
+ "duration": 3888,
+ "upload_date": "20230130",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Intro",
+   "end_time": 42.0
+  },
+  {
+   "start_time": 42.0,
+   "title": "Data collection",
+   "end_time": 304.0
+  },
+  {
+   "start_time": 304.0,
+   "title": "Data annotation",
+   "end_time": 1189.0
+  },
+  {
+   "start_time": 1189.0,
+   "title": "Dataset structure",
+   "end_time": 1808.0
+  },
+  {
+   "start_time": 1808.0,
+   "title": "Train yolov8",
+   "end_time": 3015.0
+  },
+  {
+   "start_time": 3015.0,
+   "title": "Test yolov8",
+   "end_time": 3849.0
+  },
+  {
+   "start_time": 3849.0,
+   "title": "Outro",
+   "end_time": 3888
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "14cc19c006a4b3f9f163aef12426e020f6f497f4db0bc041a1b44300e5425494",
+  "source_bytes": 711139,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

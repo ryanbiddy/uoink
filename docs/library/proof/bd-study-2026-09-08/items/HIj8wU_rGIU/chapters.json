@@ -1,0 +1,79 @@
+{
+ "id": "HIj8wU_rGIU",
+ "title": "How to Start Coding | Programming for Beginners | Learn Coding | Intellipaat",
+ "webpage_url": "https://www.youtube.com/watch?v=HIj8wU_rGIU",
+ "uploader": "Intellipaat",
+ "channel": "Intellipaat",
+ "duration": 1988,
+ "upload_date": "20200225",
+ "release_timestamp": 1582642821,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 8.0
+  },
+  {
+   "start_time": 8.0,
+   "title": "How to start coding?",
+   "end_time": 97.0
+  },
+  {
+   "start_time": 97.0,
+   "title": "Why Learn Coding?",
+   "end_time": 294.0
+  },
+  {
+   "start_time": 294.0,
+   "title": "How to Start Coding?",
+   "end_time": 573.0
+  },
+  {
+   "start_time": 573.0,
+   "title": "Learn Basics of that language",
+   "end_time": 632.0
+  },
+  {
+   "start_time": 632.0,
+   "title": "Create a Basic Application",
+   "end_time": 731.0
+  },
+  {
+   "start_time": 731.0,
+   "title": "Which language and tools should you use?",
+   "end_time": 1242.0
+  },
+  {
+   "start_time": 1242.0,
+   "title": "How to Choose a Project?",
+   "end_time": 1448.0
+  },
+  {
+   "start_time": 1448.0,
+   "title": "Learning path: Coding",
+   "end_time": 1692.0
+  },
+  {
+   "start_time": 1692.0,
+   "title": "What Kind of Jobs Can you Expect?",
+   "end_time": 1988
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "5b0de8530fbb0db55b4c74d1c728af9d9423c90bc37393d36d85d6454a83f5e8",
+  "source_bytes": 680298,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

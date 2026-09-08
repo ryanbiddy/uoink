@@ -1,0 +1,99 @@
+{
+ "id": "leXa7EKUPFk",
+ "title": "3. Reasoning: Goal Trees and Rule-Based Expert Systems",
+ "webpage_url": "https://www.youtube.com/watch?v=leXa7EKUPFk",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2996,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 422.0
+  },
+  {
+   "start_time": 422.0,
+   "title": "Program Structure",
+   "end_time": 915.0
+  },
+  {
+   "start_time": 915.0,
+   "title": "Goal Trees",
+   "end_time": 965.0
+  },
+  {
+   "start_time": 965.0,
+   "title": "Herb Simon",
+   "end_time": 1078.0
+  },
+  {
+   "start_time": 1078.0,
+   "title": "Complex Behavior Simple Program",
+   "end_time": 1125.0
+  },
+  {
+   "start_time": 1125.0,
+   "title": "Simple Rules",
+   "end_time": 1188.0
+  },
+  {
+   "start_time": 1188.0,
+   "title": "Identifying Animals",
+   "end_time": 1474.0
+  },
+  {
+   "start_time": 1474.0,
+   "title": "RuleBased Expert Systems",
+   "end_time": 1828.0
+  },
+  {
+   "start_time": 1828.0,
+   "title": "Deduction",
+   "end_time": 1898.0
+  },
+  {
+   "start_time": 1898.0,
+   "title": "Mice and Dialogue",
+   "end_time": 1992.0
+  },
+  {
+   "start_time": 1992.0,
+   "title": "Example Problem",
+   "end_time": 2202.0
+  },
+  {
+   "start_time": 2202.0,
+   "title": "Knowledge Engineering Principles",
+   "end_time": 2542.0
+  },
+  {
+   "start_time": 2542.0,
+   "title": "Is Human Intelligence Really Smart",
+   "end_time": 2635.0
+  },
+  {
+   "start_time": 2635.0,
+   "title": "RuleBased Reasoning",
+   "end_time": 2996
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "97c2e33ec7aa53c87bf3ad80650e3ba4241b5e4b9bf2edc9f18af562035244a0",
+  "source_bytes": 683310,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

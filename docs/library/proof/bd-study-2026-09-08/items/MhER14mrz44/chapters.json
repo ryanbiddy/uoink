@@ -1,0 +1,89 @@
+{
+ "id": "MhER14mrz44",
+ "title": "ThursdAI - LIVE from @aiDotEngineer WF in SF w/ Swyx, OpenAI, DeepMind, Nvidia, Sakana & EXO labs!",
+ "webpage_url": "https://www.youtube.com/watch?v=MhER14mrz44",
+ "uploader": "Alex Volkov from ThursdAI",
+ "channel": "Alex Volkov from ThursdAI",
+ "duration": 9671,
+ "upload_date": "20260703",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Intro — LIVE from AI Engineer World's Fair",
+   "end_time": 233.0
+  },
+  {
+   "start_time": 233.0,
+   "title": "Fable 5 is BACK",
+   "end_time": 387.0
+  },
+  {
+   "start_time": 387.0,
+   "title": "Sonnet 5 — \"Meh\"",
+   "end_time": 1174.0
+  },
+  {
+   "start_time": 1174.0,
+   "title": "Open Source: LongCat 2.0 Unmasked",
+   "end_time": 1421.0
+  },
+  {
+   "start_time": 1421.0,
+   "title": "Etched ASIC Debate",
+   "end_time": 2158.0
+  },
+  {
+   "start_time": 2158.0,
+   "title": "EXO × NVIDIA announce local.ai LIVE",
+   "end_time": 3107.0
+  },
+  {
+   "start_time": 3107.0,
+   "title": "️ Dominic Kundel — OpenAI",
+   "end_time": 4377.0
+  },
+  {
+   "start_time": 4377.0,
+   "title": "This Week's Buzz — Zubin / CoreWeave Aria",
+   "end_time": 4927.0
+  },
+  {
+   "start_time": 4927.0,
+   "title": "Stefania Druga — Sakana AI / Fugu",
+   "end_time": 6167.0
+  },
+  {
+   "start_time": 6167.0,
+   "title": "Philipp Schmid — DeepMind",
+   "end_time": 7139.0
+  },
+  {
+   "start_time": 7139.0,
+   "title": "Darya Volkov — AI Engineer from the Floor",
+   "end_time": 7871.0
+  },
+  {
+   "start_time": 7871.0,
+   "title": "️ Swyx — The AIE Wrap & The Highest Loop",
+   "end_time": 9671
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "cd85202cfb21994e63011dc3eb4b431038822d03ff2b5d1e86d6b1007f2ab35b",
+  "source_bytes": 732401,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

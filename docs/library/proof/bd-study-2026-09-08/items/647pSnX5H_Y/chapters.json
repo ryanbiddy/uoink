@@ -1,0 +1,79 @@
+{
+ "id": "647pSnX5H_Y",
+ "title": "You're Wasting 40% Of Your AI Time On Something Fixable",
+ "webpage_url": "https://www.youtube.com/watch?v=647pSnX5H_Y",
+ "uploader": "AI News & Strategy Daily | Nate B Jones",
+ "channel": "AI News & Strategy Daily | Nate B Jones",
+ "duration": 1633,
+ "upload_date": "20260509",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Why most people get stuck on the agent scaffolding layer",
+   "end_time": 154.0
+  },
+  {
+   "start_time": 154.0,
+   "title": "The mech suit metaphor — what actually surrounds an LLM",
+   "end_time": 339.0
+  },
+  {
+   "start_time": 339.0,
+   "title": "The map: prompts, skills, plugins, MCPs, hooks, scripts",
+   "end_time": 582.0
+  },
+  {
+   "start_time": 582.0,
+   "title": "Why now — GPT 5.5 and messy multi-part work",
+   "end_time": 698.0
+  },
+  {
+   "start_time": 698.0,
+   "title": "Prompts: when one-offs are the right call",
+   "end_time": 810.0
+  },
+  {
+   "start_time": 810.0,
+   "title": "Skills: teaching a tool your house style",
+   "end_time": 1042.0
+  },
+  {
+   "start_time": 1042.0,
+   "title": "Plugins: packaging a whole workflow your team can install",
+   "end_time": 1272.0
+  },
+  {
+   "start_time": 1272.0,
+   "title": "MCPs and app connectors: live access to where work lives",
+   "end_time": 1386.0
+  },
+  {
+   "start_time": 1386.0,
+   "title": "Hooks and scripts: the deterministic parts you don't trust the model with",
+   "end_time": 1527.0
+  },
+  {
+   "start_time": 1527.0,
+   "title": "Why the app store analogy undersells what plugins really are",
+   "end_time": 1633
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "f0a22ecedb51cebd7c8977af2cf4f2915fb03eb80bd2409d581cd01bac386b9e",
+  "source_bytes": 675445,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

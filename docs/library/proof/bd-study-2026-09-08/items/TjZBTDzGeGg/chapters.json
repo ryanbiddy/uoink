@@ -1,0 +1,84 @@
+{
+ "id": "TjZBTDzGeGg",
+ "title": "1. Introduction and Scope",
+ "webpage_url": "https://www.youtube.com/watch?v=TjZBTDzGeGg",
+ "uploader": "MIT OpenCourseWare",
+ "channel": "MIT OpenCourseWare",
+ "duration": 2839,
+ "upload_date": "20140110",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 120.0
+  },
+  {
+   "start_time": 120.0,
+   "title": "Artificial Intelligence",
+   "end_time": 660.0
+  },
+  {
+   "start_time": 660.0,
+   "title": "Algorithms",
+   "end_time": 780.0
+  },
+  {
+   "start_time": 780.0,
+   "title": "Generating Tests",
+   "end_time": 840.0
+  },
+  {
+   "start_time": 840.0,
+   "title": "Rumpelstiltskin",
+   "end_time": 1260.0
+  },
+  {
+   "start_time": 1260.0,
+   "title": "Lady Lovelace",
+   "end_time": 1320.0
+  },
+  {
+   "start_time": 1320.0,
+   "title": "Marvin Minsky",
+   "end_time": 2100.0
+  },
+  {
+   "start_time": 2100.0,
+   "title": "Noam Chomsky",
+   "end_time": 2160.0
+  },
+  {
+   "start_time": 2160.0,
+   "title": "Language",
+   "end_time": 2340.0
+  },
+  {
+   "start_time": 2340.0,
+   "title": "Remarks",
+   "end_time": 2760.0
+  },
+  {
+   "start_time": 2760.0,
+   "title": "Announcements",
+   "end_time": 2839
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "3bc697ffe2225f85a9295e1ee868d0b317d4a4552dd01892ecd18e8d0ea1594f",
+  "source_bytes": 674099,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

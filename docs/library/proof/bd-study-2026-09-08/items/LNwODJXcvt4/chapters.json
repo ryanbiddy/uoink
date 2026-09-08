@@ -1,0 +1,44 @@
+{
+ "id": "LNwODJXcvt4",
+ "title": "How to Train Ultralytics YOLOv8 models on Your Custom Dataset in Google Colab | Episode 3",
+ "webpage_url": "https://www.youtube.com/watch?v=LNwODJXcvt4",
+ "uploader": "Ultralytics",
+ "channel": "Ultralytics",
+ "duration": 361,
+ "upload_date": "20230726",
+ "release_timestamp": null,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "Introduction",
+   "end_time": 80.0
+  },
+  {
+   "start_time": 80.0,
+   "title": "️ Setting Up Environment",
+   "end_time": 225.0
+  },
+  {
+   "start_time": 225.0,
+   "title": "️ Labeling Dataset",
+   "end_time": 361
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "f7097dda02c38c2cd96f13c9d6e163c9f78e57bdab0da05c5a5931b03c88e8db",
+  "source_bytes": 682514,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}

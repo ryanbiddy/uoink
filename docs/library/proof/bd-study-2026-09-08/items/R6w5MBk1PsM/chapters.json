@@ -1,0 +1,74 @@
+{
+ "id": "R6w5MBk1PsM",
+ "title": "Nvidia CEO Live on Bloomberg Technology (full show) #tech",
+ "webpage_url": "https://www.youtube.com/watch?v=R6w5MBk1PsM",
+ "uploader": "Bloomberg Television",
+ "channel": "Bloomberg Television",
+ "duration": 3595,
+ "upload_date": "20250107",
+ "release_timestamp": 1736265612,
+ "chapters": [
+  {
+   "start_time": 0.0,
+   "title": "welcome show begins",
+   "end_time": 60.0
+  },
+  {
+   "start_time": 60.0,
+   "title": "tech check",
+   "end_time": 120.0
+  },
+  {
+   "start_time": 120.0,
+   "title": "ed ludlow at CES",
+   "end_time": 300.0
+  },
+  {
+   "start_time": 300.0,
+   "title": "outlook for nvidia and chips",
+   "end_time": 660.0
+  },
+  {
+   "start_time": 660.0,
+   "title": "meta cuts fact checkers ahead of Trump presidency",
+   "end_time": 840.0
+  },
+  {
+   "start_time": 840.0,
+   "title": "politics and social media, censorship",
+   "end_time": 1350.0
+  },
+  {
+   "start_time": 1350.0,
+   "title": "us adds Chinese firms to blacklist",
+   "end_time": 1620.0
+  },
+  {
+   "start_time": 1620.0,
+   "title": "trump press conference",
+   "end_time": 2220.0
+  },
+  {
+   "start_time": 2220.0,
+   "title": "interview with Nvidia CEO Jensen Huang",
+   "end_time": 3595
+  }
+ ],
+ "_provenance": {
+  "source_file": "metadata.json at the item corpus path (see manifest corpus_relpath)",
+  "source_sha256": "1726a95ca85acec8aa0ba77ef4253d4f6fb007a689f552861ad271d8e50a5ae4",
+  "source_bytes": 690233,
+  "extracted_fields": [
+   "id",
+   "title",
+   "webpage_url",
+   "uploader",
+   "channel",
+   "duration",
+   "upload_date",
+   "release_timestamp",
+   "chapters",
+   "chapters"
+  ]
+ }
+}
