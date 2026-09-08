@@ -62,6 +62,90 @@ def load_taxonomy(path: Path) -> dict:
         raise ProofScoreError(f"Failed to parse taxonomy JSON from {p}: {e}")
 
 
+def _service_normalized_nodes(tax_doc: dict) -> list:
+    """The service's own normalization (library_work.approve_taxonomy): path, name from the
+    path, retired default false, parent from the path, sorted by depth, path and id. The
+    revision hash is the digest of this list, so a taxonomy whose nodes changed after
+    approval cannot reproduce its declared revision."""
+    import library_work  # the same code the service runs
+
+    nodes = tax_doc.get("nodes")
+    if not isinstance(nodes, list) or not nodes:
+        raise ProofScoreError("Taxonomy has no nodes")
+    normalized = []
+    for node in nodes:
+        if not isinstance(node, dict) or not isinstance(node.get("path"), list) or not node["path"]:
+            raise ProofScoreError("Taxonomy node lacks a path")
+        # The harness's documented approve_taxonomy input conversion (proof_run.normalized_taxonomy):
+        # NFC path parts and a boolean retired flag, before the service's own normalization.
+        path = [unicodedata.normalize("NFC", part) for part in node["path"]]
+        normalized.append(dict(node, path=path, name=path[-1], retired=bool(node.get("retired", False))))
+    by_path = {tuple(n["path"]): n["shelf_id"] for n in normalized}
+    for node in normalized:
+        node["parent_shelf_id"] = by_path.get(tuple(node["path"][:-1])) if len(node["path"]) > 1 else None
+    normalized.sort(key=lambda n: (len(n["path"]), n["path"], n["shelf_id"]))
+    return [normalized, library_work.digest(normalized)]
+
+
+def taxonomy_revision(tax_doc: dict) -> str:
+    """AX-1: the revision the scorer trusts is recomputed from the nodes with the service's
+    own algorithm, never read from the file alone. A declared revision that differs from the
+    recomputed one is refused. (The stage 1 taxonomy v1 declares none; its recomputed value
+    is what the harness recorded from the service.)"""
+    _, recomputed = _service_normalized_nodes(tax_doc)
+    declared = tax_doc.get("revision_hash")
+    if declared is not None and declared != recomputed:
+        raise ProofScoreError(
+            f"Taxonomy content does not reproduce its declared revision: declared {declared} recomputed {recomputed}"
+        )
+    return recomputed
+
+
+def bind_taxonomy(tax_doc: dict, tax_path: Path, manifest: dict, receipts: dict, mapping_doc: Optional[dict]) -> str:
+    """AX-1 (STAGE4-AUDIT-2026-09-08): the --taxonomy file is admitted only when its recomputed
+    revision equals the revision the validated manifest froze, the revision the receipts
+    executed under, and the revision the frozen mapping was sealed against; and its bytes
+    equal the manifest's frozen file hash. Any absent identity is a refusal."""
+    declared = tax_doc.get("revision_hash")
+    if not isinstance(declared, str) or len(declared) != 64:
+        raise ProofScoreError("Taxonomy declares no revision_hash; an unbound taxonomy cannot be scored")
+    revision = taxonomy_revision(tax_doc)
+    hashes = manifest.get("hashes") or {}
+    frozen_revision = hashes.get("taxonomy_revision_hash") or (manifest.get("taxonomy") or {}).get("revision_hash")
+    if not frozen_revision:
+        raise ProofScoreError("Frozen manifest names no taxonomy revision")
+    if revision != frozen_revision:
+        raise ProofScoreError(f"Taxonomy revision {revision} is not the manifest's frozen revision {frozen_revision}")
+    embedded = (manifest.get("taxonomy") or {}).get("revision_hash")
+    if embedded and embedded != revision:
+        raise ProofScoreError("Manifest's embedded taxonomy names a different revision than its hashes")
+    embedded_nodes = (manifest.get("taxonomy") or {}).get("nodes")
+    if embedded_nodes is not None:
+        if _service_normalized_nodes({"nodes": embedded_nodes})[1] != revision:
+            raise ProofScoreError("Manifest's embedded taxonomy nodes do not reproduce the frozen revision")
+    frozen_file = hashes.get("taxonomy_file_sha256")
+    if frozen_file:
+        actual = hashlib.sha256(Path(tax_path).read_bytes()).hexdigest()
+        if actual != frozen_file:
+            raise ProofScoreError(f"Taxonomy file bytes {actual} differ from the manifest's frozen file hash {frozen_file}")
+    executed = (receipts.get("inputs") or {}).get("taxonomy_revision_hash")
+    if not executed:
+        raise ProofScoreError("Receipt inputs carry no taxonomy_revision_hash")
+    if executed != revision:
+        raise ProofScoreError(f"Receipts executed under taxonomy revision {executed}, not {revision}")
+    version_id = tax_doc.get("version_id")
+    manifest_version = (manifest.get("taxonomy") or {}).get("version_id")
+    if manifest_version and version_id != manifest_version:
+        raise ProofScoreError(f"Taxonomy version_id {version_id!r} is not the manifest's {manifest_version!r}")
+    if mapping_doc is not None:
+        sealed = mapping_doc.get("taxonomy_revision_hash")
+        if not sealed:
+            raise ProofScoreError("Frozen mapping carries no taxonomy_revision_hash")
+        if sealed != revision:
+            raise ProofScoreError(f"Frozen mapping was sealed against taxonomy revision {sealed}, not {revision}")
+    return revision
+
+
 def extract_taxonomy_paths(tax_doc: dict) -> Tuple[Set[Tuple[str, ...]], Dict[Tuple[str, ...], str]]:
     """Extracts NFC-normalized paths matching the frozen case convention."""
     nodes = tax_doc.get("nodes") or tax_doc.get("shelves") or []
@@ -128,9 +212,13 @@ def validate_receipts_for_scoring(
             f"Source SHA-256 mismatch: {source_sha} vs inputs {inputs.get('source_sha256')}"
         )
 
-    # 3. Check exact taxonomy and holdout split hashes
-    tax_hash = taxonomy_data.get("revision_hash") or taxonomy_data.get("taxonomy_revision_hash")
-    if tax_hash and inputs.get("taxonomy_revision_hash"):
+    # 3. Check exact taxonomy and holdout split hashes. AX-1 (STAGE4-AUDIT-2026-09-08): when a
+    # taxonomy is supplied, both sides must carry a revision hash and they must agree; a
+    # missing hash on either side is a refusal, never a skipped comparison.
+    if taxonomy_data:
+        tax_hash = taxonomy_revision(taxonomy_data)
+        if not inputs.get("taxonomy_revision_hash"):
+            raise ProofScoreError("Receipt inputs carry no taxonomy_revision_hash")
         if tax_hash != inputs["taxonomy_revision_hash"]:
             raise ProofScoreError(
                 f"Taxonomy revision hash mismatch: {tax_hash} vs receipt inputs {inputs['taxonomy_revision_hash']}"
@@ -220,13 +308,14 @@ def verify_frozen_mapping(mapping_doc: dict, holdout_data: dict, gold_data: list
     holdout_ids = [item["video_id"] for items in (holdout_data.get("strata") or {}).values() for item in items]
     if set(frozen_items) != set(holdout_ids):
         raise ProofScoreError("Frozen mapping does not cover exactly the hold-out identities")
-    # Stage 4 mapping documents bind the taxonomy by revision hash only (STAGE4-BINDINGS).
+    # Stage 4 mapping documents bind the taxonomy by revision hash (STAGE4-BINDINGS). AX-1:
+    # the hash is required on both sides and compared unconditionally; a version id, when
+    # present, must also agree.
     if mapping_doc.get("taxonomy_version_id") is not None and mapping_doc.get("taxonomy_version_id") != taxonomy_data.get("version_id"):
         raise ProofScoreError("Frozen mapping names a different taxonomy version")
-    if mapping_doc.get("taxonomy_version_id") is None and not mapping_doc.get("taxonomy_revision_hash"):
-        raise ProofScoreError("Frozen mapping binds neither a taxonomy version nor a revision hash")
-    if (mapping_doc.get("taxonomy_revision_hash") and taxonomy_data.get("revision_hash")
-            and mapping_doc["taxonomy_revision_hash"] != taxonomy_data["revision_hash"]):
+    if not mapping_doc.get("taxonomy_revision_hash"):
+        raise ProofScoreError("Frozen mapping carries no taxonomy_revision_hash")
+    if mapping_doc["taxonomy_revision_hash"] != taxonomy_revision(taxonomy_data):
         raise ProofScoreError("Frozen mapping names a different taxonomy revision hash")
     for vid in holdout_ids:
         gold = gold_by_id.get(vid, {})
@@ -754,11 +843,19 @@ def main() -> None:
     taxonomy_data = load_taxonomy(args.taxonomy)
 
     mapping_status = "not checked (no --mapping)"
+    mapping_doc = None
     if args.mapping is not None:
         if not args.mapping.is_file():
             print(f"ERROR: Mapping file not found: {args.mapping}", file=sys.stderr)
             sys.exit(1)
         mapping_doc = json.loads(args.mapping.read_text(encoding="utf-8"))
+    # AX-1: the supplied taxonomy is admitted only as the manifest's frozen revision.
+    try:
+        taxonomy_binding = bind_taxonomy(taxonomy_data, args.taxonomy, manifest_data, receipts_data, mapping_doc)
+    except ProofScoreError as exc:
+        print(f"SCORER ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if mapping_doc is not None:
         try:
             mapping_status = verify_frozen_mapping(mapping_doc, holdout_data, gold_data, taxonomy_data)
         except ProofScoreError as exc:
@@ -771,6 +868,7 @@ def main() -> None:
         print(f"SCORER ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
     results["frozen_mapping"] = mapping_status
+    results["taxonomy_binding"] = f"bound to manifest revision {taxonomy_binding}"
     results["receipt_validation"] = validation
 
     out_dir = args.out if args.out else args.receipts.parent

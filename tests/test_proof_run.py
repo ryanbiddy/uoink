@@ -718,7 +718,7 @@ def test_stage4_execution_record_identities():
     assert stage["effort"] is None
     assert stage["bindings"] == "docs/library/proof/holdout-v3-stage4-bindings-2026-09-07.json"
     assert stage["diff_ledger"] == "docs/library/proof/card-contract-v2-diff-2026-09-07.json"
-    assert stage["probe_receipt"] == "docs/library/proof/stage4-probe-receipts-2026-09-07.json"
+    assert stage["probe_receipt"] == "docs/library/proof/run-stage4-probe-2026-09-07/receipts.json"
     assert stage["probe_n"] == 16
     assert stage["probe_wall_budget_ms"] == 900_000
     assert stage["manifest"] == "docs/library/proof/manifest-stage4-2026-09-07.json"
@@ -726,3 +726,79 @@ def test_stage4_execution_record_identities():
     assert rec.GUARD_RULE_V2["amendment"] == "AO-G1"
     assert rec.GUARD_RULE_V2["comparison"] == "integer"
 
+
+# --- AX-1 (STAGE4-AUDIT-2026-09-08): the scorer admits only the manifest's frozen taxonomy -----
+
+_STAGE4_TAXONOMY = ROOT / "docs" / "library" / "taxonomy-v3-2026-09-07.json"
+_STAGE4_MANIFEST = ROOT / "docs" / "library" / "proof" / "manifest-stage4-2026-09-07.json"
+_STAGE4_MAPPING = ROOT / "docs" / "library" / "proof" / "labels" / "holdout-v3-stage4-mapping-2026-09-07.json"
+_STAGE4_RECEIPTS = ROOT / "docs" / "library" / "proof" / "run-stage4-2026-09-08-run2" / "receipts.json"
+
+
+def _stage4_binding_inputs():
+    load = lambda path: json.loads(path.read_text(encoding="utf-8"))
+    return load(_STAGE4_TAXONOMY), load(_STAGE4_MANIFEST), load(_STAGE4_RECEIPTS), load(_STAGE4_MAPPING)
+
+
+def test_ax1_scorer_binds_the_approved_taxonomy_to_the_frozen_manifest():
+    tax, manifest, receipts, mapping = _stage4_binding_inputs()
+    revision = proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, manifest, receipts, mapping)
+    assert revision == tax["revision_hash"] == manifest["hashes"]["taxonomy_revision_hash"]
+    assert revision == receipts["inputs"]["taxonomy_revision_hash"] == mapping["taxonomy_revision_hash"]
+    assert proof_score.taxonomy_revision(tax) == revision
+
+
+def test_ax1_scorer_refuses_a_taxonomy_without_a_revision():
+    """Astra's AX negative fixture: revision fields removed, foreign version id, one
+    definition changed, shelf paths retained. Before AX-1 the CLI scored it."""
+    tax, manifest, receipts, mapping = _stage4_binding_inputs()
+    foreign = copy.deepcopy(tax)
+    foreign.pop("revision_hash")
+    foreign["version_id"] = "foreign-ax-fixture"
+    foreign["nodes"][0]["definition"] = "changed"
+    with pytest.raises(ProofScoreError, match="declares no revision_hash"):
+        proof_score.bind_taxonomy(foreign, _STAGE4_TAXONOMY, manifest, receipts, mapping)
+    # Without a declared revision the recomputed value is the altered content's, not v3's.
+    assert proof_score.taxonomy_revision(foreign) != tax["revision_hash"]
+
+
+def test_ax1_scorer_refuses_altered_content_under_the_approved_revision():
+    tax, manifest, receipts, mapping = _stage4_binding_inputs()
+    altered = copy.deepcopy(tax)
+    altered["nodes"][0]["definition"] = "changed"
+    with pytest.raises(ProofScoreError, match="does not reproduce its declared revision"):
+        proof_score.bind_taxonomy(altered, _STAGE4_TAXONOMY, manifest, receipts, mapping)
+
+
+def test_ax1_scorer_refuses_a_wrong_revision_hash():
+    tax, manifest, receipts, mapping = _stage4_binding_inputs()
+    wrong = copy.deepcopy(tax)
+    wrong["revision_hash"] = "0" * 64
+    with pytest.raises(ProofScoreError, match="does not reproduce its declared revision"):
+        proof_score.bind_taxonomy(wrong, _STAGE4_TAXONOMY, manifest, receipts, mapping)
+
+
+def test_ax1_scorer_refuses_a_manifest_or_mapping_or_receipt_that_names_another_revision(tmp_path):
+    tax, manifest, receipts, mapping = _stage4_binding_inputs()
+    other = copy.deepcopy(manifest)
+    other["hashes"]["taxonomy_revision_hash"] = "1" * 64
+    with pytest.raises(ProofScoreError, match="not the manifest's frozen revision"):
+        proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, other, receipts, mapping)
+    unsealed = copy.deepcopy(mapping)
+    unsealed.pop("taxonomy_revision_hash")
+    with pytest.raises(ProofScoreError, match="Frozen mapping carries no taxonomy_revision_hash"):
+        proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, manifest, receipts, unsealed)
+    foreign_receipts = copy.deepcopy(receipts)
+    foreign_receipts["inputs"]["taxonomy_revision_hash"] = "2" * 64
+    with pytest.raises(ProofScoreError, match="executed under taxonomy revision"):
+        proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, manifest, foreign_receipts, mapping)
+    unrecorded = copy.deepcopy(receipts)
+    unrecorded["inputs"].pop("taxonomy_revision_hash")
+    with pytest.raises(ProofScoreError, match="carry no taxonomy_revision_hash"):
+        proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, manifest, unrecorded, mapping)
+    # A file whose bytes differ from the frozen file hash is refused even when its content
+    # reproduces the revision (the manifest binds the exact bytes).
+    rewritten = tmp_path / "taxonomy-rewritten.json"
+    rewritten.write_text(json.dumps(tax, indent=1), encoding="utf-8")
+    with pytest.raises(ProofScoreError, match="differ from the manifest's frozen file hash"):
+        proof_score.bind_taxonomy(tax, rewritten, manifest, receipts, mapping)
