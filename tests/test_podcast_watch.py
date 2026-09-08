@@ -227,6 +227,12 @@ def test_standing_podcast_capture_queues_publish_without_model_consent(
             queued.append((requested_id, kwargs)) or
             ({"ok": True, "job_id": "watch-job"}, 202)))
 
+    # AS-02 (run AT-4): a backend executes only a start whose persisted execution
+    # claim this incarnation holds; an unclaimed start is left to its executor
+    # (``uncertain``) rather than run twice. The dispatcher claims before run().
+    unclaimed = backend.run(start, item, source)
+    assert unclaimed.status == "uncertain" and downloads == [] and queued == []
+    assert backend.claim_execution(start, "watch-instance")["outcome"] == "claimed"
     outcome = backend.run(start, item, source)
     assert outcome.status == "in_flight", "the transcription worker completes the ledger row"
     assert downloads == [episode_id]

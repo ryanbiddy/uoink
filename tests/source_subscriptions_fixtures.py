@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+import clips as clips_mod  # noqa: E402
 import index as index_mod  # noqa: E402
 import source_subscriptions as ss  # noqa: E402
 
@@ -140,9 +141,11 @@ def publish(idx, video_id, *, backend=None, url=None, root=None, metadata=None,
                      "timestamp_end, text, source_url, source_deep_link) "
                      "VALUES (?, 'transcript_chunk', 0, 12.5, 21.75, ?, ?, ?)",
                      (video_id, f"Evidence for {video_id}", url, url + "&t=12s"))
-        conn.execute("INSERT OR REPLACE INTO clips (video_id, seq, start, end, text, source_deep_link) "
-                     "VALUES (?, 0, 12.5, 21.75, ?, ?)",
-                     (video_id, f"Evidence for {video_id}", url + "&t=12s"))
+        # Run AT-4 (AS-01): the service validates clips against the real
+        # builder's deterministic derivation, so the fixture derives its clip
+        # the way index.insert_citations does instead of hand-writing one
+        # (a hand-written podcast link differed from the derivation).
+        clips_mod.build_clips_for_video(conn, video_id, commit=False)
     if backend is not None:
         backend.published[video_id] = video_id
     return video_id

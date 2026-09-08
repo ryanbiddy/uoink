@@ -958,9 +958,145 @@ class CaptureOwnershipUnavailable(RuntimeError):
 # AS-03: a manual dispatcher waits for the shared capture lock at most this
 # long before returning a retryable failure (run AT-3).
 MANUAL_CAPTURE_LOCK_TIMEOUT_S = 900.0
-# AS-01: share of a clip's words that its overlapping transcript citations
-# must carry for the clip to count as derived from that evidence.
-CLIP_DERIVATION_MIN_RATIO = 0.9
+# AS-01 (run AT-4): the derivation check is exact, so no word-share threshold
+# exists any more. A clip is valid only when it is the deterministic output of
+# ``clips.merge_cues`` over the persisted transcript citations.
+EVIDENCE_TIMING_TOLERANCE_S = 1e-6
+
+
+# ---- AS-01: the publisher's artifact projection and clip derivation ----------
+def _projection_number(value: Any) -> float | None:
+    """Mirror of the publisher's ``_as_float``: the number a sidecar value
+    projects to (``server._citations_from_sidecar``)."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _projection_hms(value: Any) -> float | None:
+    """Mirror of the publisher's ``_parse_hms``: ``HH:MM:SS`` or a number."""
+    if not isinstance(value, str):
+        return _projection_number(value)
+    try:
+        numbers = [int(part) for part in value.strip().split(":")]
+    except ValueError:
+        return None
+    seconds = 0
+    for number in numbers:
+        seconds = seconds * 60 + number
+    return float(seconds)
+
+
+def _collapse_ws(text: Any) -> str:
+    return " ".join(str(text or "").split())
+
+
+def _same_timing(left: Any, right: Any) -> bool:
+    if left is None and right is None:
+        return True
+    if left is None or right is None:
+        return False
+    try:
+        left, right = float(left), float(right)
+    except (TypeError, ValueError):
+        return False
+    if not (math.isfinite(left) and math.isfinite(right)):
+        return False
+    return abs(left - right) <= EVIDENCE_TIMING_TOLERANCE_S
+
+
+def sidecar_evidence_projection(sidecar: dict) -> dict[str, list[dict]] | None:
+    """AS-01: the citation rows the publisher projects from a sidecar's
+    evidence arrays. ``server._citations_from_sidecar`` writes one
+    ``transcript_chunk`` per transcript entry (index, start, end, text) and
+    one ``screenshot`` per screenshot entry (index, parsed ``HH:MM:SS``
+    timestamp); ``podcasts.episode_to_corpus`` writes the transcript form from
+    the same ``segments`` it stores in the sidecar. Non-dict entries keep
+    their index gap exactly as the publisher does. ``None`` when the sidecar
+    carries no evidence array at all, so nothing can be projected and no
+    absence of timed evidence can be established from it."""
+    projection: dict[str, list[dict]] = {}
+    transcript = sidecar.get("transcript")
+    if isinstance(transcript, list):
+        projection["transcript_chunk"] = [
+            {"seq": index, "timestamp_start": _projection_number(entry.get("start")),
+             "timestamp_end": _projection_number(entry.get("end")), "text": entry.get("text")}
+            for index, entry in enumerate(transcript) if isinstance(entry, dict)]
+    screenshots = sidecar.get("screenshots")
+    if isinstance(screenshots, list):
+        projection["screenshot"] = [
+            {"seq": index, "timestamp_start": _projection_hms(entry.get("timestamp")),
+             "timestamp_end": None, "text": None}
+            for index, entry in enumerate(screenshots) if isinstance(entry, dict)]
+    return projection or None
+
+
+def citation_projection_defect(citations: list[dict], projection: dict | None) -> str | None:
+    """AS-01: the persisted citation rows must be the publisher's projection
+    of the artifacts, compared by contents (per kind: the same rows in the
+    same order, each with the same seq, start, end and, for transcript rows,
+    the same text with whitespace collapsed), never by counts. A kind absent
+    from an available projection projects to no rows. Returns the defect or
+    ``None``; ``None`` also when no projection is available, which callers
+    must treat as "nothing established", not as agreement."""
+    if projection is None:
+        return None
+    by_kind: dict[str, list[dict]] = {}
+    for row in citations:
+        by_kind.setdefault(str(row.get("kind")), []).append(row)
+    for kind in ("transcript_chunk", "screenshot"):
+        expected = projection.get(kind) or []
+        actual = sorted(by_kind.get(kind, []), key=lambda row: int(row.get("seq") or 0))
+        if len(actual) != len(expected):
+            return "citation_projection_mismatch"
+        for row, want in zip(actual, expected):
+            if int(row.get("seq") or 0) != want["seq"]:
+                return "citation_projection_mismatch"
+            if not _same_timing(row.get("timestamp_start"), want["timestamp_start"]) \
+                    or not _same_timing(row.get("timestamp_end"), want["timestamp_end"]):
+                return "citation_projection_mismatch"
+            if kind == "transcript_chunk" and _collapse_ws(row.get("text")) != _collapse_ws(want["text"]):
+                return "citation_projection_mismatch"
+    return None
+
+
+def clip_derivation_defect(conn, video_id: str, citations: list[dict], clips: list[dict]) -> str | None:
+    """AS-01: the persisted clips must be exactly the deterministic output of
+    ``clips.merge_cues`` over the transcript citations (the same derivation
+    ``index.insert_citations`` commits): the same number of clips, in seq
+    order, each with the same source interval, the same ordered text and the
+    same link. This honours the builder's de-overlap rules, its lossless
+    coarse slicing of an over-long cue (each slice keeps the cue's interval
+    and their concatenation is the cue text) and its link rebuilding; an
+    invented or reordered word, an expanded interval or a foreign link is a
+    clip the citations never derived. Returns the defect or ``None``."""
+    try:
+        import clips as clip_builder
+    except ImportError:
+        return "clip_builder_unavailable"
+    cues = [{"seq": row.get("seq"), "timestamp_start": row.get("timestamp_start"),
+             "timestamp_end": row.get("timestamp_end"), "text": row.get("text"),
+             "source_deep_link": row.get("source_deep_link")}
+            for row in sorted((row for row in citations if row.get("kind") == "transcript_chunk"),
+                              key=lambda row: int(row.get("seq") or 0))]
+    try:
+        derived = clip_builder.merge_cues(cues, clip_builder._item_for(conn, video_id)) if cues else []
+    except Exception:
+        log.exception("clip derivation raised for %s", video_id)
+        return "clip_not_derived"
+    if len(derived) != len(clips):
+        return "clip_not_derived"
+    for row, want in zip(sorted(clips, key=lambda row: int(row.get("seq") or 0)), derived):
+        if int(row.get("seq") or 0) != int(want["seq"]):
+            return "clip_not_derived"
+        if not _same_timing(row.get("start"), want["start"]) or not _same_timing(row.get("end"), want["end"]):
+            return "clip_not_derived"
+        if str(row.get("text") or "") != str(want["text"] or ""):
+            return "clip_not_derived"
+        if (row.get("source_deep_link") or None) != (want.get("source_deep_link") or None):
+            return "clip_not_derived"
+    return None
 
 
 def _backend_call(backend, name: str, *args):
@@ -993,13 +1129,22 @@ def podcast_identity_conflict(conn, row: dict, feed_key: str, guid: str, capture
     overwrite or link a row whose identity disagrees.
 
     Every available binding is compared with ``(feed_key, guid, capture_key,
-    episode_id)``: the row's persisted feed URL and GUID, its capture key, its
-    ``episode_id`` provenance, and every ``podcast_episodes`` row that already
-    links to it through ``yoink_video_id`` (the reverse legacy link). Any
-    disagreement is a conflict. A row with no binding at all cannot establish
-    its identity; that is reported as a conflict too, never as a match, because
-    the shortened id is not proof. Returns the reason or ``None`` when at least
-    one binding exists and every binding agrees."""
+    episode_id)`` independently (AS-06, run AT-4): the row's persisted feed
+    URL, its persisted GUID, its capture key, its ``episode_id`` provenance,
+    and every ``podcast_episodes`` row that already links to it through
+    ``yoink_video_id`` (the reverse legacy link). A present field that
+    disagrees is a conflict even when its partner field is absent: an
+    agreeing capture key never erases a contradictory feed URL or GUID.
+    Incomplete metadata can lack proof, but it cannot discard evidence.
+
+    A match additionally needs an affirmative full-identity binding: a feed
+    URL and GUID that both agree, an agreeing capture key (which encodes
+    both), or an episode provenance/reverse link that resolves to the same
+    feed and GUID. A row with only partial agreement (say a feed URL and
+    nothing else) or no binding at all cannot establish its identity; that is
+    reported as ``identity_conflict:unverifiable``, never as a match, because
+    the shortened id is not proof. Returns the reason or ``None`` when a full
+    binding exists and every available binding agrees."""
     video_id = row.get("video_id")
     try:
         meta = json.loads(row.get("metadata_json") or "{}")
@@ -1009,15 +1154,19 @@ def podcast_identity_conflict(conn, row: dict, feed_key: str, guid: str, capture
         meta = {}
     bindings = 0
     stored_feed, stored_guid = meta.get("feed_url"), meta.get("guid")
-    if isinstance(stored_feed, str) and isinstance(stored_guid, str):
+    feed_present = isinstance(stored_feed, str) and bool(stored_feed.strip())
+    guid_present = isinstance(stored_guid, str) and bool(stored_guid)
+    if feed_present and not _same_podcast_feed(stored_feed, feed_key):
+        return "identity_conflict:provenance"
+    if guid_present and stored_guid != guid:
+        return "identity_conflict:provenance"
+    if feed_present and guid_present:
         bindings += 1
-        if stored_guid != guid or not _same_podcast_feed(stored_feed, feed_key):
-            return "identity_conflict:provenance"
     stored_key = meta.get("capture_key")
     if isinstance(stored_key, str) and stored_key:
-        bindings += 1
         if stored_key != capture_key:
             return "identity_conflict:capture_key"
+        bindings += 1
     linked_episode = meta.get("episode_id")
     if type(linked_episode) is int:
         if episode_id is not None and linked_episode == int(episode_id):
@@ -1104,6 +1253,37 @@ class CaptureBackend:
         its executor (thread, job, incarnation) overrides this with an
         explicit check of the proof's evidence against that state."""
         return False
+
+    def claim_execution(self, start: dict, instance_id: str) -> dict:
+        """AS-02 (run AT-4): atomically claim the one execution of a started
+        row. ``{"outcome": "claimed"}`` when this call took it, ``"held"``
+        when any executor already holds it (with the holder's record under
+        ``claim``), ``"unavailable"`` when the claim store cannot be used.
+        The base rule keeps the registry on the backend object, which every
+        service instance bound to that backend shares; a backend with a data
+        root persists it (``claim_execution_record``)."""
+        registry = self.__dict__.setdefault("_execution_claims", {})
+        lock = self.__dict__.setdefault("_execution_claims_lock", threading.Lock())
+        with lock:
+            held = registry.get(start["start_id"])
+            if held is not None:
+                return {"outcome": "held", "claim": dict(held)}
+            record = {"start_id": start["start_id"], "instance": instance_id,
+                      "owner_token_hash": sha256_text(str(start.get("owner_token") or ""))}
+            registry[start["start_id"]] = record
+            return {"outcome": "claimed", "claim": dict(record)}
+
+    def execution_claim(self, start: dict) -> dict | None:
+        """The persisted claim for ``start`` or ``None`` (an unexecuted intent)."""
+        registry = self.__dict__.get("_execution_claims") or {}
+        held = registry.get(start["start_id"])
+        return dict(held) if held is not None else None
+
+    def release_execution(self, start: dict) -> None:
+        """Drop the claim once the ledger row is terminal."""
+        registry = self.__dict__.get("_execution_claims")
+        if registry:
+            registry.pop(start["start_id"], None)
 
     def published_video_id(self, conn, item: dict, source: dict) -> str | None:
         return None
@@ -1377,6 +1557,230 @@ class CaptureLock:
         self.release()
 
 
+# ===========================================================================
+# AS-02 (run AT-4): the persisted execution claim and child ownership.
+#
+# A started ledger row is a charged intent; handing it to an executor is a
+# second, distinct event that must happen at most once across every service
+# instance, connection and helper process sharing a data root. The claim is
+# one file per start created with O_EXCL under ``root/source_claims``; its
+# content names the executing incarnation (identity, pid, created_ms) and the
+# hash of the owner token it executes under. Children an executor spawns for
+# the start (yt-dlp, ffmpeg) are recorded under ``root/source_children`` with
+# their pid and creation time so a probe can tell a dead parent with a
+# surviving child from a stopped capture. Both directories live beside the
+# incarnation records, and the server backend and its independent test
+# namespace share this one implementation.
+# ===========================================================================
+EXECUTION_CLAIM_DIR = "source_claims"
+CHILD_OWNERSHIP_DIR = "source_children"
+_CAPTURE_CONTEXT = threading.local()
+
+
+def _ownership_path(root, directory: str, start_id: str) -> str:
+    return os.path.join(os.path.abspath(str(root)), directory,
+                        sha256_text(str(start_id))[:40] + ".json")
+
+
+def _read_ownership_record(path: str) -> dict | None:
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            record = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    return record if type(record) is dict else None
+
+
+def _write_ownership_record(path: str, record: dict) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    temporary = f"{path}.{os.getpid()}.{secrets.token_hex(4)}.tmp"
+    with open(temporary, "w", encoding="utf-8") as handle:
+        json.dump(record, handle)
+    os.replace(temporary, path)
+
+
+def claim_execution_record(root, start: dict, incarnation: ProcessIncarnation) -> dict:
+    """Atomically claim the one execution of ``start`` for ``incarnation``.
+    Returns ``{"outcome": "claimed", "claim": record}`` when this call
+    created the claim, ``{"outcome": "held", "claim": record}`` when another
+    executor (any instance, any process) already holds it, or
+    ``{"outcome": "unavailable", "error": name}`` when the claim directory
+    cannot be used; a caller must never treat the last as ownership."""
+    path = _ownership_path(root, EXECUTION_CLAIM_DIR, start["start_id"])
+    record = {"start_id": start["start_id"], "capture_key": start.get("capture_key"),
+              "owner_token_hash": sha256_text(str(start.get("owner_token") or "")),
+              "instance": incarnation.identity, "pid": incarnation.pid,
+              "created_ms": incarnation.created_ms, "claimed_ms": int(time.time() * 1000)}
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        holder = _read_ownership_record(path)
+        return {"outcome": "held", "claim": holder or {"start_id": start["start_id"]}}
+    except OSError as exc:
+        return {"outcome": "unavailable", "error": type(exc).__name__}
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(record, handle)
+    except OSError as exc:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        return {"outcome": "unavailable", "error": type(exc).__name__}
+    return {"outcome": "claimed", "claim": record}
+
+
+def read_execution_claim(root, start_id: str) -> dict | None:
+    return _read_ownership_record(_ownership_path(root, EXECUTION_CLAIM_DIR, start_id))
+
+
+def adopt_execution_record(root, start: dict, incarnation: ProcessIncarnation) -> dict:
+    """Continue an attempt whose executor is gone (a durable job resumed after
+    a helper restart): take the claim when none exists, keep it when this
+    incarnation already holds it, or take it over only when the recorded
+    holder's process is verifiably dead and no recorded child of the start
+    survives. A live or unknown holder is never displaced. Returns the same
+    shape as ``claim_execution_record``."""
+    claimed = claim_execution_record(root, start, incarnation)
+    if claimed["outcome"] != "held":
+        return claimed
+    holder = claimed["claim"]
+    if execution_claim_holder(holder, start, incarnation):
+        return {"outcome": "claimed", "claim": holder}
+    if holder.get("owner_token_hash") not in (None, sha256_text(str(start.get("owner_token") or ""))):
+        return {"outcome": "held", "claim": holder}
+    if instance_liveness(holder.get("instance"), root) != "dead" \
+            or child_ownership_liveness(root, start["start_id"]) not in ("none", "dead"):
+        return {"outcome": "held", "claim": holder}
+    record = dict(holder, instance=incarnation.identity, pid=incarnation.pid,
+                  created_ms=incarnation.created_ms, adopted_ms=int(time.time() * 1000),
+                  adopted_from=holder.get("instance"),
+                  owner_token_hash=sha256_text(str(start.get("owner_token") or "")))
+    try:
+        _write_ownership_record(_ownership_path(root, EXECUTION_CLAIM_DIR, start["start_id"]), record)
+    except OSError as exc:
+        return {"outcome": "unavailable", "error": type(exc).__name__}
+    return {"outcome": "claimed", "claim": record}
+
+
+def release_execution_claim(root, start_id: str) -> None:
+    for directory in (EXECUTION_CLAIM_DIR, CHILD_OWNERSHIP_DIR):
+        try:
+            os.remove(_ownership_path(root, directory, start_id))
+        except FileNotFoundError:
+            pass
+        except OSError:
+            log.exception("could not release the execution record for %s", start_id)
+
+
+def execution_claim_holder(claim: dict | None, start: dict, incarnation: ProcessIncarnation) -> bool:
+    """Whether ``claim`` binds this incarnation to ``start`` under its current
+    owner token; the check every executor makes after a lock wait and before
+    publisher writes."""
+    if claim is None:
+        return False
+    return (claim.get("start_id") == start.get("start_id")
+            and claim.get("instance") == incarnation.identity
+            and claim.get("owner_token_hash") == sha256_text(str(start.get("owner_token") or "")))
+
+
+@contextmanager
+def capture_context(start_id: str, incarnation: ProcessIncarnation | None):
+    """Mark the calling thread as executing ``start_id`` so subprocesses it
+    launches are recorded as that start's children (``record_child_start``)."""
+    previous = getattr(_CAPTURE_CONTEXT, "value", None)
+    _CAPTURE_CONTEXT.value = {"start_id": start_id,
+                              "instance": incarnation.identity if incarnation else None}
+    try:
+        yield
+    finally:
+        _CAPTURE_CONTEXT.value = previous
+
+
+def current_capture_context() -> dict | None:
+    return getattr(_CAPTURE_CONTEXT, "value", None)
+
+
+def _process_created_ms(pid: int) -> int | None:
+    try:
+        if os.name == "nt":
+            import ctypes
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel32.OpenProcess.restype = ctypes.c_void_p
+            handle = kernel32.OpenProcess(0x1000, False, int(pid))
+            if not handle:
+                return None
+            try:
+                return _windows_process_created_ms(ctypes.c_void_p(handle))
+            finally:
+                kernel32.CloseHandle(ctypes.c_void_p(handle))
+        return _posix_process_created_ms(int(pid))
+    except Exception:
+        return None
+
+
+_CHILD_RECORD_LOCK = threading.Lock()
+
+
+def record_child_start(root, start_id: str, pid: int, instance: str | None) -> None:
+    """Persist a spawned child (pid, creation time, start, incarnation) under
+    ``root/source_children`` before the parent waits on it (AS-02)."""
+    path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
+    with _CHILD_RECORD_LOCK:
+        record = _read_ownership_record(path) or {"start_id": start_id, "children": []}
+        children = record.get("children") if isinstance(record.get("children"), list) else []
+        children.append({"pid": int(pid), "created_ms": _process_created_ms(int(pid)),
+                         "instance": instance, "started_ms": int(time.time() * 1000),
+                         "ended_ms": None})
+        record["children"] = children[-50:]
+        try:
+            _write_ownership_record(path, record)
+        except OSError:
+            log.exception("could not record the child of %s", start_id)
+
+
+def record_child_end(root, start_id: str, pid: int) -> None:
+    path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
+    with _CHILD_RECORD_LOCK:
+        record = _read_ownership_record(path)
+        if record is None:
+            return
+        for child in record.get("children") or []:
+            if isinstance(child, dict) and child.get("pid") == int(pid) and child.get("ended_ms") is None:
+                child["ended_ms"] = int(time.time() * 1000)
+        try:
+            _write_ownership_record(path, record)
+        except OSError:
+            log.exception("could not record the child exit of %s", start_id)
+
+
+def child_ownership_liveness(root, start_id: str) -> str:
+    """``alive`` when a recorded child of ``start_id`` that never reported its
+    exit still runs (pid and creation time agree), ``dead`` when every such
+    child is gone, ``none`` without any record, ``unknown`` otherwise."""
+    record = _read_ownership_record(_ownership_path(root, CHILD_OWNERSHIP_DIR, start_id))
+    if record is None:
+        return "none"
+    verdict = "none"
+    for child in record.get("children") or []:
+        if not isinstance(child, dict) or child.get("ended_ms") is not None:
+            continue
+        pid = child.get("pid")
+        if type(pid) is not int or pid <= 0:
+            verdict = "unknown"
+            continue
+        created = child.get("created_ms")
+        state = _process_alive(pid, created if type(created) is int else None)
+        if state == "alive":
+            return "alive"
+        if state == "unknown":
+            verdict = "unknown"
+        elif verdict == "none":
+            verdict = "dead"
+    return verdict
+
+
 @dataclass(frozen=True)
 class RequestContext:
     authenticated: bool = False
@@ -1551,9 +1955,11 @@ class SourceSubscriptionService:
         self.backend = backend or CaptureBackend()
         self.instance_id = instance_id or f"{socket.gethostname()}:{secrets.token_hex(4)}"
         self.jitter = jitter or (lambda: 0)
-        # AS-02: start ids this service instance has already handed to its
-        # backend; a replayed or delayed started payload never dispatches twice.
-        self._dispatched: set[str] = set()
+        # AS-02 (run AT-4): the execution claim is no longer a service-local
+        # set; it is taken atomically through the backend's persisted claim
+        # store (``CaptureBackend.claim_execution``), shared across service
+        # instances, connections and processes. This lock only serialises the
+        # claim step inside one instance.
         self._dispatch_lock = threading.Lock()
         # Test-only crash/barrier injection; never configured by a transport.
         self._test_fault_hook = _test_fault_hook
@@ -1726,15 +2132,9 @@ class SourceSubscriptionService:
         except OSError:
             return None
 
-    def _sidecar_defect(self, source: dict, item: dict, video_id: str, text: str) -> str | None:
-        """AS-01: the sidecar must parse and, where it names an identity or a
+    def _sidecar_defect(self, source: dict, item: dict, video_id: str, sidecar: dict) -> str | None:
+        """AS-01: the parsed sidecar must, where it names an identity or a
         provenance, agree with the corpus id, the source and the entry."""
-        try:
-            sidecar = json.loads(text)
-        except ValueError:
-            return "sidecar_unreadable"
-        if type(sidecar) is not dict:
-            return "sidecar_unreadable"
         declared = sidecar.get("video_id")
         if declared is not None and declared != video_id:
             return "sidecar_identity_mismatch"
@@ -1765,64 +2165,77 @@ class SourceSubscriptionService:
         return number if math.isfinite(number) else None
 
     @staticmethod
-    def _evidence_words(text: Any) -> set[str]:
-        return {word.casefold() for word in str(text or "").split() if word}
+    def _parse_sidecar(text: str) -> dict | None:
+        try:
+            sidecar = json.loads(text)
+        except ValueError:
+            return None
+        return sidecar if type(sidecar) is dict else None
 
-    def _evidence_defect(self, conn, video_id: str) -> str | None:
-        """AS-01: citations carry finite, nonnegative, ordered source timing;
-        clips are required exactly when timed evidence exists (contract:
-        missing clips are legitimate only where there is no timed evidence,
-        and a timestamped screenshot is timed evidence); every clip derives
-        from the transcript citations it overlaps in time and text."""
+    def _evidence_defect(self, conn, video_id: str, sidecar: dict | None = None) -> str | None:
+        """AS-01 (run AT-4): the persisted evidence must be a derivation of
+        the artifacts, not a count or a word set that agrees with them.
+
+        1. The citation rows are the publisher's projection of the sidecar's
+           evidence arrays, compared by contents (``citation_projection_defect``).
+        2. Citation timing is finite, nonnegative and ordered.
+        3. Absence of timed evidence is established only from agreeing
+           artifacts and index data: the projection must exist and must
+           carry no timed entry either. A citation whose start is missing
+           while the sidecar still times that entry is damage (caught by 1);
+           a sidecar with no evidence array at all establishes nothing, so
+           untimed citations under it are unverifiable, never the v1
+           exception.
+        4. Clips are required exactly when timed evidence exists (a
+           timestamped screenshot is timed evidence), and every clip must be
+           the deterministic output of ``clips.merge_cues`` over the
+           transcript citations (``clip_derivation_defect``): its de-overlap
+           rules, ordered text, source intervals, links and lossless coarse
+           slicing are honoured; invented or reordered words and expanded
+           timing are rejected."""
         try:
             citations = [dict(r) for r in conn.execute(
-                "SELECT kind, seq, timestamp_start, timestamp_end, text FROM citations "
-                "WHERE video_id=? ORDER BY kind, seq", (video_id,)).fetchall()]
+                "SELECT kind, seq, timestamp_start, timestamp_end, text, source_deep_link "
+                "FROM citations WHERE video_id=? ORDER BY kind, seq", (video_id,)).fetchall()]
             clips = [dict(r) for r in conn.execute(
-                "SELECT seq, start, \"end\", text FROM clips WHERE video_id=? ORDER BY seq",
-                (video_id,)).fetchall()]
+                "SELECT seq, start, \"end\", text, source_deep_link FROM clips "
+                "WHERE video_id=? ORDER BY seq", (video_id,)).fetchall()]
         except sqlite3.OperationalError:
             return "citations_missing"
-        timed = []
+        projection = sidecar_evidence_projection(sidecar) if sidecar is not None else None
+        defect = citation_projection_defect(citations, projection)
+        if defect:
+            return defect
+        timed = 0
         for citation in citations:
             if citation.get("timestamp_start") is None:
                 continue
             start = self._timing_value(citation.get("timestamp_start"))
             if start is None or start < 0:
                 return "citation_timing_invalid"
-            end = start
             if citation.get("timestamp_end") is not None:
                 end = self._timing_value(citation.get("timestamp_end"))
                 if end is None or end < start:
                     return "citation_timing_invalid"
-            timed.append((start, end, citation.get("kind"), citation.get("text")))
+            timed += 1
         if not timed:
-            # Contract exception: no timed evidence, so no clips are owed.
-            return None
+            if projection is None:
+                # Nothing in the artifacts says whether timing was lost.
+                return "evidence_unverifiable"
+            if any(entry["timestamp_start"] is not None
+                   for rows in projection.values() for entry in rows):
+                return "citation_timing_lost"
+            # Contract exception, established from agreeing artifacts and
+            # index data: no timed evidence, so no clips are owed.
+            return None if not clips else "clip_not_derived"
         if not clips:
             return "clips_missing"
-        transcript = [entry for entry in timed if entry[2] == "transcript_chunk"]
         for clip in clips:
             start = self._timing_value(clip.get("start"))
             end = self._timing_value(clip.get("end"))
             if start is None or end is None or start < 0 or end < start:
                 return "clip_timing_invalid"
-            overlapping = [entry for entry in transcript
-                           if entry[0] <= end and entry[1] >= start]
-            if not overlapping:
-                return "clip_not_derived"
-            words = self._evidence_words(clip.get("text"))
-            if not words:
-                return "clip_not_derived"
-            cited: set[str] = set()
-            for entry in overlapping:
-                cited |= self._evidence_words(entry[3])
-            # clips.py slices only whitespace and, for an over-long single
-            # word, one character boundary; anything below this share of
-            # cited words is text the citations never carried.
-            if len(words & cited) < CLIP_DERIVATION_MIN_RATIO * len(words):
-                return "clip_not_derived"
-        return None
+        return clip_derivation_defect(conn, video_id, citations, clips)
 
     def _publication_evidence(self, conn, source: dict, item: dict, video_id: str,
                               start: dict | None = None) -> PublicationEvidence:
@@ -1846,15 +2259,22 @@ class SourceSubscriptionService:
         if defect:
             return PublicationEvidence(video_id, False, defect, row=row)
         corpus = self._read_artifact(row.get("corpus_path"))
-        sidecar = self._read_artifact(row.get("sidecar_path"))
-        if corpus is None or sidecar is None:
+        sidecar_text = self._read_artifact(row.get("sidecar_path"))
+        if corpus is None or sidecar_text is None:
             return PublicationEvidence(video_id, False, "corpus_files_missing", row=row)
         if not corpus.strip():
             return PublicationEvidence(video_id, False, "corpus_unreadable", row=row)
+        sidecar = self._parse_sidecar(sidecar_text)
+        if sidecar is None:
+            return PublicationEvidence(video_id, False, "sidecar_unreadable", row=row)
         defect = self._sidecar_defect(source, item, video_id, sidecar)
         if defect:
             return PublicationEvidence(video_id, False, defect, row=row)
-        defect = self._evidence_defect(conn, video_id)
+        # AS-01 (run AT-4): citations against the publisher's projection of
+        # this sidecar, clips against the builder's derivation; the same rule
+        # at completion, restart reconciliation and pre-existing linking, and
+        # always before any outbox row can be written.
+        defect = self._evidence_defect(conn, video_id, sidecar)
         if defect:
             return PublicationEvidence(video_id, False, defect, row=row)
         try:
@@ -3160,8 +3580,48 @@ class SourceSubscriptionService:
             return {"outcome": "not_owner", "start_id": start_id}
         if start["state"] not in ("started", "uncertain") or start["started_at_ms"] is None:
             return {"outcome": "not_started", "state": start["state"], "start_id": start_id}
+        # AS-02 (run AT-4): the persisted execution claim distinguishes an
+        # unexecuted intent (``execution`` None) from an attempt some executor
+        # already owns; callers that run must hold it (``execution_claim``).
+        try:
+            claim = _backend_call(self.backend, "execution_claim", dict(start))
+        except Exception:
+            log.exception("execution claim lookup raised for %s", start_id)
+            claim = None
         return {"outcome": "active", "start_id": start_id, "state": start["state"],
-                "owner_token": start["owner_token"], "start": start}
+                "owner_token": start["owner_token"], "start": start, "execution": claim}
+
+    def _claim_execution_for_dispatch(self, start: dict) -> dict:
+        """AS-02 (run AT-4): take the shared, persisted execution claim for a
+        started row and record this instance as its executing owner. Exactly
+        one dispatcher across every service instance and process gets
+        ``claimed``; a replay, a delayed duplicate or a second instance gets
+        ``already_dispatched`` and hands nothing to the backend. An
+        unavailable claim store is never ownership."""
+        try:
+            claim = _backend_call(self.backend, "claim_execution", dict(start), self.instance_id)
+        except Exception as exc:
+            log.exception("execution claim raised for %s", start["start_id"])
+            claim = {"outcome": "unavailable", "error": type(exc).__name__}
+        if claim.get("outcome") == "claimed":
+            with self.store.write() as conn:
+                conn.execute(
+                    "UPDATE source_capture_starts SET owner_instance=? WHERE start_id=? "
+                    "AND owner_token=? AND state='started'",
+                    (self.instance_id, start["start_id"], start["owner_token"]))
+            return {"outcome": "claimed", "claim": claim.get("claim")}
+        if claim.get("outcome") == "held":
+            return {"outcome": "already_dispatched", "start_id": start["start_id"],
+                    "claim": claim.get("claim")}
+        return {"outcome": "claim_unavailable", "start_id": start["start_id"],
+                "error": claim.get("error")}
+
+    def _release_execution(self, start: dict) -> None:
+        """Drop the execution claim after a terminal ledger transition."""
+        try:
+            _backend_call(self.backend, "release_execution", dict(start))
+        except Exception:
+            log.exception("execution claim release raised for %s", start.get("start_id"))
 
     def execute_started(self, started: dict) -> dict:
         start, item, source = started["start"], started["item"], started["source"]
@@ -3170,10 +3630,10 @@ class SourceSubscriptionService:
         # AS-02: a started payload is not authority. Re-read ownership and
         # state before the backend runs: a delayed dispatcher whose attempt
         # has since failed, succeeded or been replaced dispatches nothing,
-        # and one start id is handed to the backend at most once here.
+        # and (run AT-4) one start id is handed to an executor at most once
+        # across every service instance and process through the persisted
+        # execution claim, never through a service-local set.
         with self._dispatch_lock:
-            if start_id in self._dispatched:
-                return {"outcome": "already_dispatched", "start_id": start_id}
             current = self.claim_execution(start_id, owner_token=token)
             if current.get("outcome") != "active":
                 return {"outcome": current.get("outcome", "not_started"),
@@ -3182,7 +3642,12 @@ class SourceSubscriptionService:
                 # An uncertain row is reconciliation's to settle, never a
                 # fresh dispatch under the old payload.
                 return {"outcome": "not_started", "state": current["state"], "start_id": start_id}
-            self._dispatched.add(start_id)
+            if current.get("execution") is not None:
+                return {"outcome": "already_dispatched", "start_id": start_id,
+                        "claim": current["execution"]}
+            claimed = self._claim_execution_for_dispatch(current["start"])
+            if claimed.get("outcome") != "claimed":
+                return claimed
         start = current["start"]
         try:
             outcome = self.backend.run(dict(start), dict(item), dict(source))
@@ -3278,36 +3743,51 @@ class SourceSubscriptionService:
             else:
                 evidence = self._publication_evidence(conn, source, item, video_id, start=start)
             if not evidence.complete:
-                return self._settle_incomplete(conn, start, item, evidence, proof, now)
-            # AS-02: terminal executor evidence before success releases the
-            # source's active ownership; an unknown executor keeps the
-            # attempt in flight with the complete publication visible.
-            if not self._worker_terminal(start, proof):
-                state = self._hold_uncertain(conn, start)
-                return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
-                        "item_id": start["item_id"], "source_id": start["source_id"],
-                        "video_id": video_id, "publication": "complete"}
-            conn.execute(
-                "UPDATE source_capture_starts SET state='succeeded', finished_at_ms=?, video_id=? "
-                "WHERE start_id=?", (now, video_id, start_id))
-            conn.execute(
-                "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
-                "blocked_reason=NULL, retry_at_ms=NULL WHERE item_id=?",
-                (video_id, now, start["item_id"]))
-            # Contract: link all matching observations without starting or charging.
-            conn.execute(
-                "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
-                "blocked_reason=NULL, retry_at_ms=NULL WHERE capture_key=? "
-                "AND state IN ('observed','eligible')", (video_id, now, start["capture_key"]))
-            # Contract, "Post-commit classification handoff": INSERT OR IGNORE.
-            conn.execute(
-                "INSERT OR IGNORE INTO source_classification_outbox (capture_key, video_id, "
-                "committed_at_ms, state, updated_at_ms) VALUES (?,?,?,'pending',?)",
-                (start["capture_key"], video_id, now, now))
-            result = {"outcome": "succeeded", "start_id": start_id, "item_id": start["item_id"],
-                      "source_id": start["source_id"], "video_id": video_id}
-        self._test_boundary("after_outbox_commit")
+                result = self._settle_incomplete(conn, start, item, evidence, proof, now)
+                if result.get("outcome") != "failed":
+                    return result
+                # A terminal failure commits with this transaction; the
+                # execution claim is released only after that (AS-02, run AT-4).
+            else:
+                # AS-02: terminal executor evidence before success releases the
+                # source's active ownership; an unknown executor keeps the
+                # attempt in flight with the complete publication visible.
+                if not self._worker_terminal(start, proof):
+                    state = self._hold_uncertain(conn, start)
+                    return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
+                            "item_id": start["item_id"], "source_id": start["source_id"],
+                            "video_id": video_id, "publication": "complete"}
+                result = self._commit_success(conn, start, video_id, now)
+        self._release_execution(start)
+        if result.get("outcome") == "succeeded":
+            self._test_boundary("after_outbox_commit")
         return result
+
+    @staticmethod
+    def _commit_success(conn, start: dict, video_id: str, now: int) -> dict:
+        """The success writes of ``complete_capture``: ledger succeeded, item
+        committed, matching observations linked, then the outbox row; all in
+        the caller's one transaction after AS-01 validation passed."""
+        start_id = start["start_id"]
+        conn.execute(
+            "UPDATE source_capture_starts SET state='succeeded', finished_at_ms=?, video_id=? "
+            "WHERE start_id=?", (now, video_id, start_id))
+        conn.execute(
+            "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
+            "blocked_reason=NULL, retry_at_ms=NULL WHERE item_id=?",
+            (video_id, now, start["item_id"]))
+        # Contract: link all matching observations without starting or charging.
+        conn.execute(
+            "UPDATE source_items SET state='committed', video_id=?, committed_at_ms=?, "
+            "blocked_reason=NULL, retry_at_ms=NULL WHERE capture_key=? "
+            "AND state IN ('observed','eligible')", (video_id, now, start["capture_key"]))
+        # Contract, "Post-commit classification handoff": INSERT OR IGNORE.
+        conn.execute(
+            "INSERT OR IGNORE INTO source_classification_outbox (capture_key, video_id, "
+            "committed_at_ms, state, updated_at_ms) VALUES (?,?,?,'pending',?)",
+            (start["capture_key"], video_id, now, now))
+        return {"outcome": "succeeded", "start_id": start_id, "item_id": start["item_id"],
+                "source_id": start["source_id"], "video_id": video_id}
 
     def _settle_incomplete(self, conn, start: dict, item: dict, evidence: PublicationEvidence,
                            proof: CompletionProof | None, now: int) -> dict:
@@ -3348,7 +3828,11 @@ class SourceSubscriptionService:
                 return {"outcome": "worker_not_stopped", "state": state, "start_id": start_id,
                         "item_id": start["item_id"], "source_id": start["source_id"], "code": code}
             item = self._item(conn, start["item_id"])
-            return self._fail(conn, start, item, code, terminal, now)
+            result = self._fail(conn, start, item, code, terminal, now)
+        # AS-02 (run AT-4): the execution claim outlives the row only until
+        # its terminal transition committed.
+        self._release_execution(start)
+        return result
 
     @staticmethod
     def _fail(conn, start: dict, item: dict, code: str, terminal: bool, now: int) -> dict:

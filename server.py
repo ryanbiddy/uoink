@@ -3114,18 +3114,38 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
         errors=errors,
         **SUBPROCESS_KW,
     )
-    started = time.monotonic()
-    while True:
-        if cancel_event is not None and cancel_event.is_set():
-            _terminate_process(proc)
-            raise PlaylistJobCancelled("playlist job cancelled")
+    # AS-02 (run AT-4): a child spawned while a standing capture executes on
+    # this thread is persisted against that start (pid, creation time, start,
+    # incarnation) under DATA_ROOT/source_children before the parent waits on
+    # it, so a probe can see a surviving yt-dlp/ffmpeg after the parent died.
+    capture = source_subscriptions.current_capture_context()
+    if capture is not None:
         try:
-            out, err = proc.communicate(timeout=0.2)
-            break
-        except subprocess.TimeoutExpired:
-            if timeout is not None and (time.monotonic() - started) >= timeout:
+            source_subscriptions.record_child_start(
+                DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+        except Exception:
+            log.exception("could not record the child of standing capture %s",
+                          capture["start_id"])
+    started = time.monotonic()
+    try:
+        while True:
+            if cancel_event is not None and cancel_event.is_set():
                 _terminate_process(proc)
-                raise subprocess.TimeoutExpired(cmd, timeout)
+                raise PlaylistJobCancelled("playlist job cancelled")
+            try:
+                out, err = proc.communicate(timeout=0.2)
+                break
+            except subprocess.TimeoutExpired:
+                if timeout is not None and (time.monotonic() - started) >= timeout:
+                    _terminate_process(proc)
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+    finally:
+        if capture is not None and proc.poll() is not None:
+            try:
+                source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+            except Exception:
+                log.exception("could not record the child exit of standing capture %s",
+                              capture["start_id"])
 
     cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
     if check and proc.returncode:
@@ -7245,11 +7265,17 @@ def _podcast_transcription_worker() -> None:
                 whisper_runner.update_episode_transcript_state(
                     _get_index(), episode_id,
                     status=whisper_runner.STATUS_RUNNING, model_used=model)
-                transcript = whisper_runner.transcribe_audio(
-                    audio_path, data_root=DATA_ROOT, model_size=model,
-                    language=job.get("language"),
-                    diarize=bool(job.get("diarize")),
-                    consent_given=bool(job.get("consent_given")))
+                # AS-02 (run AT-4): children spawned for a standing start are
+                # recorded against it (see _run_subprocess).
+                standing_start = job.get("source_start_id")
+                with (source_subscriptions.capture_context(
+                        standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
+                        if standing_start else contextlib.nullcontext()):
+                    transcript = whisper_runner.transcribe_audio(
+                        audio_path, data_root=DATA_ROOT, model_size=model,
+                        language=job.get("language"),
+                        diarize=bool(job.get("diarize")),
+                        consent_given=bool(job.get("consent_given")))
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
@@ -7270,6 +7296,17 @@ def _podcast_transcription_worker() -> None:
                     job_id, current_video_phase="publishing", progress=95,
                     message="Publishing the episode to your local corpus.")
                 try:
+                    # AS-02 (run AT-4): before the publisher writes, a
+                    # standing job must still hold its start's execution
+                    # claim; the ledger fence at settlement is not enough.
+                    if job.get("source_start_id"):
+                        fence = _source_service().claim_execution(
+                            job["source_start_id"], backend_id=job["source_start_id"])
+                        if fence.get("outcome") != "active" or not _source_service().backend.holds_execution(
+                                {"start_id": job["source_start_id"],
+                                 "owner_token": fence.get("owner_token")}):
+                            raise source_subscriptions.CaptureOwnershipUnavailable(
+                                "standing start no longer executed by this process")
                     corpus_result = podcasts.episode_to_corpus(
                         _get_index(), episode_id, data_root=DATA_ROOT)
                     _heartbeat_note_ingest()
@@ -7390,11 +7427,11 @@ def _ensure_standing_podcast_ownership(job_id: str, job: dict, episode_id: int) 
     key = current["start"]["capture_key"]
     with _jobs_lock:
         token = (_jobs.get(job_id) or {}).get("_source_owner_token")
-    if token == current["owner_token"] and backend.owns(key):
-        return True
     lock_start = {"start_id": start_id, "owner_token": current["owner_token"],
                   "capture_key": key, "source_id": current["start"]["source_id"],
                   "item_id": current["start"]["item_id"]}
+    if token == current["owner_token"] and backend.owns(key) and backend.holds_execution(lock_start):
+        return True
     deadline = time.monotonic() + source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S
     while True:
         try:
@@ -7422,6 +7459,21 @@ def _ensure_standing_podcast_ownership(job_id: str, job: dict, episode_id: int) 
                     completed_at=_now_iso(),
                     message="Standing capture was settled while waiting; nothing to resume.")
         return False
+    # AS-02 (run AT-4): after the lock wait, the persisted execution claim.
+    # A resumed job continues its own charged start by adopting the claim of
+    # a verifiably dead predecessor; a claim held by a live or unknown
+    # executor means this job must not run under that start.
+    lock_start["owner_token"] = current["owner_token"]
+    adopted = backend.adopt_execution(lock_start)
+    if adopted.get("outcome") != "claimed":
+        backend.release(lock_start)
+        # The start stays with its executor: detach this job from it so its
+        # terminal state is never read as that executor having stopped.
+        _update_job(job_id, state="failed", current_video_phase=None, current_video=None,
+                    videos_failed=1, completed_at=_now_iso(), source_start_id=None,
+                    error=f"execution claim {adopted.get('outcome') or 'unavailable'}",
+                    message="Standing capture is owned by another executor; not resumed here.")
+        return False
     with _jobs_lock:
         if job_id in _jobs:
             _jobs[job_id]["_source_owner_token"] = current["owner_token"]
@@ -7442,14 +7494,29 @@ class _ManualOwnership:
     """What a manual dispatcher holds while it extracts (AS-03). ``error`` is
     set when the shared capture-identity lock could not be taken; the caller
     must then return a retryable failure instead of extracting.
-    ``already_captured`` is the live corpus id found for this identity after
-    the lock was acquired (the common-dispatcher corpus recheck)."""
-    __slots__ = ("lock", "error", "already_captured")
+
+    AS-03 (run AT-4): the post-lock completeness/identity recheck is a
+    result the dispatcher consumes, never a log line. ``already_captured`` is
+    the live corpus id found for this identity after the lock was acquired;
+    ``completed_while_waiting`` says that row appeared only while this
+    request waited for the lock (a capture it queued behind finished), so
+    ``reused`` carries that capture's completed result and the caller must
+    return it without fetching or acquiring anything. ``conflict`` names a
+    row at this identity whose persisted provenance is another video; the
+    caller must block before any overwrite. A row that already existed
+    before the wait is a deliberate manual re-extraction, the one explicit
+    refresh semantic the manual paths have; it is never inferred from
+    having waited."""
+    __slots__ = ("lock", "error", "already_captured", "completed_while_waiting",
+                 "conflict", "reused")
 
     def __init__(self):
         self.lock = None
         self.error = None
         self.already_captured = None
+        self.completed_while_waiting = False
+        self.conflict = None
+        self.reused = None
 
     @property
     def ok(self) -> bool:
@@ -7458,6 +7525,61 @@ class _ManualOwnership:
     def raise_if_unavailable(self) -> None:
         if self.error is not None:
             raise source_subscriptions.CaptureOwnershipUnavailable(self.error)
+
+    @staticmethod
+    def corpus_row(video_id):
+        """The live corpus row for a YouTube identity, or ``None``."""
+        if not video_id:
+            return None
+        try:
+            row = _get_index().get_yoink(video_id)
+        except Exception:
+            return None
+        if not row or row.get("deleted_at"):
+            return None
+        return row
+
+    def recheck(self, video_id, row, *, existed_before: bool) -> None:
+        """Consume the post-lock corpus state for ``video_id``."""
+        if row is None:
+            return
+        self.already_captured = video_id
+        try:
+            meta = json.loads(row.get("metadata_json") or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        if type(meta) is not dict:
+            meta = {}
+        persisted = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(meta.get("url"))
+        if persisted is not None and persisted != video_id:
+            self.conflict = (f"the library row for {video_id} records another video "
+                             f"({persisted}); refusing to overwrite it")
+            return
+        if existed_before:
+            log.info("manual extraction of %s: corpus already held this video before the "
+                     "request; the request re-extracts it deliberately", video_id)
+            return
+        self.completed_while_waiting = True
+        screenshots = 0
+        try:
+            with _get_index()._lock:
+                screenshots = int(_get_index()._conn.execute(
+                    "SELECT COUNT(*) FROM citations WHERE video_id=? AND kind='screenshot'",
+                    (video_id,)).fetchone()[0])
+        except Exception:
+            screenshots = 0
+        import os as _os  # local: this class body also runs in a bare test namespace
+        corpus_path = row.get("corpus_path") or ""
+        folder = _os.path.dirname(corpus_path) if corpus_path else None
+        self.reused = {
+            "ok": True, "reused": True, "reason": "captured_while_waiting",
+            "video_id": video_id, "title": row.get("title"), "folder": folder,
+            "corpus_path": corpus_path or None, "sidecar_path": row.get("sidecar_path"),
+            "screenshot_count": screenshots, "captured_at": row.get("yoinked_at"),
+            "topic": row.get("topic"),
+        }
+        log.info("manual extraction of %s: a capture it waited behind completed; "
+                 "reusing that result without a second acquisition", video_id)
 
 
 @contextlib.contextmanager
@@ -7470,12 +7592,16 @@ def _manual_extraction_ownership(url: str):
     AS-03 (run AT-3): the wait for the shared lock is bounded and a failed
     acquisition (OS error or an exhausted wait) is unavailable ownership,
     reported through ``ownership.error``; the process lock is never used as
-    a substitute. After the lock is held the canonical corpus identity is
-    rechecked, so a caller can see that the standing dispatcher (or another
-    manual one) already published this video while it waited."""
+    a substitute. Run AT-4: the canonical corpus identity is inspected
+    before and after the wait and the result is consumed by the caller
+    (``_ManualOwnership.recheck``): a capture this request waited behind is
+    reused, a conflicting row blocks, a row that existed before the request
+    is a deliberate re-extraction."""
     with _extract_lock:
         ownership = _ManualOwnership()
         key = _manual_capture_key(url)
+        video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+        existed_before = ownership.corpus_row(video_id) is not None
         try:
             ownership.lock = source_subscriptions.CaptureLock.acquire(
                 DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
@@ -7486,17 +7612,9 @@ def _manual_extraction_ownership(url: str):
         if ownership.lock is None and ownership.error is None:
             ownership.error = ("another capture of this video is still running; "
                                "try again in a moment")
-        if ownership.lock is not None:
-            video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
-            if video_id:
-                try:
-                    row = _get_index().get_yoink(video_id)
-                except Exception:
-                    row = None
-                if row and not row.get("deleted_at"):
-                    ownership.already_captured = video_id
-                    log.info("manual extraction of %s: corpus already holds this video; "
-                             "the request re-extracts it deliberately", video_id)
+        if ownership.lock is not None and video_id:
+            ownership.recheck(video_id, ownership.corpus_row(video_id),
+                              existed_before=existed_before)
         try:
             yield ownership
         finally:
@@ -7726,6 +7844,42 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         # AS-03: capture_key -> (CaptureLock, holds_extract_lock). Guarded by
         # _source_capture_threads_lock so the class needs no lock of its own.
         self._leases: dict = {}
+        # AS-02 (run AT-4): start_id -> the observed ``run`` invocation in
+        # this process: owner token, incarnation, whether it returned and
+        # what it returned. ``executor_returned`` proofs verify against this
+        # record, never against an empty registry.
+        self._invocations: dict = {}
+
+    # ---- execution claim (AS-02, run AT-4) ---------------------------------
+    def claim_execution(self, start, instance_id):
+        """The one execution of a started row, claimed atomically across every
+        service instance and helper process on this data root (an O_EXCL file
+        under ``DATA_ROOT/source_claims`` naming this incarnation, its pid
+        and the owner token hash). ``unavailable`` is never ownership."""
+        return source_subscriptions.claim_execution_record(
+            DATA_ROOT, start, source_subscriptions.process_incarnation(DATA_ROOT))
+
+    def execution_claim(self, start):
+        return source_subscriptions.read_execution_claim(DATA_ROOT, start["start_id"])
+
+    def adopt_execution(self, start):
+        """A durable podcast job resumed after a helper restart continues the
+        same charged start: take the claim when none exists or its holder is
+        verifiably dead with no surviving child; never displace a live or
+        unknown holder (AS-02, run AT-4)."""
+        return source_subscriptions.adopt_execution_record(
+            DATA_ROOT, start, source_subscriptions.process_incarnation(DATA_ROOT))
+
+    def release_execution(self, start):
+        source_subscriptions.release_execution_claim(DATA_ROOT, start["start_id"])
+
+    def holds_execution(self, start) -> bool:
+        """AS-02: whether this incarnation holds the persisted execution claim
+        for ``start`` under its current owner token; checked after every lock
+        wait and before any acquisition or publisher write."""
+        return source_subscriptions.execution_claim_holder(
+            self.execution_claim(start), start,
+            source_subscriptions.process_incarnation(DATA_ROOT))
 
     # ---- execution ownership (AS-03) ------------------------------------
     def acquire(self, start, item, source):
@@ -7849,9 +8003,23 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         return start["start_id"]
 
     def run(self, start, item, source):
-        if source["kind"] == "podcast_rss":
-            return self._run_podcast(start, item, source)
-        return self._run_youtube(start, item, source)
+        # AS-02 (run AT-4): the invocation is observed here, bound to the
+        # start, its owner token and this incarnation, and its return is
+        # recorded; ``verify_proof`` checks ``executor_returned`` against it.
+        record = {"owner_token": start["owner_token"], "instance": _source_instance_id(),
+                  "returned": False, "status": None}
+        with _source_capture_threads_lock:
+            self._invocations[start["start_id"]] = record
+        try:
+            if source["kind"] == "podcast_rss":
+                outcome = self._run_podcast(start, item, source)
+            else:
+                outcome = self._run_youtube(start, item, source)
+        except BaseException:
+            record["status"], record["returned"] = "raised", True
+            raise
+        record["status"], record["returned"] = outcome.status, True
+        return outcome
 
     def _run_podcast(self, start, item, source):
         episode_id = int(item["legacy_episode_id"])
@@ -7861,8 +8029,17 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         with _source_capture_threads_lock:
             _source_capture_threads[start_id] = threading.current_thread()
         try:
-            downloaded = podcasts.download_episode_audio(
-                _get_index(), episode_id, data_root=DATA_ROOT)
+            # AS-02 (run AT-4): before acquisition, this process must hold
+            # the persisted execution claim for the start; otherwise the
+            # attempt belongs to another executor and is left to it.
+            if not self.holds_execution(start):
+                log.warning("standing capture %s: execution claim not held here; not run",
+                            start_id)
+                return source_subscriptions.CaptureOutcome("uncertain")
+            with source_subscriptions.capture_context(
+                    start_id, source_subscriptions.process_incarnation(DATA_ROOT)):
+                downloaded = podcasts.download_episode_audio(
+                    _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
                 code = "download_failed"
                 if downloaded.get("error") == "timeout":
@@ -7913,19 +8090,28 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     return
                 # AS-02: re-read ownership and state after waiting for the
                 # lock; an attempt that was failed, replaced or settled while
-                # this worker waited fetches and publishes nothing.
+                # this worker waited fetches and publishes nothing. Run AT-4:
+                # this process must also hold the persisted execution claim
+                # (checked before acquisition and again before publisher
+                # writes); the final ledger fence alone is not enough.
                 current = _source_service().claim_execution(start_id, owner_token=owner_token)
-                if current.get("outcome") != "active":
+                if current.get("outcome") != "active" or not self.holds_execution(start):
                     log.warning("standing capture %s no longer owns its start (%s); not run",
                                 start_id, current.get("outcome"))
                     return
-                metadata = _fetch_metadata(url)
-                title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
-                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                          / (slugify(title) or "video"))
-                result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
-                                         open_explorer=False)
+                incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
+                with source_subscriptions.capture_context(start_id, incarnation):
+                    metadata = _fetch_metadata(url)
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                              / (slugify(title) or "video"))
+                    if not self.holds_execution(start):
+                        log.warning("standing capture %s lost its execution claim before "
+                                    "publication; nothing written", start_id)
+                        return
+                    result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
+                                             open_explorer=False)
                 _record_single_extract_job(url, _now_iso(), result=result)
                 published = (metadata.get("id") or video_id)
                 # AS-02: publication is fenced by the owner token, the ledger
@@ -7961,20 +8147,39 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
 
     # ---- worker state (AS-02) ---------------------------------------------
     def probe(self, start):
-        """``running`` for a live worker thread, an in-process download, or a
-        queued/running podcast job; ``stopped`` only for a terminal job or an
-        owner incarnation whose persisted process is verifiably dead. An
-        empty thread registry is never death evidence: it says nothing about
-        another process, its child, or the separate podcast worker."""
+        """``running`` for a live worker thread, an in-process download, a
+        queued/running podcast job, or (run AT-4) a recorded child process
+        of the start that still runs; ``stopped`` only for a terminal job, an
+        observed synchronous return of this incarnation's own invocation, or
+        an executing incarnation whose persisted process is verifiably dead
+        while no recorded child survives it. An empty thread registry is
+        never death evidence: it says nothing about another process, its
+        child, or the separate podcast worker. The executing incarnation is
+        the persisted execution claim's holder when one exists, else the
+        row's ``owner_instance``."""
+        start_id = start["start_id"]
         with _source_capture_threads_lock:
-            thread = _source_capture_threads.get(start["start_id"])
+            thread = _source_capture_threads.get(start_id)
+            invocation = self._invocations.get(start_id)
         if thread is not None and thread.is_alive():
             return "running"
-        job = _find_job_for_start(start["start_id"])
+        job = _find_job_for_start(start_id)
         if job is not None:
             return "stopped" if job.get("state") in _JOB_TERMINAL_STATES else "running"
-        liveness = source_subscriptions.instance_liveness(start.get("owner_instance"), DATA_ROOT)
+        children = source_subscriptions.child_ownership_liveness(DATA_ROOT, start_id)
+        if children == "alive":
+            # A dead parent is not a stopped capture while yt-dlp/ffmpeg lives.
+            return "running"
+        claim = self.execution_claim(start)
+        executor = claim.get("instance") if claim else start.get("owner_instance")
+        liveness = source_subscriptions.instance_liveness(executor, DATA_ROOT)
         if liveness == "dead":
+            return "stopped" if children in ("none", "dead") else "unknown"
+        if liveness == "current" and claim is not None and invocation is not None \
+                and invocation.get("returned") and invocation.get("status") != "in_flight" \
+                and invocation.get("owner_token") == start.get("owner_token"):
+            # This incarnation's own invocation returned synchronously and
+            # left no thread, job or child behind.
             return "stopped"
         return "unknown"
 
@@ -7993,6 +8198,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         start_id = start["start_id"]
         with _source_capture_threads_lock:
             thread = _source_capture_threads.get(start_id)
+            invocation = self._invocations.get(start_id)
         current = getattr(threading, "current_thread", None)
         on_worker = (thread is not None and current is not None and thread is current())
         if proof.evidence == "worker_finished":
@@ -8004,13 +8210,25 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             return (job is not None and job.get("source_start_id") == start_id
                     and job.get("state") in _JOB_TERMINAL_STATES)
         if proof.evidence == "executor_returned":
-            # run() returned synchronously on the dispatcher's thread: nothing
-            # else may execute for the start here (no other live worker
-            # thread, no queued or running job bound to it).
+            # Run AT-4: the label alone proves nothing. This process must have
+            # observed the ``run`` invocation for this start, bound to the
+            # proof's owner token and this incarnation, and observed it
+            # return a synchronous (non in-flight) outcome; and nothing else
+            # may still execute for the start here (no other live worker
+            # thread, no queued or running job, no recorded live child).
+            if invocation is None or not invocation.get("returned"):
+                return False
+            if invocation.get("owner_token") != proof.owner_token \
+                    or invocation.get("instance") != _source_instance_id():
+                return False
+            if invocation.get("status") == "in_flight":
+                return False
             if thread is not None and thread.is_alive() and not on_worker:
                 return False
             job = _find_job_for_start(start_id)
-            return job is None or job.get("state") in _JOB_TERMINAL_STATES
+            if job is not None and job.get("state") not in _JOB_TERMINAL_STATES:
+                return False
+            return source_subscriptions.child_ownership_liveness(DATA_ROOT, start_id) != "alive"
         return False
 
     # ---- durable publication inspection and recovery (AS-01) --------------
@@ -8028,10 +8246,14 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         """The publisher's own completion record. Podcast: the episode row is
         linked to this corpus id (``_link_episode_to_yoink`` is the last
         durable step of ``episode_to_corpus``). YouTube: ``_index_yoink`` ends
-        with the citation write derived from the sidecar, so the record is a
-        citation set that matches the sidecar's transcript and screenshot
-        entries kind by kind (AS-01: tied to the artifacts, not any row).
-        The service separately validates files, identity, timing and clips."""
+        with the citation write projected from the sidecar. AS-01 (run AT-4):
+        for both, the record is the citation set that IS the publisher's
+        projection of the sidecar's evidence arrays, compared by contents
+        (per kind: same rows, seq, timing and text) through the shared
+        ``source_subscriptions.citation_projection_defect``, never by counts.
+        A sidecar without evidence arrays has no projection; then the
+        citation write itself is the only completion step there is. The
+        service separately validates files, identity, timing and clips."""
         try:
             row = conn.execute(
                 "SELECT deleted_at, sidecar_path FROM yoinks WHERE video_id=?",
@@ -8042,25 +8264,19 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 linked = conn.execute(
                     "SELECT 1 FROM podcast_episodes WHERE yoink_video_id=? "
                     "AND transcript_status='done' LIMIT 1", (video_id,)).fetchone()
-                return video_id if linked is not None else None
+                if linked is None:
+                    return None
             sidecar = self._read_sidecar(row["sidecar_path"])
             if sidecar is None:
                 return None
-            counts = {kind: int(count) for kind, count in conn.execute(
-                "SELECT kind, COUNT(*) FROM citations WHERE video_id=? GROUP BY kind",
-                (video_id,)).fetchall()}
-            expected = {}
-            for key, kind in (("transcript", "transcript_chunk"), ("screenshots", "screenshot")):
-                entries = sidecar.get(key)
-                if isinstance(entries, list):
-                    expected[kind] = sum(1 for entry in entries if isinstance(entry, dict))
-            if not expected:
-                # A sidecar without evidence arrays: the citation write is the
-                # only completion step there is.
-                return video_id if sum(counts.values()) else None
-            for kind, count in expected.items():
-                if counts.get(kind, 0) != count:
-                    return None
+            citations = [dict(r) for r in conn.execute(
+                "SELECT kind, seq, timestamp_start, timestamp_end, text FROM citations "
+                "WHERE video_id=? ORDER BY kind, seq", (video_id,)).fetchall()]
+            projection = source_subscriptions.sidecar_evidence_projection(sidecar)
+            if projection is None:
+                return video_id if citations else None
+            if source_subscriptions.citation_projection_defect(citations, projection):
+                return None
             return video_id
         except Exception:  # a missing table is "no completion record", not a crash
             return None
@@ -9351,17 +9567,30 @@ def _playlist_worker(job_id: str):
                 with _manual_extraction_ownership(v["url"]) as ownership:  # AS-03 shared dispatcher lock
                     ownership.raise_if_unavailable()  # AS-03: this video fails retryably
                     _raise_if_cancelled(cancel_event)
-                    result = _run_extraction(
-                        v["url"],
-                        interval,
-                        target,
-                        open_explorer=False,
-                        metadata=metadata,
-                        topic="Playlist",
-                        generate_paste=False,
-                        cancel_event=cancel_event,
-                        phase_callback=phase_cb,
-                    )
+                    if ownership.conflict:
+                        # AS-03 (run AT-4): block before any overwrite.
+                        raise RuntimeError(ownership.conflict)
+                    if ownership.completed_while_waiting and ownership.reused:
+                        # AS-03 (run AT-4): the capture this video waited
+                        # behind completed; reuse its folder, acquire nothing.
+                        source_folder = Path(ownership.reused["folder"]) \
+                            if ownership.reused.get("folder") else None
+                        if source_folder is None or not source_folder.is_dir():
+                            raise FileNotFoundError("completed capture folder is missing")
+                        shutil.copytree(source_folder, target, dirs_exist_ok=True)
+                        result = dict(ownership.reused, title=title, folder=str(target))
+                    else:
+                        result = _run_extraction(
+                            v["url"],
+                            interval,
+                            target,
+                            open_explorer=False,
+                            metadata=metadata,
+                            topic="Playlist",
+                            generate_paste=False,
+                            cancel_event=cancel_event,
+                            phase_callback=phase_cb,
+                        )
 
                 corpus_path = _resolve_corpus_path(target)
                 item = {
@@ -9664,21 +9893,39 @@ def _retry_pending_one() -> bool:
             log.warning("retry worker: pending #%d could not take the capture lock (%s); "
                         "retry at %s", pending_id, ownership.error, retry_at)
             return True
+        if ownership.conflict:
+            # AS-03 (run AT-4): an identity conflict blocks before overwrite;
+            # the queue row goes terminal with the reason.
+            try:
+                idx.mark_pending_failed(pending_id, _sanitize_error(ownership.conflict),
+                                        _now_iso(), force_final=True)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            _record_single_extract_job(url, started_at, error=ownership.conflict,
+                                       failure_phase="metadata",
+                                       long_video_mode=long_video_mode)
+            _pending_long_video_mode(pending_id, remove=True)
+            return True
+        # AS-03 (run AT-4): the capture this row waited behind completed;
+        # reuse it, no fetch, no second acquisition.
+        result = ownership.reused if (ownership.completed_while_waiting
+                                      and ownership.reused) else None
         try:
-            metadata = _fetch_metadata(url)
-            title = metadata.get("title") or "Untitled"
-            topic = _classify_topic(metadata)
-            folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                      / (slugify(title) or "video"))
+            if result is None:
+                metadata = _fetch_metadata(url)
+                title = metadata.get("title") or "Untitled"
+                topic = _classify_topic(metadata)
+                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                          / (slugify(title) or "video"))
 
-            def phase_cb(phase: str):
-                nonlocal current_phase
-                current_phase = phase
+                def phase_cb(phase: str):
+                    nonlocal current_phase
+                    current_phase = phase
 
-            result = _run_extraction(url, interval, folder,
-                                     metadata=metadata, topic=topic,
-                                     long_video_mode=long_video_mode,
-                                     phase_callback=phase_cb)
+                result = _run_extraction(url, interval, folder,
+                                         metadata=metadata, topic=topic,
+                                         long_video_mode=long_video_mode,
+                                         phase_callback=phase_cb)
         except BaseException as e:
             if _is_youtube_rate_limit(e):
                 attempts = attempts_before + 1
@@ -15896,6 +16143,17 @@ class Handler(BaseHTTPRequestHandler):
                 log.info("POST /extract -> 503 (%s)", ownership.error)
                 return self._send_json(503, {"ok": False, "error": ownership.error,
                                              "retryable": True})
+            # AS-03 (run AT-4): consume the post-lock recheck. A conflicting
+            # row blocks before any overwrite; a capture this request waited
+            # behind is reused as-is (no metadata fetch, no acquisition).
+            if ownership.conflict:
+                log.info("POST /extract -> 409 (%s)", ownership.conflict)
+                return self._send_json(409, {"ok": False, "error": ownership.conflict,
+                                             "identity_conflict": True})
+            if ownership.completed_while_waiting and ownership.reused:
+                _record_single_extract_job(url, started_at, result=ownership.reused)
+                log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
+                return self._send_json(200, ownership.reused)
             try:
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
@@ -16044,25 +16302,49 @@ class Handler(BaseHTTPRequestHandler):
                 log.info("POST /session/add -> 503 (%s)", ownership.error)
                 return self._send_json(503, {"ok": False, "error": ownership.error,
                                              "retryable": True})
+            if ownership.conflict:
+                # AS-03 (run AT-4): an identity conflict blocks before overwrite.
+                log.info("POST /session/add -> 409 (%s)", ownership.conflict)
+                return self._send_json(409, {"ok": False, "error": ownership.conflict,
+                                             "identity_conflict": True,
+                                             "session_id": session_id})
             try:
-                metadata = _fetch_metadata(url)
-                title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
-                video_slug = slugify(title) or "video"
-                target = sess_folder / video_slug
-                # Disambiguate if same-named video already added.
-                if target.exists():
-                    video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                if ownership.completed_while_waiting and ownership.reused:
+                    # AS-03 (run AT-4): the capture this request waited behind
+                    # completed; reuse its folder in the session, no fetch,
+                    # no second acquisition.
+                    reused = ownership.reused
+                    title = reused.get("title") or "Untitled"
+                    video_slug = slugify(title) or "video"
                     target = sess_folder / video_slug
+                    if target.exists():
+                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                        target = sess_folder / video_slug
+                    source_folder = Path(reused["folder"]) if reused.get("folder") else None
+                    if source_folder is None or not source_folder.is_dir():
+                        raise FileNotFoundError("completed capture folder is missing")
+                    shutil.copytree(source_folder, target)
+                    result = dict(reused, title=title, video_slug=video_slug,
+                                  folder=str(target), caption_count=0)
+                else:
+                    metadata = _fetch_metadata(url)
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    video_slug = slugify(title) or "video"
+                    target = sess_folder / video_slug
+                    # Disambiguate if same-named video already added.
+                    if target.exists():
+                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                        target = sess_folder / video_slug
 
-                # Session adds don't go to the clipboard one-by-one (the
-                # whole session is concatenated and copied at /session/close),
-                # so skip the per-video paste-corpus generation -- it would
-                # just inflate the runtime message payload for nothing.
-                result = _run_extraction(url, interval, target,
-                                          open_explorer=False,
-                                          metadata=metadata, topic=topic,
-                                          generate_paste=False)
+                    # Session adds don't go to the clipboard one-by-one (the
+                    # whole session is concatenated and copied at /session/close),
+                    # so skip the per-video paste-corpus generation -- it would
+                    # just inflate the runtime message payload for nothing.
+                    result = _run_extraction(url, interval, target,
+                                              open_explorer=False,
+                                              metadata=metadata, topic=topic,
+                                              generate_paste=False)
             except BaseException as e:
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
