@@ -34,3 +34,4 @@ docs/library/proof/run-stage4-*/** -text
 docs/library/proof/stage4-schema-probe-*.json -text
 docs/library/proof/s21-*/** -text
 docs/library/proof/aw-*/** -text
+docs/library/proof/procrec-*/** -text

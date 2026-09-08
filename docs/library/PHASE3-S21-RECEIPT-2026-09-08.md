@@ -60,7 +60,28 @@ Receipt: `receipt-at3-candidate-d479899.json` (evidence database SHA-256 `735b98
 The browser observation from the first run stands for the unchanged dashboard surfaces;
 it was not repeated.
 
+## Rerun on the round-3 candidate (`0bb97c8`, after AT-4)
+
+Same launcher, same procedure: `AUTOMATED PASS`, `model_calls = 0`, `forbidden_attempts = []`,
+one item once, one work row after commit, no second charge. Receipt
+`receipt-at4-candidate-0bb97c8.json` (evidence database SHA-256 `4237cee4…`). Astra's AS-3
+request for the real incarnation, capture-lock assertions and full provenance fields inside
+the launcher is Astra's own file to extend; Fable did not edit it.
+
+## Process-recovery receipt (AS-02)
+
+`tests/library_work_astra/process_recovery_receipt.py --execute` (Fable-only launcher; not
+collected by pytest) on `0bb97c8`: a real parent process took the persisted execution claim
+for a start, spawned a real child and recorded it under `DATA_ROOT/source_children`, and was
+killed while the child survived. The production `_ServerCaptureBackend.probe` (compiled from
+this checkout's `server.py` as Astra's integration harness does) reported `running` with the
+parent alive, `running` with the parent dead and the child alive (children `alive`, executing
+incarnation `dead`), and `stopped` only after the child was killed. Receipt
+`docs/library/proof/procrec-2026-09-08/receipt.json` (pids, claim record, per-step
+observations, assertions, result PASS).
+
 ## Status
 
-S21's product observations are established on `61eeb07` and re-established on `d479899`.
-Astra rules in run AS-3. S22 (installed-tree run) is still owed.
+S21's product observations are established on `61eeb07`, `d479899` and `0bb97c8`; the AS-02
+surviving-child case has a real-process receipt. Astra rules in run AS-4. The installed Inno
+package run is still owed and needs Ryan.
