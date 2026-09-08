@@ -1,0 +1,67 @@
+# Phase 4 client rerun after AW-4
+
+Run only after AV-5m2 and any AW-4 repairs are integrated and the candidate SHA
+is frozen. The earlier [AW receipt](PHASE4-AW-RECEIPT-2026-09-08.md) is partial
+and belongs to `d4d99bb`; preserve it. The repaired observation must satisfy
+all five requirements in [AW-3](PHASE4-ACCEPTANCE-3-2026-09-08.md), including
+actual actions and complete returned evidence. Do not reuse its numerical or
+client verdict as a result for the later candidate.
+
+The preparation and observation changes are:
+
+1. Stage the frozen source through the existing source-only build path. Use a
+   disposable profile, stdio child and separate output directory. Duplicate the
+   authorized upgraded index copy read-only into the fixture; rebind all used
+   corpus/sidecar paths to disposable copies and verify those paths before any
+   request. Never open the live index or contact port 5179. Freeze and hash the
+   candidate, launch files, client version/mode, interpreter, SDK, allowlist,
+   source-copy manifest and full expected packet before starting the client.
+   Derive expected IDs, complete quotes, timing and source/card/excerpt hashes
+   from stored evidence and canonical card construction, independently of the
+   reader response. Include the retained timed and text-only items.
+2. Record the complete client event stream and stdio requests/results, with
+   timestamps and child identities. Observe discovery, bounded search, item,
+   full card and excerpt retrieval; compare complete contents and hashes, not
+   prefixes. Compare tool fallback with the same resource response. Record
+   all five templates, four prompts and the candidate's actual tool inventory;
+   explain authorized inventory changes rather than assuming the old count.
+3. Invoke consult-library and reshelve-review through a supported native Claude
+   Code prompt route and retain the returned messages and actual prompts/get
+   traffic. Model text saying a prompt was invoked is not proof. Record any
+   missing client route as a failure; do not substitute a synthetic protocol
+   client. Compare queue, projection and settings before/after. Observe the
+   actual returned public link in an isolated browser, including the requested
+   seek and the text-only item's absence of invented timing. Any brief workflow
+   must retain its prepared packet, restart, publication, citations, receipt,
+   identical retry and stale refusal.
+4. Separate explicit reconnect from fixture-storage failure and broken-child
+   transport failure. Keep old/new child PIDs and full unchanged-item responses.
+   Measure each live-child storage refusal from its request, within 2 seconds,
+   and prove no replacement empty index was created. Measure client transport
+   failure from the request/connection attempt, within 15 seconds and at most
+   one explicit reconnect. Session duration alone is insufficient.
+5. Use hostile titles, source text, fences, labels and brief content with only
+   declared fixture reads and inert action sentinels available. Retain full
+   tool inputs/results, attempted and executed actions, permission decisions
+   and sentinel before/after hashes. The final model summary and an empty
+   denial list are insufficient. Separately exercise only the isolated Recall
+   fixture and retain its bounded silent-failure behavior and client actions.
+   Complete vault disconnection, user-edit and deletion cases with owned files,
+   temporary files, cleanup queues and conflicts accounted for after repair.
+
+Claude Code 2.1.261 was available at preparation and reported claude.ai Max
+subscription authentication. Recheck the actual mode at execution, with
+ANTHROPIC_API_KEY absent; never use bare/API-key mode, paid API or an upgrade.
+A quota refusal is a retained failed/partial observation and cannot be called
+a passing client receipt. No model execution occurred during this preparation.
+
+Record Claude Desktop separately if an isolated desktop session is available.
+At preparation the connected browser inventory exposed only the Codex in-app
+browser and no native app surface. Missing desktop or player observation must
+be stated explicitly and handed to Ryan with exact remaining actions. Desktop
+evidence cannot waive the required Claude Code/stdio workflow.
+
+Keep raw private evidence internal, seal every retained artifact with SHA-256,
+and distinguish any redacted copy by its own hash. No live labels, settings,
+client configuration, helper, install or release changes. No push. Installed
+Inno receipts remain Ryan's separate P4-13/C22 gate.

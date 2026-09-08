@@ -202,3 +202,21 @@ across phases; integrate one verified result at a time. Gemini's quota reset
 was reported around 17:50 PDT; no new Gemini retry is planned before then.
 Claude workers share Fable's nearly spent subscription. Codex remains available
 for the AW-4, BA-4 and BD-2 reviews when their repaired candidates are ready.
+
+### 2026-09-08 16:56 PDT — Full-tree verification after BC-3c
+
+Full-tree verification of `e6c6ed0` with the repaired disposable environment:
+**1,976 passed, four failed, three skipped, one existing xfail**, 309.63 seconds.
+The four failures are exactly the superseded AS-7 evidence assertions listed in
+AS-9. No new implementation failure remains in this run. S21 was excluded; the
+still-open AW-3, BA-3, BA-measurements3 and BD reproduction files were excluded by
+their current rulings. Existing skips cover unavailable symlink privileges and
+ffmpeg; the existing xfail is SEC-06's non-ASCII search behavior. This is not an
+unqualified green full tree and does not accept the excluded reproductions.
+Commands, XML and output are retained in `_scratch/ig-full-bc3c`.
+
+The next client observation is planned in `PHASE4-CLIENT-RERUN-BRIEF-2026-09-08.md`.
+It requires a frozen repaired candidate, full stdio/client action evidence and
+the five AW-3 requirements. Preparation verified Claude Code 2.1.261 with claude.ai
+Max subscription authentication and no API key; no model ran. Execute only after
+AV-5m2 and AW-4. No client or installed receipt is credited by this preparation.
