@@ -108,7 +108,7 @@ def test_generate_dogfoods_writer_facing_assembly_path():
         "async function generateScriptInWriting()", 1)[0]
     build = DASHBOARD.split(
         "async function assembleCurrentWorkspace()", 1)[1].split(
-        "async function runWorkspaceCritique()", 1)[0]
+        "async function prepareWorkspaceCritiqueContext()", 1)[0]
 
     assert "/api/corpus/v1/assemble" in generate
     assert "/workspace/assemble" not in generate
