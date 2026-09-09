@@ -1887,3 +1887,18 @@ cleanup. Modified guard bytes cannot be reported as restored. The provenance wai
 has an actual process deadline. Next: bundled operator observation without Setup
 or a client; C22 fourth worker remains running. Final full-tree and portable
 runbook/bundle remain agent work. Both exact fixture proposals remain unapplied.
+
+
+## Integrator log — 2026-09-09, first bundled P4 operator observation
+
+P4 integrated at 5109c98. Bundled driver prepare/check/client-config stages exit
+zero; collection exits one (12 passed / three failed / eight unobserved).
+The collector wrongly applies full-packet requirements to its explicit storage-
+unavailable and transport-termination sessions. Both normal original sessions
+are complete. Its deletion key-presence pass is also insufficient: the synthetic
+item was not actually soft-deleted and one deletion remains pending. Original
+results are preserved; this is not accepted deletion evidence. Follow
+RYAN-P4-BUNDLED-COLLECTION-REPAIR-BRIEF-2026-09-09.md before any fresh observation.
+No Setup/client/model ran. All command jobs cleaned, guard removed, original
+_pth/installer/142 packaged source bindings unchanged. Proof:
+proof/ryan-p4-bundled-01-2026-09-09/SHA256.json. C22 fourth worker still running.

@@ -1,0 +1,119 @@
+{
+  "env": {
+    "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\user\\local",
+    "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\user\\roaming",
+    "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\tmp",
+    "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\tmp",
+    "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\output",
+    "UOINK_INDEX_PATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\index.db",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\guard;E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "P4_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "P4_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "P4_ISOLATED_PORT": "18231",
+    "P4_INSTALLED_APP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "P4_FORBIDDEN_INDEX": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\user\\local\\Uoink\\index.db",
+    "MCP_TIMEOUT": "10000",
+    "ENABLE_TOOL_SEARCH": "false",
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+    "UOINK_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "UOINK_ISOLATED_PORT": "18231",
+    "CLAUDE_CONFIG_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\client\\claude-config"
+  },
+  "autoMemoryEnabled": false,
+  "permissions": {
+    "allow": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library",
+      "mcp__p4_sentinel__record_action"
+    ],
+    "deny": [
+      "mcp__uoink__add_podcast_feed",
+      "mcp__uoink__analyze_comments",
+      "mcp__uoink__cancel_job",
+      "mcp__uoink__classify_hook",
+      "mcp__uoink__download_podcast_episode",
+      "mcp__uoink__episode_to_corpus",
+      "mcp__uoink__export_cited_range",
+      "mcp__uoink__find_mentions",
+      "mcp__uoink__get_citation_map",
+      "mcp__uoink__get_evidence_card",
+      "mcp__uoink__get_job_status",
+      "mcp__uoink__get_library_activity",
+      "mcp__uoink__get_library_brief_input",
+      "mcp__uoink__get_taxonomy",
+      "mcp__uoink__get_transcript_reliability",
+      "mcp__uoink__get_uoink_corpus",
+      "mcp__uoink__get_uoink_health",
+      "mcp__uoink__get_whisperx_status",
+      "mcp__uoink__list_podcast_episodes",
+      "mcp__uoink__list_podcast_feeds",
+      "mcp__uoink__list_recent_uoinks",
+      "mcp__uoink__poll_podcast_feed",
+      "mcp__uoink__publish_library_brief",
+      "mcp__uoink__remove_podcast_feed",
+      "mcp__uoink__search_clips",
+      "mcp__uoink__search_uoinks",
+      "mcp__uoink__transcribe_podcast_episode",
+      "mcp__uoink__uoink_playlist",
+      "mcp__uoink__uoink_video"
+    ],
+    "defaultMode": "dontAsk"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "E:/AI/projects/uoink/checkouts/Yoink-library/installer/staging/python/python.exe -B -s -P E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile/client/observe_client_actions.py hook --fixture-root E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-profile E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-port 18231",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "E:/AI/projects/uoink/checkouts/Yoink-library/installer/staging/python/python.exe -B -s -P E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile/client/observe_client_actions.py hook --fixture-root E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-profile E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-port 18231",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "E:/AI/projects/uoink/checkouts/Yoink-library/installer/staging/python/python.exe -B -s -P E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile/client/observe_client_actions.py hook --fixture-root E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-profile E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-port 18231",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "E:/AI/projects/uoink/checkouts/Yoink-library/installer/staging/python/python.exe -B -s -P E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile/client/observe_client_actions.py hook --fixture-root E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-profile E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/p4-bundled-01/profile --isolated-port 18231",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

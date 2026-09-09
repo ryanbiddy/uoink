@@ -1,0 +1,8 @@
+{
+  "fixture_generator_version": "p4-evidence-completeness-v2-2026-09-09",
+  "store_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\library",
+  "store_root_is_product_default": true,
+  "archived_v1_nondefault_store": "prompt-store",
+  "original_expected_archived": "docs/library/proof/ryan-p4-kit-review-03-2026-09-09/expected.json",
+  "correction": "Generator now uses LibraryWorkService default store_root (index.parent/library) so the original-route LibraryPreviewReader recheck can find taxonomy files. Attached entry is still labeled and is not original-route credit."
+}

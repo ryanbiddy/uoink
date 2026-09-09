@@ -1,0 +1,544 @@
+{
+  "route_label": "original-installed",
+  "installed_credit": false,
+  "runtime_mode": "source-runtime",
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-P",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\kit\\p4_stdio_tap.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "--isolated-port",
+    "18231",
+    "--fixture-root",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "--record-dir",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\originalinstalleda",
+    "--cwd",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "--route-label",
+    "original-installed",
+    "--",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "--isolated-port",
+    "18231"
+  ],
+  "elapsed_ms": 4560.0193,
+  "exit_code": 1,
+  "observed_inventory": {
+    "tools": [
+      "uoink_video",
+      "uoink_playlist",
+      "get_job_status",
+      "cancel_job",
+      "list_recent_uoinks",
+      "search_uoinks",
+      "search_clips",
+      "get_evidence_card",
+      "get_uoink_corpus",
+      "analyze_comments",
+      "classify_hook",
+      "get_taxonomy",
+      "get_citation_map",
+      "get_uoink_health",
+      "find_mentions",
+      "get_transcript_reliability",
+      "add_podcast_feed",
+      "list_podcast_feeds",
+      "remove_podcast_feed",
+      "poll_podcast_feed",
+      "list_podcast_episodes",
+      "download_podcast_episode",
+      "get_whisperx_status",
+      "transcribe_podcast_episode",
+      "episode_to_corpus",
+      "get_library_activity",
+      "search_library",
+      "get_library_item",
+      "read_library_resource",
+      "get_library_brief_input",
+      "publish_library_brief",
+      "export_cited_range"
+    ],
+    "templates": [
+      "library-card",
+      "library-excerpt",
+      "library-corpus-chunk",
+      "library-shelf-page",
+      "library-brief"
+    ],
+    "prompts": [
+      "consult-library",
+      "evidence-brief",
+      "whats-new",
+      "reshelve-review"
+    ]
+  },
+  "expected_tools": [
+    "uoink_video",
+    "uoink_playlist",
+    "get_job_status",
+    "cancel_job",
+    "list_recent_uoinks",
+    "search_uoinks",
+    "search_clips",
+    "get_evidence_card",
+    "get_uoink_corpus",
+    "analyze_comments",
+    "classify_hook",
+    "get_taxonomy",
+    "get_citation_map",
+    "get_uoink_health",
+    "find_mentions",
+    "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    "get_library_brief_input",
+    "publish_library_brief",
+    "export_cited_range"
+  ],
+  "expected_templates": [
+    "library-card",
+    "library-excerpt",
+    "library-corpus-chunk",
+    "library-shelf-page",
+    "library-brief"
+  ],
+  "expected_prompts": [
+    "consult-library",
+    "evidence-brief",
+    "whats-new",
+    "reshelve-review"
+  ],
+  "reconnect": {
+    "first_wrapper_pid": 72772,
+    "second_wrapper_pid": 77216,
+    "first_child_pid": 72032,
+    "second_child_pid": 70124,
+    "distinct": true,
+    "commands": [
+      [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--isolated-port",
+        "18231",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\originalinstalleda",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--isolated-port",
+        "18231"
+      ],
+      [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--isolated-port",
+        "18231",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\originalinstalledb",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+        "--isolated-port",
+        "18231"
+      ]
+    ],
+    "identity_source": "tap child_started events"
+  },
+  "unavailable_storage": {
+    "elapsed_ms": 1.8141,
+    "bound_ms": 2000.0,
+    "within_bound": true,
+    "replacement_index_created": false,
+    "replacement_preserved": null,
+    "held_original_restored": true,
+    "expected_refusal": true,
+    "reply": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "error": {
+        "code": -32603,
+        "message": "The library storage is unavailable.",
+        "data": {
+          "ok": false,
+          "schema_version": 1,
+          "contract_version": "phase4-v1-2026-09-08",
+          "error": {
+            "code": "library_unavailable",
+            "message": "The library storage is unavailable.",
+            "retryable": true,
+            "details": {
+              "storage": "FileNotFoundError"
+            }
+          }
+        }
+      }
+    },
+    "index_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\index.db"
+  },
+  "guard_canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "guard_restore": {
+    "restored": [],
+    "ok": true,
+    "failures": [],
+    "child_cleanup_receipts": [
+      {
+        "pid": 72772,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            72772,
+            68616,
+            72032,
+            66212
+          ],
+          "owned_pids": [
+            66212,
+            68616,
+            72032,
+            72772
+          ],
+          "parent_pid": 72772,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            66212,
+            68616,
+            72032,
+            72772
+          ],
+          "parent_pid": 72772,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-09 11:31:08,209 INFO Processing request of type ListToolsRequest\r\n2026-09-09 11:31:08,211 INFO Processing request of type ListResourceTemplatesRequest\r\n2026-09-09 11:31:08,212 INFO Processing request of type ListPromptsRequest\r\n2026-09-09 11:31:08,213 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,217 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,218 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,220 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,221 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,223 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,224 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,226 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,228 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,229 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,231 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,232 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,234 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,236 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,237 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,239 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,240 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,242 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,244 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:08,255 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:08,258 INFO Processing request of type GetPromptRequest\r\n2026-09-09 11:31:08,260 INFO Processing request of type GetPromptRequest\r\n",
+        "stderr_bytes": 1884,
+        "retained_events": 27,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\traffic\\originalinstalleda-72772",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 77216,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            77216,
+            71520,
+            70124,
+            74748
+          ],
+          "owned_pids": [
+            70124,
+            71520,
+            74748,
+            77216
+          ],
+          "parent_pid": 77216,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            70124,
+            71520,
+            74748,
+            77216
+          ],
+          "parent_pid": 77216,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-09 11:31:09,368 INFO Processing request of type ListToolsRequest\r\n2026-09-09 11:31:09,370 INFO Processing request of type ListResourceTemplatesRequest\r\n2026-09-09 11:31:09,371 INFO Processing request of type ListPromptsRequest\r\n2026-09-09 11:31:09,372 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,379 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,380 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,382 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,383 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,385 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,387 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,388 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,390 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,391 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,392 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,394 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,396 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,397 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,398 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,400 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,402 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,403 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,405 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:09,415 INFO Processing request of type CallToolRequest\r\n2026-09-09 11:31:09,418 INFO Processing request of type GetPromptRequest\r\n2026-09-09 11:31:09,420 INFO Processing request of type GetPromptRequest\r\n",
+        "stderr_bytes": 1884,
+        "retained_events": 27,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\traffic\\originalinstalledb-77216",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 70464,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            70464,
+            54244,
+            72932,
+            73556
+          ],
+          "owned_pids": [
+            54244,
+            70464,
+            72932,
+            73556
+          ],
+          "parent_pid": 70464,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            54244,
+            70464,
+            72932,
+            73556
+          ],
+          "parent_pid": 70464,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-09 11:31:10,504 INFO Processing request of type ReadResourceRequest\r\n2026-09-09 11:31:10,504 WARNING library storage binding failed: FileNotFoundError\r\n",
+        "stderr_bytes": 160,
+        "retained_events": 3,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\traffic\\originalinstalledunavail-70464",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 77180,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            77180,
+            77308,
+            73516,
+            36556
+          ],
+          "owned_pids": [
+            36556,
+            73516,
+            77180,
+            77308
+          ],
+          "parent_pid": 77180,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            36556,
+            73516,
+            77180,
+            77308
+          ],
+          "parent_pid": 77180,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "",
+        "stderr_bytes": 0,
+        "retained_events": 2,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\traffic\\originalinstalledtransport-77180",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      }
+    ],
+    "children_confirmed_gone": true
+  },
+  "transport_failure": {
+    "elapsed_ms": 0.0,
+    "bound_ms": 15000.0,
+    "within_bound": true,
+    "exit_code": 1
+  },
+  "inspection": {
+    "packet_and_prompt_subset_complete": true,
+    "frame_faults": [],
+    "missing_required_native_prompts": [],
+    "inventory_differences": [],
+    "reconnect_identities": [
+      {
+        "record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\originalinstalleda-72772\\events.jsonl",
+        "route_label": "original-installed",
+        "child_pids": [
+          72032
+        ],
+        "exit": []
+      },
+      {
+        "record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile\\records\\originalinstalledb-77216\\events.jsonl",
+        "route_label": "original-installed",
+        "child_pids": [
+          70124
+        ],
+        "exit": []
+      }
+    ],
+    "reshelve_review_success": true,
+    "valid_preview_pair": true
+  },
+  "guard_install": {
+    "mechanism": "bundled_site_packages",
+    "bundled": true,
+    "already_present": true,
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py"
+  },
+  "product_findings": [],
+  "hidden_by_special_route": false,
+  "fake_child_used": false,
+  "note": "Isolation flags were forwarded. If the original installed entry ignores them, that is a product finding, not a hidden special route. FAKE_CHILD is instrument-only and was not used on this route.",
+  "utc": "2026-09-09T18:31:11.621486+00:00",
+  "isolation": {
+    "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-01\\profile",
+    "isolated_port": 18231,
+    "instrument_only": false
+  }
+}
