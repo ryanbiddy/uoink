@@ -11539,10 +11539,20 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/mcp/v1/tools/call" or (bare == "/mcp/v1" and method == "tools/call"):
             params = body.get("params") if isinstance(body.get("params"), dict) else body
             name = params.get("name")
-            args = params.get("arguments") or {}
+            args = params.get("arguments", {})
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
-            payload = _mcp_tools_module().call_tool(name, args)
+            tools = _mcp_tools_module()
+            spec = tools.TOOL_REGISTRY.get(name)
+            if spec is not None:
+                validation_error = openapi_bridge.validate_arguments(
+                    args, spec.input_schema
+                )
+                if validation_error:
+                    return self._send_mcp_error(
+                        request_id, -32602, validation_error
+                    )
+            payload = tools.call_tool(name, args)
             return self._send_mcp_result(request_id, self._mcp_tool_call_result(payload))
         return self._send_mcp_error(request_id, -32601, "method not found")
 
