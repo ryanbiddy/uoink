@@ -1,8 +1,10 @@
 # Living Library integration candidate
 
 Local integration candidate, 2026-09-09. Phases 3–6 are accepted with the
-conditions below. The full-tree and installer fields will be completed from
-their actual receipts. This document does not approve installation or release.
+conditions below. The complete candidate test run is failed, with a demonstrated
+frozen-fixture cleanup problem awaiting Ryan's ruling. The installer field
+will be completed from its actual receipt. This document does not approve
+installation or release.
 
 ## Package and scope
 
@@ -143,7 +145,25 @@ subsecond player timing. See `PHASE6-BD2-2026-09-08.md` and
 
 ## Combined verification
 
-Final candidate full-tree result: pending.
+Candidate `6c313ea` full tree: **2,102 passed, 92 failed, three skipped,
+one existing xfail**, 550.41 seconds. Only S21 was excluded; every closed
+Phase 4 reproduction was included. This is a failed full-tree result.
+
+All 67 additional mirror failures had passed in the prior focused union on
+the same production source. A reduced ordered pair demonstrates why the
+first ordinary export fails: AW-11's private-helper fixture directly terminates
+its session and drops the Mirror pointer, leaving a dead thread-local I/O
+binding for the next fixture. No process or exclusion lock remains. Production
+stop/kill cleanup forgets that binding; four independent lifecycle controls
+succeeded without resetting global state. The original tests remain unchanged.
+
+Ryan must authorize consistent fixture teardown before a corrected full-tree
+run. The 67 failures remain failed; neither the diagnosis nor the controls
+turn them into passes. The old D15 assertion did not fail in this contaminated
+run, which does not override its earlier frozen failure. See
+[the investigation brief](CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md) and
+`proof/candidate-full-01-2026-09-09/summary.json` for the complete comparison,
+two failed order diagnostics and lifecycle control.
 
 The latest pre-Phase-4 closure run on `44968d9` had 2,106 passes, 26 failures,
 three skips and one existing xfail in 514.25 seconds. S21 and the then-open
@@ -169,6 +189,10 @@ changed to manufacture a passing result.
 - Frozen fixture rulings documented in
   `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. Behavioral assertions
   remain unchanged; corrected setup needs Ryan's explicit ruling.
+- AW-11's direct private-helper teardown leaves a dead originating binding
+  for later tests. Authorize fixture cleanup through the production stop/
+  forget path while preserving its foreign-helper assertions; the failed
+  full-tree result remains until a documented corrected run is authorized.
 - Already-held diarization output and independent human labels for 30
   passages across five items. The speaker gate requires at least 95%
   accuracy and 80% coverage; no speaker pass is claimed.

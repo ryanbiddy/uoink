@@ -1,0 +1,19 @@
+{
+  "igc1/failure-comparison.json": "b2b8eaab3727c7a081a2a4ee8040300dbab40d98bf61b02b77de8a14d33b573b",
+  "igc1/results.json": "11d292d253d54ea8f4a5e22198bc178c0e329a98629e89b0045b78b6d4bfb842",
+  "igc1/tests.log": "74f507f0f150a269dd73ee3df4b868ba66a72456eabb978b51227754b961ed03",
+  "igc1/tests.xml": "b6fcfc176e691adeb902e69379a97412f6bff6f9100546cbc2c29a38afa548d8",
+  "igo1/mirror-state.jsonl": "1f9fd925f4b95cef1ddd4bff5de670bd69090d1de3ff2c4af607a3c7b370b18c",
+  "igo1/results.json": "afb6745173d3280878fe385c2d8b52cf3ac2a31bd2fdebc1ca6f5f24c1108875",
+  "igo1/tests.log": "f3869a4ed09b65a3113e9ada87389d56703e6e22cc47ed5f2f9b5ef01a9402c2",
+  "igo1/tests.xml": "3da01c91433cef8a748d55fe070aefddade63a659b8ef1227e17f2511c2be58a",
+  "igo2/mirror-state.jsonl": "89d6783b7b56b4a3e53ca069825bcc9494d1f53e5c4c3c71cd81335297d99ce2",
+  "igo2/results.json": "cd71915f4309e5a5b886f4c40f14b9b79bb6930e19d233580ef2f12ca99298f6",
+  "igo2/tests.log": "76e0dfdb64a334119b48a799ee9180216034a54c7a83951ae80829d4cba7ba97",
+  "igo2/tests.xml": "0002454635611607a221421ee715456d04263dbf5030f666b95fb30284667f24",
+  "integrator_verify.py": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+  "mirror_lifecycle_control.py": "00d87b587bde55132c29a25e65f2aa78a53076a29ab5194e7ce119e3615ba418",
+  "mirror_order_probe.py": "1ee46f046d71d55ab727f131e1896a9b7bed68f872adb17b826a6331b70fcc04",
+  "production-lifecycle-control.json": "44bb981be939cf9839767fb2eff07b8c105de3127fa2afd3151cad9bae9e6449",
+  "summary.json": "7c1c372e94f7262ffdc0b894334678ce55af198f58ca3cca8800e97c31cc008f"
+}

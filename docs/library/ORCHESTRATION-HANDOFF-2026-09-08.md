@@ -62,14 +62,18 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Implementation and required Claude Code/stdio behavior accepted with conditions; 286 passed / nine frozen failures in both roots, broader AW-4 113 passed | `PHASE4-CLIENT-02-2026-09-09.md` closes the planned supplement: complete packets, action evidence, missing-index refusals, Recall and vault accounting | Ryan: installed Inno, frozen fixture rulings and retained X-source HTTP 403 condition. No implementation repair remains identified |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
-| Integration | Candidate branch cut from `9217846`; release notes prepared | `cc/living-library-candidate`; no worker active or unresolved merge entry | Run full suite with only S21 excluded, then local installer; installed-tree receipts stay with Ryan |
+| Integration | Candidate from `9217846`; full tree on `6c313ea`: 2,102 passed / 92 failed, only S21 excluded | Reduced pair demonstrates frozen AW-11 teardown contamination; all 67 extra failures passed the earlier focused union. Four production lifecycle controls succeeded | Ryan owns the fixture-cleanup ruling. Preserve failed full tree; build local installer for review with that condition |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest full tree, `44968d9`: **2,106 passed, 26 failed, three skipped, one existing xfail**,
-514.25 seconds. S21 and the still-open AW-5/AW-7 files were excluded. See the final log entry
-for the failure classification; this is not an unqualified passing tree.
+Latest candidate full tree, `6c313ea`: **2,102 passed, 92 failed, three skipped,
+one existing xfail**, 550.41 seconds, with only S21 excluded. The preceding
+`44968d9` run had 2,106 passed / 26 failed, excluding the then-open AW-5/AW-7
+files as well. All 67 additional mirror failures passed the focused union on
+the same source; a reduced pair proves AW-11's direct teardown leaves a dead
+I/O binding for subsequent fixtures. No corrected full-tree run occurred.
+See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
@@ -142,8 +146,11 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    build the installer locally (`build.ps1`; Inno Setup 6 is installed) as the staged
    package for Ryan's C22/Phase 4 receipts. No merge, no push, no release publish.
    Candidate branch was cut from `9217846`; release notes are now tracked.
-   Next: freeze the notes commit, run the full tree without the old AW-5/AW-7
-   exclusions, then build and record the actual installer/runtime result.
+   Full tree on `6c313ea` finished with 2,102 passed / 92 failed. The new
+   order-dependent fixture-cleanup ruling is under Blockers for Ryan; original
+   tests remain unchanged. Build the local installer with this explicit
+   condition and record its actual bundled-runtime result. Do not manufacture
+   a green full tree with reordered or reset fixtures.
 
 Worker notes: claude worker = no shell, one session at a time, shares the subscription (tell it
 "no subagents; targeted searches; write early"); gemini has shell, times out on big sets (3-5
@@ -160,6 +167,14 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   HTTP 403 in the isolated browser. Keep this explicitly blocked link condition,
   or authorize an access repair and a documented follow-up. The successful
   timed YouTube observation is separate; no replacement source was fetched.
+- Candidate full tree: frozen AW-11 foreign-helper teardown directly calls
+  `session.terminate()` and discards `env.mirror._vault_io`, leaving a dead
+  `_IO_CTX.session` on the test thread. A following ordinary export then refuses.
+  Authorize consistent teardown through production stop/forget cleanup while
+  keeping the same behavior assertions. Two order diagnostics retain this
+  failure; four production lifecycle controls succeed without state resets.
+  No test was changed and the 92-failure full tree stays failed. See
+  `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md` and its 17-file proof seal.
 - Acceptance-fixture rulings: D13's user-edit fixture creates its edit only after
   the publication forbidden by its visibility case, and eight old Phase 4
   parent-process interceptors cannot observe the new isolated writer's syscall;
@@ -1126,3 +1141,34 @@ the returned bounded corpus URI for the next actual-client source-link
 observation before proposing a canonical-card change. The client supplement
 also covers hostile content, Recall and vault cases. These are our remaining
 work; Phase 4 is still unaccepted and no new implementation defect is ruled.
+
+### 2026-09-09 00:23 PDT - Candidate full tree retained; fixture cleanup ruling
+
+The candidate's full tree on `6c313ea` completed with 2,102 passes and 92
+failures, three skips and one xfail in 550.41 seconds. Only S21 was excluded.
+All 67 additional mirror failures were passing cases in the earlier focused
+AW-12 checkout union on identical production source. One old D15 assertion
+did not fail here; this contaminated result does not supersede its ruling.
+
+The diagnostic prefix reproduced seven passes followed by the failed ordinary
+export. A two-case reduction reproduced the same failure: the AW-11 foreign-
+helper test passes, then AW-2's first ordinary export fails. Read-only snapshots
+show the first fixture has directly terminated its private session but left
+that exact dead session in the main thread's I/O context. No process, owner
+or mutex remains. The next fixture inherits the dead operation and refuses.
+The current observer adds I/O context fields absent from the first diagnostic;
+the first observer was not separately hash-frozen. Both failed results remain.
+
+Production resync/stop/kill uses `_forget_session` after proven death. Four
+separate synthetic lifecycle observations completed with no stale context,
+retained session, owner or mutex, without resetting globals. Do not remove
+the expired-operation refusal to make the fixture pass: it protects late
+helpers from adopting a new operation. Request consistent fixture teardown
+under Ryan's existing acceptance-test rule. No acceptance file or product
+source changed, and no corrected full tree was attempted.
+
+The 17-file seal in `proof/candidate-full-01-2026-09-09/` preserves the full
+result, both diagnostics, full comparisons and production control. Release
+notes and Blockers for Ryan retain the failed result and additional teardown
+condition. Continue the local installer build from the clean receipt commit;
+it is a review package, with installation/main merge still Ryan's decisions.

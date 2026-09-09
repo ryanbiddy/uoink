@@ -1,0 +1,27 @@
+.......F                                                                 [100%]
+================================== FAILURES ===================================
+___________________ test_d09_resync_repairs_missed_refresh ____________________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:267: in test_d09_resync_repairs_missed_refresh
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_resync_repairs_missed_refresh
+1 failed, 7 passed in 9.15s

@@ -1,0 +1,1986 @@
+........................................................................ [  3%]
+........................................................................ [  6%]
+....................................FFFF................................ [  9%]
+........................................................................ [ 13%]
+...............................................FFFF.FFFFFFFFF.......FFFF [ 16%]
+FFFFF.FFF..F.FF...F............FFFFF.FFFFF.FFFFFF....................... [ 19%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+...F.....F........................................FF....F............... [ 29%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+...........................................x............................ [ 39%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+................................................................F.FFF..F [ 58%]
+FFF.FFFFFF.F..F......................................................... [ 62%]
+........................................................................ [ 65%]
+.....................................................................s.. [ 68%]
+........................................................................ [ 72%]
+.................................................................FFFF... [ 75%]
+F.F.F...F...F......................................FFFFF................ [ 78%]
+...........FFFFF........F...............................FF.............. [ 81%]
+........................................................................ [ 85%]
+.........................................s.......s...................... [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+........................................................................ [ 98%]
+......................................                                   [100%]
+================================== FAILURES ===================================
+____________ test_as7_c21_at6_receipt_records_process_exit_status _____________
+tests\library_work_astra\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status
+    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (
+E   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
+E   assert ({})
+______________ test_as7_c21_all_at6_artifact_bytes_are_archived _______________
+tests\library_work_astra\test_phase3_acceptance7.py:92: in test_as7_c21_all_at6_artifact_bytes_are_archived
+    assert missing == [], {'missing_artifacts': missing}
+E   AssertionError: {'missing_artifacts': ['helper\\server.log', 'source_instances\\81ea2cd742d9bc80.json', 'Podcasts\\untitled-podcast\\s...898789.json', 'Podcasts\\untitled-podcast\\s21-controlled-capture-7fc8c898789\\s21-controlled-capture-7fc8c898789.md']}
+E   assert ['helper\\ser...c8c898789.md'] == []
+E     
+E     Left contains 4 more items, first extra item: 'helper\\server.log'
+E     Use -v to get more diff
+___ test_as7_c21_browser_run_has_retained_receipt_and_database[at6-browser] ___
+tests\library_work_astra\test_phase3_acceptance7.py:100: in test_as7_c21_browser_run_has_retained_receipt_and_database
+    assert matching, {'missing_browser_run_feed_port': feed_port,
+E   AssertionError: {'missing_browser_run_feed_port': 64703, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}
+E   assert []
+_ test_as7_c21_browser_run_has_retained_receipt_and_database[c21-pill-browser] _
+tests\library_work_astra\test_phase3_acceptance7.py:100: in test_as7_c21_browser_run_has_retained_receipt_and_database
+    assert matching, {'missing_browser_run_feed_port': feed_port,
+E   AssertionError: {'missing_browser_run_feed_port': 49557, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}
+E   assert []
+___________________ test_d09_resync_repairs_missed_refresh ____________________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:267: in test_d09_resync_repairs_missed_refresh
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ test_d09_fresh_resync_exports_shelf_and_brief[shelf] _____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:280: in test_d09_fresh_resync_exports_shelf_and_brief
+    assert (env.vault / mirror.MIRROR_ROOT / expected).is_file()
+E   AssertionError: assert False
+E    +  where False = is_file()
+E    +    where is_file = ((WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a22/v') / 'Uoink') / 'Shelves/dd42ee7c8eebb63c04e737c4a9fdbd3ebc3490c9cf6730f7c7d07c664b227037.md').is_file
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a22/v') = namespace(root=WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a22'), idx=<index.Index objec...cts/uoink/checkouts/Yoink-library/_scratch/igc1-0/a22/v'), mirror=<library_mirror.Mirror object at 0x000001FB9CF88C80>).vault
+E    +      and   'Uoink' = mirror.MIRROR_ROOT
+____________ test_d09_fresh_resync_exports_shelf_and_brief[brief] _____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:280: in test_d09_fresh_resync_exports_shelf_and_brief
+    assert (env.vault / mirror.MIRROR_ROOT / expected).is_file()
+E   AssertionError: assert False
+E    +  where False = is_file()
+E    +    where is_file = ((WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a23/v') / 'Uoink') / 'Briefs/2026-09-08-c8cd28bc52a154a2c80e296fdd9bb6c16e8f56b807e35e67002ebf996175d6d6.md').is_file
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a23/v') = namespace(root=WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a23'), idx=<index.Index objec...cts/uoink/checkouts/Yoink-library/_scratch/igc1-0/a23/v'), mirror=<library_mirror.Mirror object at 0x000001FB9CF894F0>).vault
+E    +      and   'Uoink' = mirror.MIRROR_ROOT
+__________________ test_d09_scope_cleanup_keeps_local_brief ___________________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:285: in test_d09_scope_cleanup_keeps_local_brief
+    export(env, "a", "b")
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___________ test_d11_server_delivers_deletion_events_while_disabled ___________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:309: in test_d11_server_delivers_deletion_events_while_disabled
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________________ test_d11_soft_delete_removes_item_source_text ________________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:321: in test_d11_soft_delete_removes_item_source_text
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_ test_d12_unowned_temps_are_never_inferred_from_name_or_text[stem-My Interrupted personal draft] _
+tests\library_work_astra\test_phase4_aw2_acceptance.py:332: in test_d12_unowned_temps_are_never_inferred_from_name_or_text
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_ test_d12_unowned_temps_are_never_inferred_from_name_or_text[unique-USER OWNED TEMP] _
+tests\library_work_astra\test_phase4_aw2_acceptance.py:332: in test_d12_unowned_temps_are_never_inferred_from_name_or_text
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1fb967e8c50: unset>.is_set
+
+During handling of the above exception, another exception occurred:
+tests\library_work_astra\test_phase4_aw2_acceptance.py:366: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert finished.wait(3)
+E   assert False
+E    +  where False = wait(3)
+E    +    where wait = <threading.Event at 0x1fb967e8650: unset>.wait
+_______________ test_d13_purge_rechecks_user_edit_before_unlink _______________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:371: in test_d13_purge_rechecks_user_edit_before_unlink
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_d14_index_has_recoverable_intent_on_manifest_failure __________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:403: in test_d14_index_has_recoverable_intent_on_manifest_failure
+    assert (env.vault / "Uoink/Library.md").exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = (WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a32/v') / 'Uoink/Library.md').exists
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a32/v') = namespace(root=WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a32'), idx=<index.Index objec...cts/uoink/checkouts/Yoink-library/_scratch/igc1-0/a32/v'), mirror=<library_mirror.Mirror object at 0x000001FB958F9400>).vault
+____________ test_d15_bound_volume_not_readopted_after_ledger_loss ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:408: in test_d15_bound_volume_not_readopted_after_ledger_loss
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ test_d16_shelf_title_cannot_introduce_markdown_image _____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:424: in test_d16_shelf_title_cannot_introduce_markdown_image
+    assert "![AW2](https://example.invalid/image)" not in shelf.read_text(encoding="utf-8")
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:771: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\a34\\v\\Uoink\\Shelves\\dd42ee7c8eebb63c04e737c4a9fdbd3ebc3490c9cf6730f7c7d07c664b227037.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for apply
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_d09_resync_reexports_explicitly_readmitted_scope_item __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:158: in test_d09_resync_reexports_explicitly_readmitted_scope_item
+    export(env, "a", "b")
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_____________ test_d10_brief_source_revision_rechecked_at_replace _____________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:183: in test_d10_brief_source_revision_rechecked_at_replace
+    assert visited
+E   assert []
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:189: in interrupted_item_temp
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:189: in interrupted_item_temp
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:189: in interrupted_item_temp
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1fb95aa1c70: unset>.is_set
+
+During handling of the above exception, another exception occurred:
+tests\library_work_astra\test_phase4_aw3_acceptance.py:277: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert finished.wait(3)
+E   assert False
+E    +  where False = wait(3)
+E    +    where wait = <threading.Event at 0x1fb95aa3710: unset>.wait
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1fb95aefdd0: unset>.is_set
+
+During handling of the above exception, another exception occurred:
+tests\library_work_astra\test_phase4_aw3_acceptance.py:277: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert finished.wait(3)
+E   assert False
+E    +  where False = wait(3)
+E    +    where wait = <threading.Event at 0x1fb95aedb50: unset>.wait
+_____________ test_d14_index_intent_matches_exact_published_bytes _____________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:298: in test_d14_index_intent_matches_exact_published_bytes
+    assert index_file.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a49/v/Uoink/Library.md').exists
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:329: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1fb954b9730: unset>.is_set
+
+During handling of the above exception, another exception occurred:
+tests\library_work_astra\test_phase4_aw3_acceptance.py:340: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert finished.wait(3)
+E   assert False
+E    +  where False = wait(3)
+E    +    where wait = <threading.Event at 0x1fb954b8830: unset>.wait
+____ test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault _____
+tests\library_work_astra\test_phase4_aw4_acceptance.py:14: in test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______ test_aw4_failed_atomic_binding_write_preserves_previous_binding _______
+tests\library_work_astra\test_phase4_aw4_acceptance.py:29: in test_aw4_failed_atomic_binding_write_preserves_previous_binding
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________ test_aw4_temp_cleanup_preserves_same_content_replacement_file ________
+tests\library_work_astra\test_phase4_aw4_acceptance.py:46: in test_aw4_temp_cleanup_preserves_same_content_replacement_file
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______ test_aw5_destination_lease_io_is_inside_a_cancellable_boundary ________
+tests\library_work_astra\test_phase4_aw5_acceptance.py:38: in test_aw5_destination_lease_io_is_inside_a_cancellable_boundary
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______ test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp _______
+tests\library_work_astra\test_phase4_aw6_acceptance.py:9: in test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___ test_aw7_timed_out_lease_writer_cannot_mutate_destination_after_return ____
+tests\library_work_astra\test_phase4_aw7_acceptance.py:10: in test_aw7_timed_out_lease_writer_cannot_mutate_destination_after_return
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________________ test_baseline_owned_export_and_brief_are_real ________________
+tests\library_work_astra\test_phase4_aw_acceptance.py:103: in test_baseline_owned_export_and_brief_are_real
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______ test_resync_rebuilds_from_current_sources_without_prior_events ________
+tests\library_work_astra\test_phase4_aw_acceptance.py:278: in test_resync_rebuilds_from_current_sources_without_prior_events
+    assert item_file(env).exists() and item_file(env, "b").exists(), result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert (False)
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a75/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a75/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a75'), idx=<index.Index objec...cts/uoink/checkouts/Yoink-library/_scratch/igc1-0/a75/v'), mirror=<library_mirror.Mirror object at 0x000001FB96226D50>))
+____ test_bulk_wiring_events_schedule_current_derivatives[source_refresh] _____
+tests\library_work_astra\test_phase4_aw_acceptance.py:283: in test_bulk_wiring_events_schedule_current_derivatives
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_bulk_wiring_events_schedule_current_derivatives[apply] _________
+tests\library_work_astra\test_phase4_aw_acceptance.py:283: in test_bulk_wiring_events_schedule_current_derivatives
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_bulk_wiring_events_schedule_current_derivatives[undo] __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:283: in test_bulk_wiring_events_schedule_current_derivatives
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ test_scope_narrowing_cleans_previously_exported_items ____________
+tests\library_work_astra\test_phase4_aw_acceptance.py:291: in test_scope_narrowing_cleans_previously_exported_items
+    export(env, "a", "b")
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_real_brief_mirror_is_removed_when_dependency_deleted __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:312: in test_real_brief_mirror_is_removed_when_dependency_deleted
+    assert exported.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a81/v/Uoink/Briefs/2026-09-08-bb3fd186f0d55c5eaea32e31d2951145b9cc6b26cd45e5805c08fdb38479289d.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for brief_published
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_____ test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files _____
+tests\library_work_astra\test_phase4_aw_acceptance.py:319: in test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_missing_manifest_stops_replacement_for_reconciliation __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:331: in test_missing_manifest_stops_replacement_for_reconciliation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______________ test_unowned_temp_named_like_item_is_preserved ________________
+tests\library_work_astra\test_phase4_aw_acceptance.py:342: in test_unowned_temp_named_like_item_is_preserved
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:350: in test_purge_removes_intent_owned_actual_temp_name
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___________ test_timed_out_vault_worker_cannot_publish_after_return ___________
+tests\library_work_astra\test_phase4_aw_acceptance.py:419: in test_timed_out_vault_worker_cannot_publish_after_return
+    assert entered.is_set()
+E   assert False
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1fb953f4530: unset>.is_set
+
+During handling of the above exception, another exception occurred:
+tests\library_work_astra\test_phase4_aw_acceptance.py:423: in test_timed_out_vault_worker_cannot_publish_after_return
+    assert finished.wait(3)
+E   assert False
+E    +  where False = wait(3)
+E    +    where wait = <threading.Event at 0x1fb953f6ff0: unset>.wait
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_manifest_failure_keeps_recovery_intent_and_no_success __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:439: in test_manifest_failure_keeps_recovery_intent_and_no_success
+    assert env.mirror._intent_path(mirror.item_key("a")).exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a88/d/reach/mirror/intents/59a86c27e75796c1311380a86356886410328f7b77cff9117f66ac8bff3ff03a.json').exists
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a88/d/reach/mirror/intents/59a86c27e75796c1311380a86356886410328f7b77cff9117f66ac8bff3ff03a.json') = _intent_path('item:a')
+E    +        where _intent_path = <library_mirror.Mirror object at 0x000001FB962273E0>._intent_path
+E    +          where <library_mirror.Mirror object at 0x000001FB962273E0> = namespace(root=WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/a88'), idx=<index.Index objec...cts/uoink/checkouts/Yoink-library/_scratch/igc1-0/a88/v'), mirror=<library_mirror.Mirror object at 0x000001FB962273E0>).mirror
+E    +        and   'item:a' = <function item_key at 0x000001FB984BC7D0>('a')
+E    +          where <function item_key at 0x000001FB984BC7D0> = mirror.item_key
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_missing_volume_marker_is_not_adopted_after_prior_sync __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:443: in test_missing_volume_marker_is_not_adopted_after_prior_sync
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______________ test_shelf_links_resolve_to_exported_item_files _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:454: in test_shelf_links_resolve_to_exported_item_files
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______________ test_generated_index_escapes_raw_identity_markup _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:469: in test_generated_index_escapes_raw_identity_markup
+    export(env, hostile)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_mirror_preserves_user_edit_between_hash_and_replace ___________
+tests\library_work_astra\test_phase4_aw_acceptance.py:475: in test_mirror_preserves_user_edit_between_hash_and_replace
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ test_phase5_ba3_final_wire_serialization_is_inside_deadline _________
+tests\library_work_astra\test_phase5_acceptance3.py:411: in test_phase5_ba3_final_wire_serialization_is_inside_deadline
+    result = stdio_result({"interval": INTERVAL})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase5_acceptance.py:431: in stdio_result
+    return asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+uoink_mcp.py:819: in _phase4_call_tool
+    return activity_result(req.params.arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+uoink_mcp.py:761: in activity_result
+    envelope = library_analysis.get_library_activity(args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase5_acceptance.py:430: in <lambda>
+    with patch.object(analysis, "get_library_activity", lambda arguments: real_read(arguments, clock=NOW)):
+                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: test_phase5_ba3_final_wire_serialization_is_inside_deadline.<locals>.read() got an unexpected keyword argument 'clock'
+______ test_ba4_actual_sdk_serialization_retains_admission_and_deadline _______
+tests\library_work_astra\test_phase5_ba4_acceptance.py:95: in test_ba4_actual_sdk_serialization_retains_admission_and_deadline
+    assert result["isError"], f"Expired actual serialization emitted success; active admissions={observed_active}"
+E   AssertionError: Expired actual serialization emitted success; active admissions=[0]
+E   assert False
+___ test_bd01_never_published_stale_snapshot_requires_original_ticket[raw] ____
+tests\library_work_astra\test_phase6_bd_acceptance.py:39: in test_bd01_never_published_stale_snapshot_requires_original_ticket
+    _published(_publish(conn, newer))
+               ^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+__ test_bd01_never_published_stale_snapshot_requires_original_ticket[index] ___
+tests\library_work_astra\test_phase6_bd_acceptance.py:32: in test_bd01_never_published_stale_snapshot_requires_original_ticket
+    (_seed_index(idx, base) if idx else _seed(conn, base))
+     ^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_bc2.py:111: in _seed_index
+    return idx.publish_media_snapshot(f.item["video_id"], cues=f.cues, media_block=f.block,
+index.py:1911: in publish_media_snapshot
+    raise _media.MediaError("invalid_request", details={"reason": "publication_ticket_required"})
+E   library_media.MediaError: The request is invalid.
+________ test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media ________
+tests\library_work_astra\test_phase6_bd_acceptance.py:96: in test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media
+    _published(_publish(conn, newer))
+               ^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+__________ TestP409PathsAndConsent.test_consent_allowlist_filtering ___________
+tests\test_library_mirror.py:264: in test_consent_allowlist_filtering
+    assert allowed_file.exists(), f"Expected {allowed_file} to exist"
+E   AssertionError: Expected E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\igc1-0\t254\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+E   assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t254/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___________ TestP409PathsAndConsent.test_path_traversal_confinement ___________
+tests\test_library_mirror.py:298: in test_path_traversal_confinement
+    assert target.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t256/vault/Uoink/Library/3754d6cb3a38e1185e5b382d5f3ef3f118af75bf4bf0254d1fdb8437f51423e0.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______ TestP409PathsAndConsent.test_windows_reserved_names_confinement _______
+tests\test_library_mirror.py:313: in test_windows_reserved_names_confinement
+    assert target.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t257/vault/Uoink/Library/321f68140efca2b301c8c9e9cd67f0e0e3f89a6b24ca923c13bade1ee6552073.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ TestP409PathsAndConsent.test_case_and_unicode_collisions ___________
+tests\test_library_mirror.py:331: in test_case_and_unicode_collisions
+    assert f1.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t258/vault/Uoink/Library/29592a94f045306c6b3143a91630fba13a3f3d9e0bb1dd5fb567bd62b2554a47.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______ TestP410EditsAndAtomicity.test_user_edit_conflict_preserves_bytes ______
+tests\test_library_mirror.py:373: in test_user_edit_conflict_preserves_bytes
+    assert file_path.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t261/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_ TestP410EditsAndAtomicity.test_crash_before_replacement_preserves_old_file __
+tests\test_library_mirror.py:405: in test_crash_before_replacement_preserves_old_file
+    orig_hash = _compute_file_sha256(file_path)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_library_mirror.py:78: in _compute_file_sha256
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t262\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ TestP410EditsAndAtomicity.test_two_writers_serialized ____________
+tests\test_library_mirror.py:442: in test_two_writers_serialized
+    assert h1.item_file_path("vid-standard-01").exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t263/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t263/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+E    +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001FB9F747E30>.item_file_path
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________ TestP410EditsAndAtomicity.test_stale_delayed_work_rejected __________
+tests\test_library_mirror.py:453: in test_stale_delayed_work_rejected
+    gen1_hash = _compute_file_sha256(f)
+                ^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_library_mirror.py:78: in _compute_file_sha256
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t264\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____ TestP410EditsAndAtomicity.test_file_size_cap_and_frontmatter_escaping ____
+tests\test_library_mirror.py:500: in test_file_size_cap_and_frontmatter_escaping
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t266/vault/Uoink/Library/31eb248514f78c8a800ea067ea91a2626e50ac2b50ca2b2fe5081fbfea57da17.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+___________ TestP410EditsAndAtomicity.test_library_md_written_last ____________
+tests\test_library_mirror.py:515: in test_library_md_written_last
+    assert lib_md.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t267/vault/Uoink/Library.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________________ TestP411Deletion.test_soft_delete_tombstone _________________
+tests\test_library_mirror.py:542: in test_soft_delete_tombstone
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t268/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_______ TestP411Deletion.test_hard_purge_removes_owned_files_idempotent _______
+tests\test_library_mirror.py:568: in test_hard_purge_removes_owned_files_idempotent
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t269/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______________ TestP411Deletion.test_restore_replaces_tombstone _______________
+tests\test_library_mirror.py:593: in test_restore_replaces_tombstone
+    assert "deleted: true" in f.read_text(encoding="utf-8").lower()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:771: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t270\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for soft_delete
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________________ TestP411Deletion.test_purge_blocked_user_edit ________________
+tests\test_library_mirror.py:613: in test_purge_blocked_user_edit
+    f.write_text("# Personal Note\nMust not be deleted!", encoding="utf-8")
+C:\Python314\Lib\pathlib\__init__.py:809: in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:771: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t271\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_ TestP411Deletion.test_reconnected_destination_validates_marker_and_drains_deletions_first _
+tests\test_library_mirror.py:654: in test_reconnected_destination_validates_marker_and_drains_deletions_first
+    assert h.item_file_path(vid_to_delete).exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t273/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+E    +      where WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t273/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+E    +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001FB9CFF14F0>.item_file_path
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______ TestP412CorrectionStoreSeparation.test_no_read_back_into_taxonomy ______
+tests\test_library_mirror.py:729: in test_no_read_back_into_taxonomy
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/t276/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_timeout_kills_worker_and_keeps_independent_user_edit __________
+tests\test_phase4_av5m3_isolation.py:66: in test_timeout_kills_worker_and_keeps_independent_user_edit
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________________ test_live_worker_lease_blocks_a_second_mirror ________________
+tests\test_phase4_av5m3_isolation.py:107: in test_live_worker_lease_blocks_a_second_mirror
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_____________ test_recorded_temp_hash_does_not_delete_user_bytes ______________
+tests\test_phase4_av5m3_isolation.py:129: in test_recorded_temp_hash_does_not_delete_user_bytes
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_________________ test_failed_replace_retains_temp_generation _________________
+tests\test_phase4_av5m3_isolation.py:148: in test_failed_replace_retains_temp_generation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______________ test_witness_persistence_failure_is_not_swallowed ______________
+tests\test_phase4_av5m4a2_binding.py:42: in test_witness_persistence_failure_is_not_swallowed
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_____________ test_unknown_temp_record_has_no_deletion_authority ______________
+tests\test_phase4_av5m4a2_binding.py:68: in test_unknown_temp_record_has_no_deletion_authority
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______________ test_newer_consent_authorizes_destination_change _______________
+tests\test_phase4_av5m4a2_binding.py:111: in test_newer_consent_authorizes_destination_change
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+______ test_finally_cleanup_retains_intent_when_temp_name_changed_owners ______
+tests\test_phase4_av5m4a3_identity.py:79: in test_finally_cleanup_retains_intent_when_temp_name_changed_owners
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ test_stalled_dest_lease_write_is_inside_cancellation _____________
+tests\test_phase4_av5m4b2_lifetime.py:57: in test_stalled_dest_lease_write_is_inside_cancellation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+_____________ test_job_assignment_failure_refuses_before_mutation _____________
+tests\test_phase4_av5m4b_lifetime.py:224: in test_job_assignment_failure_refuses_before_mutation
+    assert not mirror._foreign_vault_worker_alive(str(dest))
+E   AssertionError: assert not True
+E    +  where True = <function _foreign_vault_worker_alive at 0x000001FB984A17A0>('E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\j0\\v')
+E    +    where <function _foreign_vault_worker_alive at 0x000001FB984A17A0> = mirror._foreign_vault_worker_alive
+E    +    and   'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\j0\\v' = str(WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igc1-0/j0/v'))
+_______ test_child_boundary_timeout_confirms_death_and_keeps_user_edit ________
+tests\test_phase4_av5m4b_lifetime.py:231: in test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+____________ test_timed_out_parent_cannot_use_later_resync_session ____________
+tests\test_phase4_av5m4b_lifetime.py:270: in test_timed_out_parent_cannot_use_later_resync_session
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_second_process_with_different_temp_root_is_excluded ___________
+tests\test_phase4_av5m4b_lifetime.py:300: in test_second_process_with_different_temp_root_is_excluded
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+________________ test_corrupt_lease_does_not_grant_destination ________________
+tests\test_phase4_av5m4b_lifetime.py:364: in test_corrupt_lease_does_not_grant_destination
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2214 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2212, in on_committed_event
+    self._record_event(kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 3026, in _record_event
+    self._save_ledger(ledger)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2789, in _save_ledger
+    self._atomic_local(path, payload)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2861, in _atomic_local
+    raise OSError("operation is no longer live")
+OSError: operation is no longer live
+__________ test_bc2_publication_fence_refuses_every_stale_publisher ___________
+tests\test_phase6_bc2.py:165: in test_bc2_publication_fence_refuses_every_stale_publisher
+    _published(_publish(conn, b))
+               ^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+_ test_bc2_fenced_retry_recovers_from_each_boundary_and_a_corrupt_ledger_refuses _
+tests\test_phase6_bc2.py:303: in <lambda>
+    _operation_refusal(lambda: _publish(trace, new), "invalid_source_data")
+                               ^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+
+During handling of the above exception, another exception occurred:
+tests\test_phase6_bc2.py:303: in test_bc2_fenced_retry_recovers_from_each_boundary_and_a_corrupt_ledger_refuses
+    _operation_refusal(lambda: _publish(trace, new), "invalid_source_data")
+tests\test_phase6_evaluation.py:1223: in _operation_refusal
+    assert exc.code == code
+E   AssertionError: assert 'invalid_request' == 'invalid_source_data'
+E     
+E     - invalid_source_data
+E     + invalid_request
+_ test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work _
+tests\test_phase6_bc2.py:316: in test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work
+    result = _seed_index(idx, f)
+             ^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_bc2.py:111: in _seed_index
+    return idx.publish_media_snapshot(f.item["video_id"], cues=f.cues, media_block=f.block,
+index.py:1911: in publish_media_snapshot
+    raise _media.MediaError("invalid_request", details={"reason": "publication_ticket_required"})
+E   library_media.MediaError: The request is invalid.
+__ test_bc2_clip_build_refuses_instead_of_replacing_a_materialized_snapshot ___
+tests\test_phase6_bc2.py:414: in test_bc2_clip_build_refuses_instead_of_replacing_a_materialized_snapshot
+    _seed_index(idx, g)
+tests\test_phase6_bc2.py:111: in _seed_index
+    return idx.publish_media_snapshot(f.item["video_id"], cues=f.cues, media_block=f.block,
+index.py:1911: in publish_media_snapshot
+    raise _media.MediaError("invalid_request", details={"reason": "publication_ticket_required"})
+E   library_media.MediaError: The request is invalid.
+______ test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement _______
+tests\test_phase6_bc2.py:446: in test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement
+    result = _publish(conn, b)
+             ^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+_ test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact _
+tests\test_phase6_bc2.py:1226: in test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact
+    assert caught.value.code == "invalid_source_data"
+E   AssertionError: assert 'invalid_request' == 'invalid_source_data'
+E     
+E     - invalid_source_data
+E     + invalid_request
+________________ test_phase6_rebuild_and_publication_recovery _________________
+tests\test_phase6_evaluation.py:1253: in test_phase6_rebuild_and_publication_recovery
+    _published(_publish(conn, shorter))
+               ^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+_______________ test_phase6_stale_citation_and_delete_refusals ________________
+tests\test_phase6_evaluation.py:1388: in test_phase6_stale_citation_and_delete_refusals
+    _published(_publish(conn, replacement))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase6_evaluation.py:1229: in _publish
+    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+library_media.py:2180: in publish_transcript
+    raise _request("publication_ticket_required")
+E   library_media.MediaError: The request is invalid.
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase3_acceptance4.py: 1 warning
+tests/library_work_astra/test_phase3_publication.py: 1 warning
+tests/library_work_astra/test_phase3_repairs.py: 4 warnings
+tests/library_work_astra/test_phase6_bd2_acceptance.py: 8 warnings
+tests/library_work_astra/test_phase6_bd_acceptance.py: 4 warnings
+tests/security/test_security_findings.py: 4 warnings
+tests/test_phase0_podcast_repair.py: 4 warnings
+tests/test_phase6_bc2.py: 4 warnings
+tests/test_phase6_bc3f.py: 4 warnings
+tests/test_podcast_background_jobs.py: 16 warnings
+tests/test_podcast_corpus_bridge.py: 38 warnings
+tests/test_podcast_durability.py: 10 warnings
+tests/test_podcast_watch.py: 9 warnings
+tests/test_quiet_notifications.py: 1 warning
+tests/test_source_subscriptions_migration.py: 4 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py: 2 warnings
+tests/test_c03_durability.py: 4 warnings
+tests/test_corpus_contract_v1.py: 32 warnings
+tests/test_podcast_corpus_bridge.py: 4 warnings
+tests/test_taste_scoring.py: 3 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\memory_layer.py:90: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py::test_auto_uoink_poll
+tests/test_auto_uoink_poll.py::test_auto_uoink_does_not_burn_backlog_or_starve_plain_poll
+tests/test_auto_uoink_poll.py::test_taste_signal_cannot_override_consent_only_the_ledger_captures
+tests/test_discovery_route.py::test_discovery_route
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_restarted_job_reuses_a_completed_transcript
+tests/test_podcast_background_jobs.py::test_auto_transcription_publishes_and_toasts_after_corpus_commit
+tests/test_podcast_background_jobs.py::test_auto_publish_failure_preserves_completed_transcript_for_retry
+tests/test_podcast_durability.py::test_all_podcast_state_transitions_survive_close_reopen
+  E:\AI\projects\uoink\checkouts\Yoink-library\whisper_runner.py:84: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+  E:\AI\projects\uoink\checkouts\Yoink-library\server.py:9379: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    pixels = list(small.getdata())
+
+tests/test_workspaces_crud.py::test_crud_lifecycle
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_error_paths
+  E:\AI\projects\uoink\checkouts\Yoink-library\workspaces.py:40: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_mcpb_posix_build.py:16: POSIX build-script execution
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t2184\\outside.mp4' -> 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igc1-0\\t2184\\symlink-media\\video.mp4'
+SKIPPED [1] tests\test_screenshot_extraction_cm10.py:41: ffmpeg not on PATH
+XFAIL tests/security/test_security_findings.py::test_sec_06_fts_query_non_ascii_dropped - SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_all_at6_artifact_bytes_are_archived
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_browser_run_has_retained_receipt_and_database[at6-browser]
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_browser_run_has_retained_receipt_and_database[c21-pill-browser]
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_resync_repairs_missed_refresh
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_fresh_resync_exports_shelf_and_brief[shelf]
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_fresh_resync_exports_shelf_and_brief[brief]
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_scope_cleanup_keeps_local_brief
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d11_server_delivers_deletion_events_while_disabled
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d11_soft_delete_removes_item_source_text
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d12_unowned_temps_are_never_inferred_from_name_or_text[stem-My Interrupted personal draft]
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d12_unowned_temps_are_never_inferred_from_name_or_text[unique-USER OWNED TEMP]
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_purge_rechecks_user_edit_before_unlink
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d14_index_has_recoverable_intent_on_manifest_failure
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d15_bound_volume_not_readopted_after_ledger_loss
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d16_shelf_title_cannot_introduce_markdown_image
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d09_resync_reexports_explicitly_readmitted_scope_item
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d10_brief_source_revision_rechecked_at_replace
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d14_index_intent_matches_exact_published_bytes
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+FAILED tests/library_work_astra/test_phase4_aw4_acceptance.py::test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault
+FAILED tests/library_work_astra/test_phase4_aw4_acceptance.py::test_aw4_failed_atomic_binding_write_preserves_previous_binding
+FAILED tests/library_work_astra/test_phase4_aw4_acceptance.py::test_aw4_temp_cleanup_preserves_same_content_replacement_file
+FAILED tests/library_work_astra/test_phase4_aw5_acceptance.py::test_aw5_destination_lease_io_is_inside_a_cancellable_boundary
+FAILED tests/library_work_astra/test_phase4_aw6_acceptance.py::test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp
+FAILED tests/library_work_astra/test_phase4_aw7_acceptance.py::test_aw7_timed_out_lease_writer_cannot_mutate_destination_after_return
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_baseline_owned_export_and_brief_are_real
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_resync_rebuilds_from_current_sources_without_prior_events
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_bulk_wiring_events_schedule_current_derivatives[source_refresh]
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_bulk_wiring_events_schedule_current_derivatives[apply]
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_bulk_wiring_events_schedule_current_derivatives[undo]
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_scope_narrowing_cleans_previously_exported_items
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_real_brief_mirror_is_removed_when_dependency_deleted
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_missing_manifest_stops_replacement_for_reconciliation
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_unowned_temp_named_like_item_is_preserved
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_timed_out_vault_worker_cannot_publish_after_return
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_manifest_failure_keeps_recovery_intent_and_no_success
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_missing_volume_marker_is_not_adopted_after_prior_sync
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_shelf_links_resolve_to_exported_item_files
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_generated_index_escapes_raw_identity_markup
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_mirror_preserves_user_edit_between_hash_and_replace
+FAILED tests/library_work_astra/test_phase5_acceptance3.py::test_phase5_ba3_final_wire_serialization_is_inside_deadline
+FAILED tests/library_work_astra/test_phase5_ba4_acceptance.py::test_ba4_actual_sdk_serialization_retains_admission_and_deadline
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd01_never_published_stale_snapshot_requires_original_ticket[raw]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd01_never_published_stale_snapshot_requires_original_ticket[index]
+FAILED tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_consent_allowlist_filtering
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_path_traversal_confinement
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_windows_reserved_names_confinement
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_case_and_unicode_collisions
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_user_edit_conflict_preserves_bytes
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_crash_before_replacement_preserves_old_file
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_two_writers_serialized
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_stale_delayed_work_rejected
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_file_size_cap_and_frontmatter_escaping
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_library_md_written_last
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_soft_delete_tombstone
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_hard_purge_removes_owned_files_idempotent
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_restore_replaces_tombstone
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_purge_blocked_user_edit
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_reconnected_destination_validates_marker_and_drains_deletions_first
+FAILED tests/test_library_mirror.py::TestP412CorrectionStoreSeparation::test_no_read_back_into_taxonomy
+FAILED tests/test_phase4_av5m3_isolation.py::test_timeout_kills_worker_and_keeps_independent_user_edit
+FAILED tests/test_phase4_av5m3_isolation.py::test_live_worker_lease_blocks_a_second_mirror
+FAILED tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes
+FAILED tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation
+FAILED tests/test_phase4_av5m4a2_binding.py::test_witness_persistence_failure_is_not_swallowed
+FAILED tests/test_phase4_av5m4a2_binding.py::test_unknown_temp_record_has_no_deletion_authority
+FAILED tests/test_phase4_av5m4a2_binding.py::test_newer_consent_authorizes_destination_change
+FAILED tests/test_phase4_av5m4a3_identity.py::test_finally_cleanup_retains_intent_when_temp_name_changed_owners
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_stalled_dest_lease_write_is_inside_cancellation
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_job_assignment_failure_refuses_before_mutation
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_timed_out_parent_cannot_use_later_resync_session
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_second_process_with_different_temp_root_is_excluded
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_corrupt_lease_does_not_grant_destination
+FAILED tests/test_phase6_bc2.py::test_bc2_publication_fence_refuses_every_stale_publisher
+FAILED tests/test_phase6_bc2.py::test_bc2_fenced_retry_recovers_from_each_boundary_and_a_corrupt_ledger_refuses
+FAILED tests/test_phase6_bc2.py::test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work
+FAILED tests/test_phase6_bc2.py::test_bc2_clip_build_refuses_instead_of_replacing_a_materialized_snapshot
+FAILED tests/test_phase6_bc2.py::test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement
+FAILED tests/test_phase6_bc2.py::test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact
+FAILED tests/test_phase6_evaluation.py::test_phase6_rebuild_and_publication_recovery
+FAILED tests/test_phase6_evaluation.py::test_phase6_stale_citation_and_delete_refusals
+92 failed, 2102 passed, 3 skipped, 1 xfailed, 183 warnings in 550.41s (0:09:10)

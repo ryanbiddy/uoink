@@ -1,0 +1,30 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/library_work_astra/test_phase4_aw10_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw11_start_cancel_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw12_launch_handoff_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw12_thread_identity_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_resync_repairs_missed_refresh",
+      "-p",
+      "_scratch.mirror_order_probe",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igo1-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igo1\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igo1\\tests.log"
+  }
+]
