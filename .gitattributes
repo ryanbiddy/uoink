@@ -53,3 +53,4 @@ docs/library/patches/av5m4b5-grok-rejected-2026-09-08.patch -text
 docs/library/proof/sdk-source-preflight-*/** -text
 docs/library/proof/aw11-*/** -text
 docs/library/patches/av5m4b6-grok-rejected-2026-09-08.patch -text
+docs/library/proof/client-capacity-*/** -text

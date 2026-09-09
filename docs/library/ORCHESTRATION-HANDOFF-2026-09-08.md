@@ -932,3 +932,19 @@ boundaries, requires the complete B6 union and all three unchanged AW-11
 cases, and adds actual Popen-handoff coverage. All 25 AW-11 proof hashes
 match committed blobs. The checkout remains on the accepted A3 production
 baseline; no B-series production change has been integrated.
+
+### 2026-09-08 22:24 PDT - Isolated client capacity observed
+
+Claude Code 2.1.261's native `/usage` refreshed to **70% all-model weekly
+use, 88% Fable weekly use, 0% current-session use; usage credits off**. Its
+session accounting showed zero tokens and $0. No task prompt was submitted;
+the client made its own startup quota-check request, retained as such. The
+receipt and selected noncredential evidence are sealed under
+`proof/client-capacity-2026-09-08/`. This does not establish product acceptance.
+
+The initial normal-profile trust prompt was declined. A fresh client profile
+used only a temporary copy of the still-valid subscription access credential,
+without its refresh credential, and account metadata. The temporary credential
+was deleted after exit. The real client run must also use a separate profile
+and freeze its own launch/model metadata. B7 remains active; the archived copy
+and native library prompts still wait for the accepted implementation.

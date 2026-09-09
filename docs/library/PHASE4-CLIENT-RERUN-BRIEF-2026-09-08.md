@@ -213,3 +213,30 @@ preservation of the input configuration, separate Recall activation, spaced
 argument paths, and refusal of unexpected servers or incomplete metadata.
 The five sealed artifacts are in `client-config-check/`. No actual client,
 archived database or acceptance gate was exercised by those checks.
+
+## Disposable client profile and capacity preflight
+
+The 22:21 PDT native client preflight used a separate CLAUDE_CONFIG_DIR and
+no tools or MCP servers. After refresh, `/usage` showed 70% of the all-model
+week used, 88% of the Fable week used, 0% current-session use and usage credits
+off. Session accounting was zero tokens and $0. No task prompt was submitted.
+The client did issue its own startup `/v1/messages` quota check, which is
+recorded separately. This is capacity evidence, not product acceptance; recheck
+the actual authenticated mode and available allowance at execution.
+
+The initial normal-profile TUI trust dialog was declined. Its replacement
+used a fresh profile under AgentControlRoom local data with only the current
+subscription access credential and account metadata. No refresh credential
+was copied; the access credential had nearly eight hours remaining and was
+removed after exit. [Anthropic's authentication documentation](https://code.claude.com/docs/en/authentication)
+describes CLAUDE_CONFIG_DIR's separate credential location on Windows. Raw
+credentials must never enter proof archives, transcripts or Git.
+
+Use the same profile isolation for the actual receipt. Preserve the generated
+launch.json and create a separately frozen launch-isolated.json with the
+explicit profile environment and actual client arguments. The planned model
+is the supported `haiku` alias; record its resolved model in the real session.
+That receipt establishes only the observed client/model combination. Choose
+the model before any task prompt, retain the explicit configuration and its
+hash, and do not spend usage credits or switch to paid API on any refusal.
+No model task or archived-copy observation occurred during this preflight.

@@ -1,0 +1,36 @@
+[?25l[8;1Hyou: /usage[K
+Settings  Status   Config   Usage   Stats[K
+Session[K
+Total cost:            $0.0000
+Total duration (API):  0s
+Total duration (wall): 22s
+Total code changes:    0 lines added, 0 lines removed
+Usage:                 0 input, 0 output, 0 cache read, 0 cache write
+Current session
+0% 0% used
+Resets 3:20am (America/Los_Angeles)
+Current week (all models)
+69% 69% used
+Resets Sep 12, 3am (America/Los_Angeles)
++50% weekly limits promo through Sep 13 · clau.de/cc-50-promo
+What's contributing to your limits usage?
+Approximate, based on local sessions on this machine — does not include other[?25h
+devices or claude.ai
+Scanning local sessions…
+Refreshing…[?25l
+Esc to cancel[5;29H[?25h[?25l[19;1HRefreshing…[K
+Esc to cancel[K
+[K
+[K
+[K
+[K[5;29H[?25h[?25l[14;1HResets 3:19am (America/Los_Angeles)[K
+Current week (all models)[K
+70% 70% used[K
+Resets Sep 12, 2:59am (America/Los_Angeles)[K
++50% weekly limits promo through Sep 13 · clau.de/cc-50-promo[K
+Current week (Fable)[K
+88% 88% used[K
+Resets Sep 12, 2:59am (America/Los_Angeles)
+Usage credits
+Usage credits are off · /usage-credits to turn them on
+Esc to cancel[5;29H[?25h

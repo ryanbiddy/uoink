@@ -1,0 +1,53 @@
+{
+  "observation_utc": "2026-09-09T05:21:15.895Z",
+  "status": "read-only native client capacity preflight; no product acceptance",
+  "client": "Claude Code 2.1.261",
+  "surface": "interactive terminal, screen reader mode",
+  "session_id": "ff4f488f-4013-4ea8-a5a2-4e7854b261e6",
+  "auth": {
+    "loggedIn": true,
+    "authMethod": "claude.ai",
+    "apiProvider": "firstParty",
+    "subscriptionType": "max"
+  },
+  "usage_after_refresh": {
+    "current_session_used_percent": 0,
+    "week_all_models_used_percent": 70,
+    "week_fable_used_percent": 88,
+    "usage_credits_enabled": false,
+    "current_session_reset_display": "3:19am (America/Los_Angeles)",
+    "week_reset_display": "Sep 12, 2:59am (America/Los_Angeles)"
+  },
+  "initial_then_refreshed": "all-model week changed from 69 to 70 percent; Fable row appeared after refresh",
+  "client_session_accounting": {
+    "cost_usd": 0,
+    "api_duration_s": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0
+  },
+  "commands": [
+    "/usage",
+    "/exit"
+  ],
+  "task_prompt_submitted": false,
+  "client_startup_request": "/v1/messages source=quota_check; separate from user task generation",
+  "restrictions": {
+    "tools": [],
+    "mcp_servers": {},
+    "restricted": true,
+    "strict_mcp_config": true,
+    "no_chrome": true,
+    "auto_memory": false
+  },
+  "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\aw-client-capacity-2026-09-08-2222",
+  "temporary_access_credential_removed": true,
+  "refresh_credential_copied": false,
+  "original_attempt": "normal-profile trust dialog declined; no task prompt sent",
+  "raw_debug_internal": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\client-capacity-preflight\\claude-debug-isolated.log",
+    "sha256": "4a2245cd5814c3368a69ca467507b222af995e41b36696098f5a5ff71fbb41c1"
+  },
+  "excerpt_note": "Auth and debug files are explicitly selected excerpts; original private files remain in scratch."
+}

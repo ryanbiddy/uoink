@@ -1,0 +1,36 @@
+{
+  "files": {
+    "docs/library/proof/client-capacity-2026-09-08/auth-mode-excerpt.json": {
+      "bytes": 118,
+      "sha256": "226f4e1ea284f76ae16c83cda88edc9fe9e49d990cf681c177f960d3a12b1ca3"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/BRIEF.md": {
+      "bytes": 1605,
+      "sha256": "e7b1801ac2b4f17af696021c722a03bdcd7a6ee8b28afeb4c72a4fd2be18c888"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/mcp.json": {
+      "bytes": 18,
+      "sha256": "e93fc8db2b1bd77107fe6c758bca9545fa864cf7cce8ab93a7b2b93a1d566a7b"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/quota-debug-excerpt.txt": {
+      "bytes": 303,
+      "sha256": "eb4b31ab1794c71767039656dc6f0670d1ea6c242cf41c2c774ce8de9931cd4d"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/receipt.json": {
+      "bytes": 2056,
+      "sha256": "bc35bb05b14e9bd15dccffe724b2bee9287e562869cd28be0a12f7ea27b7f505"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/settings.json": {
+      "bytes": 140,
+      "sha256": "fe949983d23a16f7767d5225b1cbc9789f067f9df9301abe5b6d774abb9b0c0f"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/usage-screen.raw.txt": {
+      "bytes": 1222,
+      "sha256": "f0c1586aed9ad45e8d077a0c43893195180737037c4b453aecd4041392fc0e3e"
+    },
+    "docs/library/proof/client-capacity-2026-09-08/version.txt": {
+      "bytes": 23,
+      "sha256": "7955ad130b9f31ac4dfb333164a5ea2894b61efba918de1d6b99592dbe98f76a"
+    }
+  }
+}
