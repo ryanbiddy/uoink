@@ -11094,7 +11094,12 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         render_mode = (body.get("render_mode")
                          or page_extractor.RENDER_MODE_JS).strip().lower()
-        include_screenshot = bool(body.get("include_screenshot", True))
+        include_screenshot = body.get("include_screenshot", True)
+        if not isinstance(include_screenshot, bool):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "include_screenshot must be a boolean",
+            })
         try:
             follow_depth = int(body.get("follow_links_depth", 0))
         except (TypeError, ValueError):
