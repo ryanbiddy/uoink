@@ -716,39 +716,45 @@ def _register_phase4_stdio() -> None:
     def activity_result(arguments):
         args = arguments if arguments is not None else {}
         start_time = time.monotonic()
-        try:
-            import library_analysis
-            envelope = library_analysis.get_library_activity(args)
-            if envelope.get("ok") is not True:
-                text = library_resources.render_tool_text(envelope)
-                return mcp_types.ServerResult(mcp_types.CallToolResult(
-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+        import library_analysis
 
-            # Deadline check before rendering
-            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
-                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
-                text = library_resources.render_tool_text(envelope)
-                return mcp_types.ServerResult(mcp_types.CallToolResult(
-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
-
+        def _deadline_result():
+            envelope = library_analysis.error_envelope(
+                "deadline_exceeded", "Service deadline exceeded during serialization")
             text = library_resources.render_tool_text(envelope)
-
-            # Deadline check after rendering (charged to the same request)
-            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
-                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
-                text = library_resources.render_tool_text(envelope)
-                return mcp_types.ServerResult(mcp_types.CallToolResult(
-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
-
-            is_error = envelope.get("ok") is not True
-            payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
-            if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
-                envelope = library_analysis.error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
-                text, is_error = library_resources.render_tool_text(envelope), True
             return mcp_types.ServerResult(mcp_types.CallToolResult(
-                content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+                content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+
+        try:
+            with library_analysis.adapter_admission():
+                envelope = library_analysis.get_library_activity(args)
+                if envelope.get("ok") is not True:
+                    text = library_resources.render_tool_text(envelope)
+                    if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+                        return _deadline_result()
+                    return mcp_types.ServerResult(mcp_types.CallToolResult(
+                        content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+
+                if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+                    return _deadline_result()
+
+                text = library_resources.render_tool_text(envelope)
+                is_error = envelope.get("ok") is not True
+                payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
+                over_budget = library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]
+                # Charge final protocol serialization to the same admission/deadline.
+                if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+                    return _deadline_result()
+                if over_budget:
+                    envelope = library_analysis.error_envelope(
+                        "resource_too_large", "Requested document exceeds bounded response limits")
+                    text, is_error = library_resources.render_tool_text(envelope), True
+                return mcp_types.ServerResult(mcp_types.CallToolResult(
+                    content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
         except ResourceError as exc:
-            text, is_error = library_resources.render_tool_text(exc.envelope()), True
+            envelope = library_analysis.error_envelope(
+                exc.code, exc.message, details=exc.details or None)
+            text, is_error = library_resources.render_tool_text(envelope), True
             return mcp_types.ServerResult(mcp_types.CallToolResult(
                 content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
 

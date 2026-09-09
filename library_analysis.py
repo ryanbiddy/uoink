@@ -17,7 +17,6 @@ import sqlite3
 import sys
 import threading
 import time
-import unicodedata
 import uuid
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
@@ -101,6 +100,7 @@ _rate_limiter = _RollingRateLimiter(RATE_LIMIT_ADMISSIONS, RATE_LIMIT_WINDOW_SEC
 _active_reads_sem = threading.Semaphore(MAX_ACTIVE_READS)
 _READER_NONCE = str(uuid.uuid4())
 _CONN_NONCES: List[Tuple[sqlite3.Connection, str]] = []
+_stdio_holds_admission = threading.local()
 
 
 def _get_connection_nonce(conn: sqlite3.Connection) -> str:
@@ -126,6 +126,7 @@ def reset_rate_limiter() -> None:
     """Reset the rolling rate limiter (for test isolation)."""
     with _rate_limiter._lock:
         _rate_limiter._calls.clear()
+    _stdio_holds_admission.depth = 0
     guard = getattr(library_resources, "_PROCESS_GUARD", None)
     if guard is not None:
         with guard._lock:
@@ -195,7 +196,8 @@ def error_envelope(
 
 _ISO_Z_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
 _ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$")
-_FRACTIONAL_ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{3}))?Z$")
+# Whole-string grammar: `$` would still admit a trailing newline before storage.
+_FRACTIONAL_ISO_RE = re.compile(r"\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{3}))?Z\Z")
 _DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -316,9 +318,9 @@ def parse_interval(interval: Any, as_of_dt: datetime) -> Tuple[Optional[datetime
     if not isinstance(s_raw, str) or not isinstance(e_raw, str):
         return None, None, error_envelope("validation_error", "interval bounds must be strings")
 
-    # Strict UTC ISO regex with fractional bounds
-    match_s = _FRACTIONAL_ISO_RE.match(s_raw)
-    match_e = _FRACTIONAL_ISO_RE.match(e_raw)
+    # Strict UTC ISO regex with fractional bounds (whole string, including no trailing newline)
+    match_s = _FRACTIONAL_ISO_RE.fullmatch(s_raw)
+    match_e = _FRACTIONAL_ISO_RE.fullmatch(e_raw)
     if not match_s or not match_e:
         return None, None, error_envelope("validation_error", "interval bounds must be valid ISO 8601 UTC with optional 3-digit millisecond fraction")
 
@@ -550,8 +552,7 @@ def _creator_hint_key(item: dict) -> Tuple[str, str, str]:
 
 def _display_hint(value: str) -> Tuple[str, bool]:
     raw = value.strip() if value and str(value).strip() else "unknown"
-    shown = _truncate_label(raw)
-    return shown, shown != raw
+    return _bound_label(raw)
 
 
 def _get_connection() -> Tuple[Optional[sqlite3.Connection], Any, Optional[dict], bool]:
@@ -1007,6 +1008,45 @@ def _truncate_label(label: str) -> str:
     return label[: MAX_LABEL_CODEPOINTS - 3] + "..."
 
 
+def _bound_label(label: Any) -> Tuple[str, bool]:
+    """Cap a display label at 120 code points and report whether it was truncated."""
+    raw = label if isinstance(label, str) else ("" if label is None else str(label))
+    shown = _truncate_label(raw)
+    return shown, shown != raw
+
+
+def _adapter_admission_depth() -> int:
+    return int(getattr(_stdio_holds_admission, "depth", 0) or 0)
+
+
+@contextmanager
+def adapter_admission():
+    """Hold the shared process guard through adapter serialization (BA-11).
+
+    Nested entry increments the per-thread depth so an inner scope cannot
+    release or clear an outer active admission.
+    """
+    guard = library_resources.process_guard()
+    depth = _adapter_admission_depth()
+    _stdio_holds_admission.depth = depth + 1
+    owns = depth == 0
+    try:
+        if owns:
+            guard.admit()
+    except Exception:
+        _stdio_holds_admission.depth = depth
+        raise
+    try:
+        yield
+    finally:
+        _stdio_holds_admission.depth = depth
+        if owns:
+            try:
+                guard.release()
+            except Exception:
+                pass
+
+
 def get_library_activity(
     args: dict,
     *,
@@ -1015,18 +1055,21 @@ def get_library_activity(
 ) -> dict:
     """Entry point for get_library_activity read tool."""
     guard = library_resources.process_guard()
-    try:
-        guard.admit()
-    except library_resources.ResourceError as e:
-        return error_envelope(e.code, e.message, details=e.details, retryable=True)
-    except Exception as e:
-        return error_envelope("rate_limited", str(e), retryable=True)
+    owns_admission = _adapter_admission_depth() == 0
+    if owns_admission:
+        try:
+            guard.admit()
+        except library_resources.ResourceError as e:
+            return error_envelope(e.code, e.message, details=e.details, retryable=True)
+        except Exception as e:
+            return error_envelope("rate_limited", str(e), retryable=True)
 
     start_time = time.monotonic()
     try:
         return _execute_activity(args, db=db, clock=clock, start_time=start_time)
     finally:
-        guard.release()
+        if owns_admission:
+            guard.release()
 
 
 def _calculate_transport_bytes(resp_dict: dict) -> int:
@@ -1161,38 +1204,43 @@ def _execute_activity(
 
     try:
         if conn.in_transaction:
-            return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction", retryable=False)
+            return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction")
     except sqlite3.Error as exc:
-        return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
+        return error_envelope("storage_unavailable", f"Database error: {exc}")
 
     deadline = start_time + SERVICE_DEADLINE_SEC
     rem = deadline - time.monotonic()
     if rem <= 0:
-        return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition", retryable=False)
+        return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition")
 
     lock_acquired = False
     if lock is not None:
         if hasattr(lock, "acquire"):
             lock_acquired = lock.acquire(timeout=rem)
             if not lock_acquired:
-                return error_envelope("deadline_exceeded", "Service deadline exceeded while acquiring lock", retryable=False)
+                return error_envelope("deadline_exceeded", "Service deadline exceeded while acquiring lock")
         else:
             lock.__enter__()
             lock_acquired = True
 
     boundary = _ReadBoundary(conn, snapshot_owner)
+    busy_conn = conn
+    prev_busy_timeout = None
     try:
         try:
             if conn.in_transaction:
-                return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction", retryable=False)
+                return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction")
         except sqlite3.Error as exc:
-            return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
+            return error_envelope("storage_unavailable", f"Database error: {exc}")
 
         rem = deadline - time.monotonic()
         if rem <= 0:
-            return error_envelope("deadline_exceeded", "Service deadline exceeded before SQLite snapshot", retryable=False)
+            return error_envelope("deadline_exceeded", "Service deadline exceeded before SQLite snapshot")
         busy_ms = max(1, min(int(rem * 1000), int(rem * 100))) if (sys.platform == "win32" and rem < 0.2) else max(1, int(rem * 1000))
         try:
+            busy_row = conn.execute("PRAGMA busy_timeout").fetchone()
+            if busy_row is not None:
+                prev_busy_timeout = busy_row[0]
             conn.execute(f"PRAGMA busy_timeout = {busy_ms}")
             def _progress():
                 if time.monotonic() >= deadline:
@@ -1209,12 +1257,12 @@ def _execute_activity(
             conn = boundary.enter()
         except sqlite3.OperationalError as exc:
             if "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
-                return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}", retryable=False)
-            return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}", retryable=False)
+                return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}")
+            return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}")
         except sqlite3.Error as exc:
-            return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
+            return error_envelope("storage_unavailable", f"Database error: {exc}")
         except RuntimeError as exc:
-            return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}", retryable=False)
+            return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}")
 
         tbl_err = _verify_tables(conn)
         if tbl_err is not None:
@@ -2280,12 +2328,15 @@ def _execute_activity(
                     },
                 }
 
+            shown_name, name_truncated = _bound_label(s_name)
+            shown_active, _ = _bound_label(active_name)
             shelves_rows.append({
                 "shelf_id": s_id,
-                "name": s_name,
-                "label": s_name,
-                "active_name": active_name,
-                "active_label": active_name,
+                "name": shown_name,
+                "label": shown_name,
+                "label_truncated": name_truncated,
+                "active_name": shown_active,
+                "active_label": shown_active,
                 "current_size": _count_metric(f"shelf_activity.shelves.{s_id}.current_size", c_size, "items", "scope_shelf_current"),
                 "start_size": _count_metric(f"shelf_activity.shelves.{s_id}.start_size", s_start, "items", "scope_shelf_baseline") if s_start is not None else None,
                 "end_size": _count_metric(f"shelf_activity.shelves.{s_id}.end_size", s_end, "items", "scope_shelf_baseline") if s_end is not None else None,
@@ -2450,12 +2501,14 @@ def _execute_activity(
                     src_cov_rec["exclusions"] = {"invalid_observation_timestamp": src_invalid}
                 source_coverage_records[src_cov_id] = src_cov_rec
 
+                shown_source, source_name_truncated = _bound_label(d_name)
                 active_source_rows.append({
                     "source_id": s_id,
                     "identity_kind": "subscription",
                     "kind": kind,
                     "canonical_url": url,
-                    "display_name": _truncate_label(d_name),
+                    "display_name": shown_source,
+                    "display_name_truncated": source_name_truncated,
                     "captures_in_interval": _count_metric(f"sources.{s_id}.captures", captures_in_int, "saved_items", "scope_source_captures"),
                     "new_observations": (
                         _count_metric(
@@ -3277,19 +3330,39 @@ def _execute_activity(
             if detail == "evidence":
                 detail_response["metric_id"] = metric_id
 
-            # Refuse unfit identity (> 512 bytes or control characters) without truncation
-            for r in detail_rows:
-                ids_to_check = [r.get("row_id"), r.get("source_key")]
-                for id_val in ids_to_check:
-                    if isinstance(id_val, str):
-                        raw_id = id_val.encode("utf-8")
-                        if len(raw_id) > 512 or any(unicodedata.category(ch) == "Cc" for ch in id_val):
-                            return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
+            def _refresh_detail_page() -> None:
+                page_next = None
+                if offset + len(detail_rows) < detail_total:
+                    page_next = {
+                        "interval": canonical_interval,
+                        "date_basis": date_basis,
+                        "detail": detail,
+                        "expected_revision": report_revision,
+                        "offset": offset + len(detail_rows),
+                        "limit": limit,
+                    }
+                    if detail == "evidence":
+                        page_next["metric_id"] = metric_id
+                omitted = max(0, detail_total - (offset + len(detail_rows)))
+                detail_response["rows"] = detail_rows
+                detail_response["returned_rows"] = len(detail_rows)
+                detail_response["omitted_rows"] = omitted
+                detail_response["next"] = page_next
+                detail_response["pagination"][detail] = {
+                    "total_rows": detail_total,
+                    "returned_rows": len(detail_rows),
+                    "omitted_rows": omitted,
+                    "next": page_next,
+                }
 
-            # Bound serialized response
-            resp_bytes = _calculate_transport_bytes(detail_response)
-            if resp_bytes > MAX_RESPONSE_BYTES:
-                return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
+            # Whole-row shedding: drop complete detail rows until the packet
+            # fits. A single identity that still cannot fit mandatory output
+            # is resource_too_large; metric IDs remain the only 512-byte limit.
+            while _calculate_transport_bytes(detail_response) > MAX_RESPONSE_BYTES:
+                if len(detail_rows) <= 1:
+                    return error_envelope("resource_too_large", "Requested document exceeds bounded response limits")
+                detail_rows.pop()
+                _refresh_detail_page()
 
             # Finish the snapshot, then verify generation before returning
             stale_err = _finish_snapshot_and_revalidate()
@@ -3443,11 +3516,16 @@ def _execute_activity(
 
     except sqlite3.OperationalError as exc:
         if "interrupted" in str(exc).lower() or "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
-            return error_envelope("deadline_exceeded", f"Database query exceeded deadline: {exc}", retryable=False)
-        return error_envelope("storage_unavailable", f"Database operational error: {exc}", retryable=False)
+            return error_envelope("deadline_exceeded", f"Database query exceeded deadline: {exc}")
+        return error_envelope("storage_unavailable", f"Database operational error: {exc}")
     except sqlite3.Error as exc:
-        return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
+        return error_envelope("storage_unavailable", f"Database error: {exc}")
     finally:
+        if prev_busy_timeout is not None:
+            try:
+                busy_conn.execute(f"PRAGMA busy_timeout = {int(prev_busy_timeout)}")
+            except Exception:
+                pass
         try:
             conn.set_progress_handler(None, 0)
         except Exception:
