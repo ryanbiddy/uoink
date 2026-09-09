@@ -128,3 +128,15 @@ service recheck: **one passed**, 0.85 seconds (checkout scratch
 `aw-prompt-prep-synthetic`). Apply remained false, assignments unchanged, and
 service reattachment preserved the semantic state. No archived copy, actual
 client/model, native prompt request or phase acceptance is credited by that test.
+
+## Client timeout preparation
+
+Set `MCP_TIMEOUT=10000` and the explicit fixture server's `timeout` to 10000
+milliseconds in the separately frozen client launch. The installed 2.1.261
+client's help supports restricted mode, strict MCP configuration and explicit
+settings. [Anthropic's MCP documentation](https://code.claude.com/docs/en/mcp)
+documents both timeout controls and identifies the per-server tool timeout
+as a wall-clock limit. This is a planned configuration, not a measured bound.
+Retain actual request/connection timestamps, failure and any explicit reconnect;
+the 15-second acceptance gate still requires an observation. Recheck subscription
+authentication immediately before launch, with API-key and bare modes absent.

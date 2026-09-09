@@ -67,6 +67,9 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
+Latest full tree, `669725f`: **2,102 passed, 30 failed, three skipped, one existing xfail**,
+529.82 seconds. S21 and the still-open AW-5/AW-7 files were excluded. See the final log entry
+for the failure classification; this is not an unqualified passing tree.
 
 ## Queue (in order; each item names its brief)
 
@@ -692,3 +695,20 @@ as required, plus only the still-open AW-5 and AW-7 reproduction files excluded
 under their B4 repair ruling. Other frozen and stale-document failures remain
 included. The checkout will remain fixed during that run. This does not credit
 the excluded cases or replace any earlier failed or aborted invocation.
+
+### 2026-09-08 - Phase 6 closure full tree completed
+
+Full tree on fixed `669725f`: **2,102 passed, 30 failed, three skipped,
+one existing xfail**, 529.82 seconds. Checkout scratch `full-bd2-final`
+contains the expanded command, log and XML. The thirty failures are four
+superseded AS-7 evidence assertions, nine frozen Phase 4 setup/interceptor
+cases, eleven omitted-ticket Phase 6 calls, the Phase 5 unary/clock case,
+the replaced BA-4 SDK route and four stale measurement-document cases.
+No additional failure appeared in the included tree. S21 and only the
+still-open AW-5/AW-7 reproduction files were excluded. Those two files remain
+B4's work, not passes or Ryan blockers.
+
+Read-only client preparation reconfirmed Claude Code's claude.ai Max
+authentication with no API key. Its documented startup and per-server tool
+timeouts permit a declared 10-second limit for the later broken-transport
+observation. No client/model or archived-copy preparation has run.
