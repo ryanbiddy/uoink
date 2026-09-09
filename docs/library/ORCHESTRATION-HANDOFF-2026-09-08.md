@@ -53,7 +53,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 18:18 PDT; implementation/review HEAD `3d2fa9f`; not pushed)
+## State at handoff (updated 2026-09-08 18:53 PDT; implementation/review HEAD `d792875`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -61,7 +61,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m3 (`270e569`) is intermediate work. AV-5m4a and AV-5m4b rejected; AW-5 has two failed exclusion/boundary cases and one passing real-parent-loss check | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a2 (grok binding/temp/staging retry) and AV-5m4b2 (grok lifecycle/exclusion retry), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g rejected; AZ-5h transport repair (grok), AZ-5g2 measured refresh (grok), final BA-4 |
-| 6 | BC-3d (`897f0d2`) integrated: both roots 158 passed / 11 omitted-ticket failures; all three BD-2 cases pass. New BD-3 provenance case fails | Consumed capture binding omits provenance and other plan inputs. Phase 6 remains unaccepted; BD-27 observed | BC-3e (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
+| 6 | BC-3e (`d792875`) integrated: both roots 167 passed / 11 omitted-ticket failures; BD-2, BD-3 and eight new implementation tests pass | BD-4 reproduces a changed caption overwritten at publisher entry. Phase 6 remains unaccepted; BD-27 observed | BC-3f (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -104,8 +104,9 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
-   BC-3d integrated at `897f0d2`; dispatch BC-3e (grok) from
-   `PHASE6-BC3E-BRIEF-2026-09-08.md`, then verify/integrate and finish BD-2 (codex). Preserve both
+   BC-3d integrated at `897f0d2`; BC-3e integrated at `d792875`.
+   Dispatch BC-3f (grok) from `PHASE6-BC3F-BRIEF-2026-09-08.md`,
+   then verify/integrate and finish BD-2 (codex). Preserve both
    rejected diffs and the quota failure.
    BD-27 normal-Comet observation is recorded as satisfied;
    the speaker gate remains Ryan's.
@@ -367,7 +368,7 @@ a surviving old parent thread, and temp-root-dependent exclusion. AV-5m4a and
 AV-5m4b reserve separate repair regions; integrate both with three-way apply
 and review their overlap. None of these implementation gaps is a Ryan blocker.
 
-### 2026-09-08 18:18 PDT — AZ-5d2 verified and integrated
+### 2026-09-08 18:18 PDT â€” AZ-5d2 verified and integrated
 
 AZ-5d2 Grok `7afd1cb4` independently produced **470 passed, five failed**
 in both roots (123.01 s worker, 109.21 s checkout). Logs/XML/commands:
@@ -388,7 +389,7 @@ partial diff is under independent verification; it is not accepted. The
 draft still directly writes a new binding, swallows witness failures and
 fallbacks from identity-checked unlink on TypeError. AV-5m4b remains active.
 
-### 2026-09-08 18:20 PDT — BC-3d integrated; two bounded repair continuations
+### 2026-09-08 18:20 PDT â€” BC-3d integrated; two bounded repair continuations
 
 BC-3d integrated at `897f0d2` after clean three-way apply and independent
 **158 passed, 11 failed** in each root (79.87 s worker, 72.70 s checkout).
@@ -407,7 +408,7 @@ is integrated. AV-5m4a2 has a bounded Grok repair brief; AV-5m4b retains
 its separate lifetime/exclusion scope. AZ-5g Gemini was dispatched from
 `14f9e1b`; source-only client preparation is still unexecuted.
 
-### 2026-09-08 18:26 PDT — final SDK serialization gap; active runs
+### 2026-09-08 18:26 PDT â€” final SDK serialization gap; active runs
 
 Preliminary BA-4 added an independent actual SDK stdio probe on the current
 AZ-5d2 implementation. It injects elapsed time at final JSON-RPC serialization
@@ -424,7 +425,7 @@ BC-3e Grok `21cb8de9` and AV-5m4a2 Grok `53f50b6f` (base `d9ccba5`),
 AV-5m4b Grok `5c22dbae` (base `98d8b35`). The first three started at
 18:16/18:20/18:20 PDT; AV-5m4b remains on its original lifetime scope.
 
-### 2026-09-08 18:31 PDT — AV-5m4b rejected; AW-5 reproduced
+### 2026-09-08 18:31 PDT â€” AV-5m4b rejected; AW-5 reproduced
 
 AV-5m4b Grok `5c22dbae` finished. Independent full union: **214 passed,
 14 failed**, 65.52 s (`_scratch/av5m4b-wi`). Twelve are the eight retained
@@ -445,7 +446,7 @@ proposed implementation tests remain archived; only implementation-specific
 path assertions in those unintegrated tests may be adapted with explanation.
 All committed acceptance tests remain frozen.
 
-### 2026-09-08 18:42 PDT — AZ-5g retained as incomplete; transport repair next
+### 2026-09-08 18:42 PDT â€” AZ-5g retained as incomplete; transport repair next
 
 AZ-5g Gemini `5e9baea5` ended with Control Room status completed but no
 required report. Independent full union produced **474 passed, one failed**,
@@ -469,3 +470,24 @@ complete timed/text-only synthetic resource responses: two passes, 0.98 s
 (`_scratch/aw-expected-unit-fixed`). Two earlier scratch-verifier setup
 errors are retained, with their repair brief. No production/helper or
 committed test changed, and no measured copy, client or model was run.
+
+### 2026-09-08 18:53 PDT - BC-3e integrated; publisher-entry gap retained
+
+BC-3e Grok `21cb8de9` integrated at `d792875` after clean three-way apply.
+Independent verification: **167 passed, eleven failed** in each root,
+142.25 seconds worker and 138.13 seconds checkout. Commands, logs and XML:
+worker scratch `bc3e-wi`, checkout scratch `bc3e-ci`. All eight new tests and
+BD-3 pass; the eleven omitted-ticket failures remain unchanged.
+
+New BD-4 fails when a pending caption correction arrives inside the call to
+the Index publisher, after the owner's final standalone check. The first
+exact-byte probe failed in 7.22 seconds. Before freezing the new test, an
+additional decoded-caption assertion made the content loss explicit; it
+failed in 6.37 seconds. Both failures and the scratch observability-repair
+brief remain retained. `PHASE6-BD4-2026-09-08.md` and the BC-3f brief govern
+the next repair. No Phase 6 acceptance is claimed.
+
+AZ-5h Grok `f62e5609` started from `e0d8bef` at 18:42 PDT. AV-5m4a2
+`53f50b6f` finished; AV-5m4b2 `3ddbb5ef` continues its separate repair scope.
+Five old Windows-1252 dash bytes in this handoff were converted to UTF-8
+without changing their text so subsequent edits can read the document.
