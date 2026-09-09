@@ -1,0 +1,18 @@
+[
+  "build.ps1",
+  "installer/uoink.iss",
+  "migrate_install.py",
+  "server.py",
+  "suite_service.py",
+  "uoink_dashboard.py",
+  "uoink_install_isolation.py",
+  "uoink_mcp.py",
+  "uoink_splash.py",
+  "tests/test_install_isolation.py",
+  "tests/test_install_isolation_repair.py",
+  "tests/test_install_isolation_integrator_review.py",
+  "tests/test_inno_final_boundary.py",
+  "docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md",
+  "docs/library/RYAN-INSTALL-ISOLATION-REPAIR-WORKER-2026-09-09.md",
+  "docs/library/RYAN-INNO-FINAL-BOUNDARY-WORKER-2026-09-09.md"
+]

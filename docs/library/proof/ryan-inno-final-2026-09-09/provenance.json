@@ -1,0 +1,109 @@
+{
+  "checkout_parent": "5162fcba264acce72bf24d0f930cea6c1919974a",
+  "worker_parent": "b6119e5f4698320a73203c0f1f276d5417b809b0",
+  "three_way_merge": "clean; server.py and uoink_mcp.py retain e86bc16 read-opening source",
+  "sources": {
+    "build.ps1": {
+      "sha256": "2cee14befadcc777a1ac62404c501b78e19fe7e5ef2cee16a2f76bbe76640647",
+      "lf_sha256": "d9c7835f2146974237810da2a1008bdaee9db8f578bb08ddb2b49f617375e188",
+      "worker_lf_sha256": "d9c7835f2146974237810da2a1008bdaee9db8f578bb08ddb2b49f617375e188",
+      "bytes": 42678
+    },
+    "installer/uoink.iss": {
+      "sha256": "3305f362d5b4bba21096562bcd883b166117f19e36697cb9bfba414f37be666b",
+      "lf_sha256": "ad34724e7970248328241b408ea4a8f79982d95c618a765aa7c6fc4c51f29ee7",
+      "worker_lf_sha256": "ad34724e7970248328241b408ea4a8f79982d95c618a765aa7c6fc4c51f29ee7",
+      "bytes": 70270
+    },
+    "migrate_install.py": {
+      "sha256": "8288f4b2bea3abf0f6c767f034994efbe6613434a1211353bd6c6a08e7877929",
+      "lf_sha256": "9838e0a7c7318f72f7cec7a3db591414f1993a4a50a810cd37320da9bdbaf4d1",
+      "worker_lf_sha256": "9838e0a7c7318f72f7cec7a3db591414f1993a4a50a810cd37320da9bdbaf4d1",
+      "bytes": 23703
+    },
+    "server.py": {
+      "sha256": "b5ef486b6354f0bcd9ad6ae961909dd5a8dbc82aa15147348601dfb52bf7ca66",
+      "lf_sha256": "a48b0f67eea57f5290c2c304979daaaf7f93f99b008fca3f63ea2c439178c7e1",
+      "worker_lf_sha256": "48df0f1ee36a7e606e161721d1c8e059248e5b09b2f59b20cee839bb51c2f5e9",
+      "bytes": 808627
+    },
+    "suite_service.py": {
+      "sha256": "d0207b9224be5eeae80e0a4f7806960f7868a2ce1d1c8a681c2fea3cfee5a99a",
+      "lf_sha256": "2a3a671edae348f73adbab59f60bda3ef2655c09634316fd1703b7848bd998b3",
+      "worker_lf_sha256": "2a3a671edae348f73adbab59f60bda3ef2655c09634316fd1703b7848bd998b3",
+      "bytes": 7737
+    },
+    "uoink_dashboard.py": {
+      "sha256": "da99fa6b778bf5653bc403d699af7585125086a9590c693a5fafdb3f0104437c",
+      "lf_sha256": "8b0734d8bd662e907252aa29b75f1dbef807a1602a2e607e654f4b20f89c5256",
+      "worker_lf_sha256": "8b0734d8bd662e907252aa29b75f1dbef807a1602a2e607e654f4b20f89c5256",
+      "bytes": 5838
+    },
+    "uoink_install_isolation.py": {
+      "sha256": "1b9337040b2ea954b0e2fb8ff6db4554db3dd313ffc808f7362cbc50ebaeb9a3",
+      "lf_sha256": "e7b2651e9e792c26f981b07a58a207d37bb1b026c4dc978eb57cb489fcbe77a9",
+      "worker_lf_sha256": "e7b2651e9e792c26f981b07a58a207d37bb1b026c4dc978eb57cb489fcbe77a9",
+      "bytes": 48563
+    },
+    "uoink_mcp.py": {
+      "sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+      "lf_sha256": "f7df3e98038a5eb325cd102188214f388cec52b1c605d5ef51e21e87bd6cf9ea",
+      "worker_lf_sha256": "652db7b28fc29a3d7202c81f5f37e3aa4237218b73cfd697e6ff1f067201ca62",
+      "bytes": 53340
+    },
+    "uoink_splash.py": {
+      "sha256": "104047b1cd16f4c3c8c3852923346554b829b65ded98f1df3b3c31a38ec9ec8f",
+      "lf_sha256": "5d955f6125e16663f2ad7f692edfa506a3ef202145f2d9508a8780d63b931f72",
+      "worker_lf_sha256": "5d955f6125e16663f2ad7f692edfa506a3ef202145f2d9508a8780d63b931f72",
+      "bytes": 18735
+    },
+    "tests/test_install_isolation.py": {
+      "sha256": "9faec071c4a627334af600afd3888144dd34f052282fd5b96156d9500a8fd86e",
+      "lf_sha256": "5535448109ddb36f31c33c65e9a17936493708386af4df2215d232aaccfea369",
+      "worker_lf_sha256": "5535448109ddb36f31c33c65e9a17936493708386af4df2215d232aaccfea369",
+      "bytes": 25704
+    },
+    "tests/test_install_isolation_repair.py": {
+      "sha256": "025185adc59f1eb3d17707ba55d3bd57af09c7468213d8e1a8251860ef78ee8a",
+      "lf_sha256": "a07e354f44bfbd93735bbf432806e04c64c08048870b6939c24a11b6873f9556",
+      "worker_lf_sha256": "a07e354f44bfbd93735bbf432806e04c64c08048870b6939c24a11b6873f9556",
+      "bytes": 9450
+    },
+    "tests/test_install_isolation_integrator_review.py": {
+      "sha256": "1a1b0a0a092b7a873bed39d8e60254e63cbd85e76a7d3a26f138856ba6c2dcfc",
+      "lf_sha256": "2fa456aef28ad6814ab96eca8446fd742ad80bc869988c7d1e554b81dca1064a",
+      "worker_lf_sha256": "2fa456aef28ad6814ab96eca8446fd742ad80bc869988c7d1e554b81dca1064a",
+      "bytes": 1407
+    },
+    "tests/test_inno_final_boundary.py": {
+      "sha256": "98c50c313a922d3040906ba24ef9330e3507d9d83103d5d53284143abe9e4c50",
+      "lf_sha256": "9f67ac6c89afc3d1afacbf83413500701c73022663a17d3b9b9a2814fd41e96f",
+      "worker_lf_sha256": "9f67ac6c89afc3d1afacbf83413500701c73022663a17d3b9b9a2814fd41e96f",
+      "bytes": 10506
+    },
+    "docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md": {
+      "sha256": "2555a96e3e8a951331fc5ed4b2a04249f4e05bf18ae74d2494b898bb123e8ff1",
+      "lf_sha256": "5ee1c05acef87e6027ea3e45699fbf887e24813bc9eb022b60b0f50c05aadddc",
+      "worker_lf_sha256": "5ee1c05acef87e6027ea3e45699fbf887e24813bc9eb022b60b0f50c05aadddc",
+      "bytes": 9986
+    },
+    "docs/library/RYAN-INSTALL-ISOLATION-REPAIR-WORKER-2026-09-09.md": {
+      "sha256": "c6768619189a86e91ccc01ef8fde2450a2b34bdd8feb14802b7f76dea0d07fb5",
+      "lf_sha256": "a1f8167024f1757c24cfe00e13d89f05853e8779ab2b163944f9e74d52139814",
+      "worker_lf_sha256": "a1f8167024f1757c24cfe00e13d89f05853e8779ab2b163944f9e74d52139814",
+      "bytes": 157547
+    },
+    "docs/library/RYAN-INNO-FINAL-BOUNDARY-WORKER-2026-09-09.md": {
+      "sha256": "2292fd08cc219c2667ff1f963cffc5ca6f1af601696cd8c2bc8328135e448bad",
+      "lf_sha256": "06b0a4f18e8f7e107f561f57e7fd9acb0f859d8bf220416d8fb7306501a42fed",
+      "worker_lf_sha256": "06b0a4f18e8f7e107f561f57e7fd9acb0f859d8bf220416d8fb7306501a42fed",
+      "bytes": 11946
+    }
+  },
+  "outcomes": {
+    "worker_original": "118 passed, 1 skipped, 15.69 s",
+    "worker_corrected": "118 passed, 1 skipped, 15.79 s",
+    "checkout_with_12_read_and_anchor_companions": "130 passed, 1 skipped, 22.09 s",
+    "corrected_dummy_compile": "exit 0; no Setup execution"
+  }
+}

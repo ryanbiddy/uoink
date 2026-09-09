@@ -1,0 +1,18 @@
+{
+  "exit": 2,
+  "cmd": [
+    "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    "/Q",
+    "/OC:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-boundary-iscc\\out",
+    "/FUoink-Setup-compile-only",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-boundary-iscc\\uoink.iss"
+  ],
+  "iss_source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\installer\\uoink.iss",
+  "iss_source_sha256": "30fd4496a312b7e3e69d7a341a8c8fc8a9f7ea647494d98b15a36df005170deb",
+  "iss_copy": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-boundary-iscc\\uoink.iss",
+  "iss_copy_sha256": "30fd4496a312b7e3e69d7a341a8c8fc8a9f7ea647494d98b15a36df005170deb",
+  "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-boundary-iscc\\iscc.log",
+  "stdout_len": 0,
+  "stderr": "Error on line 377 in C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-boundary-iscc\\uoink.iss: Column 3:\nDuplicate identifier 'FILE_ATTRIBUTE_REPARSE_POINT'\nCompile aborted.\n",
+  "artifact_exists": false
+}

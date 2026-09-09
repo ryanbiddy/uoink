@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    "/Q",
+    "/OC:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-astra-compile\\out",
+    "/FUoink-Setup-compile-only",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-astra-compile\\uoink.iss"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.6899495124816895,
+  "source_sha256": "0eb23637cb7d0b2a34d5f8a4c16e108cdc6960064f00a4ae51063ac87bdb6766",
+  "copy_sha256": "0eb23637cb7d0b2a34d5f8a4c16e108cdc6960064f00a4ae51063ac87bdb6766",
+  "artifact_executed": false,
+  "artifact": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d0577a56-f15\\grok\\_scratch\\inno-astra-compile\\out\\Uoink-Setup-compile-only.exe",
+    "bytes": 2030467,
+    "sha256": "842d0cae1628da52c01bffb88ec50cfeca0d2c6a2ce60f984e0a61d5e3b84702"
+  }
+}

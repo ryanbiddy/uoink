@@ -291,6 +291,19 @@ def run_migration(*, dry_run: bool = False, app_dir: Path | None = None) -> dict
     Returns a status dict. Idempotent and safe to call on every boot: a
     completed migration is a near-no-op (it only re-checks the 7-day cleanup).
     """
+    try:
+        import uoink_install_isolation as iso
+        isolated = iso.current_binding()
+    except Exception:
+        isolated = None
+    if isolated is not None:
+        return {
+            "dry_run": dry_run,
+            "old_root": None,
+            "new_root": str(isolated.profile),
+            "steps": [{"isolated": "skipped_isolated_install"}],
+            "outcome": "skipped_isolated_install",
+        }
     if app_dir is None:
         app_dir = Path(__file__).parent.resolve()
     new_root = _new_data_root()

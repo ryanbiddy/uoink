@@ -32,7 +32,8 @@
 ; own entry rather than upgrading the old Yoink AppId in place -- the first-run
 ; helper (migrate_install.py) migrates the user's data, and the old Yoink
 ; install is left for its 7-day grace cleanup. Keep this fixed from v2.1 on.
-AppId={{1CCDA47D-2347-43D1-99F4-BD6E7C231288}
+AppId={code:GetInstallAppId}
+UsePreviousLanguage=no
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
@@ -55,9 +56,15 @@ WizardImageFile=staging\installer-assets\wizard-large-100.bmp,staging\installer-
 WizardSmallImageFile=staging\installer-assets\wizard-small-100.bmp,staging\installer-assets\wizard-small-125.bmp,staging\installer-assets\wizard-small-150.bmp,staging\installer-assets\wizard-small-200.bmp
 SetupIconFile=staging\uoink.ico
 UninstallDisplayIcon={app}\uoink.ico
-UninstallDisplayName={#AppName}
+UninstallDisplayName={code:GetUninstallDisplayName}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+; Ordinary upgrades keep force-close. Isolated mode cannot disable Restart
+; Manager by skipping wpPreparing (Inno never calls ShouldSkipPage for that
+; page) or by leaving RegisterExtraCloseApplicationsResources empty (that
+; callback only adds resources). Isolated setup must pass the documented
+; /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS switches and must refuse
+; /CLOSEAPPLICATIONS, /FORCECLOSEAPPLICATIONS and /RESTARTAPPLICATIONS.
 CloseApplications=force
 ChangesEnvironment=no
 
@@ -126,6 +133,10 @@ Source: "staging\scripts\recall_hook.py"; DestDir: "{app}\scripts"; Flags: ignor
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
 Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
+; Isolated installed-profile configuration. server.py, uoink_mcp.py, the
+; splash/dashboard wrappers and the isolated stop command import this before
+; opening default data. Must ship or isolated mode cannot start.
+Source: "staging\uoink_install_isolation.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\workspaces.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -224,21 +235,51 @@ Name: "{group}\Uoink"; \
   Parameters: """{app}\server.py"" --show-dashboard"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
-  Comment: "Start Uoink"
+  Comment: "Start Uoink"; \
+  Check: not IsolatedInstall
+
+Name: "{group}\Uoink Isolated"; \
+  Filename: "{app}\python\pythonw.exe"; \
+  Parameters: """{app}\server.py"" --isolated-profile ""{param:PROFILE}"" --isolated-port {param:PORT} --show-dashboard"; \
+  WorkingDir: "{app}"; \
+  IconFilename: "{app}\uoink.ico"; \
+  Comment: "Start isolated Uoink"; \
+  Check: IsolatedInstall
 
 Name: "{group}\Stop Uoink"; \
   Filename: "{app}\stop-server.bat"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
-  Comment: "Stop Uoink"
+  Comment: "Stop Uoink"; \
+  Check: not IsolatedInstall
+
+Name: "{group}\Stop Uoink Isolated"; \
+  Filename: "{app}\python\python.exe"; \
+  Parameters: """{app}\uoink_install_isolation.py"" --isolated-stop --isolated-from-install-dir ""{app}"""; \
+  WorkingDir: "{app}"; \
+  IconFilename: "{app}\uoink.ico"; \
+  Comment: "Stop isolated Uoink"; \
+  Check: IsolatedInstall
 
 Name: "{group}\Open Uoink folder"; \
   Filename: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
-  Comment: "Open the Uoink install folder"
+  Comment: "Open the Uoink install folder"; \
+  Check: not IsolatedInstall
+
+Name: "{group}\Open Uoink Isolated folder"; \
+  Filename: "{app}"; \
+  IconFilename: "{app}\uoink.ico"; \
+  Comment: "Open the isolated Uoink install folder"; \
+  Check: IsolatedInstall
 
 Name: "{group}\Uninstall Uoink"; \
-  Filename: "{uninstallexe}"
+  Filename: "{uninstallexe}"; \
+  Check: not IsolatedInstall
+
+Name: "{group}\Uninstall Uoink Isolated"; \
+  Filename: "{uninstallexe}"; \
+  Check: IsolatedInstall
 
 ; Desktop launcher -- mirrors the {group}\Uoink start-menu entry above, gated on
 ; the optional "desktopicon" task. v3.2.7: the installer had promised a desktop
@@ -249,7 +290,17 @@ Name: "{autodesktop}\Uoink"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
   Comment: "Start Uoink"; \
-  Tasks: desktopicon
+  Tasks: desktopicon; \
+  Check: not IsolatedInstall
+
+Name: "{autodesktop}\Uoink Isolated"; \
+  Filename: "{app}\python\pythonw.exe"; \
+  Parameters: """{app}\server.py"" --isolated-profile ""{param:PROFILE}"" --isolated-port {param:PORT} --show-dashboard"; \
+  WorkingDir: "{app}"; \
+  IconFilename: "{app}\uoink.ico"; \
+  Comment: "Start isolated Uoink"; \
+  Tasks: desktopicon; \
+  Check: IsolatedInstall
 
 [Registry]
 ; Auto-start the helper on every Windows login. uninsdeletevalue removes the
@@ -258,7 +309,8 @@ Name: "{autodesktop}\Uoink"; \
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
   ValueType: string; ValueName: "Uoink"; \
   ValueData: """{app}\python\pythonw.exe"" ""{app}\server.py"""; \
-  Flags: uninsdeletevalue
+  Flags: uninsdeletevalue; \
+  Check: not IsolatedInstall
 
 [Run]
 ; "Set up the browser button now" checkbox on the finish page (default checked).
@@ -266,7 +318,8 @@ Filename: "{app}\python\pythonw.exe"; \
   Parameters: """{app}\server.py"""; \
   WorkingDir: "{app}"; \
   Description: "Set up the browser button now"; \
-  Flags: postinstall nowait skipifsilent
+  Flags: postinstall nowait skipifsilent; \
+  Check: not IsolatedInstall
 
 [UninstallRun]
 ; Stop a running server before file removal so unins doesn't fail on locked
@@ -274,13 +327,22 @@ Filename: "{app}\python\pythonw.exe"; \
 Filename: "{app}\stop-server.bat"; \
   WorkingDir: "{app}"; \
   Flags: runhidden waituntilterminated; \
-  RunOnceId: "StopUoink"
+  RunOnceId: "StopUoink"; \
+  Check: not IsolatedInstall
+
+Filename: "{app}\python\python.exe"; \
+  Parameters: """{app}\uoink_install_isolation.py"" --isolated-stop --isolated-from-install-dir ""{app}"""; \
+  WorkingDir: "{app}"; \
+  Flags: runhidden waituntilterminated; \
+  RunOnceId: "StopIsolatedUoink"; \
+  Check: IsolatedInstall
 
 [UninstallDelete]
 ; Pip and the running Python create files we didn't ship (.pyc caches, the
 ; PID file, the live log). Sweep the whole install dir on uninstall.
 Type: files; Name: "{app}\server.log"
 Type: files; Name: "{app}\server.pid"
+Type: files; Name: "{app}\isolated-install.json"
 Type: filesandordirs; Name: "{app}\python\Lib\site-packages\__pycache__"
 Type: filesandordirs; Name: "{app}\python\Lib\site-packages"
 Type: filesandordirs; Name: "{app}\python\__pycache__"
@@ -312,6 +374,7 @@ const
   C_RUST  = $000C41C2;
   C_CREAM = $00ECF4FF;
   C_INK   = $000A0A0A;
+  ISOLATED_MARKER_MAX = 8192;
 
 var
   WelcomePage:  TWizardPage;
@@ -320,6 +383,995 @@ var
   DefaultNextCaption: String;
   DefaultNextLeft: Integer;
   DefaultNextWidth: Integer;
+  IsolatedErrorText: String;
+
+function IsolatedCmdToken(const Param: String; var Name, Value: String; var HasValue: Boolean): Boolean;
+var
+  S: String;
+  Eq: Integer;
+begin
+  Result := False;
+  Name := '';
+  Value := '';
+  HasValue := False;
+  S := Trim(Param);
+  if (Length(S) < 2) or (S[1] <> '/') then
+    Exit;
+  S := Copy(S, 2, Length(S));
+  Eq := Pos('=', S);
+  if Eq > 0 then
+  begin
+    Name := Copy(S, 1, Eq - 1);
+    Value := RemoveQuotes(Copy(S, Eq + 1, Length(S)));
+    HasValue := True;
+  end
+  else
+    Name := S;
+  Result := Name <> '';
+end;
+
+function IsolatedCountSwitch(const Wanted: String): Integer;
+var
+  I: Integer;
+  Name, Value: String;
+  HasValue: Boolean;
+begin
+  Result := 0;
+  for I := 1 to ParamCount do
+  begin
+    if IsolatedCmdToken(ParamStr(I), Name, Value, HasValue) then
+    begin
+      if CompareText(Name, Wanted) = 0 then
+        Result := Result + 1;
+    end;
+  end;
+end;
+
+function IsolatedCmdSwitchPresent(const Wanted: String): Boolean;
+begin
+  Result := IsolatedCountSwitch(Wanted) > 0;
+end;
+
+function IsolatedSingleSwitch(const Wanted: String; RequireValue: Boolean): Boolean;
+var
+  I: Integer;
+  Name, Value: String;
+  HasValue: Boolean;
+begin
+  Result := False;
+  if IsolatedCountSwitch(Wanted) <> 1 then
+    Exit;
+  for I := 1 to ParamCount do
+    if IsolatedCmdToken(ParamStr(I), Name, Value, HasValue) then
+      if CompareText(Name, Wanted) = 0 then
+      begin
+        Result := (HasValue = RequireValue) and ((not RequireValue) or (Value <> ''));
+        Exit;
+      end;
+end;
+
+function IsolatedSetupRequested(): Boolean;
+begin
+  Result := CompareText(Trim(ExpandConstant('{param:ISOLATED}')), '1') = 0;
+end;
+
+function IsolatedRequestPresent(): Boolean;
+begin
+  Result := IsolatedCmdSwitchPresent('ISOLATED') or
+            IsolatedCmdSwitchPresent('PROFILE') or
+            IsolatedCmdSwitchPresent('PORT');
+end;
+
+function IsolatedMarkerPath(const AppDir: String): String;
+begin
+  Result := AddBackslash(AppDir) + 'isolated-install.json';
+end;
+
+function IsolatedMarkerFileExists(const AppDir: String): Boolean;
+begin
+  Result := FileExists(IsolatedMarkerPath(AppDir));
+end;
+
+function IsolatedPersisted(): Boolean;
+var
+  Flag: String;
+begin
+  Result := False;
+  if not IsUninstaller() then
+    Exit;
+  Flag := GetPreviousData('Isolated', '');
+  Result := CompareText(Trim(Flag), '1') = 0;
+end;
+
+function IsolatedInstall(): Boolean;
+begin
+  if IsUninstaller() then
+    Result := IsolatedPersisted()
+  else
+    Result := IsolatedSetupRequested();
+end;
+
+function GetInstallAppId(Param: String): String;
+begin
+  (* Ordinary AppId stays 1CCDA47D-2347-43D1-99F4-BD6E7C231288. Isolated
+     installs register a distinct uninstall entry. *)
+  if IsolatedSetupRequested() then
+    Result := '{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}'
+  else
+    Result := '{1CCDA47D-2347-43D1-99F4-BD6E7C231288}';
+end;
+
+function GetUninstallDisplayName(Param: String): String;
+begin
+  if IsolatedInstall() then
+    Result := 'Uoink Isolated'
+  else
+    Result := '{#AppName}';
+end;
+
+function IsolatedProfile(): String;
+begin
+  Result := RemoveQuotes(Trim(ExpandConstant('{param:PROFILE}')));
+end;
+
+function IsolatedPort(): Integer;
+begin
+  Result := StrToIntDef(Trim(ExpandConstant('{param:PORT}')), -1);
+end;
+
+function IsolatedExplicitDir(): String;
+begin
+  Result := RemoveQuotes(Trim(ExpandConstant('{param:DIR}')));
+end;
+
+function JsonEscape(const S: String): String;
+begin
+  Result := S;
+  StringChangeEx(Result, '\', '\\', True);
+  StringChangeEx(Result, '"', '\"', True);
+end;
+
+function IsolatedNormalizedInput(const Path: String): String;
+begin
+  Result := RemoveQuotes(Trim(Path));
+  StringChangeEx(Result, '/', '\', True);
+end;
+
+function IsolatedPathIsAbsolute(const Profile: String): Boolean;
+var
+  S: String;
+begin
+  S := IsolatedNormalizedInput(Profile);
+  Result := False;
+  if Length(S) >= 3 then
+    Result := (S[2] = ':') and (S[3] = '\');
+end;
+
+function IsolatedPathLooksDeviceOrUnc(const Path: String): Boolean;
+var
+  S: String;
+begin
+  S := IsolatedNormalizedInput(Path);
+  Result := (Length(S) >= 2) and (S[1] = '\') and (S[2] = '\');
+end;
+
+function IsolatedReservedName(const Component: String): Boolean;
+var
+  Upper, Base: String;
+  Dot: Integer;
+begin
+  Upper := UpperCase(Trim(Component));
+  while (Length(Upper) > 0) and ((Upper[Length(Upper)] = '.') or (Upper[Length(Upper)] = ' ')) do
+    Upper := Copy(Upper, 1, Length(Upper) - 1);
+  Dot := Pos('.', Upper);
+  if Dot > 0 then
+    Base := Copy(Upper, 1, Dot - 1)
+  else
+    Base := Upper;
+  Result :=
+    (Base = 'CON') or (Base = 'PRN') or (Base = 'AUX') or (Base = 'NUL') or
+    (Base = 'COM1') or (Base = 'COM2') or (Base = 'COM3') or (Base = 'COM4') or
+    (Base = 'COM5') or (Base = 'COM6') or (Base = 'COM7') or (Base = 'COM8') or
+    (Base = 'COM9') or
+    (Base = 'LPT1') or (Base = 'LPT2') or (Base = 'LPT3') or (Base = 'LPT4') or
+    (Base = 'LPT5') or (Base = 'LPT6') or (Base = 'LPT7') or (Base = 'LPT8') or
+    (Base = 'LPT9');
+end;
+
+function IsolatedPathIsAmbiguous(const Path: String): Boolean;
+var
+  S, Comp: String;
+  I, Start: Integer;
+  Ch: String;
+begin
+  S := IsolatedNormalizedInput(Path);
+  Result := True;
+  if (S = '') or (Length(S) > 4096) then
+    Exit;
+  I := 1;
+  while I <= Length(S) do
+  begin
+    Ch := Copy(S, I, 1);
+    if (Ch = '*') or (Ch = '?') or (Ch = '<') or (Ch = '>') or (Ch = '|') or (Ch = '"') then
+      Exit;
+    if (Ch = ':') and (I <> 2) then
+      Exit;
+    I := I + 1;
+  end;
+  if (Length(S) >= 3) and (S[2] = ':') and (S[3] = '\') then
+    Start := 4
+  else
+    Exit;
+  Comp := '';
+  I := Start;
+  while I <= Length(S) + 1 do
+  begin
+    if (I > Length(S)) or (S[I] = '\') then
+    begin
+      if Comp = '' then
+      begin
+        if I <= Length(S) then
+          Exit;
+      end
+      else
+      begin
+        if (Comp[Length(Comp)] = '.') or (Comp[Length(Comp)] = ' ') then
+          Exit;
+        if IsolatedReservedName(Comp) then
+          Exit;
+      end;
+      Comp := '';
+    end
+    else
+      Comp := Comp + S[I];
+    I := I + 1;
+  end;
+  Result := False;
+end;
+
+function IsolatedWinLongPath(ShortPathName, LongPathName: String; cchBuffer: Integer): Integer;
+external 'GetLongPathNameW@kernel32.dll stdcall';
+
+function IsolatedWinGetFileAttributes(PathName: String): Integer;
+external 'GetFileAttributesW@kernel32.dll stdcall';
+
+function IsolatedWinCreateFile(
+  FileName: String;
+  DesiredAccess, ShareMode, SecurityAttributes: Integer;
+  CreationDisposition, FlagsAndAttributes, TemplateFile: Integer): Integer;
+external 'CreateFileW@kernel32.dll stdcall';
+
+function IsolatedWinCloseHandle(Handle: Integer): Integer;
+external 'CloseHandle@kernel32.dll stdcall';
+
+function IsolatedWinFinalPath(
+  Handle: Integer; FilePath: String; cchFilePath, Flags: Integer): Integer;
+external 'GetFinalPathNameByHandleW@kernel32.dll stdcall';
+
+function IsolatedExpandOnly(const Path: String): String;
+var
+  S: String;
+begin
+  S := IsolatedNormalizedInput(Path);
+  if S <> '' then
+    S := ExpandFileName(S);
+  Result := RemoveBackslashUnlessRoot(S);
+end;
+
+function IsolatedExistingAncestorsHaveReparse(const Path: String): Boolean;
+var
+  Current: String;
+  Attr: Integer;
+begin
+  Result := False;
+  Current := IsolatedExpandOnly(Path);
+  while Length(Current) >= 3 do
+  begin
+    Attr := IsolatedWinGetFileAttributes(Current);
+    if Attr <> -1 then
+    begin
+      if (Attr and FILE_ATTRIBUTE_REPARSE_POINT) <> 0 then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+    if (Length(Current) <= 3) and (Current[2] = ':') then
+      Break;
+    Current := RemoveBackslashUnlessRoot(ExtractFileDir(Current));
+    if Current = '' then
+      Break;
+  end;
+end;
+
+function IsolatedFinalPath(const Path: String): String;
+var
+  Current, Buf: String;
+  Handle, N: Integer;
+begin
+  Result := '';
+  Current := IsolatedExpandOnly(Path);
+  while (Current <> '') and (not DirExists(Current)) and (not FileExists(Current)) do
+  begin
+    if (Length(Current) <= 3) and (Length(Current) >= 2) and (Current[2] = ':') then
+      Break;
+    Current := RemoveBackslashUnlessRoot(ExtractFileDir(Current));
+  end;
+  if (Current = '') or ((not DirExists(Current)) and (not FileExists(Current))) then
+    Exit;
+  Handle := IsolatedWinCreateFile(Current, 0, 7, 0, 3, $02000000, 0);
+  if (Handle = 0) or (Handle = -1) then
+    Exit;
+  try
+    SetLength(Buf, 4096);
+    try
+      N := IsolatedWinFinalPath(Handle, Buf, 4096, 0);
+    except
+      N := 0;
+    end;
+    if (N > 0) and (N < 4096) then
+      Result := Copy(Buf, 1, N);
+  finally
+    IsolatedWinCloseHandle(Handle);
+  end;
+  if CompareText(Copy(Result, 1, 8), '\\?\UNC\') = 0 then
+    Result := '\' + Copy(Result, 8, Length(Result))
+  else if CompareText(Copy(Result, 1, 4), '\\?\') = 0 then
+    Result := Copy(Result, 5, Length(Result));
+end;
+
+function IsolatedCanonicalPath(const Path: String): String;
+var
+  S, Buf: String;
+  N: Integer;
+begin
+  S := IsolatedNormalizedInput(Path);
+  if S <> '' then
+    S := ExpandFileName(S);
+  SetLength(Buf, 4096);
+  N := IsolatedWinLongPath(S, Buf, 4096);
+  if (N > 0) and (N < 4096) then
+    S := Copy(Buf, 1, N);
+  Result := UpperCase(RemoveBackslashUnlessRoot(S));
+end;
+
+function IsolatedPathIsRootVolume(const Profile: String): Boolean;
+var
+  S: String;
+begin
+  S := IsolatedCanonicalPath(Profile);
+  Result := (Length(S) = 3) and (S[2] = ':') and (S[3] = '\');
+end;
+
+function IsolatedSamePath(const Left, Right: String): Boolean;
+var
+  A, B, SA, SB: String;
+begin
+  A := IsolatedCanonicalPath(Left);
+  B := IsolatedCanonicalPath(Right);
+  Result := CompareText(A, B) = 0;
+  if Result then
+    Exit;
+  SA := GetShortName(A);
+  SB := GetShortName(B);
+  if (SA <> '') and (SB <> '') then
+    Result := CompareText(SA, SB) = 0;
+end;
+
+function IsolatedPathIsInside(const Inner, Outer: String): Boolean;
+var
+  A, B: String;
+begin
+  if IsolatedSamePath(Inner, Outer) then
+  begin
+    Result := True;
+    Exit;
+  end;
+  A := IsolatedCanonicalPath(Inner);
+  B := AddBackslash(IsolatedCanonicalPath(Outer));
+  Result := (Length(A) > Length(B)) and (Copy(A, 1, Length(B)) = B);
+end;
+
+procedure IsolatedAbort(const CodeAndMessage: String);
+begin
+  IsolatedErrorText := CodeAndMessage;
+  Log('isolated install refused: ' + CodeAndMessage);
+  if not WizardSilent then
+    MsgBox(CodeAndMessage, mbError, MB_OK);
+end;
+
+procedure IsolatedUninstallAbort(const CodeAndMessage: String);
+begin
+  IsolatedErrorText := CodeAndMessage;
+  Log('isolated uninstall refused: ' + CodeAndMessage);
+  if not UninstallSilent then
+    MsgBox(CodeAndMessage, mbError, MB_OK);
+end;
+
+function IsolatedCloseSwitchesValid(): Boolean;
+begin
+  Result := False;
+  if IsolatedCmdSwitchPresent('CLOSEAPPLICATIONS') or
+     IsolatedCmdSwitchPresent('FORCECLOSEAPPLICATIONS') or
+     IsolatedCmdSwitchPresent('RESTARTAPPLICATIONS') then
+  begin
+    IsolatedAbort('isolated-close-applications-forbidden: isolated mode refuses /CLOSEAPPLICATIONS, /FORCECLOSEAPPLICATIONS and /RESTARTAPPLICATIONS');
+    Exit;
+  end;
+  if (not IsolatedSingleSwitch('NOCLOSEAPPLICATIONS', False)) or
+     (not IsolatedSingleSwitch('NORESTARTAPPLICATIONS', False)) then
+  begin
+    IsolatedAbort('isolated-close-applications-required: isolated mode requires /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function IsolatedJsonSkipWs(const Body: String; I: Integer): Integer;
+begin
+  while (I <= Length(Body)) and ((Body[I] = ' ') or (Body[I] = #9) or (Body[I] = #10) or (Body[I] = #13)) do
+    I := I + 1;
+  Result := I;
+end;
+
+function IsolatedJsonParseString(const Body: String; var I: Integer; var Value: String): Boolean;
+var
+  Escaping: Boolean;
+begin
+  Result := False;
+  Value := '';
+  if (I > Length(Body)) or (Body[I] <> '"') then
+    Exit;
+  I := I + 1;
+  Escaping := False;
+  while I <= Length(Body) do
+  begin
+    if Ord(Body[I]) < 32 then
+      Exit;
+    if Escaping then
+    begin
+      if (Body[I] <> '\') and (Body[I] <> '"') then
+        Exit;
+      Value := Value + Body[I];
+      Escaping := False;
+    end
+    else if Body[I] = '\' then
+      Escaping := True
+    else if Body[I] = '"' then
+    begin
+      I := I + 1;
+      Result := True;
+      Exit;
+    end
+    else
+      Value := Value + Body[I];
+    I := I + 1;
+    if Length(Value) > 4096 then
+      Exit;
+  end;
+end;
+
+function IsolatedJsonParseInt(const Body: String; var I: Integer; var Value: Integer): Boolean;
+var
+  Digits: String;
+  Start: Integer;
+begin
+  Result := False;
+  Value := -1;
+  if (I <= Length(Body)) and (Body[I] = '-') then
+    Exit;
+  if (I > Length(Body)) or (Body[I] < '0') or (Body[I] > '9') then
+    Exit;
+  if (Body[I] = '0') and (I < Length(Body)) and (Body[I + 1] >= '0') and (Body[I + 1] <= '9') then
+    Exit;
+  Start := I;
+  while (I <= Length(Body)) and (Body[I] >= '0') and (Body[I] <= '9') do
+    I := I + 1;
+  if (I - Start) > 10 then
+    Exit;
+  Digits := Copy(Body, Start, I - Start);
+  Value := StrToIntDef(Digits, -1);
+  if (Value < 0) or (IntToStr(Value) <> Digits) then
+    Exit;
+  Result := True;
+end;
+
+function IsolatedParseMarker(
+  const Body: String;
+  var Mode, Profile, Host, AppDir: String;
+  var Port: Integer): Boolean;
+var
+  I, Count, SeenMode, SeenProfile, SeenPort, SeenHost, SeenApp: Integer;
+  Key, StrVal: String;
+  IntVal: Integer;
+  NeedComma: Boolean;
+begin
+  Result := False;
+  Mode := '';
+  Profile := '';
+  Host := '';
+  AppDir := '';
+  Port := -1;
+  if (Length(Body) = 0) or (Length(Body) > ISOLATED_MARKER_MAX) then
+    Exit;
+  I := IsolatedJsonSkipWs(Body, 1);
+  if (I > Length(Body)) or (Body[I] <> '{') then
+    Exit;
+  I := I + 1;
+  Count := 0;
+  SeenMode := 0;
+  SeenProfile := 0;
+  SeenPort := 0;
+  SeenHost := 0;
+  SeenApp := 0;
+  NeedComma := False;
+  while True do
+  begin
+    I := IsolatedJsonSkipWs(Body, I);
+    if I > Length(Body) then
+      Exit;
+    if Body[I] = '}' then
+    begin
+      I := I + 1;
+      Break;
+    end;
+    if NeedComma then
+    begin
+      if Body[I] <> ',' then
+        Exit;
+      I := I + 1;
+      I := IsolatedJsonSkipWs(Body, I);
+      if (I <= Length(Body)) and (Body[I] = '}') then
+        Exit;
+    end;
+    if not IsolatedJsonParseString(Body, I, Key) then
+      Exit;
+    I := IsolatedJsonSkipWs(Body, I);
+    if (I > Length(Body)) or (Body[I] <> ':') then
+      Exit;
+    I := I + 1;
+    I := IsolatedJsonSkipWs(Body, I);
+    if I > Length(Body) then
+      Exit;
+    if (Body[I] = '{') or (Body[I] = '[') then
+      Exit;
+    if Body[I] = '"' then
+    begin
+      if not IsolatedJsonParseString(Body, I, StrVal) then
+        Exit;
+      if Key = 'mode' then
+      begin
+        SeenMode := SeenMode + 1;
+        Mode := StrVal;
+      end
+      else if Key = 'profile' then
+      begin
+        SeenProfile := SeenProfile + 1;
+        Profile := StrVal;
+      end
+      else if Key = 'host' then
+      begin
+        SeenHost := SeenHost + 1;
+        Host := StrVal;
+      end
+      else if Key = 'app_dir' then
+      begin
+        SeenApp := SeenApp + 1;
+        AppDir := StrVal;
+      end
+      else
+        Exit;
+    end
+    else
+    begin
+      if not IsolatedJsonParseInt(Body, I, IntVal) then
+        Exit;
+      if Key = 'port' then
+      begin
+        SeenPort := SeenPort + 1;
+        Port := IntVal;
+      end
+      else
+        Exit;
+    end;
+    Count := Count + 1;
+    if Count > 5 then
+      Exit;
+    NeedComma := True;
+  end;
+  I := IsolatedJsonSkipWs(Body, I);
+  if I <= Length(Body) then
+    Exit;
+  if (SeenMode <> 1) or (SeenProfile <> 1) or (SeenPort <> 1) or
+     (SeenHost <> 1) or (SeenApp <> 1) then
+    Exit;
+  if (Mode <> 'isolated') or (Profile = '') or (Host <> '127.0.0.1') or (AppDir = '') then
+    Exit;
+  if (Port < 1) or (Port > 65535) or (Port = 5179) then
+    Exit;
+  Result := True;
+end;
+
+function IsolatedJsonExtractString(const Body, Key: String; var Value: String): Boolean;
+var
+  Mode, Profile, Host, AppDir: String;
+  Port: Integer;
+begin
+  Result := False;
+  Value := '';
+  if not IsolatedParseMarker(Body, Mode, Profile, Host, AppDir, Port) then
+    Exit;
+  if Key = 'mode' then
+  begin
+    Value := Mode;
+    Result := True;
+  end
+  else if Key = 'profile' then
+  begin
+    Value := Profile;
+    Result := True;
+  end
+  else if Key = 'host' then
+  begin
+    Value := Host;
+    Result := True;
+  end
+  else if Key = 'app_dir' then
+  begin
+    Value := AppDir;
+    Result := True;
+  end;
+end;
+
+function IsolatedJsonExtractInt(const Body, Key: String; var Value: Integer): Boolean;
+var
+  Mode, Profile, Host, AppDir: String;
+  Port: Integer;
+begin
+  Result := False;
+  Value := -1;
+  if not IsolatedParseMarker(Body, Mode, Profile, Host, AppDir, Port) then
+    Exit;
+  if Key = 'port' then
+  begin
+    Value := Port;
+    Result := True;
+  end;
+end;
+
+function IsolatedReadMarkerBody(const AppDir: String; var Body: String): Boolean;
+var
+  Raw: AnsiString;
+begin
+  Result := False;
+  Body := '';
+  if IsolatedPathLooksDeviceOrUnc(AppDir) or IsolatedExistingAncestorsHaveReparse(AppDir) or
+     IsolatedExistingAncestorsHaveReparse(IsolatedMarkerPath(AppDir)) then
+    Exit;
+  if not LoadStringFromFile(IsolatedMarkerPath(AppDir), Raw) then
+    Exit;
+  if Length(Raw) > ISOLATED_MARKER_MAX then
+    Exit;
+  Body := Utf8Decode(Raw);
+  if Utf8Encode(Body) <> Raw then
+    Exit;
+  Result := True;
+end;
+
+function IsolatedMarkerExact(const AppDir, Profile: String; Port: Integer): Boolean;
+var
+  Body, Mode, MarkedProfile, Host, AppDirMarked: String;
+  MarkedPort: Integer;
+begin
+  Result := False;
+  if not IsolatedReadMarkerBody(AppDir, Body) then
+    Exit;
+  if not IsolatedParseMarker(Body, Mode, MarkedProfile, Host, AppDirMarked, MarkedPort) then
+    Exit;
+  Result := IsolatedSamePath(MarkedProfile, Profile) and (MarkedPort = Port) and
+            IsolatedSamePath(AppDirMarked, AppDir);
+end;
+
+function IsolatedMarkerMatches(const AppDir, Profile: String; Port: Integer): Boolean;
+begin
+  { Exact JSON field match; substring searches are not ownership. }
+  Result := IsolatedMarkerExact(AppDir, Profile, Port);
+end;
+
+function IsolatedMarkerWellFormed(const AppDir: String): Boolean;
+var
+  Body, Mode, MarkedProfile, Host, AppDirMarked: String;
+  MarkedPort: Integer;
+begin
+  Result := False;
+  if not IsolatedReadMarkerBody(AppDir, Body) then
+    Exit;
+  Result := IsolatedParseMarker(Body, Mode, MarkedProfile, Host, AppDirMarked, MarkedPort);
+end;
+
+function IsolatedPathIsUnsafe(const Path: String): Boolean;
+begin
+  Result := IsolatedPathIsInside(Path, ExpandConstant('{win}')) or
+            IsolatedPathIsInside(Path, ExpandConstant('{sys}')) or
+            IsolatedPathIsInside(Path, ExpandConstant('{pf}')) or
+            IsolatedPathIsInside(Path, ExpandConstant('{pf32}'));
+end;
+
+function IsolatedPathHitsLibrary(const Path: String; var Code: String): Boolean;
+var
+  NormalData, LegacyData, DesktopUoink, DesktopYoink: String;
+begin
+  Result := True;
+  NormalData := ExpandConstant('{localappdata}\Uoink');
+  LegacyData := ExpandConstant('{localappdata}\Yoink');
+  DesktopUoink := ExpandConstant('{userdesktop}\Uoink');
+  DesktopYoink := ExpandConstant('{userdesktop}\Yoink');
+  if IsolatedPathIsInside(Path, NormalData) or IsolatedPathIsInside(NormalData, Path) then
+  begin
+    Code := 'isolated-profile-normal-data';
+    Exit;
+  end;
+  if IsolatedPathIsInside(Path, LegacyData) or IsolatedPathIsInside(LegacyData, Path) then
+  begin
+    Code := 'isolated-profile-legacy-data';
+    Exit;
+  end;
+  if IsolatedPathIsInside(Path, DesktopUoink) or IsolatedPathIsInside(DesktopUoink, Path) or
+     IsolatedPathIsInside(Path, DesktopYoink) or IsolatedPathIsInside(DesktopYoink, Path) then
+  begin
+    Code := 'isolated-profile-normal-data';
+    Exit;
+  end;
+  Result := False;
+  Code := '';
+end;
+
+function IsolatedGuardPath(const Path, Kind: String): Boolean;
+var
+  LibraryCode, Resolved: String;
+begin
+  Result := False;
+  if IsolatedPathLooksDeviceOrUnc(Path) then
+  begin
+    IsolatedAbort('isolated-path-unsupported: isolated ' + Kind + ' cannot be a device or UNC path');
+    Exit;
+  end;
+  if IsolatedPathIsAmbiguous(Path) then
+  begin
+    IsolatedAbort('isolated-path-unsupported: isolated ' + Kind + ' has an ambiguous Windows path');
+    Exit;
+  end;
+  if IsolatedExistingAncestorsHaveReparse(Path) then
+  begin
+    IsolatedAbort('isolated-path-reparse: isolated ' + Kind + ' refuses a reparse point in any existing ancestor');
+    Exit;
+  end;
+  Resolved := IsolatedFinalPath(Path);
+  if Resolved = '' then
+  begin
+    IsolatedAbort('isolated-path-unresolved: isolated ' + Kind + ' cannot verify its existing ancestor');
+    Exit;
+  end;
+  if (Resolved <> '') and IsolatedPathLooksDeviceOrUnc(Resolved) then
+  begin
+    IsolatedAbort('isolated-path-unsupported: isolated ' + Kind + ' resolves to a device or UNC path');
+    Exit;
+  end;
+  if (Resolved <> '') and IsolatedPathHitsLibrary(Resolved, LibraryCode) then
+  begin
+    IsolatedAbort(LibraryCode + ': isolated ' + Kind + ' resolves through an alias onto ordinary or legacy data');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function IsolatedValidateProfile(const Profile: String): Boolean;
+var
+  LibraryCode: String;
+begin
+  Result := False;
+  if Profile = '' then
+  begin
+    IsolatedAbort('isolated-profile-missing: isolated mode requires /PROFILE=<absolute directory>');
+    Exit;
+  end;
+  if IsolatedPathLooksDeviceOrUnc(Profile) then
+  begin
+    IsolatedAbort('isolated-path-unsupported: isolated /PROFILE cannot be a device or UNC path');
+    Exit;
+  end;
+  if not IsolatedPathIsAbsolute(Profile) then
+  begin
+    IsolatedAbort('isolated-profile-relative: isolated /PROFILE must be an absolute directory');
+    Exit;
+  end;
+  if not IsolatedGuardPath(Profile, '/PROFILE') then
+    Exit;
+  if IsolatedPathIsRootVolume(Profile) then
+  begin
+    IsolatedAbort('isolated-profile-root-volume: isolated /PROFILE cannot be a drive root');
+    Exit;
+  end;
+  if IsolatedPathIsUnsafe(Profile) then
+  begin
+    IsolatedAbort('isolated-profile-unsafe: isolated /PROFILE cannot be a protected system path');
+    Exit;
+  end;
+  if IsolatedPathHitsLibrary(Profile, LibraryCode) then
+  begin
+    IsolatedAbort(LibraryCode + ': isolated /PROFILE collides with ordinary or legacy data');
+    Exit;
+  end;
+  if not DirExists(Profile) then
+  begin
+    IsolatedAbort('isolated-profile-not-found: isolated /PROFILE must already exist');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function IsolatedValidatePortValue(Port: Integer): Boolean;
+begin
+  Result := False;
+  if Trim(ExpandConstant('{param:PORT}')) = '' then
+  begin
+    IsolatedAbort('isolated-port-missing: isolated mode requires /PORT=<loopback port>');
+    Exit;
+  end;
+  if Port < 1 then
+  begin
+    IsolatedAbort('isolated-port-invalid: isolated /PORT must be an integer 1-65535');
+    Exit;
+  end;
+  if Port > 65535 then
+  begin
+    IsolatedAbort('isolated-port-invalid: isolated /PORT must be an integer 1-65535');
+    Exit;
+  end;
+  if Port = 5179 then
+  begin
+    IsolatedAbort('isolated-port-forbidden: isolated /PORT cannot be 5179');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function IsolatedValidateTargetDir(const AppDir: String): Boolean;
+var
+  Profile: String;
+  Port: Integer;
+  LibraryCode: String;
+begin
+  Result := False;
+  if not IsolatedSetupRequested() then
+  begin
+    if IsolatedMarkerFileExists(AppDir) then
+    begin
+      IsolatedAbort('isolated-install-ordinary-reuse: ordinary setup refuses an isolated target before preparation');
+      Exit;
+    end;
+    Result := True;
+    Exit;
+  end;
+  Profile := IsolatedProfile();
+  Port := IsolatedPort();
+  if AppDir = '' then
+  begin
+    IsolatedAbort('isolated-install-app-relative: isolated /DIR must be an absolute directory');
+    Exit;
+  end;
+  if IsolatedPathLooksDeviceOrUnc(AppDir) then
+  begin
+    IsolatedAbort('isolated-path-unsupported: isolated /DIR cannot be a device or UNC path');
+    Exit;
+  end;
+  if not IsolatedPathIsAbsolute(AppDir) then
+  begin
+    IsolatedAbort('isolated-install-app-relative: isolated /DIR must be an absolute directory');
+    Exit;
+  end;
+  if not IsolatedGuardPath(AppDir, '/DIR') then
+    Exit;
+  if IsolatedPathIsRootVolume(AppDir) then
+  begin
+    IsolatedAbort('isolated-profile-root-volume: isolated /DIR cannot be a drive root');
+    Exit;
+  end;
+  if IsolatedPathIsUnsafe(AppDir) then
+  begin
+    IsolatedAbort('isolated-profile-unsafe: isolated /DIR cannot be a protected system path');
+    Exit;
+  end;
+  if IsolatedPathHitsLibrary(AppDir, LibraryCode) then
+  begin
+    IsolatedAbort('isolated-install-ordinary-reuse: isolated /DIR collides with ordinary or legacy data');
+    Exit;
+  end;
+  if IsolatedSamePath(AppDir, ExpandConstant('{localappdata}\Uoink')) then
+  begin
+    IsolatedAbort('isolated-install-ordinary-reuse: isolated /DIR cannot be the ordinary install directory');
+    Exit;
+  end;
+  if IsolatedSamePath(AppDir, Profile) or IsolatedPathIsInside(AppDir, Profile) or IsolatedPathIsInside(Profile, AppDir) then
+  begin
+    IsolatedAbort('isolated-profile-conflict: isolated /PROFILE cannot be the install directory');
+    Exit;
+  end;
+  if IsolatedMarkerFileExists(AppDir) then
+  begin
+    if not IsolatedMarkerWellFormed(AppDir) then
+    begin
+      IsolatedAbort('isolated-install-marker-mismatch: existing isolated-install.json is damaged');
+      Exit;
+    end;
+    if not IsolatedMarkerExact(AppDir, Profile, Port) then
+    begin
+      IsolatedAbort('isolated-install-marker-mismatch: existing isolated-install.json does not match /PROFILE and /PORT');
+      Exit;
+    end;
+  end
+  else if FileExists(AddBackslash(AppDir) + 'server.py') then
+  begin
+    IsolatedAbort('isolated-install-ordinary-reuse: refusing to treat an ordinary installation as isolated');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function IsolatedValidateDeclaredInputs(): Boolean;
+var
+  ExplicitDir: String;
+begin
+  Result := False;
+  if (not IsolatedSingleSwitch('ISOLATED', True)) or
+     (not IsolatedSingleSwitch('PROFILE', True)) or
+     (not IsolatedSingleSwitch('PORT', True)) or
+     (not IsolatedSingleSwitch('DIR', True)) then
+  begin
+    IsolatedAbort('isolated-argument-invalid: isolated mode requires one value each for /ISOLATED, /PROFILE, /PORT and /DIR');
+    Exit;
+  end;
+  if not IsolatedValidateProfile(IsolatedProfile()) then
+    Exit;
+  if not IsolatedValidatePortValue(IsolatedPort()) then
+    Exit;
+  ExplicitDir := IsolatedExplicitDir();
+  if ExplicitDir <> '' then
+  begin
+    if not IsolatedValidateTargetDir(ExplicitDir) then
+      Exit;
+  end;
+  if FileExists(AddBackslash(IsolatedProfile()) + 'runtime-identity.json') then
+  begin
+    IsolatedAbort('isolated-running-requires-stop: owned isolated helper still recorded as running; run the isolated stop command first');
+    Exit;
+  end;
+  Result := True;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  Result := False;
+  IsolatedErrorText := '';
+  if IsolatedRequestPresent() then
+  begin
+    if not IsolatedSetupRequested() then
+    begin
+      IsolatedAbort('isolated-argument-invalid: isolated mode requires /ISOLATED=1; missing or contradictory isolated parameters refuse ordinary setup');
+      Exit;
+    end;
+    if IsolatedCountSwitch('ISOLATED') > 1 then
+    begin
+      IsolatedAbort('isolated-argument-invalid: duplicate /ISOLATED is contradictory');
+      Exit;
+    end;
+    if not IsolatedCloseSwitchesValid() then
+      Exit;
+    Result := IsolatedValidateDeclaredInputs();
+    Exit;
+  end;
+  Result := True;
+end;
 
 function LegacyYoinkPresent(): Boolean;
 begin
@@ -414,8 +1466,146 @@ begin
     the wizard's first screen (mock 1.2.1). }
   if PageID = wpWelcome then
     Result := True;
-  if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
+  if (PageID = MigratePage.ID) and ((not LegacyYoinkPresent()) or IsolatedInstall()) then
     Result := True;
+  { Skipping wpPreparing does not disable Restart Manager: Inno never calls
+    ShouldSkipPage for that page. Isolated mode requires the documented
+    /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS switches instead.
+    RegisterExtraCloseApplicationsResources only adds resources. }
+end;
+
+procedure RegisterPreviousData(PreviousDataKey: Integer);
+begin
+  if IsolatedSetupRequested() then
+  begin
+    if not SetPreviousData(PreviousDataKey, 'Isolated', '1') then
+      RaiseException('isolated-persistence-failed: could not persist Isolated');
+    if not SetPreviousData(PreviousDataKey, 'Profile', IsolatedProfile()) then
+      RaiseException('isolated-persistence-failed: could not persist Profile');
+    if not SetPreviousData(PreviousDataKey, 'Port', IntToStr(IsolatedPort())) then
+      RaiseException('isolated-persistence-failed: could not persist Port');
+    if not SetPreviousData(PreviousDataKey, 'AppDir', ExpandConstant('{app}')) then
+      RaiseException('isolated-persistence-failed: could not persist AppDir');
+  end;
+end;
+
+procedure RegisterExtraCloseApplicationsResources;
+begin
+  if IsolatedInstall() then
+    Exit;
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if CurPageID = wpSelectDir then
+    Result := IsolatedValidateTargetDir(WizardDirValue);
+end;
+
+function IsolatedOwnedStop(const AppDir: String): Boolean;
+var
+  PythonExe, Script: String;
+  ResultCode: Integer;
+  Executed: Boolean;
+begin
+  Result := False;
+  PythonExe := AddBackslash(AppDir) + 'python\python.exe';
+  Script := AddBackslash(AppDir) + 'uoink_install_isolation.py';
+  if (not FileExists(PythonExe)) or (not FileExists(Script)) then
+  begin
+    Log('isolated uninstall: owned stop launch failed; python or isolation script missing');
+    Exit;
+  end;
+  Executed := Exec(
+    PythonExe,
+    '"' + Script + '" --isolated-stop --isolated-from-install-dir "' + AppDir + '"',
+    AppDir,
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode);
+  if not Executed then
+  begin
+    Log('isolated uninstall: owned stop Exec failed');
+    Exit;
+  end;
+  if ResultCode <> 0 then
+  begin
+    Log('isolated uninstall: owned stop exited ' + IntToStr(ResultCode));
+    Exit;
+  end;
+  Result := True;
+end;
+
+function InitializeUninstall(): Boolean;
+var
+  AppDir, IsolatedFlag, PersistedProfile, PersistedPort, PersistedAppDir: String;
+  MarkerExists: Boolean;
+begin
+  Result := False;
+  AppDir := ExpandConstant('{app}');
+  IsolatedFlag := GetPreviousData('Isolated', '');
+  PersistedProfile := GetPreviousData('Profile', '');
+  PersistedPort := GetPreviousData('Port', '');
+  PersistedAppDir := GetPreviousData('AppDir', '');
+  MarkerExists := IsolatedMarkerFileExists(AppDir);
+
+  if (CompareText(Trim(IsolatedFlag), '1') <> 0) and (not MarkerExists) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  (* Isolated or ambiguous uninstall: never fall back to ordinary stop-server.bat.
+     UninstallRun nonzero exit does not gate deletion, so owned stop runs here. *)
+  if IsolatedExistingAncestorsHaveReparse(AppDir) or IsolatedPathLooksDeviceOrUnc(AppDir) then
+  begin
+    IsolatedUninstallAbort('isolated-path-reparse: isolated uninstall refuses a reparse, device or UNC app directory before stop or deletion');
+    Exit;
+  end;
+
+  if CompareText(Trim(IsolatedFlag), '1') <> 0 then
+  begin
+    IsolatedUninstallAbort('isolated-install-ordinary-reuse: refusing to adopt an ordinary uninstall as isolated, and refusing ordinary stop against an isolated marker');
+    Exit;
+  end;
+
+  if (PersistedProfile = '') or (PersistedPort = '') or (PersistedAppDir = '') then
+  begin
+    IsolatedUninstallAbort('isolated-install-marker-mismatch: persisted isolated uninstall evidence is incomplete');
+    Exit;
+  end;
+
+  if not IsolatedSamePath(PersistedAppDir, AppDir) then
+  begin
+    IsolatedUninstallAbort('isolated-install-marker-mismatch: persisted app directory differs; refusing deletion');
+    Exit;
+  end;
+
+  if not MarkerExists then
+  begin
+    IsolatedUninstallAbort('isolated-install-marker-missing: isolated-install.json disappeared; refusing deletion');
+    Exit;
+  end;
+
+  if not IsolatedMarkerWellFormed(AppDir) then
+  begin
+    IsolatedUninstallAbort('isolated-install-marker-mismatch: isolated-install.json is damaged; refusing deletion');
+    Exit;
+  end;
+
+  if not IsolatedMarkerExact(AppDir, PersistedProfile, StrToIntDef(PersistedPort, -1)) then
+  begin
+    IsolatedUninstallAbort('isolated-install-marker-mismatch: isolated-install.json does not match persisted profile and port');
+    Exit;
+  end;
+
+  if not IsolatedOwnedStop(AppDir) then
+  begin
+    IsolatedUninstallAbort('isolated-stop-failed: owned isolated stop failed or returned nonzero; refusing deletion');
+    Exit;
+  end;
+
+  Result := True;
 end;
 
 (* v2.2.0 must-fix: stop the old helper + clear the splash sentinel BEFORE
@@ -450,9 +1640,46 @@ var
   SentinelPath: string;
   ResultCode: Integer;
   Executed: Boolean;
+  AppDir: String;
 begin
   Result := '';
   NeedsRestart := False;
+  AppDir := ExpandConstant('{app}');
+  (* Final chosen directory is valid here. InitializeSetup must not treat the
+     default {app} as the target. Ordinary setup against an isolated target
+     refuses before ordinary preparation. *)
+  if not IsolatedValidateTargetDir(AppDir) then
+  begin
+    if IsolatedErrorText <> '' then
+      Result := IsolatedErrorText
+    else
+      Result := 'isolated install refused: target directory failed validation';
+    Exit;
+  end;
+  (* Isolated installs never probe 5179, never stop a helper by name/prefix,
+     and never touch the ordinary %LOCALAPPDATA%\Uoink splash sentinel.
+     Revalidate close switches, declared inputs and path ancestors here. *)
+  if IsolatedInstall() then
+  begin
+    if not IsolatedCloseSwitchesValid() then
+    begin
+      if IsolatedErrorText <> '' then
+        Result := IsolatedErrorText
+      else
+        Result := 'isolated-close-applications-required: isolated mode requires /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS';
+      Exit;
+    end;
+    if not IsolatedValidateDeclaredInputs() then
+    begin
+      if IsolatedErrorText <> '' then
+        Result := IsolatedErrorText
+      else
+        Result := 'isolated install refused: declared inputs failed PrepareToInstall revalidation';
+      Exit;
+    end;
+    Log('PrepareToInstall: isolated mode skips upgrade_prep.ps1 and ordinary sentinel delete');
+    Exit;
+  end;
   SentinelPath := ExpandConstant('{localappdata}\Uoink\.first-run-done');
 
   (* dontcopy file -- ExtractTemporaryFile pulls it into {tmp} the first
@@ -532,10 +1759,52 @@ begin
   Log('Post-install verification: bundled files verified for {#AppVersion}');
 end;
 
+function WriteIsolatedMarker(): Boolean;
+var
+  MarkerPath, Body, AppDir: String;
+begin
+  AppDir := ExpandConstant('{app}');
+  if IsolatedExistingAncestorsHaveReparse(AppDir) or IsolatedPathLooksDeviceOrUnc(AppDir) or
+     IsolatedExistingAncestorsHaveReparse(IsolatedMarkerPath(AppDir)) then
+  begin
+    Result := False;
+    Log('Post-install: refused isolated-install.json write through a reparse, device or UNC path');
+    Exit;
+  end;
+  MarkerPath := IsolatedMarkerPath(AppDir);
+  Body :=
+    '{' + #13#10 +
+    '  "mode": "isolated",' + #13#10 +
+    '  "profile": "' + JsonEscape(IsolatedProfile()) + '",' + #13#10 +
+    '  "port": ' + IntToStr(IsolatedPort()) + ',' + #13#10 +
+    '  "host": "127.0.0.1",' + #13#10 +
+    '  "app_dir": "' + JsonEscape(AppDir) + '"' + #13#10 +
+    '}' + #13#10;
+  if not SaveStringToFile(MarkerPath, Utf8Encode(Body), False) then
+  begin
+    Result := False;
+    Log('Post-install: failed to write isolated-install.json');
+    Exit;
+  end;
+  Result := IsolatedMarkerWellFormed(AppDir) and
+            IsolatedMarkerExact(AppDir, IsolatedProfile(), IsolatedPort());
+  if Result then
+    Log('Post-install: wrote and verified isolated-install.json')
+  else
+    Log('Post-install: isolated-install.json persistence verification failed');
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
+  begin
+    if IsolatedInstall() then
+    begin
+      if not WriteIsolatedMarker() then
+        RaiseException('isolated-install-marker-write-failed: could not write isolated-install.json');
+    end;
     VerifyInstalledHelper();
+  end;
 end;
 
 { Finding 2.2 (creative review v2.2, AG): override Next/Back chrome on

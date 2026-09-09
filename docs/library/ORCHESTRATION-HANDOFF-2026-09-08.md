@@ -80,11 +80,11 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
+| 3 | Recovery `239dbbd` retains historical AT6 exit gap; isolation now reviewed with 130 checkout passes / one skip | Exact isolated process stop and Inno path/identity controls integrated; real installed behavior unexecuted | Finish C22 executable scenarios, final tree/package and Ryan's installed receipt |
 | 4 | Lifecycle repair retained; original stdio read repair has nine new passes and broader 212 passed / eight failed | Existing reads no longer migrate/backfill or recover authoritative storage; eight parent-interception failures remain; X HTTP 403 stays blocked | Include read repair in final committed tree and bundled original entry; finish installed receipt kit |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Complete `263b7e4` tree: 2,193 passed / nine failed / three skipped / one xfailed, 728.37 s | Eleven previous failures close, eight new cases pass, no missing cases or new failures. Exact eight-case interception fixture proposal awaits Ryan; historical exit gap remains | Finish three bounded installation/kit repairs, then final committed tree, rebuilt package and complete operator runbook |
+| Integration | Complete `263b7e4` tree: 2,193 passed / nine failed / three skipped / one xfailed; later preview and isolation source reviewed | Exact eight-case interception fixture proposal awaits Ryan; historical exit gap remains; final isolation has 130 focused passes / one skip | Finish two receipt kits, then final committed tree, rebuilt package and complete operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -162,6 +162,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    found active Restart Manager closing, non-gating uninstall errors and path /
    marker parsing gaps. Follow `RYAN-INNO-FINAL-BOUNDARY-REPAIR-BRIEF-2026-09-09.md`
    before integration. The second raw patch and all three observations are sealed.
+   Final isolation worker plus Astra's documented Inno correction is now integrated:
+   118 passed / one skip in the corrected worker, 130 passed / one skip in checkout
+   with twelve read/startup companions. Exact-script dummy compile exits zero;
+   `RYAN-INNO-FINAL-INTEGRATION-REVIEW-2026-09-09.md` preserves installed limits.
    C22 replacement independently has 26 passes / two failures, 69.61 s. Its
    receipt still substitutes direct child-record calls for helper recovery,
    miscounts charges and compares protected state only after all scenarios.
@@ -1654,3 +1658,18 @@ import-site guard bypass, unbounded stdin writes, incomplete tree cleanup
 claims, partial packet acceptance and deletion of the held original database
 if a replacement appears. Follow RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md.
 The old failed observation and frozen test remain; no installed claim is made.
+
+### 2026-09-09 — Isolation integrates with bounded Inno correction
+
+Grok d0577a56 and Astra's RYAN-INNO-REVIEW-SUPPLEMENT-BRIEF corrections are
+integrated through an exact raw diff and clean git apply --3way. The patch
+includes cached suite_service.py, which the second archive had omitted.
+The original worker patch and source are retained before the local correction.
+Worker original 118 passed / one skip (15.69 s); corrected worker 118 / one
+skip (15.79 s); checkout plus twelve preview/read/startup companions 130 /
+one skip (22.09 s). Corrected exact-script dummy ISCC exits zero; Setup was
+never run. Twenty-six raw files are sealed under proof/ryan-inno-final-2026-09-09.
+No frozen test changed. The saved identity, marker app path, strict switches,
+UTF-8 JSON, reparse leaf checks and failed persistence are now checked before
+isolated operations. Real Inno persistence and installed C22/Phase 4 remain
+unexecuted. Two receipt workers remain; final committed tree/package still owed.

@@ -53,6 +53,10 @@ else:
 HERE = Path(__file__).parent.resolve()
 sys.path.insert(0, str(HERE))
 
+# Isolation must be validated before any later import can open default data.
+import uoink_install_isolation as _install_isolation  # noqa: E402
+_install_isolation.apply_from_process()
+
 
 def _read_version() -> str:
     try:
@@ -144,7 +148,7 @@ from uoink_core.storage import (  # noqa: E402
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
-PORT = 5179
+PORT = _install_isolation.listen_port(5179)
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 
@@ -436,10 +440,14 @@ PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Uoink-Token on every subsequent request. The legacy
 # X-Yoink-Token header is still accepted through the v2.x alias window.
-TOKEN_PATH = HERE / "token.txt"
+_ISOLATION = _install_isolation.current_binding()
+TOKEN_PATH = (
+    _ISOLATION.token_path if _ISOLATION is not None else HERE / "token.txt"
+)
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
-DATA_ROOT = _platform.user_data_dir()
+# Isolated installs substitute the declared profile instead of the normal root.
+DATA_ROOT = _install_isolation.data_root(_platform.user_data_dir())
 RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
@@ -1878,6 +1886,9 @@ def _get_output_root() -> Path:
     A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
     the Desktop path turns out to be unwritable -- see
     _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        return isolated.output_dir
     override = (os.environ.get("UOINK_OUTPUT_DIR")
                 or os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
     if override:
@@ -1935,6 +1946,15 @@ def _apply_output_root_fallback() -> None:
     so /health and /diagnose can warn. /file accepts both candidates
     either way, so legacy yoinks still on the Desktop remain readable."""
     global DESKTOP_ROOT, SESSIONS_ROOT, _OUTPUT_ROOT_FALLBACK
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        DESKTOP_ROOT = isolated.output_dir
+        SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+        try:
+            DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            log.warning("isolated output root: cannot create %s -- %s", DESKTOP_ROOT, e)
+        return
     try:
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     except OSError as e:
@@ -1968,6 +1988,15 @@ def _allowed_roots() -> set[Path]:
     the user opts in to move their Desktop corpus, they may still have
     uoinks under Desktop\\Uoink OR legacy yoinks under Desktop\\Yoink whose
     thumbnails the Memory page needs to render."""
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        roots: set[Path] = set()
+        for candidate in (isolated.output_dir, isolated.profile):
+            try:
+                roots.add(candidate.resolve())
+            except OSError:
+                pass
+        return roots
     roots: set[Path] = set()
     desktop = _get_desktop_dir()
     for candidate in (DESKTOP_ROOT, desktop / "Uoink", desktop / "Yoink",
@@ -1980,7 +2009,9 @@ def _allowed_roots() -> set[Path]:
 
 
 # --- Logging ---------------------------------------------------------------
-LOG_PATH = HERE / "server.log"
+LOG_PATH = (
+    _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -17074,10 +17105,13 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         if script.exists():
             exe = _bundled_interpreter(gui=True) or Path(sys.executable)
             creationflags = 0x08000000 if sys.platform == "win32" else 0
+            env = os.environ.copy()
+            env.update(_install_isolation.child_environ())
             subprocess.Popen(
-                [str(exe), str(script)],
+                [str(exe), str(script), *_install_isolation.child_argv()],
                 cwd=str(HERE),
                 creationflags=creationflags,
+                env=env,
             )
             log.info("dashboard: spawned (%s)", reason)
             return True
@@ -17085,7 +17119,7 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        webbrowser.open(f"http://{HOST}:{PORT}/dashboard")
+        webbrowser.open(_install_isolation.helper_url("/dashboard"))
         log.info("dashboard: opened browser fallback (%s)", reason)
         return True
     except Exception as e:
@@ -17099,6 +17133,13 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
     accept()s. Worker threads stay daemonic (inherited from ThreadingHTTPServer)
     so Ctrl+C still exits promptly."""
     request_queue_size = 16
+
+    def server_bind(self):
+        if _install_isolation.current_binding() is not None:
+            self.allow_reuse_address = False
+            if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 def main(*, show_dashboard: bool = False):
@@ -17123,11 +17164,15 @@ def main(*, show_dashboard: bool = False):
     # idempotent, so this is a near-no-op on every boot after the first. Runs
     # before _get_index() so the copied index.db / settings are in place under
     # the new \Uoink\ DATA_ROOT before anything reads them. Never fatal.
-    try:
-        _mig = migrate_install.run_migration(app_dir=HERE)
-        log.info("install migration: %s", _mig.get("outcome"))
-    except Exception as e:
-        log.warning("install migration raised (non-fatal): %s", e)
+    # Isolated installs must not copy the ordinary Yoink/Uoink library.
+    if _install_isolation.current_binding() is None:
+        try:
+            _mig = migrate_install.run_migration(app_dir=HERE)
+            log.info("install migration: %s", _mig.get("outcome"))
+        except Exception as e:
+            log.warning("install migration raised (non-fatal): %s", e)
+    else:
+        log.info("install migration: skipped_isolated_install")
 
     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
     # active output root to %LOCALAPPDATA%\Uoink\output before the first
@@ -17143,7 +17188,11 @@ def main(*, show_dashboard: bool = False):
         # Port held by something we couldn't probe via /health (different
         # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
         # restart-on-failure policy recover or surface the outage.
-        log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
+        # Isolated mode never falls back to production port 5179.
+        if _install_isolation.current_binding() is not None:
+            log.error("isolated-port-occupied: failed to bind %s:%d -- %s", HOST, PORT, e)
+        else:
+            log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(1)
 
     _migrate_plaintext_anthropic_key()
@@ -17203,13 +17252,32 @@ def main(*, show_dashboard: bool = False):
     _start_podcast_feed_scheduler_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
-    pid_file = HERE / "server.pid"
+    isolated = _install_isolation.current_binding()
+    pid_file = isolated.pid_path if isolated is not None else HERE / "server.pid"
     try:
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
         pass
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
+    if isolated is not None:
+        try:
+            owned_image = (
+                _install_isolation.current_process_executable() or sys.executable
+            )
+            _install_isolation.write_runtime_identity(
+                isolated,
+                pid=os.getpid(),
+                executable=owned_image,
+                script=str(HERE / "server.py"),
+                created_ms=_install_isolation.current_process_created_ms(),
+                nonce=secrets.token_hex(8),
+            )
+        except (OSError, _install_isolation.IsolationError) as e:
+            log.error("isolated identity write failed: %s", e)
+            server.server_close()
+            sys.exit(1)
+        atexit.register(lambda binding=isolated: binding.identity_path.unlink(missing_ok=True))
 
     # S6: advertise only the resident address and bounded capabilities.
     # The lease is deliberately token-free and non-executable; credentials
@@ -17274,8 +17342,13 @@ def main(*, show_dashboard: bool = False):
                 _splash_script = str(HERE / "uoink_splash.py")
                 _splash_pyw = str(_bundled_interpreter(gui=True) or sys.executable)
                 _splash_flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
-                subprocess.Popen([_splash_pyw, _splash_script],
-                                 creationflags=_splash_flags)
+                _splash_env = os.environ.copy()
+                _splash_env.update(_install_isolation.child_environ())
+                subprocess.Popen(
+                    [_splash_pyw, _splash_script, *_install_isolation.child_argv()],
+                    creationflags=_splash_flags,
+                    env=_splash_env,
+                )
                 splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:
@@ -17746,6 +17819,8 @@ def doctor_payload() -> dict:
 def run_cli(argv: list[str]) -> int:
     """Tiny CLI dispatcher for the helper. Returns a process exit code.
 
+    - --isolated-stop / --isolated-upgrade-check : owned isolated identity
+      commands. They never probe port 5179 or kill by name/prefix.
     - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
@@ -17768,6 +17843,9 @@ def run_cli(argv: list[str]) -> int:
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
+        return _install_isolation.cli(argv)
+    argv = _install_isolation.strip_cli(argv)
     if argv and argv[0] == "doctor":
         argv = ["--doctor", *argv[1:]]
     elif argv and argv[0] == "rebuild-index":

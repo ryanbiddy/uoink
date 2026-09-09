@@ -28,6 +28,13 @@ contents through the original stdio entry after restart. Its broader companion
 run has 212 passed / the same eight mirror-hook failures. It still needs the
 final complete-tree and bundled-runtime observations.
 
+The isolated-install source is reviewed: 118 worker checks pass, and 130 pass
+in checkout with the read/startup companions; each run retains one Windows
+privilege skip. Setup requires explicit isolated app/profile/port arguments
+and close/restart suppression. Uninstall validates saved identity and confirms
+owned termination before deletion. This source has compiled with dummy staging;
+real installation, registry persistence and uninstall remain unexecuted.
+
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from

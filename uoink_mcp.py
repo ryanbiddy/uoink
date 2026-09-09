@@ -44,6 +44,9 @@ _APP_DIR = str(Path(__file__).resolve().parent)
 if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
 
+import uoink_install_isolation as _install_isolation  # noqa: E402
+_install_isolation.apply_from_process()
+
 
 try:
     import anyio

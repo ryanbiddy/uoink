@@ -39,6 +39,10 @@ from pathlib import Path
 log = logging.getLogger("uoink.splash")
 
 HERE = Path(__file__).parent.resolve()
+sys.path.insert(0, str(HERE))
+import uoink_install_isolation as _install_isolation  # noqa: E402
+_install_isolation.apply_from_process()
+
 SPLASH_URL = "http://127.0.0.1:5179/splash"
 DASHBOARD_SETTINGS_URL = "http://127.0.0.1:5179/dashboard#settings/byo-key"
 WIDTH, HEIGHT = 640, 450
@@ -62,24 +66,33 @@ def _read_version() -> str:
 VERSION = _read_version()
 
 
-def _sentinel_path() -> Path:
-    """Resolve %LOCALAPPDATA%\\Uoink\\.first-run-done via _platform."""
+def _data_root() -> Path:
+    binding = _install_isolation.current_binding()
+    if binding is not None:
+        return binding.profile
     try:
-        sys.path.insert(0, str(HERE))
-        import _platform  # noqa: F401 -- import for its side effect of resolving the path
-        return _platform.user_data_dir() / ".first-run-done"
+        import _platform
+        return _platform.user_data_dir()
     except Exception:
-        return HERE / ".first-run-done"
+        return HERE
+
+
+def _sentinel_path() -> Path:
+    """Resolve the first-run sentinel under the active data root."""
+    return _data_root() / ".first-run-done"
 
 
 def _extension_sentinel_path() -> Path:
-    """Resolve %LOCALAPPDATA%\\Uoink\\.extension-loaded for the load hint."""
-    try:
-        sys.path.insert(0, str(HERE))
-        import _platform
-        return _platform.user_data_dir() / ".extension-loaded"
-    except Exception:
-        return HERE / ".extension-loaded"
+    """Resolve .extension-loaded under the active data root."""
+    return _data_root() / ".extension-loaded"
+
+
+def _splash_url() -> str:
+    return _install_isolation.helper_url("/splash")
+
+
+def _dashboard_settings_url() -> str:
+    return _install_isolation.helper_url("/dashboard#settings/byo-key")
 
 
 def _extension_dir() -> Path:
@@ -177,7 +190,7 @@ def _sentinel_current(path: Path) -> bool:
 
 def _helper_health_ok() -> bool:
     try:
-        with urllib.request.urlopen("http://127.0.0.1:5179/health", timeout=1.0) as res:
+        with urllib.request.urlopen(_install_isolation.helper_url("/health"), timeout=1.0) as res:
             payload = json.loads(res.read().decode("utf-8"))
             return bool(payload.get("ok", True))
     except Exception:
@@ -341,10 +354,12 @@ def _spawn_dashboard(url: str | None = None) -> None:
     script = str(HERE / "uoink_dashboard.py")
     try:
         creationflags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
-        cmd = [sys.executable, script]
+        cmd = [sys.executable, script, *_install_isolation.child_argv()]
         if url:
             cmd.append(url)
-        subprocess.Popen(cmd, creationflags=creationflags)
+        env = os.environ.copy()
+        env.update(_install_isolation.child_environ())
+        subprocess.Popen(cmd, creationflags=creationflags, env=env)
     except Exception as e:
         log.warning("spawn dashboard failed: %s", e)
 
@@ -370,7 +385,7 @@ class JsApi:
         return True
 
     def open_settings(self):
-        _spawn_dashboard(DASHBOARD_SETTINGS_URL)
+        _spawn_dashboard(_dashboard_settings_url())
         self._dismiss()
         return True
 
@@ -518,7 +533,7 @@ def main() -> int:
     final_x = sw - WIDTH - MARGIN
 
     api = JsApi()
-    window_kwargs = {"url": SPLASH_URL}
+    window_kwargs = {"url": _splash_url()}
     if not _helper_health_ok():
         window_kwargs = {
             "html": _failed_splash_html("Uoink failed to start. Check the helper log."),

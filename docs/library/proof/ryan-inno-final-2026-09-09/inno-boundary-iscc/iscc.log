@@ -1,0 +1,3 @@
+Error on line 377 in C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d0577a56-f15\grok\_scratch\inno-boundary-iscc\uoink.iss: Column 3:
+Duplicate identifier 'FILE_ATTRIBUTE_REPARSE_POINT'
+Compile aborted.

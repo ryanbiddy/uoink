@@ -1,0 +1,40 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_isolation.py",
+      "tests/test_install_isolation_repair.py",
+      "tests/test_install_isolation_integrator_review.py",
+      "tests/test_installer_files_complete.py",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_installer_download_accuracy.py",
+      "tests/test_u11_installer_overhaul.py",
+      "tests/test_splash_hotfix.py",
+      "tests/test_c01_mcp_stdio.py",
+      "tests/test_s6_suite_integration.py",
+      "tests/test_migration_step0_characterization.py",
+      "tests/test_source_subscriptions_migration.py",
+      "tests/test_mac_layout_prep.py",
+      "tests/test_u12_first_run_polish.py",
+      "tests/test_inno_final_boundary.py",
+      "tests/test_preview_restart_read.py",
+      "tests/test_existing_index_read_open.py",
+      "tests/test_startup_anchor_transaction.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\iso-c5-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\iso-c5\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\iso-c5\\tests.log"
+  }
+]

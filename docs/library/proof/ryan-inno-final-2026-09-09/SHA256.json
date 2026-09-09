@@ -1,0 +1,108 @@
+{
+  "files": {
+    "integration.patch": {
+      "bytes": 344578,
+      "sha256": "397faf8de8992bf1e095ce65453b8f8ba804dfd8c89aea83bf41c91fc8e02cf2"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "paths.json": {
+      "bytes": 587,
+      "sha256": "06d3d380c83079d81c8767e3290066df1fa5cb796f383d6a1d2e7278be7f36ce"
+    },
+    "provenance.json": {
+      "bytes": 5948,
+      "sha256": "974e11da18bbd08cc1a97f2e87fc0bf9a9597155f38aa1ecfb4626d529458157"
+    },
+    "worker-original.iss": {
+      "bytes": 68349,
+      "sha256": "c03f338917ddc21e510ff728e59f09134d6c6bede8bc82d8ddf5c41fb72d5aa7"
+    },
+    "worker-original.patch": {
+      "bytes": 342657,
+      "sha256": "374f58a6b7835b73be82fc73f176058eb2cec6d83489014b7aba1e9eb91381c4"
+    },
+    "guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "inno-astra-compile/compile.json": {
+      "bytes": 977,
+      "sha256": "0118ae9a1277a0b5c7980ed0a04a57b74bcdd3957672f414fc5843784c617966"
+    },
+    "inno-astra-compile/iscc.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "inno-boundary-g1/results.json": {
+      "bytes": 1442,
+      "sha256": "f4f48882c93d24613b0b74d6eaa8bb85d777f6458e71c8684175082e48afc379"
+    },
+    "inno-boundary-g1/tests.log": {
+      "bytes": 2223,
+      "sha256": "2fb967828d4ee1091d4db49261587a5057fc7555f2ed4b59b74c0c43996bbdd1"
+    },
+    "inno-boundary-g1/tests.xml": {
+      "bytes": 16589,
+      "sha256": "3cfcb7af702a37b4898bca197373bba4cae747c2cec1a9e43381304c2df7d1fd"
+    },
+    "inno-boundary-iscc/compile.json": {
+      "bytes": 1359,
+      "sha256": "4b8db6c320cc22bbe1f29b90398557a33bf720e5ae92e6af848f90c6c2a9b6f2"
+    },
+    "inno-boundary-iscc/iscc.log": {
+      "bytes": 230,
+      "sha256": "208ed13fb5cf006e598006c47cb9828ba2be1ef0043617b1ad7ec5aab6abcd7c"
+    },
+    "inno-boundary-iscc-2/compile.json": {
+      "bytes": 1032,
+      "sha256": "a84e24a01544efdc59915649240b19c71d5ae1726d57f2a6a886d0d916afd388"
+    },
+    "inno-boundary-iscc-2/iscc.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "iso-c5/results.json": {
+      "bytes": 1482,
+      "sha256": "c0171cdae6bf6c2cf281635d9d066bcb9303ab36cc8733096d34dea2196c7214"
+    },
+    "iso-c5/tests.log": {
+      "bytes": 2023,
+      "sha256": "24a2f266fd3c4a8075072ae57f7b8ba76a54b94e7f54f222e8fe4797057b8511"
+    },
+    "iso-c5/tests.xml": {
+      "bytes": 18090,
+      "sha256": "7e8e6a33edcc7710ccede70ee0ffc5e25f8b69b8ad21fbe9a1113331703c59b9"
+    },
+    "iso-w4/results.json": {
+      "bytes": 1478,
+      "sha256": "9066b8670a3565d28884678ba492adb5a0c971fd93ea3358ddbf48112d41dee0"
+    },
+    "iso-w4/tests.log": {
+      "bytes": 2203,
+      "sha256": "8e87382c716d1bdc3f700e932ae6f662f9bed7402101e3c822188b7a266134d6"
+    },
+    "iso-w4/tests.xml": {
+      "bytes": 16549,
+      "sha256": "19f315a3ccb968cac744a05e27464cd59d144630ac4a7e43435b6239823f1932"
+    },
+    "iso-w5/results.json": {
+      "bytes": 1478,
+      "sha256": "a224ef9bac2f56417eea80581ea50f3ee13b844b8bb015b27d51770e9c7c449c"
+    },
+    "iso-w5/tests.log": {
+      "bytes": 2203,
+      "sha256": "db87a762bdef52b4f25874b4d1aec2be821a049ab7b72abfb9aac26e971fad96"
+    },
+    "iso-w5/tests.xml": {
+      "bytes": 16549,
+      "sha256": "6281b3b33006e53e31107a4bb5441954128af21d24a79c33f557b58af4c8bc66"
+    }
+  }
+}
