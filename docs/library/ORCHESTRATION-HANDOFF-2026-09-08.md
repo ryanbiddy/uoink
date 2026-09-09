@@ -853,7 +853,7 @@ the complete B5 union and new alias/operation-ownership evidence. All 19
 AW-10 sealed files match committed bytes. No B5 production change has been
 integrated; the checkout remains on the accepted A3 production baseline.
 
-### 2026-09-08 21:38 PDT - Explicit client configuration prepared
+### 2026-09-08 21:36 PDT - Explicit client configuration prepared
 
 The AW preparation now generates fresh, explicit client settings and launch
 arguments from the frozen staged inventory. Only two native resource tools,
@@ -864,3 +864,13 @@ is preserved. Two synthetic checks passed in 0.68 seconds; five artifacts
 are sealed in the client-config-check archive. These are preparation checks,
 not client observations. B6 is still active; real-client execution waits for
 its integrated result and final AW-4 ruling.
+
+### 2026-09-08 - Candidate notes prepared while B6 runs
+
+All five client-configuration preparation hashes match committed blobs at
+`09c88dd`. Its staged metadata inventory is the shared registry; the actual
+stdio inventory must still come from client discovery. The release-notes
+draft is in checkout scratch as `RELEASE-NOTES-LIVING-LIBRARY-draft.md`.
+Phase 3/5/6 dispositions and retained results are filled in; Phase 4, final
+full-tree, candidate SHA and installer fields remain explicitly pending.
+Promote it only after the Queue's candidate prerequisites are satisfied.
