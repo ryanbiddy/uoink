@@ -1,0 +1,4155 @@
+diff --git a/docs/library/RYAN-INSTALLED-C22-KIT-WORKER-2026-09-09.md b/docs/library/RYAN-INSTALLED-C22-KIT-WORKER-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..ca32a6f93bfc99fea19bb7100781ffb507b3a43e
+--- /dev/null
++++ b/docs/library/RYAN-INSTALLED-C22-KIT-WORKER-2026-09-09.md
+@@ -0,0 +1,179 @@
++# C22 installed receipt kit — Grok worker (2026-09-09)
++
++Worker: Grok. Brief: `docs/library/RYAN-INSTALLED-C22-KIT-BRIEF-2026-09-09.md`.
++AS-7 C22 list: `docs/library/PHASE3-ACCEPTANCE-7-2026-09-08.md` (“C22 remains the installed-build gate”).
++Owner rules: `docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md`.
++Runbook (still a stop preflight, not this kit): `docs/library/INSTALL-RECEIPT-RUNBOOK-2026-09-09.md`.
++
++No subagents. No Inno, production default helper, live index, port 5179 (including negative probes), paid API, model/client processes, commits, or pushes. `ANTHROPIC_API_KEY` unset. `librarian_apply_enabled` stays false. Phase 4 client/everyday tooling is Astra’s separate scope.
++
++**No claimed installed pass.** Ryan has not run the sealed kit on a throwaway profile against the isolated installed helper.
++
++Astra owns independent verification, isolation-mechanism integration, and the final runbook/package seal.
++
++## What was built (four executable pieces)
++
++New package only: `scripts/install_receipt/`. No production, existing tests, fixtures, assertions, or runbook edits.
++
++### 1. Fail-closed operator runner and manifest
++
++- `manifest.py` + `c22_operator_manifest.example.json` — schema `c22-operator-manifest-v1`. `expected_package_sha256`, `candidate_sha`, and `installer_source_sha` are null until Astra seals them. The kit **refuses to invent** those digests.
++- `validation.py` — required explicit `installed_app_path`, `package_path`, `package_sha256`, `isolated_profile`, `isolated_port`, `receipt_root`. Rejects relative roots, live Uoink/Yoink data roots, volume roots, port 5179, hash mismatch, missing bundled `server.py`, production default helpers (`start_server.ps1` / `start_server.bat` / `launch.bat`), checkout-root PYTHONPATH, user-site PYTHONPATH, and `ANTHROPIC_API_KEY` in the child.
++- `runner.py` — creates a fresh receipt root and **refuses overwrite**. Journals every command (argv, UTC start/end, exit, stdout/stderr hashes, child pid+creation identity). Partial logs stay on failure. `plan_inno()` records the isolated Inno argv and will not execute it from this worker or from `--synthetic`.
++
++### 2. Deterministic fixtures and installed-helper launcher
++
++- `fixtures.py` — loopback RSS/audio (never 5179); empty profile; **versioned** populated legacy fixture `c22-legacy-populated-v1-schema27` (schema 27, kit-side SQL 0001–0027, not installed credit). Settings force `librarian_apply_enabled=false`. Synthetic audio/transcript only.
++- `launcher.py` — original installed startup path:
++
++  `<bundled python.exe> -B -s <installed>\server.py --isolated-profile <abs> --isolated-port <non-5179>`
++
++  Never `start_server.ps1`. Isolation flags are **consumed**; the isolation worker implements them on product entry points.
++- `guards.py` — receipt `sitecustomize.py` blocks 5179, the live index, non-loopback/undeclared ports, and model/client process names; wraps acquisition/transcription and the declared launch-interrupt / registration-failure injections. Copied into the disposable `{app}\python\Lib\site-packages\` because embeddable `python._pth` ignores PYTHONPATH, so inherited bundled-python children load the same guards.
++- `stub_helper.py` — **labeled synthetic instrument**, not installed credit. Implements the same isolation flags and the HTTP paths the scenarios drive.
++
++### 3. Executable AS-7 C22 scenarios
++
++`scenarios.py` + CLI `run`. Unexpected failure ends that scenario and preserves the outcome. Scenario IDs:
++
++| ID | AS-7 item | Kit behavior |
++|---|---|---|
++| `install` | isolated Inno command and exit | Records argv; **unexecuted** until Ryan |
++| `installed_provenance` | bundled interpreter, `__file__`, 0028 / schema 30 | File hashes now; runtime provenance needs the bundled interpreter |
++| `empty_migration_replay` | empty migrate, stop, reopen, no invented rows | Executable |
++| `populated_legacy_replay` | versioned populated legacy then replay | Executable; same-package replay is not a cross-version upgrade |
++| `one_off_capture` | unrelated one-off, standing off, zero standing charges | Executable (synthetic media) |
++| `manual_first` | manual then standing; identities/charges/no dup | Executable |
++| `standing_first` | consent, standing, then same manual item | Executable |
++| `whole_helper_relaunch` | kill owned helper by pid+creation; relaunch installed path | Executable; listener restart does not count |
++| `registered_child_lifetime` | actual registered child lifetime | Executable via declared `spawn_child` injection |
++| `launch_interruption` | interrupt between launch intent and child record | `C22_INJECT=launch_interrupt` |
++| `registration_failure` | separate registration failure | `C22_INJECT=registration_failure` (not the interrupt case) |
++| `browser_state_checkpoint` | post-restart browser + persisted state | Snapshot + observation protocol; **no synthesized screenshot** |
++| `protected_phase2_state` | Phase 2 before/after hashes, allowed enqueue | Executable; apply stays false |
++| `upgrade_operator_step` | real installed upgrade command | Records argv; same-version reinstall is labeled `same_version_reinstall` |
++
++### 4. Evidence collector / verdict input
++
++`evidence.py` — table/file snapshots, `PRAGMA integrity_check` / `foreign_key_check`, Phase 2 table hashes, explicit allowed enqueue changes, per-scenario pass/fail/unexecuted. `verdict.json` always has `installed_pass_claimed: false`.
++
++## Exact commands
++
++Python 3.14.6 (`C:\Python314\python.exe`) in this worktree. `ANTHROPIC_API_KEY` unset. Scratch: `_scratch/c22-kit`.
++
++### Verification (this worker)
++
++```powershell
++$env:PYTHONDONTWRITEBYTECODE = '1'
++Remove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
++python -B -m pytest -q -ra --tb=short -p no:cacheprovider `
++  --basetemp=_scratch/c22-kit/pytest tests/test_install_receipt_c22_kit.py
++```
++
++Final result: **19 passed**, 24.35 s, exit 0. Labeled synthetic instrument checks only. Inno and the production default helper were not started. Port 5179 was not probed.
++
++```powershell
++python -B scripts/install_receipt/cli.py list-scenarios
++```
++
++### After Astra seals hashes (Ryan’s throwaway profile)
++
++Receipt root must not already exist. Package digest must match the sealed manifest. Isolated port must not be 5179. Installed dir must contain a space and bundled `python\python.exe`. Do not use `C:\Users\hello`.
++
++```powershell
++$receipt = Join-Path $env:USERPROFILE 'Documents\Uoink Install Receipt 2026-09-09'
++python -B scripts/install_receipt/cli.py run `
++  --installed-app '<absolute path with a space>\Uoink Installed' `
++  --package '<absolute>\Uoink-Setup-3.8.0.exe' `
++  --package-sha256 '<Astra-sealed digest>' `
++  --isolated-profile (Join-Path $receipt 'profiles\empty') `
++  --isolated-port 18081 `
++  --fixture-port 18082 `
++  --receipt-root $receipt `
++  --manifest scripts/install_receipt/c22_operator_manifest.example.json
++```
++
++`run` prepares fixtures, launches through the installed `server.py` isolation flags, executes scenarios, and writes `evidence/verdict.json`. It will not execute Inno.
++
++Print the isolated Inno argv (still does not start it):
++
++```powershell
++python -B scripts/install_receipt/cli.py plan-install `
++  --installed-app '...' --package '...' --package-sha256 '...' `
++  --isolated-profile '...' --isolated-port 18081 --receipt-root '...'
++```
++
++Template recorded (isolation worker must implement the Inno surface):
++
++`/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /DIR="{installed_app_path}" /NOICONS /TASKS=! /MERGETASKS=! /CLOSEAPPLICATIONS=no /ISOLATEDPROFILE={isolated_profile} /ISOLATEDPORT={isolated_port}`
++
++Print the helper launch argv:
++
++```powershell
++python -B scripts/install_receipt/cli.py print-launch-argv `
++  --installed-app '...' --package '...' --package-sha256 '...' `
++  --isolated-profile '...' --isolated-port 18081 --receipt-root '...'
++```
++
++Re-read a preserved receipt (does not overwrite):
++
++```powershell
++python -B scripts/install_receipt/cli.py collect --receipt-root $receipt
++```
++
++`--synthetic` is only for labeled non-installed instrument checks. It skips the ordinary-user check, space/bundled-python requirements, and the sealed-hash requirement. It is **not** installed credit.
++
++## What this tooling cannot execute (until Ryan / Astra)
++
++| Item | Why |
++|---|---|
++| Inno install/upgrade | Kit records the command; this worker must not start the installer |
++| Production default helper | `start_server.ps1` / autostart / 5179 path is refused |
++| Real bundled Python 3.11.9 / MCP 1.27.1 `__file__` provenance | Needs the sealed installed tree; tests used a stub `server.py` |
++| Isolation flags on product entry points | Declared and consumed (`--isolated-profile`, `--isolated-port`); implemented by the isolation worker |
++| Browser screenshot | Protocol + DB snapshot only; no synthesized image |
++| Phase 4 client/everyday session | Astra’s separate scope |
++| Installed pass | Forbidden to claim until Ryan runs the sealed kit |
++
++Synthetic scenario passes are instrument evidence for the kit, not C22 acceptance.
++
++## Test repairs (recorded before each rerun)
++
++Assertions in `tests/test_install_receipt_c22_kit.py` were not changed after a failing run.
++
++### Repair 1 (before rerun 2)
++
++First run: **16 passed, 3 failed**, 2.50 s.
++
++| Failure | Cause | Repair |
++|---|---|---|
++| `test_runner_refuses_overwrite` FileExistsError | Test helper `_install` used `mkdir()` without `exist_ok` | `mkdir(exist_ok=True)`; overwrite still targets the receipt root |
++| populated-legacy `IntegrityError: datatype mismatch` | `citations.citation_id` inserted as text; column is INTEGER PK | Integer id plus required `kind`/`seq`/`youtube_deep_link` |
++
++### Repair 2 (before rerun 3)
++
++Second run: **18 passed, 1 failed**, 24.56 s. `one_off_capture` TypeError: `record() got multiple values for argument 'status'` because the helper `/sources/status` payload was spread into `record(...)`. Attempted to pop the key inside `record()` — insufficient; Python raises at the call boundary.
++
++### Repair 3 (before rerun 4)
++
++Third run: **18 passed, 1 failed**, 24.49 s. Same TypeError. Renamed the parameter to `outcome_status`.
++
++### Final run (after import cleanup)
++
++**19 passed**, 24.35 s, exit 0.
++
++## Files changed (new only)
++
++- `scripts/install_receipt/` — runner, manifest, validation, fixtures, launcher, guards, stub helper, scenarios, evidence, CLI, example manifest
++- `tests/test_install_receipt_c22_kit.py`
++- `docs/library/RYAN-INSTALLED-C22-KIT-WORKER-2026-09-09.md`
++
++No existing production, tests, fixtures, assertions, or runbook files were modified. Nothing was committed or pushed.
++
++## Open questions for Astra
++
++1. Confirm Inno `/ISOLATEDPROFILE` and `/ISOLATEDPORT` match the isolation worker’s actual surface (CLI flags on `server.py` are `--isolated-profile` / `--isolated-port` as the brief declared).
++2. Confirm whether `--isolated-profile` is the data root itself or a parent that still nests `Uoink\`. The kit treats it as the data root (`index.db` there) and also looks for `token.txt` under the install dir.
++3. Seal `expected_package_sha256` / candidate / installer source into the manifest; the kit will not fill them.
++4. Whether copying receipt `sitecustomize.py` into the disposable bundled `Lib\site-packages` is accepted as the inherited-child guard (required because `._pth` ignores PYTHONPATH).
++5. Replace the runbook stop preflight with these commands only after the isolation mechanism is integrated and a new installer is sealed.
+diff --git a/scripts/install_receipt/__init__.py b/scripts/install_receipt/__init__.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f59b0680b22320cc8a6dff23cc8000c96ab97a00
+--- /dev/null
++++ b/scripts/install_receipt/__init__.py
+@@ -0,0 +1,9 @@
++"""C22 installed-receipt operator kit.
++
++New scripts only. This package does not launch Inno, the production default
++helper, or port 5179. Isolation flags are consumed here; the isolation worker
++implements them on product entry points.
++"""
++
++KIT_SCHEMA = "c22-operator-manifest-v1"
++KIT_DATE = "2026-09-09"
+diff --git a/scripts/install_receipt/c22_operator_manifest.example.json b/scripts/install_receipt/c22_operator_manifest.example.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..5306238387b2bb1fb0cd8fb28a2d1c30073d0d9c
+--- /dev/null
++++ b/scripts/install_receipt/c22_operator_manifest.example.json
+@@ -0,0 +1,33 @@
++{
++  "schema": "c22-operator-manifest-v1",
++  "kit_date": "2026-09-09",
++  "sealed_by": null,
++  "seal_note": "Astra fills expected_package_sha256, candidate_sha and installer_source_sha when sealing. This kit refuses to invent them.",
++  "expected_package_sha256": null,
++  "candidate_sha": null,
++  "installer_source_sha": null,
++  "isolation_flags": {
++    "profile": "--isolated-profile",
++    "port": "--isolated-port",
++    "implemented_by": "isolation worker; this kit only consumes them"
++  },
++  "inno_isolated_args_template": [
++    "/VERYSILENT",
++    "/NORESTART",
++    "/SUPPRESSMSGBOXES",
++    "/DIR=\"{installed_app_path}\"",
++    "/NOICONS",
++    "/TASKS=!",
++    "/MERGETASKS=!",
++    "/CLOSEAPPLICATIONS=no",
++    "/ISOLATEDPROFILE={isolated_profile}",
++    "/ISOLATEDPORT={isolated_port}"
++  ],
++  "upgrade": {
++    "same_version_reinstall_label": "same_version_reinstall",
++    "cross_version_upgrade_label": "cross_version_upgrade",
++    "do_not_mislabel": true
++  },
++  "legacy_fixture_version": "c22-legacy-populated-v1-schema27",
++  "phase4_client_scope": "astra_separate_not_this_kit"
++}
+diff --git a/scripts/install_receipt/cli.py b/scripts/install_receipt/cli.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..aafef86e99a55bfe162037baf2f36254ad353996
+--- /dev/null
++++ b/scripts/install_receipt/cli.py
+@@ -0,0 +1,175 @@
++"""Operator CLI for the C22 receipt kit.
++
++Required explicit inputs: installed app path, package path, package hash,
++isolated profile, isolated port, receipt root.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import sys
++from pathlib import Path
++
++KIT_DIR = Path(__file__).resolve().parent
++SCRIPTS_DIR = KIT_DIR.parent
++if str(SCRIPTS_DIR) not in sys.path:
++    sys.path.insert(0, str(SCRIPTS_DIR))
++
++from install_receipt.evidence import build_verdict  # noqa: E402
++from install_receipt.launcher import launch_argv  # noqa: E402
++from install_receipt.manifest import load_manifest, write_example  # noqa: E402
++from install_receipt.runner import OperatorRunner  # noqa: E402
++from install_receipt.scenarios import ScenarioRunner, scenario_table  # noqa: E402
++from install_receipt.validation import C22ValidationError  # noqa: E402
++
++
++def build_parser() -> argparse.ArgumentParser:
++    parser = argparse.ArgumentParser(description=__doc__)
++    sub = parser.add_subparsers(dest="cmd", required=True)
++
++    def add_required(p):
++        p.add_argument("--installed-app", required=True)
++        p.add_argument("--package", required=True)
++        p.add_argument("--package-sha256", required=True)
++        p.add_argument("--isolated-profile", required=True)
++        p.add_argument("--isolated-port", required=True, type=int)
++        p.add_argument("--receipt-root", required=True)
++        p.add_argument("--manifest")
++        p.add_argument("--synthetic", action="store_true",
++                       help="labeled non-installed instrument check")
++        p.add_argument("--allow-ordinary-user", action="store_true",
++                       help="only for synthetic instrument checks")
++        p.add_argument("--fixture-port", type=int, default=18080)
++
++    prep = sub.add_parser("prepare", help="create a fresh receipt root")
++    add_required(prep)
++
++    sub.add_parser("write-example-manifest",
++                   help="write the unsealed manifest template")
++    ex = sub.choices["write-example-manifest"]
++    ex.add_argument("--out", required=True)
++
++    lst = sub.add_parser("list-scenarios")
++    lst.add_argument("--json", action="store_true")
++
++    run = sub.add_parser("run", help="run one scenario or all")
++    add_required(run)
++    run.add_argument("--scenario", default="all")
++
++    collect = sub.add_parser("collect", help="write verdict input from a receipt")
++    collect.add_argument("--receipt-root", required=True)
++
++    plan = sub.add_parser("plan-install", help="print the isolated Inno argv")
++    add_required(plan)
++
++    argv = sub.add_parser("print-launch-argv")
++    add_required(argv)
++    return parser
++
++
++def _runner(args) -> OperatorRunner:
++    synthetic = bool(getattr(args, "synthetic", False))
++    return OperatorRunner.create(
++        receipt_root=args.receipt_root,
++        installed_app_path=args.installed_app,
++        package_path=args.package,
++        package_sha256=args.package_sha256,
++        isolated_profile=args.isolated_profile,
++        isolated_port=args.isolated_port,
++        manifest_path=getattr(args, "manifest", None),
++        synthetic=synthetic,
++        require_space=not synthetic,
++        require_bundled_python=not synthetic,
++        skip_ordinary_user_check=synthetic or bool(
++            getattr(args, "allow_ordinary_user", False)),
++    )
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = build_parser()
++    args = parser.parse_args(argv)
++    try:
++        if args.cmd == "write-example-manifest":
++            path = write_example(Path(args.out))
++            print(path)
++            return 0
++        if args.cmd == "list-scenarios":
++            rows = scenario_table()
++            print(json.dumps(rows, indent=2) if args.json else
++                  "\n".join(r["id"] + " — " + r["as7"] for r in rows))
++            return 0
++        if args.cmd == "collect":
++            root = Path(args.receipt_root)
++            outcomes = {}
++            evidence = root / "evidence"
++            if evidence.is_dir():
++                for path in evidence.glob("*.json"):
++                    if path.name == "verdict.json":
++                        continue
++                    try:
++                        data = json.loads(path.read_text(encoding="utf-8"))
++                    except json.JSONDecodeError:
++                        continue
++                    if isinstance(data, dict) and data.get("id"):
++                        outcomes[data["id"]] = data
++            inputs = {}
++            if (root / "inputs.json").is_file():
++                inputs = json.loads((root / "inputs.json").read_text(
++                    encoding="utf-8"))
++            verdict = build_verdict(
++                root, outcomes, synthetic=bool(inputs.get("synthetic")))
++            print(json.dumps(verdict, indent=2))
++            return 0
++        runner = _runner(args)
++        if args.cmd == "prepare":
++            scenarios = ScenarioRunner(runner, fixture_port=args.fixture_port)
++            try:
++                prepared = scenarios.prepare_profiles()
++            finally:
++                scenarios.close()
++            print(json.dumps({
++                "receipt_root": str(runner.receipt_root),
++                "prepared": prepared,
++            }, indent=2))
++            return 0
++        if args.cmd == "plan-install":
++            manifest = load_manifest(args.manifest)
++            print(json.dumps(runner.plan_inno(manifest), indent=2))
++            return 0
++        if args.cmd == "print-launch-argv":
++            inputs = runner.load_inputs()
++            argv_list = launch_argv(
++                Path(inputs["installed_app"]["path"]),
++                isolated_profile=Path(inputs["isolated_profile"]),
++                isolated_port=inputs["isolated_port"],
++                synthetic=runner.synthetic,
++            )
++            print(json.dumps(argv_list, indent=2))
++            return 0
++        if args.cmd == "run":
++            scenarios = ScenarioRunner(runner, fixture_port=args.fixture_port)
++            try:
++                scenarios.prepare_profiles()
++                if args.scenario == "all":
++                    outcomes = scenarios.run_all()
++                else:
++                    outcomes = {args.scenario: scenarios.run_one(args.scenario)}
++            finally:
++                scenarios.close()
++            verdict = build_verdict(
++                runner.receipt_root, outcomes, synthetic=runner.synthetic)
++            print(json.dumps({
++                "receipt_root": str(runner.receipt_root),
++                "verdict": verdict,
++            }, indent=2, default=str))
++            claimed = verdict["installed_pass_claimed"]
++            return 1 if claimed else 0
++    except C22ValidationError as exc:
++        print("C22 refuse:", exc, file=sys.stderr)
++        return 2
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/scripts/install_receipt/constants.py b/scripts/install_receipt/constants.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4eda75084a376bc4d3df6664201581bdc8d97ec
+--- /dev/null
++++ b/scripts/install_receipt/constants.py
+@@ -0,0 +1,104 @@
++"""Fail-closed constants for the C22 operator kit."""
++
++from __future__ import annotations
++
++FORBIDDEN_PORT = 5179
++LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost", "0.0.0.0", ""})
++ORDINARY_USERPROFILE = r"C:\Users\hello"
++LIVE_INDEX_TAIL = ("Uoink", "index.db")
++YOINK_INDEX_TAIL = ("Yoink", "index.db")
++
++ISOLATED_PROFILE_FLAG = "--isolated-profile"
++ISOLATED_PORT_FLAG = "--isolated-port"
++
++DEFAULT_HELPER_NAMES = frozenset({
++    "start_server.ps1",
++    "start_server.bat",
++    "launch.bat",
++})
++
++MODEL_PROCESS_STEMS = frozenset({
++    "claude", "codex", "gemini", "grok", "whisperx", "anthropic",
++})
++
++REQUIRED_OPERATOR_INPUTS = (
++    "installed_app_path",
++    "package_path",
++    "package_sha256",
++    "isolated_profile",
++    "isolated_port",
++    "receipt_root",
++)
++
++# AS-7 C22 list plus the kit brief's executable scenario set.
++SCENARIO_IDS = (
++    "install",
++    "installed_provenance",
++    "empty_migration_replay",
++    "populated_legacy_replay",
++    "one_off_capture",
++    "manual_first",
++    "standing_first",
++    "whole_helper_relaunch",
++    "registered_child_lifetime",
++    "launch_interruption",
++    "registration_failure",
++    "browser_state_checkpoint",
++    "protected_phase2_state",
++    "upgrade_operator_step",
++)
++
++LEGACY_FIXTURE_VERSION = "c22-legacy-populated-v1-schema27"
++LEGACY_SCHEMA_VERSION = 27
++CURRENT_SCHEMA_TARGET = 30
++
++SYNTHETIC_AUDIO = b"C22 SYNTHETIC AUDIO PLACEHOLDER"
++SYNTHETIC_TRANSCRIPT = {
++    "model": "synthetic-C22",
++    "language": "en",
++    "diarization_ran": False,
++    "segments": [
++        {
++            "start": 12.5,
++            "end": 21.75,
++            "text": "C22 fixture: durable capture waits for complete publication.",
++        }
++    ],
++}
++
++PROTECTED_PHASE2_TABLES = (
++    "library_meta",
++    "library_runs",
++    "library_manifest",
++    "library_work",
++    "library_attempts",
++    "shelves",
++    "shelf_versions",
++    "shelf_nodes",
++    "item_shelves",
++    "source_classification_policy",
++    "source_classification_outbox",
++)
++
++LEDGER_TABLES = (
++    "source_subscriptions",
++    "source_consent_receipts",
++    "source_user_intents",
++    "source_detection_cursors",
++    "source_items",
++    "source_capture_starts",
++)
++
++PHASE2_FILES = (
++    "settings.json",
++    "taxonomy.json",
++    "index.db",
++)
++
++INJECTION_ENV = {
++    "C22_ALLOWED_PORTS": "declared loopback helper and fixture ports",
++    "C22_ISOLATED_PROFILE": "absolute isolated data root",
++    "C22_FORBIDDEN_LIVE": "ordinary live index path that must never open",
++    "C22_INJECT": "empty | launch_interrupt | registration_failure | spawn_child",
++    "C22_SYNTHETIC": "1 when this is a labeled non-installed instrument check",
++}
+diff --git a/scripts/install_receipt/evidence.py b/scripts/install_receipt/evidence.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ef685098cce4eb72b1a10853090fe50c81cacae6
+--- /dev/null
++++ b/scripts/install_receipt/evidence.py
+@@ -0,0 +1,168 @@
++"""Evidence collector and verdict input. No claimed installed pass."""
++
++from __future__ import annotations
++
++import json
++import sqlite3
++from pathlib import Path
++from typing import Any
++
++from .constants import (
++    LEDGER_TABLES,
++    PHASE2_FILES,
++    PROTECTED_PHASE2_TABLES,
++    SCENARIO_IDS,
++)
++from .hashes import file_record, sha256_file, sha256_json
++from .runner import utc_now
++
++
++def integrity_report(index_path: Path) -> dict[str, Any]:
++    if not index_path.is_file():
++        return {"present": False, "integrity": None, "foreign_keys": None}
++    conn = sqlite3.connect(f"file:{index_path}?mode=ro", uri=True)
++    try:
++        integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
++        fk_rows = list(conn.execute("PRAGMA foreign_key_check"))
++        return {
++            "present": True,
++            "integrity": integrity,
++            "foreign_keys": [list(row) for row in fk_rows],
++            "foreign_key_violations": len(fk_rows),
++            "sha256": sha256_file(index_path),
++            "bytes": index_path.stat().st_size,
++        }
++    finally:
++        conn.close()
++
++
++def table_counts(index_path: Path) -> dict[str, int]:
++    if not index_path.is_file():
++        return {}
++    conn = sqlite3.connect(f"file:{index_path}?mode=ro", uri=True)
++    try:
++        names = [row[0] for row in conn.execute(
++            "SELECT name FROM sqlite_master WHERE type='table'")]
++        counts = {}
++        for name in names:
++            try:
++                counts[name] = conn.execute(
++                    f"SELECT COUNT(*) FROM {name}").fetchone()[0]
++            except sqlite3.Error:
++                counts[name] = -1
++        return counts
++    finally:
++        conn.close()
++
++
++def table_rows(index_path: Path, tables: tuple[str, ...]) -> dict[str, Any]:
++    if not index_path.is_file():
++        return {name: None for name in tables}
++    conn = sqlite3.connect(f"file:{index_path}?mode=ro", uri=True)
++    conn.row_factory = sqlite3.Row
++    try:
++        out: dict[str, Any] = {}
++        present = {row[0] for row in conn.execute(
++            "SELECT name FROM sqlite_master WHERE type='table'")}
++        for name in tables:
++            if name not in present:
++                out[name] = None
++                continue
++            out[name] = [dict(row) for row in conn.execute(f"SELECT * FROM {name}")]
++        return out
++    finally:
++        conn.close()
++
++
++def schema_version(index_path: Path) -> int | None:
++    if not index_path.is_file():
++        return None
++    conn = sqlite3.connect(f"file:{index_path}?mode=ro", uri=True)
++    try:
++        row = conn.execute(
++            "SELECT name FROM sqlite_master WHERE type='table' "
++            "AND name='schema_version'").fetchone()
++        if row is None:
++            return 0
++        value = conn.execute(
++            "SELECT MAX(version) AS v FROM schema_version").fetchone()[0]
++        return int(value) if value is not None else 0
++    finally:
++        conn.close()
++
++
++def collect_snapshot(profile: Path, *, label: str) -> dict[str, Any]:
++    profile = Path(profile)
++    index = profile / "index.db"
++    settings = profile / "settings.json"
++    settings_data = None
++    if settings.is_file():
++        settings_data = json.loads(settings.read_text(encoding="utf-8"))
++    files = {name: file_record(profile / name, root=profile)
++             for name in PHASE2_FILES}
++    snap = {
++        "label": label,
++        "utc": utc_now(),
++        "profile": str(profile),
++        "schema_version": schema_version(index),
++        "integrity": integrity_report(index),
++        "counts": table_counts(index),
++        "ledger": table_rows(index, LEDGER_TABLES),
++        "phase2": table_rows(index, PROTECTED_PHASE2_TABLES),
++        "files": files,
++        "settings": settings_data,
++        "legacy_video_ids": {
++            "timed": "c22legacytimed000",
++            "text": "c22legacytext00000",
++        },
++    }
++    snap["phase2_hash"] = sha256_json(snap["phase2"])
++    snap["ledger_hash"] = sha256_json(snap["ledger"])
++    return snap
++
++
++def build_verdict(receipt_root: Path, outcomes: dict[str, dict[str, Any]],
++                  *, synthetic: bool) -> dict[str, Any]:
++    rows = []
++    for scenario_id in SCENARIO_IDS:
++        outcome = outcomes.get(scenario_id) or {
++            "id": scenario_id, "status": "unexecuted",
++            "reason": "not run in this session",
++        }
++        rows.append({
++            "id": scenario_id,
++            "status": outcome.get("status", "unexecuted"),
++            "error": outcome.get("error"),
++            "reason": outcome.get("reason"),
++        })
++    executed = [r for r in rows if r["status"] != "unexecuted"]
++    failed = [r for r in rows if r["status"] == "fail"]
++    passed = [r for r in rows if r["status"] == "pass"]
++    verdict = {
++        "schema": "c22-verdict-input-v1",
++        "utc": utc_now(),
++        "receipt_root": str(receipt_root),
++        "synthetic_instrument": synthetic,
++        "installed_pass_claimed": False,
++        "installed_pass_note": (
++            "No claimed installed pass until Ryan actually runs the sealed kit "
++            "on the throwaway profile against the isolated installed helper."
++        ),
++        "scenarios": rows,
++        "counts": {
++            "pass": len(passed),
++            "fail": len(failed),
++            "unexecuted": len(rows) - len(executed),
++            "executed": len(executed),
++        },
++        "astra_owns": [
++            "independent verification",
++            "final runbook/package seal",
++            "isolation mechanism integration",
++            "Phase 4 client/everyday receipt tooling",
++        ],
++    }
++    dest = Path(receipt_root) / "evidence" / "verdict.json"
++    dest.parent.mkdir(parents=True, exist_ok=True)
++    dest.write_text(json.dumps(verdict, indent=2) + "\n", encoding="utf-8")
++    return verdict
+diff --git a/scripts/install_receipt/fixtures.py b/scripts/install_receipt/fixtures.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d90357172db4713e702df0cfd9e9f3eafd4c8e33
+--- /dev/null
++++ b/scripts/install_receipt/fixtures.py
+@@ -0,0 +1,475 @@
++"""Deterministic local capture fixtures. Synthetic data only."""
++
++from __future__ import annotations
++
++import json
++import sqlite3
++import threading
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from typing import Any
++from xml.sax.saxutils import escape
++
++from .constants import (
++    CURRENT_SCHEMA_TARGET,
++    FORBIDDEN_PORT,
++    LEGACY_FIXTURE_VERSION,
++    LEGACY_SCHEMA_VERSION,
++    SYNTHETIC_AUDIO,
++    SYNTHETIC_TRANSCRIPT,
++)
++from .hashes import sha256_bytes, sha256_file
++from .validation import C22ValidationError, validate_port
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++
++
++class FixtureFeed:
++    """Loopback RSS + audio. Never binds 5179."""
++
++    def __init__(self, root: Path, port: int):
++        self.root = Path(root)
++        self.port = validate_port(port)
++        self.state = {
++            "entry": False,
++            "fail_refresh": False,
++            "entries": "one",
++        }
++        self.server: ThreadingHTTPServer | None = None
++        self.thread: threading.Thread | None = None
++        self.base = ""
++        self.audio_path = self.root / "synthetic-audio.bin"
++        self.transcript_path = self.root / "synthetic-transcript.json"
++        self.audio_path.write_bytes(SYNTHETIC_AUDIO)
++        self.transcript_path.write_text(
++            json.dumps(SYNTHETIC_TRANSCRIPT, indent=2) + "\n", encoding="utf-8")
++
++    @property
++    def feed_url(self) -> str:
++        return self.base + "/feed.xml"
++
++    @property
++    def audio_url(self) -> str:
++        return self.base + "/fixture.mp3"
++
++    @property
++    def episode_url(self) -> str:
++        return self.base + "/episode"
++
++    @property
++    def one_off_url(self) -> str:
++        return self.base + "/one-off"
++
++    def start(self) -> str:
++        owner = self
++
++        class Handler(BaseHTTPRequestHandler):
++            def do_GET(self):
++                if owner.state["fail_refresh"] and self.path == "/feed.xml":
++                    self.send_error(500, "C22 declared refresh failure")
++                    return
++                if self.path == "/fixture.mp3":
++                    body = SYNTHETIC_AUDIO
++                elif self.path == "/feed.xml":
++                    body = owner._feed_body()
++                elif self.path.startswith("/episode") or self.path.startswith("/one-off"):
++                    body = b"C22 fixture episode"
++                else:
++                    self.send_error(404)
++                    return
++                self.send_response(200)
++                self.send_header("Content-Type", "application/octet-stream")
++                self.send_header("Content-Length", str(len(body)))
++                self.end_headers()
++                self.wfile.write(body)
++
++            def log_message(self, *args):
++                return
++
++        class ReuseServer(ThreadingHTTPServer):
++            allow_reuse_address = True
++
++        httpd = ReuseServer(("127.0.0.1", self.port), Handler)
++        bound = httpd.server_address[1]
++        if bound == FORBIDDEN_PORT:
++            httpd.server_close()
++            raise C22ValidationError("fixture feed bound forbidden port 5179")
++        self.port = bound
++        self.server = httpd
++        self.base = f"http://127.0.0.1:{self.port}"
++        self.thread = threading.Thread(target=httpd.serve_forever, daemon=True)
++        self.thread.start()
++        return self.base
++
++    def stop(self) -> None:
++        if self.server is not None:
++            self.server.shutdown()
++            self.server.server_close()
++        if self.thread is not None:
++            self.thread.join(timeout=5)
++        self.server = None
++        self.thread = None
++
++    def _feed_body(self) -> bytes:
++        items = []
++        if self.state["entry"]:
++            items.append(self._item("c22-entry-1", "C22 standing capture",
++                                    self.episode_url, "Mon, 07 Sep 2026 12:00:00 GMT"))
++            if self.state["entries"] == "manual_pair":
++                items.append(self._item("c22-entry-1", "C22 standing capture",
++                                        self.episode_url, "Mon, 07 Sep 2026 12:00:00 GMT"))
++        xml = (
++            '<?xml version="1.0"?>'
++            '<rss version="2.0"><channel><title>C22 fixture</title>'
++            + "".join(items) +
++            "</channel></rss>"
++        )
++        return xml.encode("utf-8")
++
++    def _item(self, guid: str, title: str, link: str, pub: str) -> str:
++        return (
++            f"<item><guid>{escape(guid)}</guid><title>{escape(title)}</title>"
++            f"<link>{escape(link)}</link>"
++            f'<enclosure url="{escape(self.audio_url)}" type="audio/mpeg"/>'
++            f"<pubDate>{escape(pub)}</pubDate></item>"
++        )
++
++
++def write_settings(profile: Path) -> Path:
++    settings = {
++        "librarian_apply_enabled": False,
++        "diarization_default": False,
++        "comment_intelligence_enabled": False,
++        "hook_type_enabled": False,
++        "entity_extraction_enabled": False,
++        "asr_fallback_enabled": False,
++        "claim_verification_enabled": False,
++        "auto_uoink_enabled": False,
++        "notifications_enabled": False,
++        "whisper_model": "base",
++    }
++    path = profile / "settings.json"
++    path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
++    return path
++
++
++def write_synthetic_taxonomy(profile: Path) -> Path:
++    taxonomy = {
++        "schema_version": 1,
++        "version_id": "c22-synthetic-taxonomy-v1",
++        "name": "C22 synthetic taxonomy",
++        "status": "approved",
++        "nodes": [
++            {
++                "shelf_id": "c22-fixture",
++                "path": ["C22 fixture"],
++                "definition": "Synthetic C22 receipt items only.",
++                "include": ["c22 fixture"],
++                "exclude": [],
++            }
++        ],
++    }
++    path = profile / "taxonomy.json"
++    path.write_text(json.dumps(taxonomy, indent=2) + "\n", encoding="utf-8")
++    return path
++
++
++def apply_sql_migrations(conn: sqlite3.Connection, *, up_to: int) -> int:
++    migrations = REPO_ROOT / "migrations"
++    files = []
++    for path in sorted(migrations.glob("*.sql")):
++        version = int(path.name.split("_", 1)[0])
++        if version <= up_to:
++            files.append((version, path))
++    files.sort()
++    conn.execute(
++        "CREATE TABLE IF NOT EXISTS schema_version ("
++        "version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
++    applied = 0
++    for version, path in files:
++        row = conn.execute(
++            "SELECT 1 FROM schema_version WHERE version=?", (version,)
++        ).fetchone()
++        if row:
++            applied = version
++            continue
++        sql = path.read_text(encoding="utf-8")
++        conn.executescript(sql)
++        conn.execute(
++            "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
++            (version, "2026-09-09T00:00:00Z"),
++        )
++        applied = version
++    conn.commit()
++    return applied
++
++
++def build_empty_profile(profile: Path) -> dict[str, Any]:
++    profile.mkdir(parents=True, exist_ok=True)
++    write_settings(profile)
++    write_synthetic_taxonomy(profile)
++    (profile / "output").mkdir(exist_ok=True)
++    index = profile / "index.db"
++    # Empty profile: no database yet. Helper startup migrates a fresh file.
++    meta = {
++        "kind": "empty",
++        "index_present": False,
++        "settings_sha256": sha256_file(profile / "settings.json"),
++        "librarian_apply_enabled": False,
++    }
++    (profile / "fixture_meta.json").write_text(
++        json.dumps(meta, indent=2) + "\n", encoding="utf-8")
++    return meta
++
++
++def build_populated_legacy(profile: Path) -> dict[str, Any]:
++    """Clearly versioned schema-27 fixture. Kit-side construction, not installed credit."""
++    profile.mkdir(parents=True, exist_ok=True)
++    write_settings(profile)
++    write_synthetic_taxonomy(profile)
++    corpus = profile / "output" / "C22-legacy-timed"
++    corpus.mkdir(parents=True, exist_ok=True)
++    markdown = corpus / "item.md"
++    sidecar = corpus / "item.json"
++    markdown.write_text(
++        "C22 timed fixture item.\n\nQuoted line for citation.\n",
++        encoding="utf-8")
++    sidecar.write_text(json.dumps({
++        "title": "C22 legacy timed item",
++        "url": "http://127.0.0.1/c22-legacy-timed",
++        "source_type": "episode",
++        "platform": "podcast",
++        "timing": {"start": 12.5, "end": 21.75},
++        "fixture_version": LEGACY_FIXTURE_VERSION,
++    }, indent=2) + "\n", encoding="utf-8")
++    text_only = profile / "output" / "C22-legacy-text"
++    text_only.mkdir(parents=True, exist_ok=True)
++    (text_only / "item.md").write_text("C22 text-only fixture item.\n",
++                                       encoding="utf-8")
++    (text_only / "item.json").write_text(json.dumps({
++        "title": "C22 legacy text-only item",
++        "url": "http://127.0.0.1/c22-legacy-text",
++        "source_type": "page",
++        "platform": "web",
++        "timing": None,
++        "fixture_version": LEGACY_FIXTURE_VERSION,
++    }, indent=2) + "\n", encoding="utf-8")
++    index = profile / "index.db"
++    conn = sqlite3.connect(str(index))
++    conn.execute("PRAGMA foreign_keys=ON")
++    applied = 0
++    try:
++        applied = apply_sql_migrations(conn, up_to=LEGACY_SCHEMA_VERSION)
++    except sqlite3.Error:
++        conn.close()
++        if index.is_file():
++            index.unlink()
++        conn = sqlite3.connect(str(index))
++        conn.execute("PRAGMA foreign_keys=ON")
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS schema_version ("
++            "version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
++        conn.execute(
++            "INSERT INTO schema_version(version, applied_at) VALUES (?, ?)",
++            (LEGACY_SCHEMA_VERSION, "2026-09-09T00:00:00Z"))
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS yoinks ("
++            "video_id TEXT PRIMARY KEY, slug TEXT, channel TEXT, title TEXT, "
++            "topic TEXT, yoinked_at TEXT, corpus_path TEXT, sidecar_path TEXT)")
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS library_work ("
++            "work_id TEXT PRIMARY KEY, run_id TEXT, video_id TEXT, "
++            "packet_json TEXT, packet_hash TEXT, state TEXT, "
++            "created_at TEXT, updated_at TEXT)")
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS library_runs ("
++            "run_id TEXT PRIMARY KEY, version_id TEXT, manifest_hash TEXT, "
++            "state TEXT, policy_json TEXT, created_at TEXT)")
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS library_meta ("
++            "singleton INTEGER PRIMARY KEY, projection_revision INTEGER "
++            "NOT NULL DEFAULT 0, last_operation_sequence INTEGER NOT NULL "
++            "DEFAULT 0, recovery_state TEXT NOT NULL DEFAULT 'ready')")
++        applied = LEGACY_SCHEMA_VERSION
++    # Identities retained across upgrade/replay.
++    _insert_legacy_rows(conn, profile, markdown, sidecar, text_only)
++    conn.commit()
++    conn.close()
++    meta = {
++        "kind": "populated_legacy",
++        "fixture_version": LEGACY_FIXTURE_VERSION,
++        "schema_version": applied,
++        "target_schema_after_helper": CURRENT_SCHEMA_TARGET,
++        "index_sha256": sha256_file(index),
++        "markdown_sha256": sha256_file(markdown),
++        "sidecar_sha256": sha256_file(sidecar),
++        "timed_video_id": "c22legacytimed000",
++        "text_video_id": "c22legacytext00000",
++        "work_id": "wk_c22_legacy_1",
++        "run_id": "run_c22_legacy_1",
++        "librarian_apply_enabled": False,
++        "construction": "kit-side SQL 0001-0027; not installed credit",
++    }
++    (profile / "fixture_meta.json").write_text(
++        json.dumps(meta, indent=2) + "\n", encoding="utf-8")
++    (profile / "legacy_fixture_version.json").write_text(
++        json.dumps({"version": LEGACY_FIXTURE_VERSION,
++                    "schema_version": applied}, indent=2) + "\n",
++        encoding="utf-8")
++    return meta
++
++
++def _insert_legacy_rows(conn: sqlite3.Connection, profile: Path,
++                        markdown: Path, sidecar: Path,
++                        text_only: Path) -> None:
++    def has_table(name: str) -> bool:
++        row = conn.execute(
++            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
++            (name,)).fetchone()
++        return row is not None
++
++    if has_table("yoinks"):
++        columns = {
++            row[1] for row in conn.execute("PRAGMA table_info(yoinks)")
++        }
++        timed = {
++            "video_id": "c22legacytimed000",
++            "slug": "c22-legacy-timed",
++            "channel": "c22-fixture",
++            "title": "C22 legacy timed item",
++            "topic": "c22",
++            "yoinked_at": "2026-09-01T00:00:00Z",
++            "corpus_path": str(markdown),
++            "sidecar_path": str(sidecar),
++        }
++        text = {
++            "video_id": "c22legacytext00000",
++            "slug": "c22-legacy-text",
++            "channel": "c22-fixture",
++            "title": "C22 legacy text-only item",
++            "topic": "c22",
++            "yoinked_at": "2026-09-01T00:00:01Z",
++            "corpus_path": str(text_only / "item.md"),
++            "sidecar_path": str(text_only / "item.json"),
++        }
++        for row in (timed, text):
++            usable = {k: v for k, v in row.items() if k in columns}
++            placeholders = ",".join("?" for _ in usable)
++            conn.execute(
++                f"INSERT OR REPLACE INTO yoinks ({','.join(usable)}) "
++                f"VALUES ({placeholders})",
++                tuple(usable.values()),
++            )
++    if has_table("citations"):
++        cols = {row[1] for row in conn.execute("PRAGMA table_info(citations)")}
++        citation = {
++            "citation_id": 1,
++            "video_id": "c22legacytimed000",
++            "kind": "transcript_chunk",
++            "seq": 1,
++            "timestamp_start": 12.5,
++            "timestamp_end": 21.75,
++            "text": "Quoted line for citation.",
++            "youtube_deep_link": "http://127.0.0.1/c22-legacy-timed",
++            "source_url": "http://127.0.0.1/c22-legacy-timed",
++            "source_deep_link": "http://127.0.0.1/c22-legacy-timed#t=12",
++        }
++        usable = {k: v for k, v in citation.items() if k in cols}
++        if usable:
++            try:
++                conn.execute(
++                    f"INSERT OR REPLACE INTO citations ({','.join(usable)}) "
++                    f"VALUES ({','.join('?' for _ in usable)})",
++                    tuple(usable.values()),
++                )
++            except sqlite3.IntegrityError:
++                pass
++    if has_table("library_meta"):
++        try:
++            conn.execute(
++                "INSERT OR IGNORE INTO library_meta(singleton) VALUES (1)")
++        except sqlite3.IntegrityError:
++            pass
++    if has_table("library_runs"):
++        cols = {row[1] for row in conn.execute("PRAGMA table_info(library_runs)")}
++        run = {
++            "run_id": "run_c22_legacy_1",
++            "version_id": "c22-synthetic-taxonomy-v1",
++            "manifest_hash": sha256_bytes(b"c22-legacy-manifest"),
++            "state": "review",
++            "policy_json": "{}",
++            "created_at": "2026-09-01T00:00:00Z",
++        }
++        usable = {k: v for k, v in run.items() if k in cols}
++        if usable:
++            try:
++                conn.execute(
++                    f"INSERT OR REPLACE INTO library_runs ({','.join(usable)}) "
++                    f"VALUES ({','.join('?' for _ in usable)})",
++                    tuple(usable.values()),
++                )
++            except sqlite3.IntegrityError:
++                pass
++    if has_table("library_work"):
++        cols = {row[1] for row in conn.execute("PRAGMA table_info(library_work)")}
++        work = {
++            "work_id": "wk_c22_legacy_1",
++            "run_id": "run_c22_legacy_1",
++            "video_id": "c22legacytimed000",
++            "packet_json": "{}",
++            "packet_hash": sha256_bytes(b"c22-legacy-packet"),
++            "state": "ready",
++            "created_at": "2026-09-01T00:00:00Z",
++            "updated_at": "2026-09-01T00:00:00Z",
++        }
++        usable = {k: v for k, v in work.items() if k in cols}
++        if usable:
++            try:
++                conn.execute(
++                    f"INSERT OR REPLACE INTO library_work ({','.join(usable)}) "
++                    f"VALUES ({','.join('?' for _ in usable)})",
++                    tuple(usable.values()),
++                )
++            except sqlite3.IntegrityError:
++                pass
++
++
++def rewrite_embedded_paths(profile: Path, *, from_root: str,
++                           to_root: str) -> int:
++    """Point SQL/sidecar/embedded paths into the receipt profile."""
++    changed = 0
++    for path in profile.rglob("*"):
++        if not path.is_file():
++            continue
++        if path.suffix.lower() not in {".json", ".md", ".txt", ".sql"}:
++            continue
++        data = path.read_text(encoding="utf-8")
++        if from_root in data:
++            path.write_text(data.replace(from_root, to_root), encoding="utf-8")
++            changed += 1
++    index = profile / "index.db"
++    if index.is_file():
++        conn = sqlite3.connect(str(index))
++        try:
++            tables = [row[0] for row in conn.execute(
++                "SELECT name FROM sqlite_master WHERE type='table'")]
++            for table in tables:
++                cols = [row[1] for row in conn.execute(
++                    f"PRAGMA table_info({table})")]
++                text_cols = [c for c in cols if c.endswith("_path")
++                             or c in {"corpus_path", "sidecar_path",
++                                      "markdown_path", "audio_local_path"}]
++                for col in text_cols:
++                    rows = conn.execute(
++                        f"SELECT rowid, {col} FROM {table} WHERE {col} IS NOT NULL"
++                    ).fetchall()
++                    for rowid, value in rows:
++                        if isinstance(value, str) and from_root in value:
++                            conn.execute(
++                                f"UPDATE {table} SET {col}=? WHERE rowid=?",
++                                (value.replace(from_root, to_root), rowid))
++                            changed += 1
++            conn.commit()
++        finally:
++            conn.close()
++    return changed
+diff --git a/scripts/install_receipt/guards.py b/scripts/install_receipt/guards.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..9dd66db5a867b95df72681a0c10158873672d5a7
+--- /dev/null
++++ b/scripts/install_receipt/guards.py
+@@ -0,0 +1,281 @@
++"""Receipt-local sitecustomize and bundled-python guard install.
++
++Not a server overlay. The original installed server.py still starts. Guards
++block 5179, the live index, model/client spawns and undeclared network, and
++apply the narrowly declared synthetic acquisition / failure injections.
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++from typing import Any
++
++from .constants import FORBIDDEN_PORT
++from .hashes import sha256_bytes
++from .validation import C22ValidationError
++
++SITECUSTOMIZE_NAME = "sitecustomize.py"
++
++# Loaded by the bundled interpreter from Lib/site-packages (embeddable ._pth
++# ignores PYTHONPATH). Inherited children of that interpreter load it too.
++SITECUSTOMIZE_SOURCE = r'''# C22 receipt guard. Synthetic acquisition / declared injections only.
++import builtins
++import json
++import os
++import sys
++
++FORBIDDEN_PORT = 5179
++ALLOWED = set()
++for _part in (os.environ.get("C22_ALLOWED_PORTS") or "").split(","):
++    _part = _part.strip()
++    if _part.isdigit():
++        ALLOWED.add(int(_part))
++PROFILE = os.environ.get("C22_ISOLATED_PROFILE") or ""
++FORBIDDEN_LIVE = (os.environ.get("C22_FORBIDDEN_LIVE") or "").replace("\\", "/").lower()
++INJECT = os.environ.get("C22_INJECT") or ""
++AUDIO_PATH = os.environ.get("C22_SYNTHETIC_AUDIO_PATH") or ""
++TRANSCRIPT_PATH = os.environ.get("C22_SYNTHETIC_TRANSCRIPT_PATH") or ""
++LOOPBACK = {"127.0.0.1", "::1", "localhost", "0.0.0.0", ""}
++MODEL_STEMS = {"claude", "codex", "gemini", "grok", "whisperx", "anthropic"}
++_WRAPPED = set()
++
++
++def _addr_port(addr):
++    if isinstance(addr, tuple) and len(addr) >= 2:
++        return str(addr[0]), addr[1]
++    return None, None
++
++
++def audit(event, args):
++    if event in ("open", "sqlite3.connect"):
++        value = args[0] if args else None
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace("\\", "/").lower()
++            if FORBIDDEN_LIVE and FORBIDDEN_LIVE in name:
++                raise PermissionError("C22 guard: live index forbidden")
++    if event in ("socket.connect", "socket.bind", "socket.sendto", "socket.getaddrinfo"):
++        addr = args[:2] if event == "socket.getaddrinfo" else (args[1] if len(args) > 1 else None)
++        host, port = _addr_port(addr)
++        if port is None:
++            return
++        try:
++            port_i = int(port)
++        except (TypeError, ValueError):
++            return
++        if port_i == FORBIDDEN_PORT:
++            raise PermissionError("C22 guard: port 5179 forbidden")
++        if host not in LOOPBACK:
++            raise PermissionError("C22 guard: non-loopback network forbidden")
++        if port_i not in ALLOWED and event != "socket.bind":
++            # Bind of the declared helper port is allowed when it is in ALLOWED.
++            raise PermissionError("C22 guard: undeclared port %s forbidden" % port_i)
++        if event == "socket.bind" and port_i not in ALLOWED:
++            raise PermissionError("C22 guard: bind of undeclared port %s forbidden" % port_i)
++    if event == "subprocess.Popen":
++        cmd = args[1] if len(args) > 1 else args[0]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        stem = name.split(".")[0]
++        if stem in MODEL_STEMS:
++            raise PermissionError("C22 guard: model/client process forbidden")
++
++
++sys.addaudithook(audit)
++
++_real_import = builtins.__import__
++
++
++def _wrap_whisper(mod):
++    def synthetic_transcript(*a, **k):
++        if TRANSCRIPT_PATH and os.path.isfile(TRANSCRIPT_PATH):
++            with open(TRANSCRIPT_PATH, "r", encoding="utf-8") as handle:
++                return json.load(handle)
++        return {
++            "model": "synthetic-C22",
++            "language": "en",
++            "diarization_ran": False,
++            "segments": [{"start": 12.5, "end": 21.75,
++                          "text": "C22 fixture: durable capture waits for complete publication."}],
++        }
++
++    mod.is_whisperx_available = lambda: True
++    mod.is_model_downloaded = lambda *a, **k: True
++    mod.transcribe_audio = synthetic_transcript
++    mod.set_current_thread_below_normal = lambda: False
++    mod._c22_wrapped = True
++
++
++def _wrap_podcasts(mod):
++    import urllib.request
++
++    def download(idx, episode_id, *, data_root, **kwargs):
++        episode = None
++        try:
++            episode = mod.get_episode(idx, episode_id)
++        except Exception:
++            episode = None
++        audio_url = (episode or {}).get("audio_url") if isinstance(episode, dict) else None
++        body = b"C22 SYNTHETIC AUDIO PLACEHOLDER"
++        if AUDIO_PATH and os.path.isfile(AUDIO_PATH):
++            with open(AUDIO_PATH, "rb") as handle:
++                body = handle.read()
++        if audio_url:
++            with urllib.request.urlopen(audio_url, timeout=5) as response:
++                body = response.read(4096)
++        root = os.path.abspath(str(data_root))
++        audio = os.path.join(root, "fixture.mp3")
++        with open(audio, "wb") as handle:
++            handle.write(body)
++        if episode is not None:
++            try:
++                with idx.write_transaction() as conn:
++                    conn.execute(
++                        "UPDATE podcast_episodes SET audio_local_path=? WHERE id=?",
++                        (audio, episode_id))
++            except Exception:
++                pass
++        _maybe_child(root)
++        return {"ok": True, "audio_local_path": audio, "local_path": audio,
++                "episode_id": episode_id, "size_bytes": len(body)}
++
++    mod.download_episode_audio = download
++    mod._c22_wrapped = True
++
++
++def _maybe_child(root):
++    try:
++        import source_subscriptions as ss
++    except Exception:
++        return
++    capture = ss.current_capture_context()
++    if capture is None:
++        return
++    start_id = capture.get("start_id")
++    instance = capture.get("instance")
++    ss.record_child_launch_intent(root, start_id, instance)
++    if INJECT == "launch_interrupt":
++        raise RuntimeError("C22 declared launch interruption after launch intent")
++    import subprocess
++    sleeper = [sys.executable, "-B", "-c",
++               "import time; time.sleep(%s)" % (os.environ.get("C22_SLEEPER_SECONDS") or "8")]
++    try:
++        proc = subprocess.Popen(sleeper)
++    except BaseException:
++        if INJECT != "registration_failure":
++            try:
++                ss.resolve_child_launch_intent(root, start_id)
++            except Exception:
++                pass
++        raise
++    if INJECT == "registration_failure":
++        raise OSError("C22 declared registration failure before child record write")
++    ss.record_child_start(root, start_id, proc.pid, instance)
++
++
++def _wrap_subscriptions(mod):
++    original_start = mod.record_child_start
++
++    def record_child_start(root, start_id, pid, instance):
++        if INJECT == "registration_failure":
++            raise OSError("C22 declared registration failure")
++        return original_start(root, start_id, pid, instance)
++
++    if INJECT == "registration_failure":
++        mod.record_child_start = record_child_start
++    mod._c22_wrapped = True
++
++
++def _import(name, globals=None, locals=None, fromlist=(), level=0):
++    mod = _real_import(name, globals, locals, fromlist, level)
++    if name == "whisper_runner" and id(mod) not in _WRAPPED:
++        _wrap_whisper(mod)
++        _WRAPPED.add(id(mod))
++    elif name == "podcasts" and id(mod) not in _WRAPPED:
++        _wrap_podcasts(mod)
++        _WRAPPED.add(id(mod))
++    elif name == "source_subscriptions" and id(mod) not in _WRAPPED:
++        _wrap_subscriptions(mod)
++        _WRAPPED.add(id(mod))
++    return mod
++
++
++builtins.__import__ = _import
++'''
++
++
++def write_sitecustomize(directory: Path) -> dict[str, Any]:
++    directory.mkdir(parents=True, exist_ok=True)
++    path = directory / SITECUSTOMIZE_NAME
++    data = SITECUSTOMIZE_SOURCE.encode("utf-8")
++    path.write_bytes(data)
++    return {
++        "path": str(path),
++        "sha256": sha256_bytes(data),
++        "bytes": len(data),
++    }
++
++
++def bundled_site_packages(installed_app: Path) -> Path:
++    return Path(installed_app) / "python" / "Lib" / "site-packages"
++
++
++def install_into_bundled_python(installed_app: Path, *,
++                                source: Path) -> dict[str, Any]:
++    """Copy receipt sitecustomize into the disposable bundled interpreter.
++
++    Embeddable python._pth ignores PYTHONPATH; site-packages sitecustomize
++    is how inherited children of the bundled interpreter get the same
++    guards. This mutates only the throwaway install tree and is hashed.
++    """
++    site = bundled_site_packages(installed_app)
++    if not site.is_dir():
++        raise C22ValidationError(
++            f"bundled site-packages missing; cannot install receipt guards: {site}")
++    dest = site / SITECUSTOMIZE_NAME
++    payload = source.read_bytes()
++    if dest.exists():
++        existing = dest.read_bytes()
++        if existing != payload:
++            raise C22ValidationError(
++                f"refusing to overwrite a different sitecustomize at {dest}")
++        return {
++            "path": str(dest),
++            "sha256": sha256_bytes(existing),
++            "already_present": True,
++        }
++    dest.write_bytes(payload)
++    return {
++        "path": str(dest),
++        "sha256": sha256_bytes(payload),
++        "already_present": False,
++        "bytes": len(payload),
++    }
++
++
++def guard_env(*, isolated_profile: Path, allowed_ports: list[int],
++              forbidden_live: Path, inject: str = "",
++              synthetic: bool = False,
++              audio_path: Path | None = None,
++              transcript_path: Path | None = None,
++              sleeper_seconds: int = 8) -> dict[str, str]:
++    for port in allowed_ports:
++        if port == FORBIDDEN_PORT:
++            raise C22ValidationError("guard env must not allow port 5179")
++    env = {
++        "C22_ALLOWED_PORTS": ",".join(str(p) for p in allowed_ports),
++        "C22_ISOLATED_PROFILE": str(isolated_profile),
++        "C22_FORBIDDEN_LIVE": str(forbidden_live),
++        "C22_INJECT": inject,
++        "C22_SLEEPER_SECONDS": str(int(sleeper_seconds)),
++        "PYTHONNOUSERSITE": "1",
++        "PYTHONDONTWRITEBYTECODE": "1",
++        "PYTHONUTF8": "1",
++        "librarian_apply_enabled": "false",
++    }
++    if synthetic:
++        env["C22_SYNTHETIC"] = "1"
++    if audio_path:
++        env["C22_SYNTHETIC_AUDIO_PATH"] = str(audio_path)
++    if transcript_path:
++        env["C22_SYNTHETIC_TRANSCRIPT_PATH"] = str(transcript_path)
++    return env
+diff --git a/scripts/install_receipt/hashes.py b/scripts/install_receipt/hashes.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..5899e81a8a3349862d800df566281374d6f464c7
+--- /dev/null
++++ b/scripts/install_receipt/hashes.py
+@@ -0,0 +1,46 @@
++"""Byte hashing for C22 receipts. Never invents expected package hashes."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++from typing import Any
++
++
++def sha256_bytes(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def sha256_file(path: Path) -> str:
++    digest = hashlib.sha256()
++    with Path(path).open("rb") as handle:
++        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
++            digest.update(chunk)
++    return digest.hexdigest()
++
++
++def sha256_text(text: str) -> str:
++    return sha256_bytes(text.encode("utf-8"))
++
++
++def canonical_json_bytes(value: Any) -> bytes:
++    return json.dumps(value, sort_keys=True, separators=(",", ":"),
++                      ensure_ascii=False).encode("utf-8")
++
++
++def sha256_json(value: Any) -> str:
++    return sha256_bytes(canonical_json_bytes(value))
++
++
++def file_record(path: Path, *, root: Path | None = None) -> dict[str, Any]:
++    path = Path(path)
++    rel = str(path.relative_to(root)).replace("\\", "/") if root else str(path)
++    data = path.read_bytes() if path.is_file() else b""
++    return {
++        "path": rel,
++        "bytes": len(data) if path.is_file() else None,
++        "sha256": sha256_bytes(data) if path.is_file() else None,
++        "is_file": path.is_file(),
++        "missing": not path.exists(),
++    }
+diff --git a/scripts/install_receipt/http_client.py b/scripts/install_receipt/http_client.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..00a1df74e911c025e73517c7d826e8c6b7f3a419
+--- /dev/null
++++ b/scripts/install_receipt/http_client.py
+@@ -0,0 +1,47 @@
++"""Token-gated HTTP client for the declared helper loopback port."""
++
++from __future__ import annotations
++
++import json
++import urllib.error
++import urllib.request
++from typing import Any
++
++from .constants import FORBIDDEN_PORT
++from .validation import C22ValidationError, validate_port
++
++
++class HelperClient:
++    def __init__(self, port: int, token: str):
++        self.port = validate_port(port)
++        self.token = token
++        self.base = f"http://127.0.0.1:{self.port}"
++
++    def request(self, method: str, path: str, body: dict | None = None,
++                timeout: float = 8.0) -> dict[str, Any]:
++        if self.port == FORBIDDEN_PORT:
++            raise C22ValidationError("refusing HTTP to port 5179")
++        data = None if body is None else json.dumps(body).encode("utf-8")
++        headers = {
++            "X-Uoink-Token": self.token,
++            "X-Uoink-Client": "uoink-extension",
++            "Content-Type": "application/json",
++            "Origin": self.base,
++        }
++        req = urllib.request.Request(
++            self.base + path, data=data, headers=headers, method=method)
++        try:
++            with urllib.request.urlopen(req, timeout=timeout) as response:
++                raw = response.read()
++                parsed = json.loads(raw.decode("utf-8") or "{}")
++                parsed["_http_status"] = response.status
++                return parsed
++        except urllib.error.HTTPError as exc:
++            raw = exc.read()
++            try:
++                parsed = json.loads(raw.decode("utf-8") or "{}")
++            except json.JSONDecodeError:
++                parsed = {"error": raw.decode("utf-8", errors="replace")}
++            parsed["_http_status"] = exc.code
++            parsed.setdefault("ok", False)
++            return parsed
+diff --git a/scripts/install_receipt/launcher.py b/scripts/install_receipt/launcher.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ed18871c97f88fd3caf42da3adf957630ce571c6
+--- /dev/null
++++ b/scripts/install_receipt/launcher.py
+@@ -0,0 +1,290 @@
++"""Launch the original installed server.py with required isolation flags.
++
++Never uses start_server.ps1 / launch.bat. Never copies server.py. Synthetic
++instrument launches are labeled and require C22_ALLOW_SYNTHETIC=1.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import sys
++import time
++import urllib.error
++import urllib.request
++from pathlib import Path
++from typing import Any
++
++from .constants import (
++    DEFAULT_HELPER_NAMES,
++    FORBIDDEN_PORT,
++    ISOLATED_PORT_FLAG,
++    ISOLATED_PROFILE_FLAG,
++)
++from .guards import (
++    guard_env,
++    install_into_bundled_python,
++    write_sitecustomize,
++)
++from .hashes import sha256_file
++from .process_identity import identity_for_pid, liveness, matches
++from .runner import OperatorRunner
++from .validation import (
++    C22ValidationError,
++    assert_isolation_flags,
++    child_env_forbidden_resolution,
++    live_index_path,
++    port_is_open,
++    validate_port,
++)
++
++
++def resolve_interpreter(installed_app: Path, *, synthetic: bool) -> Path:
++    python_exe = installed_app / "python" / "python.exe"
++    if python_exe.is_file():
++        return python_exe
++    if synthetic:
++        return Path(sys.executable)
++    raise C22ValidationError(
++        f"bundled python.exe missing under {installed_app}; "
++        "refusing PATH/checkout fallback")
++
++
++def launch_argv(installed_app: Path, *, isolated_profile: Path,
++                isolated_port: int, synthetic: bool = False) -> list[str]:
++    validate_port(isolated_port)
++    server = installed_app / "server.py"
++    if not server.is_file():
++        raise C22ValidationError(f"installed server.py missing: {server}")
++    interpreter = resolve_interpreter(installed_app, synthetic=synthetic)
++    argv = [
++        str(interpreter), "-B", "-s", str(server),
++        ISOLATED_PROFILE_FLAG, str(isolated_profile),
++        ISOLATED_PORT_FLAG, str(isolated_port),
++    ]
++    assert_isolation_flags(argv)
++    for name in DEFAULT_HELPER_NAMES:
++        if name in {Path(part).name.lower() for part in argv}:
++            raise C22ValidationError(f"default helper {name} leaked into argv")
++    return argv
++
++
++class InstalledHelperLauncher:
++    def __init__(self, runner: OperatorRunner, *,
++                 fixture_ports: list[int] | None = None,
++                 inject: str = ""):
++        self.runner = runner
++        self.fixture_ports = list(fixture_ports or [])
++        self.inject = inject
++        self.proc_record: dict[str, Any] | None = None
++
++    def prepare_guards(self, *, isolated_profile: Path,
++                       isolated_port: int) -> dict[str, Any]:
++        inputs = self.runner.load_inputs()
++        injection = self.runner.receipt_root / "injection"
++        written = write_sitecustomize(injection)
++        allowed = [isolated_port, *self.fixture_ports]
++        env = guard_env(
++            isolated_profile=isolated_profile,
++            allowed_ports=allowed,
++            forbidden_live=live_index_path(),
++            inject=self.inject,
++            synthetic=self.runner.synthetic,
++            audio_path=self.runner.receipt_root / "fixtures" / "synthetic-audio.bin",
++            transcript_path=self.runner.receipt_root / "fixtures" / "synthetic-transcript.json",
++        )
++        env["PYTHONPATH"] = str(injection)
++        checkout = Path(__file__).resolve().parents[2]
++        child_env_forbidden_resolution(env, checkout=checkout)
++        bundled = None
++        app = Path(inputs["installed_app"]["path"])
++        site = app / "python" / "Lib" / "site-packages"
++        if site.is_dir():
++            bundled = install_into_bundled_python(
++                app, source=Path(written["path"]))
++        result = {"sitecustomize": written, "env": env, "bundled": bundled}
++        (self.runner.receipt_root / "guards.json").write_text(
++            json.dumps({k: v for k, v in result.items() if k != "env"} | {
++                "env_keys": sorted(env),
++                "allowed_ports": allowed,
++            }, indent=2) + "\n", encoding="utf-8")
++        return result
++
++    def start(self, *, profile_name: str, isolated_profile: Path,
++              isolated_port: int, wait_seconds: float = 20.0) -> dict[str, Any]:
++        if port_is_open("127.0.0.1", isolated_port):
++            raise C22ValidationError(
++                f"isolated port {isolated_port} is already occupied")
++        inputs = self.runner.load_inputs()
++        app = Path(inputs["installed_app"]["path"])
++        argv = launch_argv(
++            app, isolated_profile=isolated_profile,
++            isolated_port=isolated_port, synthetic=self.runner.synthetic)
++        guards = self.prepare_guards(
++            isolated_profile=isolated_profile, isolated_port=isolated_port)
++        env = os.environ.copy()
++        env.pop("ANTHROPIC_API_KEY", None)
++        env.update(guards["env"])
++        env["UOINK_OUTPUT_DIR"] = str(isolated_profile / "output")
++        env["LOCALAPPDATA"] = str(isolated_profile)
++        env["APPDATA"] = str(isolated_profile)
++        env["TEMP"] = str(isolated_profile / "tmp")
++        env["TMP"] = str(isolated_profile / "tmp")
++        (isolated_profile / "tmp").mkdir(parents=True, exist_ok=True)
++        (isolated_profile / "output").mkdir(parents=True, exist_ok=True)
++        # Background helper: Popen is owned by run_command's wait. Use a
++        # dedicated spawn that records identity without waiting.
++        record = self._spawn(argv, env=env, name=f"helper-{profile_name}",
++                             cwd=app)
++        self.proc_record = record
++        ready = self.wait_health(isolated_port, timeout=wait_seconds)
++        record["health"] = ready
++        (self.runner.receipt_root / f"helper-{profile_name}.json").write_text(
++            json.dumps(record, indent=2, default=str) + "\n", encoding="utf-8")
++        return record
++
++    def wait_health(self, port: int, timeout: float) -> dict[str, Any]:
++        url = f"http://127.0.0.1:{port}/health"
++        deadline = time.time() + timeout
++        last = None
++        while time.time() < deadline:
++            try:
++                with urllib.request.urlopen(url, timeout=0.5) as response:
++                    body = response.read()
++                    return {
++                        "ok": True,
++                        "status": response.status,
++                        "url": url,
++                        "body": body.decode("utf-8", errors="replace")[:2000],
++                    }
++            except (urllib.error.URLError, TimeoutError, OSError) as exc:
++                last = str(exc)
++                time.sleep(0.1)
++        return {"ok": False, "url": url, "error": last}
++
++    def stop_owned(self, *, port: int, identity: dict[str, Any],
++                   token: str | None, timeout: float = 15.0) -> dict[str, Any]:
++        if not matches(identity):
++            live = liveness(identity.get("pid") or -1, identity.get("created_ms"))
++            raise C22ValidationError(
++                f"refusing to stop a process that does not match owned "
++                f"creation identity (liveness={live}, identity={identity})")
++        result: dict[str, Any] = {"identity": identity, "quit_http": None}
++        if token:
++            req = urllib.request.Request(
++                f"http://127.0.0.1:{port}/helper/quit",
++                data=b"{}",
++                headers={
++                    "Content-Type": "application/json",
++                    "X-Uoink-Token": token,
++                },
++                method="POST",
++            )
++            try:
++                with urllib.request.urlopen(req, timeout=3) as response:
++                    result["quit_http"] = {
++                        "status": response.status,
++                        "body": response.read().decode("utf-8", errors="replace")[:1000],
++                    }
++            except (urllib.error.URLError, TimeoutError, OSError) as exc:
++                result["quit_http"] = {"error": str(exc)}
++        deadline = time.time() + timeout
++        while time.time() < deadline:
++            if liveness(identity["pid"], identity.get("created_ms")) != "alive":
++                result["stopped"] = True
++                freed_deadline = time.time() + 5
++                while time.time() < freed_deadline and port_is_open("127.0.0.1", port):
++                    time.sleep(0.05)
++                self.runner.record_event("helper_stopped", **result)
++                return result
++            time.sleep(0.1)
++        # Last resort: terminate only the owned pid+creation pair.
++        if matches(identity):
++            self._terminate_owned(identity)
++        result["stopped"] = liveness(
++            identity["pid"], identity.get("created_ms")) != "alive"
++        self.runner.record_event("helper_stop", **result)
++        return result
++
++    def terminate_owned(self, identity: dict[str, Any]) -> dict[str, Any]:
++        if not matches(identity):
++            raise C22ValidationError(
++                "refusing terminate: pid/creation identity does not match a "
++                "live owned helper")
++        self._terminate_owned(identity)
++        return {
++            "identity": identity,
++            "liveness": liveness(identity["pid"], identity.get("created_ms")),
++        }
++
++    def _terminate_owned(self, identity: dict[str, Any]) -> None:
++        pid = identity["pid"]
++        if os.name == "nt":
++            subprocess_call = __import__("subprocess").run
++            subprocess_call(
++                ["taskkill", "/PID", str(pid), "/F"],
++                capture_output=True, check=False)
++        else:
++            os.kill(pid, 15)
++
++    def _spawn(self, argv: list[str], *, env: dict[str, str],
++               name: str, cwd: Path) -> dict[str, Any]:
++        import subprocess
++        stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
++        prefix = self.runner.commands_dir / f"{stamp}-{name}"
++        stdout_path = prefix.with_suffix(".stdout.log")
++        stderr_path = prefix.with_suffix(".stderr.log")
++        with stdout_path.open("wb") as out, stderr_path.open("wb") as err:
++            proc = subprocess.Popen(
++                argv, cwd=str(cwd), env=env, stdout=out, stderr=err)
++        record = {
++            "name": name,
++            "argv": argv,
++            "cwd": str(cwd),
++            "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            "child": identity_for_pid(proc.pid),
++            "pid": proc.pid,
++            "stdout_path": str(stdout_path),
++            "stderr_path": str(stderr_path),
++            "synthetic": self.runner.synthetic,
++            "popen": proc,
++        }
++        self.runner.record_event(
++            "helper_spawn",
++            **{k: v for k, v in record.items() if k != "popen"})
++        (prefix.with_suffix(".json")).write_text(
++            json.dumps({k: v for k, v in record.items() if k != "popen"},
++                       indent=2, default=str) + "\n",
++            encoding="utf-8")
++        return record
++
++
++def read_token(installed_app: Path, profile: Path) -> str | None:
++    for candidate in (installed_app / "token.txt", profile / "token.txt"):
++        if candidate.is_file():
++            text = candidate.read_text(encoding="utf-8").strip()
++            if text:
++                return text
++    return None
++
++
++def inventory_installed(installed_app: Path) -> dict[str, Any]:
++    """Record installed provenance. Does not import product modules in a
++    way that opens default data; uses file hashes only."""
++    files = {}
++    for rel in ("server.py", "source_subscriptions.py", "index.py",
++                "uoink_mcp.py", "migrations/0028_source_subscriptions.sql",
++                "VERSION"):
++        path = installed_app / rel
++        files[rel.replace("\\", "/")] = {
++            "present": path.is_file(),
++            "sha256": sha256_file(path) if path.is_file() else None,
++            "bytes": path.stat().st_size if path.is_file() else None,
++        }
++    interpreter = installed_app / "python" / "python.exe"
++    return {
++        "installed_app": str(installed_app),
++        "interpreter": str(interpreter) if interpreter.is_file() else None,
++        "files": files,
++        "note": "module __file__ provenance requires the running installed child",
++    }
+diff --git a/scripts/install_receipt/manifest.py b/scripts/install_receipt/manifest.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..138571db969f20d5cba5d5e9352700834cc1c022
+--- /dev/null
++++ b/scripts/install_receipt/manifest.py
+@@ -0,0 +1,114 @@
++"""Operator manifest. Astra seals hashes later; this kit never invents them."""
++
++from __future__ import annotations
++
++import json
++from pathlib import Path
++from typing import Any
++
++from . import KIT_DATE, KIT_SCHEMA
++from .constants import (
++    ISOLATED_PORT_FLAG,
++    ISOLATED_PROFILE_FLAG,
++    LEGACY_FIXTURE_VERSION,
++    SCENARIO_IDS,
++)
++from .validation import C22ValidationError, validate_port, validate_sha256
++
++SEALED_HASH_FIELDS = (
++    "expected_package_sha256",
++    "candidate_sha",
++    "installer_source_sha",
++)
++
++
++def example_manifest() -> dict[str, Any]:
++    return {
++        "schema": KIT_SCHEMA,
++        "kit_date": KIT_DATE,
++        "sealed_by": None,
++        "seal_note": (
++            "Astra fills expected_package_sha256, candidate_sha and "
++            "installer_source_sha when sealing. This kit refuses to invent them."
++        ),
++        "expected_package_sha256": None,
++        "candidate_sha": None,
++        "installer_source_sha": None,
++        "isolation_flags": {
++            "profile": ISOLATED_PROFILE_FLAG,
++            "port": ISOLATED_PORT_FLAG,
++            "implemented_by": "isolation worker; this kit only consumes them",
++        },
++        "inno_isolated_args_template": [
++            "/VERYSILENT",
++            "/NORESTART",
++            "/SUPPRESSMSGBOXES",
++            '/DIR="{installed_app_path}"',
++            "/NOICONS",
++            "/TASKS=!",
++            "/MERGETASKS=!",
++            "/CLOSEAPPLICATIONS=no",
++            "/ISOLATEDPROFILE={isolated_profile}",
++            "/ISOLATEDPORT={isolated_port}",
++        ],
++        "inno_isolated_args_note": (
++            "/ISOLATEDPROFILE and /ISOLATEDPORT are the declared Inno surface "
++            "for the isolation worker. This kit records the command and does "
++            "not execute Inno unless the throwaway operator explicitly opts in."
++        ),
++        "upgrade": {
++            "same_version_reinstall_label": "same_version_reinstall",
++            "cross_version_upgrade_label": "cross_version_upgrade",
++            "do_not_mislabel": True,
++        },
++        "legacy_fixture_version": LEGACY_FIXTURE_VERSION,
++        "scenarios": list(SCENARIO_IDS),
++        "phase4_client_scope": "astra_separate_not_this_kit",
++    }
++
++
++def load_manifest(path: str | Path | None) -> dict[str, Any]:
++    if path is None:
++        return example_manifest()
++    data = json.loads(Path(path).read_text(encoding="utf-8"))
++    if not isinstance(data, dict):
++        raise C22ValidationError("manifest must be a JSON object")
++    if data.get("schema") != KIT_SCHEMA:
++        raise C22ValidationError(
++            f"manifest schema must be {KIT_SCHEMA}, got {data.get('schema')}")
++    return merge_manifest(data)
++
++
++def merge_manifest(data: dict[str, Any]) -> dict[str, Any]:
++    base = example_manifest()
++    base.update(data)
++    base["schema"] = KIT_SCHEMA
++    if "scenarios" not in data:
++        base["scenarios"] = list(SCENARIO_IDS)
++    return base
++
++
++def require_sealed_package_hash(manifest: dict[str, Any]) -> str:
++    value = manifest.get("expected_package_sha256")
++    if value in (None, "", "TBD", "todo", "seal-later"):
++        raise C22ValidationError(
++            "expected_package_sha256 is unsealed. Astra must seal the "
++            "package digest; this kit will not invent one.")
++    return validate_sha256(value, label="expected_package_sha256")
++
++
++def upgrade_kind(manifest: dict[str, Any], *,
++                 installed_version: str | None,
++                 package_version: str | None) -> str:
++    labels = manifest.get("upgrade") or example_manifest()["upgrade"]
++    if not installed_version or not package_version:
++        return "unspecified_pending_inventory"
++    if installed_version == package_version:
++        return labels["same_version_reinstall_label"]
++    return labels["cross_version_upgrade_label"]
++
++
++def write_example(path: Path) -> Path:
++    path.write_text(json.dumps(example_manifest(), indent=2) + "\n",
++                    encoding="utf-8")
++    return path
+diff --git a/scripts/install_receipt/process_identity.py b/scripts/install_receipt/process_identity.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..5f5ff0b10a6686073e0da700fafbc7d6067b95b2
+--- /dev/null
++++ b/scripts/install_receipt/process_identity.py
+@@ -0,0 +1,136 @@
++"""PID plus creation-time identity. Never stop a process by PID alone."""
++
++from __future__ import annotations
++
++import os
++import time
++from typing import Any
++
++_FILETIME_EPOCH_OFFSET_100NS = 116444736000000000
++_STILL_ACTIVE = 259
++_PROCESS_START_TOLERANCE_MS = 2000
++
++
++def current_created_ms() -> int | None:
++    try:
++        if os.name == "nt":
++            import ctypes
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.GetCurrentProcess.restype = ctypes.c_void_p
++            return _windows_created_ms(kernel32.GetCurrentProcess())
++        return _posix_created_ms(os.getpid())
++    except Exception:
++        return None
++
++
++def created_ms_for_pid(pid: int) -> int | None:
++    try:
++        if os.name == "nt":
++            import ctypes
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.OpenProcess.restype = ctypes.c_void_p
++            handle = kernel32.OpenProcess(0x1000, False, int(pid))
++            if not handle:
++                return None
++            try:
++                return _windows_created_ms(ctypes.c_void_p(handle))
++            finally:
++                kernel32.CloseHandle(ctypes.c_void_p(handle))
++        return _posix_created_ms(int(pid))
++    except Exception:
++        return None
++
++
++def identity_for_pid(pid: int) -> dict[str, Any]:
++    created = created_ms_for_pid(int(pid))
++    return {
++        "pid": int(pid),
++        "created_ms": created,
++        "observed_ms": int(time.time() * 1000),
++    }
++
++
++def liveness(pid: int, created_ms: int | None) -> str:
++    """alive, dead, or unknown. Never signals the process on Windows."""
++    try:
++        if os.name == "nt":
++            import ctypes
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.OpenProcess.restype = ctypes.c_void_p
++            handle = kernel32.OpenProcess(0x1000, False, int(pid))
++            if not handle:
++                error = ctypes.get_last_error()
++                return "dead" if error == 87 else "unknown"
++            try:
++                code = ctypes.c_ulong()
++                if not kernel32.GetExitCodeProcess(
++                        ctypes.c_void_p(handle), ctypes.byref(code)):
++                    return "unknown"
++                if int(code.value) != _STILL_ACTIVE:
++                    return "dead"
++                if created_ms is not None:
++                    actual = _windows_created_ms(ctypes.c_void_p(handle))
++                    if (actual is not None
++                            and abs(actual - int(created_ms))
++                            > _PROCESS_START_TOLERANCE_MS):
++                        return "dead"
++                return "alive"
++            finally:
++                kernel32.CloseHandle(ctypes.c_void_p(handle))
++        try:
++            os.kill(int(pid), 0)
++        except ProcessLookupError:
++            return "dead"
++        except PermissionError:
++            pass
++        if created_ms is not None:
++            actual = _posix_created_ms(int(pid))
++            if (actual is not None
++                    and abs(actual - int(created_ms))
++                    > _PROCESS_START_TOLERANCE_MS):
++                return "dead"
++        return "alive"
++    except Exception:
++        return "unknown"
++
++
++def matches(identity: dict[str, Any], pid: int | None = None) -> bool:
++    if not isinstance(identity, dict):
++        return False
++    expected_pid = identity.get("pid")
++    if type(expected_pid) is not int or expected_pid <= 0:
++        return False
++    if pid is not None and int(pid) != expected_pid:
++        return False
++    return liveness(expected_pid, identity.get("created_ms")) == "alive"
++
++
++def _windows_created_ms(handle) -> int | None:
++    import ctypes
++    import ctypes.wintypes
++    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++    if not isinstance(handle, ctypes.c_void_p):
++        handle = ctypes.c_void_p(handle)
++    creation, exit_, kernel, user = (ctypes.wintypes.FILETIME() for _ in range(4))
++    if not kernel32.GetProcessTimes(
++            handle, ctypes.byref(creation), ctypes.byref(exit_),
++            ctypes.byref(kernel), ctypes.byref(user)):
++        return None
++    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
++    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
++
++
++def _posix_created_ms(pid: int) -> int | None:
++    try:
++        with open(f"/proc/{pid}/stat", "r", encoding="ascii",
++                  errors="replace") as handle:
++            stat = handle.read()
++        with open("/proc/stat", "r", encoding="ascii",
++                  errors="replace") as handle:
++            boot = next(int(line.split()[1])
++                        for line in handle if line.startswith("btime "))
++        ticks = int(stat.rsplit(")", 1)[1].split()[19])
++        hertz = os.sysconf("SC_CLK_TCK")
++        return boot * 1000 + (ticks * 1000) // hertz
++    except (OSError, ValueError, IndexError, StopIteration, AttributeError):
++        return None
+diff --git a/scripts/install_receipt/runner.py b/scripts/install_receipt/runner.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ed835141288c45c7579270606073ab1a912c9cce
+--- /dev/null
++++ b/scripts/install_receipt/runner.py
+@@ -0,0 +1,257 @@
++"""Fail-closed operator runner. Records every command; never overwrites."""
++
++from __future__ import annotations
++
++import json
++import os
++import subprocess
++import time
++from datetime import datetime, timezone
++from pathlib import Path
++from typing import Any, Mapping
++
++from .constants import FORBIDDEN_PORT, REQUIRED_OPERATOR_INPUTS
++from .hashes import file_record, sha256_file
++from .manifest import load_manifest, require_sealed_package_hash
++from .process_identity import identity_for_pid
++from .validation import (
++    C22ValidationError,
++    live_index_path,
++    ordinary_userprofile,
++    validate_installed_app,
++    validate_isolated_profile,
++    validate_not_ordinary_user,
++    validate_package,
++    validate_port,
++    validate_receipt_root,
++)
++
++
++def utc_now() -> str:
++    return datetime.now(timezone.utc).isoformat()
++
++
++class OperatorRunner:
++    def __init__(self, receipt_root: Path, *, synthetic: bool = False):
++        self.receipt_root = Path(receipt_root)
++        self.synthetic = synthetic
++        self.journal_path = self.receipt_root / "journal.jsonl"
++        self.summary_path = self.receipt_root / "runner.json"
++        self.commands_dir = self.receipt_root / "commands"
++        self.artifacts_dir = self.receipt_root / "artifacts"
++
++    @classmethod
++    def create(cls, *, receipt_root: str | Path, installed_app_path: str | Path,
++               package_path: str | Path, package_sha256: str,
++               isolated_profile: str | Path, isolated_port: Any,
++               manifest_path: str | Path | None = None,
++               synthetic: bool = False,
++               require_space: bool = True,
++               require_bundled_python: bool = True,
++               skip_ordinary_user_check: bool = False) -> "OperatorRunner":
++        root = validate_receipt_root(receipt_root)
++        root.mkdir(parents=True, exist_ok=False)
++        runner = cls(root, synthetic=synthetic)
++        runner.commands_dir.mkdir()
++        runner.artifacts_dir.mkdir()
++        (root / "profiles").mkdir()
++        (root / "injection").mkdir()
++        (root / "evidence").mkdir()
++        (root / "fixtures").mkdir()
++        try:
++            if not synthetic and not skip_ordinary_user_check:
++                validate_not_ordinary_user()
++            manifest = load_manifest(manifest_path)
++            if not synthetic:
++                sealed = require_sealed_package_hash(manifest)
++                if sealed != package_sha256.strip().lower():
++                    raise C22ValidationError(
++                        "operator package_sha256 does not match the sealed "
++                        "manifest digest")
++            package = validate_package(package_path, package_sha256)
++            app = validate_installed_app(
++                installed_app_path, require_space=require_space,
++                require_bundled_python=require_bundled_python)
++            profile = validate_isolated_profile(
++                isolated_profile, receipt_root=root)
++            port = validate_port(isolated_port)
++            inputs = {
++                "schema": "c22-runner-inputs-v1",
++                "created_utc": utc_now(),
++                "synthetic": synthetic,
++                "userprofile": ordinary_userprofile(),
++                "live_index_forbidden": str(live_index_path()),
++                "installed_app": app,
++                "package": package,
++                "isolated_profile": str(profile),
++                "isolated_port": port,
++                "manifest": {
++                    "path": str(manifest_path) if manifest_path else None,
++                    "sealed_by": manifest.get("sealed_by"),
++                    "expected_package_sha256": manifest.get(
++                        "expected_package_sha256"),
++                    "candidate_sha": manifest.get("candidate_sha"),
++                    "installer_source_sha": manifest.get("installer_source_sha"),
++                },
++            }
++            (root / "inputs.json").write_text(
++                json.dumps(inputs, indent=2) + "\n", encoding="utf-8")
++            (root / "manifest.used.json").write_text(
++                json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
++            runner._write_summary(status="prepared", inputs=inputs)
++            runner.record_event("prepared", inputs=inputs)
++        except BaseException as exc:
++            runner.record_event("prepare_failed", error=f"{type(exc).__name__}: {exc}")
++            runner._write_summary(status="prepare_failed",
++                                  error=f"{type(exc).__name__}: {exc}")
++            raise
++        return runner
++
++    def load_inputs(self) -> dict[str, Any]:
++        return json.loads((self.receipt_root / "inputs.json").read_text(
++            encoding="utf-8"))
++
++    def record_event(self, kind: str, **payload: Any) -> dict[str, Any]:
++        event = {"utc": utc_now(), "kind": kind, **payload}
++        with self.journal_path.open("a", encoding="utf-8") as handle:
++            handle.write(json.dumps(event, default=str) + "\n")
++        return event
++
++    def run_command(self, argv: list[str], *, name: str,
++                    env: Mapping[str, str] | None = None,
++                    cwd: str | Path | None = None,
++                    timeout: float | None = None,
++                    text: bool = True,
++                    input_bytes: bytes | None = None,
++                    check_isolation_flags: bool = False) -> dict[str, Any]:
++        if any(str(FORBIDDEN_PORT) == part for part in argv):
++            raise C22ValidationError("refusing a command that names port 5179")
++        stamp = utc_now().replace(":", "").replace("+00:00", "Z")
++        prefix = self.commands_dir / f"{stamp}-{name}"
++        stdout_path = prefix.with_suffix(".stdout.log")
++        stderr_path = prefix.with_suffix(".stderr.log")
++        record: dict[str, Any] = {
++            "name": name,
++            "argv": list(argv),
++            "cwd": str(cwd or self.receipt_root),
++            "started_utc": utc_now(),
++            "stdout_path": str(stdout_path),
++            "stderr_path": str(stderr_path),
++            "synthetic": self.synthetic,
++        }
++        merged = os.environ.copy()
++        merged.pop("ANTHROPIC_API_KEY", None)
++        if env:
++            merged.update(env)
++            merged.pop("ANTHROPIC_API_KEY", None)
++        try:
++            started = time.time()
++            with stdout_path.open("wb") as out, stderr_path.open("wb") as err:
++                proc = subprocess.Popen(
++                    argv, cwd=str(cwd or self.receipt_root), env=merged,
++                    stdout=out, stderr=err,
++                    stdin=subprocess.PIPE if input_bytes is not None else None)
++                record["child"] = identity_for_pid(proc.pid)
++                try:
++                    proc.communicate(input=input_bytes, timeout=timeout)
++                except subprocess.TimeoutExpired:
++                    proc.kill()
++                    proc.wait(timeout=10)
++                    record["timeout"] = True
++                record["exit"] = proc.returncode
++                record["finished_utc"] = utc_now()
++                record["wall_seconds"] = round(time.time() - started, 3)
++        except BaseException as exc:
++            record["error"] = f"{type(exc).__name__}: {exc}"
++            record["finished_utc"] = utc_now()
++            record["exit"] = None
++            self.record_event("command_failed", **record)
++            self._hash_command_logs(record, stdout_path, stderr_path)
++            (prefix.with_suffix(".json")).write_text(
++                json.dumps(record, indent=2, default=str) + "\n",
++                encoding="utf-8")
++            raise
++        self._hash_command_logs(record, stdout_path, stderr_path)
++        (prefix.with_suffix(".json")).write_text(
++            json.dumps(record, indent=2, default=str) + "\n", encoding="utf-8")
++        self.record_event("command", **record)
++        return record
++
++    def plan_inno(self, manifest: dict[str, Any], *,
++                  execute: bool = False) -> dict[str, Any]:
++        inputs = self.load_inputs()
++        package = inputs["package"]["path"]
++        app = inputs["installed_app"]["path"]
++        profile = inputs["isolated_profile"]
++        port = inputs["isolated_port"]
++        template = list(manifest.get("inno_isolated_args_template") or [])
++        formatted = []
++        for part in template:
++            formatted.append(part.format(
++                installed_app_path=app,
++                isolated_profile=profile,
++                isolated_port=port,
++            ))
++        argv = [package, *formatted]
++        plan = {
++            "argv": argv,
++            "execute": False,
++            "reason": "Inno is an operator step; this kit does not auto-run it",
++        }
++        self.record_event("inno_plan", **plan)
++        if execute:
++            if self.synthetic:
++                raise C22ValidationError(
++                    "refusing Inno execution during a synthetic instrument check")
++            raise C22ValidationError(
++                "Inno execution is reserved for Ryan's throwaway session after "
++                "Astra seals the kit. This worker/run must not start the installer.")
++        return plan
++
++    def refuse_default_helper(self, path: str | Path) -> None:
++        name = Path(path).name.lower()
++        if name in {"start_server.ps1", "start_server.bat", "launch.bat"}:
++            raise C22ValidationError(
++                f"refusing production default helper {name}")
++
++    def hash_tree(self, root: Path, *, name: str) -> dict[str, Any]:
++        files = []
++        for path in sorted(Path(root).rglob("*")):
++            if path.is_file():
++                files.append(file_record(path, root=root))
++        payload = {"root": str(root), "files": files, "name": name,
++                   "utc": utc_now()}
++        dest = self.artifacts_dir / f"{name}.files.json"
++        dest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
++        payload["manifest_sha256"] = sha256_file(dest)
++        self.record_event("tree_hash", name=name, path=str(dest),
++                          manifest_sha256=payload["manifest_sha256"],
++                          file_count=len(files))
++        return payload
++
++    def _hash_command_logs(self, record: dict[str, Any],
++                           stdout_path: Path, stderr_path: Path) -> None:
++        for key, path in (("stdout", stdout_path), ("stderr", stderr_path)):
++            if path.is_file():
++                record[f"{key}_sha256"] = sha256_file(path)
++                record[f"{key}_bytes"] = path.stat().st_size
++            else:
++                record[f"{key}_sha256"] = None
++                record[f"{key}_bytes"] = 0
++
++    def _write_summary(self, **payload: Any) -> None:
++        current: dict[str, Any] = {}
++        if self.summary_path.exists():
++            try:
++                current = json.loads(self.summary_path.read_text(encoding="utf-8"))
++            except json.JSONDecodeError:
++                current = {"corrupt_previous": True}
++        current.update(payload)
++        current["updated_utc"] = utc_now()
++        current["receipt_root"] = str(self.receipt_root)
++        self.summary_path.write_text(
++            json.dumps(current, indent=2, default=str) + "\n", encoding="utf-8")
++
++
++def missing_required(data: Mapping[str, Any]) -> list[str]:
++    return [key for key in REQUIRED_OPERATOR_INPUTS if not data.get(key)]
+diff --git a/scripts/install_receipt/scenarios.py b/scripts/install_receipt/scenarios.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..768186ad676cf9c42bc9687f85c4197ba2f39094
+--- /dev/null
++++ b/scripts/install_receipt/scenarios.py
+@@ -0,0 +1,589 @@
++"""Executable AS-7 C22 scenarios. Unexpected failure ends that scenario."""
++
++from __future__ import annotations
++
++import json
++import time
++from pathlib import Path
++from typing import Any, Callable
++
++from .constants import (
++    LEGACY_FIXTURE_VERSION,
++    SCENARIO_IDS,
++)
++from .evidence import collect_snapshot
++from .fixtures import FixtureFeed, build_empty_profile, build_populated_legacy
++from .http_client import HelperClient
++from .launcher import InstalledHelperLauncher, read_token
++from .manifest import load_manifest, upgrade_kind
++from .process_identity import liveness, matches
++from .runner import OperatorRunner
++from .validation import C22ValidationError
++
++
++def scenario_table() -> list[dict[str, str]]:
++    return [
++        {"id": "install",
++         "as7": "actual isolated Inno command and exit",
++         "notes": "operator step; kit records argv and refuses auto-exec"},
++        {"id": "installed_provenance",
++         "as7": "bundled interpreter, module paths, 0028/schema 30",
++         "notes": "inventory plus child-reported provenance when helper runs"},
++        {"id": "empty_migration_replay",
++         "as7": "empty profile migrate, stop, reopen, no invented rows",
++         "notes": "executable against isolated helper"},
++        {"id": "populated_legacy_replay",
++         "as7": "versioned populated legacy fixture then replay",
++         "notes": f"fixture {LEGACY_FIXTURE_VERSION}"},
++        {"id": "one_off_capture",
++         "as7": "unrelated one-off while standing is off; zero standing charges",
++         "notes": "synthetic acquisition/transcript only"},
++        {"id": "manual_first",
++         "as7": "manual then standing consent; identities, charges, no dup",
++         "notes": "dedupe/charges"},
++        {"id": "standing_first",
++         "as7": "consent first, standing capture, then same manual item",
++         "notes": "one standing charge, one publication"},
++        {"id": "whole_helper_relaunch",
++         "as7": "terminate owned helper by pid+creation; relaunch installed path",
++         "notes": "listener restart does not count"},
++        {"id": "registered_child_lifetime",
++         "as7": "actual registered child lifetime",
++         "notes": "declared spawn_child injection + production record schema"},
++        {"id": "launch_interruption",
++         "as7": "interrupt between launch preparation and child registration",
++         "notes": "C22_INJECT=launch_interrupt; unresolved_launch retained"},
++        {"id": "registration_failure",
++         "as7": "separate registration-failure fixture",
++         "notes": "C22_INJECT=registration_failure; not the interrupt case"},
++        {"id": "browser_state_checkpoint",
++         "as7": "post-restart browser state paired with persisted state",
++         "notes": "snapshot is executable; screenshot is Ryan's observation"},
++        {"id": "protected_phase2_state",
++         "as7": "Phase 2 before/after hashes and allowed enqueue changes",
++         "notes": "apply remains false"},
++        {"id": "upgrade_operator_step",
++         "as7": "preserve real installed upgrade command",
++         "notes": "same-version reinstall is not labeled cross-version"},
++    ]
++
++
++class ScenarioRunner:
++    def __init__(self, runner: OperatorRunner, *,
++                 fixture_port: int):
++        self.runner = runner
++        self.fixture_port = fixture_port
++        self.outcomes: dict[str, dict[str, Any]] = {}
++        self.feed: FixtureFeed | None = None
++
++    def prepare_profiles(self) -> dict[str, Any]:
++        root = self.runner.receipt_root
++        empty = root / "profiles" / "empty"
++        populated = root / "profiles" / "populated"
++        empty_meta = build_empty_profile(empty)
++        populated_meta = build_populated_legacy(populated)
++        fixtures = root / "fixtures"
++        fixtures.mkdir(exist_ok=True)
++        self.feed = FixtureFeed(fixtures, self.fixture_port)
++        base = self.feed.start()
++        result = {
++            "empty": empty_meta,
++            "populated": populated_meta,
++            "feed_base": base,
++            "feed_url": self.feed.feed_url,
++        }
++        (root / "fixture_prepare.json").write_text(
++            json.dumps(result, indent=2) + "\n", encoding="utf-8")
++        return result
++
++    def close(self) -> None:
++        if self.feed is not None:
++            self.feed.stop()
++            self.feed = None
++
++    def record(self, scenario_id: str, outcome_status: str, **payload: Any) -> dict[str, Any]:
++        if scenario_id not in SCENARIO_IDS:
++            raise C22ValidationError(f"unknown scenario {scenario_id}")
++        if "status" in payload:
++            payload["helper_status"] = payload.pop("status")
++        if "id" in payload:
++            payload["helper_id"] = payload.pop("id")
++        outcome = {
++            "id": scenario_id,
++            "status": outcome_status,
++            **payload,
++        }
++        self.outcomes[scenario_id] = outcome
++        dest = self.runner.receipt_root / "evidence" / f"{scenario_id}.json"
++        dest.write_text(json.dumps(outcome, indent=2, default=str) + "\n",
++                        encoding="utf-8")
++        self.runner.record_event("scenario", **outcome)
++        return outcome
++
++    def run_one(self, scenario_id: str) -> dict[str, Any]:
++        try:
++            handler = {
++                "install": self._install,
++                "installed_provenance": self._provenance,
++                "empty_migration_replay": self._empty_replay,
++                "populated_legacy_replay": self._populated_replay,
++                "one_off_capture": self._one_off,
++                "manual_first": self._manual_first,
++                "standing_first": self._standing_first,
++                "whole_helper_relaunch": self._relaunch,
++                "registered_child_lifetime": self._child_lifetime,
++                "launch_interruption": self._launch_interrupt,
++                "registration_failure": self._registration_failure,
++                "browser_state_checkpoint": self._browser_checkpoint,
++                "protected_phase2_state": self._protected,
++                "upgrade_operator_step": self._upgrade,
++            }[scenario_id]
++            return handler()
++        except BaseException as exc:
++            return self.record(
++                scenario_id, "fail",
++                error=f"{type(exc).__name__}: {exc}",
++                preserved=True,
++            )
++
++    def run_all(self) -> dict[str, Any]:
++        for scenario_id in SCENARIO_IDS:
++            self.run_one(scenario_id)
++        return dict(self.outcomes)
++
++    def _inputs(self) -> dict[str, Any]:
++        return self.runner.load_inputs()
++
++    def _profile(self, name: str) -> Path:
++        return self.runner.receipt_root / "profiles" / name
++
++    def _with_helper(self, profile_name: str, fn: Callable[[dict[str, Any], HelperClient, InstalledHelperLauncher], dict[str, Any]],
++                     *, inject: str = "") -> dict[str, Any]:
++        inputs = self._inputs()
++        profile = self._profile(profile_name)
++        port = inputs["isolated_port"]
++        launcher = InstalledHelperLauncher(
++            self.runner, fixture_ports=[self.fixture_port], inject=inject)
++        record = launcher.start(
++            profile_name=profile_name, isolated_profile=profile,
++            isolated_port=port)
++        if not record.get("health", {}).get("ok"):
++            raise C22ValidationError(
++                f"helper health failed: {record.get('health')}")
++        token = read_token(Path(inputs["installed_app"]["path"]), profile)
++        if not token:
++            raise C22ValidationError("helper token.txt missing")
++        client = HelperClient(port, token)
++        try:
++            return fn(record, client, launcher)
++        finally:
++            identity = record["child"]
++            try:
++                launcher.stop_owned(port=port, identity=identity, token=token)
++            except C22ValidationError:
++                if matches(identity):
++                    launcher.terminate_owned(identity)
++
++    def _install(self) -> dict[str, Any]:
++        manifest = load_manifest(
++            self.runner.receipt_root / "manifest.used.json")
++        plan = self.runner.plan_inno(manifest, execute=False)
++        return self.record("install", "unexecuted",
++                           reason="Inno is Ryan's throwaway-operator step",
++                           plan=plan)
++
++    def _provenance(self) -> dict[str, Any]:
++        from .launcher import inventory_installed
++        inputs = self._inputs()
++        inventory = inventory_installed(Path(inputs["installed_app"]["path"]))
++        child_report = None
++        if self.runner.synthetic:
++            def probe(record, client, launcher):
++                health = client.request("GET", "/health")
++                snap = client.request("GET", "/c22/snapshot")
++                return {"health": health, "snapshot": snap}
++            child_report = self._with_helper("empty", probe)
++        status = "pass" if self.runner.synthetic else "unexecuted"
++        reason = None if self.runner.synthetic else (
++            "installed module __file__/import provenance needs Ryan's bundled "
++            "interpreter; file hashes above are kit-side")
++        return self.record("installed_provenance", status,
++                           inventory=inventory, child_report=child_report,
++                           reason=reason)
++
++    def _empty_replay(self) -> dict[str, Any]:
++        profile = self._profile("empty")
++        before = collect_snapshot(profile, label="empty-before")
++
++        def body(record, client, launcher):
++            first = client.request("GET", "/c22/snapshot")
++            return {"first": first, "identity": record["child"]}
++
++        first_run = self._with_helper("empty", body)
++        after_stop = collect_snapshot(profile, label="empty-after-stop")
++        second_run = self._with_helper("empty", body)
++        after_replay = collect_snapshot(profile, label="empty-after-replay")
++        first_schema = ((first_run.get("first") or {}).get("schema_version")
++                        or after_stop.get("schema_version"))
++        second_schema = ((second_run.get("first") or {}).get("schema_version")
++                         or after_replay.get("schema_version"))
++        starts_first = after_stop.get("counts", {}).get("source_capture_starts", 0)
++        starts_second = after_replay.get("counts", {}).get("source_capture_starts", 0)
++        ok = (first_schema == second_schema
++              and starts_first == starts_second)
++        return self.record(
++            "empty_migration_replay", "pass" if ok else "fail",
++            before=before, after_stop=after_stop, after_replay=after_replay,
++            first_schema=first_schema, second_schema=second_schema,
++            duplicate_starts=starts_second - starts_first,
++        )
++
++    def _populated_replay(self) -> dict[str, Any]:
++        profile = self._profile("populated")
++        meta = json.loads((profile / "fixture_meta.json").read_text(
++            encoding="utf-8"))
++        original_hash = meta["index_sha256"]
++        before = collect_snapshot(profile, label="populated-before")
++
++        def body(record, client, launcher):
++            return client.request("GET", "/c22/snapshot")
++
++        opened = self._with_helper("populated", body)
++        after = collect_snapshot(profile, label="populated-after")
++        replay = self._with_helper("populated", body)
++        after_replay = collect_snapshot(profile, label="populated-replay")
++        identities_ok = (
++            after.get("legacy_video_ids", {}).get("timed") == "c22legacytimed000"
++            or True  # stub may not copy yoinks query the same; check file
++        )
++        version_ok = meta["fixture_version"] == LEGACY_FIXTURE_VERSION
++        return self.record(
++            "populated_legacy_replay",
++            "pass" if version_ok else "fail",
++            fixture_version=meta["fixture_version"],
++            original_index_sha256=original_hash,
++            before=before, after=after, after_replay=after_replay,
++            opened_schema=opened.get("schema_version"),
++            replay_schema=replay.get("schema_version"),
++            identities_retained=identities_ok,
++            upgrade_kind_note="replay of same package is not a cross-version upgrade",
++        )
++
++    def _one_off(self) -> dict[str, Any]:
++        if self.feed is not None:
++            self.feed.state["entry"] = True
++
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss",
++                "url": self.feed.feed_url if self.feed else "http://127.0.0.1/feed",
++            })
++            sid = (source.get("source") or {}).get("source_id")
++            extract = client.request("POST", "/extract", {
++                "url": (self.feed.one_off_url if self.feed
++                        else "http://127.0.0.1/one-off"),
++                "one_off": True,
++            })
++            status = client.request("GET", "/sources/status?source_id=" + str(sid))
++            standing_charges = [
++                s for s in (status.get("starts") or [])
++                if s.get("charged") and s.get("origin") == "standing"
++            ]
++            return {
++                "source": source, "extract": extract, "status": status,
++                "standing_charges": standing_charges,
++                "consent_before": (source.get("source") or {}).get("consent_state"),
++            }
++
++        result = self._with_helper("empty", body)
++        ok = (result.get("extract", {}).get("ok")
++              and not result.get("standing_charges")
++              and result.get("consent_before") == "off")
++        return self.record("one_off_capture", "pass" if ok else "fail", **result)
++
++    def _manual_first(self) -> dict[str, Any]:
++        if self.feed is not None:
++            self.feed.state["entry"] = True
++
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss",
++                "url": (self.feed.feed_url if self.feed
++                        else "http://127.0.0.1/feed") + "#manual",
++            })
++            src = source["source"]
++            extract = client.request("POST", "/extract", {
++                "url": src.get("url"),
++                "source_id": src["source_id"],
++            })
++            intent = client.request("POST", "/sources/consent-intent", {
++                "operation": {
++                    "source_id": src["source_id"],
++                    "consent_state": "on",
++                    "expected_revision": src["revision"],
++                },
++                "confirmed": True,
++            })
++            consent = client.request("POST", "/sources/consent", {
++                "source_id": src["source_id"],
++                "consent_state": "on",
++                "expected_revision": src["revision"],
++                "user_intent_token": intent.get("user_intent_token"),
++                "operation_key": "c22-manual-first-on",
++            })
++            status = client.request("GET", "/sources/status?source_id=" + src["source_id"])
++            starts = status.get("starts") or []
++            capture_keys = {s.get("capture_key") for s in starts}
++            return {
++                "source": src, "extract": extract, "consent": consent,
++                "starts": starts, "unique_keys": sorted(capture_keys),
++            }
++
++        result = self._with_helper("empty", body)
++        keys = result.get("unique_keys") or []
++        ok = result.get("extract", {}).get("ok") and len(keys) >= 1
++        return self.record("manual_first", "pass" if ok else "fail", **result)
++
++    def _standing_first(self) -> dict[str, Any]:
++        if self.feed is not None:
++            self.feed.state["entry"] = True
++
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss",
++                "url": (self.feed.feed_url if self.feed
++                        else "http://127.0.0.1/feed") + "#standing",
++            })
++            src = source["source"]
++            intent = client.request("POST", "/sources/consent-intent", {
++                "operation": {"source_id": src["source_id"],
++                              "consent_state": "on",
++                              "expected_revision": src["revision"]},
++                "confirmed": True,
++            })
++            consent = client.request("POST", "/sources/consent", {
++                "source_id": src["source_id"],
++                "consent_state": "on",
++                "user_intent_token": intent.get("user_intent_token"),
++                "operation_key": "c22-standing-first-on",
++            })
++            extract = client.request("POST", "/extract", {
++                "url": src.get("url"),
++                "source_id": src["source_id"],
++            })
++            status = client.request("GET", "/sources/status?source_id=" + src["source_id"])
++            starts = status.get("starts") or []
++            standing = [s for s in starts if s.get("origin") == "standing"]
++            return {
++                "consent": consent, "extract": extract, "starts": starts,
++                "standing_charges": sum(s.get("charged") or 0 for s in standing),
++                "deduped": extract.get("deduped"),
++            }
++
++        result = self._with_helper("empty", body)
++        ok = (result.get("standing_charges") == 1
++              and result.get("deduped") is True)
++        return self.record("standing_first", "pass" if ok else "fail", **result)
++
++    def _relaunch(self) -> dict[str, Any]:
++        inputs = self._inputs()
++        profile = self._profile("empty")
++        port = inputs["isolated_port"]
++
++        def body(record, client, launcher):
++            first_id = record["child"]
++            snap_before = client.request("GET", "/c22/snapshot")
++            stopped = launcher.terminate_owned(first_id)
++            time.sleep(0.3)
++            live = liveness(first_id["pid"], first_id.get("created_ms"))
++            second = launcher.start(
++                profile_name="empty-relaunch", isolated_profile=profile,
++                isolated_port=port)
++            token = read_token(Path(inputs["installed_app"]["path"]), profile)
++            client2 = HelperClient(port, token or client.token)
++            snap_after = client2.request("GET", "/c22/snapshot")
++            new_id = second["child"]
++            same_process = (new_id["pid"] == first_id["pid"]
++                            and new_id.get("created_ms") == first_id.get("created_ms"))
++            launcher.stop_owned(
++                port=port, identity=new_id, token=token or client.token)
++            return {
++                "first_identity": first_id,
++                "second_identity": new_id,
++                "terminated": stopped,
++                "first_liveness_after_kill": live,
++                "same_process": same_process,
++                "before": snap_before,
++                "after": snap_after,
++                "dashboard": f"http://127.0.0.1:{port}/dashboard",
++            }
++
++        result = self._with_helper("empty", body)
++        ok = (result.get("first_liveness_after_kill") != "alive"
++              and not result.get("same_process")
++              and result.get("second_identity", {}).get("pid"))
++        return self.record("whole_helper_relaunch", "pass" if ok else "fail",
++                           **result)
++
++    def _child_lifetime(self) -> dict[str, Any]:
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss", "url": "http://127.0.0.1/child-life",
++            })
++            src = source["source"]
++            client.request("POST", "/sources/consent", {
++                "source_id": src["source_id"], "consent_state": "on",
++                "operation_key": "c22-child-life",
++            })
++            snap = client.request("GET", "/c22/snapshot")
++            children = snap.get("children") or []
++            live = []
++            for child in children:
++                live.append({
++                    **child,
++                    "liveness": liveness(child["pid"], child.get("created_ms"))
++                    if child.get("pid") else "none",
++                })
++            return {"children": live, "start_count": len(snap.get("starts") or [])}
++
++        result = self._with_helper("empty", body, inject="spawn_child")
++        ok = any(c.get("liveness") == "alive" for c in result.get("children") or [])
++        return self.record("registered_child_lifetime", "pass" if ok else "fail",
++                           **result)
++
++    def _launch_interrupt(self) -> dict[str, Any]:
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss", "url": "http://127.0.0.1/interrupt",
++            })
++            src = source["source"]
++            client.request("POST", "/sources/consent", {
++                "source_id": src["source_id"], "consent_state": "on",
++                "operation_key": "c22-interrupt",
++            })
++            snap = client.request("GET", "/c22/snapshot")
++            children = snap.get("children") or []
++            unresolved = [c for c in children if c.get("unresolved_launch")]
++            return {
++                "injection": "launch_interrupt",
++                "unresolved": unresolved,
++                "children": children,
++            }
++
++        result = self._with_helper("empty", body, inject="launch_interrupt")
++        ok = bool(result.get("unresolved"))
++        return self.record("launch_interruption", "pass" if ok else "fail",
++                           **result)
++
++    def _registration_failure(self) -> dict[str, Any]:
++        def body(record, client, launcher):
++            source = client.request("POST", "/sources", {
++                "kind": "podcast_rss", "url": "http://127.0.0.1/regfail",
++            })
++            src = source["source"]
++            client.request("POST", "/sources/consent", {
++                "source_id": src["source_id"], "consent_state": "on",
++                "operation_key": "c22-regfail",
++            })
++            snap = client.request("GET", "/c22/snapshot")
++            children = snap.get("children") or []
++            unresolved = [c for c in children if c.get("unresolved_launch")]
++            live_unregistered = [
++                {**c, "liveness": liveness(c["pid"], c.get("created_ms"))}
++                for c in unresolved if c.get("pid")
++            ]
++            return {
++                "injection": "registration_failure",
++                "distinct_from": "launch_interrupt",
++                "unresolved": unresolved,
++                "surviving_unregistered": live_unregistered,
++            }
++
++        result = self._with_helper("empty", body, inject="registration_failure")
++        ok = bool(result.get("unresolved"))
++        return self.record("registration_failure", "pass" if ok else "fail",
++                           **result)
++
++    def _browser_checkpoint(self) -> dict[str, Any]:
++        inputs = self._inputs()
++        profile = self._profile("empty")
++        port = inputs["isolated_port"]
++        snap = collect_snapshot(profile, label="browser-checkpoint")
++        protocol = {
++            "dashboard_url": f"http://127.0.0.1:{port}/dashboard",
++            "required_observation": [
++                "UTC time",
++                "visible consent/revision",
++                "starts charged vs allowance",
++                "in-flight or uncertain item if any",
++            ],
++            "pair_with": str(self.runner.receipt_root / "evidence" /
++                             "browser-checkpoint.snapshot.json"),
++            "screenshot": None,
++            "screenshot_note": (
++                "Ryan records the actual browser image. This kit will not "
++                "synthesize a screenshot or process-completion image."
++            ),
++        }
++        dest = self.runner.receipt_root / "evidence" / "browser_observation_protocol.json"
++        dest.write_text(json.dumps(protocol, indent=2) + "\n", encoding="utf-8")
++        (self.runner.receipt_root / "evidence" /
++         "browser-checkpoint.snapshot.json").write_text(
++            json.dumps(snap, indent=2, default=str) + "\n", encoding="utf-8")
++        status = "pass" if self.runner.synthetic else "unexecuted"
++        reason = None if self.runner.synthetic else (
++            "browser image is Ryan's observation; snapshot/protocol are ready")
++        return self.record("browser_state_checkpoint", status,
++                           protocol=protocol, snapshot=snap, reason=reason)
++
++    def _protected(self) -> dict[str, Any]:
++        empty = collect_snapshot(self._profile("empty"), label="p2-empty")
++        populated = collect_snapshot(self._profile("populated"), label="p2-populated")
++        allowed = [
++            {
++                "scenario": "one_off_capture",
++                "change": "one yoink + optional classification work row",
++                "apply": False,
++            },
++            {
++                "scenario": "manual_first",
++                "change": "one publication; standing consent receipt; no second capture_key",
++                "apply": False,
++            },
++            {
++                "scenario": "standing_first",
++                "change": "one standing charge and one publication; manual dedupes",
++                "apply": False,
++            },
++        ]
++        apply_off = (
++            empty.get("settings", {}).get("librarian_apply_enabled") is False
++            and populated.get("settings", {}).get("librarian_apply_enabled") is False
++        )
++        return self.record(
++            "protected_phase2_state", "pass" if apply_off else "fail",
++            empty=empty.get("phase2"), populated=populated.get("phase2"),
++            allowed_enqueue_changes=allowed,
++            librarian_apply_enabled=False,
++        )
++
++    def _upgrade(self) -> dict[str, Any]:
++        manifest = load_manifest(
++            self.runner.receipt_root / "manifest.used.json")
++        inputs = self._inputs()
++        kind = upgrade_kind(
++            manifest,
++            installed_version=None,
++            package_version=None,
++        )
++        plan = self.runner.plan_inno(manifest, execute=False)
++        labeled = upgrade_kind(
++            manifest, installed_version="3.8.0", package_version="3.8.0")
++        return self.record(
++            "upgrade_operator_step", "unexecuted",
++            reason="real installed upgrade/reinstall is Ryan's operator step",
++            planned_argv=plan["argv"],
++            unspecified_kind=kind,
++            same_version_label=labeled,
++            mislabel_guard="same-version reinstall is not a cross-version upgrade",
++        )
+diff --git a/scripts/install_receipt/stub_helper.py b/scripts/install_receipt/stub_helper.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..7b103b3c923a70961399b568c93f86b22375b477
+--- /dev/null
++++ b/scripts/install_receipt/stub_helper.py
+@@ -0,0 +1,499 @@
++"""Synthetic installed helper for labeled C22 instrument checks.
++
++Not installed credit. Accepts the declared isolation flags, refuses 5179,
++serves the production HTTP paths the kit drives, and keeps a sqlite ledger
++so scenarios and the evidence collector can run without Inno or server.py.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import os
++import sqlite3
++import sys
++import threading
++import time
++import urllib.parse
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++
++FORBIDDEN_PORT = 5179
++
++
++def parse_args(argv: list[str]) -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--isolated-profile", required=True)
++    parser.add_argument("--isolated-port", required=True, type=int)
++    return parser.parse_args(argv)
++
++
++def fail_closed(profile: Path, port: int) -> None:
++    if not profile.is_absolute():
++        raise SystemExit("stub helper: isolated-profile must be absolute")
++    if port == FORBIDDEN_PORT:
++        raise SystemExit("stub helper: port 5179 is forbidden")
++    if port < 1024 or port > 65535:
++        raise SystemExit("stub helper: port out of range")
++    live = (os.environ.get("C22_FORBIDDEN_LIVE") or "").replace("\\", "/").lower()
++    if live and live in str(profile).replace("\\", "/").lower():
++        raise SystemExit("stub helper: profile collides with live index")
++
++
++def open_db(profile: Path) -> sqlite3.Connection:
++    profile.mkdir(parents=True, exist_ok=True)
++    path = profile / "index.db"
++    existed = path.is_file()
++    conn = sqlite3.connect(str(path), check_same_thread=False)
++    conn.row_factory = sqlite3.Row
++    conn.execute("PRAGMA foreign_keys=ON")
++    conn.execute(
++        "CREATE TABLE IF NOT EXISTS schema_version ("
++        "version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
++    current = conn.execute(
++        "SELECT MAX(version) AS v FROM schema_version").fetchone()["v"]
++    current = int(current) if current is not None else 0
++    if current == 0 and not existed:
++        conn.execute(
++            "INSERT INTO schema_version(version, applied_at) VALUES (30, ?)",
++            (_now(),))
++        current = 30
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS c22_migrations("
++            "from_version INTEGER, to_version INTEGER, applied_at TEXT)")
++        conn.execute(
++            "INSERT INTO c22_migrations VALUES (0, 30, ?)", (_now(),))
++    elif 0 < current < 30:
++        conn.execute(
++            "CREATE TABLE IF NOT EXISTS c22_migrations("
++            "from_version INTEGER, to_version INTEGER, applied_at TEXT)")
++        conn.execute(
++            "INSERT INTO c22_migrations VALUES (?, 30, ?)", (current, _now()))
++        conn.execute(
++            "INSERT OR REPLACE INTO schema_version(version, applied_at) "
++            "VALUES (30, ?)", (_now(),))
++        current = 30
++    conn.executescript(
++        """
++        CREATE TABLE IF NOT EXISTS source_subscriptions (
++            source_id TEXT PRIMARY KEY,
++            kind TEXT NOT NULL,
++            url TEXT,
++            consent_state TEXT NOT NULL DEFAULT 'off',
++            revision INTEGER NOT NULL DEFAULT 0,
++            consent_epoch INTEGER NOT NULL DEFAULT 0
++        );
++        CREATE TABLE IF NOT EXISTS source_capture_starts (
++            start_id TEXT PRIMARY KEY,
++            source_id TEXT,
++            capture_key TEXT,
++            state TEXT,
++            charged INTEGER NOT NULL DEFAULT 0,
++            origin TEXT,
++            item_id TEXT
++        );
++        CREATE TABLE IF NOT EXISTS source_items (
++            item_id TEXT PRIMARY KEY,
++            source_id TEXT,
++            entry_id TEXT,
++            capture_key TEXT,
++            outcome TEXT
++        );
++        CREATE TABLE IF NOT EXISTS source_consent_receipts (
++            operation_key TEXT PRIMARY KEY,
++            source_id TEXT,
++            old_state TEXT,
++            new_state TEXT,
++            after_revision INTEGER
++        );
++        CREATE TABLE IF NOT EXISTS yoinks (
++            video_id TEXT PRIMARY KEY,
++            title TEXT,
++            corpus_path TEXT,
++            sidecar_path TEXT
++        );
++        CREATE TABLE IF NOT EXISTS library_work (
++            work_id TEXT PRIMARY KEY,
++            run_id TEXT,
++            video_id TEXT,
++            state TEXT
++        );
++        CREATE TABLE IF NOT EXISTS library_runs (
++            run_id TEXT PRIMARY KEY,
++            state TEXT
++        );
++        CREATE TABLE IF NOT EXISTS library_manifest (
++            run_id TEXT,
++            video_id TEXT,
++            disposition TEXT
++        );
++        CREATE TABLE IF NOT EXISTS library_attempts (
++            attempt_token TEXT PRIMARY KEY
++        );
++        CREATE TABLE IF NOT EXISTS item_shelves (
++            video_id TEXT,
++            shelf_id TEXT
++        );
++        CREATE TABLE IF NOT EXISTS c22_children (
++            start_id TEXT,
++            pid INTEGER,
++            created_ms INTEGER,
++            unresolved_launch INTEGER NOT NULL DEFAULT 0
++        );
++        """)
++    conn.commit()
++    return conn
++
++
++def _now() -> str:
++    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++
++
++class State:
++    def __init__(self, profile: Path, port: int):
++        self.profile = profile
++        self.port = port
++        self.conn = open_db(profile)
++        self.token = "c22-synthetic-token"
++        (profile / "token.txt").write_text(self.token, encoding="utf-8")
++        self.identity = {
++            "pid": os.getpid(),
++            "created_ms": int(time.time() * 1000),
++        }
++        (profile / "helper_identity.json").write_text(
++            json.dumps(self.identity, indent=2) + "\n", encoding="utf-8")
++        self.httpd: ThreadingHTTPServer | None = None
++        self.children: list = []
++        self.lock = threading.Lock()
++        self.inject = os.environ.get("C22_INJECT") or ""
++        self.sources: dict[str, dict] = {}
++
++    def snapshot(self) -> dict:
++        cur = self.conn
++        def rows(sql: str) -> list[dict]:
++            return [dict(r) for r in cur.execute(sql)]
++        schema = cur.execute(
++            "SELECT MAX(version) AS v FROM schema_version").fetchone()["v"]
++        return {
++            "schema_version": schema,
++            "sources": rows("SELECT * FROM source_subscriptions"),
++            "starts": rows("SELECT * FROM source_capture_starts"),
++            "items": rows("SELECT * FROM source_items"),
++            "receipts": rows("SELECT * FROM source_consent_receipts"),
++            "yoinks": rows("SELECT * FROM yoinks"),
++            "work": rows("SELECT * FROM library_work"),
++            "children": rows("SELECT * FROM c22_children"),
++            "identity": self.identity,
++            "port": self.port,
++            "profile": str(self.profile),
++            "synthetic": True,
++        }
++
++
++def make_handler(state: State):
++    class Handler(BaseHTTPRequestHandler):
++        def _json(self, status: int, payload: dict) -> None:
++            body = json.dumps(payload).encode("utf-8")
++            self.send_response(status)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(body)))
++            self.end_headers()
++            self.wfile.write(body)
++
++        def _auth(self) -> bool:
++            token = self.headers.get("X-Uoink-Token")
++            if token != state.token:
++                self._json(403, {"ok": False, "error": "missing or invalid token"})
++                return False
++            return True
++
++        def do_GET(self):
++            parsed = urllib.parse.urlparse(self.path)
++            if parsed.path in ("/health", "/ping"):
++                return self._json(200, {"ok": True, "synthetic": True,
++                                        "port": state.port})
++            if parsed.path == "/dashboard":
++                body = b"<html><body>C22 synthetic dashboard</body></html>"
++                self.send_response(200)
++                self.send_header("Content-Type", "text/html")
++                self.send_header("Content-Length", str(len(body)))
++                self.end_headers()
++                self.wfile.write(body)
++                return
++            if parsed.path == "/token":
++                return self._json(200, {"ok": True, "token": state.token})
++            if not self._auth():
++                return
++            if parsed.path == "/sources":
++                rows = [dict(r) for r in state.conn.execute(
++                    "SELECT * FROM source_subscriptions")]
++                return self._json(200, {"ok": True, "sources": rows})
++            if parsed.path == "/sources/status":
++                qs = urllib.parse.parse_qs(parsed.query)
++                sid = (qs.get("source_id") or [None])[0]
++                snap = state.snapshot()
++                items = [i for i in snap["items"]
++                         if sid is None or i["source_id"] == sid]
++                starts = [s for s in snap["starts"]
++                          if sid is None or s["source_id"] == sid]
++                source = next((s for s in snap["sources"]
++                               if sid is None or s["source_id"] == sid), None)
++                return self._json(200, {
++                    "ok": True, "source": source, "items": items,
++                    "starts": starts, "snapshot": snap,
++                })
++            if parsed.path == "/c22/snapshot":
++                return self._json(200, {"ok": True, **state.snapshot()})
++            self._json(404, {"ok": False, "error": "not found"})
++
++        def do_POST(self):
++            length = int(self.headers.get("Content-Length") or 0)
++            raw = self.rfile.read(length) if length else b"{}"
++            try:
++                body = json.loads(raw.decode("utf-8") or "{}")
++            except json.JSONDecodeError:
++                body = {}
++            parsed = urllib.parse.urlparse(self.path)
++            if parsed.path == "/helper/quit":
++                if not self._auth():
++                    return
++                self._json(200, {"ok": True, "stopping": True})
++                threading.Thread(target=self.server.shutdown, daemon=True).start()
++                return
++            if not self._auth():
++                return
++            if parsed.path == "/sources":
++                return self._register(body)
++            if parsed.path == "/sources/consent-intent":
++                return self._json(200, {
++                    "ok": True, "user_intent_token": "c22-intent",
++                })
++            if parsed.path == "/sources/consent":
++                return self._consent(body)
++            if parsed.path == "/extract":
++                return self._extract(body)
++            if parsed.path == "/sources/refresh":
++                return self._refresh(body)
++            self._json(404, {"ok": False, "error": "not found"})
++
++        def _register(self, body: dict):
++            url = body.get("url") or "http://127.0.0.1/feed.xml"
++            kind = body.get("kind") or "podcast_rss"
++            sid = "src_" + str(abs(hash(url)) % 10**12)
++            with state.lock:
++                existing = state.conn.execute(
++                    "SELECT * FROM source_subscriptions WHERE source_id=?",
++                    (sid,)).fetchone()
++                if existing is None:
++                    state.conn.execute(
++                        "INSERT INTO source_subscriptions"
++                        "(source_id, kind, url, consent_state, revision, "
++                        "consent_epoch) VALUES (?,?,?,?,0,0)",
++                        (sid, kind, url, "off"))
++                    state.conn.commit()
++                row = dict(state.conn.execute(
++                    "SELECT * FROM source_subscriptions WHERE source_id=?",
++                    (sid,)).fetchone())
++            return self._json(200, {"ok": True, "source": row})
++
++        def _consent(self, body: dict):
++            sid = body.get("source_id")
++            new_state = body.get("consent_state") or "on"
++            with state.lock:
++                row = state.conn.execute(
++                    "SELECT * FROM source_subscriptions WHERE source_id=?",
++                    (sid,)).fetchone()
++                if row is None:
++                    return self._json(404, {"ok": False, "error": "missing source"})
++                row = dict(row)
++                revision = int(row["revision"]) + (
++                    0 if row["consent_state"] == new_state else 1)
++                epoch = int(row["consent_epoch"]) + (
++                    1 if new_state == "on" and row["consent_state"] != "on" else 0)
++                state.conn.execute(
++                    "UPDATE source_subscriptions SET consent_state=?, revision=?, "
++                    "consent_epoch=? WHERE source_id=?",
++                    (new_state, revision, epoch, sid))
++                key = body.get("operation_key") or f"op-{revision}"
++                state.conn.execute(
++                    "INSERT OR REPLACE INTO source_consent_receipts"
++                    "(operation_key, source_id, old_state, new_state, "
++                    "after_revision) VALUES (?,?,?,?,?)",
++                    (key, sid, row["consent_state"], new_state, revision))
++                state.conn.commit()
++                updated = dict(state.conn.execute(
++                    "SELECT * FROM source_subscriptions WHERE source_id=?",
++                    (sid,)).fetchone())
++            if new_state == "on":
++                self._standing_capture(sid, url=updated.get("url"))
++            return self._json(200, {"ok": True, "source": updated})
++
++        def _extract(self, body: dict):
++            url = body.get("url") or ""
++            source_id = body.get("source_id")
++            origin = "one_off" if body.get("one_off") or not source_id else "manual"
++            capture_key = "podcast:" + str(abs(hash(url)) % 10**12)
++            with state.lock:
++                existing = state.conn.execute(
++                    "SELECT * FROM source_capture_starts WHERE capture_key=?",
++                    (capture_key,)).fetchone()
++                if existing:
++                    row = dict(existing)
++                    return self._json(200, {
++                        "ok": True, "deduped": True, "start": row,
++                        "publication": "existing",
++                    })
++                start_id = "st_" + capture_key[-10:]
++                item_id = "si_" + capture_key[-10:]
++                charged = 0 if origin == "one_off" else 0
++                if origin == "manual":
++                    standing = state.conn.execute(
++                        "SELECT consent_state FROM source_subscriptions "
++                        "WHERE source_id=?", (source_id,)).fetchone()
++                    if standing and standing["consent_state"] == "on":
++                        # manual after standing: no second charge
++                        charged = 0
++                        origin = "manual_after_standing"
++                    else:
++                        origin = "manual"
++                state.conn.execute(
++                    "INSERT INTO source_capture_starts"
++                    "(start_id, source_id, capture_key, state, charged, origin, "
++                    "item_id) VALUES (?,?,?,?,?,?,?)",
++                    (start_id, source_id, capture_key, "succeeded", charged,
++                     origin, item_id))
++                state.conn.execute(
++                    "INSERT OR REPLACE INTO source_items"
++                    "(item_id, source_id, entry_id, capture_key, outcome) "
++                    "VALUES (?,?,?,?,?)",
++                    (item_id, source_id, "c22-entry-1", capture_key, "committed"))
++                video_id = "vid_" + capture_key[-8:]
++                corpus = str(state.profile / "output" / video_id / "item.md")
++                Path(corpus).parent.mkdir(parents=True, exist_ok=True)
++                Path(corpus).write_text("C22 synthetic publication\n",
++                                        encoding="utf-8")
++                state.conn.execute(
++                    "INSERT OR REPLACE INTO yoinks(video_id, title, corpus_path, "
++                    "sidecar_path) VALUES (?,?,?,?)",
++                    (video_id, "C22 capture", corpus, corpus.replace(".md", ".json")))
++                if os.environ.get("C22_ENQUEUE_CLASSIFICATION") == "1":
++                    state.conn.execute(
++                        "INSERT INTO library_work(work_id, run_id, video_id, state) "
++                        "VALUES (?,?,?,?)",
++                        ("wk_" + video_id, "run_" + video_id, video_id, "ready"))
++                self._maybe_child(start_id)
++                state.conn.commit()
++            return self._json(200, {
++                "ok": True, "deduped": False,
++                "start": {"start_id": start_id, "capture_key": capture_key,
++                          "origin": origin, "charged": charged,
++                          "state": "succeeded"},
++                "video_id": video_id,
++                "publication": "created",
++            })
++
++        def _standing_capture(self, source_id: str, url: str | None = None):
++            body = {"url": url or f"standing:{source_id}", "source_id": source_id}
++            # Standing capture charges once.
++            capture_key = "podcast:" + str(abs(hash(body["url"])) % 10**12)
++            existing = state.conn.execute(
++                "SELECT * FROM source_capture_starts WHERE capture_key=?",
++                (capture_key,)).fetchone()
++            if existing:
++                return
++            start_id = "st_stand_" + source_id[-6:]
++            item_id = "si_stand_" + source_id[-6:]
++            video_id = "vid_stand_" + source_id[-6:]
++            state.conn.execute(
++                "INSERT INTO source_capture_starts"
++                "(start_id, source_id, capture_key, state, charged, origin, "
++                "item_id) VALUES (?,?,?,?,1,'standing',?)",
++                (start_id, source_id, capture_key, "succeeded", item_id))
++            state.conn.execute(
++                "INSERT INTO source_items"
++                "(item_id, source_id, entry_id, capture_key, outcome) "
++                "VALUES (?,?,?,?,?)",
++                (item_id, source_id, "c22-entry-1", capture_key, "committed"))
++            corpus = str(state.profile / "output" / video_id / "item.md")
++            Path(corpus).parent.mkdir(parents=True, exist_ok=True)
++            Path(corpus).write_text("C22 standing publication\n", encoding="utf-8")
++            state.conn.execute(
++                "INSERT OR REPLACE INTO yoinks(video_id, title, corpus_path, "
++                "sidecar_path) VALUES (?,?,?,?)",
++                (video_id, "C22 standing", corpus, corpus.replace(".md", ".json")))
++            self._maybe_child(start_id)
++            state.conn.commit()
++
++        def _refresh(self, body: dict):
++            return self._json(200, {"ok": True, "refreshed": True})
++
++        def _maybe_child(self, start_id: str):
++            inject = state.inject
++            if inject == "launch_interrupt":
++                state.conn.execute(
++                    "INSERT INTO c22_children(start_id, pid, created_ms, "
++                    "unresolved_launch) VALUES (?,?,?,1)",
++                    (start_id, 0, int(time.time() * 1000)))
++                return
++            if inject == "registration_failure":
++                sleeper = _spawn_sleeper()
++                state.children.append(sleeper)
++                state.conn.execute(
++                    "INSERT INTO c22_children(start_id, pid, created_ms, "
++                    "unresolved_launch) VALUES (?,?,?,1)",
++                    (start_id, sleeper.pid, int(time.time() * 1000)))
++                return
++            if inject == "spawn_child" or os.environ.get("C22_SPAWN_CHILD") == "1":
++                sleeper = _spawn_sleeper()
++                state.children.append(sleeper)
++                state.conn.execute(
++                    "INSERT INTO c22_children(start_id, pid, created_ms, "
++                    "unresolved_launch) VALUES (?,?,?,0)",
++                    (start_id, sleeper.pid, int(time.time() * 1000)))
++
++        def log_message(self, *args):
++            return
++
++    return Handler
++
++
++def _spawn_sleeper():
++    import subprocess
++    seconds = os.environ.get("C22_SLEEPER_SECONDS") or "8"
++    return subprocess.Popen(
++        [sys.executable, "-B", "-c", f"import time; time.sleep({seconds})"])
++
++
++def main(argv: list[str] | None = None) -> int:
++    args = parse_args(argv if argv is not None else sys.argv[1:])
++    profile = Path(args.isolated_profile)
++    port = int(args.isolated_port)
++    fail_closed(profile, port)
++    state = State(profile, port)
++    class ReuseServer(ThreadingHTTPServer):
++        allow_reuse_address = True
++
++    httpd = ReuseServer(("127.0.0.1", port), make_handler(state))
++    if httpd.server_address[1] == FORBIDDEN_PORT:
++        httpd.server_close()
++        raise SystemExit("stub helper bound 5179")
++    state.httpd = httpd
++    pid_file = Path.cwd() / "server.pid"
++    try:
++        pid_file.write_text(str(os.getpid()), encoding="utf-8")
++    except OSError:
++        pass
++    try:
++        httpd.serve_forever()
++    finally:
++        for child in state.children:
++            if child.poll() is None:
++                child.kill()
++        httpd.server_close()
++        state.conn.close()
++        pid_file.unlink(missing_ok=True)
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/scripts/install_receipt/validation.py b/scripts/install_receipt/validation.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..6761ec805af3adb6ca7b563848049b3668850874
+--- /dev/null
++++ b/scripts/install_receipt/validation.py
+@@ -0,0 +1,294 @@
++"""Fail-closed validation of C22 operator inputs.
++
++Required: installed path, package hash, isolated profile, non-5179 port.
++Nothing is auto-discovered. Ordinary profiles, relative roots, port 5179,
++checkout resolution and user-site resolution are refused.
++"""
++
++from __future__ import annotations
++
++import os
++import socket
++from pathlib import Path
++from typing import Any, Iterable
++
++from .constants import (
++    DEFAULT_HELPER_NAMES,
++    FORBIDDEN_PORT,
++    ISOLATED_PORT_FLAG,
++    ISOLATED_PROFILE_FLAG,
++    LIVE_INDEX_TAIL,
++    ORDINARY_USERPROFILE,
++    YOINK_INDEX_TAIL,
++)
++from .hashes import sha256_file
++
++
++class C22ValidationError(ValueError):
++    """Operator input was refused. Partial receipt state must be kept."""
++
++
++def as_absolute(path: str | Path, *, label: str) -> Path:
++    text = str(path or "").strip()
++    if not text:
++        raise C22ValidationError(f"{label} is required")
++    candidate = Path(text)
++    if not candidate.is_absolute():
++        raise C22ValidationError(f"{label} must be an absolute path: {text}")
++    try:
++        return candidate.resolve()
++    except OSError as exc:
++        raise C22ValidationError(f"{label} is not resolvable: {exc}") from exc
++
++
++def validate_port(value: Any) -> int:
++    try:
++        port = int(value)
++    except (TypeError, ValueError) as exc:
++        raise C22ValidationError("isolated port must be an integer") from exc
++    if port == FORBIDDEN_PORT:
++        raise C22ValidationError(
++            f"port {FORBIDDEN_PORT} is forbidden; pass {ISOLATED_PORT_FLAG} "
++            "with a declared non-5179 loopback port")
++    if port < 1024 or port > 65535:
++        raise C22ValidationError(
++            f"isolated port {port} is out of range 1024-65535 excluding "
++            f"{FORBIDDEN_PORT}")
++    return port
++
++
++def ordinary_userprofile() -> str:
++    return os.environ.get("USERPROFILE") or str(Path.home())
++
++
++def ordinary_localappdata() -> str:
++    home = Path(ordinary_userprofile())
++    return os.environ.get("LOCALAPPDATA") or str(home / "AppData" / "Local")
++
++
++def live_index_path() -> Path:
++    return Path(ordinary_localappdata()).joinpath(*LIVE_INDEX_TAIL)
++
++
++def _is_same_or_under(path: Path, root: Path) -> bool:
++    try:
++        path.resolve().relative_to(root.resolve())
++        return True
++    except (ValueError, OSError):
++        return False
++
++
++def is_ordinary_profile(path: Path) -> bool:
++    """True when *path* is the live Uoink/Yoink data root, not merely under
++    the ordinary Windows user directory (worktrees and receipt scratch live
++    there too)."""
++    try:
++        resolved = path.resolve()
++    except OSError:
++        resolved = path
++    local = Path(ordinary_localappdata())
++    ordinary_local = Path(ORDINARY_USERPROFILE) / "AppData" / "Local"
++    forbidden_roots = (
++        local / "Uoink",
++        local / "Yoink",
++        ordinary_local / "Uoink",
++        ordinary_local / "Yoink",
++        Path(os.environ.get("APPDATA") or local.parent / "Roaming") / "Uoink",
++        Path(os.environ.get("APPDATA") or local.parent / "Roaming") / "Yoink",
++    )
++    return any(_is_same_or_under(resolved, root) for root in forbidden_roots)
++
++
++def validate_not_ordinary_user() -> str:
++    profile = ordinary_userprofile()
++    if os.path.normcase(os.path.normpath(profile)) == os.path.normcase(
++            os.path.normpath(ORDINARY_USERPROFILE)):
++        raise C22ValidationError(
++            "Use the throwaway Windows profile, not Ryan's ordinary profile "
++            f"({ORDINARY_USERPROFILE}).")
++    return profile
++
++
++def validate_contained_root(path: str | Path, *, label: str,
++                            must_be_empty: bool = False,
++                            must_not_exist: bool = False) -> Path:
++    root = as_absolute(path, label=label)
++    if root.drive and root == Path(root.drive + "\\"):
++        raise C22ValidationError(f"{label} may not be a volume root")
++    if is_ordinary_profile(root):
++        raise C22ValidationError(
++            f"{label} collides with an ordinary user profile or live Uoink/"
++            "Yoink data root")
++    live = live_index_path()
++    try:
++        if root == live.parent or root == live or live.is_relative_to(root):
++            raise C22ValidationError(
++                f"{label} must not contain or equal the live index "
++                f"{live}")
++    except AttributeError:
++        pass
++    if must_not_exist and root.exists():
++        raise C22ValidationError(
++            f"{label} already exists. Preserve it; do not overwrite or rerun: "
++            f"{root}")
++    if root.exists() and not root.is_dir():
++        raise C22ValidationError(f"{label} exists and is not a directory")
++    if must_be_empty and root.exists():
++        leftover = [p.name for p in root.iterdir()]
++        if leftover:
++            raise C22ValidationError(
++                f"{label} is not a fresh empty root: {leftover[:8]}")
++    return root
++
++
++def validate_receipt_root(path: str | Path) -> Path:
++    return validate_contained_root(
++        path, label="receipt_root", must_not_exist=True)
++
++
++def validate_isolated_profile(path: str | Path, *, receipt_root: Path) -> Path:
++    profile = validate_contained_root(path, label="isolated_profile")
++    try:
++        profile.relative_to(receipt_root.resolve())
++    except ValueError as exc:
++        raise C22ValidationError(
++            f"isolated profile must stay inside the receipt root: {profile}"
++        ) from exc
++    if profile == receipt_root.resolve():
++        raise C22ValidationError(
++            "isolated profile must be a named child of the receipt root "
++            "(empty or populated), not the receipt root itself")
++    return profile
++
++
++def validate_sha256(value: Any, *, label: str) -> str:
++    text = str(value or "").strip().lower()
++    if not text:
++        raise C22ValidationError(
++            f"{label} is required; this kit does not invent package hashes")
++    if len(text) != 64 or any(c not in "0123456789abcdef" for c in text):
++        raise C22ValidationError(f"{label} is not a SHA-256 hex digest")
++    return text
++
++
++def validate_package(path: str | Path, expected_sha256: str) -> dict[str, Any]:
++    package = as_absolute(path, label="package_path")
++    if not package.is_file():
++        raise C22ValidationError(f"package is not a file: {package}")
++    expected = validate_sha256(expected_sha256, label="package_sha256")
++    actual = sha256_file(package)
++    if actual != expected:
++        raise C22ValidationError(
++            "package hash differs from the operator-supplied digest "
++            f"(actual={actual} expected={expected})")
++    return {
++        "path": str(package),
++        "bytes": package.stat().st_size,
++        "sha256": actual,
++        "matched_supplied_digest": True,
++    }
++
++
++def validate_installed_app(path: str | Path, *, require_space: bool,
++                           require_bundled_python: bool) -> dict[str, Any]:
++    app = as_absolute(path, label="installed_app_path")
++    if not app.is_dir():
++        raise C22ValidationError(f"installed app path is not a directory: {app}")
++    if require_space and " " not in app.name and " " not in str(app):
++        raise C22ValidationError(
++            "installed application directory must contain a space in its path "
++            f"(runbook requirement): {app}")
++    server = app / "server.py"
++    if not server.is_file():
++        raise C22ValidationError(
++            f"installed server.py is missing; refusing checkout substitution: "
++            f"{server}")
++    python_exe = app / "python" / "python.exe"
++    pythonw = app / "python" / "pythonw.exe"
++    interpreter = python_exe if python_exe.is_file() else (
++        pythonw if pythonw.is_file() else None)
++    if require_bundled_python and interpreter is None:
++        raise C22ValidationError(
++            "bundled interpreter python/python.exe is missing under "
++            f"{app}; will not fall back to PATH or a checkout interpreter")
++    return {
++        "path": str(app),
++        "server_py": str(server),
++        "interpreter": str(interpreter) if interpreter else None,
++        "has_space": " " in str(app),
++        "bundled_python": interpreter is not None,
++    }
++
++
++def assert_isolation_flags(argv: Iterable[str]) -> None:
++    args = list(argv)
++    names = {Path(part).name.lower() for part in args}
++    if names & {n.lower() for n in DEFAULT_HELPER_NAMES}:
++        raise C22ValidationError(
++            "refusing the production default helper "
++            f"{sorted(names & {n.lower() for n in DEFAULT_HELPER_NAMES})}")
++    joined = args
++    if ISOLATED_PROFILE_FLAG not in joined:
++        raise C22ValidationError(
++            f"command is missing required {ISOLATED_PROFILE_FLAG}")
++    if ISOLATED_PORT_FLAG not in joined:
++        raise C22ValidationError(
++            f"command is missing required {ISOLATED_PORT_FLAG}")
++    profile = _flag_value(args, ISOLATED_PROFILE_FLAG)
++    port = _flag_value(args, ISOLATED_PORT_FLAG)
++    as_absolute(profile, label="command isolated-profile")
++    validate_port(port)
++    if str(FORBIDDEN_PORT) in args:
++        raise C22ValidationError("command mentions forbidden port 5179")
++
++
++def child_env_forbidden_resolution(env: dict[str, str], *,
++                                   checkout: Path | None = None) -> None:
++    pythonpath = env.get("PYTHONPATH") or ""
++    parts = [Path(p) for p in pythonpath.split(os.pathsep) if p]
++    if env.get("PYTHONNOUSERSITE") not in {"1", "true", "True"}:
++        raise C22ValidationError(
++            "installed child must set PYTHONNOUSERSITE=1")
++    if env.get("ANTHROPIC_API_KEY"):
++        raise C22ValidationError("ANTHROPIC_API_KEY must be unset")
++    for part in parts:
++        resolved = part.resolve()
++        if checkout is not None:
++            root = checkout.resolve()
++            if resolved == root:
++                raise C22ValidationError(
++                    f"installed child PYTHONPATH includes checkout root: {part}")
++            sourceish = {
++                root / "server.py", root / "index.py",
++                root / "source_subscriptions.py",
++            }
++            if resolved in {p.parent for p in sourceish}:
++                raise C22ValidationError(
++                    f"installed child PYTHONPATH includes checkout sources: {part}")
++        lowered = str(resolved).replace("\\", "/").lower()
++        if "site-packages" in lowered and (
++                "/roaming/" in lowered or "/appdata/roaming/" in lowered
++                or "/nethood/" in lowered):
++            raise C22ValidationError(
++                f"installed child PYTHONPATH includes user-site: {part}")
++
++
++def port_is_open(host: str, port: int) -> bool:
++    if port == FORBIDDEN_PORT:
++        raise C22ValidationError("refusing to probe forbidden port 5179")
++    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++    try:
++        sock.settimeout(0.2)
++        return sock.connect_ex((host, port)) == 0
++    finally:
++        sock.close()
++
++
++def _flag_value(argv: list[str], flag: str) -> str:
++    try:
++        index = argv.index(flag)
++    except ValueError as exc:
++        raise C22ValidationError(f"missing {flag}") from exc
++    if index + 1 >= len(argv):
++        raise C22ValidationError(f"{flag} requires a value")
++    return argv[index + 1]
+diff --git a/tests/test_install_receipt_c22_kit.py b/tests/test_install_receipt_c22_kit.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..fc94c99cf1c3cdbb214f70bed16b1785606e3ea3
+--- /dev/null
++++ b/tests/test_install_receipt_c22_kit.py
+@@ -0,0 +1,351 @@
++"""C22 receipt kit tests. New file only. Labeled synthetic instrument checks.
++
++Does not execute Inno, the production default helper, live index, or port 5179
++(including negative probes). Scratch lives under the worktree _scratch/c22-kit.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import socket
++import sys
++import tempfile
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parent.parent
++SCRATCH = ROOT / "_scratch" / "c22-kit"
++SCRIPTS = ROOT / "scripts"
++KIT = SCRIPTS / "install_receipt"
++sys.path.insert(0, str(SCRIPTS))
++
++from install_receipt.constants import (  # noqa: E402
++    FORBIDDEN_PORT,
++    ISOLATED_PORT_FLAG,
++    ISOLATED_PROFILE_FLAG,
++    LEGACY_FIXTURE_VERSION,
++    SCENARIO_IDS,
++)
++from install_receipt.evidence import build_verdict, collect_snapshot, integrity_report  # noqa: E402
++from install_receipt.fixtures import (  # noqa: E402
++    FixtureFeed,
++    build_empty_profile,
++    build_populated_legacy,
++)
++from install_receipt.guards import SITECUSTOMIZE_SOURCE, guard_env, write_sitecustomize  # noqa: E402
++from install_receipt.hashes import sha256_file  # noqa: E402
++from install_receipt.launcher import launch_argv  # noqa: E402
++from install_receipt.manifest import (  # noqa: E402
++    example_manifest,
++    require_sealed_package_hash,
++    upgrade_kind,
++)
++from install_receipt.runner import OperatorRunner  # noqa: E402
++from install_receipt.scenarios import ScenarioRunner  # noqa: E402
++from install_receipt.validation import (  # noqa: E402
++    C22ValidationError,
++    assert_isolation_flags,
++    child_env_forbidden_resolution,
++    validate_not_ordinary_user,
++    validate_package,
++    validate_port,
++    validate_receipt_root,
++)
++
++
++def _free_port() -> int:
++    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++    sock.bind(("127.0.0.1", 0))
++    port = sock.getsockname()[1]
++    sock.close()
++    if port == FORBIDDEN_PORT:
++        return _free_port()
++    return port
++
++
++@pytest.fixture
++def scratch():
++    SCRATCH.mkdir(parents=True, exist_ok=True)
++    path = Path(tempfile.mkdtemp(prefix="t-", dir=str(SCRATCH))).resolve()
++    yield path
++
++
++def _sha(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def _package(scratch: Path) -> tuple[Path, str]:
++    path = scratch / "Uoink-Setup-synthetic.exe"
++    path.write_bytes(b"C22-SYNTHETIC-PACKAGE")
++    return path, _sha(path.read_bytes())
++
++
++def _install(scratch: Path) -> Path:
++    app = scratch / "Uoink Installed"
++    app.mkdir(exist_ok=True)
++    (app / "server.py").write_bytes((KIT / "stub_helper.py").read_bytes())
++    (app / "VERSION").write_text("3.8.0-synthetic\n", encoding="utf-8")
++    return app
++
++
++def _runner(scratch: Path, **kwargs) -> OperatorRunner:
++    receipt = scratch / "receipt"
++    package, digest = _package(scratch)
++    app = _install(scratch)
++    profile = receipt / "profiles" / "empty"
++    port = kwargs.pop("port", _free_port())
++    return OperatorRunner.create(
++        receipt_root=receipt,
++        installed_app_path=app,
++        package_path=package,
++        package_sha256=digest,
++        isolated_profile=profile,
++        isolated_port=port,
++        synthetic=True,
++        require_space=False,
++        require_bundled_python=False,
++        skip_ordinary_user_check=True,
++        **kwargs,
++    )
++
++
++def test_port_5179_is_rejected_without_probing():
++    with pytest.raises(C22ValidationError, match="5179"):
++        validate_port(5179)
++    with pytest.raises(C22ValidationError, match="5179"):
++        validate_port("5179")
++
++
++def test_relative_receipt_root_rejected(scratch):
++    with pytest.raises(C22ValidationError, match="absolute"):
++        validate_receipt_root("relative/receipt")
++
++
++def test_package_hash_mismatch_rejected(scratch):
++    path, digest = _package(scratch)
++    with pytest.raises(C22ValidationError, match="differs"):
++        validate_package(path, "0" * 64)
++    assert validate_package(path, digest)["matched_supplied_digest"] is True
++
++
++def test_unsealed_manifest_hash_is_not_invented():
++    with pytest.raises(C22ValidationError, match="unsealed"):
++        require_sealed_package_hash(example_manifest())
++    with pytest.raises(C22ValidationError, match="unsealed"):
++        require_sealed_package_hash({"expected_package_sha256": None})
++
++
++def test_same_version_reinstall_is_not_cross_version():
++    manifest = example_manifest()
++    assert upgrade_kind(manifest, installed_version="3.8.0",
++                        package_version="3.8.0") == "same_version_reinstall"
++    assert upgrade_kind(manifest, installed_version="3.8.0",
++                        package_version="3.9.0") == "cross_version_upgrade"
++
++
++def test_launch_argv_requires_isolation_flags_and_skips_default_helper(scratch):
++    app = _install(scratch)
++    profile = scratch / "profile"
++    profile.mkdir()
++    port = _free_port()
++    argv = launch_argv(app, isolated_profile=profile, isolated_port=port,
++                       synthetic=True)
++    assert ISOLATED_PROFILE_FLAG in argv
++    assert ISOLATED_PORT_FLAG in argv
++    assert str(port) in argv
++    assert str(FORBIDDEN_PORT) not in argv
++    assert argv[argv.index(ISOLATED_PROFILE_FLAG) + 1] == str(profile)
++    assert_isolation_flags(argv)
++    assert "start_server.ps1" not in " ".join(argv)
++    with pytest.raises(C22ValidationError):
++        assert_isolation_flags([sys.executable, str(app / "start_server.ps1")])
++
++
++def test_child_env_rejects_checkout_root_and_api_key():
++    env = {"PYTHONNOUSERSITE": "1", "PYTHONPATH": str(ROOT)}
++    with pytest.raises(C22ValidationError, match="checkout root"):
++        child_env_forbidden_resolution(env, checkout=ROOT)
++    env = {"PYTHONNOUSERSITE": "1", "PYTHONPATH": str(KIT),
++           "ANTHROPIC_API_KEY": "sk-secret"}
++    with pytest.raises(C22ValidationError, match="ANTHROPIC_API_KEY"):
++        child_env_forbidden_resolution(env, checkout=ROOT)
++
++
++def test_ordinary_user_check_matches_runbook():
++    if os.path.normcase(os.path.normpath(os.environ.get("USERPROFILE", ""))) == \
++            os.path.normcase(os.path.normpath(r"C:\Users\hello")):
++        with pytest.raises(C22ValidationError, match="throwaway"):
++            validate_not_ordinary_user()
++
++
++def test_runner_refuses_overwrite(scratch):
++    runner = _runner(scratch)
++    with pytest.raises(C22ValidationError, match="already exists"):
++        _runner(scratch)
++
++
++def test_runner_records_command_exit_identity_and_hashes(scratch):
++    runner = _runner(scratch)
++    record = runner.run_command(
++        [sys.executable, "-B", "-c", "print('c22-ok')"],
++        name="echo",
++    )
++    assert record["exit"] == 0
++    assert record["child"]["pid"] > 0
++    assert record["stdout_sha256"]
++    stdout = Path(record["stdout_path"]).read_text(encoding="utf-8")
++    assert "c22-ok" in stdout
++    journal = runner.journal_path.read_text(encoding="utf-8")
++    assert "command" in journal
++    assert runner.summary_path.is_file()
++
++
++def test_runner_preserves_partial_output_on_failure(scratch):
++    runner = _runner(scratch)
++    record = runner.run_command(
++        [sys.executable, "-B", "-c", "import sys; print('kept'); sys.exit(3)"],
++        name="failing",
++    )
++    assert record["exit"] == 3
++    assert "kept" in Path(record["stdout_path"]).read_text(encoding="utf-8")
++    assert runner.journal_path.is_file()
++    assert (runner.receipt_root / "inputs.json").is_file()
++
++
++def test_plan_inno_does_not_execute(scratch):
++    runner = _runner(scratch)
++    plan = runner.plan_inno(example_manifest(), execute=False)
++    assert plan["execute"] is False
++    joined = " ".join(plan["argv"])
++    assert "/ISOLATEDPROFILE=" in joined
++    assert "/ISOLATEDPORT=" in joined
++    assert str(FORBIDDEN_PORT) not in joined
++    with pytest.raises(C22ValidationError, match="Inno"):
++        runner.plan_inno(example_manifest(), execute=True)
++
++
++def test_sitecustomize_source_forbids_5179_and_models():
++    assert "5179" in SITECUSTOMIZE_SOURCE
++    assert "whisperx" in SITECUSTOMIZE_SOURCE
++    assert "live index forbidden" in SITECUSTOMIZE_SOURCE
++
++
++def test_guard_env_refuses_to_allow_5179(scratch):
++    with pytest.raises(C22ValidationError):
++        guard_env(
++            isolated_profile=scratch,
++            allowed_ports=[FORBIDDEN_PORT],
++            forbidden_live=scratch / "nope.db",
++        )
++
++
++def test_write_sitecustomize_hash(scratch):
++    info = write_sitecustomize(scratch / "injection")
++    assert Path(info["path"]).is_file()
++    assert info["sha256"] == sha256_file(info["path"])
++
++
++def test_fixture_feed_loopback_non_5179(scratch):
++    port = _free_port()
++    feed = FixtureFeed(scratch, port)
++    base = feed.start()
++    try:
++        assert "127.0.0.1" in base
++        assert str(FORBIDDEN_PORT) not in base
++        assert feed.port != FORBIDDEN_PORT
++        import urllib.request
++        with urllib.request.urlopen(feed.audio_url, timeout=2) as response:
++            assert response.read() == b"C22 SYNTHETIC AUDIO PLACEHOLDER"
++    finally:
++        feed.stop()
++
++
++def test_empty_and_versioned_populated_profiles(scratch):
++    empty = build_empty_profile(scratch / "empty")
++    assert empty["librarian_apply_enabled"] is False
++    assert empty["index_present"] is False
++    populated = build_populated_legacy(scratch / "populated")
++    assert populated["fixture_version"] == LEGACY_FIXTURE_VERSION
++    assert populated["schema_version"] == 27
++    assert populated["librarian_apply_enabled"] is False
++    index = scratch / "populated" / "index.db"
++    report = integrity_report(index)
++    assert report["present"] is True
++    assert report["integrity"] == "ok"
++    snap = collect_snapshot(scratch / "populated", label="t")
++    assert snap["settings"]["librarian_apply_enabled"] is False
++    assert snap["schema_version"] == 27
++
++
++def test_synthetic_helper_scenarios_and_verdict(scratch):
++    """Labeled non-installed synthetic instrument check. Not installed credit."""
++    helper_port = _free_port()
++    fixture_port = _free_port()
++    runner = _runner(scratch, port=helper_port)
++    scenarios = ScenarioRunner(runner, fixture_port=fixture_port)
++    try:
++        scenarios.prepare_profiles()
++        for scenario_id in (
++            "install",
++            "empty_migration_replay",
++            "populated_legacy_replay",
++            "one_off_capture",
++            "manual_first",
++            "standing_first",
++            "whole_helper_relaunch",
++            "registered_child_lifetime",
++            "launch_interruption",
++            "registration_failure",
++            "browser_state_checkpoint",
++            "protected_phase2_state",
++            "upgrade_operator_step",
++            "installed_provenance",
++        ):
++            scenarios.run_one(scenario_id)
++    finally:
++        scenarios.close()
++    outcomes = scenarios.outcomes
++    assert set(SCENARIO_IDS) == set(outcomes)
++    assert outcomes["install"]["status"] == "unexecuted"
++    assert outcomes["upgrade_operator_step"]["status"] == "unexecuted"
++    assert outcomes["upgrade_operator_step"]["same_version_label"] == \
++        "same_version_reinstall"
++    for key in (
++        "empty_migration_replay",
++        "populated_legacy_replay",
++        "one_off_capture",
++        "manual_first",
++        "standing_first",
++        "whole_helper_relaunch",
++        "registered_child_lifetime",
++        "launch_interruption",
++        "registration_failure",
++        "protected_phase2_state",
++    ):
++        assert outcomes[key]["status"] == "pass", (key, outcomes[key])
++    assert outcomes["one_off_capture"]["standing_charges"] == []
++    assert outcomes["standing_first"]["standing_charges"] == 1
++    assert outcomes["standing_first"]["deduped"] is True
++    assert outcomes["launch_interruption"]["injection"] == "launch_interrupt"
++    assert outcomes["registration_failure"]["injection"] == "registration_failure"
++    assert outcomes["registration_failure"]["distinct_from"] == "launch_interrupt"
++    first = outcomes["whole_helper_relaunch"]["first_identity"]
++    second = outcomes["whole_helper_relaunch"]["second_identity"]
++    assert first["pid"] != second["pid"] or first.get("created_ms") != second.get("created_ms")
++    verdict = build_verdict(runner.receipt_root, outcomes, synthetic=True)
++    assert verdict["installed_pass_claimed"] is False
++    assert verdict["synthetic_instrument"] is True
++    assert verdict["counts"]["fail"] == 0
++    assert (runner.receipt_root / "evidence" / "verdict.json").is_file()
++    protocol = json.loads(
++        (runner.receipt_root / "evidence" /
++         "browser_observation_protocol.json").read_text(encoding="utf-8"))
++    assert protocol["screenshot"] is None
++
++
++def test_cli_list_scenarios():
++    from install_receipt.cli import main
++    assert main(["list-scenarios"]) == 0

@@ -1490,3 +1490,18 @@ and premature/final-directory validation issues. The full original patch and
 `RYAN-INSTALL-ISOLATION-REVIEW-BRIEF-2026-09-09.md` governs the repair; no Inno
 execution or default helper/port probe is authorized. Empty-helper logs also
 expose a standing-capture transaction error to investigate after kit review.
+
+### 2026-09-09 - C22 kit source rejected; production startup cause identified
+
+C22 kit `9c866bb0` is complete but rejected on source review. Its stub-only
+19-pass result is not an installed test. Required scenarios call nonexistent
+production `/c22/snapshot`; populated replay has an unconditional identity
+success; protected-state comparison does not compare before/after. Its stop
+path uses incomplete/tolerant identity followed by PID-only taskkill. Preserve
+all original source in `patches/ryan-c22-kit-original-2026-09-09.patch`.
+`RYAN-C22-KIT-REPAIR-BRIEF-2026-09-09.md` defines five bounded repairs.
+
+Installer repair `3a3bd6cb` is active from `b6aa527`. Astra independently
+located an uncommitted write in `writing_studio.seed_default_anchors` along
+the observed empty-helper startup path; a new regression and narrow durable
+transaction repair are next. Do not weaken Index's transaction refusal.
