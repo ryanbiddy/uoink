@@ -1,0 +1,448 @@
+diff --git a/docs/library/RYAN-STARTUP-BACKFILL-TRANSACTION-REPAIR-WORKER-2026-09-09.md b/docs/library/RYAN-STARTUP-BACKFILL-TRANSACTION-REPAIR-WORKER-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..91b350f7f8e19fe271d99c065fd159a28ac9ccfa
+--- /dev/null
++++ b/docs/library/RYAN-STARTUP-BACKFILL-TRANSACTION-REPAIR-WORKER-2026-09-09.md
+@@ -0,0 +1,177 @@
++# Startup backfill transaction ownership — Grok worker
++
++Worker: grok
++Worktree: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\f9e2c921-de5\grok`
++Branch: `control-room/f9e2c921-de5-grok`
++Base HEAD: `e23d7821b9967ed7e6bd5cfa2705bb3d68d183c0`
++
++Status: **source complete in this worktree**. Astra independently integrates
++with a raw three-way patch, rebuilds, and repeats the original bundled
++observation. This worker did not commit, push, run Setup, rebuild, contact
++port 5179, open the live index, fetch, enable apply, or call a paid API /
++model / client.
++
++No subagents. No existing test, fixture, assertion, skip or parameter edits.
++Owned files: `server.py` and new `tests/test_startup_backfill_transaction_ownership.py`.
++
++## Diagnosis
++
++The bundled C22 helper logs at 6632f33 are real shared-connection races, not
++erased by scenario success.
++
++One-off (`20260909T200249Z-helper-one-off.stdout.log`):
++
++```
++source_subscriptions._Store.read -> self.conn.execute("COMMIT")
++sqlite3.OperationalError: cannot commit - no transaction is active
++```
++
++Child-life (`20260909T200350Z-helper-child-life.stdout.log`):
++
++```
++expire_poll_leases -> Index.write_transaction
++RuntimeError: cannot start a write transaction while another transaction is active
++```
++
++`server._run_phase2_author_backfill_once` selected and then
++`INSERT OR REPLACE` + `idx._conn.commit()` on the process Index connection
++without `idx._lock` and without `read_snapshot` / `write_transaction`.
++Source-watch `_Store.read` / `write` share that connection and lock. The
++unowned `commit()` can end a source-watch `BEGIN` (one-off). The unowned
++`INSERT` can leave `in_transaction` true so the next `write_transaction`
++refuses (child-life). Swallowing persist errors as a warning also hid a
++failed flag write and could leave a foreign transaction open.
++
++Author correction (`page_extractor.backfill_platform_author` /
++`Index.update_taxonomy`) already serialises through the Index lock. It was
++not changed.
++
++## Repair
++
++Flag lookup uses `Index.read_snapshot` (lock + `BEGIN DEFERRED`, rollback,
++refuse if a transaction is already active). Flag persistence uses
++`Index.write_transaction` (lock + `BEGIN IMMEDIATE`, owned commit, rollback
++on failure). Persist errors propagate; `_start_backfill_thread` already logs
++them. The completion flag is not written on failure, so the next startup
++retries. Once-per-install early return and idempotent author correction are
++unchanged. Source-store transactions were not weakened. The watcher was not
++removed. Unrelated work is not globally serialised.
++
++## Regression file
++
++`tests/test_startup_backfill_transaction_ownership.py` uses disposable
++`tmp_path` profiles and real SQLite:
++
++- ordinary hostname-channel correction and repeat invocation (flag gates rerun)
++- foreign transaction refused, not absorbed or committed
++- failed flag write leaves `in_transaction` false, no completion row, retry
++  persists the flag
++- held source `store.read` / `store.write` block backfill; the held unit still
++  owns its transaction and does not see the completion key
++- concurrent expire/due tick and backfill keep owned transactions
++
++## Guarded native verifier
++
++Interpreter: `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`
++Script: `docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py`
++`IG_FORBIDDEN_LIVE` was a string; that file was not inspected. API keys unset.
++`PHASE3_REQUIRE_IMPLEMENTATION=1` is set by the verifier. `test_phase3_s21.py`
++was not collected.
++
++| Label | Group | XML | Result |
++| --- | --- | --- | --- |
++| `g-sbf2` | named suites | `_scratch/g-sbf2/tests.xml` | 23 tests, 22 passed, 1 failed, 0 skipped, 3.20s |
++| `g-sbf3` | strict Phase 3 except s21 | `_scratch/g-sbf3/tests.xml` | 182 tests, 181 passed, 1 failed, 0 skipped, 35.53s |
++| `g-sbf-ix` | `test_existing_index_read_open.py` alone | `_scratch/g-sbf-ix/tests.xml` | 3 passed |
++
++Named-suite pass set: all 6 new tests, 3 `test_startup_anchor_transaction`, 4
++`test_cat_p2_taxonomy`, 7 `test_v3_2_3_anchors_lens`, and 2 of 3
++`test_existing_index_read_open`.
++
++### Retained named-suite grouping failure
++
++`test_read_open_does_not_migrate_then_explicit_backend_promotes` fails in the
++named group (`assert writer is reader`) because
++`tests/test_cat_p2_taxonomy.py` assigns `server._get_index = lambda: idx`
++without restore. Isolation of that file is 3 passed (`g-sbf-ix`). Existing
++test was not edited.
++
++### Retained original AT6 failure
++
++`tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status`
++
++```
++AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
++```
++
++Logs: `_scratch/g-sbf2/tests.log`, `_scratch/g-sbf3/tests.log`.
++
++Original C22 reproduction (untouched):
++
++- `docs/library/proof/ryan-c22-bundled-01-2026-09-09/receipt/commands/20260909T200249Z-helper-one-off.stdout.log`
++- `docs/library/proof/ryan-c22-bundled-01-2026-09-09/receipt/commands/20260909T200350Z-helper-child-life.stdout.log`
++
++## Hashes (worktree files)
++
++- `server.py` SHA256 `60302255ee70c125d95ba02e7c90e6255f56d94e9f60c81b90b3189ff39fc646`
++- `tests/test_startup_backfill_transaction_ownership.py` SHA256 `ec36cea9696d1912dbfd2581747279df68a3f4bf4887c22ef01baf3bc85b1a98`
++
++Applyable combined patch:
++`docs/library/patches/startup-backfill-transaction-ownership-2026-09-09.patch`
++
++## Complete diff
++
++```diff
++diff --git a/server.py b/server.py
++index db8984b..d1bf0aa 100644
++--- a/server.py
+++++ b/server.py
++@@ -3017,26 +3017,29 @@ def _run_phase2_author_backfill_once() -> None:
++     """Run the Phase 2 sidecar author backfill a single time per install.
++     The SQL migration (0020) already set platform + the YouTube author; this
++     recovers the real X / Reddit author from the sidecars and corrects the
++-    hostname `channel` values (Bug 3)."""
+++    hostname `channel` values (Bug 3).
+++
+++    Flag lookup and persistence go through Index's lock/transaction boundary
+++    so a source-watch snapshot or write on the shared connection is not
+++    committed or entered. A failed flag write does not record completion.
+++    """
++     idx = _get_index()
++-    try:
++-        row = idx._conn.execute(
++-            "SELECT value FROM memory_layer WHERE key=?",
++-            (_PHASE2_BACKFILL_KEY,)).fetchone()
++-    except Exception:
++-        row = None
+++    with idx.read_snapshot() as conn:
+++        try:
+++            row = conn.execute(
+++                "SELECT value FROM memory_layer WHERE key=?",
+++                (_PHASE2_BACKFILL_KEY,)).fetchone()
+++        except Exception:
+++            row = None
++     if row is not None:
++         return  # already run on this install
++     stats = page_extractor.backfill_platform_author(idx)
++     log.info("phase 2 author backfill: %s", stats)
++-    try:
++-        idx._conn.execute(
+++    with idx.write_transaction() as conn:
+++        conn.execute(
++             "INSERT OR REPLACE INTO memory_layer (key, value, updated_at) "
++             "VALUES (?, ?, ?)",
++             (_PHASE2_BACKFILL_KEY, json.dumps(stats), _now_iso()))
++-        idx._conn.commit()
++-    except Exception:
++-        log.warning("could not record phase 2 backfill completion flag")
++```
++
++New file `tests/test_startup_backfill_transaction_ownership.py` (213 lines) is
++in the combined patch above.
++
++## Astra
++
++Integrate these two source files with a raw three-way patch. Rebuild the
++changed product. Repeat the original bundled C22 observation plus the final
++complete tree. This worker does not rebuild.
+diff --git a/server.py b/server.py
+index db8984b8ccb4ea986d6cf615f943f70b7f481255..d1bf0aadd4d4182bd8be3aea305ccac356888ecd 100644
+--- a/server.py
++++ b/server.py
+@@ -3017,26 +3017,29 @@ def _run_phase2_author_backfill_once() -> None:
+     """Run the Phase 2 sidecar author backfill a single time per install.
+     The SQL migration (0020) already set platform + the YouTube author; this
+     recovers the real X / Reddit author from the sidecars and corrects the
+-    hostname `channel` values (Bug 3)."""
++    hostname `channel` values (Bug 3).
++
++    Flag lookup and persistence go through Index's lock/transaction boundary
++    so a source-watch snapshot or write on the shared connection is not
++    committed or entered. A failed flag write does not record completion.
++    """
+     idx = _get_index()
+-    try:
+-        row = idx._conn.execute(
+-            "SELECT value FROM memory_layer WHERE key=?",
+-            (_PHASE2_BACKFILL_KEY,)).fetchone()
+-    except Exception:
+-        row = None
++    with idx.read_snapshot() as conn:
++        try:
++            row = conn.execute(
++                "SELECT value FROM memory_layer WHERE key=?",
++                (_PHASE2_BACKFILL_KEY,)).fetchone()
++        except Exception:
++            row = None
+     if row is not None:
+         return  # already run on this install
+     stats = page_extractor.backfill_platform_author(idx)
+     log.info("phase 2 author backfill: %s", stats)
+-    try:
+-        idx._conn.execute(
++    with idx.write_transaction() as conn:
++        conn.execute(
+             "INSERT OR REPLACE INTO memory_layer (key, value, updated_at) "
+             "VALUES (?, ?, ?)",
+             (_PHASE2_BACKFILL_KEY, json.dumps(stats), _now_iso()))
+-        idx._conn.commit()
+-    except Exception:
+-        log.warning("could not record phase 2 backfill completion flag")
+ 
+ 
+ # Markers in yoink.md so the comments section can be replaced after the
+diff --git a/tests/test_startup_backfill_transaction_ownership.py b/tests/test_startup_backfill_transaction_ownership.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..0869dc7d90f1e9eaad414f30ed0d36b3abd0131c
+--- /dev/null
++++ b/tests/test_startup_backfill_transaction_ownership.py
+@@ -0,0 +1,213 @@
++"""Startup Phase 2 author backfill owns its SQLite transaction."""
++from __future__ import annotations
++
++import json
++import sqlite3
++import threading
++from contextlib import contextmanager
++from pathlib import Path
++
++import pytest
++
++from index import Index
++import server
++import source_subscriptions
++
++
++def _flag_row(idx):
++    return idx._conn.execute(
++        "SELECT value FROM memory_layer WHERE key=?",
++        (server._PHASE2_BACKFILL_KEY,),
++    ).fetchone()
++
++
++def _seed_hostname_x_row(idx, root: Path) -> None:
++    folder = root / "X" / "805baf72"
++    folder.mkdir(parents=True)
++    sidecar = folder / "x.json"
++    sidecar.write_text(json.dumps({
++        "schema_version": 2, "source_type": "x_article",
++        "url": "https://x.com/boardyai/article/1", "title": "t",
++        "metadata": {"author_name": "Boardy", "author_handle": "boardyai"},
++    }), encoding="utf-8")
++    idx.upsert_yoink({
++        "video_id": "x_old1", "slug": "805baf72", "channel": "x.com",
++        "title": "t", "yoinked_at": "2026-01-01T00:00:00",
++        "corpus_path": str(folder / "x.md"), "sidecar_path": str(sidecar),
++        "source_type": "x_article"})
++    idx._conn.execute(
++        "UPDATE yoinks SET platform=NULL, author=NULL WHERE video_id='x_old1'")
++    idx._conn.execute(
++        "UPDATE yoinks SET platform='x' WHERE platform IS NULL")
++    idx._conn.commit()
++
++
++def test_ordinary_author_correction_and_repeat_invocation(tmp_path, monkeypatch):
++    with Index.open(tmp_path / "index.db") as idx:
++        monkeypatch.setattr(server, "_get_index", lambda: idx)
++        _seed_hostname_x_row(idx, tmp_path / "corpus")
++        server._run_phase2_author_backfill_once()
++        row = idx.get_yoink("x_old1")
++        assert row["author"] == "Boardy (@boardyai)"
++        assert row["channel"] == "Boardy (@boardyai)"
++        assert _flag_row(idx) is not None
++        assert not idx._conn.in_transaction
++
++        def forbidden(*_a, **_k):
++            raise AssertionError("phase 2 author backfill must not rerun")
++
++        monkeypatch.setattr(server.page_extractor, "backfill_platform_author", forbidden)
++        server._run_phase2_author_backfill_once()
++        again = idx.get_yoink("x_old1")
++        assert again["author"] == "Boardy (@boardyai)"
++        assert again["channel"] == "Boardy (@boardyai)"
++        assert _flag_row(idx) is not None
++        assert not idx._conn.in_transaction
++
++
++def test_backfill_refuses_foreign_transaction_without_absorbing_it(tmp_path, monkeypatch):
++    with Index.open(tmp_path / "index.db") as idx:
++        monkeypatch.setattr(server, "_get_index", lambda: idx)
++        idx._conn.execute("BEGIN IMMEDIATE")
++        idx._conn.execute(
++            "INSERT INTO memory_layer(key, value, updated_at) "
++            "VALUES ('caller', 'uncommitted', 'fixture')")
++        with pytest.raises(RuntimeError, match="transaction"):
++            server._run_phase2_author_backfill_once()
++        assert idx._conn.in_transaction
++        assert idx._conn.execute("SELECT key FROM memory_layer").fetchall()[0][0] == "caller"
++        assert _flag_row(idx) is None
++        idx._conn.rollback()
++        assert idx._conn.execute("SELECT COUNT(*) FROM memory_layer").fetchone()[0] == 0
++        assert not idx._conn.in_transaction
++
++
++def test_failed_flag_write_leaves_no_foreign_transaction_or_false_completion(
++        tmp_path, monkeypatch):
++    with Index.open(tmp_path / "index.db") as idx:
++        monkeypatch.setattr(server, "_get_index", lambda: idx)
++        _seed_hostname_x_row(idx, tmp_path / "corpus")
++        real = idx.write_transaction
++
++        @contextmanager
++        def fail_after_insert():
++            with real() as conn:
++                yield conn
++                raise sqlite3.OperationalError("declared flag write failure")
++
++        monkeypatch.setattr(idx, "write_transaction", fail_after_insert)
++        with pytest.raises(sqlite3.OperationalError, match="declared flag write failure"):
++            server._run_phase2_author_backfill_once()
++        assert not idx._conn.in_transaction
++        assert idx._write_txn_owner is None
++        assert _flag_row(idx) is None
++        row = idx.get_yoink("x_old1")
++        assert row["author"] == "Boardy (@boardyai)"
++
++        monkeypatch.setattr(idx, "write_transaction", real)
++        server._run_phase2_author_backfill_once()
++        flag = _flag_row(idx)
++        assert flag is not None
++        assert not idx._conn.in_transaction
++        payload = json.loads(flag[0])
++        assert payload["scanned"] >= 1
++        assert idx.get_yoink("x_old1")["author"] == "Boardy (@boardyai)"
++        assert idx.get_yoink("x_old1")["channel"] == "Boardy (@boardyai)"
++
++
++def _hold_source_unit(store, kind, held, release, observed, errors):
++    try:
++        cm = store.read if kind == "read" else store.write
++        with cm() as conn:
++            conn.execute("SELECT 1 FROM sqlite_master")
++            keys_before = {
++                r[0] for r in conn.execute("SELECT key FROM memory_layer")
++            }
++            held.set()
++            if not release.wait(timeout=5):
++                raise TimeoutError("held source unit was not released")
++            observed["in_transaction"] = conn.in_transaction
++            observed["keys"] = {
++                r[0] for r in conn.execute("SELECT key FROM memory_layer")
++            }
++            observed["keys_before"] = keys_before
++    except Exception as exc:
++        errors.append(exc)
++
++
++def _run_backfill_blocked_by_held_source(tmp_path, monkeypatch, kind):
++    with Index.open(tmp_path / "index.db") as idx:
++        monkeypatch.setattr(server, "_get_index", lambda: idx)
++        service = source_subscriptions.SourceSubscriptionService(index=idx)
++        held = threading.Event()
++        release = threading.Event()
++        finished = threading.Event()
++        observed = {}
++        errors = []
++
++        holder = threading.Thread(
++            target=_hold_source_unit,
++            args=(service.store, kind, held, release, observed, errors),
++            name=f"source-{kind}-hold",
++        )
++        holder.start()
++        assert held.wait(timeout=5)
++
++        def run_backfill():
++            try:
++                server._run_phase2_author_backfill_once()
++            except Exception as exc:
++                errors.append(exc)
++            finally:
++                finished.set()
++
++        worker = threading.Thread(target=run_backfill, name="phase2-backfill")
++        worker.start()
++        assert not finished.wait(timeout=0.4)
++        assert holder.is_alive() and worker.is_alive()
++        assert idx._conn.in_transaction
++
++        release.set()
++        holder.join(timeout=5)
++        worker.join(timeout=5)
++        assert errors == []
++        assert observed["in_transaction"] is True
++        assert server._PHASE2_BACKFILL_KEY not in observed["keys"]
++        assert finished.is_set()
++        assert _flag_row(idx) is not None
++        assert not idx._conn.in_transaction
++
++
++def test_held_source_read_is_not_committed_or_entered_by_backfill(tmp_path, monkeypatch):
++    _run_backfill_blocked_by_held_source(tmp_path, monkeypatch, "read")
++
++
++def test_held_source_write_is_not_committed_or_entered_by_backfill(tmp_path, monkeypatch):
++    _run_backfill_blocked_by_held_source(tmp_path, monkeypatch, "write")
++
++
++def test_backfill_and_source_tick_keep_owned_transactions(tmp_path, monkeypatch):
++    with Index.open(tmp_path / "index.db") as idx:
++        monkeypatch.setattr(server, "_get_index", lambda: idx)
++        service = source_subscriptions.SourceSubscriptionService(index=idx)
++        start = threading.Barrier(2)
++        errors = []
++
++        def tick():
++            start.wait(timeout=5)
++            try:
++                service.expire_poll_leases()
++                service.due_poll_ids(limit=8)
++            except Exception as exc:
++                errors.append(exc)
++
++        watcher = threading.Thread(target=tick, name="source-watch-tick")
++        watcher.start()
++        start.wait(timeout=5)
++        server._run_phase2_author_backfill_once()
++        watcher.join(timeout=5)
++        assert errors == []
++        assert _flag_row(idx) is not None
++        assert not idx._conn.in_transaction
++        service.expire_poll_leases()
++        assert service.due_poll_ids(limit=8) == []

@@ -1,0 +1,95 @@
+{
+  "scope": "Both-root integration observations; earlier failed outcomes retained; no installed credit",
+  "summaries": {
+    "vp-n1": "no tests ran in 0.03s",
+    "vp-n2": "1 failed, 1 passed in 0.34s",
+    "vp-w1": "59 passed, 1 deselected in 3.37s",
+    "vp-c1": "59 passed, 1 deselected in 3.30s"
+  },
+  "files": {
+    "integrated.patch": {
+      "bytes": 4567,
+      "sha256": "b94e96f1711b61dcea8350832a3c08986160df60debe364ff7f6729f5771e59d"
+    },
+    "vp-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "vp-c1/results.json": {
+      "bytes": 998,
+      "sha256": "f6147a1338c4d3b760a6f68c86b9866177b689b6112ed58234dce1b554d98232"
+    },
+    "vp-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "vp-c1/tests.log": {
+      "bytes": 115,
+      "sha256": "ea09d9f167d98f228a9e6bc177e0ae0d910b08a7a490f4330136f10a8841e917"
+    },
+    "vp-c1/tests.xml": {
+      "bytes": 9114,
+      "sha256": "d2c449bec88d030a39228fe48232fd130ed7f89ce4bda02527d2cc009ba67dd9"
+    },
+    "vp-n1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "vp-n1/results.json": {
+      "bytes": 822,
+      "sha256": "4f8c67c457c66118e8147069324181640358821d2e305cb55e80cfd6cfbf73b1"
+    },
+    "vp-n1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "vp-n1/tests.log": {
+      "bytes": 112,
+      "sha256": "193f0025ea696cf2bfe80449f3df0ee78f1f78dbbb59831cc02389d0d6fde231"
+    },
+    "vp-n1/tests.xml": {
+      "bytes": 233,
+      "sha256": "62e6f97b498263ccc8713e6aaa502a7003426416dfeb14e12621a91647cc4c28"
+    },
+    "vp-n2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "vp-n2/results.json": {
+      "bytes": 822,
+      "sha256": "d32d18333da0988b6f950d4be87db78f866ccd13ffa5e839fb1a51be4b91dd4b"
+    },
+    "vp-n2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "vp-n2/tests.log": {
+      "bytes": 685,
+      "sha256": "cdb132f318bf1a3d8ce3cd0e21593024e136cc88e977d460fa02be0b000ab634"
+    },
+    "vp-n2/tests.xml": {
+      "bytes": 848,
+      "sha256": "ced3abcb4c6b2988548046b2d5dd2134a7afabafc0fa096d24f8ea70ccf2a7f9"
+    },
+    "vp-w1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "vp-w1/results.json": {
+      "bytes": 1139,
+      "sha256": "4a120654eb4ede43dfdcd996052c6eb62a55d698ca62d0fb6a67874d235d750d"
+    },
+    "vp-w1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "vp-w1/tests.log": {
+      "bytes": 115,
+      "sha256": "9e3084bb101cf56fb97c1049848c9e7637c86f1ab6c31aa425b77dfc2cceb468"
+    },
+    "vp-w1/tests.xml": {
+      "bytes": 9114,
+      "sha256": "3b3ded1ef41a81730ab4af0e2dfbb96f242f0fb9382a8f54925540a9dd4e39b9"
+    }
+  }
+}

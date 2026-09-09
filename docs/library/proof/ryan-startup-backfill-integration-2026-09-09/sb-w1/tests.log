@@ -1,0 +1,9 @@
+.....................F.                                                  [100%]
+================================== FAILURES ===================================
+_______ test_read_open_does_not_migrate_then_explicit_backend_promotes ________
+tests\test_existing_index_read_open.py:38: in test_read_open_does_not_migrate_then_explicit_backend_promotes
+    assert writer is reader
+E   assert <index.Index object at 0x000001BAD4184050> is <index.Index object at 0x000001BAD1999610>
+=========================== short test summary info ===========================
+FAILED tests/test_existing_index_read_open.py::test_read_open_does_not_migrate_then_explicit_backend_promotes
+1 failed, 22 passed in 3.26s

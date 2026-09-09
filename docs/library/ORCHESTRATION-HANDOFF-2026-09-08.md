@@ -80,11 +80,11 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 57 passes in both roots; first bundled scope nine passed / two failed / three unexecuted | Startup backfill repair f9e2c921, new package and final observations before Ryan's installed receipt |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 57 passes in both roots; first bundled scope nine passed / two failed / three unexecuted | Startup repair verified in both roots; new package and final observations before Ryan's installed receipt |
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits integrated; bundled provenance repair confirmed; new startup transaction race requires product repair/build | Both setup proposals pending; integrate f9e2c921, rebuild, final bundled/full-tree observations and portable bundle |
+| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits and startup transaction repair integrated; new product build and final observations owed | Both setup proposals pending; rebuild, final bundled/full-tree observations and portable bundle |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -130,7 +130,7 @@ production backfill/source-watch connection race. Review and integrate both;
 changed packaged product requires a new build/seal before final bundled/whole-tree
 verification. Keep the old package and failed 105-file observation intact.
 
-1. Both completed workers and supplements are integrated. C22: 92 passed / two
+1. Startup f9e2c921 and both receipt-tool corrections are independently verified and integrated. No worker remains active. Both completed receipt workers and supplements are integrated. C22: 92 passed / two
    frozen failures in worker and checkout; review and raw diff are in
    `RYAN-C22-FINAL-INTEGRATION-REVIEW-2026-09-09.md`. P4: 68 passed / one frozen
    path failure in both roots; bundled operator has 15 passed / zero failed /
@@ -2046,3 +2046,19 @@ not close the startup transaction repair or installed gate. Eleven files are
 sealed at proof/ryan-c22-provenance-02-2026-09-09/SHA256.json.
 Future bundled observations must also gate unexpected helper ERROR/CRITICAL
 lines, preserving the exact expected launch/registration injection exceptions.
+
+### 2026-09-09 — startup and final blocked-query correction verified
+
+Startup sb-w1/sb-c1: 22 passed / one known getter failure in each root;
+strict sb-w2/sb-c2: 181 passed / one original AT6 failure in each root.
+Six new SQLite ownership regressions pass. The worker's initial retry-counter
+assertion error is retained with its correction to that newly authored file.
+See RYAN-STARTUP-BACKFILL-INTEGRATION-REVIEW-2026-09-09.md and its 41-file seal.
+
+Windows version accounting vp-n2 is one failed / one passed; vp-w1/vp-c1 each
+have 59 passed / one deselected. Version commands stay blocked and counted;
+only the exact stdlib origin gets the distinct capability classification.
+See RYAN-C22-VERSION-QUERY-REVIEW-2026-09-09.md. No existing fixture changed.
+No active worker remains. Preserve package-02, rebuild changed server, then
+perform fresh bundled C22/P4 and final complete-tree observations. Both exact
+fixture proposals and the historical exit gap remain unresolved.

@@ -1,0 +1,14 @@
+..F..................F.                                                  [100%]
+================================== FAILURES ===================================
+__ test_failed_flag_write_leaves_no_foreign_transaction_or_false_completion ___
+tests\test_startup_backfill_transaction_ownership.py:111: in test_failed_flag_write_leaves_no_foreign_transaction_or_false_completion
+    assert json.loads(_flag_row(idx)[0])["author_from_sidecar"] == 1
+E   assert 0 == 1
+_______ test_read_open_does_not_migrate_then_explicit_backend_promotes ________
+tests\test_existing_index_read_open.py:38: in test_read_open_does_not_migrate_then_explicit_backend_promotes
+    assert writer is reader
+E   assert <index.Index object at 0x00000209520F42F0> is <index.Index object at 0x000002095366C890>
+=========================== short test summary info ===========================
+FAILED tests/test_startup_backfill_transaction_ownership.py::test_failed_flag_write_leaves_no_foreign_transaction_or_false_completion - assert 0 == 1
+FAILED tests/test_existing_index_read_open.py::test_read_open_does_not_migrate_then_explicit_backend_promotes - assert <index.Index object at 0x00000209520F42F0> is <index.Index object at 0x000002095366C890>
+2 failed, 21 passed in 3.23s

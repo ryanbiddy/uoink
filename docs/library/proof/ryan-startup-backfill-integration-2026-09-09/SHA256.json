@@ -1,0 +1,179 @@
+{
+  "scope": "Both-root integration observations; earlier failed outcomes retained; no installed credit",
+  "summaries": {
+    "g-sbf": "2 failed, 21 passed in 3.23s",
+    "g-sbf2": "1 failed, 22 passed in 3.20s",
+    "g-sbf-ix": "3 passed in 0.67s",
+    "g-sbf3": "1 failed, 181 passed, 6 warnings in 35.53s",
+    "sb-w1": "1 failed, 22 passed in 3.26s",
+    "sb-w2": "1 failed, 181 passed, 6 warnings in 36.18s",
+    "sb-c1": "1 failed, 22 passed in 3.10s",
+    "sb-c2": "1 failed, 181 passed, 6 warnings in 35.96s"
+  },
+  "files": {
+    "integrated.patch": {
+      "bytes": 18678,
+      "sha256": "e52f738c2577e9767f8656d5b127309088f62499dbea3dc1731c41852bc0da59"
+    },
+    "g-sbf/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "g-sbf/results.json": {
+      "bytes": 1011,
+      "sha256": "39edacc0525bef96d91a511d595b97a327c0dde91151cc846263e8643ccba68f"
+    },
+    "g-sbf/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "g-sbf/tests.log": {
+      "bytes": 1259,
+      "sha256": "c7aad834472ba4ee45e81ca923f4c265be02de93442eb25efff422f185b86824"
+    },
+    "g-sbf/tests.xml": {
+      "bytes": 3861,
+      "sha256": "432cc31752eb730983da7904fa80d1c25681ffccb3f2434176bb2f54085f0755"
+    },
+    "g-sbf-ix/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "g-sbf-ix/results.json": {
+      "bytes": 822,
+      "sha256": "db1f5d6edf5b4b376bab9145fbacd1916426cedc9eaded3c984822d6889e6643"
+    },
+    "g-sbf-ix/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "g-sbf-ix/tests.log": {
+      "bytes": 100,
+      "sha256": "17955997c9444991a1589aa613a6b972a99ee024b5f245a2b315e15c01ed2e4d"
+    },
+    "g-sbf-ix/tests.xml": {
+      "bytes": 652,
+      "sha256": "448293e6937883a2b4d94a8744250e3517c4eeb84d1e2f8b65078f77a6fb693c"
+    },
+    "g-sbf2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "g-sbf2/results.json": {
+      "bytes": 1014,
+      "sha256": "f41ef0636f5c6108b9ea6882c4cb62e03b47d9a6b74623e807ae8123d017dfc4"
+    },
+    "g-sbf2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "g-sbf2/tests.log": {
+      "bytes": 803,
+      "sha256": "24ef9647ce5b64a496b38b07712fbf0c51a2abb5fcc9837b3aba2f3fb6b78945"
+    },
+    "g-sbf2/tests.xml": {
+      "bytes": 3587,
+      "sha256": "38ff1f44a0a2a936df9fb81599c520818c03731e55095cc411c917308398ec7a"
+    },
+    "g-sbf3/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "g-sbf3/results.json": {
+      "bytes": 1680,
+      "sha256": "ec7cf2d01198d78d0cf8d6532a09706a1ba333fa4526d8e42a43800356f9f334"
+    },
+    "g-sbf3/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "g-sbf3/tests.log": {
+      "bytes": 2293,
+      "sha256": "7bc86254d3a8bc0b547f3e9499109ef26b515bacd2d5bfe516415c2cd233d07b"
+    },
+    "g-sbf3/tests.xml": {
+      "bytes": 29276,
+      "sha256": "04f01d2df79f5e158d73dd23d70dc625f46cc9fe08943e91875df31d8271f199"
+    },
+    "sb-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "sb-c1/results.json": {
+      "bytes": 870,
+      "sha256": "35dd74f3e252a495dd3f29cb3549bae822f6e528820ebaa1caf539bfe6dfef77"
+    },
+    "sb-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "sb-c1/tests.log": {
+      "bytes": 705,
+      "sha256": "57c62d4c3ba03784848fc4ef8191e87a1bc33d0121dad254277882b204d99427"
+    },
+    "sb-c1/tests.xml": {
+      "bytes": 3587,
+      "sha256": "f116b9e215568688e5b749f72a9507f375d78381465a614a8899f77abe3eb788"
+    },
+    "sb-c2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "sb-c2/results.json": {
+      "bytes": 1536,
+      "sha256": "b4b80c507a5a8579ce612352ee774ae45770d9ac3fc7250544cf44cb06975b38"
+    },
+    "sb-c2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "sb-c2/tests.log": {
+      "bytes": 2143,
+      "sha256": "3c7c6397bca5296eaaf99eb01c8e77e8880e458c39c6bb48e28b06424dc954f3"
+    },
+    "sb-c2/tests.xml": {
+      "bytes": 29276,
+      "sha256": "a2764930141a019ecb198511ef4ac7b4ce57498419735d67e35650c5271dc629"
+    },
+    "sb-w1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "sb-w1/results.json": {
+      "bytes": 1011,
+      "sha256": "298a29599de8e11f36bc1f024cccd697a03f8c6b198c3a6b0e55e8353fa9a7dd"
+    },
+    "sb-w1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "sb-w1/tests.log": {
+      "bytes": 705,
+      "sha256": "6b7b0314d53c88e129a38cec39df48bfb4f8cdacf1ae58d89727e9088c95cffc"
+    },
+    "sb-w1/tests.xml": {
+      "bytes": 3587,
+      "sha256": "6015e2d6c75292f6b639c32e041f4b89b82703456aea05285364a0e24802a748"
+    },
+    "sb-w2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "sb-w2/results.json": {
+      "bytes": 1677,
+      "sha256": "8fe5265af10c476f4c17c021a2cf6ad8b0ce5ff9ef831d2ec528bf732989ceb9"
+    },
+    "sb-w2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "sb-w2/tests.log": {
+      "bytes": 2186,
+      "sha256": "3d11e3a2fd74e9b7f6ace065f0ae3b3492e6a63a55a78617d40ffcedb5fda94c"
+    },
+    "sb-w2/tests.xml": {
+      "bytes": 29276,
+      "sha256": "b2c46a60f45ec44ed3e23d6a6750f06f9f86a80fb27261a45a04088fe0360f81"
+    }
+  }
+}

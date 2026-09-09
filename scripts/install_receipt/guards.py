@@ -90,6 +90,27 @@ def _urllib3_ipv6_query():
     return False
 
 
+def _platform_version_query(args):
+    # Classification only: even this exact stdlib query is refused before spawn.
+    executable = str(args[0]) if args else ""
+    command = args[1] if len(args) > 1 else None
+    if os.path.basename(executable).lower() != "cmd.exe" or not isinstance(command, str):
+        return False
+    if command not in {executable + ' /c "' + query + '"'
+                       for query in ("ver", "command /c ver", "cmd /c ver")}:
+        return False
+    module = sys.modules.get("platform")
+    function = getattr(module, "_syscmd_ver", None)
+    frame = sys._getframe(1)
+    while frame is not None:
+        if (function is not None and frame.f_code is getattr(function, "__code__", None)
+                and frame.f_globals is getattr(module, "__dict__", None)
+                and os.path.basename(frame.f_code.co_filename).lower() == "platform.py"):
+            return True
+        frame = frame.f_back
+    return False
+
+
 def audit(event, args):
     if event in ("open", "sqlite3.connect"):
         value = args[0] if args else None
@@ -137,6 +158,11 @@ def audit(event, args):
     if event == "subprocess.Popen":
         _event("subprocess_attempt", command=str(args[1] if len(args) > 1 else args[0]))
         if os.environ.get("C22_PROVENANCE_ONLY") == "1":
+            if _platform_version_query(args):
+                _event("blocked_capability_probe", operation=event,
+                       dependency="platform._syscmd_ver", spawned=False,
+                       command=str(args[1]))
+                raise PermissionError("C22 guard: Windows version subprocess deliberately refused")
             _event("forbidden_attempt", operation=event, resource="provenance_descendant")
             raise _denied("C22 guard: provenance may not spawn descendants")
         cmd = args[1] if len(args) > 1 else args[0]

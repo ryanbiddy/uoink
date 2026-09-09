@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.309" timestamp="2026-09-09T13:36:55.825203-07:00" hostname="Ryan-PC"><testcase classname="tests.test_install_receipt_c22_version_probe" name="test_version_query_never_spawns_and_only_stdlib_origin_is_classified[True]" time="0.090"><failure message="assert 0 == 3&#10; +  where 0 = len([])">tests\test_install_receipt_c22_version_probe.py:43: in test_version_query_never_spawns_and_only_stdlib_origin_is_classified
+    assert len(probes) == 3
+E   assert 0 == 3
+E    +  where 0 = len([])</failure></testcase><testcase classname="tests.test_install_receipt_c22_version_probe" name="test_version_query_never_spawns_and_only_stdlib_origin_is_classified[False]" time="0.082" /></testsuite></testsuites>

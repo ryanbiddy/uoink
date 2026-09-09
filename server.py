@@ -3017,26 +3017,29 @@ def _run_phase2_author_backfill_once() -> None:
     """Run the Phase 2 sidecar author backfill a single time per install.
     The SQL migration (0020) already set platform + the YouTube author; this
     recovers the real X / Reddit author from the sidecars and corrects the
-    hostname `channel` values (Bug 3)."""
+    hostname `channel` values (Bug 3).
+
+    Flag lookup and persistence go through Index's lock/transaction boundary
+    so a source-watch snapshot or write on the shared connection is not
+    committed or entered. A failed flag write does not record completion.
+    """
     idx = _get_index()
-    try:
-        row = idx._conn.execute(
-            "SELECT value FROM memory_layer WHERE key=?",
-            (_PHASE2_BACKFILL_KEY,)).fetchone()
-    except Exception:
-        row = None
+    with idx.read_snapshot() as conn:
+        try:
+            row = conn.execute(
+                "SELECT value FROM memory_layer WHERE key=?",
+                (_PHASE2_BACKFILL_KEY,)).fetchone()
+        except Exception:
+            row = None
     if row is not None:
         return  # already run on this install
     stats = page_extractor.backfill_platform_author(idx)
     log.info("phase 2 author backfill: %s", stats)
-    try:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "INSERT OR REPLACE INTO memory_layer (key, value, updated_at) "
             "VALUES (?, ?, ?)",
             (_PHASE2_BACKFILL_KEY, json.dumps(stats), _now_iso()))
-        idx._conn.commit()
-    except Exception:
-        log.warning("could not record phase 2 backfill completion flag")
 
 
 # Markers in yoink.md so the comments section can be replaced after the

@@ -1,0 +1,98 @@
+diff --git a/scripts/install_receipt/guards.py b/scripts/install_receipt/guards.py
+index 0c99d7490cb499f4af4dbf5fd1e6f3f43edd2fd8..d7995c567a17952697e04c9bd69eb9b4da284200 100644
+--- a/scripts/install_receipt/guards.py
++++ b/scripts/install_receipt/guards.py
+@@ -90,6 +90,27 @@ def _urllib3_ipv6_query():
+     return False
+ 
+ 
++def _platform_version_query(args):
++    # Classification only: even this exact stdlib query is refused before spawn.
++    executable = str(args[0]) if args else ""
++    command = args[1] if len(args) > 1 else None
++    if os.path.basename(executable).lower() != "cmd.exe" or not isinstance(command, str):
++        return False
++    if command not in {executable + ' /c "' + query + '"'
++                       for query in ("ver", "command /c ver", "cmd /c ver")}:
++        return False
++    module = sys.modules.get("platform")
++    function = getattr(module, "_syscmd_ver", None)
++    frame = sys._getframe(1)
++    while frame is not None:
++        if (function is not None and frame.f_code is getattr(function, "__code__", None)
++                and frame.f_globals is getattr(module, "__dict__", None)
++                and os.path.basename(frame.f_code.co_filename).lower() == "platform.py"):
++            return True
++        frame = frame.f_back
++    return False
++
++
+ def audit(event, args):
+     if event in ("open", "sqlite3.connect"):
+         value = args[0] if args else None
+@@ -137,6 +158,11 @@ def audit(event, args):
+     if event == "subprocess.Popen":
+         _event("subprocess_attempt", command=str(args[1] if len(args) > 1 else args[0]))
+         if os.environ.get("C22_PROVENANCE_ONLY") == "1":
++            if _platform_version_query(args):
++                _event("blocked_capability_probe", operation=event,
++                       dependency="platform._syscmd_ver", spawned=False,
++                       command=str(args[1]))
++                raise PermissionError("C22 guard: Windows version subprocess deliberately refused")
+             _event("forbidden_attempt", operation=event, resource="provenance_descendant")
+             raise _denied("C22 guard: provenance may not spawn descendants")
+         cmd = args[1] if len(args) > 1 else args[0]
+diff --git a/tests/test_install_receipt_c22_version_probe.py b/tests/test_install_receipt_c22_version_probe.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..682458ed0d5797ce297e6eb3a9873ee670dc57a6
+--- /dev/null
++++ b/tests/test_install_receipt_c22_version_probe.py
+@@ -0,0 +1,48 @@
++"""Windows capability queries stay blocked; only the exact stdlib origin is classified."""
++import json
++import os
++from pathlib import Path
++import subprocess
++import sys
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
++from install_receipt.guards import SITECUSTOMIZE_SOURCE
++
++
++@pytest.mark.skipif(os.name != "nt", reason="Windows shell audit command shape")
++@pytest.mark.parametrize("declared", [True, False])
++def test_version_query_never_spawns_and_only_stdlib_origin_is_classified(tmp_path, declared):
++    guard = tmp_path / "guard.py"
++    guard.write_text(SITECUSTOMIZE_SOURCE, encoding="utf8")
++    code = "import runpy\nrunpy.run_path(" + repr(str(guard)) + ")\n"
++    if declared:
++        code += "import platform\nassert platform._syscmd_ver() == ('', '', '')\n"
++    else:
++        code += """import subprocess
++try:
++    subprocess.check_output('ver', shell=True)
++except PermissionError:
++    pass
++else:
++    raise AssertionError('version subprocess must stay blocked')
++"""
++    events_file = tmp_path / "events.jsonl"
++    env = os.environ.copy()
++    env.update(C22_PROVENANCE_ONLY="1", C22_EVENTS_PATH=str(events_file))
++    result = subprocess.run([sys.executable, "-I", "-S", "-B", "-c", code],
++                            env=env, cwd=tmp_path, capture_output=True, text=True, timeout=15)
++    assert result.returncode == 0, result.stdout + result.stderr
++    events = [json.loads(line) for line in events_file.read_text(encoding="utf8").splitlines()]
++    attempts = [e for e in events if e['event'] == 'subprocess_attempt']
++    probes = [e for e in events if e['event'] == 'blocked_capability_probe']
++    forbidden = [e for e in events if e['event'] == 'forbidden_attempt']
++    assert len(attempts) == (3 if declared else 1)
++    if declared:
++        assert len(probes) == 3
++        assert all(e['spawned'] is False and e['dependency'] == 'platform._syscmd_ver' for e in probes)
++        assert not forbidden
++    else:
++        assert forbidden
++        assert not probes

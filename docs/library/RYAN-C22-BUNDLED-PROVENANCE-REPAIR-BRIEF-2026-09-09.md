@@ -65,3 +65,5 @@ forms as blocked capability probes, with spawned=false and retained raw attempts
 all other descendant attempts remain forbidden. Repeat the focused compatibility
 union in both roots before the fresh final bundled observation. Do not edit the
 existing seven compatibility regressions or apply this classification to old data.
+
+Preparation vp-n1 stops before creating its new file because equivalent worker/checkout text has different newline bytes; its following selector collects zero tests and exits four. Compare normalized source text for this baseline check, retain vp-n1, and use fresh vp-n2 for the first actual new-regression observation. No measurement passed at vp-n1.

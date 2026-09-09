@@ -1,0 +1,10 @@
+F.                                                                       [100%]
+================================== FAILURES ===================================
+_ test_version_query_never_spawns_and_only_stdlib_origin_is_classified[True] __
+tests\test_install_receipt_c22_version_probe.py:43: in test_version_query_never_spawns_and_only_stdlib_origin_is_classified
+    assert len(probes) == 3
+E   assert 0 == 3
+E    +  where 0 = len([])
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_version_probe.py::test_version_query_never_spawns_and_only_stdlib_origin_is_classified[True]
+1 failed, 1 passed in 0.34s
