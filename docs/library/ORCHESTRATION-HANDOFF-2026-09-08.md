@@ -53,14 +53,14 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 19:04 PDT; implementation/review HEAD `b833167`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review HEAD `8e3e4f0`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a2 integrated: both roots 219 passed / nine frozen setup failures; AW-4 and seven new tests pass. AW-6 immediate cleanup loses a replacement file | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4a3 (grok temp boundary) and AV-5m4b2 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g rejected; AZ-5h transport repair (grok), AZ-5g2 measured refresh (grok), final BA-4 |
+| 4 | AV-5m4a2 (`b833167`): both roots 219 passed / nine frozen setup failures; AW-4 and seven new tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4a3 (grok temp boundary) and AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 5 | AZ-5h (`8e3e4f0`): both roots 561 passed / six retained failures; seven actual-entry cases pass | BA-5 reproduces reset domain deadline and oversized refusal. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5h2 (grok), then AZ-5g2 measured refresh (grok), final BA-4 |
 | 6 | BC-3e (`d792875`) integrated: both roots 167 passed / 11 omitted-ticket failures; BD-2, BD-3 and eight new implementation tests pass | BD-4 reproduces a changed caption overwritten at publisher entry. Phase 6 remains unaccepted; BD-27 observed | BC-3f (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -77,30 +77,29 @@ with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no 
 AZ-5a3g grok `54108a1f` integrated at `d437b59`. AV-5m2 grok `6b5e5f1e`
 and BC-3a2 grok `5aca8450` finished and are rejected; both complete original diffs
 are retained in the patches directory. New repair briefs below govern retries.
-AV-5m3 grok `c5f611c8` integrated at `270e569` as intermediate work, not acceptance.
-BC-3a3 grok `855b1d16` integrated at `00fe216`. AZ-5d grok `e739a5ec`
-finished and is rejected; its full diff is retained. AZ-5d2 and BC-3d are
-running from `90151e7` (started 17:44-17:45 PDT): AZ-5d2 `7afd1cb4`, BC-3d
-`31d2ed06`. AV-5m4a gemini `eb32f3b4` and AV-5m4b grok `5c22dbae` started
-17:53 PDT on `98d8b35`.
+AV-5m3 integrated at `270e569`, BC-3a3 at `00fe216`, AZ-5d2 at `3d2fa9f`,
+BC-3d at `897f0d2`, BC-3e at `d792875`, AV-5m4a2 at `b833167`, and
+AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
+AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
+complete/partial diffs as described below. Active at this update: BC-3f
+Grok `33751bb7` and AV-5m4a3 Grok `888d4940`. AZ-5h2 and AV-5m4b3 are next.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
-   AZ-5d2 is verified and integrated. Dispatch AZ-5g (gemini) from
-   `PHASE5-AZ5G-BRIEF-2026-09-08.md` and the original AZ-5 brief.
-   AZ-5g finished with a rejected incomplete record (474 passed / one frozen
-   failure in independent verification). Dispatch AZ-5h (grok) from
-   `PHASE5-AZ5H-BRIEF-2026-09-08.md`, then AZ-5g2 (grok) from
+   AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
+   record (474 passed / one frozen failure in independent verification).
+   Dispatch AZ-5h2 (grok) from `PHASE5-AZ5H2-BRIEF-2026-09-08.md`,
+   then AZ-5g2 (grok) from
    `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
    measurement stays retained and is not integrated.
 3. AV-5m3 and AV-5m4a2 are integrated; AV-5m2 remains rejected. Dispatch/verify
    AV-5m4a3 (grok) from `PHASE4-AV5M4A3-BRIEF-2026-09-08.md`; AV-5m4a
-   timed out and its partial diff is rejected. AV-5m4b also finished and is
-   rejected after AW-5; dispatch AV-5m4b2 (grok) under
-   `PHASE4-AV5M4B2-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
+   timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
+   rejected after AW-5/AW-7; dispatch AV-5m4b3 (grok) under
+   `PHASE4-AV5M4B3-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -512,3 +511,35 @@ remains in our queue. No client or installed receipt is credited yet.
 BC-3f Grok `33751bb7` started at 18:58 PDT from `ae40b57`. AZ-5h and
 AV-5m4b2 remain active. The handoff's Queue is current; older run-start
 paragraphs above are retained history.
+
+### 2026-09-08 - AZ-5h integrated; BA-5 and AW-7 retained
+
+AZ-5h Grok `f62e5609` integrated at `8e3e4f0`, clean three-way apply.
+Independent named union plus Phase 4 resources/prompts/briefs: **561 passed,
+six failed** in both roots (115.63 seconds worker, 113.79 seconds checkout;
+scratch `az5h-wi` / `az5h-ci`). Seven actual-entry tests pass. The original
+BA-4 test still fails on the replaced SDK stream route, which is retained
+as a route-limited result. Five other failures remain the unary/clock
+fixture and four stale measurement assertions.
+
+New BA-5 observes 4.6680728 seconds from inbound admission with 1.5 seconds
+of simulated dispatch and a real SQLite EXCLUSIVE holder (one failure,
+7.09 seconds including setup). Its separate large-id test returns a
+65,838-byte refusal (one failure, 1.39 seconds). Worker scratch
+`ba5-inbound-clock` / `ba5-refusal-wire` retain the raw verification.
+AZ-5h2 is briefed before AZ-5g2; neither defect is a Ryan gate.
+
+AV-5m4b2 independently has **226 passed, twelve failed**, 71.70 seconds
+(worker scratch `av5m4b2-wi`). Three AW-5 cases pass. New AW-7 has **one
+failure**, 3.65 seconds: the delayed parent writes its destination lease
+after timeout returns. The complete B2 diff/reports/proposed tests are
+retained in `patches/av5m4b2-grok-rejected-2026-09-08.patch`; nothing is
+integrated. B3 must isolate lease mutations, protect final local intent
+mutations, prove SQLite ownership without guessing native object pointers,
+and replace the unsupported real-child timeout explanation with evidence.
+
+The broader BD-2 check on `831714d` produced **382 passed, four failed**,
+57.90 seconds, with all Phase 3 files except S21 plus nine named adapter,
+podcast, clip and resource files. Failures are only the unchanged AS-7
+superseded-evidence cases. Logs/XML/expanded command are in checkout scratch
+`bd2-broader-bc3e`. Later BC-3f/AZ-5h integration still needs final verification.
