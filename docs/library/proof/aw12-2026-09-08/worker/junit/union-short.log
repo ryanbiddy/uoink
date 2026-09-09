@@ -1,0 +1,78 @@
+selector_count=29 ANTHROPIC=False
+.......................F...............................F.............FFF [ 24%]
+FF.FF................................................................... [ 49%]
+........................................................................ [ 74%]
+........................................................................ [ 98%]
+...                                                                      [100%]
+================================== FAILURES ===================================
+E   assert 0 == 1
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:371: assert 0 == 1
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1e6aca70770: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw2_acceptance.py:362: assert (False)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1e6aca72750: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1e6aca72810: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1e6aca71c10: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:329: assert (False)
+E   AssertionError: assert (True and not True)
+     +  where True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/...lRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001E6AC9AF890>))
+     +  and   True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:360: AssertionError: assert (True and not True)
+============================== warnings summary ===============================
+..\..\..\..\..\..\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py:1464
+  C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py:1464: PytestConfigWarning: Unknown config option: console_output_file
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1e6aca70770: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1e6aca72750: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1e6aca72810: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1e6aca71c10: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption - AssertionError: assert (True and not True)
+ +  where True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/...lRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001E6AC9AF890>))
+ +  and   True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+9 failed, 282 passed, 1 warning in 145.57s (0:02:25)
+UNION_EXIT:1

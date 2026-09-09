@@ -1,0 +1,34 @@
+{"actual_current_integer_id": 70136, "after": "{\"owner\":\"foreign\"}", "allocator_reuse": "simulated at mirror.get_ident only", "origin_exited": true, "origin_integer_id": 57204, "returned": "success", "same_thread_object": false, "simulated_current_integer_id": 57204, "writer_pid": 67980}
+F{"cancel_return_s": 4.299974534660578e-06, "competitor": {"acquired": false, "pid": 68488}, "global_retained": true, "launch_open": true, "owner_held": true, "physical_liveness": "dead", "termination_confirmed": false}
+F{"actual_stale_handle_kernel_call": false, "caller_errors": ["vault io worker job assignment failed"], "caller_returned": true, "cancel_return_s": 0.03203639999264851, "final_physical_liveness": "dead", "job_closed_before_launcher_resumed": true, "launcher_pid": 10992, "owner_held_before_handoff": false, "retained_before_handoff": false, "termination_confirmed_before_handoff": true}
+F                                                                      [100%]
+================================== FAILURES ===================================
+__ test_exited_origin_cannot_authorize_another_thread_by_recycled_integer_id __
+_scratch\test_aw12_thread_identity.py:63: in test_exited_origin_cannot_authorize_another_thread_by_recycled_integer_id
+    assert after == original, observed
+E   AssertionError: {'allocator_reuse': 'simulated at mirror.get_ident only', 'origin_exited': True, 'same_thread_object': False, 'origin_integer_id': 57204, ...}
+E   assert b'{"owner":"foreign"}' == b'{"owner":"original"}'
+E     
+E     At index 10 diff: b'f' != b'o'
+E     Use -v to get more diff
+---------------------------- Captured stdout call -----------------------------
+{"actual_current_integer_id": 70136, "after": "{\"owner\":\"foreign\"}", "allocator_reuse": "simulated at mirror.get_ident only", "origin_exited": true, "origin_integer_id": 57204, "returned": "success", "same_thread_object": false, "simulated_current_integer_id": 57204, "writer_pid": 67980}
+______ test_cancelled_prepare_releases_without_requiring_a_future_launch ______
+_scratch\test_aw12_launch_handoff.py:27: in test_cancelled_prepare_releases_without_requiring_a_future_launch
+    assert confirmed and observed["competitor"]["acquired"], observed
+E   AssertionError: {'termination_confirmed': False, 'cancel_return_s': 4.299974534660578e-06, 'physical_liveness': 'dead', 'launch_open': True, ...}
+E   assert (False)
+---------------------------- Captured stdout call -----------------------------
+{"cancel_return_s": 4.299974534660578e-06, "competitor": {"acquired": false, "pid": 68488}, "global_retained": true, "launch_open": true, "owner_held": true, "physical_liveness": "dead", "termination_confirmed": false}
+____________ test_cancel_cannot_close_job_during_launch_assignment ____________
+_scratch\test_aw12_launch_handoff.py:96: in test_cancel_cannot_close_job_during_launch_assignment
+    assert not closed_early, observed
+E   AssertionError: {'launcher_pid': 10992, 'cancel_return_s': 0.03203639999264851, 'termination_confirmed_before_handoff': True, 'job_closed_before_launcher_resumed': True, ...}
+E   assert not [644]
+---------------------------- Captured stdout call -----------------------------
+{"actual_stale_handle_kernel_call": false, "caller_errors": ["vault io worker job assignment failed"], "caller_returned": true, "cancel_return_s": 0.03203639999264851, "final_physical_liveness": "dead", "job_closed_before_launcher_resumed": true, "launcher_pid": 10992, "owner_held_before_handoff": false, "retained_before_handoff": false, "termination_confirmed_before_handoff": true}
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw12_thread_identity.py::test_exited_origin_cannot_authorize_another_thread_by_recycled_integer_id
+FAILED _scratch/test_aw12_launch_handoff.py::test_cancelled_prepare_releases_without_requiring_a_future_launch
+FAILED _scratch/test_aw12_launch_handoff.py::test_cancel_cannot_close_job_during_launch_assignment
+3 failed in 3.77s

@@ -1,0 +1,88 @@
+{
+  "files": {
+    "docs/library/proof/aw12-2026-09-08/AW12-THREAD-IDENTITY-REVIEW-BRIEF.md": {
+      "sha256": "4fd5b9bb62c5764b64539d7cb11db0a7098c3972fee807b34c4496e96dffcef9",
+      "bytes": 2622
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/results.json": {
+      "sha256": "2488719ccb0fc2d17ab615c394e9442d2f6f2e4cda8142bf908553948bace777",
+      "bytes": 888
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/tests.log": {
+      "sha256": "db5e42cdc18aad1b577d32c134e8531a5c9d794a7b03d5ee46365e3c1c6715ef",
+      "bytes": 4039
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/tests.xml": {
+      "sha256": "96b1c26d32d1448b478908ed929e7ba27a62f37d9cae9c0edd42fe371baf0831",
+      "bytes": 2631
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/results.json": {
+      "sha256": "17038a7c5bc5e72475c15cd1a41dbcc907ef17855188d1981a1d7adb5a9450c9",
+      "bytes": 2363
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/tests.log": {
+      "sha256": "b0aa4c1672acafb8de28c392da3aaf0fbda243671ce89dfdc87b8949244aaa79",
+      "bytes": 11126
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/tests.xml": {
+      "sha256": "47ec89f990eb391adb0dee1a399ebef885970d8dd3523acb726e4bdd2abf9391",
+      "bytes": 50963
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/index.py": {
+      "sha256": "02aaf994cc98eac0e1dc1cd552bbdae22eeae1ab23422339277c2b68c790c781",
+      "bytes": 110388
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_briefs.py": {
+      "sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556",
+      "bytes": 74080
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_mirror.py": {
+      "sha256": "8b670a0cdde7660abdfa3c96b16a968d52c59d7acb86caba4616f8de1001e953",
+      "bytes": 201992
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_mirror_vault_io.py": {
+      "sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7",
+      "bytes": 19933
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source-before.json": {
+      "sha256": "cf29ec491e3d3be79657714ac1d737e9501712d1f0ecf08e1c081fa8189b521c",
+      "bytes": 513
+    },
+    "docs/library/proof/aw12-2026-09-08/test_aw12_launch_handoff.py": {
+      "sha256": "865019e2ff70b91d708d4d3158e586788035b5f81cee45354dc89e91bac778ae",
+      "bytes": 3889
+    },
+    "docs/library/proof/aw12-2026-09-08/test_aw12_thread_identity.py": {
+      "sha256": "86b283bf8bd6d221260293c3274af01761249a75b6f9d38af9542a8e8303fe9c",
+      "bytes": 2404
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union-short.log": {
+      "sha256": "58aa82fdd497a7baf299c9681a8ae51b4dd3da066f83ec22dab04bade13947f7",
+      "bytes": 11225
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union-terminal.log": {
+      "sha256": "00b02918c59779abcf591b299171143d324c0b6c8d1f7537c94e5c16f214804e",
+      "bytes": 11274
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union.xml": {
+      "sha256": "edabee214df4adf610ef35156fca1bf17203c67c65fc32c55984420932db837b",
+      "bytes": 48804
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/focus.xml": {
+      "sha256": "73961a35af47eca16c6a38ec1e8b512266cd2c4153f3263ab8af7c177cc8c2ec",
+      "bytes": 1327
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/union-short.log": {
+      "sha256": "affe9fb879e966b37825793bfa4079c76ef2bb5d83b241ff04f6544669322aef",
+      "bytes": 7073
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/union.xml": {
+      "sha256": "063e4d3876bec046db4e243309bd54b850b807fa988cbbc38203303ea87db241",
+      "bytes": 48688
+    },
+    "docs/library/patches/av5m4b7-grok-original-2026-09-08.patch": {
+      "sha256": "e578f2575ce0680761e40d4038c202a4dd148a7414d6ae95d77f09ae5208090c",
+      "bytes": 300847
+    }
+  }
+}

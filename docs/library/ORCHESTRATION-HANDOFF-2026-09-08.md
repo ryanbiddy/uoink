@@ -59,7 +59,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a3 (`ffdbef4`) integrated. B6 independently 275 passed / nine frozen failures; AW-10 alias admission closed, rejected after AW-11 | Phase 4 remains unaccepted; cancelled launch retention and foreign helper adoption are implementation work | AV-5m4b7 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | AV-5m4a3 (`ffdbef4`) integrated. B7 independently 282 passed / nine frozen failures; three additional AW-12 review cases failed | Astra's bounded ownership correction is in verification; Phase 4 remains unaccepted | Verify and integrate B7 plus AW-12, finish AW-4, then the real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -96,7 +96,9 @@ rejected after AW-10. Its complete diff and independent proof are retained.
 AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` finished from
 `17f3714` and is rejected after AW-11. Its complete diff and independent proof
 are retained. AV-5m4b7 Grok `b00703c8-7ca0-4e4b-b3ba-c6f1bad3d6ac`
-is active from `7995c0e` (22:16 PDT).
+finished from `7995c0e`. Its original patch is retained. Astra's AW-12 review
+correction is being verified in that finished worktree; no external worker
+is active.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -113,8 +115,11 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. B5 is rejected after AW-10; B6 after AW-11. Verify active AV-5m4b7 (grok) under
-   `PHASE4-AV5M4B7-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
+   AW-9. B5 is rejected after AW-10; B6 after AW-11. B7's original union is
+   independently verified; three AW-12 cases require the bounded integrator
+   correction documented in that worker's `PHASE4-AW12-2026-09-08.md`. Verify
+   the full B7 union plus AW-12 in both roots, preserving the original patch
+   and failed results. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -949,7 +954,7 @@ was deleted after exit. The real client run must also use a separate profile
 and freeze its own launch/model metadata. B7 remains active; the archived copy
 and native library prompts still wait for the accepted implementation.
 
-### 2026-09-08 22:36 PDT - B7 first union; final review preparation
+### 2026-09-08 - B7 first union; final review preparation
 
 B7's first focused seven cases passed. Its first combined union has **281
 passed, ten failed**, 137.89 seconds: the nine frozen failures plus its new
@@ -967,3 +972,28 @@ The scratch AW12-THREAD-IDENTITY-REVIEW-BRIEF specifies a final check of B7's
 integer-thread-ID helper fallback. Python permits those IDs to be reused;
 any diagnostic must distinguish simulated ID reuse from observed Windows
 allocation. No such diagnostic has run and no new result is claimed.
+
+### 2026-09-08 22:53 PDT - B7 verified; bounded AW-12 correction
+
+B7 independently reproduced **282 passed, nine failed**, 159.69 seconds.
+The worker's unknown `console_output_file` option warning was a command
+configuration warning, not a product exception. Final source remained fixed
+at mirror hash `8b670a0cdde7660abdfa3c96b16a968d52c59d7acb86caba4616f8de1001e953`.
+The original 300,847-byte patch and observations are retained separately.
+
+AW-12's three cases failed in **3.77 seconds**. Simulated integer-thread-ID
+reuse authorized an actual foreign intent replacement; Windows allocation
+reuse itself was not observed. Prepared-only cancellation retained an unused
+gate. Cancellation also closed the job while launch still held it for
+assignment; the probe prevented a stale-handle kernel call. All task-created
+child cleanup was confirmed. These remain implementation findings.
+
+Astra made the bounded correction in the finished B7 worktree: actual Thread
+identity for helper authority, release after cancelled preparation, retained
+job ownership through assignment, and one nonblocking termination owner.
+Graceful shutdown uses the same final cleanup. The original worker report
+and patch are preserved. The corrected focus passed **11 tests**, 13.25
+seconds, including unchanged AW-11/B7 cases and one concurrent-termination
+case. The complete corrected union is running; checkout integration waits
+for it. Mirror hash is now
+`33bd644ca3ac13070716fa8493221260c4b713ba71e4a402683d608de06761b3`.

@@ -1,0 +1,91 @@
+selector_count=29 ANTHROPIC=False
+.......................F...............................F.............FFF [ 24%]
+FF.FF................................................................... [ 49%]
+........................................................................ [ 74%]
+...............................................ok  initialize answers under -P (embeddable path rules)
+ok  tools/list returns exactly 25 canonical tools
+ok  tools/call round-trips against the isolated index
+.ok  doctor payload carries mcp_stdio
+.ok  entry point pins the app dir before importing server
+.ok  removed aliases reject and MCPB lists the same 25 tools
+..........{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a129\\aw10-alias", "competitor_pid": 16352, "first_lease_written": false, "first_writer_alive": true, "first_writer_pid": 72160, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a129\\v", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "same_file": true, "started": false}
+.{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a130\\j", "competitor_pid": 40864, "first_lease_written": false, "first_writer_alive": true, "first_writer_pid": 57204, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a130\\v", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "same_file": true, "started": false, "startup_s": 0.05903760000364855}
+.{"alias": {"path": "junction", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false, "thread_alive": false}, "target": {"path": "target", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false, "thread_alive": false}}
+.{"mutex": {"acquired": false, "dest": "b", "phase": "held", "pid": 72468}, "session": {"competitor_pid": 33976, "dest": "b", "phase": "held", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false}}
+.....{"admitted_alive": false, "caller_errors": [{"message": "vault io worker cancelled", "type": "OSError"}], "cancelled_admission": true, "content_mutation_commands": 0, "global_retained": false, "launcher_pid": null, "lease_written": false, "mirror_retained": false, "owner_held": false, "physical_liveness": "dead", "writer_pid": null}
+.{"after": "{\"owner\":\"original\"}", "context_owner": false, "context_session": false, "error": "destination exclusion unavailable", "foreign_thread": 68564, "operation": "put", "origin_thread": 65008, "original_writer_alive": true, "returned": "OSError", "writer_pid": 68400}
+.{"after": "{\"owner\":\"original\"}", "context_owner": false, "context_session": false, "error": "destination exclusion unavailable", "foreign_thread": 70136, "operation": "unlink", "origin_thread": 65008, "original_writer_alive": true, "returned": "OSError", "writer_pid": 63952}
+.{"mid": {"admitted_alive_mid": false, "cancel_return_s": 1.700012944638729e-06, "cancelled_admission": true, "content_mutation_commands": 0, "global_retained": true, "idle_child_is_not_post_timeout_publication": true, "launcher_pid_mid": null, "lease_written": false, "mirror_retained": true, "owner_held": true, "physical_liveness_mid": "dead", "popen_in_progress": true, "startup_s_mid": 0.0, "termination_s_mid": 0.0, "writer_pid_mid": null}}
+{"after": {"caller_errors": [{"message": "vault io worker cancelled", "type": "OSError"}], "cancel_return_s": 1.700012944638729e-06, "child_alive_after": false, "child_pid": 31128, "child_registered": true, "lease_written": false, "physical_liveness": "dead", "startup_s": 0.0, "termination_confirmed": true, "termination_s": 1.610000617802143e-05}}
+. [ 98%]
+{"caller_errors": [{"message": "vault io worker failed to start", "type": "OSError"}], "cancel_return_s": 1.500011421740055e-06, "children_created": 0, "global_retained": false, "launcher_pid": null, "lease_written": false, "mirror_retained": false, "owner_held": false, "physical_liveness": "dead", "termination_s": 0.0, "writer_pid": null}
+.F{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a143\\j", "canonical_alias_differs": true, "gate_key_shared": true, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\a143\\v", "other": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\t\\o0", "reused_count": 1, "samefile_alias": true, "session_alive": true}
+.                                                                      [100%]
+================================== FAILURES ===================================
+E   assert 0 == 1
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:371: assert 0 == 1
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x27628d51130: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw2_acceptance.py:362: assert (False)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x27628c34d10: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x27628c34dd0: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x27628c35970: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:329: assert (False)
+E   AssertionError: assert (True and not True)
+     +  where True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/...lRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x0000027623AB9F40>))
+     +  and   True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:360: AssertionError: assert (True and not True)
+E   OSError: operation is no longer live
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b00703c8-7ca\grok\library_mirror.py:2846: OSError: operation is no longer live
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x27628d51130: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x27628c34d10: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x27628c34dd0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x27628c35970: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption - AssertionError: assert (True and not True)
+ +  where True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/...lRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x0000027623AB9F40>))
+ +  and   True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+FAILED tests/test_phase4_av5m4b7_lifetime.py::test_originating_helper_succeeds_foreign_helper_refuses - OSError: operation is no longer live
+10 failed, 281 passed in 137.89s (0:02:17)
+UNION_EXIT:1

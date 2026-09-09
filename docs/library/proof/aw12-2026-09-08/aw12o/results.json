@@ -1,0 +1,25 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "_scratch/test_aw12_thread_identity.py",
+      "_scratch/test_aw12_launch_handoff.py",
+      "--capture=tee-sys",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\aw12o-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\aw12o\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\aw12o\\tests.log"
+  }
+]

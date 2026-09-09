@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="1.137" timestamp="2026-09-08T22:45:58.484409-07:00" hostname="Ryan-PC"><testcase classname="_scratch.test_aw12_thread_identity" name="test_exited_origin_cannot_authorize_another_thread_by_recycled_integer_id" time="0.257"><failure message="AssertionError: {'allocator_reuse': 'simulated at mirror.get_ident only', 'origin_exited': True, 'same_thread_object': False, 'origin_integer_id': 57204, ...}&#10;assert b'{&quot;owner&quot;:&quot;foreign&quot;}' == b'{&quot;owner&quot;:&quot;original&quot;}'&#10;  &#10;  At index 10 diff: b'f' != b'o'&#10;  Use -v to get more diff">_scratch\test_aw12_thread_identity.py:63: in test_exited_origin_cannot_authorize_another_thread_by_recycled_integer_id
+    assert after == original, observed
+E   AssertionError: {'allocator_reuse': 'simulated at mirror.get_ident only', 'origin_exited': True, 'same_thread_object': False, 'origin_integer_id': 57204, ...}
+E   assert b'{"owner":"foreign"}' == b'{"owner":"original"}'
+E     
+E     At index 10 diff: b'f' != b'o'
+E     Use -v to get more diff</failure></testcase><testcase classname="_scratch.test_aw12_launch_handoff" name="test_cancelled_prepare_releases_without_requiring_a_future_launch" time="0.563"><failure message="AssertionError: {'termination_confirmed': False, 'cancel_return_s': 4.299974534660578e-06, 'physical_liveness': 'dead', 'launch_open': True, ...}&#10;assert (False)">_scratch\test_aw12_launch_handoff.py:27: in test_cancelled_prepare_releases_without_requiring_a_future_launch
+    assert confirmed and observed["competitor"]["acquired"], observed
+E   AssertionError: {'termination_confirmed': False, 'cancel_return_s': 4.299974534660578e-06, 'physical_liveness': 'dead', 'launch_open': True, ...}
+E   assert (False)</failure></testcase><testcase classname="_scratch.test_aw12_launch_handoff" name="test_cancel_cannot_close_job_during_launch_assignment" time="0.107"><failure message="AssertionError: {'launcher_pid': 10992, 'cancel_return_s': 0.03203639999264851, 'termination_confirmed_before_handoff': True, 'job_closed_before_launcher_resumed': True, ...}&#10;assert not [644]">_scratch\test_aw12_launch_handoff.py:96: in test_cancel_cannot_close_job_during_launch_assignment
+    assert not closed_early, observed
+E   AssertionError: {'launcher_pid': 10992, 'cancel_return_s': 0.03203639999264851, 'termination_confirmed_before_handoff': True, 'job_closed_before_launcher_resumed': True, ...}
+E   assert not [644]</failure></testcase></testsuite></testsuites>
