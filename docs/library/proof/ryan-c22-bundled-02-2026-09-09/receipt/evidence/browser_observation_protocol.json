@@ -1,0 +1,12 @@
+{
+  "dashboard_url": "http://127.0.0.1:18331/dashboard",
+  "required_observation": [
+    "UTC time",
+    "visible consent/revision",
+    "starts charged vs allowance",
+    "in-flight or uncertain item if any"
+  ],
+  "pair_with": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\evidence\\browser-checkpoint.snapshot.json",
+  "screenshot": null,
+  "screenshot_note": "Ryan records the actual browser image. This kit will not synthesize a screenshot or process-completion image. A browser protocol without an image is unexecuted in all modes."
+}

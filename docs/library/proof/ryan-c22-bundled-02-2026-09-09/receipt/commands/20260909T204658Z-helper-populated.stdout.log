@@ -1,0 +1,19 @@
+2026-09-09 13:46:58,992 INFO install migration: skipped_isolated_install
+2026-09-09 13:46:59,001 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 13:46:59,007 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 13:46:59,017 INFO clip upgrade backfill: 1 transcript citations -> 1 clips across 1/2 items in 0.000s
+2026-09-09 13:46:59,024 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 13:46:59,026 INFO seeded 5 default style anchors
+2026-09-09 13:46:59,026 INFO default style anchors: seeded 5 on first run
+2026-09-09 13:46:59,026 INFO Restored 0 job record(s) from the library index
+2026-09-09 13:46:59,048 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 13:46:59,119 INFO phase 2 author backfill: {'total': 2, 'scanned': 2, 'author_from_sidecar': 1, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 13:46:59,128 INFO tray: started (daemon thread)
+2026-09-09 13:46:59,143 INFO splash: spawned (version 3.8.0)
+2026-09-09 13:46:59,144 INFO Uoink server v3.8.0 running on http://127.0.0.1:18331
+2026-09-09 13:46:59,144 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 13:46:59,145 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\populated\output
+2026-09-09 13:46:59,145 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\populated\server.log
+2026-09-09 13:46:59,145 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-09 13:46:59,516 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 13:46:59,550 INFO GET /health from 127.0.0.1 -> ok

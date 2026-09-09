@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-interrupt-restart",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\profiles\\child-interrupt",
+    "--isolated-port",
+    "18331"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "started_utc": "2026-09-09T20:49:18Z",
+  "child": {
+    "pid": 40120,
+    "created_ms": 1788986958664,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "observed_ms": 1788986958665,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 40120,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204918Z-helper-child-interrupt-restart.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204918Z-helper-child-interrupt-restart.stderr.log",
+  "synthetic": true
+}

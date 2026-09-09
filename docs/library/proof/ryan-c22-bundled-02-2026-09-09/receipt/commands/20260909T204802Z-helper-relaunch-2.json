@@ -1,0 +1,27 @@
+{
+  "name": "helper-relaunch-2",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\profiles\\relaunch",
+    "--isolated-port",
+    "18331"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "started_utc": "2026-09-09T20:48:02Z",
+  "child": {
+    "pid": 75512,
+    "created_ms": 1788986882105,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "observed_ms": 1788986882106,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 75512,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204802Z-helper-relaunch-2.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204802Z-helper-relaunch-2.stderr.log",
+  "synthetic": true
+}

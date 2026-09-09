@@ -1,0 +1,417 @@
+{
+  "id": "installed_provenance",
+  "status": "pass",
+  "inventory": {
+    "installed_app": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "files": {
+      "server.py": {
+        "present": true,
+        "sha256": "60302255ee70c125d95ba02e7c90e6255f56d94e9f60c81b90b3189ff39fc646",
+        "bytes": 808822
+      },
+      "source_subscriptions.py": {
+        "present": true,
+        "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7",
+        "bytes": 250605
+      },
+      "index.py": {
+        "present": true,
+        "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395",
+        "bytes": 112774
+      },
+      "uoink_mcp.py": {
+        "present": true,
+        "sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+        "bytes": 53340
+      },
+      "uoink_install_isolation.py": {
+        "present": true,
+        "sha256": "1b9337040b2ea954b0e2fb8ff6db4554db3dd313ffc808f7362cbc50ebaeb9a3",
+        "bytes": 48563
+      },
+      "migrations/0028_source_subscriptions.sql": {
+        "present": true,
+        "sha256": "0aa6d273fd9c1b211eb39d573b7e4eb32766e9e9a12b38828264310d6f528dde",
+        "bytes": 9848
+      },
+      "migrations/0030_media_depth.sql": {
+        "present": true,
+        "sha256": "54ed1be45f0a2017c36af17ada563486f2238b8154992b77e7c09c418d108bd4",
+        "bytes": 4310
+      },
+      "VERSION": {
+        "present": true,
+        "sha256": "af88cc86a71fca3a89139c024a168b0919360213f5fe9e34472d68ccfb98e26c",
+        "bytes": 7
+      },
+      "isolated-install.json": {
+        "present": false,
+        "sha256": null,
+        "bytes": null
+      }
+    },
+    "note": "module __file__ provenance requires the running installed child"
+  },
+  "provenance": {
+    "name": "bundled-provenance",
+    "argv": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "-B",
+      "-s",
+      "-c",
+      "import pathlib, sys\nsys.path.insert(0, str(pathlib.Path(sys.argv[1]).resolve(strict=True)))\nimport hashlib, importlib, importlib.metadata, json, pathlib, sys, sysconfig\nrequired = ('server','source_subscriptions','index','uoink_mcp','source_manifest','podcasts','library_work')\nmodules = {}\nerrors = []\nfor name in required:\n    try:\n        mod = importlib.import_module(name)\n        path = pathlib.Path(getattr(mod, '__file__', '') or '')\n        resolved = str(path.resolve()) if path else None\n        digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None\n        modules[name] = {'ok': True, 'file': resolved, 'sha256': digest}\n    except Exception as exc:\n        errors.append({'module': name, 'type': type(exc).__name__, 'message': str(exc)})\n        modules[name] = {'ok': False, 'error': type(exc).__name__}\nmcp_version = None\ntry:\n    import mcp\n    mcp_version = importlib.metadata.version('mcp')\nexcept Exception as exc:\n    errors.append({'module': 'mcp', 'type': type(exc).__name__, 'message': str(exc)})\nusersite = ''\ntry:\n    usersite = sysconfig.get_path('purelib', scheme='nt_user') if sys.platform=='win32' else ''\nexcept Exception:\n    usersite = ''\nreport = {\n    'schema': 'c22-provenance-v1',\n    'executable': str(pathlib.Path(sys.executable).resolve()),\n    'version': sys.version.split()[0],\n    'nousersite': bool(sys.flags.no_user_site),\n    'prefix': sys.prefix,\n    'path': [str(p) for p in sys.path],\n    'usersite_scheme': usersite,\n    'usersite_on_path': bool(usersite and any(str(p).lower().startswith(str(usersite).lower()) for p in sys.path)),\n    'modules': modules,\n    'mcp_version': mcp_version,\n    'import_errors': errors,\n}\nprint(json.dumps(report))\nraise SystemExit(0 if not errors else 2)\n",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+    ],
+    "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "started_utc": "2026-09-09T20:46:50Z",
+    "child": {
+      "pid": 57624,
+      "created_ms": 1788986810444,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "observed_ms": 1788986810453,
+      "from_popen": true,
+      "poll": null
+    },
+    "pid": 57624,
+    "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204650Z-bundled-provenance.stdout.log",
+    "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\commands\\20260909T204650Z-bundled-provenance.stderr.log",
+    "synthetic": true,
+    "exit": 0,
+    "_stop_result": {
+      "identity": {
+        "pid": 57624,
+        "created_ms": 1788986810444,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788986810453,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": null,
+      "token_present": false,
+      "exit": 0,
+      "stopped": true,
+      "port_freed": true,
+      "guard_restore": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py",
+        "existed": true,
+        "conflict": false,
+        "before_sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+        "removed": true,
+        "restored": false,
+        "absent_after": true,
+        "original_was_absent": true
+      },
+      "pth_preserved": {
+        "sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf",
+        "matches_original": true
+      },
+      "guard_original_preserved": {
+        "previous_absent": true,
+        "previous_sha256": null,
+        "rewritten": false
+      },
+      "opened_live_index": false,
+      "hashed_live_index": false
+    },
+    "cleanup": {
+      "identity": {
+        "pid": 57624,
+        "created_ms": 1788986810444,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788986810453,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": null,
+      "token_present": false,
+      "exit": 0,
+      "stopped": true,
+      "port_freed": true,
+      "guard_restore": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py",
+        "existed": true,
+        "conflict": false,
+        "before_sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+        "removed": true,
+        "restored": false,
+        "absent_after": true,
+        "original_was_absent": true
+      },
+      "pth_preserved": {
+        "sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf",
+        "matches_original": true
+      },
+      "guard_original_preserved": {
+        "previous_absent": true,
+        "previous_sha256": null,
+        "rewritten": false
+      },
+      "opened_live_index": false,
+      "hashed_live_index": false
+    },
+    "structured": {
+      "schema": "c22-provenance-v1",
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "version": "3.11.9",
+      "nousersite": true,
+      "prefix": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python",
+      "path": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311.zip",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\win32",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\win32\\lib",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\pythonwin"
+      ],
+      "usersite_scheme": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\environment\\APPDATA\\Python\\Python311\\site-packages",
+      "usersite_on_path": false,
+      "modules": {
+        "server": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+          "sha256": "60302255ee70c125d95ba02e7c90e6255f56d94e9f60c81b90b3189ff39fc646"
+        },
+        "source_subscriptions": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\source_subscriptions.py",
+          "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7"
+        },
+        "index": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\index.py",
+          "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395"
+        },
+        "uoink_mcp": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+          "sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a"
+        },
+        "source_manifest": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\source_manifest.py",
+          "sha256": "0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4"
+        },
+        "podcasts": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\podcasts.py",
+          "sha256": "628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0"
+        },
+        "library_work": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\library_work.py",
+          "sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa"
+        }
+      },
+      "mcp_version": "1.27.1",
+      "import_errors": []
+    },
+    "source_bindings": {
+      "ok": true,
+      "files_checked": 142,
+      "problems": []
+    },
+    "structured_ok": true,
+    "exit_nonzero_on_import_error": true
+  },
+  "provenance_json": {
+    "schema": "c22-provenance-v1",
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "version": "3.11.9",
+    "nousersite": true,
+    "prefix": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python",
+    "path": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311.zip",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\win32",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\win32\\lib",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\pythonwin"
+    ],
+    "usersite_scheme": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\environment\\APPDATA\\Python\\Python311\\site-packages",
+    "usersite_on_path": false,
+    "modules": {
+      "server": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+        "sha256": "60302255ee70c125d95ba02e7c90e6255f56d94e9f60c81b90b3189ff39fc646"
+      },
+      "source_subscriptions": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\source_subscriptions.py",
+        "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7"
+      },
+      "index": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\index.py",
+        "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395"
+      },
+      "uoink_mcp": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+        "sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a"
+      },
+      "source_manifest": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\source_manifest.py",
+        "sha256": "0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4"
+      },
+      "podcasts": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\podcasts.py",
+        "sha256": "628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0"
+      },
+      "library_work": {
+        "ok": true,
+        "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\library_work.py",
+        "sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa"
+      }
+    },
+    "mcp_version": "1.27.1",
+    "import_errors": []
+  },
+  "location": {
+    "import_ok": true,
+    "inside_app": true,
+    "checkout_fallback": false,
+    "usersite_on_path": false,
+    "outside": [],
+    "checkout_hits": [],
+    "missing_modules": [],
+    "ok": true
+  },
+  "sealed_candidate": {
+    "installer_source_sha": "67a274d5d0c67f48405c4fa242a1011c2cf671c1",
+    "package_sha256": "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+    "package_bytes": 339059334,
+    "invented": false,
+    "schema": "candidate-package-02"
+  },
+  "installed_credit": false,
+  "source_runtime": false,
+  "provenance_stdout": "{\"schema\": \"c22-provenance-v1\", \"executable\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\python.exe\", \"version\": \"3.11.9\", \"nousersite\": true, \"prefix\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\", \"path\": [\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\python311.zip\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\Lib\\\\site-packages\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\Lib\\\\site-packages\\\\win32\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\Lib\\\\site-packages\\\\win32\\\\lib\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\python\\\\Lib\\\\site-packages\\\\pythonwin\"], \"usersite_scheme\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\c22-bundled-02\\\\environment\\\\APPDATA\\\\Python\\\\Python311\\\\site-packages\", \"usersite_on_path\": false, \"modules\": {\"server\": {\"ok\": true, \"file\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\server.py\", \"sha256\": \"60302255ee70c125d95ba02e7c90e6255f56d94e9f60c81b90b3189ff39fc646\"}, \"source_subscriptions\": {\"ok\": true, \"file\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\source_subscriptions.py\", \"sha256\": \"c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7\"}, \"index\": {\"ok\": true, \"file\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\index.py\", \"sha256\": \"f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395\"}, \"uoink_mcp\": {\"ok\": true, \"file\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\installer\\\\staging\\\\uoink_mcp.py\", \"sha256\": \"2939906aa1b2b81109440a2146467",
+  "child_report": {
+    "health": {
+      "ok": true,
+      "version": "3.8.0",
+      "migration_version": 30,
+      "migration_pending": false,
+      "last_successful_tick_at": "2026-09-09T20:46:52Z",
+      "heartbeat": {
+        "last_tick_completed_at": "2026-09-09T20:46:52Z",
+        "last_successful_tick_at": "2026-09-09T20:46:52Z",
+        "last_successful_poll_at": null,
+        "last_failed_poll_at": null,
+        "last_poll_error": null,
+        "last_ingest_completed_at": null,
+        "last_tick": {
+          "ok": true,
+          "polls": 0,
+          "failed_polls": 0
+        },
+        "counts": {
+          "ticks": 1,
+          "polls_ok": 0,
+          "polls_failed": 0,
+          "ingests": 0
+        },
+        "tick_interval_sec": 30,
+        "freshness": {
+          "state": "fresh",
+          "age_sec": 1.0,
+          "stale_after_sec": 300
+        }
+      },
+      "whisperx_available": true,
+      "whisper_model": "base",
+      "whisperx_model_loaded": true,
+      "index_recovering": false,
+      "output_root_fallback": false,
+      "path_integrity": {
+        "ok": true,
+        "checked": 0,
+        "missing": 0
+      },
+      "library": {
+        "status": "idle",
+        "waiting_for_client": false,
+        "ready": 0,
+        "leased": 0,
+        "run_revision": null,
+        "recovery_state": "ready",
+        "error_code": null,
+        "apply_enabled": false,
+        "contract_version": "phase2-v1-2026-09-04"
+      },
+      "_http_status": 200
+    },
+    "identity": {
+      "pid": 63264,
+      "created_ms": 1788986811934,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "observed_ms": 1788986811937,
+      "from_popen": true,
+      "poll": null
+    },
+    "helper_stop": {
+      "identity": {
+        "pid": 63264,
+        "created_ms": 1788986811934,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788986811937,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": {
+        "status": 200,
+        "body": "{\"ok\": true, \"stopping\": true}"
+      },
+      "token_present": true,
+      "exit": 0,
+      "stopped": true,
+      "port_freed": true,
+      "guard_restore": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py",
+        "existed": true,
+        "conflict": false,
+        "before_sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+        "removed": true,
+        "restored": false,
+        "absent_after": true,
+        "original_was_absent": true
+      },
+      "pth_preserved": {
+        "sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf",
+        "matches_original": true
+      },
+      "guard_original_preserved": {
+        "previous_absent": true,
+        "previous_sha256": null,
+        "rewritten": false
+      },
+      "opened_live_index": false,
+      "hashed_live_index": false,
+      "live_index_forbidden": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+        "opened": false,
+        "hashed": false,
+        "exists_probed": false,
+        "mtime_ns": null,
+        "sha256": null,
+        "bytes": null,
+        "note": "forbidden live index path recorded as a string only"
+      }
+    }
+  },
+  "schema": {
+    "expected": 30,
+    "actual": 30,
+    "ok": true
+  },
+  "health_migration_version": 30,
+  "reason": null
+}

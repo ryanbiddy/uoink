@@ -1,0 +1,46 @@
+2026-09-09 13:47:03,675 INFO install migration: skipped_isolated_install
+2026-09-09 13:47:03,686 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 13:47:03,691 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 13:47:03,693 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 13:47:03,694 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 13:47:03,696 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 13:47:03,698 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 13:47:03,700 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 13:47:03,702 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 13:47:03,704 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 13:47:03,706 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 13:47:03,707 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 13:47:03,709 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 13:47:03,712 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 13:47:03,714 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 13:47:03,716 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 13:47:03,718 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 13:47:03,719 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 13:47:03,722 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 13:47:03,723 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 13:47:03,725 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 13:47:03,727 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 13:47:03,730 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 13:47:03,732 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 13:47:03,734 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 13:47:03,736 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 13:47:03,738 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 13:47:03,740 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 13:47:03,742 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 13:47:03,745 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 13:47:03,756 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 13:47:03,757 INFO seeded 5 default style anchors
+2026-09-09 13:47:03,757 INFO default style anchors: seeded 5 on first run
+2026-09-09 13:47:03,757 INFO Restored 0 job record(s) from the library index
+2026-09-09 13:47:03,759 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 13:47:03,759 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 13:47:03,859 INFO tray: started (daemon thread)
+2026-09-09 13:47:03,874 INFO splash: spawned (version 3.8.0)
+2026-09-09 13:47:03,874 INFO Uoink server v3.8.0 running on http://127.0.0.1:18331
+2026-09-09 13:47:03,874 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 13:47:03,874 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\one-off\output
+2026-09-09 13:47:03,874 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\one-off\server.log
+2026-09-09 13:47:03,874 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-09 13:47:04,199 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 13:47:04,234 INFO POST /extract -> 400 (URL must be a YouTube, X, TikTok, or Instagram Reel video link)
+2026-09-09 13:47:04,407 INFO desktop notification queued: notifications disabled

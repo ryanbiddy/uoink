@@ -80,11 +80,11 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 57 passes in both roots; first bundled scope nine passed / two failed / three unexecuted | Startup repair verified in both roots; new package and final observations before Ryan's installed receipt |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 59 passes in both roots; new bundled C22 11 passed / zero failed / three unexecuted | Package-03 and original bundled checks complete; final tree and Ryan's installed receipt |
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `67a274d`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits/startup repair integrated; package-03 built/sealed; final observations owed | Both setup proposals pending; final bundled/full-tree observations and portable bundle |
+| Integration | Installer built/sealed at `67a274d`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits/startup repair integrated; package-03 and bundled checks sealed; final tree owed | Both setup proposals pending; final full-tree observation and portable bundle |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -121,25 +121,21 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
-New priority before the numbered completion queue: original bundled C22 at
-6632f33 has nine passed / two failed / three unexecuted. Follow
-RYAN-C22-BUNDLED-PROVENANCE-REPAIR-BRIEF-2026-09-09.md for the receipt probe and
-guard compatibility/accounting. Independently follow
-RYAN-STARTUP-BACKFILL-TRANSACTION-REPAIR-BRIEF-2026-09-09.md for the newly observed
-production backfill/source-watch connection race. Review and integrate both;
-changed packaged product requires a new build/seal before final bundled/whole-tree
-verification. Keep the old package and failed 105-file observation intact.
+Completed priority repair: startup f9e2c921 and receipt compatibility integrated
+at 67a274d; package-03 built from that source and sealed at b28431b. Original
+bundled C22 now 11 passed / zero failed / three unexecuted, with no unexpected
+startup error. P4 four stages exit zero. Both observations bind the new package.
+The prior failed data and package-02 remain intact. No active worker remains.
 
 1. Startup f9e2c921 and both receipt-tool corrections are independently verified and integrated. No worker remains active. Both completed receipt workers and supplements are integrated. C22: 92 passed / two
    frozen failures in worker and checkout; review and raw diff are in
    `RYAN-C22-FINAL-INTEGRATION-REVIEW-2026-09-09.md`. P4: 68 passed / one frozen
    path failure in both roots; bundled operator has 15 passed / zero failed /
    eight unobserved. No worker remains active and no installed credit is inferred.
-2. Run C22's reviewed kit against original bundled Python/product with fresh
-   disposable fixtures under `RYAN-FINAL-KIT-TREE-VERIFICATION-BRIEF-2026-09-09.md`.
-   Preserve pre-Inno/synthetic labels, complete commands, before/after bindings,
-   cleanup and the browser helper hold without an invented image. Do not execute
-   Setup, a client or a model. Restore only this observation's owned instrumentation.
+2. Original package-03 C22 and P4 checks are complete at b28431b. C22: 11
+   passed / zero failed / three unexecuted. P4: four stages exit zero; client
+   and visual observations remain absent. Seals: ryan-c22-bundled-02 and
+   ryan-p4-bundled-03. No Setup, client or model ran. Proceed to the final tree.
 3. Run the final kit-inclusive complete tree at a committed SHA under that same
    brief: guarded native runtime, only S21 excluded, every frozen failure retained.
    Seal exact case membership/counts/log/XML and compare with 8fc6a40. Investigate
@@ -149,12 +145,11 @@ verification. Keep the old package and failed 105-file observation intact.
    assertion audit and review, verify the ordered read pair and affected mirror
    union, then include them in the committed complete tree. Waiting is not approval.
    The separate original AT6 exit remains unavailable; do not invent it.
-5. Package build source is 8a607c3, executable SHA-256
-   d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1.
-   Rebuild/reseal only if packaged source changes; otherwise verify all 142 source
-   bindings against the final validation commit. The complete runbook now replaces
-   the blocked preflight. Assemble the portable bundle with exact package bytes,
-   both tools, migrations, full notes, final proof and per-file/ZIP hashes.
+5. Package build source is 67a274d5d0c67f48405c4fa242a1011c2cf671c1;
+   executable SHA-256 a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe.
+   Verify its 142 source bindings against final validation; rebuild only if
+   packaged source changes. Assemble the portable bundle with both tools,
+   migrations, notes, final proof and per-file/ZIP hashes. The runbook is complete.
 6. Update release notes, State table and remaining Ryan items. Fast-forward the
    authorized backup branch and push only origin/cc/living-library, without force;
    verify the remote SHA. Report actual counts, build/validation/backup commits,
@@ -2073,3 +2068,23 @@ now points to package-03. Runbook and both observation drivers bind the new hash
 No Setup, client/model or installed receipt ran. Final bundled/full-tree checks follow.
 
 Active package binding pk3-c1: 59 passed / one deselected, 3.17 s. The original long source case remains required in the final tree. Three raw files sealed under proof/ryan-package03-binding-2026-09-09.
+
+### 2026-09-09 — new original bundled observations close startup defects
+
+At b28431b with package-03 a89112bb, C22 records 11 passed / zero failed /
+three unexecuted. Every protected comparison passes; unexpected runtime errors
+are empty. Nineteen recorded command identities are dead. Browser hold/stop
+snapshots are retained without inventing an image. Guard is removed, _pth exact,
+only the observation-created marker removed after cleanup; all 142 bindings
+and executable bytes unchanged. The 45 refused capability probes (42 urllib3,
+three Windows version) remain counted within 317 network and 142 process
+audit events. No generic forbidden attempt is present; do not claim zero attempts.
+
+P4 on the same source/package completes prepare, check, prepare-client and
+collect with exit zero; 15 passed / zero failed / eight unobserved. Full native
+prompt/packet sessions and synthetic mirror deletion accounting are retained.
+All command jobs cleaned and all package/guard checks pass. Both measurements
+are original staged runtime, pre-Inno, with no real client/model/visual credit.
+Final complete tree and portable bundle remain. Frozen test proposals are unapplied.
+
+The first P4 archive staging check stopped because the global mirror ignore omitted a sealed manifest.json. Force-added only this vetted proof directory; all 66 working/staged hashes then verify. No observation was rerun and the complete tree had not yet started. Future archive staging must verify every manifest member, including ignored mirror metadata.

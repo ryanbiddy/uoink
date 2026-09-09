@@ -1,0 +1,106 @@
+{
+  "schema": "c22-verdict-input-v1",
+  "utc": "2026-09-09T20:50:00.821941+00:00",
+  "receipt_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt",
+  "synthetic_instrument": true,
+  "installed_pass_claimed": false,
+  "installed_pass_note": "No claimed installed pass until Ryan actually runs the sealed kit on the throwaway profile against the isolated installed helper.",
+  "scenarios": [
+    {
+      "id": "install",
+      "status": "unexecuted",
+      "error": null,
+      "reason": "Inno is Ryan's throwaway-operator step"
+    },
+    {
+      "id": "installed_provenance",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "empty_migration_replay",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "populated_legacy_replay",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "one_off_capture",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "manual_first",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "standing_first",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "whole_helper_relaunch",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "registered_child_lifetime",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "launch_interruption",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "registration_failure",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "browser_state_checkpoint",
+      "status": "unexecuted",
+      "error": null,
+      "reason": "browser protocol without an image is unexecuted in all modes"
+    },
+    {
+      "id": "protected_phase2_state",
+      "status": "pass",
+      "error": null,
+      "reason": null
+    },
+    {
+      "id": "upgrade_operator_step",
+      "status": "unexecuted",
+      "error": null,
+      "reason": "real installed upgrade/reinstall is Ryan's operator step"
+    }
+  ],
+  "counts": {
+    "pass": 11,
+    "fail": 0,
+    "unexecuted": 3,
+    "executed": 11
+  },
+  "astra_owns": [
+    "independent verification",
+    "final runbook/package seal",
+    "isolation mechanism integration",
+    "Phase 4 client/everyday receipt tooling"
+  ]
+}

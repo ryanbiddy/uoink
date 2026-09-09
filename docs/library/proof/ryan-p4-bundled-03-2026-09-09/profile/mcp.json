@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "uoink": {
+      "type": "stdio",
+      "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "args": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "--isolated-port",
+        "18232",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\records\\stdio",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "--isolated-port",
+        "18232"
+      ],
+      "env": {
+        "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\user\\local",
+        "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\user\\roaming",
+        "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\tmp",
+        "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\tmp",
+        "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\output",
+        "UOINK_INDEX_PATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\index.db",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile\\guard;E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "P4_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "P4_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "P4_ISOLATED_PORT": "18232",
+        "P4_INSTALLED_APP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+        "P4_FORBIDDEN_INDEX": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\user\\local\\Uoink\\index.db",
+        "MCP_TIMEOUT": "10000",
+        "ENABLE_TOOL_SEARCH": "false",
+        "DISABLE_AUTOUPDATER": "1",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+        "UOINK_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4-bundled-03\\profile",
+        "UOINK_ISOLATED_PORT": "18232"
+      }
+    }
+  }
+}

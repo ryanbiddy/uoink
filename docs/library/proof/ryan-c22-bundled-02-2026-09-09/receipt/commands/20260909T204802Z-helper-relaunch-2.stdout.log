@@ -1,0 +1,12 @@
+2026-09-09 13:48:02,887 INFO install migration: skipped_isolated_install
+2026-09-09 13:48:02,896 INFO Restored 0 job record(s) from the library index
+2026-09-09 13:48:02,898 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 13:48:02,998 INFO tray: started (daemon thread)
+2026-09-09 13:48:03,008 INFO splash: spawned (version 3.8.0)
+2026-09-09 13:48:03,008 INFO Uoink server v3.8.0 running on http://127.0.0.1:18331
+2026-09-09 13:48:03,008 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 13:48:03,008 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\relaunch\output
+2026-09-09 13:48:03,008 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-02\receipt\profiles\relaunch\server.log
+2026-09-09 13:48:03,008 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-09 13:48:03,430 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 13:48:03,461 INFO GET /health from 127.0.0.1 -> ok

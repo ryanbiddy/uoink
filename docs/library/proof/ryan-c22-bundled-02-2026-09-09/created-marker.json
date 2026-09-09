@@ -1,0 +1,10 @@
+{
+  "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\isolated-install.json",
+  "sha256": "7ccde079b4ea4c5cd8e6a1f1c8b1ff4fe758b8b6d3ac10ffb06fd269f65c9a6e",
+  "contents": {
+    "mode": "isolated",
+    "profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-02\\receipt\\profiles\\empty",
+    "port": 18331,
+    "app_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+  }
+}
