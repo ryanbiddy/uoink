@@ -578,7 +578,8 @@ def _get_connection() -> Tuple[Optional[sqlite3.Connection], Any, Optional[dict]
             if not os.path.exists(override):
                 return None, None, error_envelope("storage_unavailable", f"Database file does not exist: {override}"), False
             try:
-                c = sqlite3.connect(f"file:{os.path.abspath(override)}?mode=ro", uri=True)
+                c = sqlite3.connect(
+                    f"file:{os.path.abspath(override)}?mode=ro", uri=True, timeout=0)
                 return c, None, None, True
             except Exception as e:
                 return None, None, error_envelope("storage_unavailable", f"Failed to open database: {e}"), False
@@ -604,7 +605,8 @@ def _get_connection() -> Tuple[Optional[sqlite3.Connection], Any, Optional[dict]
             if not os.path.exists(idx_path):
                 return None, None, error_envelope("storage_unavailable", f"Index file not found: {idx_path}"), False
             try:
-                c = sqlite3.connect(f"file:{os.path.abspath(idx_path)}?mode=ro", uri=True)
+                c = sqlite3.connect(
+                    f"file:{os.path.abspath(idx_path)}?mode=ro", uri=True, timeout=0)
                 return c, None, None, True
             except Exception as e:
                 return None, None, error_envelope("storage_unavailable", f"Cannot open index: {e}"), False
@@ -716,6 +718,40 @@ class _ReadBoundary:
             cm.__exit__(None, None, None)
         except sqlite3.Error:
             pass
+
+
+def _sqlite_busy_error(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    return isinstance(exc, sqlite3.OperationalError) and (
+        "locked" in text or "busy" in text)
+
+
+def _remaining_activity_budget(deadline: float) -> float:
+    return deadline - time.monotonic()
+
+
+def _call_until_activity_deadline(deadline: float, fn):
+    """Run ``fn`` without waiting past ``deadline`` on SQLITE_BUSY.
+
+    ``PRAGMA busy_timeout`` is 0 for the snapshot, so a holder of BEGIN
+    EXCLUSIVE fails immediately; this retries until the original inbound
+    deadline instead of starting a fresh 2 s wait.
+    """
+    while True:
+        rem = _remaining_activity_budget(deadline)
+        if rem <= 0:
+            return None, error_envelope(
+                "deadline_exceeded", "Service deadline exceeded before SQLite snapshot")
+        try:
+            return fn(), None
+        except sqlite3.OperationalError as exc:
+            if not _sqlite_busy_error(exc):
+                raise
+            rem = _remaining_activity_budget(deadline)
+            if rem <= 0:
+                return None, error_envelope(
+                    "deadline_exceeded", f"Database busy wait exceeded deadline: {exc}")
+            time.sleep(min(0.02, rem))
 
 
 # ---------------------------------------------------------------------------
@@ -1050,6 +1086,17 @@ def adapter_admission():
                 pass
 
 
+def _activity_start_time() -> float:
+    """Inbound admission stamp when a transport scope already holds the slot.
+
+    Direct/HTTP callers have no transport scope, so the clock starts here.
+    """
+    scope = library_resources.current_transport_scope()
+    if scope is not None and scope.admitted_at is not None:
+        return float(scope.admitted_at)
+    return time.monotonic()
+
+
 def get_library_activity(
     args: dict,
     *,
@@ -1070,7 +1117,7 @@ def get_library_activity(
         except Exception as e:
             return error_envelope("rate_limited", str(e), retryable=True)
 
-    start_time = time.monotonic()
+    start_time = _activity_start_time()
     try:
         return _execute_activity(args, db=db, clock=clock, start_time=start_time)
     finally:
@@ -1194,6 +1241,11 @@ def _execute_activity(
         else:
             limit = 20
 
+    deadline = start_time + SERVICE_DEADLINE_SEC
+    rem = _remaining_activity_budget(deadline)
+    if rem <= 0:
+        return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition")
+
     # Connect to DB
     if db is not None:
         old_override = _analysis_db_override
@@ -1214,15 +1266,14 @@ def _execute_activity(
     except sqlite3.Error as exc:
         return error_envelope("storage_unavailable", f"Database error: {exc}")
 
-    deadline = start_time + SERVICE_DEADLINE_SEC
-    rem = deadline - time.monotonic()
+    rem = _remaining_activity_budget(deadline)
     if rem <= 0:
         return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition")
 
     lock_acquired = False
     if lock is not None:
         if hasattr(lock, "acquire"):
-            lock_acquired = lock.acquire(timeout=rem)
+            lock_acquired = lock.acquire(timeout=max(0.0, rem))
             if not lock_acquired:
                 return error_envelope("deadline_exceeded", "Service deadline exceeded while acquiring lock")
         else:
@@ -1239,15 +1290,17 @@ def _execute_activity(
         except sqlite3.Error as exc:
             return error_envelope("storage_unavailable", f"Database error: {exc}")
 
-        rem = deadline - time.monotonic()
+        rem = _remaining_activity_budget(deadline)
         if rem <= 0:
             return error_envelope("deadline_exceeded", "Service deadline exceeded before SQLite snapshot")
-        busy_ms = max(1, min(int(rem * 1000), int(rem * 100))) if (sys.platform == "win32" and rem < 0.2) else max(1, int(rem * 1000))
         try:
             busy_row = conn.execute("PRAGMA busy_timeout").fetchone()
             if busy_row is not None:
                 prev_busy_timeout = busy_row[0]
-            conn.execute(f"PRAGMA busy_timeout = {busy_ms}")
+            # Fail-fast on SQLITE_BUSY: Windows overshoots a multi-second
+            # busy_timeout, so snapshot/query waits retry until the original
+            # inbound deadline instead of waiting a fresh 2 s.
+            conn.execute("PRAGMA busy_timeout = 0")
             def _progress():
                 if time.monotonic() >= deadline:
                     return 1
@@ -1260,9 +1313,11 @@ def _execute_activity(
         # boundary (or its local equivalent for a bare connection), opened
         # under the Index lock acquired above.
         try:
-            conn = boundary.enter()
+            conn, snap_err = _call_until_activity_deadline(deadline, boundary.enter)
+            if snap_err is not None:
+                return snap_err
         except sqlite3.OperationalError as exc:
-            if "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
+            if _sqlite_busy_error(exc) or time.monotonic() >= deadline:
                 return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}")
             return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}")
         except sqlite3.Error as exc:
@@ -1270,7 +1325,15 @@ def _execute_activity(
         except RuntimeError as exc:
             return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}")
 
-        tbl_err = _verify_tables(conn)
+        try:
+            tbl_err, verify_err = _call_until_activity_deadline(
+                deadline, lambda: _verify_tables(conn))
+            if verify_err is not None:
+                return verify_err
+        except sqlite3.OperationalError as exc:
+            if _sqlite_busy_error(exc) or time.monotonic() >= deadline:
+                return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}")
+            raise
         if tbl_err is not None:
             return tbl_err
 

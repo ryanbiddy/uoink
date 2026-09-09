@@ -926,6 +926,84 @@ def _stdio_budget_refusal_message(scope, request_id, code: str):
     return _stdio_domain_rpc_error_message(request_id, exc)
 
 
+_STDIO_PROTOCOL_REJECTION_CODE = -32600
+_STDIO_PROTOCOL_REJECTION_MESSAGE = "Inbound request exceeds protocol limits"
+
+
+def _stdio_completed_frame_cap() -> int:
+    import library_resources
+    return int(library_resources.LIMITS["max_response_bytes"])
+
+
+def _stdio_protocol_rejection_frame(request_id=None) -> str:
+    """Fixed bounded JSON-RPC rejection. ``id`` is null when the inbound
+    envelope cannot be accepted. The installed SDK type rejects ``id=None``."""
+    return json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "error": {
+                "code": _STDIO_PROTOCOL_REJECTION_CODE,
+                "message": _STDIO_PROTOCOL_REJECTION_MESSAGE,
+            },
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+
+def _stdio_line_utf8_len(line) -> int:
+    if isinstance(line, bytes):
+        return len(line.rstrip(b"\r\n"))
+    text = line if isinstance(line, str) else str(line)
+    return len(text.rstrip("\r\n").encode("utf-8"))
+
+
+def _stdio_request_id_fits(request_id, cap: int) -> bool:
+    if request_id is None:
+        return True
+    try:
+        frame = _stdio_protocol_rejection_frame(request_id)
+    except (TypeError, ValueError, OverflowError):
+        return False
+    return len(frame.encode("utf-8")) <= cap
+
+
+def _stdio_inbound_line_rejection(line) -> str | None:
+    if _stdio_line_utf8_len(line) > _stdio_completed_frame_cap():
+        return _stdio_protocol_rejection_frame(None)
+    return None
+
+
+def _stdio_request_id_rejection(message) -> str | None:
+    root = message.root
+    if isinstance(root, mcp_types.JSONRPCNotification):
+        return None
+    request_id = getattr(root, "id", None)
+    if _stdio_request_id_fits(request_id, _stdio_completed_frame_cap()):
+        return None
+    return _stdio_protocol_rejection_frame(None)
+
+
+def _stdio_enforce_completed_frame(text: str, request_id, scope) -> str:
+    """Bound success, typed errors, and replacement refusals to the wire cap."""
+    import library_resources
+    cap = _stdio_completed_frame_cap()
+    if len(text.encode("utf-8")) <= cap:
+        return text
+    if request_id is not None and _stdio_request_id_fits(request_id, cap):
+        if scope is not None:
+            repl = _stdio_budget_refusal_message(
+                scope, request_id, "resource_too_large"
+            ).model_dump_json(by_alias=True, exclude_none=True)
+        else:
+            repl = _stdio_protocol_rejection_frame(request_id)
+        if len(repl.encode("utf-8")) <= cap:
+            return repl
+    return _stdio_protocol_rejection_frame(None)
+
+
 def _begin_inbound_transport_scope(message) -> None:
     import library_resources
     root = message.root
@@ -973,6 +1051,7 @@ async def _deliver_bounded_outbound(session_message, stdout) -> None:
                 text = _stdio_budget_refusal_message(
                     scope, request_id, "resource_too_large"
                 ).model_dump_json(by_alias=True, exclude_none=True)
+        text = _stdio_enforce_completed_frame(text, request_id, scope)
         await stdout.write(text + "\n")
         await stdout.flush()
     finally:
@@ -1006,10 +1085,18 @@ def _bounded_stdio_server(stdin=None, stdout=None):
             try:
                 async with read_stream_writer:
                     async for line in stdin:
+                        inbound_refusal = _stdio_inbound_line_rejection(line)
+                        if inbound_refusal is not None:
+                            await write_stream.send(inbound_refusal)
+                            continue
                         try:
                             message = mcp_types.JSONRPCMessage.model_validate_json(line)
                         except Exception as exc:
                             await read_stream_writer.send(exc)
+                            continue
+                        inbound_refusal = _stdio_request_id_rejection(message)
+                        if inbound_refusal is not None:
+                            await write_stream.send(inbound_refusal)
                             continue
                         _begin_inbound_transport_scope(message)
                         await read_stream_writer.send(SessionMessage(message))
@@ -1020,6 +1107,11 @@ def _bounded_stdio_server(stdin=None, stdout=None):
             try:
                 async with write_stream_reader:
                     async for session_message in write_stream_reader:
+                        if isinstance(session_message, str):
+                            frame = session_message if session_message.endswith("\n") else session_message + "\n"
+                            await stdout.write(frame)
+                            await stdout.flush()
+                            continue
                         await _deliver_bounded_outbound(session_message, stdout)
             except anyio.ClosedResourceError:  # pragma: no cover
                 await anyio.lowlevel.checkpoint()
