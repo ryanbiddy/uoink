@@ -59,9 +59,9 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m3 (`270e569`) integrated as intermediate work: 209 passed / eight unchanged parent-interceptor failures in both roots. AW-4 adds four failed ownership/staging cases plus lifecycle findings | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a (gemini binding/temp/staging) and AV-5m4b (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | AV-5m3 (`270e569`) integrated as intermediate work: 209 passed / eight unchanged parent-interceptor failures in both roots. AW-4 adds four failed ownership/staging cases plus lifecycle findings | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a2 (grok binding/temp/staging retry) and AV-5m4b (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g (gemini), then BA-4 (codex) |
-| 6 | BC-3a3 (`00fe216`) integrated: frozen BD 11/14, five new implementation tests pass. BD-2 reproduces stale-input replacement in capture and podcast owners | `PHASE6-BD2-2026-09-08.md`: two new failures, one passing ledger-history control; prior 11 omitted-ticket failures retained. BD-27 observed | BC-3d (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
+| 6 | BC-3d (`897f0d2`) integrated: both roots 158 passed / 11 omitted-ticket failures; all three BD-2 cases pass. New BD-3 provenance case fails | Consumed capture binding omits provenance and other plan inputs. Phase 6 remains unaccepted; BD-27 observed | BC-3e (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -93,13 +93,14 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    `PHASE5-AZ5G-BRIEF-2026-09-08.md` and the original AZ-5 brief.
    BA-4 (codex review) follows on the integrated candidate.
 3. AV-5m3 is integrated at `270e569`; AV-5m2 remains rejected. Dispatch/verify
-   AV-5m4a (gemini) and AV-5m4b (grok) from their separate `PHASE4-AV5M4A-BRIEF-2026-09-08.md`
-   and `PHASE4-AV5M4B-BRIEF-2026-09-08.md` scopes. Finish AW-4 (codex), then the real-client rerun (AW-3
+   AV-5m4a2 (grok) from `PHASE4-AV5M4A2-BRIEF-2026-09-08.md`; AV-5m4a
+   timed out and its partial diff is rejected. AV-5m4b (grok) remains active
+   under `PHASE4-AV5M4B-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
-   Run BC-3d (grok) from `PHASE6-BC3D-BRIEF-2026-09-08.md` for the reproduced
-   owning-input defects; verify/integrate and finish BD-2 (codex). Preserve both
+   BC-3d integrated at `897f0d2`; dispatch BC-3e (grok) from
+   `PHASE6-BC3E-BRIEF-2026-09-08.md`, then verify/integrate and finish BD-2 (codex). Preserve both
    rejected diffs and the quota failure.
    BD-27 normal-Comet observation is recorded as satisfied;
    the speaker gate remains Ryan's.
@@ -381,3 +382,22 @@ AV-5m4a Gemini `eb32f3b4` timed out without its required report. Its
 partial diff is under independent verification; it is not accepted. The
 draft still directly writes a new binding, swallows witness failures and
 fallbacks from identity-checked unlink on TypeError. AV-5m4b remains active.
+
+### 2026-09-08 18:20 PDT — BC-3d integrated; two bounded repair continuations
+
+BC-3d integrated at `897f0d2` after clean three-way apply and independent
+**158 passed, 11 failed** in each root (79.87 s worker, 72.70 s checkout).
+Logs/commands/XML: worker `_scratch/bc3d-wi`, checkout `_scratch/bc3d-ci`.
+All three BD-2 cases pass. New frozen BD-3 has **one failure**, 9.16 s in
+the worker: changing only transcript provenance lets stale capture A overwrite
+completed B. `PHASE6-BC3E-BRIEF-2026-09-08.md` requires every consumed
+plan input bound and rechecked at publication. No Phase 6 acceptance claim.
+
+AV-5m4a independently produced **213 passed, eight failed**, 76.63 s
+(worker `_scratch/av5m4a-wi`). Its four AW-4 cases pass, but direct initial
+binding writes, swallowed witness failure, unchecked unlink retry and parent
+mutation fallback violate the brief. The complete partial diff is retained
+in `patches/av5m4a-gemini-timeout-rejected-2026-09-08.patch`. No portion
+is integrated. AV-5m4a2 has a bounded Grok repair brief; AV-5m4b retains
+its separate lifetime/exclusion scope. AZ-5g Gemini was dispatched from
+`14f9e1b`; source-only client preparation is still unexecuted.
