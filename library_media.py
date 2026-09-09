@@ -2818,7 +2818,24 @@ def _admitted_export(request: dict, *, clock, bind) -> dict:
     """One admission on the shared Phase 4 process guard (no second pool):
     the deadline runs from the admission timestamp through storage binding
     (``bind() -> (connection, lock | None)``), the bounded lock wait, the
-    coherent read and the wire checks."""
+    coherent read and the wire checks. A stdio transport scope already
+    holding this request's slot is nested: no second admission."""
+    scope = _resources.current_transport_scope()
+    if scope is not None:
+        if scope.refusal is not None:
+            return _refuse(scope.refusal.code, details=scope.refusal.details,
+                           message=scope.refusal.message)
+        deadline = float(scope.deadline_at)
+        try:
+            conn, index_lock = bind()
+            with _BoundedIndexLock(index_lock, clock, deadline):
+                return _export(conn, request, clock=clock, deadline=deadline)
+        except MediaError as exc:
+            return exc.envelope()
+        except _resources.ResourceError as exc:
+            return _refuse(exc.code, details=exc.details, message=exc.message)
+        except sqlite3.Error:
+            return _refuse("library_unavailable", details={"reason": "storage_error"})
     guard = _resources._PROCESS_GUARD or _resources.process_guard()
     try:
         admitted = guard.admit()

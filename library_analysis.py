@@ -127,8 +127,10 @@ def reset_rate_limiter() -> None:
     with _rate_limiter._lock:
         _rate_limiter._calls.clear()
     _stdio_holds_admission.depth = 0
+    library_resources.reset_transport_scopes()
     guard = getattr(library_resources, "_PROCESS_GUARD", None)
     if guard is not None:
+        guard.clock = time.monotonic
         with guard._lock:
             guard._admissions.clear()
             guard._active = 0
@@ -1024,12 +1026,13 @@ def adapter_admission():
     """Hold the shared process guard through adapter serialization (BA-11).
 
     Nested entry increments the per-thread depth so an inner scope cannot
-    release or clear an outer active admission.
+    release or clear an outer active admission. A stdio transport scope for
+    this request already holds the slot; this context then only nests.
     """
     guard = library_resources.process_guard()
     depth = _adapter_admission_depth()
     _stdio_holds_admission.depth = depth + 1
-    owns = depth == 0
+    owns = depth == 0 and library_resources.current_transport_scope() is None
     try:
         if owns:
             guard.admit()
@@ -1055,7 +1058,10 @@ def get_library_activity(
 ) -> dict:
     """Entry point for get_library_activity read tool."""
     guard = library_resources.process_guard()
-    owns_admission = _adapter_admission_depth() == 0
+    owns_admission = (
+        _adapter_admission_depth() == 0
+        and library_resources.current_transport_scope() is None
+    )
     if owns_admission:
         try:
             guard.admit()

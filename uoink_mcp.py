@@ -17,7 +17,9 @@ completed their deprecation window in Uoink v2.5 and are not registered in
 v3. Run E (2026-09-04) added the two Phase 1 clip tools, `search_clips` and
 `get_evidence_card`, to stdio. See docs/v2-mcp.md.
 Phase 5 run AZ (2026-09-08) added `get_library_activity` (contract phase5-v1),
-making 29 stdio tools.
+making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
+requests keep one admission through the real SDK JSON-RPC dump, then
+release.
 """
 
 from __future__ import annotations
@@ -42,6 +44,8 @@ if _APP_DIR not in sys.path:
 
 
 try:
+    import anyio
+    import anyio.lowlevel
     from mcp.server.fastmcp import FastMCP
     from mcp import types as mcp_types
 except ImportError:
@@ -686,10 +690,34 @@ def _register_phase4_stdio() -> None:
             raise mcp_error(exc) from None
         return rendered
 
+    def _bind_transport_handle_request() -> None:
+        _orig_handle_request = low._handle_request
+
+        async def _handle_request_with_transport_scope(
+            message, req, session, lifespan_context, raise_exceptions=False,
+        ):
+            token = library_resources.bind_transport_scope(getattr(message, "request_id", None))
+            try:
+                scope = library_resources.current_transport_scope()
+                if scope is not None and scope.refusal is not None:
+                    response = _stdio_refusal_server_result(req, scope.refusal)
+                    try:
+                        await message.respond(response)
+                    except (anyio.BrokenResourceError, anyio.ClosedResourceError):
+                        pass
+                    return
+                return await _orig_handle_request(
+                    message, req, session, lifespan_context, raise_exceptions)
+            finally:
+                library_resources.reset_bound_transport_scope(token)
+
+        low._handle_request = _handle_request_with_transport_scope
+
     handlers = getattr(low, "request_handlers", None)
     if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
         print("Uoink MCP: tool interception unavailable; Phase 4 tools use FastMCP's "
               "default result shape.", file=sys.stderr)
+        _bind_transport_handle_request()
         return
     fastmcp_call_tool = handlers.get(mcp_types.CallToolRequest)
     fastmcp_list_tools = handlers.get(mcp_types.ListToolsRequest)
@@ -717,6 +745,9 @@ def _register_phase4_stdio() -> None:
         args = arguments if arguments is not None else {}
         start_time = time.monotonic()
         import library_analysis
+        scope = library_resources.current_transport_scope()
+        if scope is not None and scope.admitted_at is not None:
+            start_time = scope.admitted_at
 
         def _deadline_result():
             envelope = library_analysis.error_envelope(
@@ -811,8 +842,210 @@ def _register_phase4_stdio() -> None:
             return result
         handlers[mcp_types.ListToolsRequest] = _phase4_list_tools
 
+    _bind_transport_handle_request()
+
+
+def _stdio_param(params, key: str):
+    if params is None:
+        return None
+    if isinstance(params, dict):
+        return params.get(key)
+    return getattr(params, key, None)
+
+
+def _stdio_refusal_server_result(req, exc):
+    import library_analysis
+    import library_resources
+    tool_name = _stdio_param(getattr(req, "params", None), "name")
+    method = getattr(req, "method", None)
+    if method == "tools/call" or tool_name:
+        if tool_name == library_resources.ACTIVITY_TOOL_NAME:
+            envelope = library_analysis.error_envelope(
+                exc.code, exc.message, details=exc.details or None)
+        else:
+            envelope = exc.envelope()
+        text = library_resources.render_tool_text(envelope)
+        return mcp_types.ServerResult(mcp_types.CallToolResult(
+            content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+    code = -32602 if exc.code == "invalid_request" else (
+        -32002 if exc.code in ("resource_not_found", "resource_deleted") else -32603)
+    return mcp_types.ErrorData(code=code, message=exc.message, data=exc.envelope())
+
+
+def _stdio_jsonrpc_is_error(root) -> bool:
+    if isinstance(root, mcp_types.JSONRPCError):
+        return True
+    if isinstance(root, mcp_types.JSONRPCResponse) and isinstance(root.result, dict):
+        return root.result.get("isError") is True
+    return False
+
+
+def _stdio_domain_tool_message(request_id, envelope):
+    import library_resources
+    text = library_resources.render_tool_text(envelope)
+    result = mcp_types.CallToolResult(
+        content=[mcp_types.TextContent(type="text", text=text)], isError=True)
+    dumped = result.model_dump(by_alias=True, mode="json", exclude_none=True)
+    return mcp_types.JSONRPCMessage(
+        mcp_types.JSONRPCResponse(jsonrpc="2.0", id=request_id, result=dumped))
+
+
+def _stdio_domain_rpc_error_message(request_id, exc):
+    code = -32602 if exc.code == "invalid_request" else (
+        -32002 if exc.code in ("resource_not_found", "resource_deleted") else -32603)
+    return mcp_types.JSONRPCMessage(mcp_types.JSONRPCError(
+        jsonrpc="2.0",
+        id=request_id,
+        error=mcp_types.ErrorData(code=code, message=exc.message, data=exc.envelope()),
+    ))
+
+
+def _stdio_budget_refusal_message(scope, request_id, code: str):
+    import library_analysis
+    import library_resources
+    if code == "deadline_exceeded":
+        if scope.tool_name == library_resources.ACTIVITY_TOOL_NAME:
+            envelope = library_analysis.error_envelope(
+                "deadline_exceeded", "Service deadline exceeded during serialization")
+        else:
+            envelope = library_resources.ResourceError("deadline_exceeded").envelope()
+        exc = library_resources.ResourceError("deadline_exceeded")
+    else:
+        if scope.tool_name == library_resources.ACTIVITY_TOOL_NAME:
+            envelope = library_analysis.error_envelope(
+                "resource_too_large", "Requested document exceeds bounded response limits")
+        else:
+            envelope = library_resources.ResourceError(
+                "resource_too_large",
+                details={"what": scope.tool_name or scope.method,
+                         "next_step": "lower limit or read a smaller resource"},
+            ).envelope()
+        exc = library_resources.ResourceError("resource_too_large")
+    if scope.method == "tools/call":
+        return _stdio_domain_tool_message(request_id, envelope)
+    return _stdio_domain_rpc_error_message(request_id, exc)
+
+
+def _begin_inbound_transport_scope(message) -> None:
+    import library_resources
+    root = message.root
+    if isinstance(root, mcp_types.JSONRPCNotification):
+        method = getattr(root, "method", "") or ""
+        if method == "notifications/cancelled":
+            request_id = _stdio_param(root.params, "requestId")
+            if request_id is None:
+                request_id = _stdio_param(root.params, "request_id")
+            library_resources.mark_transport_cancelled(request_id)
+        return
+    if not isinstance(root, mcp_types.JSONRPCRequest):
+        return
+    tool_name = _stdio_param(root.params, "name") if root.method == "tools/call" else None
+    if not library_resources.is_budgeted_stdio_request(root.method, tool_name):
+        return
+    library_resources.begin_transport_request(root.id, root.method, tool_name)
+
+
+async def _deliver_bounded_outbound(session_message, stdout) -> None:
+    """Serialize with the real SDK message, then check bytes and deadline."""
+    import library_resources
+    message = session_message.message
+    root = message.root
+    request_id = getattr(root, "id", None) if not isinstance(root, mcp_types.JSONRPCNotification) else None
+    scope = library_resources.transport_scope(request_id)
+    try:
+        if (
+            scope is not None
+            and scope.cancel_requested
+            and not _stdio_jsonrpc_is_error(root)
+        ):
+            return
+        text = message.model_dump_json(by_alias=True, exclude_none=True)
+        if (
+            scope is not None
+            and not scope.cancel_requested
+            and not _stdio_jsonrpc_is_error(root)
+        ):
+            if scope.expired():
+                text = _stdio_budget_refusal_message(
+                    scope, request_id, "deadline_exceeded"
+                ).model_dump_json(by_alias=True, exclude_none=True)
+            elif len(text.encode("utf-8")) > library_resources.LIMITS["max_response_bytes"]:
+                text = _stdio_budget_refusal_message(
+                    scope, request_id, "resource_too_large"
+                ).model_dump_json(by_alias=True, exclude_none=True)
+        await stdout.write(text + "\n")
+        await stdout.flush()
+    finally:
+        if request_id is not None:
+            library_resources.finish_transport_request(request_id)
+
+
+def bounded_stdio_server(stdin=None, stdout=None):
+    """Application stdio transport: SDK messages, product-owned write lifetime."""
+    return _bounded_stdio_server(stdin, stdout)
+
+
+def _bounded_stdio_server(stdin=None, stdout=None):
+    from contextlib import asynccontextmanager
+    from io import TextIOWrapper
+
+    from mcp.shared.message import SessionMessage
+
+    @asynccontextmanager
+    async def _cm(stdin=stdin, stdout=stdout):
+        import library_resources
+        if not stdin:
+            stdin = anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace"))
+        if not stdout:
+            stdout = anyio.wrap_file(TextIOWrapper(sys.stdout.buffer, encoding="utf-8"))
+
+        read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+        write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
+
+        async def stdin_reader():
+            try:
+                async with read_stream_writer:
+                    async for line in stdin:
+                        try:
+                            message = mcp_types.JSONRPCMessage.model_validate_json(line)
+                        except Exception as exc:
+                            await read_stream_writer.send(exc)
+                            continue
+                        _begin_inbound_transport_scope(message)
+                        await read_stream_writer.send(SessionMessage(message))
+            except anyio.ClosedResourceError:  # pragma: no cover
+                await anyio.lowlevel.checkpoint()
+
+        async def stdout_writer():
+            try:
+                async with write_stream_reader:
+                    async for session_message in write_stream_reader:
+                        await _deliver_bounded_outbound(session_message, stdout)
+            except anyio.ClosedResourceError:  # pragma: no cover
+                await anyio.lowlevel.checkpoint()
+            finally:
+                library_resources.release_all_transport_scopes()
+
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(stdin_reader)
+            tg.start_soon(stdout_writer)
+            try:
+                yield read_stream, write_stream
+            finally:
+                library_resources.release_all_transport_scopes()
+
+    return _cm()
+
+
+async def run_bounded_stdio_async() -> None:
+    """Shipped stdio entry: bounded writer around the registered low-level server."""
+    async with bounded_stdio_server() as (read_stream, write_stream):
+        low = mcp._mcp_server
+        await low.run(read_stream, write_stream, low.create_initialization_options())
+
 
 _register_phase4_stdio()
+mcp.run_stdio_async = run_bounded_stdio_async
 
 
 if __name__ == "__main__":
