@@ -1,0 +1,305 @@
+{
+  "status": "partial real-client receipt; remaining source-link follow-up, hostile content, Recall and vault scenarios",
+  "candidate": "7eec17b0497eafca14658746e123e1928a97f30c",
+  "sealed_at": "2026-09-09T06:35:03.241849+00:00",
+  "client": "Claude Code 2.1.261",
+  "model": "claude-haiku-4-5-20251001",
+  "authentication": "claude.ai Max; usage credits off",
+  "client_cost_display_usd": 0.1917,
+  "cost_display_kind": "CLI token-cost accounting; not a paid-API invoice",
+  "packet_comparisons": [
+    {
+      "item_id": "WgPbbWmnXJ8",
+      "kind": "card",
+      "route": "resource",
+      "status": "equal"
+    },
+    {
+      "item_id": "WgPbbWmnXJ8",
+      "kind": "card",
+      "route": "tool",
+      "status": "equal"
+    },
+    {
+      "item_id": "WgPbbWmnXJ8",
+      "kind": "excerpt",
+      "route": "resource",
+      "status": "equal"
+    },
+    {
+      "item_id": "WgPbbWmnXJ8",
+      "kind": "excerpt",
+      "route": "tool",
+      "status": "equal"
+    },
+    {
+      "item_id": "x_27061a15409",
+      "kind": "card",
+      "route": "resource",
+      "status": "equal"
+    },
+    {
+      "item_id": "x_27061a15409",
+      "kind": "card",
+      "route": "tool",
+      "status": "equal"
+    },
+    {
+      "item_id": "x_27061a15409",
+      "kind": "excerpt",
+      "route": "resource",
+      "status": "equal"
+    },
+    {
+      "item_id": "x_27061a15409",
+      "kind": "excerpt",
+      "route": "tool",
+      "status": "equal"
+    }
+  ],
+  "native_prompt_names": [
+    "reshelve-review",
+    "consult-library"
+  ],
+  "native_consult_argument": {
+    "topic": "object"
+  },
+  "reconnect": {
+    "WgPbbWmnXJ8": {
+      "complete_envelope_equal": true,
+      "before_record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\records\\stdio-53932\\events.jsonl",
+      "after_record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\records\\stdio-62820\\events.jsonl",
+      "before_response_sha256": "08e139cfe4b115c24f3d9e9151c9477efcb1357595e7f5c0cc32a1c1bf00fe62",
+      "after_response_sha256": "c46d13b7fa4cc61bd317f9693e901df651bf0cc68fa3a73c73d169d719aaeafa",
+      "corpus_uri": "uoink://library/v1/items/V2dQYmJXbW5YSjg/corpus/6a3befdbe855cd815c711541a23dae8c9be95d9c68ef43ed73fbe9137ae155d0/0/4096"
+    },
+    "x_27061a15409": {
+      "complete_envelope_equal": true,
+      "before_record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\records\\stdio-53932\\events.jsonl",
+      "after_record": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\records\\stdio-62820\\events.jsonl",
+      "before_response_sha256": "b43565b6bd3fa5f9b0fbea61ca5d2abfa204d814204604482350cc01af7b84a1",
+      "after_response_sha256": "5fe5d26d2a1ac7f3a2c4ec6af9caf96ea0a9c00512b72056b8ea75af21407220",
+      "corpus_uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/corpus/07603cc32bd8840cf211b4ad9fb6effd13e769e9f82d9a4da139acde3e3b4cb5/0/4096"
+    }
+  },
+  "corpus_refusals": [
+    {
+      "route": "native",
+      "elapsed_ms": 1.8373,
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 6,
+        "error": {
+          "code": -32603,
+          "message": "This revision is unavailable. Resolve the item again.",
+          "data": {
+            "ok": false,
+            "schema_version": 1,
+            "contract_version": "phase4-v1-2026-09-08",
+            "error": {
+              "code": "revision_unavailable",
+              "message": "This revision is unavailable. Resolve the item again.",
+              "retryable": false,
+              "details": {
+                "next_step": "get_library_item"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "method": "resources/read",
+        "params": {
+          "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+        },
+        "jsonrpc": "2.0",
+        "id": 6
+      }
+    },
+    {
+      "route": "tool",
+      "elapsed_ms": 1.9249,
+      "response": {
+        "contract_version": "phase4-v1-2026-09-08",
+        "error": {
+          "code": "revision_unavailable",
+          "details": {
+            "next_step": "get_library_item"
+          },
+          "message": "This revision is unavailable. Resolve the item again.",
+          "retryable": false
+        },
+        "ok": false,
+        "schema_version": 1
+      },
+      "arguments": {
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+      }
+    }
+  ],
+  "state_unchanged": true,
+  "transport_client_failure_ms": 10003,
+  "transport_scope": "One request while child 71588 was suspended; zero reconnects or retries in this fault case; child resumed after timeout",
+  "inventory": {
+    "stdio_tools": 32,
+    "native_prompts": 4,
+    "native_resource_templates_requested": false,
+    "template_limit": "Client did not send resources/templates/list; five templates remain source/stdio-test evidence, not observed client discovery"
+  },
+  "source_link_limit": {
+    "item_id": "x_27061a15409",
+    "archived_metadata_json": null,
+    "card_source_link": null,
+    "held_corpus_and_sidecar_source": "https://x.com/NASAAdmin/status/2020984085754282078",
+    "next": "Read returned bounded corpus URI in actual client; null card link is preserved"
+  },
+  "database_disappearance": "Unobserved: Windows denied rename of the open fixture SQLite directory; unavailable corpus measured separately",
+  "actions": [
+    {
+      "timestamp": "2026-09-09T06:20:52.967Z",
+      "id": "toolu_015vkd8YYqGdsMYpntcVBpcC",
+      "name": "ListMcpResourcesTool",
+      "input": {
+        "server": "uoink"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:20:53.284Z",
+      "id": "toolu_01B6nRWYQxQgjS4wVSRDr2C2",
+      "name": "mcp__uoink__search_library",
+      "input": {
+        "query": "object",
+        "limit": 2
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:20:59.169Z",
+      "id": "toolu_017Tid77uiYzf45FcM2GhvF2",
+      "name": "mcp__uoink__get_library_item",
+      "input": {
+        "video_id": "WgPbbWmnXJ8"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:20:59.430Z",
+      "id": "toolu_015kqGM9fdZWTQGjJEkddvkj",
+      "name": "mcp__uoink__get_library_item",
+      "input": {
+        "video_id": "x_27061a15409"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:09.642Z",
+      "id": "toolu_015ZoMBYjUm2KN3V6YsgMF7w",
+      "name": "ReadMcpResourceTool",
+      "input": {
+        "server": "uoink",
+        "uri": "uoink://library/v1/items/V2dQYmJXbW5YSjg/cards/bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825/spread-longest-v2/58f8b660d84b7e82c9f2141e399bf11598c6e473a50f2cd51ff4057b3ce4fcf8"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:10.967Z",
+      "id": "toolu_01Q7dnhMZUBYiprUB6NzuHuV",
+      "name": "ReadMcpResourceTool",
+      "input": {
+        "server": "uoink",
+        "uri": "uoink://library/v1/items/V2dQYmJXbW5YSjg/excerpts/bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825/075f70ca68f99d8a17df706051d292e848923ba312437b77e4e950cc7b7e930b"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:11.928Z",
+      "id": "toolu_019WcJbpd1hP9X6L78fvf3yf",
+      "name": "ReadMcpResourceTool",
+      "input": {
+        "server": "uoink",
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/cards/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/spread-longest-v2/1b993f78ba50b3db0c5a1bd2d98d8e2f2e24df0f711bdd5abf0b9d7ade2a6d1c"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:12.956Z",
+      "id": "toolu_01NcevhYmLekLEQyju8VtuRn",
+      "name": "ReadMcpResourceTool",
+      "input": {
+        "server": "uoink",
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:17.726Z",
+      "id": "toolu_019BhfT6HMq1QWTzTxxutrix",
+      "name": "mcp__uoink__read_library_resource",
+      "input": {
+        "uri": "uoink://library/v1/items/V2dQYmJXbW5YSjg/cards/bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825/spread-longest-v2/58f8b660d84b7e82c9f2141e399bf11598c6e473a50f2cd51ff4057b3ce4fcf8"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:19.403Z",
+      "id": "toolu_01QpMe4yVnKz6VZcitPaL4Mg",
+      "name": "mcp__uoink__read_library_resource",
+      "input": {
+        "uri": "uoink://library/v1/items/V2dQYmJXbW5YSjg/excerpts/bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825/075f70ca68f99d8a17df706051d292e848923ba312437b77e4e950cc7b7e930b"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:20.646Z",
+      "id": "toolu_01KTRtJUgWpY4eCzqHCnqKQL",
+      "name": "mcp__uoink__read_library_resource",
+      "input": {
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/cards/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/spread-longest-v2/1b993f78ba50b3db0c5a1bd2d98d8e2f2e24df0f711bdd5abf0b9d7ade2a6d1c"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:21:21.282Z",
+      "id": "toolu_01KJJDNHjG4vTYyyd8wCAyyn",
+      "name": "mcp__uoink__read_library_resource",
+      "input": {
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:23:42.477Z",
+      "id": "toolu_01SgeHFzgvfGLP6oWsbGPfq7",
+      "name": "mcp__uoink__get_library_item",
+      "input": {
+        "video_id": "WgPbbWmnXJ8"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:23:42.737Z",
+      "id": "toolu_01RQfuEFrdtJGhyBAhMpLeST",
+      "name": "mcp__uoink__get_library_item",
+      "input": {
+        "video_id": "x_27061a15409"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:26:16.926Z",
+      "id": "toolu_019o65rhCwoooChudfCPunzk",
+      "name": "ReadMcpResourceTool",
+      "input": {
+        "server": "uoink",
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:26:17.901Z",
+      "id": "toolu_016ugCNEBNq3P6LoR28KnKxi",
+      "name": "mcp__uoink__read_library_resource",
+      "input": {
+        "uri": "uoink://library/v1/items/eF8yNzA2MWExNTQwOQ/excerpts/a940b9882325c08dc6a7c8ba0e180715c64ed454d0b106a4d5f1cd2a457c7030/996cd811f00127c81f7003f38e8b5e7144bb900e62ee19fe8b54a9b8f09a7211"
+      }
+    },
+    {
+      "timestamp": "2026-09-09T06:28:44.082Z",
+      "id": "toolu_018mVzqrJqVDf6VHyJjgNRrq",
+      "name": "mcp__uoink__get_library_item",
+      "input": {
+        "video_id": "x_27061a15409"
+      }
+    }
+  ],
+  "raw_debug_sha256": "2690c3aeb76f0499036948cf6caa2c1997a15e720dabe142465f4469acfd5282",
+  "raw_debug_location": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\client\\claude-debug.log",
+  "debug_archive_kind": "Selected noncredential lines; raw private file retained separately and not committed",
+  "client_transcript_sha256": "5669686013d7bc848fd6ec42a7786d047f2f835b5bbf39e4e8f562d5b09300f2"
+}

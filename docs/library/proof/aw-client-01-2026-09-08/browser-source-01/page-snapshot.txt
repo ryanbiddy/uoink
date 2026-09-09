@@ -1,0 +1,282 @@
+Skip navigation
+Sign in
+Includes paid promotion
+32:28 / 4:33:46
+Chapter 5 - Running Yolo
+Object Detection 101 Course - Including 4xProjects | Computer Vision
+Murtaza's Workshop - Robotics and AI
+452K subscribers
+Subscribe
+28K
+Share
+1.4M views  3 years ago  #ComputerVision #OpenCV #CVZone
+Win a 3080 Ti by Registering using the link below and attending one of the conference sessions.(20 to 23 March 2023)
+https://nvda.ws/3HnZEPM 
+ …
+...more
+
+689 Comments
+Sort by
+Add a comment...
+Pinned by @murtazasworkshop
+@murtazasworkshop
+3 years ago (edited)
+If you are getting an error while installing requirement “lap==0.4.0” then try installing visual studio C++ complier as shown at 1:10:10.
+Let me know if that solves your issue.
+66
+Reply
+28 replies
+@studywithliv0
+1 year ago
+Walter Writes AI Humanizer takes AI text and makes it sound like an actual person wrote it
+498
+Reply
+1 reply
+@usmanumer9871
+1 year ago
+Wow kya baat ha. Lahore ka munda  goron ka ustad ban gaya Mashallah 
+4
+Reply
+@adayinthelife5496
+3 years ago
+You videos are super clean! Nice work.
+9
+Reply
+@KyukiBlade
+3 years ago
+This is the best course for beginner like me !
+Awesome work ! Thanks 
+12
+Reply
+@muhammadzohaibhassan552
+3 years ago
+Amazing tutorial, vey well explained. Highly recommended
+7
+Reply
+@ayushbanerjee1187
+3 years ago
+For anyone struggling with the requirements.txt, make sure you have Python 3.10 or above. I was trying to run it on Python 3.9, and it was saying there was some hardware error. I completely deleted and reinstalled python 3.10, and everything works perfectly. Besides that, this was a highly informative course on the YOLO algorithm and its applications. Thank you Murtaza.
+30
+Reply
+2 replies
+@thewantedbullofwallstreet
+3 years ago (edited)
+Am in the right place at the right time. Thanks. i will be very greatful if you do another video with tensorflow ️️
+5
+Reply
+@OG_Truth_Teller
+3 years ago
+May God bless you brother, thanks for the free and helpful content
+5
+Reply
+@Abstract_Code
+3 years ago
+I was waiting so long for this tutorial thank you so much!
+3
+Reply
+@iotwork9483
+3 years ago
+amazing you are very professional,,and your teaching style is amazing I easily understand as a begginer ...
+2
+Reply
+@DavidGiannopoulos
+2 years ago
+Dude, i want an object detection / reader / scanner that works over a visor or glasses in real time. Could be very very basic at first but over time it would be an incredibly useful tool for the everyday human.
+2
+Reply
+@flyingmods9568
+3 years ago
+fantastic work Murtaza, thank you! This made me think of autonomous drones: if you combine Yolo object detection with the Tello camera input and make it go forward as long as it detects objects in the room and stop it, when no longer detecting, you would have a sort of lidar for free...
+19
+Reply
+1 reply
+@joychen1285
+3 years ago
+The tutorials, are awesome and easy for beginners to follow up!
+8
+Reply
+@chibuikeokpala6064
+3 years ago
+Thanks so much. this was really educating and interesting.
+Reply
+@iamdSachin
+3 years ago
+One more excellent project as usual....waiting for next
+Reply
+@newdetektive
+3 years ago
+This course help me for my learning project. 
+Thank you sir. 
+I need more specific counting for every class object. Could you make new video tutorials about it sir. Thank you again
+1
+Reply
+@WASDRGKER
+2 years ago
+It's lucky for me to find this video!!!  I can finish my homework with this video!
+Reply
+@uzaylos
+1 year ago (edited)
+You don't need to make 30 to 15 . You extract drawing line func. from second if loop and line will be there longer. 2:13:00
+      if limits[0] < cx < limits[2] and limits[1] - 30 < cy < limits[1] + 30:
+            if totalCount.count(id) == 0:
+                totalCount.append(id)
+            cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 5)
+Thank you for everything by the way.
+Read more
+1
+Reply
+@danielmichaelraj9665
+3 years ago
+Murtaza you are doing a great job, its really helpfull for the beginners. To get an audio output what should we do with this coding?
+4
+Reply
+ 
+ 
+ 
+ 
+21:05
+Python Face Detection from Scratch (OpenCV  + YOLO + Webcam)
+Python Simplified
+68K
+1mo ago
+22:05
+How to Train a Custom YOLO Object Detection Model | Football Dataset + Roboflow + Colab (part1)
+GemsLabs tech
+12K
+4mo ago
+21:26
+How to Train YOLO Object Detection Models in Google Colab (YOLO26, YOLO11, YOLOv8)
+Edje Electronics
+725K
+1y ago
+21:06
+Jon on Trump's Meme Assault on Canada & the Alternate Reality He's Constructed | The Daily Show
+The Daily Show
+589K
+3h ago
+New
+30:05
+How to Build Real-Time Object Counting with YOLO11 & OpenCV  | Object Tracking + Line Crossing
+CV orbit
+676
+2w ago
+15:03
+Jimmy Kimmel Recaps Trump’s Crazy Summer, Our Country Still Being a Mess & Our 4,000th Show
+Jimmy Kimmel Live
+267K
+2h ago
+New
+16:31
+Speed Up YOLO Object Detection by 4x with Python - here is how
+Pysource
+52K
+1y ago
+10:56
+The coolest anti-surveillance tools at Defcon
+Naomi Brockwell TV
+729K
+3w ago
+2:27:50
+The Man Who Calls BS On AI: They’re LYING About AI, 2027 Is When It All Breaks! | Ed Zitron
+The Diary Of A CEO
+ and Better Offline
+7.1M
+12d ago
+37:31
+The Last Word With Lawrence O'Donnell 9/8/26 | 🅼🆂🅽🅱️🅲 Breaking News Today September 8, 2026
+Sonideras Lo Más Nuevo
+25K
+3h ago
+New
+11:53
+Barack Obama Being Accidentally Funny for 14 Minutes Straight
+Kinzaman
+1.8M
+12d ago
+31:35
+The Dumbest Human Moments On The Internet
+Daily Dose Of Internet
+4.7M
+10d ago
+2:35:40
+Learn Modern Computer Vision in 2026: From Basics to Advanced
+Murtaza's Workshop - Robotics and AI
+22K
+2mo ago
+22:08
+Why Google Just Gave Away Gemma 4 for Free
+Ali H. Salem
+663K
+4mo ago
+10:05
+Trump Goes Brunette and Pitches Renaming New Mexico to "New America" | The Tonight Show
+The Tonight Show Starring Jimmy Fallon
+37K
+2h ago
+New
+16:05
+What is YOLO algorithm? | Deep Learning Tutorial 31 (Tensorflow, Keras & Python)
+codebasics
+949K
+5y ago
+48:06
+Canadians Can’t Believe They’re Calling It “Lake America”
+Josh Johnson
+221K
+5h ago
+New
+1:45:49
+Narcissism Expert: Catch Psychopaths Hiding In Plain Sight By Asking This! | Dr Leanne Ten Brinke
+The Diary Of A CEO
+ and Leanne ten Brinke
+3.3M
+1d ago
+New
+15:11
+Magnus SACRIFICES HIS QUEEN IN OPENING of the LAST GAME at EWC 2026 FINAL!
+Chess.com
+ and 2 more
+1.3M
+3w ago
+20:16
+I Built an AI Virus To Destroy This Scammer
+Scammer Payback
+1.6M
+1mo ago
+25:57
+Stop Rambling: The 3-2-1 Speaking Trick That Makes You Sound Like A CEO
+BigDeal by Codie Sanchez 
+4.3M
+8mo ago
+30:06
+MCP Explained Simply — What It Is and Why It Exists
+TechWorld with Nana
+280K
+6d ago
+New
+35:45
+MIT Explains the 12 Possible Endings for AI
+Species | Documenting AGI
+8.9M
+5mo ago
+20:01
+What Happened to The Amazon Cargo Plane in Miami?
+Captain Steeeve
+3.2M
+1d ago
+Fundraiser
+New
+10:45
+Object Detection in 10 minutes with YOLOv5 & Python!
+Rob Mulla
+418K
+4y ago
+3:26:28
+OpenCV Python Course — Learn Computer Vision (Beginner to Advanced) 
+Kevin Wood | Robotics & AI
+45K
+1y ago
+ 
+ 
+ 
+ 

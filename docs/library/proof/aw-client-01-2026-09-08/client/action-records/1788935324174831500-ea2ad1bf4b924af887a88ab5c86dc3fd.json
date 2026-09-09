@@ -1,0 +1,37 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-09T06:28:44.174820+00:00",
+  "monotonic_ns": 397951332217700,
+  "pid": 63308,
+  "input": {
+    "session_id": "bb8d69fd-b538-42ff-9e9b-93ba78007e20",
+    "transcript_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\aw-client-receipt-20260909T061822Z\\projects\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-01-client\\bb8d69fd-b538-42ff-9e9b-93ba78007e20.jsonl",
+    "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\client",
+    "scratchpad_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\profile\\claude\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-01-client\\bb8d69fd-b538-42ff-9e9b-93ba78007e20\\scratchpad",
+    "prompt_id": "0221cef5-9f87-4e0c-81c0-feeabd986749",
+    "permission_mode": "dontAsk",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "mcp__uoink__get_library_item",
+    "tool_input": {
+      "video_id": "x_27061a15409"
+    },
+    "tool_use_id": "toolu_018mVzqrJqVDf6VHyJjgNRrq"
+  },
+  "response": {
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "allow",
+      "permissionDecisionReason": "AW fixture read or inert sentinel"
+    }
+  },
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__aw_sentinel__record_action"
+  }
+}

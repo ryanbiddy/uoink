@@ -1,0 +1,86 @@
+{
+  "after": {
+    "clips": {
+      "rows": 3705,
+      "sha256": "df044eb616dc7d953500257c22a3cf8d169717ef5b7c9ece32d0d87797616fad"
+    },
+    "item_shelves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_applies": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_attempts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_item_policy": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_manifest": {
+      "rows": 2,
+      "sha256": "87fed7f5f3639db5c0dbc836db41e6ce201ee1a554b7898a394f13abc902cc07"
+    },
+    "library_meta": {
+      "rows": 1,
+      "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+    },
+    "library_operation_receipts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_previews": {
+      "rows": 1,
+      "sha256": "41cebe7740d581cec82b77d4e943089b05577db644fe76631d6a78ab42c525b6"
+    },
+    "library_proposals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_runs": {
+      "rows": 1,
+      "sha256": "b2e1883c68dfb3d1267072c410e785f22ad6ee785068369424dddb544d73b219"
+    },
+    "library_submissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_user_intents": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_work": {
+      "rows": 2,
+      "sha256": "df13f2989a7ba171df7e1da8fb71b0351c79b7492d678c44f881a970d98fe05d"
+    },
+    "shelf_nodes": {
+      "rows": 1,
+      "sha256": "c197e7cf37f87360d26399e3dde510b0890989afcbc162c4427ebbf417d7d057"
+    },
+    "shelf_versions": {
+      "rows": 1,
+      "sha256": "bd3ad6ee48e421d850f9143e1c7914026aaeb59bb7c40fdbc44132f89a2b5b32"
+    },
+    "yoinks": {
+      "rows": 548,
+      "sha256": "0d29899c37bed1d8729dcfd2cb9497fbeeb94904de739e2fb76b4adfdec871ca"
+    },
+    "settings": {
+      "sha256": "195586f5c9dd9b0990935e3067fa6711ffe98b13472c731ca46bc09db582865b"
+    }
+  },
+  "changed": [],
+  "semantically_unchanged": true,
+  "integrity": [
+    [
+      "ok"
+    ]
+  ],
+  "foreign_keys": [],
+  "database_bytes": 76087296,
+  "database_sha256": "f82f7273f586375324fa1f11a3571289af2afd63b890bfbba9213c90a6330413",
+  "items": 548
+}

@@ -59,7 +59,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | B7 plus Astra's AW-12 correction integrated at `6858b81`; both roots 286 passed / nine frozen failures; broader AW-4 113 passed | Final AW-4 closes observed implementation findings; actual client acceptance remains | Run the real-client receipt on the frozen source. Frozen fixture and installed Inno rulings are Ryan's |
+| 4 | Implementation closed at `6858b81`; both roots 286 passed / nine frozen failures; broader AW-4 113 passed. Client observation 01 is partial on `7eec17b` | Native prompts, eight complete packet comparisons, explicit reconnect, corpus refusal and a 10.003-second transport timeout observed | Finish the client supplement: bounded text source link, hostile content, Recall and vault scenarios. Frozen fixture and installed Inno rulings are Ryan's |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -119,9 +119,11 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    `6858b81`, with 286 passed / nine frozen failures in both roots. Original
    B7 and all failed observations remain retained. Final AW-4's four broader
    companion files passed 113 tests; see `PHASE4-AW4-FINAL-2026-09-08.md`.
-   Run the real-client rerun (AW-3
-   lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
-   and its harness under `docs/library/proof/aw-2026-09-08/`).
+   Real-client observation 01 is partial on `7eec17b`; see
+   `PHASE4-CLIENT-01-2026-09-08.md`. Continue with
+   `PHASE4-CLIENT-SUPPLEMENT-BRIEF-2026-09-08.md` and the original client-rerun
+   brief. AW-3's five requirements remain in force; Fable's earlier receipt
+   and all partial observations stay retained.
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
    BC-3d integrated at `897f0d2`; BC-3e integrated at `d792875`.
    BC-3f integrated at `986b555`. Final BD-2 on `d1d5fb8` closes implementation
@@ -1032,3 +1034,35 @@ The real-client receipt can now begin from the clean committed SHA. Use a
 fresh archived-copy fixture and separate Claude profile, keep usage credits
 off and apply false, and retain the actual client/model/launch bindings.
 This is still a required observation, not a Ryan blocker or a phase pass.
+
+### 2026-09-08 - Actual native client routes observed
+
+Client observation 01 on frozen `7eec17b` used Claude Code 2.1.261,
+`claude-haiku-4-5-20251001`, claude.ai Max and a disposable access-only profile.
+Usage credits stayed off. The CLI's $0.1917 token-cost display is not a paid
+API invoice. Native resources and both required native prompts actually work
+in this client: complete packets and `prompts/get` traffic are retained. Do
+not repeat the earlier receipt's claim that these routes are unavailable.
+The consult command consumed topic `object`, the first positional word.
+
+All eight card/excerpt comparisons matched complete independently frozen
+text. Explicit reconnect replaced 61780 with 71588 and preserved both full
+item responses. Unavailable corpus reads refused in 1.8373 / 1.9249 ms.
+A distinct suspended-child request timed out in the client after 10.003
+seconds, with no retry/reconnect in that case. The child was resumed and
+all client children exited; temporary access credentials were removed.
+The returned YouTube link played in a fresh anonymous Chrome context.
+Library and settings state remained unchanged, with 548 items and clean
+integrity/foreign-key checks. Seventy-seven artifacts are sealed.
+
+Windows denied moving the open SQLite directory; that setup produced no
+product request. Corpus disconnection is a separate result, not proof of
+database disappearance. The client did not request resource templates;
+its 32-tool/four-prompt discovery is observed, template discovery is not.
+
+The held text-only row lacks URL metadata. Its card links remain null,
+while the held corpus and sidecar retain the original public source. Use
+the returned bounded corpus URI for the next actual-client source-link
+observation before proposing a canonical-card change. The client supplement
+also covers hostile content, Recall and vault cases. These are our remaining
+work; Phase 4 is still unaccepted and no new implementation defect is ruled.

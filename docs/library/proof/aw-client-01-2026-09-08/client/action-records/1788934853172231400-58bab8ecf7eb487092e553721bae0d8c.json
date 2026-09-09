@@ -1,0 +1,194 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-09T06:20:53.172220+00:00",
+  "monotonic_ns": 397480329617400,
+  "pid": 69256,
+  "input": {
+    "session_id": "bb8d69fd-b538-42ff-9e9b-93ba78007e20",
+    "transcript_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\aw-client-receipt-20260909T061822Z\\projects\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-01-client\\bb8d69fd-b538-42ff-9e9b-93ba78007e20.jsonl",
+    "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\client",
+    "scratchpad_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\profile\\claude\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-01-client\\bb8d69fd-b538-42ff-9e9b-93ba78007e20\\scratchpad",
+    "prompt_id": "db801c99-0528-4473-be94-c5f3221cf5a3",
+    "permission_mode": "dontAsk",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "ListMcpResourcesTool",
+    "tool_input": {
+      "server": "uoink"
+    },
+    "tool_response": [
+      {
+        "name": "Card: Clara Bennett - Sam Altman (CEO of Open AI): \"You no longer need to write prompts.\" ...",
+        "uri": "uoink://library/v1/items/MjA5NTc4MzUwMjMwNjU0NTY2NA/cards/c0b44ba5c75f116050b8235e869434a5b9a343c67d6196765ec9688647e41e09/spread-longest-v2/4e943e5e05e12c68e53da34db0ab07f4b279cbebc8b1be8eff228fac6c1ed216",
+        "description": "Librarian evidence card (Clara Bennett); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 7407,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Kyrox - Andrej Karpathy spent 8 years at OpenAI and Tesla Last week he compr...",
+        "uri": "uoink://library/v1/items/MjA5NTYwMjQ5NjQ2NzM0OTUwNA/cards/2e0e69fecbe6160a4c5bf357bff5a338bdf7ed60872176761150cec2d8cf298b/spread-longest-v2/7cd821d86a1ffed9da68cbc33bc6e7b656172ec96c1e8e1f294298175a00df8c",
+        "description": "Librarian evidence card (Kyrox); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 7349,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: claire vo 🖤 - 💫 👩 🚀 GPT-6 Astra is here (and I'm obsessed) I was able to test this...",
+        "uri": "uoink://library/v1/items/MjA5NTU4NTQxOTYzMTEzMjY3Mg/cards/fdd50826c7dc79674040134bf1bb45a809657b903992d1afaa4fd6bcac1c57d0/spread-longest-v2/460234494233ff68ae3d8751d3f448c9d0603d6e13b2e8aa3a6fd25a6aafa3b1",
+        "description": "Librarian evidence card (claire vo 🖤); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1129,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Pietro Schirano - 3/6 Made this beautiful PS1 style Beyblade game, which is actually pr...",
+        "uri": "uoink://library/v1/items/MjA5NTUyMjI3MjM1ODM0MjY1Nw/cards/f36f19e59043dcf65bfc9eb53d2570b50434ff812a3bc293fbb7012dcf9f1891/spread-longest-v2/137ae73f08828642500bc9f8aec07e24d8aa8c8a4ff20c578a52a7140e199e79",
+        "description": "Librarian evidence card (Pietro Schirano); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1135,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: claire vo 🖤 - BREAKING: GPT-6 Astra absolutely crushes Tiny Computer Bench™️, by ...",
+        "uri": "uoink://library/v1/items/MjA5NTYyNDc2NTMyNzQ1ODMwNA/cards/eb681ee7a94366bb96d9cbe3ba5124f7dd375931cb2563d31fd2a4db78e3b552/spread-longest-v2/bb6724bca9295e2b082443e121efa8bb2bf189e3bba71084519d91e220ca29b2",
+        "description": "Librarian evidence card (claire vo 🖤); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1124,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Ty - Astra is a monster at 3D, it one shotted this model of @ChelseaFC's s...",
+        "uri": "uoink://library/v1/items/MjA5NTYyNDQ0MDU5NjA3NDQ5Ng/cards/49d598c73bc9608fd873465a5399fa100bb45e6d341649f9f6e89f4ccea325d3/spread-longest-v2/0e8d139a61c2d0cf94c8f0383e9204685c0ce71c8db830be0632e7d09a0704d9",
+        "description": "Librarian evidence card (Ty); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1101,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Max Weinbach - I had early access to GPT-6 Astra and it's maybe the most insane mode...",
+        "uri": "uoink://library/v1/items/MjA5NTU5NjAzMjI1NjA2NTU0Mw/cards/f7a611080343618e86ab18c36ab68f505be30bbc218a8305fe0bbab01ba722da/spread-longest-v2/3e1ca624c2ccf16d2224305cf72ba70d42af9c72d67073d9474f636b7ed7c277",
+        "description": "Librarian evidence card (Max Weinbach); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1122,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: NVIDIA RTX Spark - Local AI agents should be easy to set up. That’s why @NousResearch i...",
+        "uri": "uoink://library/v1/items/MjA5NTU5NTE5NTk5NTY2ODQ4NA/cards/954a8d0547dd8e6af9668d0234519d19c7952ace85a34f612e803eeac1a632c2/spread-longest-v2/960a806661aa0bf9dd32e41afa105b89186ad7a5a05b15bed6a1e3b987c5cbc2",
+        "description": "Librarian evidence card (NVIDIA RTX Spark); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1138,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Pietro Schirano - 4/6 Perfectly converted this video into code. I can't tell you my sho...",
+        "uri": "uoink://library/v1/items/MjA5NTUyMjMxMzY3NjQzOTU1Ng/cards/00faaa2750daa051b0b919d31c34e187e86e633cc039b7b1d3f5bb3ab5cfe782/spread-longest-v2/583298ef96458d198328e5d70e13b8f1b54cbee620c8e34a09d49f639cecff3a",
+        "description": "Librarian evidence card (Pietro Schirano); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1134,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Pietro Schirano - 2/6 Created an underwater exploration game in one /goal prompt, all t...",
+        "uri": "uoink://library/v1/items/MjA5NTUyMjIzNzcwOTQ5MjIyNQ/cards/fc39735ec0242c32a3274afa52ab6a165e3d8e9820f8c41b2f922456757422f6/spread-longest-v2/1c31c15b29799138502b03fe295f163d695bfba9f25633af5f285b08ffd1b9aa",
+        "description": "Librarian evidence card (Pietro Schirano); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1134,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Pietro Schirano - 6/6 It can also fully produce music in code. I gave it access to Abl...",
+        "uri": "uoink://library/v1/items/MjA5NTUyMjczMTU1OTQ2OTA1Nw/cards/e2fd835551819b408d1bc4f4e3be3e540b16d8cd40569733f5fecfba655631dd/spread-longest-v2/3b07df1664d4434f8a356831bb47114b3aae895e725b4017ed23043d0c310574",
+        "description": "Librarian evidence card (Pietro Schirano); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1135,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: @rohanpaul_ai: OpenAI President Greg Brockman explains why Anthropic pulle…",
+        "uri": "uoink://library/v1/items/eF85MTZhNjI3ODgwMg/cards/c36cb1983a4d59d7e05c929ebb5014206394270a16762466b550a80f0651a679/spread-longest-v2/70026fe6555f634675c74137f90d116817ed596dcd17db18a1dd8509deab47b0",
+        "description": "Librarian evidence card (Rohan Paul (@rohanpaul_ai)); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1066,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Claire Zau - Six health insurance brokers are retiring for every one entering the ...",
+        "uri": "uoink://library/v1/items/MjA5NDg3MjYzNjk5NjE2NTYzMg/cards/714016da77813f5d987e47ca591a10355dd534dc46da5e5f27c1e19727789c2f/spread-longest-v2/c0dd901a88726bba1a58a632cc3bc63d69ef6c85fd8c97e2558a9451b0ab6b9a",
+        "description": "Librarian evidence card (Claire Zau); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 7395,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Chubby♨️ - AI video companies are no longer claiming they can simply generate be...",
+        "uri": "uoink://library/v1/items/MjA5NTA3MDg5Mzk0NDgzMjAwMw/cards/60a76a6fb32345f0948c939d11f53c253e4c3c6f4fce4b23fdf4dd234f856028/spread-longest-v2/2250d4ee0b9c7154f726b18258d268a2388e4a1944acb165b51c109da1d3a7f4",
+        "description": "Librarian evidence card (Chubby♨️); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 7407,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Justine Moore - Re-shoot an existing video from a new angle 🤯 Truly insane work from...",
+        "uri": "uoink://library/v1/items/MjA5NDkwNjQ5MDE0Njc0MjI3Mg/cards/81ffe1092c4faea732d4f02f7b2b7c6e3745d2bd87040074a4ad986fd5ef0b95/spread-longest-v2/dc4d193966d2ed03338350f9fd7606d2f71bdc604b40af2582200bd84be9b34d",
+        "description": "Librarian evidence card (Justine Moore); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1139,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Sofía Sicilia - 🚨 ÚLTIMA HORA: Alguien construyó exactamente la herramienta que Andre...",
+        "uri": "uoink://library/v1/items/MjA5NDY2NjcyMzY4MTA3NTIwMQ/cards/9d24c20b56f5ed5aa2b286bceaf23e846ccabed3133534a684ebf7b3b89c5cde/spread-longest-v2/a2a3240a6a7a4b6fd58e67d4eeb4b3419fe123d54ae004df359c3a9094ac5d9f",
+        "description": "Librarian evidence card (Sofía Sicilia); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1140,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Perplexity - Introducing hybrid compute in Perplexity Computer. Computer can star...",
+        "uri": "uoink://library/v1/items/MjA5NDgwMzQ3MDAwMDAwOTIxNg/cards/44b16888f9835a2cecf1366a6ab21c16473752bc5f220aff7bf3730c9d0eb232/spread-longest-v2/a51ee9ac1ff7469a87f14091d68c0e4373c30b36937773a169b541179c8f55d9",
+        "description": "Librarian evidence card (Perplexity); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1131,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Angry Tom - Real footage vs. AI",
+        "uri": "uoink://library/v1/items/MjA5NDkxNTY2Mzk2MTY2MTUxMw/cards/af7cc36767ede5ab77ff334fb3e4b7d016a93d87820fb00b561ecb4b4da662f9/spread-longest-v2/d0e6d278b1f273a299c7b9c1fdcf133af8bf806bbd23f81940ffe6d838dbe529",
+        "description": "Librarian evidence card (Angry Tom); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 2418,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: yuwen lu - damn fable 5.1 真的能自己研究明白怎么写狂草",
+        "uri": "uoink://library/v1/items/MjA5NTAxNjc4MTgyNDA4MjI1Mg/cards/409eaed3a4e59ab321efb376a7ba866c758d92ed9e42c2b5d8e458605deab827/spread-longest-v2/3fccd89c9fb533c6666fdb9f6640e3e82c8cb9821091a1ef5f98cc9ff7999df5",
+        "description": "Librarian evidence card (yuwen lu); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1053,
+        "server": "uoink"
+      },
+      {
+        "name": "Card: Ann Nguyen - Claude Fable 5.1 has gone absolutely unhinged with the visual aesthet...",
+        "uri": "uoink://library/v1/items/MjA5NTAyMzgxOTQwNDc4Mzg5Ng/cards/fbbd2bd7b1761e2578c1b7787f52238e48a126c8b53fce6693a07fefa428cd9a/spread-longest-v2/55d40a4b3f517c86548def5f3f6c791c4bf2748493d58b38c42ea27b9a165491",
+        "description": "Librarian evidence card (Ann Nguyen); untrusted data.",
+        "mimeType": "text/markdown",
+        "size": 1118,
+        "server": "uoink"
+      }
+    ],
+    "tool_use_id": "toolu_015vkd8YYqGdsMYpntcVBpcC",
+    "duration_ms": 1
+  },
+  "response": {},
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__aw_sentinel__record_action"
+  }
+}

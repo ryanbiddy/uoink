@@ -1,0 +1,55 @@
+[
+  {
+    "time": 1788935316852,
+    "input": "Make exactly one fresh get_library_item call for x_27061a15409 now. Report its actual outcome. The test child is deliberately suspended; do not retry or reconnect and do not use cached data.",
+    "chunk_id": "a147f2",
+    "wall_time_seconds": 1.0158039,
+    "session_id": 52067,
+    "original_token_count": 67,
+    "output": "\r\u001b[?25l\u001b[21;1Hdon't ask on (shift+tab to cycle)\u001b[K\r\n$  Make exactly one fresh get_library_item call for x_27061a15409 now. Report   \r\nits actual outcome. The test child is deliberately suspended; do not retry      \r\nor reconnect and do not use cached data.\u001b[K\u001b[?25h\r\n"
+  },
+  {
+    "time": 1788935323339,
+    "input": "<ENTER>",
+    "chunk_id": "f44c37",
+    "wall_time_seconds": 1.0073185,
+    "session_id": 52067,
+    "original_token_count": 119,
+    "output": "\u001b]133;A;redraw=0\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b[?25l\u001b[20;1Hyou: Make exactly one fresh get_library_item call for x_27061a15409 now. Report \r\nits actual outcome. The test child is deliberately suspended; do not retry or   \r\nreconnect and do not use cached data.\u001b[K\r\nPouncing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\u001b[?25h\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\r\n$\u001b]0;◑ Authorized read-only fixture acceptance session\u0007"
+  },
+  {
+    "time": 1788935368082,
+    "chunk_id": "62b249",
+    "wall_time_seconds": 5.002719,
+    "session_id": 52067,
+    "original_token_count": 364,
+    "output": "\r\u001b[?25l\u001b[21;1Htool: Calling uoink… (ctrl+o to expand)\u001b[K\r\nPouncing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\u001b[?25h\r\n$\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\r\u001b[?25l\u001b[20;1Htool error: Calling uoink… (ctrl+o to expand)\u001b[K\r\nPouncing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n$\u001b[K\u001b[?25h\u001b]0;◑ Authorized read-only fixture acceptance session\u0007\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\r\u001b]0;✳ Authorized read-only fixture acceptance session\u0007\u001b[?25l\u001b[20;1HCalled uoink (ctrl+o to expand)\u001b[K\r\nclaude: Result: Timeout after 10 seconds—the suspended MCP child did not respond\r\n to the get_library_item call for x_27061a15409.\u001b[K\r\nBrewed for 13s · done 11:28 PM\u001b[K\r\ndon't ask on (shift+tab to cycle)\u001b[K\u001b[?25h\r\n$"
+  },
+  {
+    "time": 1788935402605,
+    "input": "/usage<ENTER>",
+    "chunk_id": "6cf83d",
+    "wall_time_seconds": 1.0075789,
+    "session_id": 52067,
+    "original_token_count": 618,
+    "output": "\r\u001b[?25l\u001b[?25l\u001b[?25l\u001b[23;1Hyou: /usage\u001b[K\r\nSettings  Status   Config   Usage   Stats\u001b[K\u001b[?25h\r\nSession\r\nTotal cost:            $0.1917\r\nTotal duration (API):  1m 44s\r\nTotal duration (wall): 10m 45s\r\nTotal code changes:    0 lines added, 0 lines removed\r\nUsage by model:\r\n    claude-haiku-4-5:  1.2k input, 9.8k output, 389.0k cache read, 51.3k cache  \u001b[24;79H\u001b[?25h\r\nwrite ($0.1917)\r\nPrompt cache (main):   13 requests · 88% of input tokens from cache · no misses \u001b[24;80H\r\n· warm (1h TTL, last activity 1m 7s ago)\r\nCurrent session\r\n0% 0% used\r\nResets 3:20am (America/Los_Angeles)\r\nCurrent week (all models)\r\n69% 69% used\r\nResets Sep 12, 3am (America/Los_Angeles)\r\n+50% weekly limits promo through Sep 13 · clau.de/cc-50-promo\r\nWhat's contributing to your limits usage?\r\nApproximate, based on local sessions on this machine — does not include other   \u001b[24;78H\u001b[?25h\r\ndevices or claude.ai\r\nScanning local sessions…\r\nRefreshing…\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h\u001b[?25l\u001b[H\u001b[?25h\u001b[?25l\u001b[22;1HLast 24h · these are independent characteristics of your usage, not a breakdown \r\n54% of your usage came from the MCP server \"uoink\"\u001b[K\r\nMCP tool results stay in context for the rest of the session. /compact to flush \u001b[24;80H\u001b[?25h\r\nthem, or disable servers you don't need.\r\nSkills % of usage\r\n/mcp__uoink__reshelve-review 9%\r\n/mcp__uoink__consult-library 8%\r\nMCP servers % of usage\r\nuoink 54%\r\nd to day · w to week\r\nRefreshing…\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h\u001b[?25l\u001b[H\u001b[?25h\u001b[?25l\u001b[5;1HResets 3:19am (America/Los_Angeles)\u001b[K\r\nCurrent week (all models)\u001b[K\r\n70% 70% used\u001b[K\r\nResets Sep 12, 2:59am (America/Los_Angeles)\u001b[K\r\n+50% weekly limits promo through Sep 13 · clau.de/cc-50-promo\u001b[K\r\nCurrent week (Fable)\u001b[K\r\n88% 88% used\u001b[K\r\nResets Sep 12, 2:59am (America/Los_Angeles)\u001b[K\r\nWhat's contributing to your limits usage?\u001b[K\r\nApproximate, based on local sessions on this machine — does not include other   \r\ndevices or claude.ai\u001b[K\r\nLast 24h · these are independent characteristics of your usage, not a breakdown \r\n54% of your usage came from the MCP server \"uoink\"\u001b[K\r\nMCP tool results stay in context for the rest of the session. /compact to flush \r\nthem, or disable servers you don't need.\u001b[K\r\nSkills % of usage\u001b[K\r\n/mcp__uoink__reshelve-review 9%\u001b[K\r\n/mcp__uoink__consult-library 8%\u001b[K\r\nMCP servers % of usage\u001b[K\r\nuoink 54%\u001b[K\u001b[?25h\r\nd to day · w to week\r\nUsage credits\r\nUsage credits are off · /usage-credits to turn them on\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h"
+  },
+  {
+    "time": 1788935423229,
+    "input": "<ESC>",
+    "chunk_id": "8e83dd",
+    "wall_time_seconds": 1.007909,
+    "session_id": 52067,
+    "original_token_count": 61,
+    "output": "\u001b]133;A;redraw=0\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b[?25l\u001b[H\u001b[?25h\u001b[?25lSettings dialog dismissed\u001b[K\r\ndon't ask on (shift+tab to cycle)\u001b[K\r\n$\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\u001b[3;2H\u001b[?25h"
+  },
+  {
+    "time": 1788935434511,
+    "input": "/exit<ENTER>",
+    "chunk_id": "a64b23",
+    "wall_time_seconds": 0.3482146,
+    "exit_code": 0,
+    "original_token_count": 99,
+    "output": "\u001b]0;◐ Authorized read-only fixture acceptance session\u0007\r\u001b]133;A;redraw=0\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b[?1006l\u001b[?1003l\u001b[?1002l\u001b[?1000l\u001b[>4m\u001b[<u\u001b[?2031l\u001b[?2004l\r\nResume this session with:\r\nclaude --resume bb8d69fd-b538-42ff-9e9b-93ba78007e20\r\n\u001b]0;\u0007\u001b]0;✳ Authorized read-only fixture acceptance session\u0007\u001b]0;C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\u0007"
+  }
+]

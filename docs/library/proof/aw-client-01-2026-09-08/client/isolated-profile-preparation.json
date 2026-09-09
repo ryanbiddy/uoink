@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-09-09T06:18:23.120535+00:00",
+  "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\aw-client-receipt-20260909T061822Z",
+  "executable": "C:\\Users\\hello\\.local\\bin\\claude.exe",
+  "executable_sha256": "f2f5d1a155167488aeb32cd263e15436253c7b1681ae147c9e73e4d6bbc3c852",
+  "client_version": "2.1.261 (Claude Code)",
+  "authentication": {
+    "loggedIn": true,
+    "authMethod": "claude.ai",
+    "apiProvider": "firstParty",
+    "subscriptionType": "max"
+  },
+  "access_expiry_remaining_seconds_at_copy": 25197.103365898132,
+  "refresh_credential_copied": false,
+  "credential_archived": false,
+  "task_model_started": false,
+  "planned_model_alias": "haiku"
+}

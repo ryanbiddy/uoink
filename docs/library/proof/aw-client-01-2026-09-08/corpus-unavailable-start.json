@@ -1,0 +1,28 @@
+{
+  "utc": "2026-09-09T06:26:04.8601753Z",
+  "action": "held corpus storage unavailable",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items",
+  "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items-offline",
+  "child_pid": 71588,
+  "child_alive_before": true,
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items\\6b3304dc9cb8e089a0ea5b4078fe1951a081916a32cd8cef122a4d5e3fda4f50\\corpus.json",
+      "sha256": "7CE73B3A0FEB6C43C9B84C5457CB8D2EF7B140EB35B954E23401EDA705F77419"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items\\6b3304dc9cb8e089a0ea5b4078fe1951a081916a32cd8cef122a4d5e3fda4f50\\corpus.md",
+      "sha256": "07603CC32BD8840CF211B4AD9FB6EFFD13E769E9F82D9A4DA139ACDE3E3B4CB5"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items\\acb8ecc2e5926f32c9127b7c78e4044b026313cfa6eb51f3146e0e9cb1d7735b\\corpus.json",
+      "sha256": "6D2FD451A905E9696815565763DF76E6639F8B98C0B97B2E7104C785EC0B57E5"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-01\\items\\acb8ecc2e5926f32c9127b7c78e4044b026313cfa6eb51f3146e0e9cb1d7735b\\corpus.md",
+      "sha256": "6A3BEFDBE855CD815C711541A23DAE8C9BE95D9C68EF43ED73FBE9137AE155D0"
+    }
+  ],
+  "source_absent": true,
+  "child_alive_after": true
+}

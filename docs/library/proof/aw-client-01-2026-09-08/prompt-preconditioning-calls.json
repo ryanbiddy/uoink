@@ -1,0 +1,172 @@
+[
+  {
+    "method": "approve_taxonomy",
+    "request": {
+      "version_id": "aw_native_prompt_fixture",
+      "nodes": [
+        {
+          "shelf_id": "aw_fixture_only",
+          "path": [
+            "AW fixture only"
+          ],
+          "definition": "Synthetic prompt-observation taxonomy; never activated or applied.",
+          "include": [
+            "fixture only"
+          ],
+          "exclude": [
+            "all live classification"
+          ]
+        }
+      ]
+    },
+    "response": {
+      "ok": true,
+      "schema_version": 1,
+      "version_id": "aw_native_prompt_fixture",
+      "nodes": [
+        {
+          "shelf_id": "aw_fixture_only",
+          "path": [
+            "AW fixture only"
+          ],
+          "definition": "Synthetic prompt-observation taxonomy; never activated or applied.",
+          "include": [
+            "fixture only"
+          ],
+          "exclude": [
+            "all live classification"
+          ],
+          "name": "AW fixture only",
+          "retired": false,
+          "parent_shelf_id": null
+        }
+      ],
+      "parent_version_id": null,
+      "revision_hash": "61f91f6bb9db2e2bd565ba193946feb65dee8855b49bcd4410c60fa1d01f4db8"
+    }
+  },
+  {
+    "method": "prepare_run",
+    "request": {
+      "run_id": "aw_native_prompt_fixture",
+      "version_id": "aw_native_prompt_fixture",
+      "video_ids": [
+        "WgPbbWmnXJ8",
+        "x_27061a15409"
+      ],
+      "prompt_hash": "6961053ef3f7fcf5b8f75e3b3bbb6c3c2b72ff6509997970295931da0a540808",
+      "exclusions": {
+        "WgPbbWmnXJ8": "Report-only fixture; no classification or application requested.",
+        "x_27061a15409": "Report-only fixture; no classification or application requested."
+      }
+    },
+    "response": {
+      "ok": true,
+      "schema_version": 1,
+      "run_id": "aw_native_prompt_fixture",
+      "run_revision": 1,
+      "manifest_hash": "55f90edefe17c2ddda634ee33fad38360de2019df70c81de182cfe7c0d961ef0",
+      "target_count": 2
+    }
+  },
+  {
+    "method": "preview_apply",
+    "request": {
+      "mode": "preview",
+      "run_id": "aw_native_prompt_fixture",
+      "expected_projection_revision": 0
+    },
+    "response": {
+      "ok": true,
+      "schema_version": 1,
+      "preview_id": "C92e7dLpVKKa2tVknEnK1o5DAu0q0D_x",
+      "expected_projection_revision": 0,
+      "delta_hash": "bd63ce14ef8eabcb5f6b0de572aae1c4ff1f0220ccecea2e6d7a61e3d4b57640",
+      "expires_ms": 1788935614922,
+      "delta": {
+        "items": {},
+        "policies": {}
+      },
+      "inverse": {
+        "items": {},
+        "policies": {}
+      },
+      "summary": {
+        "items": [
+          {
+            "video_id": "WgPbbWmnXJ8",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested.",
+            "additions": [],
+            "deletions": [],
+            "replacements": [],
+            "primary_before": null,
+            "primary_after": null,
+            "unchanged": true,
+            "preserved_pins": []
+          },
+          {
+            "video_id": "x_27061a15409",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested.",
+            "additions": [],
+            "deletions": [],
+            "replacements": [],
+            "primary_before": null,
+            "primary_after": null,
+            "unchanged": true,
+            "preserved_pins": []
+          }
+        ],
+        "exclusions": [
+          {
+            "video_id": "WgPbbWmnXJ8",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested."
+          },
+          {
+            "video_id": "x_27061a15409",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested."
+          }
+        ],
+        "changed_items": 0,
+        "baseline_items": 0,
+        "changed_item_ids": [],
+        "churn_percent": 0.0,
+        "initial_filing": true,
+        "initial_filing_items": [],
+        "activation": {
+          "before": null,
+          "after": null
+        },
+        "blocking_reasons": []
+      },
+      "manifest_exclusions": [
+        {
+          "video_id": "WgPbbWmnXJ8",
+          "disposition": "unsupported",
+          "reason": "Report-only fixture; no classification or application requested."
+        },
+        {
+          "video_id": "x_27061a15409",
+          "disposition": "unsupported",
+          "reason": "Report-only fixture; no classification or application requested."
+        }
+      ],
+      "changed_items": 0,
+      "baseline_items": 0,
+      "churn_percent": 0.0,
+      "initial_filing": true,
+      "can_apply": false,
+      "reasons": [
+        {
+          "code": "apply_disabled"
+        },
+        {
+          "code": "preview_approval_required"
+        }
+      ]
+    }
+  }
+]

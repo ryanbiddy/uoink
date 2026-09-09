@@ -1,0 +1,635 @@
+{
+  "started_at": "2026-09-09T06:30:03.537Z",
+  "requested_url": "https://youtube.com/watch?v=WgPbbWmnXJ8&t=1946s",
+  "scope": "Fresh anonymous isolated Chrome context; returned timed source link only",
+  "network_failures": [
+    {
+      "url": "https://www.youtube.com/api/stats/qoe?fmt=396&afmt=251&cpn=FCUjZaE-hzTCj8x2&el=detailpage&ns=yt&fexp=v1%2C100673025%2C-76698868%2C30487%2C15321210%2C11737789%2C9105%2C22730%2C2821%2C124674%2C77203%2C65%2C13917%2C26504%2C9252%2C3479%2C13030%2C23206%2C69841%2C8206%2C2625%2C1904%2C18126%2C2878%2C12227%2C25059%2C4174%2C12720%2C17727%2C18705%2C26008%2C9671%2C3345%2C16087%2C9404%2C23826%2C9500%2C1840%2C14783%2C9776%2C29073%2C41205%2C20589%2C2364%2C31949%2C6491%2C2690%2C7242%2C8174%2C17456%2C20111%2C6032%2C1168%2C372%2C7759%2C34320%2C38312%2C1350%2C588%2C277%2C9496%2C3360%2C4367%2C9716%2C3614%2C7197%2C4418%2C2%2C1343%2C8328%2C5251%2C3844%2C1165%2C3%2C3%2C15988%2C1339%2C9618%2C1287%2C3241%2C16117%2C1114%2C112%2C8280%2C757%2C1538%2C1810%2C996%2C4637%2C435%2C1105%2C14915%2C2417%2C3%2C511%2C141%2C1240%2C1466%2C355%2C12073%2C2166%2C2073%2C6084%2C972%2C1237%2C34%2C2155%2C14328%2C5045%2C2333%2C367%2C8073%2C4209&cl=977222275&dai=unspecified&seq=1&docid=WgPbbWmnXJ8&ei=7PygasbECOiVt7EP9JHv0Ak&event=streamingstats&plid=AAZbBvtKWKm3WeQF&cbr=HeadlessChrome&cbrver=152.0.0.0&c=WEB&cver=2.20260907.06.00&cplayer=UNIPLAYER&cos=Windows&cosver=10.0&cplatform=DESKTOP&vps=0.000:N,0.026:B,0.029:S:ss.15,0.530:S,0.530:S&cat=streaming,sabr&cmt=0.026:1946.000,0.029:1946.000,0.530:1946.000&afs=0.527:251;CggKA2RyYxIBMQ::i:fl.-17.74;tl.-14;vg.0;nm.1;sms.2:CAEoAQ&vfs=0.530:396:397::a:sms.2:CAEoAQ&view=0.530:830:467&bwm=0.530:132051:0.509&bwe=0.530:98304&bat=0.530:1:1&vis=0.530:0&bh=0.530:0.000&qclc=ChBGQ1VqWmFFLWh6VENqOHgyEAE",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&ctier=L&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cctier%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&ctier=L&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cctier%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://rr1---sn-q4fzen7e.googlevideo.com/videoplayback?expire=5689892273&ei=ABaTLabUppaxElP1nlJ_TKE&ip=51.64.40.24&id=o-AFderyeKVvqxktBlfGLv46MjYp46qs1SlRZaDTkoeDXYa&itag=18&source=youtube&requiressl=yes&mh=X6&mm=390%2C08807%2C45429&mn=UySt3%2CVoVol%2CUQitB&ms=UySt3%2CVoVol%2CUQitB&mv=b&mvi=2&pl=14&ctier=L&initcwndbps=4281379&siu=2&spc=vkqwlETgfw2NIQndID4FBndKVT4KympkzAD2P9cH7MVv&vprv=2&svpuc=2&mime=video%2Fmp4&ns=yW8YQW1gU6on8g58spPDTKQc&cnr=14&ratebypass=yes&dur=46913428&lmt=9224289468529618&mt=5689892273&fvip=3&c=WEB&txp=4281379&n=Bhk4_NCuyyuKAgAL&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cctier%2Csiu%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=r1awvYQG1GHfFSeLSGtq1MXPq0aDHf-EwiIAWFHJ4MQhL76hsXXWh_2cAQsgNMYw3k0bNOoTbF1tmsK3jH-hR54th86Fye5x13SX17VOFAe8",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://www.youtube.com/ptracking?html5=1&video_id=WgPbbWmnXJ8&cpn=FCUjZaE-hzTCj8x2&ei=7PygasbECOiVt7EP9JHv0Ak&ptk=youtube_single&oid=OgU6ZxndAH3sV3Qv0EHszA&ptchn=YUjYU5FveRAscQ8V21w81A&pltype=content&m=Azv490OkkzT6pnTWOenz2oJfPgbgQbMhaM7RaEq635dTU0a7sS_TbUS91K9PaQxiGniZG6WSLaDqI38yHqIGiTN4",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/962985656/?backend=innertube&cname=1&cver=2_20260907&data=backend%3Dinnertube%3Bcname%3D1%3Bcver%3D2_20260907%3Bptype%3Df_view%3Btype%3Dview%3Butuid%3DYUjYU5FveRAscQ8V21w81A%3Butvid%3DWgPbbWmnXJ8&foc_id=YUjYU5FveRAscQ8V21w81A&label=followon_view&ptype=f_view&random=731308765&utuid=YUjYU5FveRAscQ8V21w81A&cv_attributed=0",
+      "failure": {
+        "errorText": "net::ERR_FAILED"
+      }
+    },
+    {
+      "url": "https://youtube.com/",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      }
+    }
+  ],
+  "browser_version": "152.0.7977.83",
+  "http_status": 200,
+  "actual_url": "https://www.youtube.com/watch?v=WgPbbWmnXJ8&t=1946s",
+  "title": "Object Detection 101 Course - Including 4xProjects | Computer Vision - YouTube",
+  "visible_buttons": [
+    {
+      "label": "Guide",
+      "text": ""
+    },
+    {
+      "label": "Skip navigation",
+      "text": "Skip navigation"
+    },
+    {
+      "label": "Search",
+      "text": ""
+    },
+    {
+      "label": "Search with your voice",
+      "text": ""
+    },
+    {
+      "label": "Settings",
+      "text": ""
+    },
+    {
+      "label": "Pause (k)",
+      "text": ""
+    },
+    {
+      "label": "Mute (m)",
+      "text": ""
+    },
+    {
+      "label": "32 Minutes 28 Seconds of 4 Hours 33 Minutes 46 Seconds",
+      "text": "32:28 / 4:33:46"
+    },
+    {
+      "label": null,
+      "text": "Chapter 5 - Running Yolo"
+    },
+    {
+      "label": "Autoplay is on",
+      "text": ""
+    },
+    {
+      "label": "Subtitles/closed captions unavailable",
+      "text": ""
+    },
+    {
+      "label": "Settings",
+      "text": ""
+    },
+    {
+      "label": "Theater mode (t)",
+      "text": ""
+    },
+    {
+      "label": "Full screen (f)",
+      "text": ""
+    },
+    {
+      "label": "Subscribe to Murtaza's Workshop - Robotics and AI.",
+      "text": "Subscribe"
+    },
+    {
+      "label": "like this video along with 28,849 other people",
+      "text": "28K"
+    },
+    {
+      "label": "Dislike this video",
+      "text": ""
+    },
+    {
+      "label": "Share",
+      "text": "Share"
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": null,
+      "text": "...more\n"
+    },
+    {
+      "label": "Sort comments",
+      "text": "Sort by"
+    },
+    {
+      "label": "@murtazasworkshop",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 66 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "28 replies",
+      "text": "28 replies"
+    },
+    {
+      "label": "@studywithliv0",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 498 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "1 reply",
+      "text": "1 reply"
+    },
+    {
+      "label": "@usmanumer9871",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 4 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@adayinthelife5496",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 9 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@KyukiBlade",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 12 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@muhammadzohaibhassan552",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 7 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@ayushbanerjee1187",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 30 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "2 replies",
+      "text": "2 replies"
+    },
+    {
+      "label": "@thewantedbullofwallstreet",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 5 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@OG_Truth_Teller",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 5 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@Abstract_Code",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 3 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@iotwork9483",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 2 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@DavidGiannopoulos",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 2 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@flyingmods9568",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 19 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "1 reply",
+      "text": "1 reply"
+    },
+    {
+      "label": "@joychen1285",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 8 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@chibuikeokpala6064",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 0 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@iamdSachin",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 0 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Heart",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@newdetektive",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 1 other person",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@WASDRGKER",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 0 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@uzaylos",
+      "text": ""
+    },
+    {
+      "label": null,
+      "text": "Read more"
+    },
+    {
+      "label": "Like this comment along with 1 other person",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "@danielmichaelraj9665",
+      "text": ""
+    },
+    {
+      "label": "Like this comment along with 4 other people",
+      "text": ""
+    },
+    {
+      "label": "Dislike this comment",
+      "text": ""
+    },
+    {
+      "label": "Reply",
+      "text": "Reply"
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    },
+    {
+      "label": "More actions",
+      "text": ""
+    }
+  ],
+  "player_state": [
+    {
+      "currentTime": 1949.195567,
+      "paused": false,
+      "ended": false,
+      "readyState": 4,
+      "error": null
+    }
+  ],
+  "ended_at": "2026-09-09T06:30:10.220Z"
+}

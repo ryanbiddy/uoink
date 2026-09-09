@@ -1,0 +1,2 @@
+{"kind": "suspend", "utc": "2026-09-09T06:28:25.803650+00:00", "monotonic_ns": 397932961046300, "guard_pid": 72184, "child_pid": 71588, "image": "C:\\Python314\\python.exe", "ntstatus": 0}
+{"kind": "resume", "utc": "2026-09-09T06:29:28.313023+00:00", "monotonic_ns": 397995470421700, "guard_pid": 72184, "child_pid": 71588, "image": "C:\\Python314\\python.exe", "ntstatus": 0, "release_signal": true}
