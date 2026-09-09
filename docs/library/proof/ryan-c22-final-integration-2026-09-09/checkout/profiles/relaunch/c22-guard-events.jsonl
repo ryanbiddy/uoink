@@ -1,0 +1,8 @@
+{"event": "guard_loaded", "pid": 23336, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\relaunch", "injection": ""}
+{"event": "network_attempt", "pid": 23336, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 23336, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 23336, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}
+{"event": "guard_loaded", "pid": 77236, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\relaunch", "injection": ""}
+{"event": "network_attempt", "pid": 77236, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 77236, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 77236, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}

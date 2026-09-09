@@ -1,0 +1,16 @@
+{"event": "guard_loaded", "pid": 52004, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 52004, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 52004, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 52004, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 52004, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63100)"}
+{"event": "network_attempt", "pid": 52004, "operation": "socket.connect", "address": "('127.0.0.1', 63100)"}
+{"event": "subprocess_attempt", "pid": 52004, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe -B -c \"import time; time.sleep(8)\""}
+{"event": "guard_loaded", "pid": 57864, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "guard_loaded", "pid": 58032, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 58032, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 58032, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 58032, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}
+{"event": "guard_loaded", "pid": 43568, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 43568, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 43568, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 43568, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}

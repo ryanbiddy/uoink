@@ -1,0 +1,26 @@
+[
+  {
+    "path": "tests/test_install_receipt_c22_kit.py",
+    "original_git_blob": "fc94c99cf1c3cdbb214f70bed16b1785606e3ea3",
+    "current_git_blob": "fc94c99cf1c3cdbb214f70bed16b1785606e3ea3",
+    "identical": true
+  },
+  {
+    "path": "tests/test_install_receipt_c22_kit_repair.py",
+    "original_git_blob": "b71e4fdfbe3f0b81ef94f886bae126af1e667313",
+    "current_git_blob": "b71e4fdfbe3f0b81ef94f886bae126af1e667313",
+    "identical": true
+  },
+  {
+    "path": "tests/test_install_receipt_c22_scenario_truth.py",
+    "original_git_blob": "4bc2c2fcc3055500ebb3d2a2b71af1bc9f52a99f",
+    "current_git_blob": "4bc2c2fcc3055500ebb3d2a2b71af1bc9f52a99f",
+    "identical": true
+  },
+  {
+    "path": "tests/test_install_receipt_c22_final_oracles.py",
+    "original_git_blob": "a5152238a262fdf954670d4f69687a992994ef36",
+    "current_git_blob": "a5152238a262fdf954670d4f69687a992994ef36",
+    "identical": true
+  }
+]

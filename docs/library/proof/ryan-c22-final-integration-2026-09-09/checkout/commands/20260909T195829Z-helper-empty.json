@@ -1,0 +1,29 @@
+{
+  "name": "helper-empty",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty",
+    "--isolated-port",
+    "63099",
+    "--isolated-from-install-dir",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed",
+  "started_utc": "2026-09-09T19:58:29Z",
+  "child": {
+    "pid": 76528,
+    "created_ms": 1788983909526,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1788983909530,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 76528,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T195829Z-helper-empty.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T195829Z-helper-empty.stderr.log",
+  "synthetic": true
+}

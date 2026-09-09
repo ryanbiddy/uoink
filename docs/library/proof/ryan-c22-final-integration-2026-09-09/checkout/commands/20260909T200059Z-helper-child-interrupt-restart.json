@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-interrupt-restart",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-interrupt",
+    "--isolated-port",
+    "63099"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed",
+  "started_utc": "2026-09-09T20:00:59Z",
+  "child": {
+    "pid": 16172,
+    "created_ms": 1788984059671,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1788984059673,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 16172,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T200059Z-helper-child-interrupt-restart.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T200059Z-helper-child-interrupt-restart.stderr.log",
+  "synthetic": true
+}

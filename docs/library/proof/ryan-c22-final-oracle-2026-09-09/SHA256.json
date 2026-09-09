@@ -1,0 +1,81 @@
+{
+  "scope": "C22 final oracle worker observation; not installed credit",
+  "files": {
+    "scripts/install_receipt/cli.py": {
+      "bytes": 13553,
+      "sha256": "52e3dad790ef2ad13335c5a25c8da9349a85c8ada1e875f4b798e825a9513e78"
+    },
+    "scripts/install_receipt/constants.py": {
+      "bytes": 4883,
+      "sha256": "802075947208183750fa7cb6752b2d8d51049ba6f347fbcc0bb0dd710f9f05c6"
+    },
+    "scripts/install_receipt/guards.py": {
+      "bytes": 27556,
+      "sha256": "b2f3ec77af68ebad532aeca44306e69a746784ea49ffb3f480345ea33b75a971"
+    },
+    "scripts/install_receipt/launcher.py": {
+      "bytes": 31659,
+      "sha256": "c381fea298769af23ab35a8bf343ce834c2ecce2134e2a854c2c6c99334f1394"
+    },
+    "scripts/install_receipt/manifest.py": {
+      "bytes": 7226,
+      "sha256": "cc14aeea2f5e5514d0e3436b79128f768bc050f97ba67c667fd8702a58e1783d"
+    },
+    "scripts/install_receipt/oracles.py": {
+      "bytes": 24580,
+      "sha256": "14cb33a9657bb1f45cab029ee67194081a1b24264b8d86c3d3179382523a083a"
+    },
+    "scripts/install_receipt/runner.py": {
+      "bytes": 23198,
+      "sha256": "c100b75d554c316d0c4e1acb85b3171bfb62aab0aba9a3416118a945d3904c18"
+    },
+    "scripts/install_receipt/scenarios.py": {
+      "bytes": 63996,
+      "sha256": "0632e61f7021c50da51ddf970412b2fc610b09155b4a4c332438a57ead6e1155"
+    },
+    "scripts/install_receipt/source_runtime.py": {
+      "bytes": 12715,
+      "sha256": "b91a1828f13f093132d21d47bdf500777a77e3dad0224a1598572af769f0e3c7"
+    },
+    "scripts/install_receipt/validation.py": {
+      "bytes": 14831,
+      "sha256": "9ab8950ee6ccb0d3b4abe08060186ae297fa5be8b6743dc5282116d4b3edee4b"
+    },
+    "tests/test_install_receipt_c22_final_oracles.py": {
+      "bytes": 18635,
+      "sha256": "556fe63aba97d2004894cb5180f06adc7035c4204a25a583c0ba677b2de3357a"
+    },
+    "docs/library/RYAN-C22-FINAL-ORACLE-WORKER-2026-09-09.md": {
+      "bytes": 14184,
+      "sha256": "97ddee022a1f6b54bece06ed79fcb21bcd7b656c8a8c74bd4f4ed05a923b564f"
+    },
+    "docs/library/proof/ryan-c22-final-oracle-2026-09-09/tests.log": {
+      "bytes": 2113,
+      "sha256": "0f380461467bef019143fffc1f6dac51ef915b399b85df9620068c33ddfdb156"
+    },
+    "docs/library/proof/ryan-c22-final-oracle-2026-09-09/tests.xml": {
+      "bytes": 10287,
+      "sha256": "14c2c0dc8cfe0dda20faecbafd37618e20283a78b5298de171a24d81b3ecc6de"
+    },
+    "docs/library/proof/ryan-c22-final-oracle-2026-09-09/results.json": {
+      "bytes": 984,
+      "sha256": "99f255c27adff09a6b75420791fa23570b63583f20c48800276df2e5e83cc51a"
+    },
+    "docs/library/proof/ryan-c22-review-03-input-2026-09-09/original.patch": {
+      "bytes": 334499,
+      "sha256": "60d00f827282df8f44204a0608a6921380666b92d4863c7b666c239d9fbed1db"
+    },
+    "docs/library/proof/candidate-package-02-2026-09-09/source-bindings.json": {
+      "bytes": 40014,
+      "sha256": "da47f187ab099aaba82283b91993e7a19348eedb7cbadefdb8a168adfd871a75"
+    },
+    "docs/library/proof/candidate-package-02-2026-09-09/package-manifest.json": {
+      "bytes": 40526,
+      "sha256": "a41434b8c97b815bbe14f9bf4e000b406f612e7bf71545548ed2796e022fcb5e"
+    },
+    "docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    }
+  }
+}

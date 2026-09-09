@@ -1,0 +1,11 @@
+2026-09-09 12:44:07,146 INFO install migration: skipped_isolated_install
+2026-09-09 12:44:07,159 INFO Restored 1 job record(s) from the library index
+2026-09-09 12:44:07,164 INFO sources: restart reconciliation {'released': 0, 'leases_expired': 0, 'succeeded': 0, 'failed': 0, 'uncertain': 1, 'outbox_repaired': 0}
+2026-09-09 12:44:07,164 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 12:44:07,437 INFO Uoink server v3.8.0 running on http://127.0.0.1:62508
+2026-09-09 12:44:07,437 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 12:44:07,438 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\child-life\output
+2026-09-09 12:44:07,438 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\child-life\server.log
+2026-09-09 12:44:07,439 INFO desktop notification queued: notifications disabled
+2026-09-09 12:44:07,565 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 12:44:07,612 INFO GET /health from 127.0.0.1 -> ok

@@ -1,0 +1,43 @@
+2026-09-09 12:43:31,117 INFO install migration: skipped_isolated_install
+2026-09-09 12:43:31,131 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 12:43:31,135 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 12:43:31,137 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 12:43:31,138 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 12:43:31,139 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 12:43:31,141 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 12:43:31,143 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 12:43:31,144 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 12:43:31,146 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 12:43:31,147 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 12:43:31,148 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 12:43:31,150 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 12:43:31,152 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 12:43:31,154 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 12:43:31,155 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 12:43:31,157 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 12:43:31,158 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 12:43:31,160 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 12:43:31,161 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 12:43:31,163 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 12:43:31,165 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 12:43:31,166 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 12:43:31,168 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 12:43:31,170 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 12:43:31,172 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 12:43:31,174 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 12:43:31,175 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 12:43:31,177 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 12:43:31,180 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 12:43:31,191 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 12:43:31,193 INFO seeded 5 default style anchors
+2026-09-09 12:43:31,193 INFO default style anchors: seeded 5 on first run
+2026-09-09 12:43:31,193 INFO Restored 0 job record(s) from the library index
+2026-09-09 12:43:31,196 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 12:43:31,207 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 12:43:31,471 INFO Uoink server v3.8.0 running on http://127.0.0.1:62508
+2026-09-09 12:43:31,471 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 12:43:31,471 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\relaunch\output
+2026-09-09 12:43:31,471 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\relaunch\server.log
+2026-09-09 12:43:31,473 INFO desktop notification queued: notifications disabled
+2026-09-09 12:43:31,536 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 12:43:31,613 INFO GET /health from 127.0.0.1 -> ok

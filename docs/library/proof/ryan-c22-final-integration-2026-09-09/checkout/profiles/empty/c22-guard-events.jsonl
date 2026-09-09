@@ -1,0 +1,13 @@
+{"event": "guard_loaded", "pid": 75860, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty", "injection": ""}
+{"event": "guard_loaded", "pid": 76528, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 76528, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 76528, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 76528, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}
+{"event": "guard_loaded", "pid": 52424, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 52424, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 52424, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 52424, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}
+{"event": "guard_loaded", "pid": 12524, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 12524, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 12524, "operation": "socket.connect", "address": "('127.0.0.1', 63099)"}
+{"event": "network_attempt", "pid": 12524, "operation": "socket.bind", "address": "('127.0.0.1', 63099)"}

@@ -1,0 +1,28 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_receipt_c22_kit.py",
+      "tests/test_install_receipt_c22_kit_repair.py",
+      "tests/test_install_receipt_c22_scenario_truth.py",
+      "tests/test_install_receipt_c22_final_oracles.py",
+      "tests/test_install_receipt_c22_integrator_oracles.py",
+      "tests/test_install_receipt_c22_operator_edges.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ci-c1-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ci-c1\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ci-c1\\tests.log"
+  }
+]

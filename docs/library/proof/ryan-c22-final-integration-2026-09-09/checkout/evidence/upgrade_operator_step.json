@@ -1,0 +1,21 @@
+{
+  "id": "upgrade_operator_step",
+  "status": "unexecuted",
+  "reason": "real installed upgrade/reinstall is Ryan's operator step",
+  "planned_argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink-Setup-synthetic.exe",
+    "/VERYSILENT",
+    "/NORESTART",
+    "/SUPPRESSMSGBOXES",
+    "/DIR=\"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed\"",
+    "/ISOLATED=1",
+    "/PROFILE=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty",
+    "/PORT=63099",
+    "/NOCLOSEAPPLICATIONS",
+    "/NORESTARTAPPLICATIONS"
+  ],
+  "unspecified_kind": "unspecified_pending_inventory",
+  "same_version_label": "same_version_reinstall",
+  "agreed_inno_shape": true,
+  "mislabel_guard": "same-version reinstall is not a cross-version upgrade"
+}

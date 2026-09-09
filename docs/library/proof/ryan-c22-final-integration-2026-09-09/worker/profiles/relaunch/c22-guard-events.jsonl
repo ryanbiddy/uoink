@@ -1,0 +1,8 @@
+{"event": "guard_loaded", "pid": 65528, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-2thkjng6\\receipt\\profiles\\relaunch", "injection": ""}
+{"event": "network_attempt", "pid": 65528, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 62508)"}
+{"event": "network_attempt", "pid": 65528, "operation": "socket.connect", "address": "('127.0.0.1', 62508)"}
+{"event": "network_attempt", "pid": 65528, "operation": "socket.bind", "address": "('127.0.0.1', 62508)"}
+{"event": "guard_loaded", "pid": 25432, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-2thkjng6\\receipt\\profiles\\relaunch", "injection": ""}
+{"event": "network_attempt", "pid": 25432, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 62508)"}
+{"event": "network_attempt", "pid": 25432, "operation": "socket.connect", "address": "('127.0.0.1', 62508)"}
+{"event": "network_attempt", "pid": 25432, "operation": "socket.bind", "address": "('127.0.0.1', 62508)"}

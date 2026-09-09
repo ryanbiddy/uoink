@@ -1,0 +1,19 @@
+...........F.....F...................................................... [ 76%]
+......................                                                   [100%]
+================================== FAILURES ===================================
+_______________________ test_plan_inno_does_not_execute _______________________
+tests\test_install_receipt_c22_kit.py:223: in test_plan_inno_does_not_execute
+    assert "/ISOLATEDPROFILE=" in joined
+E   AssertionError: assert '/ISOLATEDPROFILE=' in 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-kit\\...\grok\\_scratch\\c22-kit\\t-3czpvopy\\receipt\\profiles\\empty /PORT=56867 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'
+_________________ test_synthetic_helper_scenarios_and_verdict _________________
+tests\test_install_receipt_c22_kit.py:328: in test_synthetic_helper_scenarios_and_verdict
+    assert outcomes[key]["status"] == "pass", (key, outcomes[key])
+E   AssertionError: ('manual_first', {'id': 'manual_first', 'status': 'fail', 'registered': {'register_source': {'ok': True, 'source': {'s...r': 'not found', '_http_status': 404}, 'episode_id': None, 'reason': 'declared episode identity not found', ...}, ...})
+E   assert 'fail' == 'pass'
+E     
+E     - pass
+E     + fail
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_kit.py::test_plan_inno_does_not_execute
+FAILED tests/test_install_receipt_c22_kit.py::test_synthetic_helper_scenarios_and_verdict
+2 failed, 92 passed in 931.84s (0:15:31)

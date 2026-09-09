@@ -1,0 +1,17 @@
+2026-09-09 12:42:27,732 INFO install migration: skipped_isolated_install
+2026-09-09 12:42:27,741 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 12:42:27,745 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 12:42:27,756 INFO clip upgrade backfill: 1 transcript citations -> 1 clips across 1/2 items in 0.001s
+2026-09-09 12:42:27,761 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 12:42:27,762 INFO seeded 5 default style anchors
+2026-09-09 12:42:27,762 INFO default style anchors: seeded 5 on first run
+2026-09-09 12:42:27,762 INFO Restored 0 job record(s) from the library index
+2026-09-09 12:42:27,796 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 12:42:27,813 INFO Uoink server v3.8.0 running on http://127.0.0.1:62508
+2026-09-09 12:42:27,813 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 12:42:27,813 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\populated\output
+2026-09-09 12:42:27,813 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-2thkjng6\receipt\profiles\populated\server.log
+2026-09-09 12:42:28,039 INFO desktop notification queued: notifications disabled
+2026-09-09 12:42:28,040 INFO phase 2 author backfill: {'total': 2, 'scanned': 2, 'author_from_sidecar': 1, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 12:42:28,166 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 12:42:28,212 INFO GET /health from 127.0.0.1 -> ok

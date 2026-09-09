@@ -1,0 +1,79 @@
+{
+  "name": "helper-child-interrupt",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-interrupt",
+    "--isolated-port",
+    "63099"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed",
+  "started_utc": "2026-09-09T20:00:28Z",
+  "child": {
+    "pid": 24680,
+    "created_ms": 1788984028244,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1788984028248,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 24680,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T200028Z-helper-child-interrupt.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\commands\\20260909T200028Z-helper-child-interrupt.stderr.log",
+  "synthetic": true,
+  "health": {
+    "ok": true,
+    "status": 200,
+    "url": "http://127.0.0.1:63099/health",
+    "body": "{\"ok\": true, \"version\": \"3.8.0\", \"migration_version\": 30, \"migration_pending\": false, \"last_successful_tick_at\": \"2026-09-09T20:00:29Z\", \"heartbeat\": {\"last_tick_completed_at\": \"2026-09-09T20:00:29Z\", \"last_successful_tick_at\": \"2026-09-09T20:00:29Z\", \"last_successful_poll_at\": null, \"last_failed_poll_at\": null, \"last_poll_error\": null, \"last_ingest_completed_at\": null, \"last_tick\": {\"ok\": true, \"polls\": 0, \"failed_polls\": 0}, \"counts\": {\"ticks\": 1, \"polls_ok\": 0, \"polls_failed\": 0, \"ingests\": 0}, \"tick_interval_sec\": 30, \"freshness\": {\"state\": \"fresh\", \"age_sec\": 0.0, \"stale_after_sec\": 300}}, \"whisperx_available\": true, \"whisper_model\": \"base\", \"whisperx_model_loaded\": true, \"index_recovering\": false, \"output_root_fallback\": false, \"path_integrity\": {\"ok\": true, \"checked\": 0, \"missing\": 0}, \"library\": {\"status\": \"idle\", \"waiting_for_client\": false, \"ready\": 0, \"leased\": 0, \"run_revision\": null, \"recovery_state\": \"ready\", \"error_code\": null, \"apply_enabled\": false, \"contract_version\": \"phase2-v1-2026-09-04\"}}"
+  },
+  "token_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-interrupt\\token.txt",
+  "live_index_before": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened": false,
+    "hashed": false,
+    "exists_probed": false,
+    "mtime_ns": null,
+    "sha256": null,
+    "bytes": null,
+    "note": "forbidden live index path recorded as a string only"
+  },
+  "canary_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\canary-localappdata",
+  "live_index_forbidden": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened": false,
+    "hashed": false,
+    "exists_probed": false,
+    "mtime_ns": null,
+    "sha256": null,
+    "bytes": null,
+    "note": "forbidden live index path recorded as a string only"
+  },
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "marker": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\Uoink Installed\\isolated-install.json",
+    "unchanged": true,
+    "preserved_installer_ownership": true,
+    "cli_binding": true,
+    "marker_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\empty",
+    "requested_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\profiles\\child-interrupt"
+  },
+  "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "canary_proof": {
+    "canary": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-f\\f-zk6ek0_9\\receipt\\guard-canary\\index.canary",
+    "rejected": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "automatic_sitecustomize": true,
+    "explicit_exec": false,
+    "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "pth": null,
+    "stdout": "CANARY_REJECTED\nC22 guard: live index forbidden\n"
+  },
+  "canary_used_as_data_root": false,
+  "declared_profile_is_data_root": true
+}
