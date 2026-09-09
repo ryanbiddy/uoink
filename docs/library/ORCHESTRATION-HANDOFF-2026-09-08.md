@@ -887,3 +887,20 @@ reduces the specific source-API uncertainty; it does not replace a smoke
 against the installer's embedded Python and full pinned dependency graph.
 B6's first full worker union had 229 passed / 55 failed and is under repair;
 its focused 23 passes do not override those regressions.
+
+### 2026-09-08 22:10 PDT - B6 worker regression repair completed
+
+B6's second union had **272 passed, twelve failed**, 137.21 seconds. Three
+new failures were helper operations trying to acquire a second writer while
+their original session held the shared gate. The worker retained both failed
+unions and documented each repair before rerunning. Its latest union has
+**275 passed, nine failed**, 132.64 seconds; only the frozen Phase 4 cases
+remain in that result. Independent verification and final review are pending.
+
+Final review must check prepared-session cancellation before Popen and B6's
+new local-helper reuse. A logically cancelled session is not proof that a
+launcher cannot still create a child. A shared Mirror object alone is not
+operation context for a foreign thread. The scratch AW11-START-CANCEL-REVIEW-
+BRIEF and its two diagnostic files define these checks before execution.
+They are hypotheses, not reported failures. No B6 production bytes have been
+integrated, and the actual client receipt still waits for AW-4.
