@@ -59,8 +59,8 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m3 (`270e569`) integrated as intermediate work: 209 passed / eight unchanged parent-interceptor failures in both roots. AW-4 adds four failed ownership/staging cases plus lifecycle findings | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a2 (grok binding/temp/staging retry) and AV-5m4b2 (grok lifecycle/exclusion retry), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g (gemini), AZ-5h transport repair (grok), measured refresh and final BA-4 |
+| 4 | AV-5m3 (`270e569`) is intermediate work. AV-5m4a and AV-5m4b rejected; AW-5 has two failed exclusion/boundary cases and one passing real-parent-loss check | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a2 (grok binding/temp/staging retry) and AV-5m4b2 (grok lifecycle/exclusion retry), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g rejected; AZ-5h transport repair (grok), AZ-5g2 measured refresh (grok), final BA-4 |
 | 6 | BC-3d (`897f0d2`) integrated: both roots 158 passed / 11 omitted-ticket failures; all three BD-2 cases pass. New BD-3 provenance case fails | Consumed capture binding omits provenance and other plan inputs. Phase 6 remains unaccepted; BD-27 observed | BC-3e (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -91,9 +91,11 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 is verified and integrated. Dispatch AZ-5g (gemini) from
    `PHASE5-AZ5G-BRIEF-2026-09-08.md` and the original AZ-5 brief.
-   Preliminary BA-4 found a final SDK-serialization gap. Retain and review
-   AZ-5g, then dispatch AZ-5h (grok) from `PHASE5-AZ5H-BRIEF-2026-09-08.md`.
-   A briefed measurement refresh and final BA-4 follow the transport repair.
+   AZ-5g finished with a rejected incomplete record (474 passed / one frozen
+   failure in independent verification). Dispatch AZ-5h (grok) from
+   `PHASE5-AZ5H-BRIEF-2026-09-08.md`, then AZ-5g2 (grok) from
+   `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
+   measurement stays retained and is not integrated.
 3. AV-5m3 is integrated at `270e569`; AV-5m2 remains rejected. Dispatch/verify
    AV-5m4a2 (grok) from `PHASE4-AV5M4A2-BRIEF-2026-09-08.md`; AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b also finished and is
@@ -442,3 +444,28 @@ audit late intent writes and unknown process liveness. The original
 proposed implementation tests remain archived; only implementation-specific
 path assertions in those unintegrated tests may be adapted with explanation.
 All committed acceptance tests remain frozen.
+
+### 2026-09-08 18:42 PDT — AZ-5g retained as incomplete; transport repair next
+
+AZ-5g Gemini `5e9baea5` ended with Control Room status completed but no
+required report. Independent full union produced **474 passed, one failed**,
+123.69 s (worker `_scratch/az5g-wi`). The single failure is the unchanged
+unary/clock setup. Four old measurement-document assertions pass against
+the proposed text; that does not certify its complete measurement record.
+
+The proposed script labels an old document blob ID as `git_tree_hash`,
+uses returned sample lengths as totals and retains no complete packet/wire
+bytes. The wrong tree metadata is directly verified: `3d2fa9f` tree is
+`a22c81c97a8c8341e2cc34e56223acdca75b30bd`; worker base `14f9e1b` tree is
+`8cbd5cc50160b193990cccedf51708abf66ee990`. The partial script labels
+`c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0` as a tree. Complete original
+diff/artifacts are retained in `patches/az5g-gemini-partial-rejected-2026-09-08.patch`.
+No portion is integrated. AZ-5h repairs the actual SDK transport boundary,
+then AZ-5g2 has a bounded Grok brief for a complete measured refresh.
+
+AV-5m4b2 is running as Grok `3ddbb5ef` from `66083f6` (18:31 PDT).
+The AW expected-packet preparation helper was independently checked against
+complete timed/text-only synthetic resource responses: two passes, 0.98 s
+(`_scratch/aw-expected-unit-fixed`). Two earlier scratch-verifier setup
+errors are retained, with their repair brief. No production/helper or
+committed test changed, and no measured copy, client or model was run.

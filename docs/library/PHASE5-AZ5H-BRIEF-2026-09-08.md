@@ -19,8 +19,18 @@ Use a supported, explicit application transport boundary. Do not patch the
 installed SDK files, inspect test callbacks, or add test-specific monkeypatch
 handling. Preserve request IDs, strict duplicate-key rejection, normal
 notifications, resource/prompt/tool inventory and text fallback behavior.
+An application-owned outbound stream/message wrapper can retain a request's
+scope while delegating serialization to its real SDK message, then check the
+completed bytes before delivery. The original SDK stdio route may remain
+usable this way. Choose and document the actual lifetime; do not replace
+serialization with a second estimate or depend on a particular test hook.
 Do not relabel a successful expired packet as a generic internal error.
 Keep a bounded retryable deadline refusal and the existing wire cap.
+Inspect the Phase 4 bounded read/resource/prompt paths, which use the same
+shared service budget and also return through the SDK writer. Apply the
+shared transport lifetime consistently where required; add focused actual
+transport coverage and run their existing suites. Do not grant new write,
+fetch, approval or model authority.
 
 The current frozen probe is bound to the existing SDK transport route. If
 a correct repair replaces the shipped transport entry, add an independent
