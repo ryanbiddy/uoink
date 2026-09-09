@@ -1,0 +1,18 @@
+..................................................................s..... [ 77%]
+.....................                                                    [100%]
+============================== warnings summary ===============================
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+tests/test_source_subscriptions_migration.py::test_s02_old_delete_routes_archive_and_preserve_rows
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-wi2-0\\t38\\outside.mp4' -> 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-wi2-0\\t38\\symlink-media\\video.mp4'
+92 passed, 1 skipped, 5 warnings in 18.81s

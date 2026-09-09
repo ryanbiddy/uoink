@@ -75,7 +75,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; corrected tree `4a35316`, source integrations continue, installer source `e47e4f2`)
+## State at handoff (updated 2026-09-09; integrated tree `263b7e4`, installer source `e47e4f2`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -84,12 +84,20 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Latest full tree remains `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; startup seed repair `db95457` has 21 passes | First installer and receipt kits need review repairs; original patches retained. Exact eight-case interception fixture proposal awaits Ryan; existing tests remain frozen | Finish three bounded installation/kit repairs, then committed full tree, rebuilt package and complete operator runbook |
+| Integration | Complete `263b7e4` tree: 2,193 passed / nine failed / three skipped / one xfailed, 728.37 s | Eleven previous failures close, eight new cases pass, no missing cases or new failures. Exact eight-case interception fixture proposal awaits Ryan; historical exit gap remains | Finish three bounded installation/kit repairs, then final committed tree, rebuilt package and complete operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest corrected full tree, `4a35316`: **2,174 passed, 20 failed, three skipped,
+Latest integrated full tree, `263b7e4`: **2,193 passed, nine failed, three
+skipped, one xfailed**, 183 warnings, 728.37 seconds. No existing test changes
+since `4a35316`; eight new regressions pass. Eleven of its failures now pass,
+no case is missing and no new failure appears. Nine failures remain: the
+historical AT6 exit record and eight mirror-interception cases. Proof:
+`proof/ryan-integrated-tree-01-2026-09-09/SHA256.json`. Installation workers
+are not part of this checkpoint and the final integrated source needs a new run.
+
+Earlier corrected full tree, `4a35316`: **2,174 passed, 20 failed, three skipped,
 one existing xfail**, 183 warnings, 607.27 seconds. Only S21 excluded; case
 membership is unchanged from `6c313ea`. All 20 failures also failed there,
 and 72 previous failures pass in this new observation. See
@@ -110,7 +118,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 Current continuation under Ryan's 2026-09-09 rulings:
 
 Completed: five corrections/review committed at `4a35316`; one corrected full
-tree sealed with actual counts. All remaining failures are assigned in
+tree sealed with actual counts. Product integrations through `db95457` are
+measured together at `263b7e4` (2,193 passed / nine failed); the unapplied
+fixture proposal and historical exit gap remain. All remaining failures are assigned in
 `CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md`. Retain the old package;
 production source has changed and a new package is owed. The runbook documents the complete
 receipt requirements but is blocked before installation; it is not an
@@ -1551,3 +1561,22 @@ committed checkpoint while the three replacement installation workers run.
 It includes all integrated product repairs and only excludes standing S21;
 the proposed mirror fixture patch remains unapplied. This checkpoint will not
 replace the final tree required after the pending source integrations.
+
+### 2026-09-09 - Integrated full-tree checkpoint sealed
+
+On exact `263b7e422a4cb5b0c3357a86e4ac957eec28a4cf`, the full tree has
+**2,193 passed / nine failed / three skipped / one xfailed**, 183 warnings,
+728.37 seconds. Only standing S21 is excluded. Compared with `4a35316`,
+eleven prior failures pass, eight new regressions pass, no case is missing
+and no new failure appears. The eight mirror parent-interception cases and
+unrecorded original AT6 child exit remain failed. The fixture proposal remains
+unapplied. No historical result is relabeled. Complete case comparison and
+raw output are sealed under `proof/ryan-integrated-tree-01-2026-09-09`.
+
+Native verifier provenance and original-installer invocation comparison are
+also sealed (14 files). The unchanged first installer suite has 92 passes /
+one skip with native child identity, separate from its rejected ownership
+probes. Installer repair `3a3bd6cb` currently reports 113 passes / one skip;
+its compilation/review must finish before independent acceptance. Phase 4 kit
+replacement `a75cec28` is active from `80e4c3c`; C22 `6accc421` remains active.
+No new package or installed receipt is claimed.

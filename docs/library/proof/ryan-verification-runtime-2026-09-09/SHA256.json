@@ -1,0 +1,61 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "identity/probe.py": {
+      "bytes": 408,
+      "sha256": "0e83a70b30d32335909636dd0353b93f2374c2f025d6b9f082309db0cffe1e7b"
+    },
+    "identity/receipt.json": {
+      "bytes": 1421,
+      "sha256": "69cd31f8ea62e21197b945dc04db3e0b6b2c693645b68c26162be7c8b324a4ad"
+    },
+    "identity/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "identity/stdout.txt": {
+      "bytes": 354,
+      "sha256": "dacdceb1723dc83bf6758e5ab19c80e3ed92903fee5f77275aa25b70fecd3e02"
+    },
+    "inherited-sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "integrator-dependencies.pth": {
+      "bytes": 351,
+      "sha256": "915537653d41a0bd1a4465c4217f5ea64c35e8f483894d36a1395e43f405b7a6"
+    },
+    "iso-wi2/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "iso-wi2/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "iso-wi2/results.json": {
+      "bytes": 1328,
+      "sha256": "0d294e9c1ce2e0907fcab7158db5cb58ad1da7db4d62cb4f6f6b66c7fa5e7a38"
+    },
+    "iso-wi2/tests.log": {
+      "bytes": 2204,
+      "sha256": "0ae2886654507c053cecd46cf4768274a7f33125b258c0ae9b9d3e40227abd50"
+    },
+    "iso-wi2/tests.xml": {
+      "bytes": 12926,
+      "sha256": "fa9427bac8c2a754c868d8c24832e9ba50006da3faa4e1a7959230e084380633"
+    },
+    "pyvenv.cfg": {
+      "bytes": 259,
+      "sha256": "44ae98c98fd2cebe7dd0b1e21a655e44187ecc01599018fc5b4b2db96411b998"
+    },
+    "retained-old-package.json": {
+      "bytes": 328,
+      "sha256": "a02990e68e26c7dd6bd5d41a35ad78c20bcb381e15ca9952198fe171e48668cf"
+    },
+    "verify_native_runtime.py": {
+      "bytes": 1874,
+      "sha256": "35259114c7d2ed3b140761a74754ae02d4146b1130b596e0b52c4c3763baf4db"
+    }
+  }
+}

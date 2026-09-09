@@ -1,0 +1,30 @@
+{
+  "baseline": "4a3531642692736d4aaa4098077ab8fde464aeb4",
+  "candidate": "263b7e422a4cb5b0c3357a86e4ac957eec28a4cf",
+  "previous_failed_now_passed": [
+    "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_all_at6_artifact_bytes_are_archived",
+    "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_browser_run_has_retained_receipt_and_database[at6-browser]",
+    "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_browser_run_has_retained_receipt_and_database[c21-pill-browser]",
+    "tests.library_work_astra.test_phase5_ba4_acceptance::test_ba4_actual_sdk_serialization_retains_admission_and_deadline",
+    "tests.test_phase4_av5m4b_lifetime::test_job_assignment_failure_refuses_before_mutation",
+    "tests.test_phase4_av5m4b_lifetime::test_child_boundary_timeout_confirms_death_and_keeps_user_edit",
+    "tests.test_phase4_av5m4b_lifetime::test_timed_out_parent_cannot_use_later_resync_session",
+    "tests.test_phase4_av5m4b_lifetime::test_second_process_with_different_temp_root_is_excluded",
+    "tests.test_phase4_av5m4b_lifetime::test_corrupt_lease_does_not_grant_destination",
+    "tests.test_phase6_bc2::test_bc2_publication_fence_refuses_every_stale_publisher",
+    "tests.test_phase6_evaluation::test_phase6_rebuild_and_publication_recovery"
+  ],
+  "current_failed_previously_not_failed": [],
+  "missing_current_cases": [],
+  "new_current_cases": [
+    "tests.test_phase4_lifecycle_foreign_lease_review::test_dead_bound_context_still_blocks_an_actual_foreign_lease",
+    "tests.test_phase4_lifecycle_plan_review::test_cancelled_origin_plan_cannot_start_a_later_lease_writer",
+    "tests.test_phase5_sdk_original_route::test_original_sdk_route_refuses_expired_actual_serialization",
+    "tests.test_phase5_sdk_original_route::test_original_sdk_route_success_keeps_complete_packet",
+    "tests.test_phase5_sdk_settlement_review::test_local_response_copy_does_not_settle_the_outgoing_request",
+    "tests.test_startup_anchor_transaction::test_default_seed_is_durable_and_releases_transaction",
+    "tests.test_startup_anchor_transaction::test_default_seed_refuses_foreign_transaction_without_absorbing_it",
+    "tests.test_startup_anchor_transaction::test_default_seed_rolls_back_partial_failure"
+  ],
+  "note": "Separate observations; prior failures remain failed. No existing test edits since the five authorized corrections."
+}

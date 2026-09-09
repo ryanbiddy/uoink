@@ -1,22 +1,26 @@
 # Living Library integration candidate
 
-Integration candidate, 2026-09-09. **Release is blocked on product repairs.**
-After Ryan's five authorized fixture corrections, the full tree on `4a35316`
-has **2,174 passed, 20 failed, three skipped and one xfailed**. All remaining
-failures have product-repair briefs; no further fixture edits are authorized.
-Historical phase acceptances below do not waive this result. The existing
-installer also needs a supported isolated installation/startup path before
-Ryan can obtain the installed receipts without contacting port 5179.
+Integration candidate, 2026-09-09. **Release is not ready yet.** The complete
+integrated product tree on `263b7e4` has **2,193 passed, nine failed, three
+skipped and one xfailed**, 183 warnings, 728.37 seconds. Eleven of the
+previous 20 failures now pass, with no new failures or missing test cases.
+Eight new regression cases pass. Existing tests remain unchanged since
+Ryan's five authorized corrections; the further mirror-hook proposal is
+pending and has not been applied. The installer and executable receipt kits
+are being repaired before the final build and Ryan's installed session.
 
 Subsequent recovery `239dbbd` closes three Phase 3 archive gaps in focused
 verification: AS-7/8/9 is 22 passed / one failed, strict Phase 3 is 181 passed /
 one failed. The original AT6 child exit status remains missing. These focused
 results do not replace the corrected full tree. Follow-on mirror repair
 `1063843` has 163 passed / eight failed in both roots. The reviewed SDK repair
-at `0ad33d4` has 267 passes in both roots. The Phase 6 refusal repair has
+at `0ad33d4` has 267 passes in both roots. The Phase 6 refusal repair at
+`512fecb` has
 71 passes in both roots, including both originally failing stale-publication
 checks. No omitted ticket is minted or allowed to publish. Installation isolation and executable receipt
-kits are in progress; no new package is sealed yet.
+kits are in progress; no new package is sealed yet. Default style seeding
+at `db95457` now commits before standing-capture startup and rolls back a
+partial seed; its three new ownership/durability checks pass in the full tree.
 
 ## Package and scope
 
@@ -26,7 +30,7 @@ Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
 current mirror and SDK repairs. Production source changed after the corrected
 tree; a new build and seal are required after the remaining verified integrations.
 The original installer and proof remain retained as historical artifacts.
-Results/runbook checkpoint `ba3d256` is backed up on `origin/cc/living-library`;
+Checkpoint `512fecb` is backed up on `origin/cc/living-library`;
 the remote SHA was independently verified. This is a branch backup of a failed
 candidate, with no merge to main or artifact publication.
 
@@ -111,9 +115,11 @@ roots; the strict suite had 178 passes and four retained assertions against
 superseded evidence. Companion suites passed 394 and dashboard tests 35 in
 both roots. Replacement AT7 evidence was verified; the old failed assertions
 were preserved. See `PHASE3-ACCEPTANCE-9-2026-09-08.md` and the handoff.
-The corrected full tree still fails those four evidence checks. Ryan's latest
-ruling makes them open product/evidence defects; replacement evidence does not
-turn the old assertions into passes. They are separate from installed C22.
+Recovery `239dbbd` restores the original artifact bytes and closes three of
+those checks in the complete `263b7e4` tree. The original AT6 child exit
+status remains unrecorded: its shell wrapper discarded that status. Neither
+the replacement observation nor the wrapper's exit can supply it. This
+remaining audit failure is separate from installed C22.
 
 ## Phase 4: bounded access and optional mirror
 
@@ -150,8 +156,10 @@ remain source/stdio-test evidence. The original timed YouTube link played,
 while the text-only source's original X URL returned HTTP 403 and stays
 blocked. Null card source metadata and text-only timing were preserved.
 Ryan retained the X HTTP 403 as a documented blocked-link condition, with no
-access repair or new fetch. The fixture ruling is resolved. Thirteen mirror
-tests still fail in the corrected full tree and require product repairs.
+access repair or new fetch. The five lifetime failures pass after `1063843`,
+including in the complete `263b7e4` tree. Eight parent-interception checks
+still fail; the exact three-file fixture proposal preserves all 150 assertion
+syntax trees and awaits Ryan's explicit approval. The proposal is unapplied.
 The installed receipt additionally awaits the isolated installation repair.
 
 ## Phase 5: descriptive library activity
@@ -165,9 +173,11 @@ remain null. Engagement analysis and Part B remain absent.
 
 Part A's historical acceptance at `a39c7e6` had 574 passes and two retained
 failures in both roots. Ryan authorized the unary/clock correction; that test
-now passes. The actual SDK-route deadline/admission test still fails and is
-an open product defect under the latest ruling. Final BA-4's supported-entry
-observation remains historical evidence, not a waiver of this failure.
+now passes. The original SDK-route deadline/admission failure closes at
+`0ad33d4`, with 267 focused passes in both roots and a pass in the complete
+`263b7e4` tree. Settlement belongs to the actual outgoing response frame;
+serializing a local copy cannot release the request early. The shared SDK
+serializer is unchanged.
 Part B is explicitly deferred.
 
 G2's sealed synthetic measurements include full responses and evidence
@@ -215,6 +225,16 @@ subsecond player timing. See `PHASE6-BD2-2026-09-08.md` and
 `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md`.
 
 ## Combined verification
+
+Integrated product checkpoint `263b7e422a4cb5b0c3357a86e4ac957eec28a4cf`:
+**2,193 passed, nine failed, three skipped, one xfailed**, 183 warnings,
+**728.37 seconds**. Only S21 is excluded. Compared by exact JUnit case
+identity with `4a35316`, eleven failures now pass, eight new regressions pass,
+no earlier case is missing and no new failure appears. All nine failures
+remain failed. See `proof/ryan-integrated-tree-01-2026-09-09/SHA256.json`.
+This uses the native Python 3.14.6 private verification runtime, with vendor
+hashes and inherited guard proof retained separately. It precedes the pending
+installer/kit integrations and their required final complete-tree check.
 
 Corrected candidate `4a3531642692736d4aaa4098077ab8fde464aeb4`: **2,174 passed,
 20 failed, three skipped, one xfailed**, 183 warnings, **607.27 seconds**.
@@ -269,9 +289,10 @@ diff and review are retained; behavior assertions were not changed.
 - Phase 2 strict precision remains failed: 39/46 timed and 6/11 text cases.
   Ryan chose option 3: reviewable suggestions, 0.90 retained for autonomous
   filing, and label application disabled. This decision is resolved.
-- Twenty failed tests require the named product repairs. These are not pending
-  owner fixture rulings. The installer isolation repair is an additional source
-  finding, not a twenty-first test failure.
+- Nine checks remain failed in the latest complete tree: eight mirror
+  interception cases and the missing historical AT6 child exit status. The
+  reviewed mirror-fixture proposal awaits Ryan; no waiver or edit is inferred.
+  The installed-path and kit repairs remain product/instrument work.
 - Installed Inno receipts for Phase 3 C22 and Phase 4, after the product repair
   supplies a safe, exact operator kit. The current runbook is blocked before
   installation and does not yet provide executable installed scenario commands.
