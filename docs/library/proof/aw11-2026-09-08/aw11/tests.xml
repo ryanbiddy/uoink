@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.852" timestamp="2026-09-08T22:13:48.471368-07:00" hostname="Ryan-PC"><testcase classname="_scratch.test_aw11_start_cancel" name="test_cancelled_start_does_not_leave_a_live_unretained_child" time="0.240"><failure message="AssertionError: {'caller_errors': [], 'launcher_pid': 70036, 'writer_pid': 62724, 'physical_liveness': 'alive', ...}&#10;assert (not True or False)&#10; +  where True = physically_alive()&#10; +    where physically_alive = &lt;library_mirror._VaultIoSession object at 0x000002D9FF0442F0&gt;.physically_alive">_scratch\test_aw11_start_cancel.py:57: in test_cancelled_start_does_not_leave_a_live_unretained_child
+    assert not session.physically_alive() or retained, observed
+E   AssertionError: {'caller_errors': [], 'launcher_pid': 70036, 'writer_pid': 62724, 'physical_liveness': 'alive', ...}
+E   assert (not True or False)
+E    +  where True = physically_alive()
+E    +    where physically_alive = &lt;library_mirror._VaultIoSession object at 0x000002D9FF0442F0&gt;.physically_alive</failure></testcase><testcase classname="_scratch.test_aw11_foreign_helper" name="test_foreign_thread_cannot_adopt_current_mirror_session[put]" time="0.205"><failure message="AssertionError: {'operation': 'put', 'origin_thread': 66256, 'writer_pid': 57928, 'foreign_thread': 72140, ...}&#10;assert b'{&quot;owner&quot;:&quot;foreign&quot;}' == b'{&quot;owner&quot;:&quot;original&quot;}'&#10;  &#10;  At index 10 diff: b'f' != b'o'&#10;  Use -v to get more diff">_scratch\test_aw11_foreign_helper.py:45: in test_foreign_thread_cannot_adopt_current_mirror_session
+    assert after == original, observations
+E   AssertionError: {'operation': 'put', 'origin_thread': 66256, 'writer_pid': 57928, 'foreign_thread': 72140, ...}
+E   assert b'{"owner":"foreign"}' == b'{"owner":"original"}'
+E     
+E     At index 10 diff: b'f' != b'o'
+E     Use -v to get more diff</failure></testcase><testcase classname="_scratch.test_aw11_foreign_helper" name="test_foreign_thread_cannot_adopt_current_mirror_session[unlink]" time="0.199"><failure message="AssertionError: {'operation': 'unlink', 'origin_thread': 66256, 'writer_pid': 5900, 'foreign_thread': 59096, ...}&#10;assert None == b'{&quot;owner&quot;:&quot;original&quot;}'">_scratch\test_aw11_foreign_helper.py:45: in test_foreign_thread_cannot_adopt_current_mirror_session
+    assert after == original, observations
+E   AssertionError: {'operation': 'unlink', 'origin_thread': 66256, 'writer_pid': 5900, 'foreign_thread': 59096, ...}
+E   assert None == b'{"owner":"original"}'</failure></testcase></testsuite></testsuites>

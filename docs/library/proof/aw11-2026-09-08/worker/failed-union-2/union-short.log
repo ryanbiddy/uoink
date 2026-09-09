@@ -1,0 +1,86 @@
+.......................F...............................F.............FFF [ 25%]
+FF.FF..F.............FF................................................. [ 50%]
+........................................................................ [ 76%]
+....................................................................     [100%]
+================================== FAILURES ===================================
+E   assert 0 == 1
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:371: assert 0 == 1
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1a2eb4cfa70: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw2_acceptance.py:362: assert (False)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1a2eb570e90: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1a2eb570d70: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x1a2eb571490: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:329: assert (False)
+E   AssertionError: assert (True and not True)
+     +  where True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/...lRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001A2EB504140>))
+     +  and   True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:360: AssertionError: assert (True and not True)
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1212: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1212: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1212: OSError: destination exclusion unavailable
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1a2eb4cfa70: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1a2eb570e90: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1a2eb570d70: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1a2eb571490: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption - AssertionError: assert (True and not True)
+ +  where True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/...lRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001A2EB504140>))
+ +  and   True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+FAILED tests/library_work_astra/test_phase4_aw4_acceptance.py::test_aw4_temp_cleanup_preserves_same_content_replacement_file - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation - OSError: destination exclusion unavailable
+12 failed, 272 passed in 137.21s (0:02:17)

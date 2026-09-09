@@ -1,0 +1,18 @@
+[
+  {
+    "path": "library_mirror.py",
+    "sha256": "89e31c2e6aebb6f575a835511645904b415d0cadb54ed32265e8fe750038e791"
+  },
+  {
+    "path": "library_mirror_vault_io.py",
+    "sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7"
+  },
+  {
+    "path": "library_briefs.py",
+    "sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556"
+  },
+  {
+    "path": "index.py",
+    "sha256": "02aaf994cc98eac0e1dc1cd552bbdae22eeae1ab23422339277c2b68c790c781"
+  }
+]

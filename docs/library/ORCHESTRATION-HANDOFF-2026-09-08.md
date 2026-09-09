@@ -59,7 +59,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a3 (`ffdbef4`) integrated. B5 independently 267 passed / nine frozen failures, all three AW-9 cases closed; rejected for AW-10 alias admission | Phase 4 remains unaccepted; one additional junction-alias failure is implementation work | AV-5m4b6 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | AV-5m4a3 (`ffdbef4`) integrated. B6 independently 275 passed / nine frozen failures; AW-10 alias admission closed, rejected after AW-11 | Phase 4 remains unaccepted; cancelled launch retention and foreign helper adoption are implementation work | AV-5m4b7 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -93,8 +93,9 @@ with an independent supplement. AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0
 finished from `564836c` and is rejected after AW-9. AV-5m4b5 Grok
 `a4af542b-c8bb-4958-97f4-185951daaad0` finished from `39d7e19` and is
 rejected after AW-10. Its complete diff and independent proof are retained.
-AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` is active from
-`17f3714` (21:30 PDT).
+AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` finished from
+`17f3714` and is rejected after AW-11. Its complete diff and independent proof
+are retained. AV-5m4b7 is next.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -111,8 +112,8 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. B5 is rejected after AW-10. Verify active AV-5m4b6 (grok) under
-   `PHASE4-AV5M4B6-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
+   AW-9. B5 is rejected after AW-10; B6 after AW-11. Dispatch AV-5m4b7 (grok) under
+   `PHASE4-AV5M4B7-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -904,3 +905,20 @@ operation context for a foreign thread. The scratch AW11-START-CANCEL-REVIEW-
 BRIEF and its two diagnostic files define these checks before execution.
 They are hypotheses, not reported failures. No B6 production bytes have been
 integrated, and the actual client receipt still waits for AW-4.
+
+### 2026-09-08 22:17 PDT - B6 independently verified; AW-11 requires repair
+
+B6 independently reproduced **275 passed, nine failed**, 153.63 seconds.
+All four final production source hashes remained unchanged across verification
+and the additional review. AW-11's three cases failed in 0.88 seconds: one
+cancelled-start retention case and foreign-thread intent put/unlink cases.
+The complete 265,652-byte patch is retained unapplied, with 25 sealed files.
+
+Cancelling a prepared session let its original caller later start an idle
+child after Mirror/global retention and the gate were released. No lease or
+content mutation was sent; this is not post-timeout publication evidence.
+Separately, B6's helper fallback let a thread without operation context replace
+and delete an intent through the current Mirror writer. All task-owned child
+cleanup was confirmed. These are implementation defects, not Ryan gates.
+The three new frozen cases and B7 brief require retained launch transitions
+and explicit helper-operation ownership while preserving existing controls.

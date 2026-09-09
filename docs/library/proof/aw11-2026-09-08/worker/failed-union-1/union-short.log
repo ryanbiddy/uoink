@@ -1,0 +1,1001 @@
+.......................F.......F.......................F.............FFF [ 25%]
+FF.FF..F.............FF.........................FF..FFFFF.FFFFF.FFFFF.FF [ 50%]
+FFFFFFF................................................................. [ 76%]
+.....................F.FFF..FFFF.FFFFFF.F..F........................     [100%]
+================================== FAILURES ===================================
+E   assert 0 == 1
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:371: assert 0 == 1
+E   Failed: DID NOT RAISE _LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:495: Failed: DID NOT RAISE _LockTimeout
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x274d968df70: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw2_acceptance.py:362: assert (False)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (0 == 1)
+     +  where 0 = len([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:210: assert (0 == 1)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x274d974cd70: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x274d974ce30: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:274: assert (False)
+E   assert (False)
+     +  where False = is_set()
+     +    where is_set = <threading.Event at 0x274d974d9d0: unset>.is_set
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:329: assert (False)
+E   AssertionError: assert (True and not True)
+     +  where True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/...lRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x00000274D96BE6C0>))
+     +  and   True = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw3_acceptance.py:360: AssertionError: assert (True and not True)
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+    assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:65: AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+    assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:65: AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+    assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:65: AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+    assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:65: AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+    assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\library_work_astra\test_phase4_aw_acceptance.py:65: AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:953: library_mirror._LockTimeout
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   AssertionError: ['_LockTimeout()']
+    assert (not False and not ['_LockTimeout()'])
+     +  where False = is_alive()
+     +    where is_alive = <Thread(Thread-26 (own), stopped 71520)>.is_alive
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_phase4_av5m4b5_lifetime.py:88: AssertionError: ['_LockTimeout()']
+E   AssertionError: ['_LockTimeout()']
+    assert (not False and not ['_LockTimeout()'])
+     +  where False = is_alive()
+     +    where is_alive = <Thread(Thread-27 (own), stopped 70948)>.is_alive
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_phase4_av5m4b5_lifetime.py:127: AssertionError: ['_LockTimeout()']
+E   assert (not False and [])
+     +  where False = is_alive()
+     +    where is_alive = <Thread(Thread-28 (own), stopped 70932)>.is_alive
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_phase4_av5m4b5_lifetime.py:171: assert (not False and [])
+E   assert ([])
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_phase4_av5m4b5_lifetime.py:211: assert ([])
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:953: library_mirror._LockTimeout
+E   library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:953: library_mirror._LockTimeout
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+E   OSError: destination exclusion unavailable
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py:1187: OSError: destination exclusion unavailable
+E   AssertionError: Expected C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\t\test_consent_allowlist_filteri0\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+    assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_consent_allowlist_filteri0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:264: AssertionError: Expected C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\t\test_consent_allowlist_filteri0\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_path_traversal_confinemen0/vault/Uoink/Library/3754d6cb3a38e1185e5b382d5f3ef3f118af75bf4bf0254d1fdb8437f51423e0.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:298: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_windows_reserved_names_co0/vault/Uoink/Library/321f68140efca2b301c8c9e9cd67f0e0e3f89a6b24ca923c13bade1ee6552073.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:313: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_case_and_unicode_collisio0/vault/Uoink/Library/29592a94f045306c6b3143a91630fba13a3f3d9e0bb1dd5fb567bd62b2554a47.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:331: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_user_edit_conflict_preser0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:373: AssertionError: assert False
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_crash_before_replacement_0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:78: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_crash_before_replacement_0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+     +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x00000274D96BDC70>.item_file_path
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:442: AssertionError: assert False
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_stale_delayed_work_reject0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:78: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_stale_delayed_work_reject0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_file_size_cap_and_frontma0/vault/Uoink/Library/31eb248514f78c8a800ea067ea91a2626e50ac2b50ca2b2fe5081fbfea57da17.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:500: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_library_md_written_last0/vault/Uoink/Library.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:515: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_soft_delete_tombstone0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:542: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_hard_purge_removes_owned_0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:568: AssertionError: assert False
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_restore_replaces_tombston0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for soft_delete
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Python314\Lib\pathlib\__init__.py:771: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_restore_replaces_tombston0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_purge_blocked_user_edit0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Python314\Lib\pathlib\__init__.py:771: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_purge_blocked_user_edit0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+     +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+     +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x00000274D49C0AA0>.item_file_path
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:654: AssertionError: assert False
+E   AssertionError: assert False
+     +  where False = exists()
+     +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_no_read_back_into_taxonom0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2047 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 2044, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+    raise self._error
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_library_mirror.py:729: AssertionError: assert False
+============================== warnings summary ===============================
+tests/test_phase4_av5m4b5_lifetime.py::test_startup_failure_keeps_exclusion_until_child_death
+  C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-28 (own)
+  
+  Traceback (most recent call last):
+    File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+      self._context.run(self.run)
+      ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+    File "C:\Python314\Lib\threading.py", line 1024, in run
+      self._target(*self._args, **self._kwargs)
+      ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\tests\test_phase4_av5m4b5_lifetime.py", line 162, in own
+      with env.mirror._exclusive(timeout=0.5):
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+    File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+      return next(self.gen)
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 4632, in _exclusive
+      owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1140, in _acquire_dest_exclusion
+      owner.start_wait()
+      ~~~~~~~~~~~~~~~~^^
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1021, in start_wait
+      raise self._error
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 1063, in _run
+      handle, key, abandoned = _win_acquire_dest_mutex_result(
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          self.dest, self.timeout,
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\library_mirror.py", line 953, in _win_acquire_dest_mutex_result
+      raise _LockTimeout()
+  library_mirror._LockTimeout
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_destination_lock_is_shared_across_local_ledgers - Failed: DID NOT RAISE _LockTimeout
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x274d968df70: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x274d974cd70: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x274d974ce30: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x274d974d9d0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption - AssertionError: assert (True and not True)
+ +  where True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/...lRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/v'), mirror=<library_mirror.Mirror object at 0x00000274D96BE6C0>))
+ +  and   True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/a76/d/reach/mirror/destination_binding.json').exists
+FAILED tests/library_work_astra/test_phase4_aw4_acceptance.py::test_aw4_temp_cleanup_preserves_same_content_replacement_file - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_lease_write_failure_after_startup_does_not_leak_child - AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+assert False
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_frozen_child_timeout_cannot_return_success - AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+assert False
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_late_atomic_local_cannot_finish_after_later_resync_owns_intent - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_late_intent_unlink_cannot_finish_after_later_resync_owns_intent - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_dead_bound_session_refuses_lease_write_before_destination - AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+assert False
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_real_child_stall_timeout_keeps_independent_user_edit - AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+assert False
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_parent_stub_timeout_is_a_separate_blocking_boundary - AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+assert False
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_late_parent_refuses_dead_session_and_does_not_adopt_later - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_inflight_isolated_intent_put_cannot_finish_after_writer_death - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_ready_identifies_actual_writer_process - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_dest_mutex_does_not_block_on_parent_realpath - library_mirror._LockTimeout
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_live_worker_without_lease_is_not_forgotten - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_before_lease - AssertionError: ['_LockTimeout()']
+assert (not False and not ['_LockTimeout()'])
+ +  where False = is_alive()
+ +    where is_alive = <Thread(Thread-26 (own), stopped 71520)>.is_alive
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_after_lease - AssertionError: ['_LockTimeout()']
+assert (not False and not ['_LockTimeout()'])
+ +  where False = is_alive()
+ +    where is_alive = <Thread(Thread-27 (own), stopped 70948)>.is_alive
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_startup_failure_keeps_exclusion_until_child_death - assert (not False and [])
+ +  where False = is_alive()
+ +    where is_alive = <Thread(Thread-28 (own), stopped 70932)>.is_alive
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_helper_startup_failure_keeps_exclusion - assert ([])
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_competitor_blocked_before_and_after_lease_then_released_on_death - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_abandoned_flag_is_not_writer_death - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_dest_aliases_share_exclusion_not_temp - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_junction_competitor_process_refuses_before_first_lease - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_same_process_foreign_thread_refuses_target_and_junction - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_unrelated_destination_serializes_on_shared_gate - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_helper_refuses_replacement_while_launching_or_live - library_mirror._LockTimeout
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_same_thread_nonrecursion_uses_gate_identity - library_mirror._LockTimeout
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_session_dest_token_independent_of_gate_key - OSError: destination exclusion unavailable
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_unknown_liveness_keeps_gate_proven_death_releases - OSError: destination exclusion unavailable
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_consent_allowlist_filtering - AssertionError: Expected C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\9577904a-b4f\grok\t\test_consent_allowlist_filteri0\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_consent_allowlist_filteri0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_path_traversal_confinement - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_path_traversal_confinemen0/vault/Uoink/Library/3754d6cb3a38e1185e5b382d5f3ef3f118af75bf4bf0254d1fdb8437f51423e0.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_windows_reserved_names_confinement - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_windows_reserved_names_co0/vault/Uoink/Library/321f68140efca2b301c8c9e9cd67f0e0e3f89a6b24ca923c13bade1ee6552073.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_case_and_unicode_collisions - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_case_and_unicode_collisio0/vault/Uoink/Library/29592a94f045306c6b3143a91630fba13a3f3d9e0bb1dd5fb567bd62b2554a47.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_user_edit_conflict_preserves_bytes - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_user_edit_conflict_preser0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_crash_before_replacement_preserves_old_file - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_crash_before_replacement_0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_two_writers_serialized - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+ +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x00000274D96BDC70>.item_file_path
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_stale_delayed_work_rejected - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_stale_delayed_work_reject0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_file_size_cap_and_frontmatter_escaping - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_file_size_cap_and_frontma0/vault/Uoink/Library/31eb248514f78c8a800ea067ea91a2626e50ac2b50ca2b2fe5081fbfea57da17.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_library_md_written_last - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_library_md_written_last0/vault/Uoink/Library.md').exists
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_soft_delete_tombstone - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_soft_delete_tombstone0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_hard_purge_removes_owned_files_idempotent - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_hard_purge_removes_owned_0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_restore_replaces_tombstone - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_restore_replaces_tombston0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_purge_blocked_user_edit - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\9577904a-b4f\\grok\\t\\test_purge_blocked_user_edit0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_reconnected_destination_validates_marker_and_drains_deletions_first - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+ +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x00000274D49C0AA0>.item_file_path
+FAILED tests/test_library_mirror.py::TestP412CorrectionStoreSeparation::test_no_read_back_into_taxonomy - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/9577904a-b4f/grok/t/test_no_read_back_into_taxonom0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+55 failed, 229 passed, 1 warning in 256.39s (0:04:16)
