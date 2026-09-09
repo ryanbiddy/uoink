@@ -53,13 +53,13 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review base `44968d9`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review base `6858b81`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a3 (`ffdbef4`) integrated. B7 independently 282 passed / nine frozen failures; three additional AW-12 review cases failed | Astra's bounded ownership correction is in verification; Phase 4 remains unaccepted | Verify and integrate B7 plus AW-12, finish AW-4, then the real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | B7 plus Astra's AW-12 correction integrated at `6858b81`; both roots 286 passed / nine frozen failures | The observed implementation findings are closed; Phase 4 still awaits broader AW-4 and actual client acceptance | Finish AW-4 broader regression, then the real-client rerun. Frozen fixture and installed Inno rulings are Ryan's |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -96,9 +96,8 @@ rejected after AW-10. Its complete diff and independent proof are retained.
 AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` finished from
 `17f3714` and is rejected after AW-11. Its complete diff and independent proof
 are retained. AV-5m4b7 Grok `b00703c8-7ca0-4e4b-b3ba-c6f1bad3d6ac`
-finished from `7995c0e`. Its original patch is retained. Astra's AW-12 review
-correction is being verified in that finished worktree; no external worker
-is active.
+finished from `7995c0e`. Its original patch is retained. B7 plus Astra's AW-12
+review correction is integrated at `6858b81`; no external worker is active.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -115,11 +114,11 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. B5 is rejected after AW-10; B6 after AW-11. B7's original union is
-   independently verified; three AW-12 cases require the bounded integrator
-   correction documented in that worker's `PHASE4-AW12-2026-09-08.md`. Verify
-   the full B7 union plus AW-12 in both roots, preserving the original patch
-   and failed results. Finish AW-4 (codex), then the real-client rerun (AW-3
+   AW-9. B5 is rejected after AW-10; B6 after AW-11. B7 plus the bounded
+   integrator correction in `PHASE4-AW12-2026-09-08.md` is integrated at
+   `6858b81`, with 286 passed / nine frozen failures in both roots. Original
+   B7 and all failed observations remain retained. Finish AW-4's four broader
+   companion files, then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -997,3 +996,25 @@ seconds, including unchanged AW-11/B7 cases and one concurrent-termination
 case. The complete corrected union is running; checkout integration waits
 for it. Mirror hash is now
 `33bd644ca3ac13070716fa8493221260c4b713ba71e4a402683d608de06761b3`.
+
+### 2026-09-08 23:00 PDT - B7 and AW-12 integrated
+
+Integration `6858b81` applied all 22 files without conflicts. The complete
+corrected union has **286 passed, nine failed** in both roots: 168.87 seconds
+in the worker and 168.01 seconds in the checkout. All four new AW-12 cases
+and the unchanged AW-11/B7 cases pass. Existing acceptance assertions and
+helpers remain unchanged. The original B7 result and all three AW-12 failures
+are separately retained; the correction is explicitly Astra's work.
+
+The original proof seal's 21 hashes matched committed bytes before integration.
+The final proof seal covers 38 files, including both full corrected outputs
+and the applied patch. The checkout mirror hash is
+`e04509fb9fa1752351af0e32e43a535a30536aeee3e7934efdbf709fffca5d45`;
+its difference from the worker hash is only line endings. Normalized bytes
+match exactly, and the other three production hashes match directly.
+
+Finish AW-4 with the four broader companion files: stdio clip tools, Phase 0
+registry capture, library adapters and live documentation contracts. The full
+named implementation union has just been checked in both roots; record the
+broader result separately. The actual client receipt and eventual candidate
+full tree remain required. Phase 4 is not yet accepted.
