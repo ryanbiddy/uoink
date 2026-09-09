@@ -44,3 +44,7 @@ docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md -text
 docs/library/PHASE5-AZ5G2-GROK-2026-09-08.md -text
 scripts/measure_phase5_az5g2.py -text
 scripts/run_phase5_az5g2_union.py -text
+docs/library/PHASE5-AZ5G2-INTEGRATOR-2026-09-08.md -text
+docs/library/proof/aw9-*/** -text
+docs/library/proof/full-ba4-*/** -text
+docs/library/patches/av5m4b4-grok-rejected-2026-09-08.patch -text

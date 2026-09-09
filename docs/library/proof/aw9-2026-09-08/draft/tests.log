@@ -1,0 +1,18 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_____________ test_unknown_writer_after_launcher_exit_is_retained _____________
+_scratch\test_aw9_lifetime.py:19: in test_unknown_writer_after_launcher_exit_is_retained
+    assert env.mirror._vault_io is session, 'Unknown writer was forgotten after its launcher exited'
+E   AssertionError: Unknown writer was forgotten after its launcher exited
+E   assert None is <library_mirror._VaultIoSession object at 0x0000014C2F8BC2F0>
+E    +  where None = <library_mirror.Mirror object at 0x0000014C2F8BC050>._vault_io
+E    +    where <library_mirror.Mirror object at 0x0000014C2F8BC050> = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/e2580c74-1d6/grok/_s...ink-library/e2580c74-1d6/grok/_scratch/aw9-draft-0/a0/v'), mirror=<library_mirror.Mirror object at 0x0000014C2F8BC050>).mirror
+_____ test_destination_exclusion_survives_owning_thread_exit_before_lease _____
+_scratch\test_aw9_lifetime.py:52: in test_destination_exclusion_survives_owning_thread_exit_before_lease
+    assert not observed['acquired'],observed
+E   AssertionError: {'acquired': True, 'pid': 64676, 'original_writer': 52476, 'original_writer_alive': True, ...}
+E   assert not True
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw9_lifetime.py::test_unknown_writer_after_launcher_exit_is_retained
+FAILED _scratch/test_aw9_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_before_lease
+2 failed in 0.96s

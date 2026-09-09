@@ -1,0 +1,17 @@
+{
+  "base": "44968d9",
+  "files": {
+    "docs/library/proof/full-ba4-2026-09-08/results.json": {
+      "bytes": 878,
+      "sha256": "ac4c04a32bc553b61e2022d62c9e05f79c32b4b9cc656d97bcd1c352909bf750"
+    },
+    "docs/library/proof/full-ba4-2026-09-08/tests.log": {
+      "bytes": 26636,
+      "sha256": "f346ab8338a868c51c1bb02cf758eff7fd12f69ecb657705afbd0fd6f42b75bf"
+    },
+    "docs/library/proof/full-ba4-2026-09-08/tests.xml": {
+      "bytes": 317900,
+      "sha256": "ee162a682cfe0a393f2a56ff16a4ad3a37c2f9473061697e485ebaf604bbb21b"
+    }
+  }
+}

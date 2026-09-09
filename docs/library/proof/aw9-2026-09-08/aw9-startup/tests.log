@@ -1,0 +1,10 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+___________ test_startup_failure_keeps_exclusion_until_child_death ____________
+_scratch\test_aw9_startup.py:42: in test_startup_failure_keeps_exclusion_until_child_death
+    assert not observed['acquired'],observed
+E   AssertionError: {'acquired': True, 'original_session_pid': 53108, 'parent_retained': False, 'launcher_alive': True, ...}
+E   assert not True
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw9_startup.py::test_startup_failure_keeps_exclusion_until_child_death
+1 failed in 3.12s

@@ -1,0 +1,12 @@
+{
+  "scope": "B4 draft review; source snapshot collected immediately after the diagnostic, not a pre-run source freeze",
+  "collected_at": "2026-09-09T03:39:55.530698+00:00",
+  "source_mtime_ns": 1788924320418376800,
+  "files": {
+    "library_mirror.py": "32844e3728e73d674ca9c924e799468f508d054b0c5df8307635fc35ce2c9ac8",
+    "results.json": "acdfca06125b9608847220f58bb9efec36bad639ec0c048fed8aabfe10841ea5",
+    "tests.log": "5a761a5845b7c9279e5005a3d1f7eb5f5cc51652230095f7e230b7a73fe1c56d",
+    "tests.xml": "74c19af3242e6cdd97a897c46308d632a891b54cd4b84d7a115333832dd7eb57",
+    "test_aw9_lifetime.py": "f1a5d7440079f7565c206364997d6beea9dc4228be807298f978688ccf0f796d"
+  }
+}

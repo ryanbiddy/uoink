@@ -53,22 +53,22 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review base `a39c7e6`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review base `44968d9`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures. B3 rejected after 240 passed / 14 failed and AW-8's final-mutation/death diagnostics | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b4 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Phase closure full tree, then combined candidate/build |
+| 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures. B4 rejected after 255 passed / nine frozen failures plus three AW-9 lifetime failures | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b5 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest full tree, `669725f`: **2,102 passed, 30 failed, three skipped, one existing xfail**,
-529.82 seconds. S21 and the still-open AW-5/AW-7 files were excluded. See the final log entry
+Latest full tree, `44968d9`: **2,106 passed, 26 failed, three skipped, one existing xfail**,
+514.25 seconds. S21 and the still-open AW-5/AW-7 files were excluded. See the final log entry
 for the failure classification; this is not an unqualified passing tree.
 
 ## Queue (in order; each item names its brief)
@@ -90,7 +90,7 @@ AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integra
 AV-5m4b3 Grok `260ef22c` is rejected with its complete diff retained.
 AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is integrated at `a39c7e6`
 with an independent supplement. AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c`
-is active from `564836c` (20:09 PDT).
+finished from `564836c` and is rejected after AW-9. Dispatch AV-5m4b5 next.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -100,14 +100,15 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
    record (474 passed / one frozen failure in independent verification).
    AZ-5h2 is integrated at `45bb2f6`; G2 and its supplement at `a39c7e6`.
-   Final BA-4 accepts Part A with the unary/clock condition for Ryan. Run the
-   closure full tree. The original partial measurement stays retained and
+   Final BA-4 accepts Part A with the unary/clock condition for Ryan. The
+   closure full tree on `44968d9` completed with 2,106 passed / 26 failed. The original partial measurement stays retained and
    is not integrated; its raw patch bytes are separately preserved by G2.
 3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
-   rejected after AW-5/AW-7. B3 is rejected after AW-8; verify active AV-5m4b4 (grok) under
-   `PHASE4-AV5M4B4-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
+   rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
+   AW-9. Dispatch and verify AV-5m4b5 (grok) under
+   `PHASE4-AV5M4B5-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -745,3 +746,32 @@ document failures are closed. Primary JSON-RPC sizes are 64,732 / 64,601 bytes
 before newline; the 24 KiB dashboard target remains missed. Run the full tree
 on this handoff commit with S21 and still-open AW-5/AW-7 excluded, as before.
 B4 remains active; Phase 4 implementation/client work remains our queue.
+
+### 2026-09-08 20:53 PDT - Phase 5 closure full tree; B4 rejected by AW-9
+
+Full tree on fixed `44968d9`: **2,106 passed, 26 failed, three skipped,
+one existing xfail**, 514.25 seconds. The four stale G2 measurement-document
+failures are closed. Remaining failures: four superseded AS-7 assertions,
+nine frozen Phase 4 setup cases, eleven omitted-ticket Phase 6 calls, the
+Phase 5 unary/clock case and the replaced BA-4 SDK route. No additional
+failure appeared. S21 and only the still-open AW-5/AW-7 files were excluded.
+The log/XML/expanded command are sealed in `proof/full-ba4-2026-09-08/`.
+All 49 G2 sealed committed blobs were verified; the integrator receipt now
+also has an exact `-text` attribute for future checkout preservation.
+
+B4 Grok `e2580c74` independently produced **255 passed, nine failed**,
+134.12 seconds. AW-9 rejects its final diff for three implementation gaps:
+unknown writer liveness becomes death after launcher exit; the destination
+mutex is abandoned when its acquiring thread exits despite retaining its
+handle; startup failure loses session ownership before Mirror stores it.
+Final unchanged lifetime probes: **two failed**, 1.01 seconds; additional
+startup probe: **one failed**, 3.12 seconds. Draft two-failure output (0.96
+seconds) remains separate. Final source hashes were captured before the
+recheck and remained unchanged. The complete rejected patch and sealed
+proof are committed; the three cases are frozen for AV-5m4b5.
+
+A Windows mutex belongs to a thread, not a retained handle. Exclusion must
+have a lifetime owner established before child launch, independent of the
+request thread, and survive any unconfirmed start/stop failure. An uncertain
+writer remains implementation work. The next B5 brief requires those actual
+boundaries and preserves A3 identity and isolated final local mutation.
