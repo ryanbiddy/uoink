@@ -80,7 +80,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS-9 `6807361` retained as historical conditional acceptance; four evidence checks still fail on `4a35316` | All four are product/evidence defects under Ryan's latest ruling; do not fabricate old receipts or treat replacements as passes | Product brief section 1; C22 after installation isolation repair |
+| 3 | Four evidence checks failed on `4a35316`; original AT6/64703 artifacts and C21 WAL state now recovered for verification | 33 original/derived archive files, exact hash bindings; AT6 child exit status remains unrecorded and is not inferred | Run unchanged AS-7/8/9 on committed recovery; C22 after installation isolation repair |
 | 4 | Thirteen mirror checks fail on corrected tree; required prior client evidence retained | Five lifecycle and eight interrupted-write/ownership failures; X HTTP 403 stays blocked, no repair/fetch | Product brief sections 2–3; installed receipt after isolation repair |
 | 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
 | 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
@@ -1357,3 +1357,24 @@ SDK and Phase 6 refusal work while Astra completes evidence recovery. Workers
 must preserve all existing tests and failed observations; integration remains
 sequential with independent verification in each root. The eight Phase 4
 interception cases and installation isolation remain separate work afterward.
+
+### 2026-09-09 - Original evidence archived; three repair workers active
+
+The 33-file original recovery is described in
+`PHASE3-ORIGINAL-EVIDENCE-RECOVERY-2026-09-09.md`. All eight AT6 and eight held
+browser artifacts match their original hashes. Feed 64703's actual receipt
+source is `6d9a819`, correcting the historical image-name association. C21's
+original database/WAL were copied without changes; the derived closed backup
+passes integrity/foreign-key checks and matches the visible one-capture,
+waiting-for-client state. No new observation is claimed. The original shell
+discarded the S21 child exit status, and Windows denied the narrow process-exit
+event query. Leave that gap open; do not substitute another process's success.
+
+From frozen brief commit `a74385c`, Grok workers are active: Phase 4 lifecycle
+`cc391d36-97ff-40e0-b8e8-9c8e70c661bb`, Phase 5 SDK
+`8cef3e8a-3ada-4fed-8e48-4b27c84ce185`, and Phase 6 refusal
+`d4d402e8-2461-436f-b9c6-9fed61a1605d`. API-key environment variables were
+removed for each dispatch; subscription only, no existing-test edits. A
+nonessential mailgraph MCP startup handshake failed in their normal CLI
+startup; no success or acceptance is inferred from the absence of streamed
+worker text. Wait for completed source/results and independently verify.

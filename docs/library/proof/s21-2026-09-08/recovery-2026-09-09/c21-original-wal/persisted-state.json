@@ -1,0 +1,271 @@
+{
+  "integrity": "ok",
+  "foreign_key_violations": [],
+  "counts": {
+    "clips": 1,
+    "library_applies": 0,
+    "library_attempts": 0,
+    "library_item_policy": 0,
+    "library_manifest": 1,
+    "library_meta": 1,
+    "library_operation_receipts": 0,
+    "library_previews": 0,
+    "library_proposals": 0,
+    "library_runs": 1,
+    "library_submissions": 0,
+    "library_user_intents": 0,
+    "library_work": 1,
+    "podcast_episodes": 2,
+    "podcast_feeds": 1,
+    "source_capture_starts": 1,
+    "source_classification_outbox": 1,
+    "source_classification_policy": 1,
+    "source_consent_receipts": 1,
+    "source_detection_cursors": 1,
+    "source_items": 2,
+    "source_subscriptions": 1,
+    "source_user_intents": 1,
+    "yoinks": 1
+  },
+  "tables": {
+    "clips": [
+      {
+        "clip_id": 1,
+        "video_id": "episode_cf538072f1d",
+        "seq": 0,
+        "start": 12.5,
+        "end": 21.75,
+        "text": "S21 fixture: durable capture waits for complete publication.",
+        "speaker": null,
+        "source_deep_link": "http://127.0.0.1:49557/episode/2#t=12",
+        "cue_count": 1,
+        "media_revision": "e0c0e5da5c0e72be9c03cdc347d5dd6c6e97903f80425d248ed2966d97280a12",
+        "speaker_state": "absent",
+        "speaker_labels_json": "[]",
+        "speaker_spans_json": "[{\"cue_hash\": \"3ccbb6d1de01ab8e5da0a661e534fb4e2dbdc43cdafd82708bdf5e12fbd01d39\", \"cue_seq\": 0, \"end\": 21.75, \"label_index\": null, \"start\": 12.5, \"text_end\": 60, \"text_start\": 0}]",
+        "chapter_seq": null,
+        "chapter_seqs_json": "[]"
+      }
+    ],
+    "library_attempts": [],
+    "library_runs": [
+      {
+        "run_id": "ss_a8836d44d0244f91c5a1a811ee3733f70a92b1b096e20097dbaaa72c3783cd8b",
+        "version_id": "taxonomy-v3-2026-09-07",
+        "manifest_hash": "139235421986d1b327f618e0c83fcdade01374525cdd259839acdd9eb1d035bf",
+        "run_revision": 1,
+        "state": "collecting",
+        "policy_json": "{\"card_schema\":1,\"corpus_head_hashes\":{\"episode_cf538072f1d\":\"8962ff1f417181ea7512fe674dce38feb79b0c4545ec59ca4ad8a82927b55fd1\"},\"exclusions\":{},\"manifest_order\":[\"episode_cf538072f1d\"],\"max_churn_percent\":15,\"max_memberships\":3,\"min_confidence\":0.6,\"previous_run_id\":null,\"prompt_hash\":\"cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32\",\"reason\":null,\"selection_version\":\"spread-longest-v2\"}",
+        "created_at": "1788903839508"
+      }
+    ],
+    "library_work": [
+      {
+        "work_id": "I8tlH6mhgpVk_58fvKaoEzRjzDQ9nGCz",
+        "run_id": "ss_a8836d44d0244f91c5a1a811ee3733f70a92b1b096e20097dbaaa72c3783cd8b",
+        "video_id": "episode_cf538072f1d",
+        "kind": "assign",
+        "packet_generation": 1,
+        "packet_json": "{\"card\":{\"card_hash\":\"6fe3ff0280029e9df5f77bfdf58fbd294b719842f7b9b2d61d1dc56667cc0a32\",\"channel\":\"Untitled podcast\",\"chars\":60,\"chars_all_clips\":60,\"chars_chosen_clips\":60,\"clip_count\":1,\"clips\":[{\"deep_link\":\"http://127.0.0.1:49557/episode/2#t=12\",\"end\":21.75,\"evidence_kind\":\"timed_clip\",\"excerpt_id\":\"87b9814879c31aeaae6fe8751cb890a36c12339aa319284d59f0d0213c175835\",\"start\":12.5,\"text\":\"S21 fixture: durable capture waits for complete publication.\",\"timing\":\"source_cues\",\"truncated\":false}],\"current_topic\":\"Uncategorized\",\"evidence_kind\":\"timed_clip\",\"excerpts\":[{\"deep_link\":\"http://127.0.0.1:49557/episode/2#t=12\",\"end\":21.75,\"evidence_kind\":\"timed_clip\",\"excerpt_id\":\"87b9814879c31aeaae6fe8751cb890a36c12339aa319284d59f0d0213c175835\",\"start\":12.5,\"text\":\"S21 fixture: durable capture waits for complete publication.\",\"timing\":\"source_cues\",\"truncated\":false}],\"hint\":{\"kind\":\"opening_prose\",\"text\":\"Chapters: unavailable from this adapter Speaker labels: diarization off S21 fixture: durable capture waits for complete publication.\",\"truncated\":false},\"platform\":\"podcast\",\"profile\":\"librarian\",\"schema_version\":1,\"selection_version\":\"spread-longest-v2\",\"slug\":\"s20-matrix-item-2-cf538072f1d\",\"source_revision\":\"5b1b90ba0f156458c1bc0bf38495cecaa42c6e4861a76f5a235e2fdd3fd336f6\",\"source_type\":\"episode\",\"status\":\"evidenced\",\"summary_hint\":\"Chapters: unavailable from this adapter Speaker labels: diarization off S21 fixture: durable capture waits for complete publication.\",\"title\":\"S20 matrix item 2\",\"topic\":\"Uncategorized\",\"truncated\":false,\"truncation\":{\"byte_budget\":false,\"fields\":[],\"selection\":false},\"url\":\"http://127.0.0.1:49557/episode/2\",\"video_id\":\"episode_cf538072f1d\",\"yoinked_at\":\"2026-09-08T21:43:27Z\"},\"policy_hash\":\"9e2ac6034030c50b7c891192ab5aa68b26b06ccbc708fc062e5493955a49bfc2\",\"schema_version\":1,\"source_revision\":\"5b1b90ba0f156458c1bc0bf38495cecaa42c6e4861a76f5a235e2fdd3fd336f6\",\"taxonomy_revision\":\"8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04\",\"video_id\":\"episode_cf538072f1d\"}",
+        "packet_hash": "3fe3f44592681bdf31b61246b3770a7cf5ef41e1b76f1779028f034c176d2f7a",
+        "state": "ready",
+        "priority": 100,
+        "attempts": 0,
+        "created_at": "1788903839508",
+        "updated_at": "1788903839508"
+      }
+    ],
+    "source_capture_starts": [
+      {
+        "start_id": "st_48d7c8a11a5f38a681492e6b6f353dae",
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "item_id": "si_a803cb523cce0c868c669a258cb5a1f3b005baba90b6a844aa676d3959bfb55f",
+        "capture_key": "podcast:c87a92acb140772050022b03add9cff0a847d1bc6240bd31f53c875b50988e65",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-08",
+        "slot": 1,
+        "state": "succeeded",
+        "reserved_at_ms": 1788903744408,
+        "reservation_expires_ms": 1788903864408,
+        "started_at_ms": 1788903744408,
+        "finished_at_ms": 1788903744408,
+        "owner_token": "Iw_geaxSmFKSlWLVG7b2cGtxuq5NaQS4-9v-d-ARre4",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-5h_s7v0y#2097fa0581277083",
+        "backend_kind": "server_capture",
+        "backend_id": "st_48d7c8a11a5f38a681492e6b6f353dae",
+        "release_or_failure_code": null,
+        "video_id": "episode_cf538072f1d"
+      }
+    ],
+    "source_classification_outbox": [
+      {
+        "capture_key": "podcast:c87a92acb140772050022b03add9cff0a847d1bc6240bd31f53c875b50988e65",
+        "video_id": "episode_cf538072f1d",
+        "committed_at_ms": 1788903744408,
+        "state": "enqueued",
+        "run_id": "ss_a8836d44d0244f91c5a1a811ee3733f70a92b1b096e20097dbaaa72c3783cd8b",
+        "version_id": "taxonomy-v3-2026-09-07",
+        "prompt_hash": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32",
+        "source_revision": "5b1b90ba0f156458c1bc0bf38495cecaa42c6e4861a76f5a235e2fdd3fd336f6",
+        "work_id": "I8tlH6mhgpVk_58fvKaoEzRjzDQ9nGCz",
+        "last_error_code": null,
+        "updated_at_ms": 1788903744408
+      }
+    ],
+    "source_classification_policy": [
+      {
+        "singleton": 1,
+        "version_id": "taxonomy-v3-2026-09-07",
+        "prompt_hash": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32",
+        "configured_by": "operator",
+        "configured_at_ms": 1788903744408
+      }
+    ],
+    "source_consent_receipts": [
+      {
+        "operation_key": "op_1788903794561_1d666723",
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "request_hash": "6ca2c6f95f865803d5b1b2d8ccdd355f414a7ddfaa93dc31b5c0cd69909d1a3f",
+        "session_hash": "fc704f49f4620f1190a874dcae3b129312266d5c793e18aa6057d923f0eb2fcb",
+        "authority": "local_user",
+        "old_state": "off",
+        "new_state": "on",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_epoch": 1,
+        "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"op_1788903794561_1d666723\",\"recorded_at_ms\":1788903744408,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13\"}",
+        "created_at_ms": 1788903744408
+      }
+    ],
+    "source_detection_cursors": [
+      {
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "revision": 1,
+        "last_poll_attempt_ms": 1788903744408,
+        "last_poll_success_ms": 1788903744408,
+        "next_poll_at_ms": 1788907344408,
+        "etag": null,
+        "last_modified": null,
+        "coverage": "complete",
+        "observed_count": 2,
+        "truncated": 0,
+        "error_count": 0,
+        "last_error_code": null,
+        "last_error_message": null,
+        "poll_owner_token": null,
+        "poll_consent_epoch": null,
+        "poll_lease_expires_ms": null
+      }
+    ],
+    "source_items": [
+      {
+        "item_id": "si_e41e58bfc1dbe6affeb4c12b47182ace4a2fe1a23bc036552e4f51f0bada6dfe",
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "entry_id": "s20-entry-1",
+        "capture_key": "podcast:3e921f4a74a892a2853f487971b146fd88f7aa12545134a67aa2bd938ee1f4f4",
+        "canonical_url": "http://127.0.0.1:49557/episode/1",
+        "title": "S20 matrix item 1",
+        "published_at_ms": 1788742800000,
+        "first_seen_ms": 1788903744408,
+        "last_seen_ms": 1788903744408,
+        "first_scan_revision": 1,
+        "first_seen_consent_epoch": 1,
+        "metadata_json": "{\"audio_url\":\"http://127.0.0.1:49557/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 01:00:00 GMT\"}",
+        "legacy_episode_id": 1,
+        "eligibility": "back_catalog",
+        "enrolled_epoch": 1,
+        "state": "eligible",
+        "actual_starts": 0,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "blocked_reason": null,
+        "video_id": null,
+        "committed_at_ms": null
+      },
+      {
+        "item_id": "si_a803cb523cce0c868c669a258cb5a1f3b005baba90b6a844aa676d3959bfb55f",
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "entry_id": "s20-entry-2",
+        "capture_key": "podcast:c87a92acb140772050022b03add9cff0a847d1bc6240bd31f53c875b50988e65",
+        "canonical_url": "http://127.0.0.1:49557/episode/2",
+        "title": "S20 matrix item 2",
+        "published_at_ms": 1788746400000,
+        "first_seen_ms": 1788903744408,
+        "last_seen_ms": 1788903744408,
+        "first_scan_revision": 1,
+        "first_seen_consent_epoch": 1,
+        "metadata_json": "{\"audio_url\":\"http://127.0.0.1:49557/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 02:00:00 GMT\"}",
+        "legacy_episode_id": 2,
+        "eligibility": "back_catalog",
+        "enrolled_epoch": 1,
+        "state": "committed",
+        "actual_starts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "blocked_reason": null,
+        "video_id": "episode_cf538072f1d",
+        "committed_at_ms": 1788903744408
+      }
+    ],
+    "source_subscriptions": [
+      {
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "kind": "podcast_rss",
+        "source_key": "http://127.0.0.1:49557/feed.xml",
+        "canonical_url": "http://127.0.0.1:49557/feed.xml",
+        "display_name": null,
+        "adapter": "podcast_rss_v1",
+        "legacy_feed_id": 1,
+        "legacy_playlist_id": null,
+        "detection_enabled": 1,
+        "archived": 0,
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1,
+        "boundary": "none",
+        "initial_enrollment_completed_ms": 1788903744408,
+        "back_catalog_enrolled": 2,
+        "poll_interval_min": 60,
+        "capture_not_before_ms": 1788907344408,
+        "accounting_hold_until_ms": 0,
+        "last_observed_ms": 1788903744408,
+        "created_at_ms": 1788903744408,
+        "updated_at_ms": 1788903744408
+      }
+    ],
+    "source_user_intents": [
+      {
+        "token_hash": "ac7dbda2f9dcdd66bab337f50e61225a37d236fcf04f07b16ee294bfd5fe5416",
+        "source_id": "src_bb127d9db713bcde5c655079149ad7eadc7bb2f1b8d34f8165cf70063813ec13",
+        "request_hash": "6ca2c6f95f865803d5b1b2d8ccdd355f414a7ddfaa93dc31b5c0cd69909d1a3f",
+        "session_hash": "fc704f49f4620f1190a874dcae3b129312266d5c793e18aa6057d923f0eb2fcb",
+        "expires_ms": 1788904044408,
+        "consumed_by": "op_1788903794561_1d666723"
+      }
+    ],
+    "yoinks": [
+      {
+        "video_id": "episode_cf538072f1d",
+        "slug": "s20-matrix-item-2-cf538072f1d",
+        "channel": "Untitled podcast",
+        "title": "S20 matrix item 2",
+        "topic": "Uncategorized",
+        "hook_type": null,
+        "yoinked_at": "2026-09-08T21:43:27Z",
+        "corpus_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-5h_s7v0y\\Podcasts\\untitled-podcast\\s20-matrix-item-2-cf538072f1d\\s20-matrix-item-2-cf538072f1d.md",
+        "sidecar_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-5h_s7v0y\\Podcasts\\untitled-podcast\\s20-matrix-item-2-cf538072f1d\\s20-matrix-item-2-cf538072f1d.json",
+        "health_score_json": null,
+        "metadata_json": "{\"url\": \"http://127.0.0.1:49557/episode/2\", \"platform\": \"podcast\", \"content_type\": \"episode\", \"duration_seconds\": null, \"upload_date\": \"Mon, 07 Sep 2026 02:00:00 GMT\", \"podcast_title\": \"Untitled podcast\", \"episode_id\": 2, \"feed_url\": \"http://127.0.0.1:49557/feed.xml\", \"guid\": \"s20-entry-2\", \"capture_key\": \"podcast:c87a92acb140772050022b03add9cff0a847d1bc6240bd31f53c875b50988e65\"}",
+        "deleted_at": null,
+        "schema_version": 2,
+        "format": null,
+        "performance_tier": null,
+        "production_style": null,
+        "length_bucket": null,
+        "source_type": "episode",
+        "platform": "podcast",
+        "author": "Untitled podcast"
+      }
+    ]
+  }
+}

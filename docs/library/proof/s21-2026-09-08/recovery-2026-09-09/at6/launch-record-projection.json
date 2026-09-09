@@ -1,0 +1,43 @@
+{
+  "projection_only": true,
+  "source_file": "C:\\Users\\hello\\.claude\\projects\\C--Users-hello\\a5f3fe64-562d-4e6e-9c5a-2726545b8830.jsonl",
+  "source_file_sha256_at_recovery": "240c59b1366a9ab567d1cbcd39dfc3b1512fa796afc00e486ee10fd903a13b34",
+  "records": [
+    {
+      "source_line": 12314,
+      "source_record_sha256": "b6377016e4fde6e04b9e0c1bccd0b3855d655c8b0d1e8246a252288828941851",
+      "uuid": "e1605dfc-673a-41b1-8238-675e76274f13",
+      "timestamp": "2026-09-08T20:08:46.169Z",
+      "block": {
+        "type": "tool_use",
+        "id": "toolu_01KnGtXmf35uPGZKWC9HgYM7",
+        "name": "Bash",
+        "input": {
+          "command": "cd \"E:/AI/projects/uoink/checkouts/Yoink-library\" && git add server.py source_subscriptions.py && git commit -q -m \"Phase 3 (run AT-6, Grok): AS-02a launch intent cleared only on affirmative evidence of no child (interrupted Popen keeps the intent unresolved and the probe unknown), AS-02b child-record schema and start binding validated before absence is inferred, AS-03a worker exit and podcast settlement callback consume the verified settlement and retain locks while the child is unsettled, AS-03b reconciliation reuses retained ownership and releases dispatcher locks after verified terminal commit, AS-03c manual reuse applies the completeness/identity checks. Astra's suite 150/150; companions 397 pass\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017D34VwAZkA7zYUFgR17KAY\" && git log --oneline -1 && export PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=\"$PWD\" S21_CANDIDATE_SHA=$(git rev-parse HEAD); unset ANTHROPIC_API_KEY; python -B tests/library_work_astra/test_phase3_s21.py --execute-s21 --hold-seconds 5 2>&1 | grep \"S21 receipt\"; python -B tests/library_work_astra/process_recovery_receipt.py --execute 2>&1 | tail -1; python -B tests/library_work_astra/test_phase3_acceptance5.py --execute-launch-probe 2>&1 | tail -3",
+          "description": "Commit round 6 and run the three Phase 3 receipts on this candidate",
+          "timeout": 900000
+        },
+        "caller": {
+          "type": "direct"
+        }
+      },
+      "tool_result_status": {}
+    },
+    {
+      "source_line": 12315,
+      "source_record_sha256": "f59c2edeb60b8145df1e776ffa932d8b4e530502100a81a79a10c7b9790206d5",
+      "uuid": "68233634-101f-4396-9ee8-0991f7924495",
+      "timestamp": "2026-09-08T20:09:00.101Z",
+      "block": {
+        "tool_use_id": "toolu_01KnGtXmf35uPGZKWC9HgYM7",
+        "type": "tool_result",
+        "content": "1830b7a Phase 3 (run AT-6, Grok): AS-02a launch intent cleared only on affirmative evidence of no child (interrupted Popen keeps the intent unresolved and the probe unknown), AS-02b child-record schema and start binding validated before absence is inferred, AS-03a worker exit and podcast settlement callback consume the verified settlement and retain locks while the child is unsettled, AS-03b reconciliation reuses retained ownership and releases dispatcher locks after verified terminal commit, AS-03c manual reuse applies the completeness/identity checks. Astra's suite 150/150; companions 397 pass\nS21 receipt: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-0w_h99w2\\receipt.json\nreceipt: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\procrec-3ss1326g\\receipt.json PASS\r\n  \"probe\": \"unknown\",\r\n  \"all_created_children_reaped\": true\r\n}\nShell cwd was reset to C:\\Users\\hello",
+        "is_error": false
+      },
+      "tool_result_status": {
+        "interrupted": false
+      }
+    }
+  ],
+  "finding": "The Python S21 child output was piped through grep; its exit status was not retained. Later commands ran after semicolons. Outer tool success cannot establish the child exit code."
+}

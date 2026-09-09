@@ -1,0 +1,38 @@
+2026-09-08 13:09:28,060 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-08 13:09:28,066 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-08 13:09:28,067 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-08 13:09:28,069 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-08 13:09:28,071 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-08 13:09:28,073 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-08 13:09:28,076 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-08 13:09:28,078 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-08 13:09:28,079 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-08 13:09:28,082 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-08 13:09:28,084 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-08 13:09:28,086 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-08 13:09:28,089 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-08 13:09:28,092 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-08 13:09:28,094 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-08 13:09:28,096 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-08 13:09:28,097 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-08 13:09:28,100 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-08 13:09:28,101 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-08 13:09:28,103 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-08 13:09:28,106 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-08 13:09:28,108 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-08 13:09:28,112 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-08 13:09:28,114 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-08 13:09:28,116 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-08 13:09:28,118 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-08 13:09:28,120 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-08 13:09:28,123 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-08 13:09:28,125 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-08 13:09:28,378 INFO standing capture st_107188b0c152180fb4800e6f18f0f71d settled: succeeded
+2026-09-08 13:09:42,522 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:09:42,660 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-08 13:09:42,691 WARNING topics.json missing at E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\s21-5o8tsqk7\helper\topics.json — falling back to 'Uncategorized'
+2026-09-08 13:09:53,916 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:10:03,916 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:10:13,909 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:10:23,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:10:33,904 INFO GET /health from 127.0.0.1 -> ok
