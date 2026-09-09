@@ -1,0 +1,10 @@
+{
+  "build_source": "8a607c37095cb4f3b66d2aee285cfb710ab5e586",
+  "validation_source": "175bcef1c5330c9313e08c8f7897ed7200a50b6f",
+  "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+  "executable_sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec",
+  "guard_sha256": "4caf808cee2623f3b01efcd5fd8bc182fbb492b2e26f3f72f4c16484f7486976",
+  "port": 18191,
+  "profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-03\\profile",
+  "installed": false
+}

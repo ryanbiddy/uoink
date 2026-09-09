@@ -1,0 +1,17 @@
+{
+  "scope": "Third worker original input and worker observation; independent union pending separately",
+  "files": {
+    "original.patch": {
+      "bytes": 334499,
+      "sha256": "60d00f827282df8f44204a0608a6921380666b92d4863c7b666c239d9fbed1db"
+    },
+    "worker-tests.log": {
+      "bytes": 2479,
+      "sha256": "94c3268b622175dea7d6a07ba3e58c7f12556fde06bdd328cc18183c6a05713b"
+    },
+    "worker-tests.xml": {
+      "bytes": 7189,
+      "sha256": "7aad319b6ae4e2e123df6e6c8ada949544741cfbec1c8ae5c5e45a78a02d9b51"
+    }
+  }
+}

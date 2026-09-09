@@ -1,0 +1,13 @@
+2026-09-09 10:48:01,699 INFO install migration: skipped_isolated_install
+2026-09-09 10:48:01,793 INFO seeded 5 default style anchors
+2026-09-09 10:48:01,793 INFO default style anchors: seeded 5 on first run
+2026-09-09 10:48:01,793 INFO Restored 0 job record(s) from the library index
+2026-09-09 10:48:01,795 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 10:48:01,814 INFO phase 2 author backfill: {'total': 1, 'scanned': 1, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 1}
+2026-09-09 10:48:01,828 INFO tray: started (daemon thread)
+2026-09-09 10:48:01,838 WARNING splash: failed to spawn (non-fatal): nonbundled child forbidden
+2026-09-09 10:48:01,841 INFO Uoink server v3.8.0 running on http://127.0.0.1:18191
+2026-09-09 10:48:01,841 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 10:48:01,841 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\packaged-runtime-03\profile\output
+2026-09-09 10:48:01,841 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\packaged-runtime-03\profile\server.log
+2026-09-09 10:48:02,118 INFO GET /health from 127.0.0.1 -> ok

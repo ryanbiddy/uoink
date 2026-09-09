@@ -186,6 +186,11 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    incomplete original-route observation. Follow
    `RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md` for manifest/guard,
    bounded transport, complete evidence and executable operator corrections.
+   Third C22 source worker reports 41 passes / two frozen failures; Astra
+   independently verifies it. Further review finds non-independent protected-state
+   allowances, missing child-survival/relaunch gates, permissive provenance and
+   guard/resume defects. Follow `RYAN-C22-FINAL-ORACLE-REPAIR-BRIEF-2026-09-09.md`
+   using its archived input; no earlier status supplies installed credit.
    Third Phase 4 instrument has 36 independent passes / one frozen failure,
    24.86 s. Its completeness flag wrongly accepts a refused reshelve prompt and
    aggregates sessions; cleanup can block on a full stdin pipe and failed canary
@@ -1761,3 +1766,33 @@ complete. The bounded correction brief above preserves existing assertions and
 requires positive complete-session and large-write oracles. The refusal's exact
 cause must be diagnosed before any product repair or fixture-generator rerun.
 Both previously proposed fixture patches remain unapplied pending Ryan's answer.
+
+### 2026-09-09 — bundled original entry works; stricter C22 oracles required
+
+At observation source `175bcef`, packaged product bindings still exactly match
+build source `8a607c3` (142 files) and executable SHA-256 d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1.
+Bundled Python 3.11.9 / MCP 1.27.1 / schema 30 ran original uoink_mcp.py with the
+explicit private profile and port 18191: 32 tools, five templates, four prompts,
+native/fallback card equality, successful consult-library AND reshelve-review.
+SQLite logical state and library files were unchanged by reading. The original
+server.py then started on the explicit isolated profile/port, reported apply false
+and model not loaded, and exited zero after authenticated quit. Both processes
+exited zero; automatic guard canary passed, guard removed and _pth unchanged.
+Proof: `proof/ryan-bundled-runtime-03-2026-09-09/SHA256.json` (18 files).
+This is synthetic staged-runtime evidence only. PID/owned-handle termination was
+observed; a persisted creation-time identity and surviving-child/restart receipt
+were not part of this narrow probe. Complete C22/P4 kits and actual Inno remain.
+
+Third P4 seed explicitly uses profile/prompt-store at generator line 402, whereas
+the original pure preview reader uses profile/library. The narrow packaged probe
+uses the real default store and succeeds. The fourth P4 brief already requires
+diagnosing/correcting that generator and retaining the original refused request.
+
+Third C22 review found that the protected-state allowance is synthesized from all
+observed new rows, so unexpected new work can authorize itself; child cases do
+not gate on helper restart during child survival; a module ERROR string can earn
+provenance credit; guard restoration checks only the parent and removes changed
+bytes; continuation regenerates baselines. Its original input and worker union
+41/2 are retained in `proof/ryan-c22-review-03-input-2026-09-09/SHA256.json`.
+Independent union continues separately. Follow the final-oracle repair brief;
+passing status assertions do not substitute for these missing observations.

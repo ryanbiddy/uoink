@@ -1,0 +1,18 @@
+...........F.....F.........................                              [100%]
+================================== FAILURES ===================================
+E   AssertionError: assert '/ISOLATEDPROFILE=' in 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-kit\\...\grok\\_scratch\\c22-kit\\t-zexmq9oj\\receipt\\profiles\\empty /PORT=63802 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\tests\test_install_receipt_c22_kit.py:223: AssertionError: assert '/ISOLATEDPROFILE=' in 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-kit\\...\grok\\_scratch\\c22-kit\\t-zexmq9oj\\receipt\\profiles\\empty /PORT=63802 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'
+E   AssertionError: ('one_off_capture', {'id': 'one_off_capture', 'status': 'fail', 'extract': {'ok': True, 'deduped': False, 'start': {'s...'off', ...}], '_http_status': 200}, 'list_feeds': {'ok': False, 'error': 'not found', '_http_status': 404}, ...}, ...})
+    assert 'fail' == 'pass'
+      
+      - pass
+      + fail
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\tests\test_install_receipt_c22_kit.py:328: AssertionError: ('one_off_capture', {'id': 'one_off_capture', 'status': 'fail', 'extract': {'ok': True, 'deduped': False, 'start': {'s...'off', ...}], '_http_status': 200}, 'list_feeds': {'ok': False, 'error': 'not found', '_http_status': 404}, ...}, ...})
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_kit.py::test_plan_inno_does_not_execute - AssertionError: assert '/ISOLATEDPROFILE=' in 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-kit\\...\grok\\_scratch\\c22-kit\\t-zexmq9oj\\receipt\\profiles\\empty /PORT=63802 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'
+FAILED tests/test_install_receipt_c22_kit.py::test_synthetic_helper_scenarios_and_verdict - AssertionError: ('one_off_capture', {'id': 'one_off_capture', 'status': 'fail', 'extract': {'ok': True, 'deduped': False, 'start': {'s...'off', ...}], '_http_status': 200}, 'list_feeds': {'ok': False, 'error': 'not found', '_http_status': 404}, ...}, ...})
+assert 'fail' == 'pass'
+  
+  - pass
+  + fail
+2 failed, 41 passed in 666.25s (0:11:06)

@@ -1,0 +1,8 @@
+2026-09-09 10:48:00,853 INFO Processing request of type ListToolsRequest
+2026-09-09 10:48:00,854 INFO Processing request of type ListResourceTemplatesRequest
+2026-09-09 10:48:00,855 INFO Processing request of type ListPromptsRequest
+2026-09-09 10:48:00,855 INFO Processing request of type CallToolRequest
+2026-09-09 10:48:00,861 INFO Processing request of type ReadResourceRequest
+2026-09-09 10:48:00,863 INFO Processing request of type CallToolRequest
+2026-09-09 10:48:00,864 INFO Processing request of type GetPromptRequest
+2026-09-09 10:48:00,865 INFO Processing request of type GetPromptRequest

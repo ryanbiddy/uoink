@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "-c",
+    "from pathlib import Path\ntry: Path('E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\packaged-runtime-03\\\\blocked-canary.bin').read_bytes()\nexcept PermissionError: print('CANARY_REFUSED')\nelse: raise RuntimeError('guard not active')"
+  ],
+  "exit": 0
+}

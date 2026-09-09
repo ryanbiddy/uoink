@@ -1,0 +1,77 @@
+{
+  "scope": "Original bundled synthetic stdio and isolated helper before Inno; no installed/client credit",
+  "files": {
+    "canary.exit.json": {
+      "bytes": 430,
+      "sha256": "3f629ef4c8c8c4393fd6d27d9477fd1834c78e816893468efdca3652e9b447c1"
+    },
+    "canary.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "canary.stdout": {
+      "bytes": 16,
+      "sha256": "d2aef59beebbdab77035843d9f919d8bcf54e637ed755574836e2b928cc973cf"
+    },
+    "exchanges.json": {
+      "bytes": 50219,
+      "sha256": "557c60692a4f54dc4a671c95e3a418b66a3e5cc4c6e60a3d9ef0b81c941bad49"
+    },
+    "frames.json": {
+      "bytes": 46751,
+      "sha256": "9947a38f2a0fd7b62345ccda7fe04e0c6ae412d38a07ff8621e2ce47f92af3ed"
+    },
+    "helper.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "helper.stdout": {
+      "bytes": 1215,
+      "sha256": "d2b1b9e6a27d4638437be9cd0137f98b15f691f9c50b697b05912700b871d0e9"
+    },
+    "launch.json": {
+      "bytes": 563,
+      "sha256": "6eb1de34db563258b15cc2e5412550e5f726697bb15696fe11d585310c98f75a"
+    },
+    "outcome.json": {
+      "bytes": 2659,
+      "sha256": "59e1227d6796e4dae41784eb15519a30e86251ece4be46c328aaf339a39a0957"
+    },
+    "packaged_runtime_probe_03.py": {
+      "bytes": 13452,
+      "sha256": "c232e7cc77dc0bcbf9e363013dbeb4e21ee8211989d99993157c26396e968e4a"
+    },
+    "post-observation-bindings.json": {
+      "bytes": 24453,
+      "sha256": "47b7d63173579b000322e2f2a0b760c1502cf8efd36c3c6f6ce49ad1ad53ec8a"
+    },
+    "preview.json": {
+      "bytes": 1200,
+      "sha256": "eff158bba4e337b25a2d0a4d829625aa3d5454c769b5ee43020426da67feddce"
+    },
+    "read-state.json": {
+      "bytes": 798,
+      "sha256": "af2067560d11ac3b797d7a1d55b17918c7806eac51a52e3c79c55c90830f3a06"
+    },
+    "runtime.json": {
+      "bytes": 3286,
+      "sha256": "cb5459c8778f72be542c5dac6a0bacf59d89cb2276934a92e2b318b16fc5d668"
+    },
+    "seed.exit.json": {
+      "bytes": 2964,
+      "sha256": "ee0145f9c9d867f0572dc79b7a0605d3920ed7f982f5d1660e905b63ec469056"
+    },
+    "seed.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "seed.stdout": {
+      "bytes": 3011,
+      "sha256": "f959c9049bbd3cc6f13dd0de5bebd5f3c80aeab28673e4675f42062e998be77a"
+    },
+    "stdio.stderr": {
+      "bytes": 607,
+      "sha256": "1c3f852614a9469fbdad9d2c59dc223b7e715e0e1bf66ae6a248f62c3c607ccf"
+    }
+  }
+}

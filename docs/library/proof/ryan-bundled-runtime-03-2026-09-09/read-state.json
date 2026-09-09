@@ -1,0 +1,16 @@
+{
+  "before": {
+    "sql_sha256": "fc30dbf34385856d403e2f0d81f524b95d3d4a46251c39e5edf78643af5e48a2",
+    "library_files": {
+      "library/.library.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "library/taxonomies/7387229778ed3ac1bf2d618b2c69e2f9943b05e78a160b3de7f1d47ecf80aa1a.json": "449faffc8630c1cdad1b81cc5019eb8a5467858594b52faa2d0d829a168bbcdf"
+    }
+  },
+  "after": {
+    "sql_sha256": "fc30dbf34385856d403e2f0d81f524b95d3d4a46251c39e5edf78643af5e48a2",
+    "library_files": {
+      "library/.library.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "library/taxonomies/7387229778ed3ac1bf2d618b2c69e2f9943b05e78a160b3de7f1d47ecf80aa1a.json": "449faffc8630c1cdad1b81cc5019eb8a5467858594b52faa2d0d829a168bbcdf"
+    }
+  }
+}
