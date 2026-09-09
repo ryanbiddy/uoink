@@ -1,42 +1,37 @@
 # Local Server (`server.py`)
 
 The browser extension talks to this server at `http://127.0.0.1:5179`.
-It runs the same yt-dlp + ffmpeg pipeline as the GUI, but exposed as JSON
-endpoints with CORS allowed for youtube.com.
+It runs the same yt-dlp + ffmpeg pipeline as the dashboard and extension,
+exposed through a loopback JSON API. User-data and mutating routes are
+authenticated; bounded liveness and product-metadata routes are public.
 
 ## Dependencies
 
-Pure Python stdlib — **no fastapi/flask/uvicorn install required**.
+The HTTP server uses the Python standard library, so it does not need
+FastAPI, Flask, or Uvicorn. The Uoink application still needs its pinned
+Python packages, yt-dlp, and ffmpeg.
 
-The optional `win11toast` package is used for a friendly startup toast; if
-it's missing, the server still runs (silently).
-
-```
-pip install win11toast      # optional
-```
-
-You also still need the same external tools as the GUI:
-
-```
-pip install yt-dlp
-winget install Gyan.FFmpeg
-```
+Follow [REQUIREMENTS.md](REQUIREMENTS.md) for the complete source setup.
+Do not install an unpinned subset from this page. Startup notifications use
+the platform integration in `_platform.py`; `win11toast` is not used.
 
 ## Running
 
-Double-click **`start_server.bat`**, or:
+After completing [REQUIREMENTS.md](REQUIREMENTS.md), run:
 
 ```
-pythonw server.py
+python server.py
 ```
 
-(Use `python server.py` instead if you want logs streaming to a console.)
+Keep that terminal open while developing. For a background launch,
+double-click **`start_server.bat`** or run:
 
-PowerShell equivalent:
-
-```
+```powershell
 .\start_server.ps1
 ```
+
+Both launchers prefer the installed bundled interpreter, then the source
+checkout's `.venv`, then `pythonw` on `PATH`.
 
 Verify it's alive at `http://127.0.0.1:5179/ping`. A live helper returns HTTP
 200 with `"ok": true`; the full response shape is documented below.
@@ -45,12 +40,11 @@ Logs are written to `server.log` next to `server.py`.
 
 ## Auto-start at login
 
-1. Press <kbd>Win</kbd>+<kbd>R</kbd>, type `shell:startup`, press Enter.
-2. Drop a shortcut to `start_server.bat` into that folder.
-
-The server launches with `pythonw`, so it sits silently in the background — no
-console window. Stop it via Task Manager (kill the `pythonw.exe` process) or by
-running the GUI's launcher and then closing it; cleaner: leave it running.
+The Windows installer creates and removes Uoink's login autostart entry. A
+source checkout does not change login state. If you deliberately add a
+shortcut to `start_server.bat` under `shell:startup`, remove that shortcut
+yourself when you no longer want the development helper at login. Do not kill
+every `pythonw.exe` process; other Python applications may use it.
 
 ## Endpoints
 
@@ -82,10 +76,22 @@ itself fails it instead contains an `error` string.
 
 ### `POST /extract`
 
-Body:
+Every POST route is token-gated. Read the source-checkout token from
+`token.txt` beside `server.py` and send it in the `X-Uoink-Token` header.
+Installed copies use `%LOCALAPPDATA%\Uoink\token.txt`.
 
-```json
-{"url": "https://www.youtube.com/watch?v=...", "interval": 30}
+PowerShell request:
+
+```powershell
+$headers = @{
+  "X-Uoink-Token" = (Get-Content .\token.txt -Raw).Trim()
+}
+$body = @{
+  url = "https://www.youtube.com/watch?v=..."
+  interval = 30
+} | ConvertTo-Json
+Invoke-RestMethod http://127.0.0.1:5179/extract `
+  -Method Post -Headers $headers -ContentType "application/json" -Body $body
 ```
 
 Response on success:
@@ -94,25 +100,37 @@ Response on success:
 {
   "ok": true,
   "folder": "C:\\Users\\you\\Desktop\\Uoink\\<slug>",
-  "combined_md": "# Title\n\n...",
+  "yoink_md": "# Title\n\n...",
+  "corpus_md_paste": "# Title\n\n...",
   "screenshot_count": 12,
-  "title": "Original video title"
+  "title": "Original video title",
+  "video_slug": "original-video-title"
 }
 ```
 
-The server also calls `os.startfile(folder)` on success so File Explorer pops
-open at the result folder automatically.
+The response also carries caption/transcript provenance and long-video mode
+fields. On success the helper asks the OS to reveal the result folder.
 
 Response on failure:
 
 ```json
-{"ok": false, "error": "ffmpeg failed: ..."}
+{
+  "ok": false,
+  "error": "<plain-language failure>",
+  "error_detail": "<sanitized diagnostic detail>",
+  "failure_phase": "screenshots"
+}
 ```
 
 ## CORS
 
-Allowed origins: `https://www.youtube.com`, `https://youtube.com`.
-Methods: `GET, POST, OPTIONS`. Headers: `Content-Type`. Preflight handled.
+Page origins are limited to `https://www.youtube.com`,
+`https://m.youtube.com`, and `https://youtube.com`; Chromium extension origins
+are accepted separately. Preflight allows `GET`, `POST`, `DELETE`, and
+`OPTIONS`, plus `Content-Type`, `X-Uoink-Token`, `X-Uoink-Client`,
+`X-Yoink-Token`, and `X-Yoink-Client`. The helper also emits the Private
+Network Access response header required for browser-to-loopback requests.
 
-If you hit a CORS error from somewhere else, edit `ALLOWED_ORIGINS` in
-`server.py`.
+Do not broaden CORS to work around a failed request. Check the request origin,
+Host, token header, and `/token` client header against
+[docs/security.md](docs/security.md).

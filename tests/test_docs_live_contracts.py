@@ -5,7 +5,12 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import shutil
+import subprocess
+import sys
 from pathlib import Path
+
+import pytest
 
 import server
 import uoink_mcp
@@ -119,6 +124,91 @@ def test_security_model_lists_every_public_get_surface() -> None:
         "/token",
     ):
         assert f"`GET {route}`" in public
+
+
+def test_local_server_runbook_matches_live_auth_response_and_cors() -> None:
+    readme = (ROOT / "README_server.md").read_text(encoding="utf-8")
+    extract = readme.split("### `POST /extract`", 1)[1].split(
+        "## CORS", 1
+    )[0]
+    cors = readme.split("## CORS", 1)[1]
+    cors_words = " ".join(cors.split())
+
+    assert "[REQUIREMENTS.md](REQUIREMENTS.md)" in readme
+    assert "win11toast` is not used" in readme
+    assert "pip install yt-dlp" not in readme
+    assert "X-Uoink-Token" in extract
+    assert '"yoink_md"' in extract
+    assert '"corpus_md_paste"' in extract
+    assert '"combined_md"' not in extract
+    examples = [
+        json.loads(raw)
+        for raw in re.findall(r"```json\s*(\{.*?\})\s*```", extract, re.DOTALL)
+    ]
+    assert len(examples) == 2
+    success, failure = examples
+    assert success["ok"] is True
+    assert isinstance(success["yoink_md"], str)
+    assert isinstance(success["corpus_md_paste"], str)
+    assert failure["ok"] is False
+    assert isinstance(failure["error"], str)
+    assert isinstance(failure["error_detail"], str)
+    assert isinstance(failure["failure_phase"], str)
+
+    for origin in server.ALLOWED_ORIGINS:
+        assert f"`{origin}`" in cors
+    assert "Chromium extension origins" in cors
+    for method in ("GET", "POST", "DELETE", "OPTIONS"):
+        assert f"`{method}`" in cors
+    for header in (
+        "Content-Type",
+        "X-Uoink-Token",
+        "X-Uoink-Client",
+        "X-Yoink-Token",
+        "X-Yoink-Client",
+    ):
+        assert f"`{header}`" in cors
+    assert "Private Network Access" in cors_words
+
+
+def test_windows_source_launchers_prefer_the_repo_venv() -> None:
+    batch = (ROOT / "start_server.bat").read_text(encoding="utf-8")
+    powershell = (ROOT / "start_server.ps1").read_text(encoding="utf-8")
+
+    assert r".venv\Scripts\pythonw.exe" in batch
+    assert r"%~dp0server.py" in batch
+    assert r".venv\Scripts\pythonw.exe" in powershell
+    assert "Start-Process -FilePath $py" in powershell
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows launcher")
+def test_powershell_launcher_selects_repo_venv_at_runtime(tmp_path: Path) -> None:
+    script = tmp_path / "start_server.ps1"
+    shutil.copy2(ROOT / "start_server.ps1", script)
+    venv_pythonw = tmp_path / ".venv" / "Scripts" / "pythonw.exe"
+    venv_pythonw.parent.mkdir(parents=True)
+    venv_pythonw.touch()
+
+    powershell = shutil.which("powershell") or shutil.which("pwsh")
+    assert powershell is not None
+    escaped_script = str(script).replace("'", "''")
+    command = (
+        "function Start-Process { "
+        "param($FilePath, $ArgumentList, $WindowStyle); "
+        "Write-Output ('SELECTED=' + $FilePath) "
+        "}; "
+        f". '{escaped_script}'"
+    )
+    result = subprocess.run(
+        [powershell, "-NoProfile", "-Command", command],
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert f"SELECTED={venv_pythonw}" in result.stdout
 
 
 def test_security_model_does_not_promise_removed_live_aliases() -> None:
