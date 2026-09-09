@@ -211,11 +211,30 @@ def get_transcript_reliability(video_id: str) -> dict:
         "get_transcript_reliability", {"video_id": video_id}
     )
 
-if __name__ == "__main__":
+_USAGE = (
+    "usage: python uoink_mcp.py "
+    "[--doctor | --migrate-dry-run]"
+)
+
+
+def run(argv: list[str]) -> int:
+    if argv in (["-h"], ["--help"]):
+        print(_USAGE)
+        return 0
     # `uoink doctor` / dry-run support: `python uoink_mcp.py --doctor` and
     # `--migrate-dry-run` delegate to the server CLI (server is already
     # imported above) instead of starting the stdio transport.
-    _argv = sys.argv[1:]
-    if "--doctor" in _argv or "--migrate-dry-run" in _argv:
-        raise SystemExit(server.run_cli(_argv))
+    if argv in (["--doctor"], ["--migrate-dry-run"]):
+        return server.run_cli(argv)
+    if argv:
+        print(
+            f"unknown argument {argv[0]!r}\n{_USAGE}",
+            file=sys.stderr,
+        )
+        return 2
     mcp.run(transport="stdio")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(run(sys.argv[1:]))
