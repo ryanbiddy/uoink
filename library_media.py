@@ -24,9 +24,13 @@ the literal BD-0 wording, read before relying on the behaviour:
    refused at ``Index.publish_media_snapshot`` and at raw
    ``publish_transcript``. The publisher never mints a ticket. An
    idempotent retry carries the original ticket. There is no empty,
-   first-publication, or evaluation-helper exception. Production callers
-   (``podcasts.episode_to_corpus``, ``server._index_yoink``) acquire the
-   ticket before building. Reconstruction consults the same ledger and
+   first-publication, or evaluation-helper exception. Owning callers
+   (``podcasts.episode_to_corpus``, ``server._index_yoink``) mint, then
+   validate the exact consumed sidecar/transcript bytes under that fence
+   and refuse ``revision_unavailable`` when those inputs changed; they
+   never mint a current ticket as a license to publish already-read stale
+   cues, and never rebuild old cues under a newer base. Reconstruction
+   consults the same ledger and
    will not restore a superseded sidecar while disk still names the
    current publication. Non-owned sidecar keys, including a key another
    owner removed, are merged onto the carrier and revalidated at the
@@ -1778,6 +1782,75 @@ def _bind_sidecar_carrier(sidecar: dict, sidecar_path: Path, ticket: Publication
     if changed:
         owned[sidecar_path] = _json(sidecar).encode("utf-8")
     return raw
+
+
+def capture_sidecar_inputs(sidecar: dict) -> tuple:
+    """The mutable capture inputs an owner consumes: transcript cores and
+    the held source-chapter list. Compared after mint so a newer owner's
+    disk sidecar cannot be replaced by a pre-read plan."""
+    if not isinstance(sidecar, dict):
+        return ((), None)
+    transcript = tuple(
+        (e.get("start"), e.get("end"), e.get("text"))
+        for e in (sidecar.get("transcript") or [])
+        if isinstance(e, dict)
+    )
+    if "source_chapters" not in sidecar:
+        return (transcript, None)
+    raw = sidecar.get("source_chapters")
+    if not isinstance(raw, list):
+        return (transcript, ())
+    chapters = tuple(
+        (c.get("start_time"), c.get("end_time"), c.get("title")) if isinstance(c, dict) else None
+        for c in raw
+    )
+    return (transcript, chapters)
+
+
+def read_owned_sidecar(sidecar_path, fallback=None):
+    """Parse the sidecar currently on disk, or ``fallback`` when it is absent.
+
+    A present but unparseable sidecar is a dependency change, not a missing
+    file: the owner must refuse rather than publish pre-read inputs over it.
+    """
+    if sidecar_path is None:
+        return fallback
+    raw = _read_bytes(Path(sidecar_path), required=False)
+    if raw is None:
+        return fallback
+    try:
+        parsed = _parse_json_object(raw, "sidecar")
+    except MediaError:
+        raise _stale("publication_input_changed") from None
+    return parsed if isinstance(parsed, dict) else fallback
+
+
+def require_unchanged_capture_inputs(sidecar_path, consumed: dict) -> None:
+    """Refuse when the on-disk sidecar's capture inputs no longer match
+    the exact dict this owner already consumed."""
+    owned = read_owned_sidecar(sidecar_path, fallback=None)
+    if owned is None:
+        return
+    if capture_sidecar_inputs(owned) != capture_sidecar_inputs(consumed):
+        raise _stale("publication_input_changed")
+
+
+def capture_plan_matches(plan: dict, owned_plan: dict) -> bool:
+    """True when two capture plans consume the same cue cores and chapters."""
+    if not isinstance(plan, dict) or not isinstance(owned_plan, dict):
+        return False
+    left = [cue_core(c) for c in (plan.get("cues") or [])]
+    right = [cue_core(c) for c in (owned_plan.get("cues") or [])]
+    return left == right and list(plan.get("chapter_rows") or []) == list(
+        owned_plan.get("chapter_rows") or [])
+
+
+def require_unchanged_input_bytes(path, expected: bytes) -> None:
+    """Refuse when a mutable publication input file no longer matches the
+    exact bytes consumed under the ownership fence."""
+    raw = _read_bytes(Path(path), required=False)
+    if raw != expected:
+        raise _stale("publication_input_changed")
 
 
 def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:

@@ -1017,12 +1017,10 @@ def _source_deep_link(source_url: str, seconds: float | int | None) -> str:
     return f"{source_url.split('#', 1)[0]}#t={timestamp}"
 
 
-def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
+def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        raise FileNotFoundError(f"transcript file missing: {path}") from None
-    except (OSError, json.JSONDecodeError) as exc:
+        raw = json.loads(data.decode("utf-8"))
+    except json.JSONDecodeError as exc:
         raise ValueError(f"transcript is not readable JSON: {exc}") from exc
     if not isinstance(raw, dict) or not isinstance(raw.get("segments"), list):
         raise ValueError("transcript must be an object with a segments array")
@@ -1054,6 +1052,16 @@ def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
     if not shaped:
         raise ValueError("transcript segments array is empty")
     return raw, shaped
+
+
+def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
+    try:
+        data = path.read_bytes()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"transcript file missing: {path}") from None
+    except OSError as exc:
+        raise ValueError(f"transcript is not readable JSON: {exc}") from exc
+    return _transcript_from_bytes(data)
 
 
 def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
@@ -1119,10 +1127,17 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     transcript_path_raw = row.get("transcript_local_path")
     if not transcript_path_raw:
         raise FileNotFoundError("episode has no transcript_local_path")
-    transcript_raw, segments = _load_transcript(Path(transcript_path_raw))
-    # Phase 6 (phase6-v1): the original transcript bytes are the archived
-    # artifact behind every label's provenance; read them once, unchanged.
-    transcript_bytes = Path(transcript_path_raw).read_bytes()
+    transcript_path = Path(transcript_path_raw)
+    # Consume the mutable transcript once, then mint. A newer owner that
+    # completes before this ticket is obtained cannot be replaced by these
+    # already-read bytes (BC-3d / BD2-02).
+    try:
+        transcript_bytes = transcript_path.read_bytes()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"transcript file missing: {transcript_path}") from None
+    except OSError as exc:
+        raise ValueError(f"transcript is not readable JSON: {exc}") from exc
+    transcript_raw, segments = _transcript_from_bytes(transcript_bytes)
     source_url = _episode_source_url(row)
     video_id, suffix = _episode_corpus_id(row)
     podcast_title = row.get("podcast_title") or "Untitled podcast"
@@ -1132,6 +1147,19 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     folder = _podcast_root(Path(data_root)) / feed_slug / f"{episode_slug}-{suffix}"
     corpus_path = folder / f"{folder.name}.md"
     sidecar_path = folder / f"{folder.name}.json"
+
+    existing = idx.get_yoink(video_id)
+    # AS-06: the shortened corpus id is not the identity. Refuse to write over
+    # a row that carries another feed/GUID, and persist the full identity
+    # (normalized feed URL, GUID, capture key) with this publication.
+    _check_corpus_identity(idx, existing, row, video_id)
+    # BC-2/BC-3d: mint after consuming the transcript file, then recheck
+    # those exact bytes under the fence before building or replacing files.
+    import library_media as _media_fence  # noqa: WPS433 -- lazy: keeps module import graph unchanged
+    ticket = (idx.begin_media_publication(video_id, folder=folder)
+              if _media_fence.schema_ready(idx._conn) else None)
+    if ticket is not None:
+        _media_fence.require_unchanged_input_bytes(transcript_path, transcript_bytes)
 
     speakers = list(dict.fromkeys(
         segment["speaker"] for segment in segments if segment.get("speaker")
@@ -1154,18 +1182,6 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "source_url": source_url, "source_deep_link": deep_link,
             "speaker": segment.get("speaker"),
         })
-
-    existing = idx.get_yoink(video_id)
-    # AS-06: the shortened corpus id is not the identity. Refuse to write over
-    # a row that carries another feed/GUID, and persist the full identity
-    # (normalized feed URL, GUID, capture key) with this publication.
-    _check_corpus_identity(idx, existing, row, video_id)
-    # BC-2: the publication ownership fence is minted before the snapshot is
-    # built and carried through settlement; a publication that started
-    # against an older base refuses revision_unavailable before any file.
-    import library_media as _media_fence  # noqa: WPS433 -- lazy: keeps module import graph unchanged
-    ticket = (idx.begin_media_publication(video_id, folder=folder)
-              if _media_fence.schema_ready(idx._conn) else None)
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
     record = {
@@ -1271,10 +1287,12 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     }
     sidecar_bytes = (json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     if _media_mod.schema_ready(idx._conn):
-        # BC-2/BD-04: one complete publication operation. The ownership
-        # ticket was minted before this build; the item row is upserted
-        # first (the publisher binds against it). Phase 3 S16 injects a
-        # crash at insert_citations after that row exists; first
+        # BC-2/BD-04/BC-3d: one complete publication operation. The
+        # ownership ticket was minted after the transcript bytes were
+        # consumed; those exact bytes are rechecked here so a newer owner
+        # that completed at mint cannot be replaced. The item row is
+        # upserted first (the publisher binds against it). Phase 3 S16
+        # injects a crash at insert_citations after that row exists; first
         # publication still hits the seam with an empty batch so a crash
         # leaves the yoink without citations. Replacement must not commit
         # the new cues before the fenced snapshot (BD-04): a projector
@@ -1283,6 +1301,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         # (sidecar last), commits the citation/media/clip rows together,
         # prunes obsolete owned inputs and invalidates Phase 2 work.
         # Retry replays the same inputs.
+        _media_mod.require_unchanged_input_bytes(transcript_path, transcript_bytes)
         idx.upsert_yoink(record, content=markdown)
         materialized = None
         try:

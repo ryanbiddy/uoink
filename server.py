@@ -2712,21 +2712,34 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
 
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
-                           sidecar_path: Path, plan: dict) -> bool:
-    """Phase 6 (BC-2): publish the helper capture through the shared media
-    publisher (``Index.publish_media_snapshot``): the ownership ticket is
-    minted first, the indexed row and the corpus bytes on disk are the
-    source revision's inputs, and the sealed block, artifact and the
-    complete sidecar (with its ``media_depth`` block) are replaced by the
-    fenced operation."""
+                           sidecar_path: Path, plan: dict | None = None) -> bool:
+    """Phase 6 (BC-2/BC-3d): publish the helper capture through the shared
+    media publisher. The ownership ticket is minted first. Exact consumed
+    sidecar inputs (transcript cores and source chapters) are then checked
+    against disk; a newer owner's file refuses ``revision_unavailable``
+    instead of rebuilding the already-read cues under that newer base.
+    A caller-supplied plan is kept only when it still matches those owned
+    inputs (sealed study artifacts). The indexed row and corpus bytes on
+    disk are the source revision's inputs; the sealed block, artifact and
+    complete sidecar are replaced by the fenced operation."""
     import library_cards  # noqa: WPS433
     import library_media  # noqa: WPS433
     import clips as _clips  # noqa: WPS433
     video_id = (sidecar.get("video_id") or "").strip()
     ticket = idx.begin_media_publication(video_id, folder=folder)
+    library_media.require_unchanged_capture_inputs(sidecar_path, sidecar)
     row = idx.get_yoink(video_id)
     if row is None:
         raise library_media.MediaError("resource_not_found")
+    owned_plan = _capture_media_plan(sidecar, folder, item=row)
+    if owned_plan is None:
+        raise library_media.MediaError(
+            "revision_unavailable", details={"reason": "publication_input_changed"})
+    if plan is None:
+        plan = owned_plan
+    elif not library_media.capture_plan_matches(plan, owned_plan):
+        raise library_media.MediaError(
+            "revision_unavailable", details={"reason": "publication_input_changed"})
     corpus_bytes = corpus_path.read_bytes()
     media_item = library_media._merge_item(row)
     head = corpus_bytes[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
@@ -2738,6 +2751,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
         playback=plan["playback"], transcript_kind=plan["transcript_kind"],
         transcript_provider=plan["transcript_provider"],
         chapter_rows=plan["chapter_rows"], recorded_at=sidecar.get("yoinked_at"), item=row)
+    library_media.require_unchanged_capture_inputs(sidecar_path, sidecar)
     published = dict(sidecar, media_depth=block)
     idx.publish_media_snapshot(
         video_id, cues=plan["cues"], media_block=block,
@@ -2813,24 +2827,26 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     }
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
-    citations = _citations_from_sidecar(sidecar, folder)
-    # Phase 6 (BC-2/BD-08): a Phase 6 capture (explicit link fields, held
-    # chapter metadata) publishes its transcript cues through the shared,
-    # fenced media publisher. ``library_unavailable`` is propagated to the
-    # owner. Other refusals are logged and leave the item's existing
-    # citations and snapshot untouched (never a silent legacy overwrite of
-    # a snapshot another publisher owns). Legacy sidecars keep the legacy
-    # citation write. An empty Phase 6 replacement publishes through the
-    # complete operation (BD-09).
+    # Phase 6 (BC-2/BD-08/BC-3d): a Phase 6 capture publishes through the
+    # shared fenced publisher. The plan is not built until the ticket is
+    # held and the consumed sidecar still matches disk; a newer owner
+    # inserted before mint is refused rather than overwritten with already-
+    # read cues. ``library_unavailable`` is propagated. Other refusals are
+    # logged and leave the existing snapshot (the row-indexed True return
+    # does not certify that new media was published). Legacy sidecars keep
+    # the legacy citation write. An empty Phase 6 replacement publishes
+    # through the complete operation (BD-09).
     published = None
     if corpus_path is not None and corpus_path.exists():
         try:
             import library_media  # noqa: WPS433 -- optional module
             if library_media.schema_ready(idx._conn):
-                plan = _capture_media_plan(sidecar, folder, item=record)
-                if plan is not None:
+                entries = [e for e in (sidecar.get("transcript") or []) if isinstance(e, dict)]
+                phase6_writer = "source_chapters" in sidecar or (
+                    entries and all("source_url" in e and "source_deep_link" in e for e in entries))
+                if phase6_writer:
                     published = _publish_capture_media(
-                        idx, folder, sidecar, corpus_path, sidecar_path, plan)
+                        idx, folder, sidecar, corpus_path, sidecar_path)
         except ImportError:
             published = None
         except Exception as exc:
@@ -2841,6 +2857,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                 raise
             log.warning("media publication refused for %s: %s", video_id, code)
             published = False
+    citations = _citations_from_sidecar(sidecar, folder)
     if published is None:
         idx.insert_citations(video_id, citations)
     elif published:
