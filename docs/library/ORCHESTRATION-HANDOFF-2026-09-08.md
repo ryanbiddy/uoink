@@ -75,7 +75,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; integrated tree `263b7e4`, installer source `e47e4f2`)
+## State at handoff (updated 2026-09-09; integrated tree `8fc6a40`, installer source `e47e4f2`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -84,12 +84,18 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Lifecycle repair retained; original stdio read repair has nine new passes and broader 212 passed / eight failed | Existing reads no longer migrate/backfill or recover authoritative storage; eight parent-interception failures remain; X HTTP 403 stays blocked | Include read repair in final committed tree and bundled original entry; finish installed receipt kit |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Complete `263b7e4` tree: 2,193 passed / nine failed / three skipped / one xfailed; later preview and isolation source reviewed | Exact eight-case interception fixture proposal awaits Ryan; historical exit gap remains; final isolation has 130 focused passes / one skip | Finish two receipt kits, then final committed tree, rebuilt package and complete operator runbook |
+| Integration | Complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Isolate new failure; finish two receipt kits, final tree, rebuilt package and operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest integrated full tree, `263b7e4`: **2,193 passed, nine failed, three
+Latest integrated full tree, `8fc6a40`: **2,254 passed, ten failed, three skipped,
+one xfailed**, 183 warnings, 573.49 seconds. Sixty-two new cases, no missing
+cases or previous-failure closures. The new read-promotion case fails only in
+this complete observation so far; follow `RYAN-READ-PROMOTION-ORDER-INVESTIGATION-BRIEF-2026-09-09.md`.
+Proof: `proof/ryan-integrated-tree-02-2026-09-09/SHA256.json`.
+
+Earlier integrated full tree, `263b7e4`: **2,193 passed, nine failed, three
 skipped, one xfailed**, 183 warnings, 728.37 seconds. No existing test changes
 since `4a35316`; eight new regressions pass. Eleven of its failures now pass,
 no case is missing and no new failure appears. Nine failures remain: the
@@ -169,6 +175,9 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    Source through `022ff43` can be measured while both kits finish under
    `RYAN-ISOLATION-CHECKPOINT-TREE-BRIEF-2026-09-09.md`; retain its checkpoint
    label and run the final kit-inclusive tree after those integrations.
+   Checkpoint `8fc6a40` has 2,254 passed / ten failed. Follow
+   `RYAN-READ-PROMOTION-ORDER-INVESTIGATION-BRIEF-2026-09-09.md` for the one
+   additional failure; do not edit fixtures or replace this failed observation.
    C22 replacement independently has 26 passes / two failures, 69.61 s. Its
    receipt still substitutes direct child-record calls for helper recovery,
    miscounts charges and compares protected state only after all scenarios.
@@ -1690,3 +1699,14 @@ all five default style anchors, without the earlier reconciliation error.
 Use RYAN-ISOLATION-CHECKPOINT-TREE-BRIEF-2026-09-09.md for this product source
 while C22 and Phase 4 instruments finish. Their final integration still needs
 its own complete committed tree and rebuilt artifact.
+
+### 2026-09-09 — Second complete checkpoint retains one additional failure
+
+8fc6a40: 2,254 passed, ten failed, three skipped, one xfailed, 183 warnings,
+573.49 s. Only S21 excluded. All 62 new cases are included; no earlier case
+is missing. The nine earlier failures remain. The additional read-promotion
+case receives a different Index from the ordinary getter, although its
+focused and integration unions passed. Investigate an earlier route fixture's
+direct getter substitution with the named brief before claiming a product
+repair or seeking a setup correction. Twelve raw files are sealed in
+proof/ryan-integrated-tree-02-2026-09-09. The result remains failed.

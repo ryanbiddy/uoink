@@ -1,7 +1,13 @@
 # Living Library integration candidate
 
-Integration candidate, 2026-09-09. **Release is not ready yet.** The complete
-integrated product tree on `263b7e4` has **2,193 passed, nine failed, three
+Integration candidate, 2026-09-09. **Release is not ready yet.** Latest complete
+tree `8fc6a40` has **2,254 passed, ten failed, three skipped and one xfailed**,
+183 warnings, 573.49 seconds. It includes 62 new cases and loses no earlier
+case. One new read-promotion check fails under full-suite ordering and is being
+investigated; the previous nine failures remain. Both receipt kits still need
+final verification before the owed package rebuild.
+
+The preceding integrated product tree on `263b7e4` had **2,193 passed, nine failed, three
 skipped and one xfailed**, 183 warnings, 728.37 seconds. Eleven of the
 previous 20 failures now pass, with no new failures or missing test cases.
 Eight new regression cases pass. Existing tests remain unchanged since
