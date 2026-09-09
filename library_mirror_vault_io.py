@@ -5,10 +5,12 @@ stdout and kills this process (Windows job object / POSIX process group) when
 the caller's deadline expires. This process is the only one that mutates the
 vault, so a terminated worker cannot publish or roll back destination bytes.
 
-Destructive unlink binds a handle (Windows sharing exclusion) or an equivalent
-POSIX rename-verify, then checks volume/file identity and content through that
-binding before deleting that file. Path-only unlink after a distant stat/hash
-is not used. If the platform cannot provide exclusion, the command refuses.
+Destructive unlink and publication bind a Windows handle with sharing
+exclusion, then check volume/file identity and content through that handle
+before deleting or renaming that file. Path-only unlink after a distant
+stat/hash is not used. A failed write deletes the creating handle's file
+before close; it does not unlink a pathname after the handle is gone.
+POSIX has no equivalent exclusion primitive here; those commands refuse.
 """
 from __future__ import annotations
 
@@ -71,19 +73,8 @@ def _not_ours_stat(st: os.stat_result) -> bool:
     return isinstance(nlink, int) and nlink > 1
 
 
-def _win_identity_unlink(path: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
-    import msvcrt
+def _kernel32():
     from ctypes import wintypes
-
-    generic_read = 0x80000000
-    delete_access = 0x00010000
-    file_share_read = 0x00000001
-    open_existing = 3
-    file_flag_open_reparse_point = 0x00200000
-    file_disposition_info = 4
-
-    class FILE_DISPOSITION_INFO(ctypes.Structure):
-        _fields_ = [("DeleteFile", wintypes.BOOLEAN)]
 
     k32 = ctypes.WinDLL("kernel32", use_last_error=True)
     k32.CreateFileW.argtypes = [
@@ -97,19 +88,76 @@ def _win_identity_unlink(path: str, expected_file_id, expected_volume_id, expect
         wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
     ]
     k32.SetFileInformationByHandle.restype = wintypes.BOOL
+    return k32
 
-    handle = k32.CreateFileW(
+
+def _win_invalid_handle():
+    return int(ctypes.c_void_p(-1).value)
+
+
+def _win_disposition_delete(osf_handle) -> bool:
+    from ctypes import wintypes
+
+    class FILE_DISPOSITION_INFO(ctypes.Structure):
+        _fields_ = [("DeleteFile", wintypes.BOOLEAN)]
+
+    info = FILE_DISPOSITION_INFO(True)
+    k32 = _kernel32()
+    return bool(k32.SetFileInformationByHandle(
+        osf_handle, 4, ctypes.byref(info), ctypes.sizeof(info),
+    ))
+
+
+def _win_rename_held(osf_handle, dest: str, replace_if_exists: bool) -> bool:
+    from ctypes import wintypes
+
+    name = dest
+    nchars = len(name) + 1
+
+    class FILE_RENAME_INFO(ctypes.Structure):
+        _fields_ = [
+            ("ReplaceIfExists", wintypes.DWORD),
+            ("RootDirectory", wintypes.HANDLE),
+            ("FileNameLength", wintypes.DWORD),
+            ("FileName", wintypes.WCHAR * nchars),
+        ]
+
+    info = FILE_RENAME_INFO()
+    info.ReplaceIfExists = 1 if replace_if_exists else 0
+    info.RootDirectory = None
+    info.FileNameLength = len(name) * ctypes.sizeof(wintypes.WCHAR)
+    info.FileName = name
+    k32 = _kernel32()
+    return bool(k32.SetFileInformationByHandle(
+        osf_handle, 3, ctypes.byref(info), ctypes.sizeof(info),
+    ))
+
+
+def _win_create_file(path: str, access: int, share: int, disposition: int, flags: int):
+    k32 = _kernel32()
+    handle = k32.CreateFileW(path, access, share, None, disposition, flags, None)
+    if not handle or int(handle) == _win_invalid_handle():
+        return None, ctypes.get_last_error()
+    return handle, 0
+
+
+def _win_identity_unlink(path: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
+    import msvcrt
+
+    generic_read = 0x80000000
+    delete_access = 0x00010000
+    file_share_read = 0x00000001
+    open_existing = 3
+    file_flag_open_reparse_point = 0x00200000
+
+    handle, err = _win_create_file(
         path,
         generic_read | delete_access,
         file_share_read,
-        None,
         open_existing,
         file_flag_open_reparse_point,
-        None,
     )
-    invalid = int(ctypes.c_void_p(-1).value)
-    if not handle or int(handle) == invalid:
-        err = ctypes.get_last_error()
+    if handle is None:
         if err in (2, 3):
             return {"ok": True, "gone": True}
         return {"ok": False, "error": "unlink_exclusion_unavailable", "winerror": err}
@@ -123,14 +171,7 @@ def _win_identity_unlink(path: str, expected_file_id, expected_volume_id, expect
             return {"ok": True, "not_ours": True}
         if expected_hash is not None and _sha256_fd(fd) != expected_hash:
             return {"ok": True, "not_ours": True}
-        info = FILE_DISPOSITION_INFO(True)
-        ok = k32.SetFileInformationByHandle(
-            msvcrt.get_osfhandle(fd),
-            file_disposition_info,
-            ctypes.byref(info),
-            ctypes.sizeof(info),
-        )
-        if not ok:
+        if not _win_disposition_delete(msvcrt.get_osfhandle(fd)):
             return {
                 "ok": False,
                 "error": "unlink_exclusion_unavailable",
@@ -141,57 +182,148 @@ def _win_identity_unlink(path: str, expected_file_id, expected_volume_id, expect
         if fd is not None:
             os.close(fd)
         elif handle:
-            k32.CloseHandle(handle)
-
-
-def _posix_identity_unlink(path: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
-    flags = os.O_RDONLY
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    try:
-        fd = os.open(path, flags)
-    except FileNotFoundError:
-        return {"ok": True, "gone": True}
-    unique = None
-    try:
-        st = os.fstat(fd)
-        if _not_ours_stat(st) or _identity_mismatch(st, expected_file_id, expected_volume_id):
-            return {"ok": True, "not_ours": True}
-        if expected_hash is not None and _sha256_fd(fd) != expected_hash:
-            return {"ok": True, "not_ours": True}
-        parent = os.path.dirname(path) or "."
-        unique = os.path.join(parent, ".uoink-unlink-" + os.urandom(12).hex())
-        try:
-            os.rename(path, unique)
-        except OSError:
-            return {"ok": False, "error": "unlink_exclusion_unavailable"}
-        try:
-            st2 = os.stat(unique)
-        except OSError:
-            return {"ok": False, "error": "unlink_exclusion_unavailable"}
-        if int(st2.st_ino) != int(st.st_ino) or int(st2.st_dev) != int(st.st_dev):
-            try:
-                os.rename(unique, path)
-            except OSError:
-                pass
-            unique = None
-            return {"ok": True, "not_ours": True}
-        os.unlink(unique)
-        unique = None
-        return {"ok": True}
-    finally:
-        os.close(fd)
-        if unique is not None:
-            try:
-                os.rename(unique, path)
-            except OSError:
-                pass
+            _kernel32().CloseHandle(handle)
 
 
 def _identity_unlink(path: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
     if os.name == "nt":
         return _win_identity_unlink(path, expected_file_id, expected_volume_id, expected_hash)
-    return _posix_identity_unlink(path, expected_file_id, expected_volume_id, expected_hash)
+    return {"ok": False, "error": "unlink_exclusion_unavailable"}
+
+
+def _win_write_new(path: str, data: bytes) -> dict:
+    import msvcrt
+
+    generic_read = 0x80000000
+    generic_write = 0x40000000
+    delete_access = 0x00010000
+    file_share_read = 0x00000001
+    create_new = 1
+    file_attribute_normal = 0x80
+    file_flag_open_reparse_point = 0x00200000
+
+    handle, err = _win_create_file(
+        path,
+        generic_read | generic_write | delete_access,
+        file_share_read,
+        create_new,
+        file_attribute_normal | file_flag_open_reparse_point,
+    )
+    if handle is None:
+        raise OSError(err, "CreateFileW write failed", path, err)
+
+    fd = None
+    try:
+        fd = msvcrt.open_osfhandle(int(handle), os.O_RDWR)
+        handle = None
+        try:
+            os.write(fd, data)
+            os.fsync(fd)
+            st = os.fstat(fd)
+            file_id, volume_id = _stat_identity(st)
+            if file_id == 0:
+                _win_disposition_delete(msvcrt.get_osfhandle(fd))
+                return {"ok": False, "error": "file_identity_unavailable"}
+            return {
+                "ok": True,
+                "hash": hashlib.sha256(data).hexdigest(),
+                "file_id": file_id,
+                "volume_id": volume_id,
+            }
+        except Exception:
+            try:
+                _win_disposition_delete(msvcrt.get_osfhandle(fd))
+            except OSError:
+                pass
+            raise
+    finally:
+        if fd is not None:
+            os.close(fd)
+        elif handle:
+            _kernel32().CloseHandle(handle)
+
+
+def _posix_write_new(path: str, data: bytes) -> dict:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_BINARY"):
+        flags |= os.O_BINARY
+    fd = os.open(path, flags, 0o644)
+    try:
+        os.write(fd, data)
+        os.fsync(fd)
+        st = os.fstat(fd)
+        file_id, volume_id = _stat_identity(st)
+        if file_id == 0:
+            return {"ok": False, "error": "file_identity_unavailable"}
+        return {
+            "ok": True,
+            "hash": hashlib.sha256(data).hexdigest(),
+            "file_id": file_id,
+            "volume_id": volume_id,
+        }
+    finally:
+        os.close(fd)
+
+
+def _write_new(path: str, data: bytes) -> dict:
+    if os.name == "nt":
+        return _win_write_new(path, data)
+    return _posix_write_new(path, data)
+
+
+def _win_identity_replace(src: str, dst: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
+    import msvcrt
+
+    if expected_file_id is None:
+        return {"ok": False, "error": "replace_exclusion_unavailable"}
+    generic_read = 0x80000000
+    delete_access = 0x00010000
+    file_share_read = 0x00000001
+    open_existing = 3
+    file_flag_open_reparse_point = 0x00200000
+
+    handle, err = _win_create_file(
+        src,
+        generic_read | delete_access,
+        file_share_read,
+        open_existing,
+        file_flag_open_reparse_point,
+    )
+    if handle is None:
+        return {"ok": False, "error": "replace_exclusion_unavailable", "winerror": err}
+
+    fd = None
+    try:
+        fd = msvcrt.open_osfhandle(int(handle), os.O_RDONLY)
+        handle = None
+        st = os.fstat(fd)
+        if _not_ours_stat(st) or _identity_mismatch(st, expected_file_id, expected_volume_id):
+            return {"ok": True, "not_ours": True}
+        if expected_hash is not None and _sha256_fd(fd) != expected_hash:
+            return {"ok": True, "not_ours": True}
+        if not _win_rename_held(msvcrt.get_osfhandle(fd), dst, True):
+            return {
+                "ok": False,
+                "error": "replace_exclusion_unavailable",
+                "winerror": ctypes.get_last_error(),
+            }
+        return {"ok": True}
+    finally:
+        if fd is not None:
+            os.close(fd)
+        elif handle:
+            _kernel32().CloseHandle(handle)
+
+
+def _identity_replace(src: str, dst: str, expected_file_id, expected_volume_id, expected_hash) -> dict:
+    if expected_file_id is None:
+        # Parent publication always binds creating identity. Unbound replace
+        # remains the worker's path-replace for startup/capability checks.
+        os.replace(src, dst)
+        return {"ok": True}
+    if os.name == "nt":
+        return _win_identity_replace(src, dst, expected_file_id, expected_volume_id, expected_hash)
+    return {"ok": False, "error": "replace_exclusion_unavailable"}
 
 
 def _handle(req: dict) -> dict:
@@ -203,47 +335,28 @@ def _handle(req: dict) -> dict:
         return {"ok": True}
     if cmd == "write":
         data = base64.b64decode(req["b64"])
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
-        if hasattr(os, "O_BINARY"):
-            flags |= os.O_BINARY
-        fd = os.open(req["path"], flags, 0o644)
-        try:
-            os.write(fd, data)
-            os.fsync(fd)
-            st = os.fstat(fd)
-            file_id, volume_id = _stat_identity(st)
-        except Exception:
-            try:
-                os.close(fd)
-            except OSError:
-                pass
-            fd = None
-            try:
-                os.unlink(req["path"])
-            except OSError:
-                pass
-            raise
-        else:
-            os.close(fd)
-            fd = None
-            if file_id == 0:
-                try:
-                    os.unlink(req["path"])
-                except OSError:
-                    pass
-                return {"ok": False, "error": "file_identity_unavailable"}
-            return {
-                "ok": True,
-                "hash": hashlib.sha256(data).hexdigest(),
-                "file_id": file_id,
-                "volume_id": volume_id,
-            }
-        finally:
-            if fd is not None:
-                os.close(fd)
+        return _write_new(req["path"], data)
     if cmd == "replace":
-        os.replace(req["src"], req["dst"])
-        return {"ok": True}
+        expected_file_id = req.get("expected_file_id")
+        expected_volume_id = req.get("expected_volume_id")
+        expected_hash = req.get("expected_hash")
+        if expected_file_id is not None:
+            try:
+                expected_file_id = int(expected_file_id)
+            except (TypeError, ValueError):
+                return {"ok": True, "not_ours": True}
+            if expected_file_id == 0:
+                return {"ok": False, "error": "file_identity_unavailable"}
+        if expected_volume_id is not None:
+            try:
+                expected_volume_id = int(expected_volume_id)
+            except (TypeError, ValueError):
+                return {"ok": True, "not_ours": True}
+        if expected_hash is not None:
+            expected_hash = str(expected_hash)
+        return _identity_replace(
+            req["src"], req["dst"], expected_file_id, expected_volume_id, expected_hash,
+        )
     if cmd == "file_id":
         try:
             flags = os.O_RDONLY

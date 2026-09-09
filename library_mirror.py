@@ -67,6 +67,9 @@ except ImportError:
     _library_briefs = None  # type: ignore[assignment]
 
 log = logging.getLogger("uoink.library_mirror")
+# Per-operation I/O context. AV-5m4b2 binds session/plan/key here; this run
+# binds creating-file authority so a later resync cannot replace it.
+_IO_CTX = threading.local()
 
 CONTRACT_VERSION = "phase4-v1-2026-09-08"
 MIRROR_LEDGER_DIR = "reach/mirror"
@@ -342,6 +345,36 @@ def _optional_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
     return parsed
+
+
+@contextlib.contextmanager
+def _bound_io_authority(
+    path: Path | str,
+    file_id: int | None,
+    volume_id: int | None,
+    digest: str | None,
+) -> Iterator[None]:
+    """Bind creating-file identity to this operation, not instance-global state."""
+    previous = getattr(_IO_CTX, "authority", None)
+    _IO_CTX.authority = {
+        "path": str(path),
+        "file_id": int(file_id) if file_id else None,
+        "volume_id": int(volume_id) if volume_id is not None else None,
+        "hash": str(digest) if digest else None,
+    }
+    try:
+        yield
+    finally:
+        _IO_CTX.authority = previous
+
+
+def _ctx_authority_for(path: Path | str) -> dict[str, Any] | None:
+    expected = getattr(_IO_CTX, "authority", None)
+    if not isinstance(expected, dict):
+        return None
+    if expected.get("path") != str(path):
+        return None
+    return expected
 
 
 def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
@@ -662,8 +695,24 @@ class _VaultIoSession:
             raise OSError(result.get("error") or "write failed")
         return result
 
-    def replace(self, src: str, dst: str) -> None:
-        result = self.call({"cmd": "replace", "src": src, "dst": dst})
+    def replace(
+        self,
+        src: str,
+        dst: str,
+        expected_file_id: int | None = None,
+        expected_hash: str | None = None,
+        expected_volume_id: int | None = None,
+    ) -> None:
+        req: dict[str, Any] = {"cmd": "replace", "src": src, "dst": dst}
+        if expected_file_id is not None:
+            req["expected_file_id"] = int(expected_file_id)
+        if expected_volume_id is not None:
+            req["expected_volume_id"] = int(expected_volume_id)
+        if expected_hash is not None:
+            req["expected_hash"] = str(expected_hash)
+        result = self.call(req)
+        if result.get("not_ours"):
+            raise OSError("replace source is not the allocated file")
         if not result.get("ok"):
             raise OSError(result.get("error") or "replace failed")
 
@@ -805,7 +854,6 @@ class Mirror:
         self._thread_lock = threading.RLock()
         self._vault_io: _VaultIoSession | None = None
         self._vault_io_startup_s = 0.0
-        self._unlink_expected: dict[str, Any] | None = None
         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
 
     # ---- public API ----------------------------------------------------
@@ -2490,14 +2538,9 @@ class Mirror:
             return "failed"
         if not expected_hash:
             return "not_ours"
-        self._unlink_expected = {
-            "path": str(path),
-            "file_id": int(expected_file_id),
-            "volume_id": int(expected_volume_id) if expected_volume_id is not None else None,
-            "hash": str(expected_hash),
-        }
         try:
-            unlink_res = self._io_unlink(path)
+            with _bound_io_authority(path, expected_file_id, expected_volume_id, expected_hash):
+                unlink_res = self._io_unlink(path)
             if isinstance(unlink_res, dict):
                 if unlink_res.get("not_ours"):
                     return "not_ours"
@@ -2506,8 +2549,6 @@ class Mirror:
             return "gone"
         except OSError:
             return "failed"
-        finally:
-            self._unlink_expected = None
 
     def _cleanup_intent_temps(self, uoink: Path, key: str, intent: dict | None) -> list[dict]:
         kept: list[dict] = []
@@ -2898,47 +2939,68 @@ class Mirror:
         return not getattr(self, "_lock_acquired", False)
 
     def _atomic_vault(self, dest: Path, data: bytes, uoink: Path, *, recheck: Callable[[], bool]) -> str:
-        plan = getattr(self, "_active_plan", None)
-        key = getattr(self, "_active_key", None)
-        self._io_mkdir(dest.parent, exist_ok=True)
-        tmp = dest.with_name(dest.name + "." + secrets.token_hex(12) + ".tmp")
-        if not _contained(uoink, tmp) or _escaping_reparse(uoink, dest.parent):
-            raise OSError("temp path escapes mirror root")
-        if _path_too_long(tmp):
-            raise OSError("temp path too long")
-        digest = _sha256_bytes(data)
-        rel = str(tmp.relative_to(uoink))
-        if key:
-            self._record_allocated_temp(key, rel, digest)
+        plan = getattr(_IO_CTX, "plan", None)
+        if plan is None:
+            plan = getattr(self, "_active_plan", None)
+        key = getattr(_IO_CTX, "key", None)
+        if key is None:
+            key = getattr(self, "_active_key", None)
+        previous_session = getattr(_IO_CTX, "session", None)
+        if previous_session is None:
+            _IO_CTX.session = getattr(self, "_vault_io", None)
         try:
-            write_res = self._io_write_file(tmp, data)
-            file_id = None
-            volume_id = None
-            if isinstance(write_res, dict):
-                file_id = _optional_int(write_res.get("file_id"))
-                volume_id = _optional_int(write_res.get("volume_id"))
+            self._io_mkdir(dest.parent, exist_ok=True)
+            tmp = dest.with_name(dest.name + "." + secrets.token_hex(12) + ".tmp")
+            if not _contained(uoink, tmp) or _escaping_reparse(uoink, dest.parent):
+                raise OSError("temp path escapes mirror root")
+            if _path_too_long(tmp):
+                raise OSError("temp path too long")
+            digest = _sha256_bytes(data)
+            rel = str(tmp.relative_to(uoink))
             if key:
+                self._record_allocated_temp(key, rel, digest)
+            previous_auth = getattr(_IO_CTX, "authority", None)
+            try:
+                write_res = self._io_write_file(tmp, data)
+                file_id = None
+                volume_id = None
+                if isinstance(write_res, dict):
+                    file_id = _optional_int(write_res.get("file_id"))
+                    volume_id = _optional_int(write_res.get("volume_id"))
                 if not file_id:
                     raise OSError("temp allocation is missing file identity")
-                self._record_allocated_temp(
-                    key, rel, digest, file_id=file_id, volume_id=volume_id,
-                )
-            if not recheck():
-                raise _AbortedWrite()
-            self._io_replace(tmp, dest)
-            tmp = None
-            if key:
-                self._clear_current_temp_rel(key)
-            if self._write_cancelled(plan):
-                # Do not roll back over whatever now occupies dest.
-                raise _AbortedWrite("cancelled or lock released")
-            return _sha256_bytes(data)
+                if key:
+                    self._record_allocated_temp(
+                        key, rel, digest, file_id=file_id, volume_id=volume_id,
+                    )
+                _IO_CTX.authority = {
+                    "path": str(tmp),
+                    "file_id": int(file_id),
+                    "volume_id": int(volume_id) if volume_id is not None else None,
+                    "hash": digest,
+                }
+                if not recheck():
+                    raise _AbortedWrite()
+                self._io_replace(tmp, dest)
+                tmp = None
+                if key:
+                    self._clear_current_temp_rel(key)
+                if self._write_cancelled(plan):
+                    # Do not roll back over whatever now occupies dest.
+                    raise _AbortedWrite("cancelled or lock released")
+                return _sha256_bytes(data)
+            finally:
+                if tmp is not None:
+                    expected = _ctx_authority_for(tmp)
+                    if expected and expected.get("file_id"):
+                        try:
+                            self._io_unlink(tmp)
+                        except OSError:
+                            pass
+                _IO_CTX.authority = previous_auth
         finally:
-            if tmp is not None:
-                try:
-                    self._io_unlink(tmp)
-                except OSError:
-                    pass
+            if previous_session is None:
+                _IO_CTX.session = previous_session
 
     def _apply_receipts(self, ledger: dict, result: dict) -> dict:
         if result.get("ok") is False and result.get("code") == "reconciliation":
@@ -3126,6 +3188,11 @@ class Mirror:
             session.terminate()
 
     def _require_vault_io(self) -> _VaultIoSession:
+        session = getattr(_IO_CTX, "session", None)
+        if session is not None:
+            if not session.alive:
+                raise OSError("vault io worker is not running")
+            return session
         session = self._vault_io
         if session is None or not session.alive:
             raise OSError("vault io worker is not running")
@@ -3138,15 +3205,28 @@ class Mirror:
         return self._require_vault_io().write_file(str(path), data)
 
     def _io_replace(self, src: Path, dst: Path) -> None:
-        self._require_vault_io().replace(str(src), str(dst))
+        session = self._require_vault_io()
+        expected = _ctx_authority_for(src)
+        file_id = _optional_int(expected.get("file_id")) if expected else None
+        if not file_id:
+            raise OSError("replace identity is unknown")
+        volume_id = _optional_int(expected.get("volume_id")) if expected else None
+        raw_hash = expected.get("hash") if expected else None
+        session.replace(
+            str(src),
+            str(dst),
+            expected_file_id=file_id,
+            expected_volume_id=volume_id,
+            expected_hash=str(raw_hash) if raw_hash else None,
+        )
 
     def _io_unlink(self, path: Path) -> dict:
         session = self._require_vault_io()
-        expected = self._unlink_expected
+        expected = _ctx_authority_for(path)
         expected_file_id = None
         expected_hash = None
         expected_volume_id = None
-        if expected and expected.get("path") == str(path):
+        if expected:
             expected_file_id = _optional_int(expected.get("file_id"))
             expected_volume_id = _optional_int(expected.get("volume_id"))
             raw_hash = expected.get("hash")
