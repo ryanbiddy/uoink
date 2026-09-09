@@ -59,3 +59,16 @@ acceptance tests. They do not move the unfinished implementation work into
 Ryan's queue. Finish and independently verify the general repairs, retain all
 failed observations, and review the resulting safety behavior before proposing
 any candidate as blocked only on the fixture rulings and other owner gates.
+# Additional fixture conflict: Phase 5 final-wire deadline probe
+
+AZ-5d (Grok `e739a5ec`) is rejected despite 393 passes and four measurement
+failures. Its adapter traverses a callback closure to bypass incompatible test
+wrappers. Production must call its reader normally.
+
+`test_phase5_acceptance3.py:391` installs a unary `read(args)` wrapper. The
+shared `stdio_result` at `test_phase5_acceptance.py:427-431` then invokes that
+wrapper with `clock=NOW`. Python raises TypeError before the final-wire probe
+runs. Ryan must authorize compatible fixture setup, preserving the deadline
+assertion, or provide a ruling. Existing tests remain unchanged. AZ-5d2 removes
+the production workaround and adds an independent actual-handler test; it must
+report the frozen setup failure separately.
