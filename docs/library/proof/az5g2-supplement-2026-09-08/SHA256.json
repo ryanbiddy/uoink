@@ -1,0 +1,14 @@
+{
+  "events.jsonl": {
+    "sha256": "e5c157b6ef3be28920b4acac20f1c97610fba0bd4b7982290160f096f233c93c",
+    "bytes": 920961
+  },
+  "measure_boundaries.py": {
+    "sha256": "907f3370a84756d03fd2752cc3284cc7d65e7f57d2f94c888634127cbec70c0e",
+    "bytes": 6470
+  },
+  "observations.json": {
+    "sha256": "90b07c72b3e353c3d814da105d0d492522c7785055e97a55e1d266695e8452c3",
+    "bytes": 23921
+  }
+}

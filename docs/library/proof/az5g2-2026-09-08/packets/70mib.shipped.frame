@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"{\"contract_version\": \"phase5-v1\", \"error\": {\"code\": \"resource_too_large\", \"message\": \"Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes\", \"retryable\": false}, \"ok\": false, \"schema_version\": 1}"}],"isError":true}}

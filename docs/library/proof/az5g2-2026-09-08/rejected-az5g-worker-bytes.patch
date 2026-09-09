@@ -1,0 +1,769 @@
+diff --git a/docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md b/docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md
+index c3c8e1b..273a6f5 100644
+--- a/docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md
++++ b/docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md
+@@ -16,21 +16,21 @@ The benchmark fixture evaluates two corpus scales:
+ 
+ | Metric | Synthetic 548 Items | Synthetic 10,000 Items | Budget Ceiling / Interpretation |
+ | :--- | :--- | :--- | :--- |
+-| **Construction Time** | ~800–950 ms | ~350–430 ms | 2,000.00 ms (2.0 s deadline; includes reader query execution, aggregation and internal serialization) |
+-| **Serialization Time** | ~3.3–4.0 ms | ~0.3–0.6 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
++| **Construction Time** | ~800–950 ms (traced) / ~38–48 ms (untraced) | ~350–480 ms (untraced) | 2,000.00 ms (2.0 s deadline; 548 fixture measurement includes tracemalloc profiling overhead; main 10k timing is untraced; both complete well inside the 2.0 s service deadline) |
++| **Serialization Time** | ~2.5–3.5 ms | ~0.2–0.5 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
+ | **Combined Query Execution** | Plans confirmed | Plans confirmed | Plans confirmed index scans (Q1: `sqlite_autoindex_yoinks_1`, Q3: `sqlite_autoindex_library_applies_3`); individual query times are not isolated from total construction time |
+-| **Peak Heap Memory (tracemalloc)** | 4,031.1 KiB (~3.94 MiB) | 61,131.7 KiB (~59.70 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only) |
+-| **Wire Response Payload** | 58,738 bytes | 58,640 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
+-| **Actual Transport Wire Payload (stdio adapter)** | 65,252 bytes | 65,095 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler |
+-| **Combined Journal Deltas** | 209.6 KiB (214,596 bytes) | 2,760,054 bytes (~2.63 MiB) | 67,108,864 bytes (64 MiB); AZ-5c (BA-05) re-seeds both fixtures with complete service-schema membership rows (previously 74,856 and 1,050,054 bytes with abbreviated rows); sizes computed from the fixture serialization, to be re-observed by the AZ-5g regeneration |
+-| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (58,738 / 58,640 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
++| **Peak Heap Memory (tracemalloc)** | 5,279.8 KiB (~5.16 MiB) | 77,827.9 KiB (~76.00 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only; 10k heap measured under relaxed 30.0 s diagnostic deadline) |
++| **Wire Response Payload** | 58,035 bytes | 57,968 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes (legacy table label 'Wire Response Payload' verified by test; distinguished from actual transport wire bytes below) |
++| **Actual Transport Wire Payload (stdio adapter)** | 64,732 bytes | 64,601 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler (`JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)`); fits within 64 KiB budget, exceeds 24,576-byte dashboard target |
++| **Combined Journal Deltas** | 209.6 KiB (214,596 bytes) | 2,760,054 bytes (~2.63 MiB) | 67,108,864 bytes (64 MiB); AZ-5c (BA-05) re-seeds both fixtures with complete service-schema membership rows (214,596 bytes and 2,760,054 bytes); sizes computed from the fixture serialization |
++| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (58,035 / 57,968 bytes) and transport wire bytes (64,732 / 64,601 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
+ 
+ ### Observations on Scaling
+-- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning (raw JSON is 58,738 bytes; actual transport wire payload through MCP stdio adapter is 65,252 bytes).
+-- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (raw JSON is 58,640 bytes; actual transport wire payload through MCP stdio adapter is 65,095 bytes), so no display arrays were removed.
+-- In the primary 548-item and 10,000-item benchmarks, the baseline replay path was skipped because the requested interval (`2026-09-01T00:00:00.000Z` to `2026-09-02T00:00:00.000Z`) preceded the first apply (`2026-09-01T10:00:00.000Z`), producing `baseline_reason: ["interval_precedes_first_apply"]`. Baseline replay was measured separately with an interval covering the apply (see Section 1.1).
+-- Construction at 10,000 items completed in ~350–430 ms, well below the 2.0-second service deadline. The 548 timing includes tracemalloc profiling overhead whereas the main 10k timing was measured without tracing (a separate 10k tracing pass recorded ~61 MiB heap peak); tracemalloc measures Python heap allocations, not total process memory / RSS.
+-- The 24,576-byte dashboard target is missed by the primary packets (58,738 / 58,640 bytes raw JSON; 65,252 / 65,095 bytes wire payload).
++- At 548 items, row shedding occurred to satisfy the 64 KiB wire budget: all 20 event rows were shed (0 returned) and joint creator hint rows were shed from 20 to 12 returned rows (raw JSON is 58,035 bytes; actual transport wire payload through MCP stdio adapter is 64,732 bytes). Creator hints (20 rows), source details (1 row), and shelf breakdown rows (2 rows) were retained.
++- At 10,000 items, row shedding occurred: all 20 event rows were shed (0 returned) and joint creator hint rows were shed from 20 to 13 returned rows (raw JSON is 57,968 bytes; actual transport wire payload through MCP stdio adapter is 64,601 bytes). Creator hints (20 rows), source details (1 row), and shelf breakdown rows (1 row) were retained.
++- In the primary 548-item and 10,000-item benchmarks, baseline replay was not skipped: `_execute_activity` executed and populated replay projection state before evaluating coverage reasons and returning `baseline_reason: ["interval_precedes_first_apply"]` because the requested interval (`2026-09-01T00:00:00.000Z` to `2026-09-02T00:00:00.000Z`) preceded the first apply (`2026-09-01T10:00:00.000Z`). Baseline replay was measured separately with an interval covering the apply and proved `coverage_status = "journal_complete"` with empty reasons (see Section 1.1).
++- Construction at 10,000 items completed in ~350–480 ms untraced, well below the 2.0-second service deadline. The 548-item timing in the cost fixture includes tracemalloc profiling overhead (~800–950 ms); untraced 548 construction completes in ~38–48 ms. The main 10k timing was measured without tracing; a separate 10k tracing pass with relaxed diagnostic deadline (30.0 s) recorded ~76–78 MiB peak Python heap allocations (tracemalloc measures Python heap allocations, not total process memory / RSS).
++- The 24,576-byte dashboard target is missed by the primary packets (58,035 / 57,968 bytes raw JSON; 64,732 / 64,601 bytes wire payload); this is an aspirational dashboard target, not an acceptance-blocking hard limit.
+ 
+ ---
+ 
+@@ -40,14 +40,14 @@ The extended test suite in `tests/test_library_analysis_fixtures.py::test_activi
+ 
+ | Path / Scenario | Fixture Dimensions | Observed Metric | Result & Interpretation |
+ | :--- | :--- | :--- | :--- |
+-| **Proved Baseline Replay** | 548 items, 1 apply at 10:00:00Z, interval 10:00:00Z–24:00:00Z | ~35–45 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Baseline proved across interval covering first apply. |
+-| **70 MiB Journal Refusal** | 1 item, 70 MiB forward/inverse deltas | ~50–95 ms refusal | `ok: False`, `error.code = "resource_too_large"`. Bounded refusal before JSON materialization. |
+-| **Deadline Expiry Refusal** | 548 items, expired monotonic clock | ~0.1–0.2 ms refusal | `ok: False`, `error.code = "deadline_exceeded"`, `retryable: True`. Immediate abort on expired deadline. |
+-| **Transport Serialization** | 548-item report packet in MCP stdio envelope | ~0.4–0.6 ms, 65,263 bytes | Full MCP transport protocol serialization with trusted document fence and text encapsulation through actual stdio adapter (65,252 bytes JSON-RPC wire payload). |
+-| **Three Memberships / Item** | 548 items, 3 shelves each (1,644 memberships) | ~40–50 ms construction | `ok: True`. Handles dense multi-shelf memberships efficiently (64,735 bytes transport wire). |
+-| **Multi-Operation Journal** | 50 items, 10 consecutive applied operations | ~5.5 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Replays sequence of 10 applies across interval covering first apply to prove state progression (35,404 bytes transport wire). |
+-| **100k-Observation Scale** | 1 item, 100,000 source item observations | ~750–860 ms construction | `ok: True`. Full scan across 100k observation rows completes well under the 2.0 s deadline (27,862 bytes transport wire). |
+-
++| **Proved Baseline Replay** | 548 items, 1 apply at 10:00:00Z, interval 10:00:00Z–24:00:00Z | ~35–45 ms construction, 57,894 bytes raw JSON | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Baseline proved across interval covering first apply (retains 0 event, 11 joint, 20 creator, 2 shelf, 1 source rows; 64,595 bytes transport wire). |
++| **70 MiB Journal Refusal** | 1 item, 73,400,398 bytes forward/inverse deltas | ~40–90 ms refusal, 221 bytes raw JSON | `ok: False`, `error.code = "resource_too_large"`, `retryable: False`. Bounded refusal before JSON materialization. |
++| **Deadline Expiry Refusal** | 548 items, expired monotonic clock | ~0.1–0.2 ms refusal, 190 bytes raw JSON | `ok: False`, `error.code = "deadline_exceeded"`, `retryable: True`. Immediate abort on expired deadline. |
++| **Transport Serialization** | 548-item report packet in hand-built envelope | ~0.3–0.7 ms, 64,743 bytes | Hand-built JSON-RPC synthetic envelope with preface and document fences; isolates serialization timing and does not invoke the stdio handler. |
++| **Actual Transport Wire (stdio adapter)** | 548-item report packet through shipped adapter | ~1.5–5.0 ms serialization (39.8 ms if including reader), 64,732 bytes | Full MCP transport protocol serialization with trusted document fence and text encapsulation through actual stdio adapter on captured packet (`JSONRPCResponse` wire payload 64,732 bytes; `isError: False`). |
++| **Three Memberships / Item** | 548 items, 3 shelves each (1,644 memberships) | ~40–70 ms construction, 57,671 bytes raw JSON | `ok: True`. Handles dense multi-shelf memberships efficiently (retains 0 event, 10 joint, 20 creator, 3 shelf, 1 source rows; journal: 405,026 bytes; 64,362 bytes transport wire). |
++| **Multi-Operation Journal** | 50 items, 10 consecutive applied operations | ~7–10 ms construction, 34,917 bytes raw JSON | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Replays sequence of 10 applies across interval covering first apply to prove state progression (retains 20 event, 1 joint, 1 creator, 2 shelf, 1 source rows; journal: 234,590 bytes; 39,378 bytes transport wire). |
++| **100k-Observation Scale** | 1 item, 100,000 source item observations | ~750–920 ms construction, 28,790 bytes raw JSON | `ok: True`. Full scan across 100k observation rows completes well under the 2.0 s deadline without journal (coverage: `no_history`; retains 1 event, 1 joint, 1 creator, 0 shelf, 2 source rows; 32,351 bytes transport wire). |
+ 
+ ---
+ 
+diff --git a/docs/library/proof/phase5-az-measurements-superseded-2026-09-08.md b/docs/library/proof/phase5-az-measurements-superseded-2026-09-08.md
+new file mode 100644
+index 0000000..0fb854f
+--- /dev/null
++++ b/docs/library/proof/phase5-az-measurements-superseded-2026-09-08.md
+@@ -0,0 +1,141 @@
++# Phase 5 AZ Synthetic Fixture Measurements (SUPERSEDED)
++
++> **SUPERSEDED DOCUMENT - PRESERVED AS DATED PROOF**
++> **Superseded Date:** 2026-09-08
++> **Source Commit:** `48655c521f39a9d4bde997b9a10509320e3548e5`
++> **Source Git Blob Hash:** `c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0`
++> **Source SHA-256:** `4745bd1db6efcd14e9b0aeb930ba0193981e4024b0ec91f4ad27a1f96da20ea0`
++> **Superseded By:** AZ-5g measured refresh in `docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md`
++> **Authority:** `docs/library/PHASE5-AZ5G-BRIEF-2026-09-08.md` and BA-14 in `docs/library/PHASE5-ACCEPTANCE-3-2026-09-08.md`
++>
++> This file preserves the exact complete pre-refresh measurement document with all its
++> historical assertions, including failed assertions:
++> 1. False claim that row shedding did not occur ("without pruning" / "row shedding did not occur").
++> 2. False claim that "baseline replay path was skipped".
++> 3. False labelling of hand-built transport serialization as "through actual stdio adapter".
++> 4. Stale raw JSON byte counts (58,738 / 58,640) preceding the AZ-5d2 production updates.
++
++---
++
++# Phase 5 AZ Synthetic Fixture Measurements
++
++**Date:** 2026-09-08  
++**Status:** Measured on synthetic test fixtures (`tests/test_library_analysis_fixtures.py`)  
++**Scope:** Read tool `get_library_activity`, report construction, serialization, query plans, and resource limits.
++
++All figures below are benchmarked against isolated SQLite databases populated with synthetic data fixtures. No live user index or production database was queried.
++
++---
++
++## 1. Cost and Scale Benchmarks
++
++The benchmark fixture evaluates two corpus scales:
++1. **548 Items:** Reflects current library size with 1–2 shelf memberships per item (822 total membership rows in synthetic fixture) and realistic creator/source distributions.
++2. **10,000 Items:** 18× scale test testing scaling behavior, row-budget shedding, and memory ceiling (10,000 membership rows).
++
++| Metric | Synthetic 548 Items | Synthetic 10,000 Items | Budget Ceiling / Interpretation |
++| :--- | :--- | :--- | :--- |
++| **Construction Time** | ~800–950 ms | ~350–430 ms | 2,000.00 ms (2.0 s deadline; includes reader query execution, aggregation and internal serialization) |
++| **Serialization Time** | ~3.3–4.0 ms | ~0.3–0.6 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
++| **Combined Query Execution** | Plans confirmed | Plans confirmed | Plans confirmed index scans (Q1: `sqlite_autoindex_yoinks_1`, Q3: `sqlite_autoindex_library_applies_3`); individual query times are not isolated from total construction time |
++| **Peak Heap Memory (tracemalloc)** | 4,031.1 KiB (~3.94 MiB) | 61,131.7 KiB (~59.70 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only) |
++| **Wire Response Payload** | 58,738 bytes | 58,640 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
++| **Actual Transport Wire Payload (stdio adapter)** | 65,252 bytes | 65,095 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler |
++| **Combined Journal Deltas** | 209.6 KiB (214,596 bytes) | 2,760,054 bytes (~2.63 MiB) | 67,108,864 bytes (64 MiB); AZ-5c (BA-05) re-seeds both fixtures with complete service-schema membership rows (previously 74,856 and 1,050,054 bytes with abbreviated rows); sizes computed from the fixture serialization, to be re-observed by the AZ-5g regeneration |
++| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (58,738 / 58,640 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
++
++### Observations on Scaling
++- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning (raw JSON is 58,738 bytes; actual transport wire payload through MCP stdio adapter is 65,252 bytes).
++- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (raw JSON is 58,640 bytes; actual transport wire payload through MCP stdio adapter is 65,095 bytes), so no display arrays were removed.
++- In the primary 548-item and 10,000-item benchmarks, the baseline replay path was skipped because the requested interval (`2026-09-01T00:00:00.000Z` to `2026-09-02T00:00:00.000Z`) preceded the first apply (`2026-09-01T10:00:00.000Z`), producing `baseline_reason: ["interval_precedes_first_apply"]`. Baseline replay was measured separately with an interval covering the apply (see Section 1.1).
++- Construction at 10,000 items completed in ~350–430 ms, well below the 2.0-second service deadline. The 548 timing includes tracemalloc profiling overhead whereas the main 10k timing was measured without tracing (a separate 10k tracing pass recorded ~61 MiB heap peak); tracemalloc measures Python heap allocations, not total process memory / RSS.
++- The 24,576-byte dashboard target is missed by the primary packets (58,738 / 58,640 bytes raw JSON; 65,252 / 65,095 bytes wire payload).
++
++---
++
++## 1.1 Measurements of Omitted Paths
++
++The extended test suite in `tests/test_library_analysis_fixtures.py::test_activity_cost_548_and_10000` measures paths omitted from the initial report:
++
++| Path / Scenario | Fixture Dimensions | Observed Metric | Result & Interpretation |
++| :--- | :--- | :--- | :--- |
++| **Proved Baseline Replay** | 548 items, 1 apply at 10:00:00Z, interval 10:00:00Z–24:00:00Z | ~35–45 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Baseline proved across interval covering first apply. |
++| **70 MiB Journal Refusal** | 1 item, 70 MiB forward/inverse deltas | ~50–95 ms refusal | `ok: False`, `error.code = "resource_too_large"`. Bounded refusal before JSON materialization. |
++| **Deadline Expiry Refusal** | 548 items, expired monotonic clock | ~0.1–0.2 ms refusal | `ok: False`, `error.code = "deadline_exceeded"`, `retryable: True`. Immediate abort on expired deadline. |
++| **Transport Serialization** | 548-item report packet in MCP stdio envelope | ~0.4–0.6 ms, 65,263 bytes | Full MCP transport protocol serialization with trusted document fence and text encapsulation through actual stdio adapter (65,252 bytes JSON-RPC wire payload). |
++| **Three Memberships / Item** | 548 items, 3 shelves each (1,644 memberships) | ~40–50 ms construction | `ok: True`. Handles dense multi-shelf memberships efficiently (64,735 bytes transport wire). |
++| **Multi-Operation Journal** | 50 items, 10 consecutive applied operations | ~5.5 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Replays sequence of 10 applies across interval covering first apply to prove state progression (35,404 bytes transport wire). |
++| **100k-Observation Scale** | 1 item, 100,000 source item observations | ~750–860 ms construction | `ok: True`. Full scan across 100k observation rows completes well under the 2.0 s deadline (27,862 bytes transport wire). |
++
++
++---
++
++## 2. SQLite Query Plans
++
++Queries run read-only against standard migrations (0001–0028) without creating migration 0029 or new secondary indexes.
++
++### Q1: Yoinks Retrieval
++```sql
++EXPLAIN QUERY PLAN
++SELECT video_id, source_type, author, channel, platform, yoinked_at, deleted_at
++FROM yoinks
++ORDER BY video_id ASC;
++```
++**Execution Plan:**
++```
++SCAN yoinks USING INDEX sqlite_autoindex_yoinks_1
++```
++- Uses the implicit primary key index on `video_id`.
++- Emits rows pre-sorted in ascending order. No temporary B-tree sorting table is created in memory or on disk.
++
++### Q3: Library Applies Journal Retrieval
++```sql
++EXPLAIN QUERY PLAN
++SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence,
++       authoritative_record_hash, forward_json, inverse_json, undo_of, created_at
++FROM library_applies
++ORDER BY operation_sequence ASC;
++```
++**Execution Plan:**
++```
++SCAN library_applies USING INDEX sqlite_autoindex_library_applies_3
++```
++- Uses the unique constraint index on `operation_sequence`.
++- Scans strictly in operation sequence order without intermediate sorting buffers.
++
++---
++
++## 3. Refusal Limits and Budget Enforcement
++
++The reader guards system availability through five explicit gates:
++
++1. **64 MiB Journal Delta Limit:**
++   - Evaluated before JSON parsing.
++   - If `SUM(LENGTH(CAST(forward_json AS BLOB)) + LENGTH(CAST(inverse_json AS BLOB)))` across `library_applies` exceeds 67,108,864 bytes, `get_library_activity` refuses with `error.code = "resource_too_large"`.
++   - Verified in `test_activity_deadline_and_work_bounds` with a 70 MiB synthetic payload.
++
++2. **2.0-Second Service Deadline:**
++   - Checked at entry and before returning responses.
++   - If execution time exceeds 2.0 seconds, the handler aborts and returns `error.code = "deadline_exceeded"`, `retryable: true`.
++   - Verified in `test_activity_deadline_and_work_bounds` using injected clock shifts.
++
++3. **64 KiB Wire Budget Envelope:**
++   - Maximum output size is 65,536 bytes.
++   - If the initial JSON serialization exceeds 65,536 bytes, the response sheds optional rows in order:
++     1. Event rows (`events.rows`)
++     2. Joint creator rows (`items.by_type_creator_hint`)
++     3. Creator rows (`items.by_creator_hint`)
++     4. Source detail rows (`sources.details`)
++     5. Shelf breakdown rows (`shelf_activity.shelves`)
++   - If mandatory summary fields alone exceed 65,536 bytes, the handler refuses with `resource_too_large`.
++   - Verified in `test_activity_wire_budget_and_untrusted_labels`.
++
++4. **Concurrency and Rate Limiting:**
++   - **Active Read Cap:** Enforced via shared `library_resources` process guard with a limit of 2 concurrent reads. Excess concurrent requests receive `rate_limited` (`retryable: true`).
++   - **Rate Limiter:** Rolling 60-second window capped at 60 admissions. Exceeding 60 calls/min raises `RateLimitExceeded` and returns `rate_limited`.
++   - *Verification note (marked limitation):* `test_activity_read_has_no_side_effects` checks `total_changes` only and does not verify concurrent load or rate limit enforcement.
++
++5. **Read Boundary Mutation Detection:**
++   - Compares `PRAGMA data_version` and `total_changes` at the start and end of read operations.
++   - If concurrent writes modify the database during read processing, the handler refuses with `error.code = "stale_report"`.
++   - *Verification note (marked limitation):* `test_gate4_deletion_invalidates_derived_report` tests sequential deletion between requests and does not prove concurrent snapshot isolation during active read transactions.
+diff --git a/docs/library/proof/phase5-az5g-measurements-2026-09-08.json b/docs/library/proof/phase5-az5g-measurements-2026-09-08.json
+new file mode 100644
+index 0000000..3b27057
+--- /dev/null
++++ b/docs/library/proof/phase5-az5g-measurements-2026-09-08.json
+@@ -0,0 +1,361 @@
++{
++  "metadata": {
++    "run": "AZ-5g",
++    "date": "2026-09-08",
++    "python_version": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
++    "platform": "win32",
++    "git_commit": "3d2fa9f",
++    "git_tree_hash": "c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0",
++    "scope": "Phase 5 synthetic cost fixture measurements (test_activity_cost_548_and_10000)"
++  },
++  "query_plans": {
++    "Q1": [
++      [
++        4,
++        0,
++        223,
++        "SCAN yoinks USING INDEX sqlite_autoindex_yoinks_1"
++      ]
++    ],
++    "Q3": [
++      [
++        4,
++        0,
++        222,
++        "SCAN library_applies USING INDEX sqlite_autoindex_library_applies_3"
++      ]
++    ]
++  },
++  "replay_probe": {
++    "replayed_state_observed": true,
++    "reasons": [
++      "interval_precedes_first_apply"
++    ],
++    "coverage_status": "partial"
++  },
++  "observations": [
++    {
++      "items": 548,
++      "memberships": 822,
++      "observations": 548,
++      "applies": 1,
++      "journal_bytes": 214596,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 833.2620999426581,
++      "ok": true,
++      "raw_bytes": 58035,
++      "baseline": {
++        "coverage_status": "partial",
++        "reasons": [
++          "interval_precedes_first_apply"
++        ],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T10:00:00.000Z"
++      },
++      "rows": {
++        "events": 0,
++        "creators": 20,
++        "joint": 12,
++        "sources": 1,
++        "shelves": 2
++      },
++      "totals": {
++        "events": null,
++        "creators": 20,
++        "joint": 12,
++        "sources": 1,
++        "shelves": 2
++      },
++      "actual_stdio_bytes": 64732,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 5.080099974293262
++    },
++    {
++      "items": 10000,
++      "memberships": 10000,
++      "observations": 10000,
++      "applies": 1,
++      "journal_bytes": 2760054,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 442.0390999875963,
++      "ok": true,
++      "raw_bytes": 57968,
++      "baseline": {
++        "coverage_status": "partial",
++        "reasons": [
++          "interval_precedes_first_apply"
++        ],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T10:00:00.000Z"
++      },
++      "rows": {
++        "events": 0,
++        "creators": 20,
++        "joint": 13,
++        "sources": 1,
++        "shelves": 1
++      },
++      "totals": {
++        "events": null,
++        "creators": 20,
++        "joint": 13,
++        "sources": 1,
++        "shelves": 1
++      },
++      "actual_stdio_bytes": 64601,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 1.4528000028803945
++    },
++    {
++      "items": 10000,
++      "memberships": 10000,
++      "observations": 10000,
++      "applies": 1,
++      "journal_bytes": 2760054,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 14511.774299957324,
++      "ok": true,
++      "raw_bytes": 57968,
++      "baseline": {
++        "coverage_status": "partial",
++        "reasons": [
++          "interval_precedes_first_apply"
++        ],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T10:00:00.000Z"
++      },
++      "rows": {
++        "events": 0,
++        "creators": 20,
++        "joint": 13,
++        "sources": 1,
++        "shelves": 1
++      },
++      "totals": {
++        "events": null,
++        "creators": 20,
++        "joint": 13,
++        "sources": 1,
++        "shelves": 1
++      },
++      "actual_stdio_bytes": 64601,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 4.931700008455664
++    },
++    {
++      "items": 548,
++      "memberships": 822,
++      "observations": 548,
++      "applies": 1,
++      "journal_bytes": 214596,
++      "interval": {
++        "start": "2026-09-01T10:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 42.742099962197244,
++      "ok": true,
++      "raw_bytes": 57894,
++      "baseline": {
++        "coverage_status": "journal_complete",
++        "reasons": [],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T10:00:00.000Z"
++      },
++      "rows": {
++        "events": 0,
++        "creators": 20,
++        "joint": 11,
++        "sources": 1,
++        "shelves": 2
++      },
++      "totals": {
++        "events": null,
++        "creators": 20,
++        "joint": 11,
++        "sources": 1,
++        "shelves": 2
++      },
++      "actual_stdio_bytes": 64595,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 1.234700030181557
++    },
++    {
++      "items": 1,
++      "memberships": 0,
++      "observations": 0,
++      "applies": 1,
++      "journal_bytes": 73400398,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 44.58839999279007,
++      "ok": false,
++      "raw_bytes": 221,
++      "error": {
++        "code": "resource_too_large",
++        "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
++        "retryable": false
++      }
++    },
++    {
++      "items": 548,
++      "memberships": 822,
++      "observations": 548,
++      "applies": 1,
++      "journal_bytes": 214596,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 0.07209996692836285,
++      "ok": false,
++      "raw_bytes": 190,
++      "error": {
++        "code": "deadline_exceeded",
++        "message": "Service deadline exceeded before lock acquisition",
++        "retryable": true
++      }
++    },
++    {
++      "items": 548,
++      "memberships": 1644,
++      "observations": 548,
++      "applies": 1,
++      "journal_bytes": 405026,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 65.5716999899596,
++      "ok": true,
++      "raw_bytes": 57671,
++      "baseline": {
++        "coverage_status": "partial",
++        "reasons": [
++          "interval_precedes_first_apply"
++        ],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T10:00:00.000Z"
++      },
++      "rows": {
++        "events": 0,
++        "creators": 20,
++        "joint": 10,
++        "sources": 1,
++        "shelves": 3
++      },
++      "totals": {
++        "events": null,
++        "creators": 20,
++        "joint": 10,
++        "sources": 1,
++        "shelves": 3
++      },
++      "actual_stdio_bytes": 64362,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 1.332599960733205
++    },
++    {
++      "items": 50,
++      "memberships": 50,
++      "observations": 0,
++      "applies": 10,
++      "journal_bytes": 234590,
++      "interval": {
++        "start": "2026-09-01T10:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 7.600500015541911,
++      "ok": true,
++      "raw_bytes": 34917,
++      "baseline": {
++        "coverage_status": "journal_complete",
++        "reasons": [],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
++        "latest_retained_timestamp": "2026-09-01T11:30:00.000Z"
++      },
++      "rows": {
++        "events": 20,
++        "creators": 1,
++        "joint": 1,
++        "sources": 1,
++        "shelves": 2
++      },
++      "totals": {
++        "events": null,
++        "creators": 1,
++        "joint": 1,
++        "sources": 1,
++        "shelves": 2
++      },
++      "actual_stdio_bytes": 39378,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 1.1327999527566135
++    },
++    {
++      "items": 1,
++      "memberships": 0,
++      "observations": 100000,
++      "applies": 0,
++      "journal_bytes": 0,
++      "interval": {
++        "start": "2026-09-01T00:00:00.000Z",
++        "end": "2026-09-02T00:00:00.000Z"
++      },
++      "date_basis": "capture_time",
++      "construction_ms": 880.4458999657072,
++      "ok": true,
++      "raw_bytes": 28790,
++      "baseline": {
++        "coverage_status": "no_history",
++        "reasons": [
++          "no_history"
++        ],
++        "clock": "applied_journal_time",
++        "earliest_retained_timestamp": null,
++        "latest_retained_timestamp": null
++      },
++      "rows": {
++        "events": 1,
++        "creators": 1,
++        "joint": 1,
++        "sources": 2,
++        "shelves": 0
++      },
++      "totals": {
++        "events": null,
++        "creators": 1,
++        "joint": 1,
++        "sources": 2,
++        "shelves": 0
++      },
++      "actual_stdio_bytes": 32351,
++      "actual_stdio_is_error": false,
++      "adapter_serialization_ms": 1.3219999964348972
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/scripts/measure_phase5_az5g.py b/scripts/measure_phase5_az5g.py
+new file mode 100644
+index 0000000..d5a8e9a
+--- /dev/null
++++ b/scripts/measure_phase5_az5g.py
+@@ -0,0 +1,187 @@
++"""scripts/measure_phase5_az5g.py - AZ-5g measured refresh runner.
++
++Executes the Phase 5 synthetic cost fixture without editing production code or tests,
++captures raw reader and actual stdio adapter observations, and writes machine-readable
++proof to docs/library/proof/phase5-az5g-measurements-2026-09-08.json.
++
++Can be executed as:
++    python -B scripts/measure_phase5_az5g.py
++or:
++    python -B -m pytest -q -s -p no:cacheprovider scripts/measure_phase5_az5g.py
++"""
++from __future__ import annotations
++
++import asyncio
++import copy
++import json
++import os
++import pathlib
++import sys
++import tempfile
++import time
++from unittest.mock import patch
++
++import pytest
++
++ROOT = pathlib.Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++
++import library_analysis
++import library_resources
++import uoink_mcp
++from mcp import types as mcp_types
++from tests import test_library_analysis_fixtures as az
++
++
++def run_az5g_measurements():
++    """Run full synthetic cost fixture with compatible reader and adapter measurement."""
++    library_analysis.reset_rate_limiter()
++    real_read = library_analysis.get_library_activity
++    records = []
++
++    def measured_read(args, **kwargs):
++        conn = kwargs.get("db")
++        record = {}
++        if conn:
++            record["items"] = conn.execute("SELECT COUNT(*) FROM yoinks").fetchone()[0]
++            record["memberships"] = conn.execute("SELECT COUNT(*) FROM item_shelves").fetchone()[0]
++            record["observations"] = conn.execute("SELECT COUNT(*) FROM source_items").fetchone()[0]
++            record["applies"] = conn.execute("SELECT COUNT(*) FROM library_applies").fetchone()[0]
++            record["journal_bytes"] = conn.execute(
++                "SELECT COALESCE(SUM(LENGTH(CAST(forward_json AS BLOB))+LENGTH(CAST(inverse_json AS BLOB))), 0) FROM library_applies"
++            ).fetchone()[0]
++        record["interval"] = copy.deepcopy(args.get("interval"))
++        record["date_basis"] = args.get("date_basis")
++
++        t0 = time.perf_counter()
++        packet = real_read(args, **kwargs)
++        t1 = time.perf_counter()
++
++        record["construction_ms"] = (t1 - t0) * 1000.0
++        record["ok"] = packet.get("ok", False)
++        record["raw_bytes"] = len(json.dumps(packet, ensure_ascii=False).encode("utf-8"))
++
++        if packet.get("ok"):
++            cov = packet.get("coverage", {}).get("cov_shelf_activity", {})
++            record["baseline"] = {
++                "coverage_status": cov.get("coverage_status"),
++                "reasons": cov.get("reasons", []),
++                "clock": cov.get("clock"),
++                "earliest_retained_timestamp": cov.get("earliest_retained_timestamp"),
++                "latest_retained_timestamp": cov.get("latest_retained_timestamp"),
++            }
++            record["rows"] = {
++                "events": len(packet.get("events", {}).get("rows", [])),
++                "creators": len(packet.get("items", {}).get("by_creator_hint", [])),
++                "joint": len(packet.get("items", {}).get("by_type_creator_hint", [])),
++                "sources": len(packet.get("sources", {}).get("details", [])),
++                "shelves": len(packet.get("shelf_activity", {}).get("shelves", [])),
++            }
++            record["totals"] = {
++                "events": packet.get("events", {}).get("total_events"),
++                "creators": len(packet.get("items", {}).get("by_creator_hint", [])),
++                "joint": len(packet.get("items", {}).get("by_type_creator_hint", [])),
++                "sources": len(packet.get("sources", {}).get("details", [])),
++                "shelves": len(packet.get("shelf_activity", {}).get("shelves", [])),
++            }
++
++            # Actual stdio adapter serialization of captured packet
++            request = mcp_types.CallToolRequest(
++                method="tools/call",
++                params=mcp_types.CallToolRequestParams(name="get_library_activity", arguments=args),
++            )
++            with patch.object(library_analysis, "get_library_activity", lambda arguments: packet):
++                t0_ad = time.perf_counter()
++                actual = asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
++                wire = mcp_types.JSONRPCResponse(jsonrpc="2.0", id=1, result=actual.model_dump(mode="json", exclude_none=True))
++                wire_json = wire.model_dump_json(by_alias=True, exclude_none=True)
++                t1_ad = time.perf_counter()
++
++            record["actual_stdio_bytes"] = len(wire_json.encode("utf-8"))
++            record["actual_stdio_is_error"] = actual.isError
++            record["adapter_serialization_ms"] = (t1_ad - t0_ad) * 1000.0
++            if actual.isError:
++                record["actual_stdio_error"] = json.loads(actual.content[0].text)
++        else:
++            record["error"] = packet.get("error")
++
++        records.append(record)
++        return packet
++
++    scratch_dir = pathlib.Path("_scratch/az5g")
++    scratch_dir.mkdir(parents=True, exist_ok=True)
++    tmp_dir = pathlib.Path(tempfile.mkdtemp(dir="_scratch/az5g"))
++    try:
++        with patch.object(library_analysis, "get_library_activity", measured_read):
++            az.test_activity_cost_548_and_10000(tmp_dir)
++    finally:
++        library_analysis.reset_rate_limiter()
++
++    # Replay observation probe (verifying that projected_state is populated during execution)
++    conn_rep = az.create_fixture_db(tmp_dir, "db_rep.db")
++    az.insert_yoink(conn_rep, "v_rep_1", yoinked_at="2026-09-01T12:00:00.000Z")
++    az.insert_apply(
++        conn_rep, "app_rep", 1, 0, 1,
++        created_at="2026-09-01T10:00:00.000Z",
++        forward_delta={"items": {"v_rep_1": [az.membership_row("v_rep_1", "shelf_a")]}, "policies": {}},
++        inverse_delta={"items": {"v_rep_1": []}, "policies": {}},
++    )
++    conn_rep.commit()
++    replayed_observed = []
++    old_profile = sys.getprofile()
++
++    def observe_return(frame, event, arg):
++        if event == "return" and frame.f_code is library_analysis._execute_activity.__code__:
++            ps = frame.f_locals.get("projected_state", {})
++            replayed_observed.append(bool(ps and any(ps.values())))
++
++    try:
++        sys.setprofile(observe_return)
++        pkt_rep = library_analysis.get_library_activity(
++            {"interval": {"start": "2026-09-01T00:00:00.000Z", "end": "2026-09-02T00:00:00.000Z"}},
++            db=conn_rep,
++        )
++    finally:
++        sys.setprofile(old_profile)
++    conn_rep.close()
++
++    # Query plans
++    conn_548 = az.create_fixture_db(tmp_dir, "db_qp.db")
++    az.insert_yoink(conn_548, "vid_001", yoinked_at="2026-09-01T12:00:00.000Z")
++    az.insert_apply(conn_548, "app_001", 1, 0, 1, forward_delta={"items": {}, "policies": {}}, inverse_delta={"items": {}, "policies": {}})
++    conn_548.commit()
++    qp_q1 = conn_548.execute("EXPLAIN QUERY PLAN SELECT video_id, source_type, author, channel, platform, yoinked_at, deleted_at FROM yoinks ORDER BY video_id ASC").fetchall()
++    qp_q3 = conn_548.execute("EXPLAIN QUERY PLAN SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence, authoritative_record_hash, forward_json, inverse_json, undo_of, created_at FROM library_applies ORDER BY operation_sequence ASC").fetchall()
++    conn_548.close()
++
++    output = {
++        "metadata": {
++            "run": "AZ-5g",
++            "date": "2026-09-08",
++            "python_version": sys.version,
++            "platform": sys.platform,
++            "git_commit": "3d2fa9f",
++            "git_tree_hash": "c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0",
++            "scope": "Phase 5 synthetic cost fixture measurements (test_activity_cost_548_and_10000)",
++        },
++        "query_plans": {
++            "Q1": [tuple(r) for r in qp_q1],
++            "Q3": [tuple(r) for r in qp_q3],
++        },
++        "replay_probe": {
++            "replayed_state_observed": any(replayed_observed),
++            "reasons": pkt_rep.get("coverage", {}).get("cov_shelf_activity", {}).get("reasons"),
++            "coverage_status": pkt_rep.get("coverage", {}).get("cov_shelf_activity", {}).get("coverage_status"),
++        },
++        "observations": records,
++    }
++
++    out_file = ROOT / "docs" / "library" / "proof" / "phase5-az5g-measurements-2026-09-08.json"
++    out_file.parent.mkdir(parents=True, exist_ok=True)
++    out_file.write_text(json.dumps(output, indent=2), encoding="utf-8")
++    print(f"\n[AZ-5G] Wrote {len(records)} benchmark observations to {out_file}")
++    return output
++
++
++if __name__ == "__main__":
++    run_az5g_measurements()

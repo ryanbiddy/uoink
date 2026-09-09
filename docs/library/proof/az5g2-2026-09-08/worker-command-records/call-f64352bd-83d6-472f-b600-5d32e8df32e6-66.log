@@ -1,0 +1,17 @@
+PYTHONPATH=C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\769107e6-1cc\grok;C:\Users\hello\AppData\Roaming\Python\Python314\site-packages
+starting measure
+measure_exit=1Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\769107e6-1cc\grok\scripts\measure_phase5_az5g2.py", line 27, in <module>
+    from mcp import types as mcp_types
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\mcp\__init__.py", line 2, in <module>
+    from .client.session_group import ClientSessionGroup
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\mcp\client\session_group.py", line 28, in <module>
+    from mcp.client.stdio import StdioServerParameters
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\mcp\client\stdio\__init__.py", line 17, in <module>
+    from mcp.os.win32.utilities import (
+    ...<4 lines>...
+    )
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\mcp\os\win32\utilities.py", line 22, in <module>
+    import pywintypes
+ModuleNotFoundError: No module named 'pywintypes'
+

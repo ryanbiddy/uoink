@@ -1,0 +1,2151 @@
+{
+  "metadata": {
+    "run": "AZ-5g2",
+    "date": "2026-09-08",
+    "python_version": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "C:\\Python314\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "git_commit": "d1d5fb8b3eca802f14ae53de3d6562df30b9129d",
+    "git_tree": "079170c1f70f4addcfaed15006a51f751ae60f67",
+    "git_head_subject": "Library handoff: record AZ-5h2 and authorize final transport measurements",
+    "mcp_installed": "1.28.1",
+    "mcp_pin": "mcp==1.27.1",
+    "anyio": "4.14.1",
+    "pydantic": "2.13.4",
+    "pytest": "9.1.1",
+    "shipped_stdio_entry": "uoink_mcp.mcp.run_stdio_async is uoink_mcp.run_bounded_stdio_async",
+    "run_stdio_is_bounded": true,
+    "apply_remains_false": true,
+    "service_deadline_sec_default": 2.0,
+    "max_response_bytes": 65536,
+    "dashboard_target_bytes": 24576,
+    "wire_cap_bytes": 65536,
+    "journal_cap_bytes": 67108864
+  },
+  "archive": {
+    "working_tree_sha256": "4745bd1db6efcd14e9b0aeb930ba0193981e4024b0ec91f4ad27a1f96da20ea0",
+    "working_tree_bytes": 9684,
+    "source_git_blob": "c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0",
+    "source_commit": "d1d5fb8b3eca802f14ae53de3d6562df30b9129d",
+    "source_tree": "079170c1f70f4addcfaed15006a51f751ae60f67",
+    "rejected_az5g_patch": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/769107e6-1cc/grok/docs/library/patches/az5g-gemini-partial-rejected-2026-09-08.patch",
+    "rejected_az5g_patch_sha256": "88a91ef8f62839f7f180683bcc03dc17105d6771d37b597fc6dec56bc91148b8",
+    "role": "byte-exact pre-refresh archive of PHASE5-AZ-MEASUREMENTS-2026-09-08.md",
+    "superseded": true,
+    "source_working_tree_commit": "d1d5fb8b3eca802f14ae53de3d6562df30b9129d",
+    "source_git_tree": "079170c1f70f4addcfaed15006a51f751ae60f67",
+    "crlf_count": 122,
+    "rejected_az5g_patch_bytes": 42608,
+    "failed_assertions_retained": [
+      "False claim that row shedding did not occur (without pruning / row shedding did not occur)",
+      "False claim that baseline replay path was skipped",
+      "False labelling of hand-built transport serialization as through actual stdio adapter",
+      "Stale raw JSON byte counts 58,738 / 58,640 preceding AZ-5d2/AZ-5h/AZ-5h2"
+    ]
+  },
+  "named": {
+    "548_primary_traced": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 548,
+        "memberships": 822,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 214596
+      },
+      "tracing_active": true,
+      "deadline_sec": 2.0,
+      "raw_bytes": 58035,
+      "ok": true,
+      "name": "548_primary_traced",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 550,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 550,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 550,
+          "metric_total": 550,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 12,
+          "pagination_omitted_rows": 8,
+          "returned_sample_length": 12,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "3cf588db5c308500ecd89c04e8a66505e59dd4683880ed717954cca1dd19b950",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_primary_traced.reader.json",
+        "bytes": 58035,
+        "sha256": "f1f66c5338b31d80df0ced7a96778a68e25e63992473d82d85000bc4a69f7b41"
+      }
+    },
+    "10000_primary_untraced": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 10000,
+        "memberships": 10000,
+        "observations": 10000,
+        "applies": 1,
+        "journal_bytes": 2760054
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 57968,
+      "ok": true,
+      "name": "10000_primary_untraced",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 10000,
+        "events": {
+          "pagination_total_rows": 10002,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 10002,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 10002,
+          "metric_total": 10002,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 30,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 13,
+          "pagination_omitted_rows": 37,
+          "returned_sample_length": 13,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "b194647222c80612448c842951ae7d3575ec57faca8e979c0e6834fbe7e701ff",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/10000_primary_untraced.reader.json",
+        "bytes": 57968,
+        "sha256": "e61769d958f9f3b2fe4759c3e347dc8274edf0469fc9cd89d3d0679368726538"
+      }
+    },
+    "10000_primary_traced_diagnostic": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 10000,
+        "memberships": 10000,
+        "observations": 10000,
+        "applies": 1,
+        "journal_bytes": 2760054
+      },
+      "tracing_active": true,
+      "deadline_sec": 30.0,
+      "raw_bytes": 57968,
+      "ok": true,
+      "name": "10000_primary_traced_diagnostic",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 10000,
+        "events": {
+          "pagination_total_rows": 10002,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 10002,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 10002,
+          "metric_total": 10002,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 30,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 13,
+          "pagination_omitted_rows": 37,
+          "returned_sample_length": 13,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "b194647222c80612448c842951ae7d3575ec57faca8e979c0e6834fbe7e701ff",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/10000_primary_traced_diagnostic.reader.json",
+        "bytes": 57968,
+        "sha256": "e61769d958f9f3b2fe4759c3e347dc8274edf0469fc9cd89d3d0679368726538"
+      }
+    },
+    "548_proved_replay": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T10:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 548,
+        "memberships": 822,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 214596
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 57894,
+      "ok": true,
+      "name": "548_proved_replay",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 549,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 549,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 549,
+          "metric_total": 549,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 11,
+          "pagination_omitted_rows": 9,
+          "returned_sample_length": 11,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T10:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "journal_complete",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [],
+          "exclusions": {}
+        },
+        "report_revision": "cfd94319b46608c6d2301dcfb687dd5edbb7509987db8b9870cbd6394aaa9f17",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_proved_replay.reader.json",
+        "bytes": 57894,
+        "sha256": "cddd72a4c6e6d67255379e03184eaebccfcf77fb5ca2f99599f3d8c910500a70"
+      }
+    },
+    "70mib_journal_refusal": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 1,
+        "memberships": 0,
+        "observations": 0,
+        "applies": 1,
+        "journal_bytes": 73400398
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 221,
+      "ok": false,
+      "name": "70mib_journal_refusal",
+      "counts": {
+        "ok": false,
+        "error": {
+          "code": "resource_too_large",
+          "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
+          "retryable": false
+        }
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/70mib_journal_refusal.reader.json",
+        "bytes": 221,
+        "sha256": "e2291a7b060424145ca98bc67d4323985bd0523dd4668148e714c94ad32a6537"
+      },
+      "error": {
+        "code": "resource_too_large",
+        "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
+        "retryable": false
+      }
+    },
+    "548_deadline_refusal": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 548,
+        "memberships": 822,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 214596
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 190,
+      "ok": false,
+      "name": "548_deadline_refusal",
+      "counts": {
+        "ok": false,
+        "error": {
+          "code": "deadline_exceeded",
+          "message": "Service deadline exceeded before lock acquisition",
+          "retryable": true
+        }
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_deadline_refusal.reader.json",
+        "bytes": 190,
+        "sha256": "8b861c603f0e14a3546fb8e5bd1a18ca0f7b0e9976445d92e2ea3fa51dd4c352"
+      },
+      "error": {
+        "code": "deadline_exceeded",
+        "message": "Service deadline exceeded before lock acquisition",
+        "retryable": true
+      }
+    },
+    "548_three_memberships": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 548,
+        "memberships": 1644,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 405026
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 57671,
+      "ok": true,
+      "name": "548_three_memberships",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 550,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 550,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 550,
+          "metric_total": 550,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 10,
+          "pagination_omitted_rows": 10,
+          "returned_sample_length": 10,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 3,
+          "pagination_returned_rows": 3,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 3,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "479a6e0bad648a5b12c918646fb2f51adc7f0a9fd4d64f1659e8fc358f4d6eea",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_three_memberships.reader.json",
+        "bytes": 57671,
+        "sha256": "39eb2bdf80a6bef717f3684e3c191d9b343c60b09af0d210a7702cd252649470"
+      }
+    },
+    "50_ten_operations": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T10:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 50,
+        "memberships": 50,
+        "observations": 0,
+        "applies": 10,
+        "journal_bytes": 234590
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 34917,
+      "ok": true,
+      "name": "50_ten_operations",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 50,
+        "events": {
+          "pagination_total_rows": 60,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 40,
+          "returned_sample_length": 20,
+          "family_returned_rows": 20,
+          "family_omitted_rows": 40,
+          "metric_total": 60,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T10:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "journal_complete",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T11:30:00.000Z",
+          "reasons": [],
+          "exclusions": {}
+        },
+        "report_revision": "d23e133057b087d5311e70a4d49aba6a323d300dffeb494a198f8f56871893d7",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.reader.json",
+        "bytes": 34917,
+        "sha256": "b86dabcb0d6e6516da24e14d9fd742bcd25917c120c626cde4f9cb8ed0b7bbb3"
+      }
+    },
+    "100k_observations": {
+      "args": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "dims": {
+        "items": 1,
+        "memberships": 0,
+        "observations": 100000,
+        "applies": 0,
+        "journal_bytes": 0
+      },
+      "tracing_active": false,
+      "deadline_sec": 2.0,
+      "raw_bytes": 28790,
+      "ok": true,
+      "name": "100k_observations",
+      "counts": {
+        "ok": true,
+        "items_total_metric": 1,
+        "events": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": 1,
+          "family_omitted_rows": 0,
+          "metric_total": 1,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 0,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 0,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "no_history",
+          "earliest_retained_timestamp": null,
+          "latest_retained_timestamp": null,
+          "reasons": [
+            "no_history"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "479d3b6e5850920768f364459400297ebcd4efdaf7e4685d75fdf3c8200453bf",
+        "warnings": []
+      },
+      "packet_file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/100k_observations.reader.json",
+        "bytes": 28790,
+        "sha256": "3bc1058eb18583a41872e986c1217f69d1e9139f27bab6487df4d7dc804da3e3"
+      }
+    }
+  },
+  "extra": {
+    "plans_548": {
+      "scale": "548",
+      "Q1": [
+        [
+          4,
+          0,
+          223,
+          "SCAN yoinks USING INDEX sqlite_autoindex_yoinks_1"
+        ]
+      ],
+      "Q3": [
+        [
+          4,
+          0,
+          222,
+          "SCAN library_applies USING INDEX sqlite_autoindex_library_applies_3"
+        ]
+      ],
+      "Q1_sql": "EXPLAIN QUERY PLAN SELECT video_id, source_type, author, channel, platform, yoinked_at, deleted_at FROM yoinks ORDER BY video_id ASC",
+      "Q3_sql": "EXPLAIN QUERY PLAN SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence, authoritative_record_hash, forward_json, inverse_json, undo_of, created_at FROM library_applies ORDER BY operation_sequence ASC"
+    },
+    "plans_10k": {
+      "scale": "10000",
+      "Q1": [
+        [
+          4,
+          0,
+          223,
+          "SCAN yoinks USING INDEX sqlite_autoindex_yoinks_1"
+        ]
+      ],
+      "Q3": [
+        [
+          4,
+          0,
+          222,
+          "SCAN library_applies USING INDEX sqlite_autoindex_library_applies_3"
+        ]
+      ],
+      "Q1_sql": "EXPLAIN QUERY PLAN SELECT video_id, source_type, author, channel, platform, yoinked_at, deleted_at FROM yoinks ORDER BY video_id ASC",
+      "Q3_sql": "EXPLAIN QUERY PLAN SELECT apply_id, operation_key, kind, before_revision, after_revision, operation_sequence, authoritative_record_hash, forward_json, inverse_json, undo_of, created_at FROM library_applies ORDER BY operation_sequence ASC"
+    },
+    "replay_probe": {
+      "path": "548 primary interval on the cost-fixture database",
+      "replayed_state_observed": true,
+      "observe_return_count": 1,
+      "reasons": [
+        "interval_precedes_first_apply"
+      ],
+      "coverage_status": "partial",
+      "ok": true,
+      "note": "Replay projection ran; interval_precedes_first_apply is a coverage reason, not a skipped path"
+    },
+    "untraced_548": {
+      "scope": "untraced_reader_construction",
+      "label": "548 primary untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 61.22460000915453,
+      "raw_json_dumps_ms": 0.37949997931718826,
+      "raw_bytes": 58035,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 550,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 550,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 550,
+          "metric_total": 550,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 12,
+          "pagination_omitted_rows": 8,
+          "returned_sample_length": 12,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "3cf588db5c308500ecd89c04e8a66505e59dd4683880ed717954cca1dd19b950",
+        "warnings": []
+      }
+    },
+    "untraced_10k": {
+      "scope": "untraced_reader_construction",
+      "label": "10000 primary untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 641.3016999722458,
+      "raw_json_dumps_ms": 0.44490001164376736,
+      "raw_bytes": 57968,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 10000,
+        "events": {
+          "pagination_total_rows": 10002,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 10002,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 10002,
+          "metric_total": 10002,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 30,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 50,
+          "pagination_returned_rows": 13,
+          "pagination_omitted_rows": 37,
+          "returned_sample_length": 13,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "b194647222c80612448c842951ae7d3575ec57faca8e979c0e6834fbe7e701ff",
+        "warnings": []
+      }
+    },
+    "untraced_replay": {
+      "scope": "untraced_reader_construction",
+      "label": "548 proved replay untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 68.6367999878712,
+      "raw_json_dumps_ms": 0.3797999816015363,
+      "raw_bytes": 57894,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 549,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 549,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 549,
+          "metric_total": 549,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 11,
+          "pagination_omitted_rows": 9,
+          "returned_sample_length": 11,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T10:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "journal_complete",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [],
+          "exclusions": {}
+        },
+        "report_revision": "cfd94319b46608c6d2301dcfb687dd5edbb7509987db8b9870cbd6394aaa9f17",
+        "warnings": []
+      }
+    },
+    "untraced_70mib": {
+      "scope": "untraced_reader_construction",
+      "label": "70MiB journal refusal untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 52.03369999071583,
+      "raw_json_dumps_ms": 0.014400051441043615,
+      "raw_bytes": 221,
+      "ok": false,
+      "error": {
+        "code": "resource_too_large",
+        "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
+        "retryable": false
+      },
+      "counts": {
+        "ok": false,
+        "error": {
+          "code": "resource_too_large",
+          "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
+          "retryable": false
+        }
+      }
+    },
+    "untraced_deadline": {
+      "scope": "untraced_reader_construction",
+      "label": "injected expired monotonic clock on 548 fixture (reader path)",
+      "tracing": false,
+      "construction_ms": 0.09720004163682461,
+      "raw_bytes": 190,
+      "ok": false,
+      "error": {
+        "code": "deadline_exceeded",
+        "message": "Service deadline exceeded before lock acquisition",
+        "retryable": true
+      }
+    },
+    "untraced_dense": {
+      "scope": "untraced_reader_construction",
+      "label": "548 three memberships untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 67.84900004277006,
+      "raw_json_dumps_ms": 0.39060000563040376,
+      "raw_bytes": 57671,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 548,
+        "events": {
+          "pagination_total_rows": 550,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 550,
+          "returned_sample_length": 0,
+          "family_returned_rows": 0,
+          "family_omitted_rows": 550,
+          "metric_total": 550,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 20,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 20,
+          "pagination_returned_rows": 10,
+          "pagination_omitted_rows": 10,
+          "returned_sample_length": 10,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 3,
+          "pagination_returned_rows": 3,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 3,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "partial",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "reasons": [
+            "interval_precedes_first_apply"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "479a6e0bad648a5b12c918646fb2f51adc7f0a9fd4d64f1659e8fc358f4d6eea",
+        "warnings": []
+      }
+    },
+    "untraced_multi": {
+      "scope": "untraced_reader_construction",
+      "label": "50/10 operations untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 12.267099984455854,
+      "raw_json_dumps_ms": 0.2704000216908753,
+      "raw_bytes": 34917,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 50,
+        "events": {
+          "pagination_total_rows": 60,
+          "pagination_returned_rows": 20,
+          "pagination_omitted_rows": 40,
+          "returned_sample_length": 20,
+          "family_returned_rows": 20,
+          "family_omitted_rows": 40,
+          "metric_total": 60,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T10:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "journal_complete",
+          "earliest_retained_timestamp": "2026-09-01T10:00:00.000Z",
+          "latest_retained_timestamp": "2026-09-01T11:30:00.000Z",
+          "reasons": [],
+          "exclusions": {}
+        },
+        "report_revision": "d23e133057b087d5311e70a4d49aba6a323d300dffeb494a198f8f56871893d7",
+        "warnings": []
+      }
+    },
+    "untraced_100k": {
+      "scope": "untraced_reader_construction",
+      "label": "100k observations untraced",
+      "tracing": false,
+      "deadline_sec": 2.0,
+      "construction_ms": 1127.1937999990769,
+      "raw_json_dumps_ms": 0.2826999989338219,
+      "raw_bytes": 28790,
+      "ok": true,
+      "error": null,
+      "counts": {
+        "ok": true,
+        "items_total_metric": 1,
+        "events": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": 1,
+          "family_omitted_rows": 0,
+          "metric_total": 1,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "creators": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "joint": {
+          "pagination_total_rows": 1,
+          "pagination_returned_rows": 1,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 1,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "sources": {
+          "pagination_total_rows": 2,
+          "pagination_returned_rows": 2,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 2,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "shelves": {
+          "pagination_total_rows": 0,
+          "pagination_returned_rows": 0,
+          "pagination_omitted_rows": 0,
+          "returned_sample_length": 0,
+          "family_returned_rows": null,
+          "family_omitted_rows": null,
+          "metric_total": null,
+          "note": "returned_sample_length is the displayed array length, not a population total"
+        },
+        "coverage_shelf": {
+          "clock": "applied_journal_time",
+          "requested_interval": {
+            "start": "2026-09-01T00:00:00.000Z",
+            "end": "2026-09-02T00:00:00.000Z"
+          },
+          "coverage_status": "no_history",
+          "earliest_retained_timestamp": null,
+          "latest_retained_timestamp": null,
+          "reasons": [
+            "no_history"
+          ],
+          "exclusions": {}
+        },
+        "report_revision": "479d3b6e5850920768f364459400297ebcd4efdaf7e4685d75fdf3c8200453bf",
+        "warnings": []
+      }
+    },
+    "heap_548": {
+      "scope": "diagnostic_tracing",
+      "label": "548 primary traced heap",
+      "tracing": true,
+      "deadline_sec": 2.0,
+      "deadline_relaxed": false,
+      "elapsed_ms": 1004.9571000272408,
+      "heap_current_bytes": 413871,
+      "heap_peak_bytes": 5379980,
+      "heap_peak_kib": 5253.88671875,
+      "ok": true,
+      "error": null,
+      "raw_bytes": 58035,
+      "note": "tracemalloc Python heap only, not process RSS; not comparable to untraced construction times"
+    },
+    "heap_10k": {
+      "scope": "diagnostic_tracing",
+      "label": "10000 primary traced heap with 30.0s diagnostic deadline",
+      "tracing": true,
+      "deadline_sec": 30.0,
+      "deadline_relaxed": true,
+      "elapsed_ms": 16057.021899963729,
+      "heap_current_bytes": 1006860,
+      "heap_peak_bytes": 80270020,
+      "heap_peak_kib": 78388.69140625,
+      "ok": true,
+      "error": null,
+      "raw_bytes": 57968,
+      "note": "tracemalloc Python heap only, not process RSS; not comparable to untraced construction times"
+    },
+    "heap_70mib": {
+      "scope": "diagnostic_tracing",
+      "label": "70MiB journal refusal traced heap",
+      "tracing": true,
+      "deadline_sec": 2.0,
+      "deadline_relaxed": false,
+      "elapsed_ms": 47.49430000083521,
+      "heap_current_bytes": 5010,
+      "heap_peak_bytes": 19123,
+      "heap_peak_kib": 18.6748046875,
+      "ok": false,
+      "error": {
+        "code": "resource_too_large",
+        "message": "Combined journal deltas (73400398 bytes) exceed budget limit of 67108864 bytes",
+        "retryable": false
+      },
+      "raw_bytes": 221,
+      "note": "tracemalloc Python heap only, not process RSS; not comparable to untraced construction times"
+    },
+    "heap_deadline": {
+      "scope": "diagnostic_tracing",
+      "label": "injected expired monotonic clock traced heap",
+      "tracing": true,
+      "deadline_sec": 2.0,
+      "deadline_relaxed": false,
+      "elapsed_ms": 0.12710003647953272,
+      "heap_current_bytes": 595,
+      "heap_peak_bytes": 6058,
+      "heap_peak_kib": 5.916015625,
+      "ok": false,
+      "error": {
+        "code": "deadline_exceeded",
+        "message": "Service deadline exceeded before lock acquisition",
+        "retryable": true
+      },
+      "raw_bytes": 190,
+      "note": "tracemalloc Python heap only; not comparable to untraced deadline timing"
+    },
+    "handbuilt_548": {
+      "scope": "hand_built_synthetic_envelope",
+      "label": "hand-built JSON-RPC synthetic envelope with preface and document fences; isolates serialization timing and does not invoke the stdio handler",
+      "includes_reader_invocation": false,
+      "elapsed_ms": 0.46800001291558146,
+      "jsonrpc_utf8_bytes": 64743,
+      "sha256": "22f24ad7f781f46fe9e1356c7468bcdba9f1cd38754b3277b2cd965ca62e2988",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_primary.handbuilt.jsonrpc",
+        "bytes": 64743,
+        "sha256": "22f24ad7f781f46fe9e1356c7468bcdba9f1cd38754b3277b2cd965ca62e2988"
+      }
+    },
+    "handler_548": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.824699982535094,
+      "jsonrpc_utf8_bytes": 64732,
+      "isError": false,
+      "sha256": "0e1b4a6b4170680cee73b22d80e35ba115d6235d93dd097a96d8e1956aefd277",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_primary.handler-only.jsonrpc",
+        "bytes": 64732,
+        "sha256": "0e1b4a6b4170680cee73b22d80e35ba115d6235d93dd097a96d8e1956aefd277"
+      }
+    },
+    "handler_10k": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.1490000179037452,
+      "jsonrpc_utf8_bytes": 64601,
+      "isError": false,
+      "sha256": "e2451217f5c5e8fe5a0d4e37da0910058dc20bca1ae5b8eeb2751c9edf7686a1",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/10000_primary.handler-only.jsonrpc",
+        "bytes": 64601,
+        "sha256": "e2451217f5c5e8fe5a0d4e37da0910058dc20bca1ae5b8eeb2751c9edf7686a1"
+      }
+    },
+    "handler_replay": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.0640000109560788,
+      "jsonrpc_utf8_bytes": 64595,
+      "isError": false,
+      "sha256": "0c68d5b730aa6f2604e43fd5a99366cd0e08f3156fa4e4f6132ea0c094363a60",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_replay.handler-only.jsonrpc",
+        "bytes": 64595,
+        "sha256": "0c68d5b730aa6f2604e43fd5a99366cd0e08f3156fa4e4f6132ea0c094363a60"
+      }
+    },
+    "handler_dense": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.1088000028394163,
+      "jsonrpc_utf8_bytes": 64362,
+      "isError": false,
+      "sha256": "056636181d8373d66d3ec8cc503a3639a1c8756da41a246ebfefee68d1059c44",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_dense.handler-only.jsonrpc",
+        "bytes": 64362,
+        "sha256": "056636181d8373d66d3ec8cc503a3639a1c8756da41a246ebfefee68d1059c44"
+      }
+    },
+    "handler_multi": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.0642000124789774,
+      "jsonrpc_utf8_bytes": 39378,
+      "isError": false,
+      "sha256": "6949a7869c0aebc2c6de191385c4cc3a0067096397caa0eab994287745b9f56d",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.handler-only.jsonrpc",
+        "bytes": 39378,
+        "sha256": "6949a7869c0aebc2c6de191385c4cc3a0067096397caa0eab994287745b9f56d"
+      }
+    },
+    "handler_100k": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 1.0588999721221626,
+      "jsonrpc_utf8_bytes": 32351,
+      "isError": false,
+      "sha256": "57f0ca0c4b1f52006222f126a8c5747a2938d02f6406d07e9e72321615c8b880",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/100k.handler-only.jsonrpc",
+        "bytes": 32351,
+        "sha256": "57f0ca0c4b1f52006222f126a8c5747a2938d02f6406d07e9e72321615c8b880"
+      }
+    },
+    "handler_70mib": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 0.5540999700315297,
+      "jsonrpc_utf8_bytes": 329,
+      "isError": true,
+      "sha256": "8ca9a7cc8e9108b1dc10f959120aeae9e94e001ddf5878939730ccf4388679ff",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/70mib.handler-only.jsonrpc",
+        "bytes": 329,
+        "sha256": "8ca9a7cc8e9108b1dc10f959120aeae9e94e001ddf5878939730ccf4388679ff"
+      }
+    },
+    "handler_deadline": {
+      "scope": "handler_only_captured_packet",
+      "label": "request handler on an already captured reader packet; does not invoke bounded_stdio_server; JSONRPCResponse id=1; no trailing newline",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
+      "elapsed_ms": 0.5183999892324209,
+      "jsonrpc_utf8_bytes": 298,
+      "isError": true,
+      "sha256": "941e79c731171b6f7d2ec226cd47ac625108a662a1b49a5a09a2f55a46a2ec9b",
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/deadline.handler-only.jsonrpc",
+        "bytes": 298,
+        "sha256": "941e79c731171b6f7d2ec226cd47ac625108a662a1b49a5a09a2f55a46a2ec9b"
+      }
+    },
+    "shipped_live_548": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "548 primary live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 69.1637999843806,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64733,
+          "jsonrpc_utf8_bytes": 64732,
+          "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64733,
+      "activity_jsonrpc_utf8_bytes": 64732,
+      "activity_sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 58035,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_primary.shipped.frame",
+        "bytes": 64733,
+        "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb"
+      }
+    },
+    "shipped_live_10k": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "10000 primary live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 579.5865999534726,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64602,
+          "jsonrpc_utf8_bytes": 64601,
+          "sha256": "74636ed07ed0930ceb0870ed226e5a37dee3e72942caa8baed48d420baaf1389",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64602,
+      "activity_jsonrpc_utf8_bytes": 64601,
+      "activity_sha256": "74636ed07ed0930ceb0870ed226e5a37dee3e72942caa8baed48d420baaf1389",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57968,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/10000_primary.shipped.frame",
+        "bytes": 64602,
+        "sha256": "74636ed07ed0930ceb0870ed226e5a37dee3e72942caa8baed48d420baaf1389"
+      }
+    },
+    "shipped_live_replay": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "548 proved replay live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 57.21180001273751,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "bdcae77a73bbfe79a9c535844bf277be61bc9ebdd2ec41cc533db6c25b17d526",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T10:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64596,
+          "jsonrpc_utf8_bytes": 64595,
+          "sha256": "f28450294a7f2e4741250c1f16d0c769979b46e7b314ed2fdb22efebb487b515",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64596,
+      "activity_jsonrpc_utf8_bytes": 64595,
+      "activity_sha256": "f28450294a7f2e4741250c1f16d0c769979b46e7b314ed2fdb22efebb487b515",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57894,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_replay.shipped.frame",
+        "bytes": 64596,
+        "sha256": "f28450294a7f2e4741250c1f16d0c769979b46e7b314ed2fdb22efebb487b515"
+      }
+    },
+    "shipped_live_dense": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "548 three-membership live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 63.36979998741299,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64363,
+          "jsonrpc_utf8_bytes": 64362,
+          "sha256": "76ac39c9909f92d38b8e67b181e59f44a378f2d0baa204a9ffa4da5a45e4eb62",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64363,
+      "activity_jsonrpc_utf8_bytes": 64362,
+      "activity_sha256": "76ac39c9909f92d38b8e67b181e59f44a378f2d0baa204a9ffa4da5a45e4eb62",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57671,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_dense.shipped.frame",
+        "bytes": 64363,
+        "sha256": "76ac39c9909f92d38b8e67b181e59f44a378f2d0baa204a9ffa4da5a45e4eb62"
+      }
+    },
+    "shipped_live_multi": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "50/10 operations live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 9.687900019343942,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "bdcae77a73bbfe79a9c535844bf277be61bc9ebdd2ec41cc533db6c25b17d526",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T10:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 39379,
+          "jsonrpc_utf8_bytes": 39378,
+          "sha256": "f57d03664cc8fa891718e43376918632ad8da762d7719b77e96628db54bab8f7",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 39379,
+      "activity_jsonrpc_utf8_bytes": 39378,
+      "activity_sha256": "f57d03664cc8fa891718e43376918632ad8da762d7719b77e96628db54bab8f7",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 34917,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.shipped.frame",
+        "bytes": 39379,
+        "sha256": "f57d03664cc8fa891718e43376918632ad8da762d7719b77e96628db54bab8f7"
+      }
+    },
+    "shipped_live_100k": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "100k observations live reader through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 1149.8404000303708,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 32352,
+          "jsonrpc_utf8_bytes": 32351,
+          "sha256": "be7ae42c934d27467a5e851f397f1f2fc95fed09bc7000fc4943b3bcd06e814b",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 32352,
+      "activity_jsonrpc_utf8_bytes": 32351,
+      "activity_sha256": "be7ae42c934d27467a5e851f397f1f2fc95fed09bc7000fc4943b3bcd06e814b",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 28790,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/100k.shipped.frame",
+        "bytes": 32352,
+        "sha256": "be7ae42c934d27467a5e851f397f1f2fc95fed09bc7000fc4943b3bcd06e814b"
+      }
+    },
+    "shipped_live_70mib": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "70MiB journal refusal through bounded_stdio_server",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 48.75800001900643,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 330,
+          "jsonrpc_utf8_bytes": 329,
+          "sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": true,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 330,
+      "activity_jsonrpc_utf8_bytes": 329,
+      "activity_sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72",
+      "isError": true,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/70mib.shipped.frame",
+        "bytes": 330,
+        "sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72"
+      }
+    },
+    "shipped_captured_548": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "shipped writer on captured 548 packet; no second reader",
+      "includes_reader_invocation": false,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 2.75129999499768,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64733,
+          "jsonrpc_utf8_bytes": 64732,
+          "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64733,
+      "activity_jsonrpc_utf8_bytes": 64732,
+      "activity_sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 58035,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_primary_captured.shipped.frame",
+        "bytes": 64733,
+        "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb"
+      }
+    },
+    "shipped_expired_inbound": {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "shipped entry expired inbound (AZ-5h2 original deadline); 2.1s shift after admit",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 1.5654999879188836,
+      "shift_after_admit_sec": 2.1,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 296,
+          "jsonrpc_utf8_bytes": 295,
+          "sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": true,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 296,
+      "activity_jsonrpc_utf8_bytes": 295,
+      "activity_sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6",
+      "isError": true,
+      "file": {
+        "path": "docs/library/proof/az5g2-2026-09-08/packets/548_expired_inbound.shipped.frame",
+        "bytes": 296,
+        "sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6"
+      }
+    }
+  },
+  "errors": [],
+  "fixture_names": [
+    "548_primary_traced",
+    "10000_primary_untraced",
+    "10000_primary_traced_diagnostic",
+    "548_proved_replay",
+    "70mib_journal_refusal",
+    "548_deadline_refusal",
+    "548_three_memberships",
+    "50_ten_operations",
+    "100k_observations"
+  ],
+  "document": {
+    "path": "docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md",
+    "bytes": 13767,
+    "sha256": "9b135d7ec1b9bd12454359d6fe1f5a45cdb60b4bc502bbebe05fe2594ad0022b"
+  },
+  "manifest": {
+    "path": "docs/library/proof/az5g2-2026-09-08/SHA256SUMS",
+    "bytes": 4936,
+    "sha256": "6e7726a88d51414ff693bcf79a0338f39a343fe1c0a6ab706ac727138362619e"
+  }
+}

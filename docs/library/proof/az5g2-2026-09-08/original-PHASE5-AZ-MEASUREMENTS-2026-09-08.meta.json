@@ -1,0 +1,19 @@
+{
+  "role": "byte-exact pre-refresh archive of PHASE5-AZ-MEASUREMENTS-2026-09-08.md",
+  "superseded": true,
+  "source_working_tree_commit": "d1d5fb8b3eca802f14ae53de3d6562df30b9129d",
+  "source_git_tree": "079170c1f70f4addcfaed15006a51f751ae60f67",
+  "source_git_blob": "c3c8e1b72d3354bdfe85b1ce881e1e765aa28ea0",
+  "working_tree_sha256": "4745bd1db6efcd14e9b0aeb930ba0193981e4024b0ec91f4ad27a1f96da20ea0",
+  "working_tree_bytes": 9684,
+  "crlf_count": 122,
+  "rejected_az5g_patch": "docs/library/patches/az5g-gemini-partial-rejected-2026-09-08.patch",
+  "rejected_az5g_patch_sha256": "88a91ef8f62839f7f180683bcc03dc17105d6771d37b597fc6dec56bc91148b8",
+  "rejected_az5g_patch_bytes": 42608,
+  "failed_assertions_retained": [
+    "False claim that row shedding did not occur (without pruning / row shedding did not occur)",
+    "False claim that baseline replay path was skipped",
+    "False labelling of hand-built transport serialization as through actual stdio adapter",
+    "Stale raw JSON byte counts 58,738 / 58,640 preceding AZ-5d2/AZ-5h/AZ-5h2"
+  ]
+}

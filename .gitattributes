@@ -39,3 +39,8 @@ docs/library/proof/s20-*/** -text
 docs/library/proof/bd-study-*/** -text
 docs/library/proof/bd-player-*/** -text
 docs/library/proof/aw8-*/** -text
+docs/library/proof/az5g2-*/** -text
+docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md -text
+docs/library/PHASE5-AZ5G2-GROK-2026-09-08.md -text
+scripts/measure_phase5_az5g2.py -text
+scripts/run_phase5_az5g2_union.py -text

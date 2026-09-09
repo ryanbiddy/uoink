@@ -1,0 +1,34 @@
+[
+  {
+    "id": "call-f64352bd-83d6-472f-b600-5d32e8df32e6-66",
+    "command": "$root = (Get-Location).Path\n$pyPath = python -c @\"\nimport os, site\nfrom pathlib import Path\nroot = os.getcwd()\nu = site.getusersitepackages()\nbase = Path(u).parent\nparts = [root, u]\nfor n in ('win32', 'win32/lib', 'pythonwin'):\n    p = base / n\n    if p.exists():\n        parts.append(str(p))\nprint(os.pathsep.join(parts))\n\"@\n$env:PYTHONPATH = $pyPath\n$env:PYTHONDONTWRITEBYTECODE = '1'\n$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'\nRemove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue\n$scratch = Join-Path $root '_scratch\\az5g2'\nNew-Item -ItemType Directory -Force -Path $scratch, (Join-Path $scratch 'appdata'), (Join-Path $scratch 'output'), (Join-Path $scratch 'tmp'), (Join-Path $scratch 'measure') | Out-Null\n$env:LOCALAPPDATA = Join-Path $scratch 'appdata'\n$env:APPDATA = Join-Path $scratch 'appdata'\n$env:TEMP = Join-Path $scratch 'tmp'\n$env:TMP = $env:TEMP\n$env:UOINK_OUTPUT_DIR = Join-Path $scratch 'output'\nWrite-Output \"PYTHONPATH=$env:PYTHONPATH\"\nWrite-Output \"starting measure\"\npython -B scripts/measure_phase5_az5g2.py\nWrite-Output \"measure_exit=$LASTEXITCODE\"\n",
+    "description": "Run AZ-5g2 measurement harness with disposable roots",
+    "log": "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-f64352bd-83d6-472f-b600-5d32e8df32e6-66.log",
+    "sha256": "46d54a5de9dd478e1b59d787f4270c5a1d003dd148fc975f89102baf302dce1a",
+    "bytes": 1156
+  },
+  {
+    "id": "call-fd96b8d0-8eee-49fb-9bf5-d19156a025be-70",
+    "command": "$root = (Get-Location).Path\n$pyPath = python -c @\"\nimport os, site\nfrom pathlib import Path\nroot = os.getcwd()\nu = Path(site.getusersitepackages())\nparts = [root, str(u)]\nfor n in ('win32', 'win32/lib', 'pythonwin', 'pywin32_system32'):\n    p = u / n\n    if p.exists():\n        parts.append(str(p))\nprint(os.pathsep.join(parts))\n\"@\n$env:PYTHONPATH = $pyPath\n$env:PYTHONDONTWRITEBYTECODE = '1'\n$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'\nRemove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue\n$scratch = Join-Path $root '_scratch\\az5g2'\nNew-Item -ItemType Directory -Force -Path $scratch, (Join-Path $scratch 'appdata'), (Join-Path $scratch 'output'), (Join-Path $scratch 'tmp'), (Join-Path $scratch 'measure') | Out-Null\n$env:LOCALAPPDATA = Join-Path $scratch 'appdata'\n$env:APPDATA = Join-Path $scratch 'appdata'\n$env:TEMP = Join-Path $scratch 'tmp'\n$env:TMP = $env:TEMP\n$env:UOINK_OUTPUT_DIR = Join-Path $scratch 'output'\nWrite-Output \"PYTHONPATH=$env:PYTHONPATH\"\npython -c \"import pywintypes, mcp; print('pywintypes_ok', pywintypes.__file__); print('mcp_ok')\"\npython -B scripts/measure_phase5_az5g2.py\nWrite-Output \"measure_exit=$LASTEXITCODE\"\n",
+    "description": "Rerun measurement harness with pywin32 on PYTHONPATH",
+    "log": "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-fd96b8d0-8eee-49fb-9bf5-d19156a025be-70.log",
+    "sha256": "18e31d58e6827bd45338233d50182be244223b0ac459e2200ab065cab5986ee4",
+    "bytes": 17855
+  },
+  {
+    "id": "call-f4568584-e466-4c1b-9242-521ba3fbe5de-81",
+    "command": "$root = (Get-Location).Path\n$pyPath = python -c @\"\nimport os, site\nfrom pathlib import Path\nroot = os.getcwd()\nu = Path(site.getusersitepackages())\nparts = [root, str(u)]\nfor n in ('win32', 'win32/lib', 'pythonwin', 'pywin32_system32'):\n    p = u / n\n    if p.exists():\n        parts.append(str(p))\nprint(os.pathsep.join(parts))\n\"@\n$env:PYTHONPATH = $pyPath\n$env:PYTHONDONTWRITEBYTECODE = '1'\n$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'\nRemove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue\n$scratch = Join-Path $root '_scratch\\az5g2'\nNew-Item -ItemType Directory -Force -Path $scratch, (Join-Path $scratch 'appdata'), (Join-Path $scratch 'output'), (Join-Path $scratch 'tmp') | Out-Null\n$env:LOCALAPPDATA = Join-Path $scratch 'appdata'\n$env:APPDATA = Join-Path $scratch 'appdata'\n$env:TEMP = Join-Path $scratch 'tmp'\n$env:TMP = $env:TEMP\n$env:UOINK_OUTPUT_DIR = Join-Path $scratch 'output'\nWrite-Output \"starting named union\"\npython -B scripts/run_phase5_az5g2_union.py\nWrite-Output \"union_exit=$LASTEXITCODE\"\n",
+    "description": "Run AZ-5g2 named pytest union with explicit selectors",
+    "log": "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-f4568584-e466-4c1b-9242-521ba3fbe5de-81.log",
+    "sha256": "5dd3fe0fa567713c09bd0c34b3f4328ec304359929ce3e27104eb4695c96a08b",
+    "bytes": 36
+  },
+  {
+    "id": "call-4bdb12e6-9e77-44f5-b866-a64d38477a5f-90",
+    "command": "$root = (Get-Location).Path\n$pyPath = python -c @\"\nimport os, site\nfrom pathlib import Path\nroot = os.getcwd()\nu = Path(site.getusersitepackages())\nparts = [root, str(u)]\nfor n in ('win32', 'win32/lib', 'pythonwin', 'pywin32_system32'):\n    p = u / n\n    if p.exists():\n        parts.append(str(p))\nprint(os.pathsep.join(parts))\n\"@\n$env:PYTHONPATH = $pyPath\n$env:PYTHONDONTWRITEBYTECODE = '1'\n$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'\nRemove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue\n$scratch = Join-Path $root '_scratch\\az5g2'\nNew-Item -ItemType Directory -Force -Path $scratch, (Join-Path $scratch 'appdata'), (Join-Path $scratch 'output'), (Join-Path $scratch 'tmp') | Out-Null\n$env:LOCALAPPDATA = Join-Path $scratch 'appdata'\n$env:APPDATA = Join-Path $scratch 'appdata'\n$env:TEMP = Join-Path $scratch 'tmp'\n$env:TMP = $env:TEMP\n$env:UOINK_OUTPUT_DIR = Join-Path $scratch 'output'\nWrite-Output \"starting named union\"\npython -B scripts/run_phase5_az5g2_union.py\nWrite-Output \"union_exit=$LASTEXITCODE\"\n",
+    "description": "Rerun named pytest union waiting on subprocess",
+    "log": "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-4bdb12e6-9e77-44f5-b866-a64d38477a5f-90.log",
+    "sha256": "8b50d9c1b6ad97b01eecd7b3ac097770b8b9a0a5c0913fee0ef4f5584a9ac653",
+    "bytes": 4958
+  }
+]

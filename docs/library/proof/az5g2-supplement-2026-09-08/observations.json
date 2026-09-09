@@ -1,0 +1,658 @@
+{
+  "scope": "integrator supplement; actual shipped writer with in-memory I/O; no real client",
+  "worker_commit": "d1d5fb8b3eca802f14ae53de3d6562df30b9129d",
+  "worker_tree": "079170c1f70f4addcfaed15006a51f751ae60f67",
+  "g2_harness_sha256": "9ec22684075c1237608cdeae636c6bedca35f52bd03632b4226b5fdb7b265a25",
+  "runs": [
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "00-548",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 54.021399992052466,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64733,
+          "jsonrpc_utf8_bytes": 64732,
+          "sha256": "75cf34b65ff739046acfb294e2f1e1c971fc34e3c70dbcd64a1ab6d6387d8128",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64733,
+      "activity_jsonrpc_utf8_bytes": 64732,
+      "activity_sha256": "75cf34b65ff739046acfb294e2f1e1c971fc34e3c70dbcd64a1ab6d6387d8128",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 58035,
+      "db_key": "548",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 46.3981,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "01-10k",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 466.73580002970994,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64602,
+          "jsonrpc_utf8_bytes": 64601,
+          "sha256": "ed5dc77e62f758d0acbb937f1e212b0b2316efb09cf4791e4a87ad049598696d",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64602,
+      "activity_jsonrpc_utf8_bytes": 64601,
+      "activity_sha256": "ed5dc77e62f758d0acbb937f1e212b0b2316efb09cf4791e4a87ad049598696d",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57968,
+      "db_key": "10k",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 464.6681,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "02-dense",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 67.61250004637986,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64363,
+          "jsonrpc_utf8_bytes": 64362,
+          "sha256": "42c7333688b13f0604788ea606b68d60908db1cd5331131ac918a0ef299ae994",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64363,
+      "activity_jsonrpc_utf8_bytes": 64362,
+      "activity_sha256": "42c7333688b13f0604788ea606b68d60908db1cd5331131ac918a0ef299ae994",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57671,
+      "db_key": "dense",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 65.5711,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "03-multi",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 12.066699971910566,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "bdcae77a73bbfe79a9c535844bf277be61bc9ebdd2ec41cc533db6c25b17d526",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T10:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 39379,
+          "jsonrpc_utf8_bytes": 39378,
+          "sha256": "e76a6227c85986596fa659a5b7c74c9da2331893eef86585a57fe7fc4a87803b",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 39379,
+      "activity_jsonrpc_utf8_bytes": 39378,
+      "activity_sha256": "e76a6227c85986596fa659a5b7c74c9da2331893eef86585a57fe7fc4a87803b",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 34917,
+      "db_key": "multi",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T10:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 10.0548,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "04-100k",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 894.385899999179,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 32352,
+          "jsonrpc_utf8_bytes": 32351,
+          "sha256": "27714ac9d7973efc7541b16847ed8c47dfcb1ffbd63410c93594a808c1f26abf",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 32352,
+      "activity_jsonrpc_utf8_bytes": 32351,
+      "activity_sha256": "27714ac9d7973efc7541b16847ed8c47dfcb1ffbd63410c93594a808c1f26abf",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 28790,
+      "db_key": "100k",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 892.3526,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "05-70mib",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 45.2122000278905,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 330,
+          "jsonrpc_utf8_bytes": 329,
+          "sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": true,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 330,
+      "activity_jsonrpc_utf8_bytes": 329,
+      "activity_sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72",
+      "isError": true,
+      "db_key": "70mib",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 43.1562,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "06-548",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 66.2284999853,
+      "shift_after_admit_sec": 0.0,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "bdcae77a73bbfe79a9c535844bf277be61bc9ebdd2ec41cc533db6c25b17d526",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T10:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 64596,
+          "jsonrpc_utf8_bytes": 64595,
+          "sha256": "3014710d9a5a1cdf16b426140d6e57a89f603de1c22a2ada09e181c602296b35",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": false,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 64596,
+      "activity_jsonrpc_utf8_bytes": 64595,
+      "activity_sha256": "3014710d9a5a1cdf16b426140d6e57a89f603de1c22a2ada09e181c602296b35",
+      "isError": false,
+      "reader_ok": true,
+      "reader_error": null,
+      "inner_reader_json_bytes": 57894,
+      "db_key": "548",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T10:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 64.2038,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    },
+    {
+      "scope": "actual_shipped_stdio_entry",
+      "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
+      "label": "07-548",
+      "includes_reader_invocation": true,
+      "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+      "elapsed_ms": 2.922999963629991,
+      "shift_after_admit_sec": 2.1,
+      "request": {
+        "initialize_line_sha256": "2b85f4f6db43f71cf4dfd33a44276ac00ee3d750f870a4878fbf52e45a537b86",
+        "call_line_sha256": "2f5fc0df62f4d4533c39fd01e4b59f07e8e6fa6d48b8b8a0d00926963641fbaf",
+        "call_json": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "name": "get_library_activity",
+            "arguments": {
+              "interval": {
+                "start": "2026-09-01T00:00:00.000Z",
+                "end": "2026-09-02T00:00:00.000Z"
+              },
+              "date_basis": "capture_time"
+            }
+          }
+        }
+      },
+      "frames_summary": [
+        {
+          "completed_frame_bytes": 452,
+          "jsonrpc_utf8_bytes": 451,
+          "sha256": "a0561c7ece5bec4a87ae00836ec23c194a5e5248c467d9ed477d539108a1db52",
+          "ends_with_newline": true,
+          "id": 1,
+          "has_error_key": false,
+          "result_isError": null,
+          "role": "initialize_response"
+        },
+        {
+          "completed_frame_bytes": 296,
+          "jsonrpc_utf8_bytes": 295,
+          "sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6",
+          "ends_with_newline": true,
+          "id": 2,
+          "has_error_key": false,
+          "result_isError": true,
+          "role": "tools_call_response"
+        }
+      ],
+      "error": null,
+      "activity_completed_frame_bytes": 296,
+      "activity_jsonrpc_utf8_bytes": 295,
+      "activity_sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6",
+      "isError": true,
+      "db_key": "548",
+      "arguments": {
+        "interval": {
+          "start": "2026-09-01T00:00:00.000Z",
+          "end": "2026-09-02T00:00:00.000Z"
+        },
+        "date_basis": "capture_time"
+      },
+      "call_input_to_flush_ms": 1.0782,
+      "final_flush_observed": true,
+      "active_after_exchange": 0
+    }
+  ],
+  "replay_diagnostics": [
+    {
+      "path": "548 primary interval on the cost-fixture database",
+      "replayed_state_observed": true,
+      "observe_return_count": 1,
+      "reasons": [
+        "interval_precedes_first_apply"
+      ],
+      "coverage_status": "partial",
+      "ok": true,
+      "note": "Replay projection ran; interval_precedes_first_apply is a coverage reason, not a skipped path",
+      "db_key": "548",
+      "profiling": true,
+      "diagnostic_deadline_sec": 30.0
+    },
+    {
+      "path": "548 primary interval on the cost-fixture database",
+      "replayed_state_observed": true,
+      "observe_return_count": 1,
+      "reasons": [
+        "interval_precedes_first_apply"
+      ],
+      "coverage_status": "partial",
+      "ok": true,
+      "note": "Replay projection ran; interval_precedes_first_apply is a coverage reason, not a skipped path",
+      "db_key": "10k",
+      "profiling": true,
+      "diagnostic_deadline_sec": 30.0
+    }
+  ],
+  "databases": {
+    "548": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_548.db",
+      "sha256_before": "ca6f74571356a574d20682d53d447afb2c2668ba867e2c91da877cb7740a9cc7",
+      "dimensions": {
+        "items": 548,
+        "memberships": 822,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 214596
+      },
+      "sha256_after": "ca6f74571356a574d20682d53d447afb2c2668ba867e2c91da877cb7740a9cc7"
+    },
+    "10k": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_10k.db",
+      "sha256_before": "32398b6b474d7f7ec32d34215587dc1501a43a673ae210bccd6da11700a56a92",
+      "dimensions": {
+        "items": 10000,
+        "memberships": 10000,
+        "observations": 10000,
+        "applies": 1,
+        "journal_bytes": 2760054
+      },
+      "sha256_after": "32398b6b474d7f7ec32d34215587dc1501a43a673ae210bccd6da11700a56a92"
+    },
+    "dense": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_3mem.db",
+      "sha256_before": "0eb9d67b6bf90e54bb681fd92512de1e482693f5972523ea11b447205e929d53",
+      "dimensions": {
+        "items": 548,
+        "memberships": 1644,
+        "observations": 548,
+        "applies": 1,
+        "journal_bytes": 405026
+      },
+      "sha256_after": "0eb9d67b6bf90e54bb681fd92512de1e482693f5972523ea11b447205e929d53"
+    },
+    "multi": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_multi.db",
+      "sha256_before": "8e285b70bfcad9c9585c0e10eddbd27df62dc3c9f579f89f81a4ebcd07abd81d",
+      "dimensions": {
+        "items": 50,
+        "memberships": 50,
+        "observations": 0,
+        "applies": 10,
+        "journal_bytes": 234590
+      },
+      "sha256_after": "8e285b70bfcad9c9585c0e10eddbd27df62dc3c9f579f89f81a4ebcd07abd81d"
+    },
+    "100k": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_100k.db",
+      "sha256_before": "aff26e0bfddec84a847e8976d108c9d19726edc2efa66620b1ec82bec32d4dd3",
+      "dimensions": {
+        "items": 1,
+        "memberships": 0,
+        "observations": 100000,
+        "applies": 0,
+        "journal_bytes": 0
+      },
+      "sha256_after": "aff26e0bfddec84a847e8976d108c9d19726edc2efa66620b1ec82bec32d4dd3"
+    },
+    "70mib": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\769107e6-1cc\\grok\\_scratch\\az5g2\\measure\\fixture-dbs\\db_refusal.db",
+      "sha256_before": "55e55119830db690501356602e56db3548f464dbff864694764f84f68c547ebe",
+      "dimensions": {
+        "items": 1,
+        "memberships": 0,
+        "observations": 0,
+        "applies": 1,
+        "journal_bytes": 73400398
+      },
+      "sha256_after": "55e55119830db690501356602e56db3548f464dbff864694764f84f68c547ebe"
+    }
+  }
+}

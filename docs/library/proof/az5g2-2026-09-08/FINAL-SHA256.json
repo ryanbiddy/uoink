@@ -1,0 +1,201 @@
+{
+  "scope": "All preserved G2 and integrator supplement artifacts, excluding this manifest itself",
+  "files": {
+    "docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md": {
+      "sha256": "f65f72f8c90654813848a45be5a56cfb1fd3ac8c4e9492077d4ed55b72fe3c1a",
+      "bytes": 13683
+    },
+    "docs/library/PHASE5-AZ5G2-GROK-2026-09-08.md": {
+      "sha256": "99e4a83e4fcfabd5328bd531242803b9cac14e9b23fef3f061f68ab14e6d8798",
+      "bytes": 8304
+    },
+    "docs/library/PHASE5-AZ5G2-INTEGRATOR-2026-09-08.md": {
+      "sha256": "13bb76ce4db8b010b5b2fc9370eed9fd6a6964b49cca3ba1cbf02598e95bf762",
+      "bytes": 4794
+    },
+    "docs/library/proof/az5g2-2026-09-08/INTEGRATOR-PACKET-VALIDATION.json": {
+      "sha256": "1bfa317af573f17c57d75f82c8d2ef673593d5d732dc747aac228504c5272388",
+      "bytes": 1287
+    },
+    "docs/library/proof/az5g2-2026-09-08/INTEGRATOR-SEAL.json": {
+      "sha256": "d9e8e6d130c46cb474347e341806eaa7be207675e88532558b43a890bbac93a1",
+      "bytes": 11928
+    },
+    "docs/library/proof/az5g2-2026-09-08/observations.json": {
+      "sha256": "cf033ada3e0afda39d493726b89312a0e36de43597dfaec5c741ae3ac96e62fb",
+      "bytes": 83497
+    },
+    "docs/library/proof/az5g2-2026-09-08/original-PHASE5-AZ-MEASUREMENTS-2026-09-08.md": {
+      "sha256": "4745bd1db6efcd14e9b0aeb930ba0193981e4024b0ec91f4ad27a1f96da20ea0",
+      "bytes": 9684
+    },
+    "docs/library/proof/az5g2-2026-09-08/original-PHASE5-AZ-MEASUREMENTS-2026-09-08.meta.json": {
+      "sha256": "932773796bc121e40703ae94bb3bba8a0bed81a2b03e49d2386ace0c4322cf2b",
+      "bytes": 1077
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/10000_primary.handler-only.jsonrpc": {
+      "sha256": "e2451217f5c5e8fe5a0d4e37da0910058dc20bca1ae5b8eeb2751c9edf7686a1",
+      "bytes": 64601
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/10000_primary.shipped.frame": {
+      "sha256": "74636ed07ed0930ceb0870ed226e5a37dee3e72942caa8baed48d420baaf1389",
+      "bytes": 64602
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/10000_primary_traced_diagnostic.reader.json": {
+      "sha256": "e61769d958f9f3b2fe4759c3e347dc8274edf0469fc9cd89d3d0679368726538",
+      "bytes": 57968
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/10000_primary_untraced.reader.json": {
+      "sha256": "e61769d958f9f3b2fe4759c3e347dc8274edf0469fc9cd89d3d0679368726538",
+      "bytes": 57968
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/100k.handler-only.jsonrpc": {
+      "sha256": "57f0ca0c4b1f52006222f126a8c5747a2938d02f6406d07e9e72321615c8b880",
+      "bytes": 32351
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/100k.shipped.frame": {
+      "sha256": "be7ae42c934d27467a5e851f397f1f2fc95fed09bc7000fc4943b3bcd06e814b",
+      "bytes": 32352
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/100k_observations.reader.json": {
+      "sha256": "3bc1058eb18583a41872e986c1217f69d1e9139f27bab6487df4d7dc804da3e3",
+      "bytes": 28790
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.handler-only.jsonrpc": {
+      "sha256": "6949a7869c0aebc2c6de191385c4cc3a0067096397caa0eab994287745b9f56d",
+      "bytes": 39378
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.reader.json": {
+      "sha256": "b86dabcb0d6e6516da24e14d9fd742bcd25917c120c626cde4f9cb8ed0b7bbb3",
+      "bytes": 34917
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/50_ten_operations.shipped.frame": {
+      "sha256": "f57d03664cc8fa891718e43376918632ad8da762d7719b77e96628db54bab8f7",
+      "bytes": 39379
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_deadline_refusal.reader.json": {
+      "sha256": "8b861c603f0e14a3546fb8e5bd1a18ca0f7b0e9976445d92e2ea3fa51dd4c352",
+      "bytes": 190
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_dense.handler-only.jsonrpc": {
+      "sha256": "056636181d8373d66d3ec8cc503a3639a1c8756da41a246ebfefee68d1059c44",
+      "bytes": 64362
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_dense.shipped.frame": {
+      "sha256": "76ac39c9909f92d38b8e67b181e59f44a378f2d0baa204a9ffa4da5a45e4eb62",
+      "bytes": 64363
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_expired_inbound.shipped.frame": {
+      "sha256": "15874d108dfd1d26dcb1b10b7fee90a2092c5e06d85ad5958ca0b556c77a33f6",
+      "bytes": 296
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_primary.handbuilt.jsonrpc": {
+      "sha256": "22f24ad7f781f46fe9e1356c7468bcdba9f1cd38754b3277b2cd965ca62e2988",
+      "bytes": 64743
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_primary.handler-only.jsonrpc": {
+      "sha256": "0e1b4a6b4170680cee73b22d80e35ba115d6235d93dd097a96d8e1956aefd277",
+      "bytes": 64732
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_primary.shipped.frame": {
+      "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+      "bytes": 64733
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_primary_captured.shipped.frame": {
+      "sha256": "1abdb83016a66d27f1a84b3124dae408453c99de791b0a205249942333f987bb",
+      "bytes": 64733
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_primary_traced.reader.json": {
+      "sha256": "f1f66c5338b31d80df0ced7a96778a68e25e63992473d82d85000bc4a69f7b41",
+      "bytes": 58035
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_proved_replay.reader.json": {
+      "sha256": "cddd72a4c6e6d67255379e03184eaebccfcf77fb5ca2f99599f3d8c910500a70",
+      "bytes": 57894
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_replay.handler-only.jsonrpc": {
+      "sha256": "0c68d5b730aa6f2604e43fd5a99366cd0e08f3156fa4e4f6132ea0c094363a60",
+      "bytes": 64595
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_replay.shipped.frame": {
+      "sha256": "f28450294a7f2e4741250c1f16d0c769979b46e7b314ed2fdb22efebb487b515",
+      "bytes": 64596
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/548_three_memberships.reader.json": {
+      "sha256": "39eb2bdf80a6bef717f3684e3c191d9b343c60b09af0d210a7702cd252649470",
+      "bytes": 57671
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/70mib.handler-only.jsonrpc": {
+      "sha256": "8ca9a7cc8e9108b1dc10f959120aeae9e94e001ddf5878939730ccf4388679ff",
+      "bytes": 329
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/70mib.shipped.frame": {
+      "sha256": "3d07ae418350070b254ec191b6a1d6154c151172fc3003c1758e370053b2bc72",
+      "bytes": 330
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/70mib_journal_refusal.reader.json": {
+      "sha256": "e2291a7b060424145ca98bc67d4323985bd0523dd4668148e714c94ad32a6537",
+      "bytes": 221
+    },
+    "docs/library/proof/az5g2-2026-09-08/packets/deadline.handler-only.jsonrpc": {
+      "sha256": "941e79c731171b6f7d2ec226cd47ac625108a662a1b49a5a09a2f55a46a2ec9b",
+      "bytes": 298
+    },
+    "docs/library/proof/az5g2-2026-09-08/rejected-az5g-gemini-5e9baea5-partial-measurements.json": {
+      "sha256": "05fd7418cbae55717de9fc8ff636fd647b289516a75e651bba5c675ac5e1da63",
+      "bytes": 9449
+    },
+    "docs/library/proof/az5g2-2026-09-08/rejected-az5g-worker-bytes.patch": {
+      "sha256": "88a91ef8f62839f7f180683bcc03dc17105d6771d37b597fc6dec56bc91148b8",
+      "bytes": 42608
+    },
+    "docs/library/proof/az5g2-2026-09-08/SHA256SUMS": {
+      "sha256": "51b5e3aee18152c13c3610198a72f5cab95b3dd14d35464422435aaea7da71f4",
+      "bytes": 4972
+    },
+    "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-4bdb12e6-9e77-44f5-b866-a64d38477a5f-90.log": {
+      "sha256": "8b50d9c1b6ad97b01eecd7b3ac097770b8b9a0a5c0913fee0ef4f5584a9ac653",
+      "bytes": 4958
+    },
+    "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-f4568584-e466-4c1b-9242-521ba3fbe5de-81.log": {
+      "sha256": "5dd3fe0fa567713c09bd0c34b3f4328ec304359929ce3e27104eb4695c96a08b",
+      "bytes": 36
+    },
+    "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-f64352bd-83d6-472f-b600-5d32e8df32e6-66.log": {
+      "sha256": "46d54a5de9dd478e1b59d787f4270c5a1d003dd148fc975f89102baf302dce1a",
+      "bytes": 1156
+    },
+    "docs/library/proof/az5g2-2026-09-08/worker-command-records/call-fd96b8d0-8eee-49fb-9bf5-d19156a025be-70.log": {
+      "sha256": "18e31d58e6827bd45338233d50182be244223b0ac459e2200ab065cab5986ee4",
+      "bytes": 17855
+    },
+    "docs/library/proof/az5g2-2026-09-08/worker-command-records/commands.json": {
+      "sha256": "f8009218985101acfb7bbffc1e2ab10ec16c3ce637cafe4b7cd337dbf2582f92",
+      "bytes": 5947
+    },
+    "docs/library/proof/az5g2-supplement-2026-09-08/events.jsonl": {
+      "sha256": "e5c157b6ef3be28920b4acac20f1c97610fba0bd4b7982290160f096f233c93c",
+      "bytes": 920961
+    },
+    "docs/library/proof/az5g2-supplement-2026-09-08/measure_boundaries.py": {
+      "sha256": "907f3370a84756d03fd2752cc3284cc7d65e7f57d2f94c888634127cbec70c0e",
+      "bytes": 6470
+    },
+    "docs/library/proof/az5g2-supplement-2026-09-08/observations.json": {
+      "sha256": "90b07c72b3e353c3d814da105d0d492522c7785055e97a55e1d266695e8452c3",
+      "bytes": 23921
+    },
+    "docs/library/proof/az5g2-supplement-2026-09-08/SHA256.json": {
+      "sha256": "5e826b8314083e4f5a10d714d3327405f897954a37fd37f514c92c1142c6d721",
+      "bytes": 395
+    },
+    "scripts/measure_phase5_az5g2.py": {
+      "sha256": "9ec22684075c1237608cdeae636c6bedca35f52bd03632b4226b5fdb7b265a25",
+      "bytes": 55184
+    },
+    "scripts/run_phase5_az5g2_union.py": {
+      "sha256": "fcbc7b58684eca4a3d9c6fdd127ef89f0a2d79f27f594733b38a48113b2c3615",
+      "bytes": 2500
+    }
+  }
+}

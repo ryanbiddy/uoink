@@ -1,0 +1,54 @@
+{
+  "checks": "complete packets, exact completed frame bytes, all pagination arithmetic",
+  "pairs": [
+    {
+      "frame": "548_primary",
+      "reader_packet": "548_primary_traced",
+      "equal": true,
+      "bytes_before_newline": 64732,
+      "isError": false
+    },
+    {
+      "frame": "10000_primary",
+      "reader_packet": "10000_primary_untraced",
+      "equal": true,
+      "bytes_before_newline": 64601,
+      "isError": false
+    },
+    {
+      "frame": "548_replay",
+      "reader_packet": "548_proved_replay",
+      "equal": true,
+      "bytes_before_newline": 64595,
+      "isError": false
+    },
+    {
+      "frame": "548_dense",
+      "reader_packet": "548_three_memberships",
+      "equal": true,
+      "bytes_before_newline": 64362,
+      "isError": false
+    },
+    {
+      "frame": "50_ten_operations",
+      "reader_packet": "50_ten_operations",
+      "equal": true,
+      "bytes_before_newline": 39378,
+      "isError": false
+    },
+    {
+      "frame": "100k",
+      "reader_packet": "100k_observations",
+      "equal": true,
+      "bytes_before_newline": 32351,
+      "isError": false
+    },
+    {
+      "frame": "70mib",
+      "reader_packet": "70mib_journal_refusal",
+      "equal": true,
+      "bytes_before_newline": 329,
+      "isError": true
+    }
+  ]
+}

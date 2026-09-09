@@ -1,0 +1,48 @@
+starting named union
+AZ-5g2 union: pytest -q --tb=short -p no:cacheprovider --junitxml=C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\769107e6-1cc\grok\_scratch\az5g2\combined.xml --basetemp=C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\769107e6-1cc\grok\_scratch\az5g2\pytest-temp tests/test_phase5_az5h.py tests/test_phase5_az5h2.py tests/test_phase5_az5d2.py tests/library_work_astra/test_phase5_ba4_acceptance.py tests/library_work_astra/test_phase5_ba5_acceptance.py tests/library_work_astra/test_phase5_acceptance.py tests/library_work_astra/test_phase5_acceptance2.py tests/library_work_astra/test_phase5_acceptance3.py tests/library_work_astra/test_phase5_dashboard.py tests/library_work_astra/test_phase5_dashboard2.py tests/library_work_astra/test_phase5_dashboard3.py tests/library_work_astra/test_phase5_measurements.py tests/library_work_astra/test_phase5_measurements2.py tests/library_work_astra/test_phase5_measurements3.py tests/test_library_analysis_fixtures.py tests/test_phase0_registry_capture.py tests/test_source_subscriptions_registry.py tests/test_c01_mcp_stdio.py tests/test_phase4_stdio.py tests/test_stdio_clip_tools.py tests/test_docs_live_contracts.py tests/test_current_doc_references.py tests/test_dashboard_sources_api.py tests/test_dashboard_sources_ui.py tests/test_dashboard_v324_ui.py tests/test_library_adapters.py tests/test_library_resources.py tests/test_library_prompts.py tests/test_library_briefs.py
+................F....................................................... [ 12%]
+........................................................................ [ 25%]
+............................................F........................... [ 37%]
+........................................................................ [ 50%]
+........................................................................ [ 62%]
+........................................................................ [ 75%]
+........................................................................ [ 87%]
+........................................................................ [100%]
+================================== FAILURES ===================================
+______ test_ba4_actual_sdk_serialization_retains_admission_and_deadline _______
+tests\library_work_astra\test_phase5_ba4_acceptance.py:95: in test_ba4_actual_sdk_serialization_retains_admission_and_deadline
+    assert result["isError"], f"Expired actual serialization emitted success; active admissions={observed_active}"
+E   AssertionError: Expired actual serialization emitted success; active admissions=[0]
+E   assert False
+_________ test_phase5_ba3_final_wire_serialization_is_inside_deadline _________
+tests\library_work_astra\test_phase5_acceptance3.py:411: in test_phase5_ba3_final_wire_serialization_is_inside_deadline
+    result = stdio_result({"interval": INTERVAL})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase5_acceptance.py:431: in stdio_result
+    return asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+uoink_mcp.py:819: in _phase4_call_tool
+    return activity_result(req.params.arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+uoink_mcp.py:761: in activity_result
+    envelope = library_analysis.get_library_activity(args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase5_acceptance.py:430: in <lambda>
+    with patch.object(analysis, "get_library_activity", lambda arguments: real_read(arguments, clock=NOW)):
+                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: test_phase5_ba3_final_wire_serialization_is_inside_deadline.<locals>.read() got an unexpected keyword argument 'clock'
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase5_ba4_acceptance.py::test_ba4_actual_sdk_serialization_retains_admission_and_deadline - AssertionError: Expired actual serialization emitted success; active admissions=[0]
+assert False
+FAILED tests/library_work_astra/test_phase5_acceptance3.py::test_phase5_ba3_final_wire_serialization_is_inside_deadline - TypeError: test_phase5_ba3_final_wire_serialization_is_inside_deadline.<locals>.read() got an unexpected keyword argument 'clock'
+2 failed, 574 passed in 132.08s (0:02:12)
+union_exit=1
