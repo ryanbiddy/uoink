@@ -1535,3 +1535,19 @@ embedded-runtime guard/package provenance are incomplete. The original patch
 is retained. `RYAN-PHASE4-KIT-REPAIR-BRIEF-2026-09-09.md` governs replacement;
 these instrument passes do not make an installed receipt. No current package
 or installed pass is claimed. C22 repair `6accc421` is active from `24a5fe0`.
+
+### 2026-09-09 - Native verification identity confirmed; integrated tree next
+
+The private native Python runtime preserves real Popen/child PID identity and
+retains the inherited audit guard even with PYTHONPATH absent. Vendor hashes
+match; a disposable canary write was refused. The unchanged first installer
+suite has 92 passes / one skip in 18.81 seconds with it. This resolves the
+verification-launcher discrepancy, not the rejected ownership defects.
+The old e47e4f2 installer has a separate verified byte-identical retained copy
+under `_scratch/retained-package-e47e4f2` before any rebuild.
+
+`RYAN-PRODUCT-CHECKPOINT-TREE-BRIEF-2026-09-09.md` now governs a complete
+committed checkpoint while the three replacement installation workers run.
+It includes all integrated product repairs and only excludes standing S21;
+the proposed mirror fixture patch remains unapplied. This checkpoint will not
+replace the final tree required after the pending source integrations.
