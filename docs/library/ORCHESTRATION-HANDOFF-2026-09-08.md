@@ -81,7 +81,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Finish C22 worker 6a890eee, verify/integrate, then Ryan's actual installed receipt |
-| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Observe bundled operator kit, final tree and Ryan's installed/client receipt |
+| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
 | Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Both setup proposals pending; finish two receipt kits, final tree and complete operator bundle/runbook |
@@ -128,7 +128,8 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    `RYAN-P4-EVIDENCE-COMPLETENESS-REPAIR-BRIEF-2026-09-09.md`. They may finish
    in either order; do useful independent work while waiting. P4 plus the bounded
    operator and collection supplements are integrated with 68 passed / one failed in both roots;
-   its bundled command path remains to be observed. Finished third
+   its bundled command path is observed at 9683d46: four stages exit zero,
+   15 checks pass and eight remain unobserved (no Setup/client/model). Finished third
    versions remain rejected as complete receipt instruments. No new original
    product or installed acceptance is inferred from their status flags.
 2. Verify each finished full diff in its worktree using the named suites. Preserve
@@ -1915,3 +1916,19 @@ and review are linked from RYAN-P4-BUNDLED-COLLECTION-REPAIR-BRIEF-2026-09-09.md
 Next is fresh p4-bundled-02 under that brief; p4-bundled-01 remains failed.
 Claude 2.1.261 local --help confirms restricted/strict-mcp-config/include-hook-
 events flags; this help/version check starts no model or receipt client.
+
+
+## Integrator log — 2026-09-09, corrected bundled P4 observation
+
+Source 9683d46. Fresh p4-bundled-02 completes prepare, check, prepare-client and
+collect with exit zero. Collection: 15 passed / zero failed / eight unobserved.
+Both normal original stdio sessions complete all packet pairs and native prompts;
+actual client/visual observations remain absent. Synthetic item soft deletion
+produces a content-free tombstone, purge removes owned item and dependent brief,
+no unaccounted pending key or extant temp remains, edited/unmanaged bytes remain.
+All four command jobs cleaned; original _pth unchanged, guard removed, executable
+hash and all 142 source bindings unchanged. This is pre-Inno original bundled
+evidence, not installed or actual-client acceptance. Proof:
+proof/ryan-p4-bundled-02-2026-09-09/SHA256.json. First observation remains failed.
+C22 fourth worker is still finishing its complete union. Final tree/runbook/bundle
+remain queued; neither pending fixture patch was applied.
