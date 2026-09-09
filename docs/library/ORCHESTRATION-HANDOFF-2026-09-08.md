@@ -53,13 +53,13 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review HEAD `8e3e4f0`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review HEAD `ffdbef4`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a2 (`b833167`): both roots 219 passed / nine frozen setup failures; AW-4 and seven new tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4a3 (grok temp boundary) and AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures; AW-6 and four new identity tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | AZ-5h (`8e3e4f0`): both roots 561 passed / six retained failures; seven actual-entry cases pass | BA-5 reproduces reset domain deadline and oversized refusal. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5h2 (grok), then AZ-5g2 measured refresh (grok), final BA-4 |
 | 6 | BC-3e (`d792875`) integrated: both roots 167 passed / 11 omitted-ticket failures; BD-2, BD-3 and eight new implementation tests pass | BD-4 reproduces a changed caption overwritten at publisher entry. Phase 6 remains unaccepted; BD-27 observed | BC-3f (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -82,8 +82,8 @@ BC-3d at `897f0d2`, BC-3e at `d792875`, AV-5m4a2 at `b833167`, and
 AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
 AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
 complete/partial diffs as described below. Active at this update: BC-3f
-Grok `33751bb7` and AV-5m4a3 Grok `888d4940` have finished and are under
-independent verification. AZ-5h2 Grok `098fb14d` and AV-5m4b3 Grok `260ef22c`
+Grok `33751bb7` has finished and is under independent verification.
+AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` and AV-5m4b3 Grok `260ef22c`
 are active from `533ef6f`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
@@ -97,8 +97,8 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    then AZ-5g2 (grok) from
    `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
    measurement stays retained and is not integrated.
-3. AV-5m3 and AV-5m4a2 are integrated; AV-5m2 remains rejected. Dispatch/verify
-   AV-5m4a3 (grok) from `PHASE4-AV5M4A3-BRIEF-2026-09-08.md`; AV-5m4a
+3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
+   AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7; dispatch AV-5m4b3 (grok) under
    `PHASE4-AV5M4B3-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
@@ -567,3 +567,22 @@ returns `feature_unavailable`. A valid-prompt observation must document its
 fixture service/preview preconditioning before freezing before-and-after
 state, and distinguish that setup from the default unattached launch. No
 real-client session or archive-copy preparation has run yet.
+
+### 2026-09-08 - AV-5m4a3 integrated
+
+AV-5m4a3 Grok `888d4940` integrated at `ffdbef4` after clean three-way
+apply. Independent union: **224 passed, nine failed** in each root,
+79.99 seconds worker and 71.68 seconds checkout. Logs/XML/commands:
+worker scratch `av5m4a3-wi`, checkout scratch `av5m4a3-ci`. All four
+new tests and AW-6 pass. The nine frozen interceptors remain failed.
+
+Creating file/volume/hash authority now follows immediate cleanup and
+bound source publication. Windows write-error deletion uses the creating
+handle before close. POSIX bound delete/rename refuses where equivalent
+exclusion is unavailable. A separate disposable check of exact binary
+bytes and an emoji-containing vault path passed (one test, 0.25 seconds,
+checkout scratch `aw8-unicode`); it found no additional defect.
+
+B3 must preserve `_IO_CTX.authority`, bound replace/unlink and the child
+write-error implementation while adding session lifetime and local intent
+exclusion. Phase 4 remains unaccepted until B3, AW-4 and the client rerun.
