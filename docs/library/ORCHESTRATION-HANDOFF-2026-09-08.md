@@ -53,15 +53,15 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 16:38 PDT; implementation/review HEAD `c8ddf9b`; not pushed)
+## State at handoff (updated 2026-09-08 17:12 PDT; implementation/review HEAD `d437b59`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; AW-3 has 10 passing cases including the control, seven open | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; integrator combined checkout suites: 203 passed, seven D12-D15 failures | Dispatch AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
-| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | AZ-5a3g RUNNING (grok `54108a1f`); AZ-5a2 retained unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass, five BD-01/03/05/06 cases open. BC-3a failed quota/partial and is rejected | `PHASE6-BD-2026-09-08.md`; BC-3c worker and checkout each 156 passed / five open, including 147 companion passes | BC-3a2 RUNNING (grok `5aca8450`) from `PHASE6-BC3A2-BRIEF-2026-09-08.md`; then BD-2 (codex). Navigation study passed numerically; BD-27 partial twice and speaker material remain Ryan gates |
+| 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; seven D12-D15 cases open. AV-5m2 rejected despite 210 passes: test-specific cancellation and uncancellable OS replacement | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; retained failed diff and `PHASE4-AV5M3-BRIEF-2026-09-08.md` | AV-5m3 (grok); then AW-4 (codex); then the real-client rerun. D13 fixture ruling is Ryan's; the implementation still needs repair |
+| 5 | AZ-5a3g integrated (`d437b59`), preserving AZ-5b/5c/5e/5f: BA-3 acceptance 41/52, dashboard3 7/7, fixtures 28/28. Measurements3 0/3; one stale BA-2 measurement assertion also fails | Worker and checkout each 382 passed / 15 failed; all 18 BA-01/03 and 23 earlier BA-3 cases pass | AZ-5d (grok BA-09/10/11), then AZ-5g (gemini BA-14), then BA-4 (codex) |
+| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass. BC-3a2 rejected: ticketless empty-publication exception and edited legacy tests | Original-test verification: 156 passed / five omitted-ticket failures; `PHASE6-BC3A3-BRIEF-2026-09-08.md` | BC-3a3 (grok), then BD-2 (codex). Legacy fixture setup ruling, BD-27 observation and speaker material are Ryan gates; implementation still needs repair |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -74,23 +74,23 @@ Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e9
 finished but rejected; AV-5m1 gemini `b31e890f` integrated at `9489141`.
 BC-3c grok `ff01d490` integrated at `c8ddf9b`. BC-3a gemini `eb0f138e` failed on quota
 with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no diff.
-AV-5m2 grok `6b5e5f1e` is running at `633eb99`. AZ-5a3g grok `54108a1f` and BC-3a2 grok `5aca8450` are running at `fc544f2`.
+AZ-5a3g grok `54108a1f` integrated at `d437b59`. AV-5m2 grok `6b5e5f1e`
+and BC-3a2 grok `5aca8450` finished and are rejected; both complete original diffs
+are retained in the patches directory. New repair briefs below govern retries.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
-2. AZ-5a2 (Phase 5) rejected and retained as `patches/az5a2-claude-2026-09-08.patch`.
-   Verify AZ-5a3g (grok `54108a1f`) from `PHASE5-AZ5A3-BRIEF-2026-09-08.md`; it records
-   the measured byte counts and requires all 18 BA-01/BA-03 cases and the 28 fixture tests.
-   Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
+2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
+   Dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
-3. AV-5m1 (Phase 4) complete at `9489141`. Verify running AV-5m2 (grok `6b5e5f1e`) from
-   `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
+3. AV-5m1 (Phase 4) complete at `9489141`. AV-5m2 is rejected. Dispatch AV-5m3
+   (grok) from `PHASE4-AV5M3-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: BC-3c is integrated. Verify BC-3a2 (grok `5aca8450`) from `PHASE6-BC3A2-BRIEF-2026-09-08.md`
-   on Grok; preserve BC-3a's failed partial diff and the quota failure.
+4. Phase 6: BC-3c is integrated; BC-3a2 is rejected. Dispatch BC-3a3 on Grok
+   from `PHASE6-BC3A3-BRIEF-2026-09-08.md`; preserve both rejected diffs and the quota failure.
    Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
    --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
@@ -239,3 +239,24 @@ edits legacy BC-2 tests. These drafts are not integrated. The source inspection
 in `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md` explains the underlying fixture
 conflicts and the Ryan rulings required under the prohibition on acceptance-test
 edits. Reject test-specific production exceptions; continue the general repairs.
+
+### 2026-09-08 17:12 PDT — AZ-5a3g integrated; AV-5m2 and BC-3a2 rejected
+
+AZ-5a3g integrated with three-way apply at `d437b59`. Worker and checkout each
+have **382 passed, 15 failed** (93.46 s / 89.21 s). All 28 fixtures, 18 BA-01/03
+cases, 23 previously repaired BA-3 cases and dashboard/inventories pass. Eleven
+BA-09/10/11 cases remain AZ-5d work; three BA-14 cases and one stale BA-2 raw-byte
+assertion remain measurement-refresh work. Logs: `_scratch/ig-az5a3g-w` in the
+worker and `_scratch/ig-az5a3g-c` in this checkout. The raw measurements remain
+fixture-only; no real stdio measurement is credited. Numerator evidence derives
+its selector ID from the enclosing metric; BA-4 must review packet completeness
+and consumers alongside the compact denominator descriptors.
+
+AV-5m2 independently reproduces 210 passes, but its final source retains the
+literal fixture-closure check despite the report mentioning a heuristic. It is
+rejected, not integrated. BC-3a2's original full diff includes test edits. After
+archiving that diff and restoring only the edited test to HEAD, the integrator
+observed 156 passes and five omitted-ticket failures. It is also rejected, not
+integrated. New AV-5m3 and BC-3a3 briefs require general safety repairs and retain
+the conflicting unchanged acceptance setup for Ryan. Neither green worker
+claims nor the fixture conflicts excuse unfinished implementation.
