@@ -805,3 +805,19 @@ only a separate Recall fixture. Client validation rejections may precede
 hooks, so retain the full client stream in addition to hook logs. All these
 checks are sealed under the AW rerun preparation-checks directory. No archived
 copy, actual client/model, live index or port 5179 was used. B5 remains active.
+
+### 2026-09-08 21:10 PDT - Destination alias diagnostics retained
+
+B5's brief already requires exclusion across supported destination aliases.
+Additional diagnostics on rejected final B4 bytes found that a trailing-dot
+alias shares the mutex (**one passed**, 0.77 seconds), while an owned junction
+to the same physical directory obtains a different mutex (**one failed**,
+0.75 seconds). Only disposable paths and read-only gate operations were used.
+Both observations and scripts are sealed in `proof/aw9-alias-2026-09-08/`.
+Do not assume every lexical Windows alias fails, or count these as B5 results.
+
+After B5 finishes, inspect its final alias handling and probe its session-start
+boundary from a competitor process while the original destination is held.
+Canonical exclusion or explicit refusal before admission is acceptable. The
+scratch `AW10-ALIAS-RECHECK-BRIEF.md` specifies that check; preserve the B4
+low-level observations separately. B5 remains in progress.

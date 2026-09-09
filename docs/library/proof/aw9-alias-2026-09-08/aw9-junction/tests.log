@@ -1,0 +1,10 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________ test_same_destination_junction_alias_uses_same_gate _____________
+_scratch\test_aw9_junction.py:28: in test_same_destination_junction_alias_uses_same_gate
+    assert not result['acquired'],result
+E   AssertionError: {'acquired': True, 'key': 'c:\\users\\hello\\appdata\\local\\agentcontrolroom\\worktrees\\uoink-library\\e2580c74-1d6\...ta\\Local\\AgentControlRoom\\worktrees\\uoink-library\\e2580c74-1d6\\grok\\_scratch\\aw9-junction-0\\a0\\v-alias', ...}
+E   assert not True
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw9_junction.py::test_same_destination_junction_alias_uses_same_gate
+1 failed in 0.75s

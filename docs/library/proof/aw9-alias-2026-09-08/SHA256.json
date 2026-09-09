@@ -1,0 +1,38 @@
+{
+  "source": "B4 final rejected library_mirror.py",
+  "source_sha256": "32844e3728e73d674ca9c924e799468f508d054b0c5df8307635fc35ce2c9ac8",
+  "files": {
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-alias/results.json": {
+      "sha256": "9b357575d3f4199e4595f1bd0c7201854c0bae282efb685e0bda882f0c09dcee",
+      "bytes": 814
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-alias/test_aw9_alias.py": {
+      "sha256": "39317a4b16a8c54d4aa8b7cbfceb09e845d2831a8203824e049046e5ac6665e8",
+      "bytes": 1048
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-alias/tests.log": {
+      "sha256": "3b1d4f2d5fcf76bdf770cedfa8af676d4f13e05ea4a69f5634ff663fb69a5269",
+      "bytes": 100
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-alias/tests.xml": {
+      "sha256": "4cd1d3ad33cb1ceca41c2417a1cba0a00569755296b7041b433c957658fd49b5",
+      "bytes": 367
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-junction/results.json": {
+      "sha256": "845333f6482cfafa474930caaa7a3834c99193758fbafb3d366227a06ec9c0f4",
+      "bytes": 826
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-junction/test_aw9_junction.py": {
+      "sha256": "05b396ac20edca96a8c6523be78a052414e8941d61c80f2fdc0175d2a803f696",
+      "bytes": 1406
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-junction/tests.log": {
+      "sha256": "9df19ce0da8e363814ac1d310df5fde2d6a066aeeffc59f902eaa5e4bb6cfa88",
+      "bytes": 849
+    },
+    "docs/library/proof/aw9-alias-2026-09-08/aw9-junction/tests.xml": {
+      "sha256": "02b2fd6febf4ac69ee97bba9b4ef50d0a2fe4727c6b639453e03437668b08ebc",
+      "bytes": 1094
+    }
+  }
+}
