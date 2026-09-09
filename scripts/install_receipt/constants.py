@@ -147,10 +147,11 @@ OUTBOX_STATES = frozenset({
     "pending", "waiting_configuration", "enqueued", "blocked",
 })
 
-# Already-committed Astra seal. This kit consumes it; it does not invent one.
+# Active Astra seal. Historical symbol name is retained for API compatibility.
+# Package-02 remains immutable; this release consumes the new package-03 bytes.
 CANDIDATE_PACKAGE_02_DIR = (
     Path(__file__).resolve().parents[2]
-    / "docs" / "library" / "proof" / "candidate-package-02-2026-09-09"
+    / "docs" / "library" / "proof" / "candidate-package-03-2026-09-09"
 )
 
 REQUIRED_PROVENANCE_MODULES = (

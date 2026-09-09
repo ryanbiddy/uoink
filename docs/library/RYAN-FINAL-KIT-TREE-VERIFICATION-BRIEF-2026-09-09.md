@@ -31,3 +31,9 @@ proof and per-file hashes. Check every ZIP member against the folder manifest.
 No Setup, uninstall, real client/model, live index, port 5179, main merge or
 publication is part of this observation. Ryan's installed/browser/client
 receipts remain separate, as do the unresolved fixture rulings and speaker gate.
+
+Package-03 supersedes the earlier d024baf5 input for the new observation. Startup
+repair 67a274d changes server.py, so rebuild/seal, bind both tools and the runbook
+to the new package, and verify every source binding. Keep package-02 and its failed
+C22 observation intact. Use fresh c22-bundled-02 and p4-bundled-03 before the final
+kit-inclusive tree. No existing tests or assertions change with this binding.

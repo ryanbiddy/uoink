@@ -84,7 +84,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits and startup transaction repair integrated; new product build and final observations owed | Both setup proposals pending; rebuild, final bundled/full-tree observations and portable bundle |
+| Integration | Installer built/sealed at `67a274d`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits/startup repair integrated; package-03 built/sealed; final observations owed | Both setup proposals pending; final bundled/full-tree observations and portable bundle |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -2062,3 +2062,14 @@ See RYAN-C22-VERSION-QUERY-REVIEW-2026-09-09.md. No existing fixture changed.
 No active worker remains. Preserve package-02, rebuild changed server, then
 perform fresh bundled C22/P4 and final complete-tree observations. Both exact
 fixture proposals and the historical exit gap remain unresolved.
+
+### 2026-09-09 — package-03 replaces the startup-race input
+
+Build source 67a274d5d0c67f48405c4fa242a1011c2cf671c1. Executable 339059334 bytes, SHA-256 a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe.
+The six raw package files are sealed before receipt instrumentation. All 142
+source/Git bindings match; package-02 and its executable are retained unchanged.
+C22 keeps its historical loader API/receipt schema while its active directory
+now points to package-03. Runbook and both observation drivers bind the new hash.
+No Setup, client/model or installed receipt ran. Final bundled/full-tree checks follow.
+
+Active package binding pk3-c1: 59 passed / one deselected, 3.17 s. The original long source case remains required in the final tree. Three raw files sealed under proof/ryan-package03-binding-2026-09-09.

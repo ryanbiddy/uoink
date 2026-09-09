@@ -1,0 +1,17 @@
+{
+  "scope": "Active package-03 binding; 59 passed, 1 deselected in 3.17s; no fixture edits",
+  "files": {
+    "results.json": {
+      "bytes": 1001,
+      "sha256": "bc1dd667553bb1daa1e6669237e8d6237823ce12ab9a2ed863cb3a397768faef"
+    },
+    "tests.log": {
+      "bytes": 115,
+      "sha256": "4960f0620986f525b89c0b5ebcf4a8ca08edef2af3151f991abe0ff78e4728d4"
+    },
+    "tests.xml": {
+      "bytes": 9114,
+      "sha256": "d3e2132f32f60a89b4caab7288e21446172e7a5001d0686df87247fa315439ef"
+    }
+  }
+}

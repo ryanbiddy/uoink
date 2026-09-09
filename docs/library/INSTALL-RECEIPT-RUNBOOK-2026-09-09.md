@@ -5,10 +5,10 @@ session supplies the installed evidence still needed for Phase 3 C22 and Phase 4
 It does not approve a main merge or publication. The release notes and
 `release-state.json` identify the tested source and remaining failures.
 
-The installer is **Uoink-Setup-3.8.0.exe**, 339,059,131 bytes, SHA-256
-`d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1`, built from
-`8a607c37095cb4f3b66d2aee285cfb710ab5e586`. Use this package and the accompanying
-tools together. The older 9defc2a installer is not this receipt candidate.
+The installer is **Uoink-Setup-3.8.0.exe**, 339,059,334 bytes, SHA-256
+`a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe`, built from
+`67a274d5d0c67f48405c4fa242a1011c2cf671c1`. Use this package and the accompanying
+tools together. Earlier d024baf5 and 9defc2a installers are retained historical packages.
 
 ## Before you begin
 
@@ -37,7 +37,7 @@ $opPython = 'C:\Python314\python.exe'
 if (-not (Test-Path -LiteralPath $opPython -PathType Leaf)) { throw 'The required system Python is unavailable.' }
 $opKit = Join-Path $opBundle 'scripts\install_receipt'
 $opPackage = Join-Path $opBundle 'Uoink-Setup-3.8.0.exe'
-$opHash = 'd024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1'
+$opHash = 'a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe'
 $opManifest = Join-Path $opBundle 'c22-operator-manifest.json'
 $opBindings = Join-Path $opBundle 'source-bindings.json'
 $opRoot = Join-Path $env:USERPROFILE 'Documents\Uoink Receipt 2026-09-09'
@@ -77,7 +77,7 @@ Start-Transcript -LiteralPath (Join-Path $opRoot 'operator-transcript.txt')
 [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); user=[Security.Principal.WindowsIdentity]::GetCurrent().Name;
     sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; profile=$env:USERPROFILE;
     package_sha256=$opHash; validation_source=$opSeal.validation_source; bundle_source=$opSeal.bundle_source;
-    installer_source='8a607c37095cb4f3b66d2aee285cfb710ab5e586'; install_started=$false
+    installer_source='67a274d5d0c67f48405c4fa242a1011c2cf671c1'; install_started=$false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $opRoot 'operator-preflight.json') -Encoding utf8
 ```
 
@@ -348,3 +348,10 @@ inputs. Astra seals derived evidence and separate C22/P4 verdicts, names every
 failure or missing observation, and updates the release notes. Do not uninstall
 or delete the disposable profile before that review. Main merge, publication,
 speaker attribution and Phase 5 Part B are outside this session.
+
+Astra also reviews every original helper log for unexpected ERROR/CRITICAL entries.
+Only the declared launch-interruption and registration-failure capture exceptions
+are expected injections. A successful scenario status does not override a startup
+transaction error or another unexplained runtime error. Blocked stdlib version and
+urllib3 capability probes must remain counted with spawned/bound false; do not
+describe them as zero process or network attempts.

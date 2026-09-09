@@ -1,0 +1,29 @@
+{
+  "scope": "Real compiler inputs and installer; pre-install; package-02 retained",
+  "files": {
+    "build-receipt.json": {
+      "bytes": 1387,
+      "sha256": "30a52a98a939470b2b52b5c3d04bc3e36582ce28055ff09922d3ea4493a1dd51"
+    },
+    "build.log": {
+      "bytes": 43127,
+      "sha256": "c96cfedd175b5d4ce8dfa7762bbe68606c33c3ab1f13a5a0fadfbf4678d94f61"
+    },
+    "package-manifest.json": {
+      "bytes": 40526,
+      "sha256": "0e248eb14ccf8358f56fa61a73f267ea690c8fecd6233f93adbcb31a84c24f25"
+    },
+    "seal_package_inputs.py": {
+      "bytes": 4182,
+      "sha256": "9b99d2084d147886fe37447dcbbbbb1726c254dc11149ef3c029320dde113db5"
+    },
+    "source-bindings.json": {
+      "bytes": 40014,
+      "sha256": "c7cd65aad3456ea35a3aca4e094a883f24006bac4b4105e51f2d67aed624e22c"
+    },
+    "staged-inventory.json": {
+      "bytes": 6462461,
+      "sha256": "e1d1190b56b05b56b976264e697f4ccff5ff3a3757b6b9d433f2498f61d91fc7"
+    }
+  }
+}

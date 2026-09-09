@@ -128,28 +128,28 @@ def write_example(path: Path) -> Path:
 
 
 def load_candidate_package_02() -> dict[str, Any]:
-    """Consume Astra's committed candidate-package-02 seal. Do not invent one."""
+    """Consume Astra's active committed seal; the function name is a compatibility API."""
     root = CANDIDATE_PACKAGE_02_DIR
     bindings_path = root / "source-bindings.json"
     manifest_path = root / "package-manifest.json"
     if not bindings_path.is_file() or not manifest_path.is_file():
         raise C22ValidationError(
-            f"candidate-package-02 seal missing under {root}")
+            f"candidate package seal missing under {root}")
     bindings = json.loads(bindings_path.read_text(encoding="utf-8"))
     package = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(bindings, dict) or not isinstance(package, dict):
-        raise C22ValidationError("candidate-package-02 seal is not a JSON object")
+        raise C22ValidationError("candidate package seal is not a JSON object")
     source = validate_git_commit(
         package.get("installer_source_sha") or bindings.get("build_source"),
-        label="candidate-package-02 installer_source_sha")
+        label="candidate package installer_source_sha")
     build = validate_git_commit(
         package.get("build_source") or bindings.get("build_source"),
-        label="candidate-package-02 build_source")
+        label="candidate package build_source")
     digest = validate_sha256(
-        package.get("package_sha256"), label="candidate-package-02 package_sha256")
+        package.get("package_sha256"), label="candidate package package_sha256")
     files = package.get("files") or bindings.get("files") or []
     if not isinstance(files, list) or not files:
-        raise C22ValidationError("candidate-package-02 files list is empty")
+        raise C22ValidationError("candidate package files list is empty")
     by_path: dict[str, dict[str, Any]] = {}
     for row in files:
         if not isinstance(row, dict):
@@ -165,9 +165,10 @@ def load_candidate_package_02() -> dict[str, Any]:
             by_path[staged.replace("\\", "/")] = row
     bytes_count = package.get("package_bytes")
     if type(bytes_count) is not int or bytes_count <= 0:
-        raise C22ValidationError("candidate-package-02 package_bytes is missing")
+        raise C22ValidationError("candidate package package_bytes is missing")
     return {
-        "schema": "candidate-package-02",
+        "schema": "candidate-package-02",  # Receipt format, not the active package number.
+        "active_package_directory": root.name,
         "dir": str(root),
         "source_bindings_path": str(bindings_path),
         "package_manifest_path": str(manifest_path),
