@@ -1,0 +1,339 @@
+diff --git a/index.py b/index.py
+index 2d38d7964ffdc825b568d5c319e9b09508d2e76b..1aff0d519b998d188e818dd4fe7e5e129d509d6e 100644
+--- a/index.py
++++ b/index.py
+@@ -413,9 +413,64 @@ class Index:
+         # Explicit write-transaction owner: (id(connection), thread ident).
+         # Bound only by write_transaction(); BriefStore uses this instead of
+         # guessing native sqlite3* pointers.
+-        self._write_txn_owner = None
++        self._write_txn_owner = None
++        self._existing_read_only = False
+ 
+     # ---- lifecycle -------------------------------------------------------
++    @classmethod
++    def open_existing(cls, path) -> "Index":
++        """Read existing storage without migrations, backfills or recovery."""
++        path = Path(path).resolve()
++        conn = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
++                               check_same_thread=False)
++        try:
++            conn.row_factory = sqlite3.Row
++            conn.execute("PRAGMA foreign_keys=ON")
++            conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()
++            idx = cls(conn, path)
++            idx._existing_read_only = True
++            return idx
++        except BaseException:
++            conn.close()
++            raise
++
++    def initialize_for_write(self) -> None:
++        """Promote an existing-only handle on an explicit ordinary operation.
++
++        Readers share this Index lock, so no read can observe the connection
++        swap. Keep the original connection usable if initialization fails.
++        """
++        with self._lock:
++            if not self._existing_read_only:
++                return
++            previous = self._conn
++            conn = sqlite3.connect(str(self._path), check_same_thread=False)
++            try:
++                conn.row_factory = sqlite3.Row
++                conn.execute("PRAGMA journal_mode=WAL")
++                conn.execute("PRAGMA foreign_keys=ON")
++                version = _run_migrations(conn)
++                _backfill_clips_if_needed(conn, version)
++                self._conn = conn
++                try:
++                    from provenance import backfill_source_types
++                    backfill_source_types(self)
++                except Exception:
++                    log.exception("source_type provenance backfill failed")
++                has_meta = conn.execute(
++                    "SELECT 1 FROM sqlite_master WHERE name='library_meta'").fetchone()
++                if has_meta and ((self._path.parent / "library").is_dir() or conn.execute(
++                        "SELECT last_operation_sequence FROM library_meta WHERE singleton=1").fetchone()[0]):
++                    self.library_service()
++            except BaseException:
++                self._conn = previous
++                if hasattr(self, "_library_work_service"):
++                    del self._library_work_service
++                conn.close()
++                raise
++            self._existing_read_only = False
++            previous.close()
++
+     @classmethod
+     def open(cls, path) -> "Index":
+         """Open (creating if needed) the index database and run migrations."""
+diff --git a/library_work.py b/library_work.py
+index 0d53a73d9b9b6dae73f81ce42dd1d2307d4ce01b..79884788266d0946b616f4f32a324a704d2aafde 100644
+--- a/library_work.py
++++ b/library_work.py
+@@ -1484,6 +1484,31 @@ class LibraryWorkService:
+                 orphaned_count=status["orphaned_count"], projection_revision=status["projection_revision"])
+ 
+ 
++class LibraryPreviewReader:
++    """Pure preview checks, without work-service startup or write endpoints.
++
++    Share the exact binding, taxonomy, evidence and delta checks with apply;
++    this object neither attaches itself to the index nor recovers the store.
++    The caller owns admission, the read transaction and its deadline.
++    """
++
++    def __init__(self, index, *, clock=None):
++        self.store_root = index._path.parent / "library"
++        self.clock = clock or (lambda: int(time.time() * 1000))
++
++    _now = LibraryWorkService._now
++    _run = LibraryWorkService._run
++    _meta = LibraryWorkService._meta
++    _card = LibraryWorkService._card
++    _taxonomy = LibraryWorkService._taxonomy
++    _snapshot = LibraryWorkService._snapshot
++    _delta = staticmethod(LibraryWorkService._delta)
++    _conflict_details = LibraryWorkService._conflict_details
++    _revision = LibraryWorkService._revision
++    _compute_preview = LibraryWorkService._compute_preview
++    _recheck_preview = LibraryWorkService._recheck_preview
++
++
+ # Module functions and class methods use the same authenticated service seam.
+ # Adapters never construct HTTP handlers or reproduce domain validation.
+ 
+diff --git a/server.py b/server.py
+index 7358d3b360262a369377c8abef0b85b8d3ec9fd6..dc992a44f1c081fda6ba476b51395660b2bf56c4 100644
+--- a/server.py
++++ b/server.py
+@@ -2105,6 +2105,8 @@ def _get_index() -> "index.Index":
+             _index_singleton = idx
+             if recovered:
+                 _index_recovering = True
++        elif getattr(_index_singleton, "_existing_read_only", False):
++            _index_singleton.initialize_for_write()
+         return _index_singleton
+ 
+ 
+@@ -2138,7 +2140,7 @@ def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
+         if _index_singleton is None:
+             if not INDEX_PATH.is_file():
+                 raise FileNotFoundError(str(INDEX_PATH))
+-            _index_singleton = index.Index.open(INDEX_PATH)
++            _index_singleton = index.Index.open_existing(INDEX_PATH)
+         return _index_singleton
+     finally:
+         _index_open_lock.release()
+diff --git a/tests/test_existing_index_read_open.py b/tests/test_existing_index_read_open.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..2f21cb5da08c1509b98a2fb4a5c25e6168d29910
+--- /dev/null
++++ b/tests/test_existing_index_read_open.py
+@@ -0,0 +1,65 @@
++"""An existing read does not initialize storage; explicit work still can."""
++import sqlite3
++
++import pytest
++
++from index import Index
++
++
++def test_existing_open_never_creates_missing_storage(tmp_path):
++    target = tmp_path / "absent" / "index.db"
++    with pytest.raises(sqlite3.OperationalError):
++        Index.open_existing(target)
++    assert not target.parent.exists()
++
++
++def test_read_open_does_not_migrate_then_explicit_backend_promotes(tmp_path, monkeypatch):
++    import index
++    import server
++    path = tmp_path / "index.db"
++    with Index.open(path):
++        pass
++    calls = []
++    original = index._run_migrations
++    def migrations(conn):
++        calls.append(True)
++        return original(conn)
++    monkeypatch.setattr(index, "_run_migrations", migrations)
++    monkeypatch.setattr(server, "INDEX_PATH", path)
++    monkeypatch.setattr(server, "_index_singleton", None)
++    reader = server._get_existing_index(timeout_s=1)
++    try:
++        assert calls == []
++        assert reader._existing_read_only
++        with pytest.raises(sqlite3.OperationalError, match="readonly"):
++            with reader.write_transaction() as conn:
++                conn.execute("UPDATE library_meta SET projection_revision=1")
++        writer = server._get_index()
++        assert writer is reader
++        assert calls == [True]
++        with writer.write_transaction() as conn:
++            conn.execute("UPDATE library_meta SET projection_revision=1")
++        assert writer._conn.execute("SELECT projection_revision FROM library_meta").fetchone()[0] == 1
++        assert server._get_existing_index() is writer
++        assert server._get_index() is writer
++        assert calls == [True]
++    finally:
++        reader.close()
++
++
++def test_failed_promotion_preserves_original_read_connection(tmp_path, monkeypatch):
++    import index
++    path = tmp_path / "index.db"
++    with Index.open(path):
++        pass
++    with Index.open_existing(path) as reader:
++        previous = reader._conn
++        def unavailable(conn):
++            raise sqlite3.OperationalError("declared initialization failure")
++        monkeypatch.setattr(index, "_run_migrations", unavailable)
++        with pytest.raises(sqlite3.OperationalError, match="declared initialization"):
++            reader.initialize_for_write()
++        assert reader._conn is previous
++        assert reader._existing_read_only
++        assert reader._conn.execute("SELECT projection_revision FROM library_meta").fetchone()[0] == 0
++        assert not hasattr(reader, "_library_work_service")
+diff --git a/tests/test_preview_restart_read.py b/tests/test_preview_restart_read.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d2027394154dfb2410b719b9c0e7ace6c5696edb
+--- /dev/null
++++ b/tests/test_preview_restart_read.py
+@@ -0,0 +1,99 @@
++"""Stored previews through the original stdio entry, without service attachment."""
++import hashlib
++import json
++import os
++from pathlib import Path
++import shutil
++import sqlite3
++import sys
++import time
++
++import pytest
++
++from library_work import RequestContext
++from tests.test_library_work_apply_undo import make_apply_environment, submit_accepted_result
++from tests.test_phase4_stdio import _StdioTestClient
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++def snapshot(data):
++    with sqlite3.connect(data / "index.db") as conn:
++        rows = "\n".join(conn.iterdump())
++    files = {p.relative_to(data).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
++             for p in (data / "library").rglob("*") if p.is_file()}
++    return rows, files
++
++
++@pytest.mark.parametrize("change,expected", [
++    ("valid", None), ("evidence", "revision_unavailable"),
++    ("taxonomy", "revision_unavailable"), ("projection", "revision_unavailable"),
++    ("expired", "revision_unavailable"), ("missing", "resource_not_found"),
++])
++def test_original_stdio_reads_stored_preview_after_restart(tmp_path, change, expected):
++    idx, service, operator, clock = make_apply_environment(
++        tmp_path / "seed", items=[{"video_id": "preview-restart"}],
++        librarian_apply_enabled=False)
++    clock[0] = int(time.time() * 1000)
++    client = RequestContext(authenticated=True, client_id="preview-reader", session_id="reader")
++    try:
++        claimed = service.claim_work(client, dict(action="claim", run_id="run_apply_01",
++            client_id="preview-reader", max_items=1, lease_seconds=600))
++        assert claimed["ok"], claimed
++        submitted = submit_accepted_result(service, client, claimed["work"][0])
++        assert submitted["ok"], submitted
++        preview = service.preview_apply(operator, dict(mode="preview", run_id="run_apply_01",
++            expected_projection_revision=0))
++        assert preview["ok"], preview
++        with idx.write_transaction() as conn:
++            if change == "evidence": conn.execute("UPDATE clips SET text='Changed after the preview'")
++            if change == "projection": conn.execute("UPDATE library_meta SET projection_revision=1")
++            if change == "expired": conn.execute("UPDATE library_previews SET expires_ms=1")
++            if change == "missing": conn.execute("DELETE FROM library_previews")
++        local = tmp_path / "user" / "local"
++        data = local / "Uoink"
++        data.mkdir(parents=True)
++        with sqlite3.connect(data / "index.db") as dest:
++            idx._conn.backup(dest)
++        shutil.copytree(service.store_root, data / "library")
++    finally:
++        idx.close()
++    if change == "taxonomy":
++        taxonomy = next((data / "library" / "taxonomies").glob("*.json"))
++        taxonomy.write_text("{}", encoding="utf8")
++    # A read must not initialize recovery, even if an unrelated journal exists.
++    journal = data / "library" / "journal"
++    journal.mkdir(exist_ok=True)
++    (journal / "not-a-recovery-request.txt").write_text("preserve this file", encoding="utf8")
++    (data / "settings.json").write_text(json.dumps({"librarian_apply_enabled": False}), encoding="utf8")
++    before = snapshot(data)
++    env = os.environ.copy()
++    env.pop("ANTHROPIC_API_KEY", None)
++    for name in ("UOINK_ISOLATED_PROFILE", "UOINK_ISOLATED_PORT", "UOINK_ISOLATED_APP_DIR"):
++        env.pop(name, None)
++    env.update(LOCALAPPDATA=str(local), APPDATA=str(tmp_path / "user" / "roaming"),
++        USERPROFILE=str(tmp_path / "user"), UOINK_OUTPUT_DIR=str(data / "output"),
++        PYTHONDONTWRITEBYTECODE="1")
++    stdio = _StdioTestClient([sys.executable, "-B", "-P", str(ROOT / "uoink_mcp.py")],
++                             cwd=tmp_path, env=env)
++    try:
++        stdio.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
++            "protocolVersion": "2024-11-05", "capabilities": {},
++            "clientInfo": {"name": "preview-restart-regression", "version": "1"}}})
++        assert "result" in stdio.wait_for(1)
++        stdio.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
++        started = time.monotonic()
++        stdio.send({"jsonrpc": "2.0", "id": 2, "method": "prompts/get", "params": {
++            "name": "reshelve-review", "arguments": {"preview_id": preview["preview_id"]}}})
++        response = stdio.wait_for(2, timeout=3)
++        assert time.monotonic() - started < 2
++        if expected is None:
++            assert "result" in response, response
++            assert preview["preview_id"] in json.dumps(response["result"])
++            assert preview["delta_hash"] in json.dumps(response["result"])
++        else:
++            assert response.get("error", {}).get("data", {}).get("error", {}).get("code") == expected, response
++    finally:
++        stdio.close()
++        stdio.proc.wait(timeout=5)
++    assert snapshot(data) == before
+diff --git a/uoink_mcp.py b/uoink_mcp.py
+index ef59990bf42082845a260eaa8fa8b390adc386ae..d1510068d748ee3c49bb9f9c97879b08a258ee6a 100644
+--- a/uoink_mcp.py
++++ b/uoink_mcp.py
+@@ -619,11 +619,17 @@ def _register_phase4_stdio() -> None:
+         return library_resources.make_reader(server)
+ 
+     def work_service(active_reader):
+-        # Report-only: use the service only if the index already built one;
+-        # constructing it could run Phase 2 recovery, which is not a read.
+-        # Resolved after admission because the index is bound lazily.
++        # Resolve only after admission. A fresh read must not initialize the
++        # mutating work service or replay its journal to inspect a preview.
++        def resolve():
++            from library_work import LibraryPreviewReader
++            existing = getattr(active_reader.index, "_library_work_service", None)
++            if existing is not None:
++                return existing
++            return LibraryPreviewReader(active_reader.index,
++                clock=lambda: int(active_reader.wall_time() * 1000))
+         return library_prompts.DeferredService(
+-            lambda: getattr(active_reader.index, "_library_work_service", None))
++            resolve)
+ 
+     def mcp_error(exc) -> McpError:
+         if exc.code == "invalid_request":
+@@ -860,7 +866,7 @@ def _stdio_param(params, key: str):
+ 
+ # Product-owned stdio writer depth. When > 0, `_deliver_bounded_outbound`
+ # already holds admission through the real SDK dump. The installed SDK
+-# `stdio_server` route stays at 0 and settles in `_sdk_serialize_and_settle`.
++# `stdio_server` route stays at 0 and settles in `_SdkOutboundMessage.model_dump_json`.
+ _bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
+ 
+ 

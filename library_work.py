@@ -1484,6 +1484,31 @@ class LibraryWorkService:
                 orphaned_count=status["orphaned_count"], projection_revision=status["projection_revision"])
 
 
+class LibraryPreviewReader:
+    """Pure preview checks, without work-service startup or write endpoints.
+
+    Share the exact binding, taxonomy, evidence and delta checks with apply;
+    this object neither attaches itself to the index nor recovers the store.
+    The caller owns admission, the read transaction and its deadline.
+    """
+
+    def __init__(self, index, *, clock=None):
+        self.store_root = index._path.parent / "library"
+        self.clock = clock or (lambda: int(time.time() * 1000))
+
+    _now = LibraryWorkService._now
+    _run = LibraryWorkService._run
+    _meta = LibraryWorkService._meta
+    _card = LibraryWorkService._card
+    _taxonomy = LibraryWorkService._taxonomy
+    _snapshot = LibraryWorkService._snapshot
+    _delta = staticmethod(LibraryWorkService._delta)
+    _conflict_details = LibraryWorkService._conflict_details
+    _revision = LibraryWorkService._revision
+    _compute_preview = LibraryWorkService._compute_preview
+    _recheck_preview = LibraryWorkService._recheck_preview
+
+
 # Module functions and class methods use the same authenticated service seam.
 # Adapters never construct HTTP handlers or reproduce domain validation.
 

@@ -414,8 +414,63 @@ class Index:
         # Bound only by write_transaction(); BriefStore uses this instead of
         # guessing native sqlite3* pointers.
         self._write_txn_owner = None
+        self._existing_read_only = False
 
     # ---- lifecycle -------------------------------------------------------
+    @classmethod
+    def open_existing(cls, path) -> "Index":
+        """Read existing storage without migrations, backfills or recovery."""
+        path = Path(path).resolve()
+        conn = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
+                               check_same_thread=False)
+        try:
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys=ON")
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()
+            idx = cls(conn, path)
+            idx._existing_read_only = True
+            return idx
+        except BaseException:
+            conn.close()
+            raise
+
+    def initialize_for_write(self) -> None:
+        """Promote an existing-only handle on an explicit ordinary operation.
+
+        Readers share this Index lock, so no read can observe the connection
+        swap. Keep the original connection usable if initialization fails.
+        """
+        with self._lock:
+            if not self._existing_read_only:
+                return
+            previous = self._conn
+            conn = sqlite3.connect(str(self._path), check_same_thread=False)
+            try:
+                conn.row_factory = sqlite3.Row
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.execute("PRAGMA foreign_keys=ON")
+                version = _run_migrations(conn)
+                _backfill_clips_if_needed(conn, version)
+                self._conn = conn
+                try:
+                    from provenance import backfill_source_types
+                    backfill_source_types(self)
+                except Exception:
+                    log.exception("source_type provenance backfill failed")
+                has_meta = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE name='library_meta'").fetchone()
+                if has_meta and ((self._path.parent / "library").is_dir() or conn.execute(
+                        "SELECT last_operation_sequence FROM library_meta WHERE singleton=1").fetchone()[0]):
+                    self.library_service()
+            except BaseException:
+                self._conn = previous
+                if hasattr(self, "_library_work_service"):
+                    del self._library_work_service
+                conn.close()
+                raise
+            self._existing_read_only = False
+            previous.close()
+
     @classmethod
     def open(cls, path) -> "Index":
         """Open (creating if needed) the index database and run migrations."""

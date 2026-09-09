@@ -22,6 +22,12 @@ kits are in progress; no new package is sealed yet. Default style seeding
 at `db95457` now commits before standing-capture startup and rolls back a
 partial seed; its three new ownership/durability checks pass in the full tree.
 
+The later existing-preview repair prevents a read from initializing storage or
+replaying recovery. Nine new checks pass, including unchanged files and SQLite
+contents through the original stdio entry after restart. Its broader companion
+run has 212 passed / the same eight mirror-hook failures. It still needs the
+final complete-tree and bundled-runtime observations.
+
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from

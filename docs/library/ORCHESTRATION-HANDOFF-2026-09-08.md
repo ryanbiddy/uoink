@@ -81,7 +81,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
-| 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
+| 4 | Lifecycle repair retained; original stdio read repair has nine new passes and broader 212 passed / eight failed | Existing reads no longer migrate/backfill or recover authoritative storage; eight parent-interception failures remain; X HTTP 403 stays blocked | Include read repair in final committed tree and bundled original entry; finish installed receipt kit |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
 | Integration | Complete `263b7e4` tree: 2,193 passed / nine failed / three skipped / one xfailed, 728.37 s | Eleven previous failures close, eight new cases pass, no missing cases or new failures. Exact eight-case interception fixture proposal awaits Ryan; historical exit gap remains | Finish three bounded installation/kit repairs, then final committed tree, rebuilt package and complete operator runbook |
@@ -166,6 +166,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    receipt still substitutes direct child-record calls for helper recovery,
    miscounts charges and compares protected state only after all scenarios.
    Follow `RYAN-C22-SCENARIO-TRUTH-REPAIR-BRIEF-2026-09-09.md`; no installed credit.
+   Existing-preview read repair is reviewed in `RYAN-PREVIEW-RESTART-REVIEW-2026-09-09.md`:
+   nine new passes; broader 212 passed / eight known mirror-hook failures. The
+   six initial subprocess failures proved storage mutation, not missing service.
+   Include this source in the final tree and packaged original-route observation.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1618,3 +1622,17 @@ suite_service.py. The original patch is unchanged; omitted-suite-service.patch
 now retains those exact bytes and is added to that seal. Astra applied this
 companion patch cleanly in the d0577a56 worker before its verification, without
 touching the worker-owned Inno file. Integrate both patches together.
+
+### 2026-09-09 — Original stdio preview reads must not recover storage
+
+Astra's six-case original-entry reproduction pre-r1 returned correct answers
+but all six failed unchanged-state checks. Index.open automatically migrated,
+backfilled and recovered the work service during an existing-only read. The
+brief retains the disproved missing-service hypothesis and corrected diagnosis.
+Index.open_existing now uses read-only SQLite without initialization; explicit
+ordinary work can promote the same handle under its lock. A pure preview reader
+shares the original validation without attaching or recovering a service.
+Nine new tests pass (7.67 s); the named union has 212 passed / eight failed
+(72.66 s), all eight the existing mirror interception cases. No frozen test
+changed. Fourteen raw files are sealed under proof/ryan-preview-read-2026-09-09.
+Final committed-tree and packaged original-entry checks must include this repair.

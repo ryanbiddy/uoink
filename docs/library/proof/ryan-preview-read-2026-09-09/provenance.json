@@ -1,0 +1,40 @@
+{
+  "checkout_parent": "2aa1338ae7bfff05720a19b6e34ba2994ef66073",
+  "sources": {
+    "index.py": {
+      "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395",
+      "lf_sha256": "37ac0b7307f130f6148ec5a6a5faaf395ddf6feecb69c37c54eb7c2fe2fe8d8b",
+      "bytes": 112774
+    },
+    "library_work.py": {
+      "sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa",
+      "lf_sha256": "828383757a10f50c959d2281535cfc9d6e03a9b242438e759db47b31124c4e93",
+      "bytes": 107686
+    },
+    "server.py": {
+      "sha256": "5a3b441236634efeaa591c88ab8ccc66368e2a81c01cf7bff2c51af24a061ab0",
+      "lf_sha256": "a5da14e83e24b5e1c4f301b0fe65cdff965499a78392c26a0268852b0cf07b61",
+      "bytes": 804884
+    },
+    "uoink_mcp.py": {
+      "sha256": "3872648e1ed9e934ac8b60c0303bf9f2250446f9dac70331c58005f24f98dbb1",
+      "lf_sha256": "2ab6fd8d68ff32aecc8ac54a98061ec4e0171abdc187dcf8a0d91f1eb0c03b9b",
+      "bytes": 53216
+    },
+    "tests/test_existing_index_read_open.py": {
+      "sha256": "6dd3c6aca7c0db692e6bde8c07d02263faf6078d84fa1bfe4b3b0242bf8a9e0b",
+      "lf_sha256": "6dd3c6aca7c0db692e6bde8c07d02263faf6078d84fa1bfe4b3b0242bf8a9e0b",
+      "bytes": 2507
+    },
+    "tests/test_preview_restart_read.py": {
+      "sha256": "8a2c14c4a7ca3c61d3bdfa4a6a53b7c615cc8d9fbfbb2444a28d54b092568e6b",
+      "lf_sha256": "8a2c14c4a7ca3c61d3bdfa4a6a53b7c615cc8d9fbfbb2444a28d54b092568e6b",
+      "bytes": 4827
+    }
+  },
+  "observations": {
+    "pre-r1": "6 failed; original entry responses correct, storage changed",
+    "pre-c1": "9 passed, 7.67 seconds",
+    "pre-u1": "212 passed, 8 failed, 72.66 seconds; eight known mirror interception cases remain"
+  }
+}

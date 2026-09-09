@@ -1,0 +1,58 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_____ test_original_stdio_reads_stored_preview_after_restart[valid-None] ______
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...6fa299308e0'}) == ("BEGIN TRANS...6fa299308e0'})
+E     
+E     At index 1 diff: {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'library/pins.json': '4941920b1c957a0177a5e8d195a55696214e8e8297bcc36b350b283680e8b733', 'library/journal/not-a-recovery-request.txt': '031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d', 'library/taxonomies/e68cc764d7c2e8ea500ea362b4307e201023b0b27477b420b8a2435b425e7095.json': '66c2e53c6785270bb15da7df2dc0f1be99d0f6ea46fad13c437d86fa299308e0'} != {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'libr...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_original_stdio_reads_stored_preview_after_restart[evidence-revision_unavailable] _
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...6fa299308e0'}) == ("BEGIN TRANS...6fa299308e0'})
+E     
+E     At index 1 diff: {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'library/pins.json': '4941920b1c957a0177a5e8d195a55696214e8e8297bcc36b350b283680e8b733', 'library/journal/not-a-recovery-request.txt': '031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d', 'library/taxonomies/e68cc764d7c2e8ea500ea362b4307e201023b0b27477b420b8a2435b425e7095.json': '66c2e53c6785270bb15da7df2dc0f1be99d0f6ea46fad13c437d86fa299308e0'} != {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'libr...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_original_stdio_reads_stored_preview_after_restart[taxonomy-revision_unavailable] _
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...0f61caaff8a'}) == ("BEGIN TRANS...0f61caaff8a'})
+E     
+E     At index 0 diff: 'BEGIN TRANSACTION;\nCREATE TABLE allowed_sites (\n    id          INTEGER PRIMARY KEY AUTOINCREMENT,\n    url_pattern TEXT NOT NULL UNIQUE,\n    added_at    TEXT NOT NULL,\n    active      INTEGER NOT NULL DEFAULT 1\n);\nINSERT INTO "allowed_sites" VALUES(1,\'youtube.com\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(2,\'youtu.be\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(3,\'x.com\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(4,\'twitter.com\',\'2026-05-30T00:00:00Z\',1);\nCREATE TABLE c...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_original_stdio_reads_stored_preview_after_restart[projection-revision_unavailable] _
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...6fa299308e0'}) == ("BEGIN TRANS...6fa299308e0'})
+E     
+E     At index 0 diff: 'BEGIN TRANSACTION;\nCREATE TABLE allowed_sites (\n    id          INTEGER PRIMARY KEY AUTOINCREMENT,\n    url_pattern TEXT NOT NULL UNIQUE,\n    added_at    TEXT NOT NULL,\n    active      INTEGER NOT NULL DEFAULT 1\n);\nINSERT INTO "allowed_sites" VALUES(1,\'youtube.com\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(2,\'youtu.be\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(3,\'x.com\',\'2026-05-30T00:00:00Z\',1);\nINSERT INTO "allowed_sites" VALUES(4,\'twitter.com\',\'2026-05-30T00:00:00Z\',1);\nCREATE TABLE c...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_original_stdio_reads_stored_preview_after_restart[expired-revision_unavailable] _
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...6fa299308e0'}) == ("BEGIN TRANS...6fa299308e0'})
+E     
+E     At index 1 diff: {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'library/pins.json': '4941920b1c957a0177a5e8d195a55696214e8e8297bcc36b350b283680e8b733', 'library/journal/not-a-recovery-request.txt': '031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d', 'library/taxonomies/e68cc764d7c2e8ea500ea362b4307e201023b0b27477b420b8a2435b425e7095.json': '66c2e53c6785270bb15da7df2dc0f1be99d0f6ea46fad13c437d86fa299308e0'} != {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'libr...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_original_stdio_reads_stored_preview_after_restart[missing-resource_not_found] _
+tests\test_preview_restart_read.py:99: in test_original_stdio_reads_stored_preview_after_restart
+    assert snapshot(data) == before
+E   assert ("BEGIN TRANS...6fa299308e0'}) == ("BEGIN TRANS...6fa299308e0'})
+E     
+E     At index 1 diff: {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'library/pins.json': '4941920b1c957a0177a5e8d195a55696214e8e8297bcc36b350b283680e8b733', 'library/journal/not-a-recovery-request.txt': '031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d', 'library/taxonomies/e68cc764d7c2e8ea500ea362b4307e201023b0b27477b420b8a2435b425e7095.json': '66c2e53c6785270bb15da7df2dc0f1be99d0f6ea46fad13c437d86fa299308e0'} != {'library/.library.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'libr...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+=========================== short test summary info ===========================
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[valid-None]
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[evidence-revision_unavailable]
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[taxonomy-revision_unavailable]
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[projection-revision_unavailable]
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[expired-revision_unavailable]
+FAILED tests/test_preview_restart_read.py::test_original_stdio_reads_stored_preview_after_restart[missing-resource_not_found]
+6 failed in 7.36s

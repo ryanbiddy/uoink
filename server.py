@@ -2105,6 +2105,8 @@ def _get_index() -> "index.Index":
             _index_singleton = idx
             if recovered:
                 _index_recovering = True
+        elif getattr(_index_singleton, "_existing_read_only", False):
+            _index_singleton.initialize_for_write()
         return _index_singleton
 
 
@@ -2138,7 +2140,7 @@ def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
         if _index_singleton is None:
             if not INDEX_PATH.is_file():
                 raise FileNotFoundError(str(INDEX_PATH))
-            _index_singleton = index.Index.open(INDEX_PATH)
+            _index_singleton = index.Index.open_existing(INDEX_PATH)
         return _index_singleton
     finally:
         _index_open_lock.release()

@@ -619,11 +619,17 @@ def _register_phase4_stdio() -> None:
         return library_resources.make_reader(server)
 
     def work_service(active_reader):
-        # Report-only: use the service only if the index already built one;
-        # constructing it could run Phase 2 recovery, which is not a read.
-        # Resolved after admission because the index is bound lazily.
+        # Resolve only after admission. A fresh read must not initialize the
+        # mutating work service or replay its journal to inspect a preview.
+        def resolve():
+            from library_work import LibraryPreviewReader
+            existing = getattr(active_reader.index, "_library_work_service", None)
+            if existing is not None:
+                return existing
+            return LibraryPreviewReader(active_reader.index,
+                clock=lambda: int(active_reader.wall_time() * 1000))
         return library_prompts.DeferredService(
-            lambda: getattr(active_reader.index, "_library_work_service", None))
+            resolve)
 
     def mcp_error(exc) -> McpError:
         if exc.code == "invalid_request":
@@ -860,7 +866,7 @@ def _stdio_param(params, key: str):
 
 # Product-owned stdio writer depth. When > 0, `_deliver_bounded_outbound`
 # already holds admission through the real SDK dump. The installed SDK
-# `stdio_server` route stays at 0 and settles in `_sdk_serialize_and_settle`.
+# `stdio_server` route stays at 0 and settles in `_SdkOutboundMessage.model_dump_json`.
 _bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
 
 
