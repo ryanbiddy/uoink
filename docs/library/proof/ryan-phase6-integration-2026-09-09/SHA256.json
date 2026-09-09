@@ -1,0 +1,73 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "applied.patch": {
+      "sha256": "a97ef930005ff10d08c6280d873ff470c0b4c70a1f0feaeccabb1fe4c71595c0",
+      "bytes": 14455
+    },
+    "checkout/p6-refusal-ci01/results.json": {
+      "sha256": "1c2ff8bddec6e853fc69415b8751182369257772e4a752836a5d601f2ce823d2",
+      "bytes": 1099
+    },
+    "checkout/p6-refusal-ci01/tests.log": {
+      "sha256": "eb24f15d8c2e51d5ffb7838077911face687fe8a858e16c319437a2a2d334aa1",
+      "bytes": 832
+    },
+    "checkout/p6-refusal-ci01/tests.xml": {
+      "sha256": "7a04e81796f14de3b0f40cc0ea7ad19c515caa5387f4612db4720c42ce2d9c7d",
+      "bytes": 10032
+    },
+    "ig_paths.py": {
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "bytes": 106
+    },
+    "integrator_verify.py": {
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+      "bytes": 4420
+    },
+    "provenance.json": {
+      "sha256": "603fa116e170920ff6953be009aae75b9190bda91f680eb0939564378ddf54b5",
+      "bytes": 1792
+    },
+    "sitecustomize.py": {
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "bytes": 1216
+    },
+    "worker/p6-refusal-01/results.json": {
+      "sha256": "8e21a10ac79cabb765c57cc50ef9d8da6756e1bdacc52104cd5e09aa6e86531f",
+      "bytes": 1167
+    },
+    "worker/p6-refusal-01/tests.log": {
+      "sha256": "be0562106f6d09aa106b56e0182b651c8dd1e7703283870704bdd464b16bfebe",
+      "bytes": 875
+    },
+    "worker/p6-refusal-01/tests.xml": {
+      "sha256": "93e268efba6b5eb15c3667e0653df1dfdae46214f6b6dc900542179233b2fef2",
+      "bytes": 10032
+    },
+    "worker/p6-refusal-02/results.json": {
+      "sha256": "c76fcf7922877398b42898c277c408b4813f3da94f789e61087140883d65aed7",
+      "bytes": 1129
+    },
+    "worker/p6-refusal-02/tests.log": {
+      "sha256": "1fbd06a5147137eb85f8113fb230f5cb26cc68a001c85f2cd0aa01b1d4a2aa87",
+      "bytes": 100
+    },
+    "worker/p6-refusal-02/tests.xml": {
+      "sha256": "95451bf6b0ebcf9a40d5fbd607d2fbd9caeda6283a89437d72092a49edecddc4",
+      "bytes": 1080
+    },
+    "worker/p6-refusal-wi01/results.json": {
+      "sha256": "33a4f5d33760b48bf4360bbfe3d3fc9eabaf2fb3cf6c50616dd380ff19196319",
+      "bytes": 1240
+    },
+    "worker/p6-refusal-wi01/tests.log": {
+      "sha256": "77df109fbcd5d245d95deafab959e759fca0e40a58a03ba0eb2dfe470d8e21c9",
+      "bytes": 875
+    },
+    "worker/p6-refusal-wi01/tests.xml": {
+      "sha256": "03a49a3104e987fdf768d264f831dceb9dd8729e89f7e41572b8c8cd5ca9a706",
+      "bytes": 10032
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "worker": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d4d402e8-246\\grok",
+  "worker_base": "a74385cd0cca237c3c6bdbdb3c0676cad8a799e9",
+  "checkout_before": "1063843c4a43e308e7bb40c9ee439914284a7824",
+  "final_worker_source": {
+    "index.py": {
+      "sha256": "b2fa9ca28e6de0bdcf1e7c0d7fe444341de1c2cfc465b95dc9276673de572ea6",
+      "bytes": 110343,
+      "lf_sha256": "862858a6b544f49b21020fadf5a81b5d83c18d811ec5e3ded4c929c7c7abb393"
+    },
+    "library_media.py": {
+      "sha256": "60f0b6a41bedaba7e806a3c800e41ef21649840018542cf66292c59b307679a0",
+      "bytes": 144402,
+      "lf_sha256": "60f0b6a41bedaba7e806a3c800e41ef21649840018542cf66292c59b307679a0"
+    }
+  },
+  "final_checkout_source": {
+    "index.py": {
+      "sha256": "b2fa9ca28e6de0bdcf1e7c0d7fe444341de1c2cfc465b95dc9276673de572ea6",
+      "bytes": 110343
+    },
+    "library_media.py": {
+      "sha256": "b4931e457553c8e4740a64459cab2bf92385e65945658b182bd5715119ed0697",
+      "bytes": 147447
+    }
+  },
+  "observations": [
+    {
+      "label": "checkout/p6-refusal-ci01",
+      "cases": 71,
+      "passed": 71,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p6-refusal-01",
+      "cases": 71,
+      "passed": 71,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p6-refusal-02",
+      "cases": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p6-refusal-wi01",
+      "cases": 71,
+      "passed": 71,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

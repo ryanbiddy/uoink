@@ -1,0 +1,11 @@
+.......................................................................  [100%]
+============================== warnings summary ===============================
+tests/test_phase6_bc2.py: 4 warnings
+tests/test_phase6_bc3f.py: 4 warnings
+tests/library_work_astra/test_phase6_bd_acceptance.py: 4 warnings
+tests/library_work_astra/test_phase6_bd2_acceptance.py: 8 warnings
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d4d402e8-246\grok\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+71 passed, 20 warnings in 213.03s (0:03:33)

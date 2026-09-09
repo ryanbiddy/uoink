@@ -19,3 +19,11 @@ The AS-7/8/9 focused check passed 22 and failed the unrecorded AT6 exit check;
 the strict Phase 3 check passed 181 and failed that same check. Historical
 companion groups overlap these suites and must not be summed as unique tests.
 The full candidate still requires its own final run after product integration.
+
+After the documented lifecycle repair integrated at `1063843`, the complete
+unchanged AW acceptance file ran within the guarded Phase 4 checkout union:
+**31 passed, one failed**. The remaining failure is the purge temporary-file
+interception case. The complete union was 163 passed / eight failed; its XML
+and guard are sealed under `proof/ryan-phase4-integration-2026-09-09/`.
+This supplies the planned current-driver observation without repeating the
+suite or changing the historical 15-pass / 17-fail companion result.

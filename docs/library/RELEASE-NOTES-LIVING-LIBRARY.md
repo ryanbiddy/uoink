@@ -13,7 +13,9 @@ verification: AS-7/8/9 is 22 passed / one failed, strict Phase 3 is 181 passed /
 one failed. The original AT6 child exit status remains missing. These focused
 results do not replace the corrected full tree. Follow-on mirror repair
 `1063843` has 163 passed / eight failed in both roots. The reviewed SDK repair
-has 267 passes in both roots. Installation isolation and executable receipt
+at `0ad33d4` has 267 passes in both roots. The Phase 6 refusal repair has
+71 passes in both roots, including both originally failing stale-publication
+checks. No omitted ticket is minted or allowed to publish. Installation isolation and executable receipt
 kits are in progress; no new package is sealed yet.
 
 ## Package and scope
@@ -197,10 +199,12 @@ The historical BD-2 disposition accepted Phase 6 subject to the omitted-ticket
 fixture ruling and speaker material. BC-3f `986b555` produced 174 passes and
 11 retained omitted-ticket failures in each root. The final broader check
 passed 382 tests with four superseded AS-7 evidence failures.
-Ryan authorized the setup correction. Two unchanged stale-publication checks
-still fail because they receive `invalid_request` instead of
-`revision_unavailable`; both remain product repairs. Speaker material stays
-blocked under the explicit release scope above.
+Ryan authorized the setup correction. The subsequent refusal repair passes
+all 71 named checks in both roots. Validated snapshots already in committed
+history receive the expected stale-revision refusal; other omitted tickets
+remain invalid and cannot publish. The failed full-tree result remains until
+the new complete tree runs. Speaker material stays blocked under the explicit
+release scope above.
 
 The frozen navigation study reduced mean absolute error from 72.06 seconds
 to zero over all 50 tasks. BD-27 playback was observed in normal Comet at

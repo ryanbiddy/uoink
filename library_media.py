@@ -20,11 +20,18 @@ the literal BD-0 wording, read before relying on the behaviour:
    under ``BEGIN IMMEDIATE`` before touching a file, writes the ledger
    claim first and the complete sidecar last, and a retry whose target the
    ledger already names completes from any file/DB boundary. Both entry
-   points require that original build-time ticket: an omitted ticket is
+   points require that original build-time ticket. An omitted ticket is
    refused at ``Index.publish_media_snapshot`` and at raw
-   ``publish_transcript``. The publisher never mints a ticket. An
-   idempotent retry carries the original ticket. There is no empty,
-   first-publication, or evaluation-helper exception. Owning callers
+   ``publish_transcript`` as ``invalid_request`` /
+   ``publication_ticket_required``, except when the proposed validated
+   snapshot is already recorded in the publication ledger history as a
+   superseded committed revision: that is ``revision_unavailable`` /
+   ``superseded_snapshot``, not missing authority. The publisher never
+   mints a ticket, never treats an unverified hash as history, and never
+   writes without a ticket. Foreign or malformed tickets stay
+   ``invalid_request``. An idempotent retry carries the original ticket.
+   There is no empty, first-publication, or evaluation-helper exception.
+   Owning callers
    (``podcasts.episode_to_corpus``, ``server._index_yoink``) mint, then
    validate the exact consumed sidecar/transcript bytes under that fence
    and refuse ``revision_unavailable`` when those inputs changed; they
@@ -2174,11 +2181,12 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
     complete sidecar last, then the DB rows committed together and obsolete
     owned artifacts pruned. A crash between steps leaves an explicit state
     that a retry with the same durable inputs completes. ``ticket`` is the
-    original build-time fence; it is never minted here."""
+    original build-time fence; it is never minted here. An omitted ticket
+    is missing authority unless the validated target is already in the
+    committed ledger history, in which case the snapshot is obsolete."""
     try:
-        if ticket is None:
-            raise _request("publication_ticket_required")
-        if not isinstance(ticket, PublicationTicket) or ticket.video_id != video_id:
+        if ticket is not None and (
+                not isinstance(ticket, PublicationTicket) or ticket.video_id != video_id):
             raise _request("ticket_identity")
         item = _load_item(conn, video_id)
         block = validate_media_block(media_block)
@@ -2252,6 +2260,10 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 raise _stale("corpus_edited")
         generation, current, ledger = _publication_state(conn, video_id, folder)
         history = list(ledger["history"]) if ledger is not None else []
+        if ticket is None:
+            if target in history:
+                raise _stale("superseded_snapshot")
+            raise _request("publication_ticket_required")
         # The sidecar on disk must be one this publication knows: the ledger's
         # current or in-flight base snapshot, this target, or the base the
         # ticket was minted against. Anything else belongs to another owner.

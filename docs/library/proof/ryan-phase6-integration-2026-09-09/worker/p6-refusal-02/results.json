@@ -1,0 +1,26 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_phase6_bc2.py::test_bc2_publication_fence_refuses_every_stale_publisher",
+      "tests/test_phase6_evaluation.py::test_phase6_rebuild_and_publication_recovery",
+      "tests/test_phase6_bc3a3.py::test_bc3a3_stale_empty_build_without_a_ticket_is_refused",
+      "tests/library_work_astra/test_phase6_bd_acceptance.py::test_bd01_never_published_stale_snapshot_requires_original_ticket",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d4d402e8-246\\grok\\_scratch\\p6-refusal-02-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d4d402e8-246\\grok\\_scratch\\p6-refusal-02\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d4d402e8-246\\grok\\_scratch\\p6-refusal-02\\tests.log"
+  }
+]

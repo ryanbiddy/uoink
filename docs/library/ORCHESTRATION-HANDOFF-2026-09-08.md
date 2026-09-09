@@ -75,7 +75,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; corrected tree `4a35316`, implementation base `6858b81`, installer source `e47e4f2`)
+## State at handoff (updated 2026-09-09; corrected tree `4a35316`, source integrations continue, installer source `e47e4f2`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -83,8 +83,8 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
 | 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
-| 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
-| Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; results/runbook checkpoint `ba3d256` backed up to `origin/cc/living-library` | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit |
+| 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
+| Integration | Latest full tree remains `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s | Production source changed; retain old installer and rebuild after remaining integrations. Exact eight-case interception fixture proposal awaits Ryan; existing tests remain frozen | Verify installation mechanism/kits, then committed full tree, package and complete operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -111,8 +111,8 @@ Current continuation under Ryan's 2026-09-09 rulings:
 
 Completed: five corrections/review committed at `4a35316`; one corrected full
 tree sealed with actual counts. All remaining failures are assigned in
-`CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md`. The package is retained
-because production source is unchanged. The runbook documents the complete
+`CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md`. Retain the old package;
+production source has changed and a new package is owed. The runbook documents the complete
 receipt requirements but is blocked before installation; it is not an
 executable installed scenario kit yet. Backup result is recorded in the log.
 
@@ -126,8 +126,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    `RYAN-PHASE5-SDK-REPAIR-2026-09-09.md` and
    `RYAN-PHASE6-REFUSAL-REPAIR-2026-09-09.md`, dispatched in that order.
    Phase 4 lifecycle plus Astra's conservative-lease correction is integrated at
-   `1063843`. Phase 5's outgoing-frame supplement has 267 passes in both roots.
-   Phase 6 has 71 independent worker passes; integrate it next with checkout checks.
+   `1063843`. Phase 5's outgoing-frame supplement at `0ad33d4` has 267 passes
+   in both roots. Phase 6 is integrated with 71 passes in each root; see its
+   integrator report. The exact mirror-interception fixture proposal is pending
+   Ryan's reply; do not apply it or infer consent from continued work.
 2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
    and helper launch use 5179, even from another Windows profile. Implementation
    worker `fd647a72-24b6-468a-905f-ddfdfa5899ac` follows
@@ -238,6 +240,13 @@ required committed input (never write `_scratch/` in backticks). `git config --g
 core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
+
+Pending 2026-09-09: `RYAN-IO-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
+contains the exact three-file/eight-case interception patch (4,298 bytes,
+SHA-256 `d64bde5d71b4349cb498bf267e6dda9b73a67f1f673b85889e9ac0c32e256929`).
+All 150 assertion syntax trees are unchanged. Approval was requested because
+Ryan froze further fixture edits. The proposal has not been applied or run.
+This does not waive the separate missing historical AT6 child exit status.
 
 - Installed Inno package receipts (Phase 3 C22, Phase 4), once product work
   supplies a no-5179 installed path and exact operator kit. Ryan has no safe
@@ -1443,3 +1452,22 @@ The last started from `1063843`. They may write new tooling and tests, but
 cannot run Inno, the normal helper, actual clients/models or any forbidden
 data/port. Astra still verifies and assembles the exact operator runbook and
 hash-bound package before Ryan's actual receipt session.
+
+### 2026-09-09 - Phase 6 refusal integrated; fixture proposal pending
+
+Phase 6 has **71 passed, zero failed** in worker and checkout, 208.89 /
+203.59 seconds. The raw patch applied cleanly to `0ad33d4`; source hashes,
+commands and results are in its 17-file seal. Missing tickets remain unable
+to publish. The new classification only recognizes validated committed-history
+snapshots as stale. No existing tests changed; speaker scope remains blocked.
+
+The exact mirror-hook proposal is archived with its assertion audit and
+one-page review. Ryan's reply is pending; it was neither applied nor executed.
+The current guarded AW companion observation is 31 passed / one failed within
+the earlier lifecycle union, so no repeated run is needed to close the driver
+follow-up. Historical failed outputs remain retained.
+
+Installation isolation worker `fd647a72` has completed. Its report claims
+92 passes / one existing skip; independent source and process review are next.
+C22 `9c866bb0` and Phase 4 kit `81060797` remain active. No current source
+package or installed receipt is claimed.

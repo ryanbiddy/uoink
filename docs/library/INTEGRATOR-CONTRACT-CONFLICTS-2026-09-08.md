@@ -5,6 +5,12 @@ recorded below. The earlier requests for permission remain as history. Behavior
 assertions stay unchanged; any failure after the corrected full tree is a product
 defect requiring a repair brief, with no further fixture edits.
 
+2026-09-09 continuation: `RYAN-IO-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
+contains an exact additional proposal for the eight parent-interception cases.
+It is **not authorized, applied or executed**. The three-file patch preserves
+150 assertions and changes only the interception target to the real isolated
+writer dispatch methods. The original failed observations and test bytes remain.
+
 Reviewer: Astra, 2026-09-08. Checkout: `dad34eb`. This is a source-inspection
 finding, not a passing runtime receipt. Preserve the existing acceptance files.
 The implementation work continues; these conflicts grant no waiver for unsafe
