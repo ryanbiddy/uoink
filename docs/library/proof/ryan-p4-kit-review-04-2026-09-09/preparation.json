@@ -1,0 +1,92 @@
+{
+  "prepared_at": "2026-09-09T18:18:31.490006+00:00",
+  "status": "fixture prepared; client not run",
+  "isolation": {
+    "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p",
+    "isolated_port": 18083,
+    "installed_app": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok",
+    "installed_interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "instrument_only": true,
+    "installed_credit": false,
+    "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4\\Uoink\\index.db",
+    "runtime_mode": "instrument-only",
+    "index_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\index.db",
+    "settings_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\settings.json",
+    "token_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\token.txt",
+    "live_path_captured_before_redirect": true
+  },
+  "product_isolation_bind": {
+    "applied": false,
+    "present": true,
+    "note": "env UOINK_ISOLATED_* bound before product import; apply_from_process runs in children",
+    "guard_canary": {
+      "refused": true,
+      "canary_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\guard-canary\\canary-index.db",
+      "live_index_opened": false
+    }
+  },
+  "package_manifest": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\m.json",
+    "sha256": "b1d3531cd5570ea5dd11fc4754bea04834e9ed48107eb54c81edb21a2fee2923",
+    "bytes": 106,
+    "declared_package_sha256": null,
+    "declared_hash_is_hex64": false,
+    "package_hash_status": "unsealed_astra_owns_final_hash",
+    "installer_source_sha": null,
+    "installer_source_is_git_sha40": false,
+    "installer_source_is_hex64": false,
+    "package_bytes": null,
+    "source_bindings": [],
+    "source_bindings_file": null,
+    "status": "unsealed",
+    "body": {
+      "status": "unsealed",
+      "package_sha256": null,
+      "note": "Astra seals the final package hash after build"
+    },
+    "invented_hash": false,
+    "hex64_alone_is_not_sealed": true,
+    "fabricated_64char_source_commit_rejected": false
+  },
+  "apply_enabled": false,
+  "items": [
+    "p4fx-timed-01",
+    "p4fx-text-01",
+    "p4fx-hostile-01"
+  ],
+  "expected_sha256": "2987ea29bc0a31da951b44724c5cb5a63c6fd59be04837d32769f6df0c914ad3",
+  "mcp_config_sha256": "e3aa1e8e7b350360a687928c4ef3420d8b68e6a35c3fa71c57ad32692552c442",
+  "attached_config_sha256": "ca891de8e84f6e8f82236d872a91d24b281fe5baf7d6881c2f51a60294b3549b",
+  "database_sha256_before_client": "6ec5dd328136cc3ea9d491f2c964564a35236ab2b8e7dbe37cb5c5930cfe8248",
+  "protected_sentinel_sha256": "7625b95f641c6d603439a0cce4cd4cdcf60f1eb7a985acd28d7ece98bdc4c795",
+  "product_findings": [],
+  "optional_player_jump": {
+    "status": "optional_separately_observed",
+    "video_id": "D_FCYsshMI4",
+    "chapter_title": "Why computer use",
+    "start_seconds": 34,
+    "url": "https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s",
+    "not_a_library_quotation": true,
+    "no_fetch": true,
+    "no_speaker_accuracy_claim": true
+  },
+  "blocked_x_link": {
+    "status": "blocked_link",
+    "url": "https://x.com/NASAAdmin/status/2020984085754282078",
+    "prior_condition": "HTTP 403 / net::ERR_HTTP_RESPONSE_CODE_FAILURE",
+    "no_retry": true,
+    "no_new_fetch": true,
+    "not_a_successful_click": true
+  },
+  "routes": {
+    "original-installed": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\mcp.json",
+    "fixture-attached": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\p4-w4-0\\t9\\r\\p\\mcp-attached.json"
+  },
+  "limits": [
+    "No client/model invocation",
+    "Synthetic text is visibly synthetic and is not a real source quotation",
+    "X HTTP 403 stays blocked; no fetch",
+    "D_FCYsshMI4 player jump is optional and separately observed",
+    "Final package hash is Astra's; this kit did not invent one"
+  ]
+}

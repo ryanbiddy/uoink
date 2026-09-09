@@ -1,0 +1,97 @@
+{
+  "scope": "Original fourth P4 input and independent 47 passed / one frozen path assertion failure, before Astra operator supplement",
+  "files": {
+    "expected.json": {
+      "bytes": 48476,
+      "sha256": "2987ea29bc0a31da951b44724c5cb5a63c6fd59be04837d32769f6df0c914ad3"
+    },
+    "fixture-generator-v2.json": {
+      "bytes": 663,
+      "sha256": "ebdd9ca23c0d2fffe6507dfd704346ff0cb06cb02e06b1ded73f7c952ada857c"
+    },
+    "original.patch": {
+      "bytes": 413167,
+      "sha256": "f0e98ecf960e7bf6de87206e0f7c46e98be04d4efbb2f180f1eb2704b57a5394"
+    },
+    "preparation.json": {
+      "bytes": 4572,
+      "sha256": "2e1c9b4f8a9c12829d6f18561ed766914d4ed4892a2b55c821bc529f36664a98"
+    },
+    "prompt-preconditioning-calls.json": {
+      "bytes": 5874,
+      "sha256": "5c383ba792a6a36071c5f79e4ec1f4f317f1edd7c3f8812ec91e095cd246fa92"
+    },
+    "source-runtime.json": {
+      "bytes": 7678,
+      "sha256": "578a2e7d93f59c84588df899d64181a71f3a5ad36700bf8b0fd6e96a27355669"
+    },
+    "p4-w4/results.json": {
+      "bytes": 971,
+      "sha256": "1864db9b7949624423731a6bfe6b073a326e942c11ee81b2027c0e52c58bab0d"
+    },
+    "p4-w4/tests.log": {
+      "bytes": 1594,
+      "sha256": "ba5d3008a9dabdff4464b6a40328f9f1723cf65f8471baf5ff0c5aeb759509be"
+    },
+    "p4-w4/tests.xml": {
+      "bytes": 8008,
+      "sha256": "afe96763bf2d7191e522d84769d710c3b09f9f0cd3ce269207dece2ad936c404"
+    },
+    "p4ec-t3/results.json": {
+      "bytes": 823,
+      "sha256": "a127e701d6547c9cd47dc61cf897022bd64ef78ec740a44f47803d91ada01a10"
+    },
+    "p4ec-t3/tests.log": {
+      "bytes": 101,
+      "sha256": "24c9c581737cf4669e825149d3ae867d7c20cb522d056f0f654966f95a2734f4"
+    },
+    "p4ec-t3/tests.xml": {
+      "bytes": 1760,
+      "sha256": "e7bb89d3651bd88d3518abdac1fb1571e26e8d93a3e51681666625b773e7c3df"
+    },
+    "p4ec-u2/results.json": {
+      "bytes": 977,
+      "sha256": "2592e692d2eaa591dacb7c38cec2a28e32e2c5a54e4710f48af8a72abd872727"
+    },
+    "p4ec-u2/tests.log": {
+      "bytes": 1816,
+      "sha256": "3f196251a2e93f6935423f7b692c231c4b1079b3c747aa194d645aceb7d74c5c"
+    },
+    "p4ec-u2/tests.xml": {
+      "bytes": 8012,
+      "sha256": "eb6577857d3a1d2f17b77663feb4b64b92ba338c7cc07beb4e72384d56722680"
+    },
+    "records/originalinstalleda-64764/events.jsonl": {
+      "bytes": 142474,
+      "sha256": "cd41d679f181e8fd12290f770c5d3014e61806686d72b2da5db17ce306e03aa0"
+    },
+    "records/originalinstalledb-54992/events.jsonl": {
+      "bytes": 142476,
+      "sha256": "33c808d15476918e86cef101c714815b408455eba7496aa50160be7348d01308"
+    },
+    "records/originalinstalledtransport-75816/events.jsonl": {
+      "bytes": 4305,
+      "sha256": "e989fd6818e2e3f7ab2cf7e344c6fdfd0ab8299148058a4d71c0e2180f53172c"
+    },
+    "records/originalinstalledunavail-60916/events.jsonl": {
+      "bytes": 7191,
+      "sha256": "1ea585f075d3bfbd6a256e020f6a7111c13d7294786d3059f87f0ea7db21ada9"
+    },
+    "records/synth-a-51152/events.jsonl": {
+      "bytes": 100126,
+      "sha256": "ec549194e8eb740ffc280ec72f3f57ea87cf8ecd278229754ff256324ba44015"
+    },
+    "records/synth-b-67148/events.jsonl": {
+      "bytes": 100127,
+      "sha256": "b727f5eb271e0bfcf2dcc8be66ee1bb126ed6029a082df36b16c02e688a8f8c9"
+    },
+    "records/synth-transport-54088/events.jsonl": {
+      "bytes": 3829,
+      "sha256": "24fecef013f713782d636a025e7234aa704e898c0fd312d9776a5bb1f23029a6"
+    },
+    "records/synth-unavail-76680/events.jsonl": {
+      "bytes": 5558,
+      "sha256": "4901ec5620e431f3136e9090098f566a6c41e69a8fae73ec9173e28dc31edb0d"
+    }
+  }
+}

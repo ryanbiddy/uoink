@@ -77,3 +77,17 @@ zero passed / three failed, 0.24 s. Source collector, new test and full log/XML
 are sealed at `proof/ryan-operator-ui-repro-2026-09-09/SHA256.json`. The existing
 fourth worker is untouched. Bring this new test into the completed fourth worktree
 and verify the bounded correction there and in checkout before integration.
+
+## Finished fourth-kit review and bounded supplement
+
+Independent `p4-w4`: 47 passed / one unchanged settings-path failure, 56.03 s.
+The raw fourth input is sealed before local changes at
+`proof/ryan-p4-kit-review-04-2026-09-09/SHA256.json`. See
+`RYAN-P4-OPERATOR-INTEGRATION-REVIEW-2026-09-09.md` for the one-page verdict.
+The completed worker does not fix the actual client config or collector.
+Also correct its duplicate status-key merge, keep synthetic sentinel checks
+separate from actual client evidence, make provenance waiting bounded, and bind
+guard restoration to affirmative child-job cleanup. A driver using system Python
+with `-I -S` must establish the actual bundled guard before any tool entry,
+including its provenance probe and fixture preparation. New targeted checks and
+both-root unions precede integration. No existing test or product edit.
