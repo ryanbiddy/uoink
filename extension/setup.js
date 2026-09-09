@@ -480,6 +480,7 @@ function onServerUp() {
   setCIControlsEnabled(true);
   loadAIPricing();
   loadCISettings();
+  loadYourChannels();
   loadHookCorrections();
   loadTasteAnchors();
   loadMCPConfig();
@@ -610,10 +611,6 @@ function renderCISettings(settings) {
               settings.anthropic_key_set ? "ok" : "warn");
   renderAICostEstimate();
 
-  // Populate Your Channels
-  yourChannelsList = settings.your_channels || [];
-  renderYcList();
-  
   // Populate Creator Tools
   if (ctWorkspaceFormat) ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
   if (ctTargetLength) {
@@ -1444,6 +1441,65 @@ const settingsPendingBanner = document.getElementById("settings-pending-banner")
 
 let yourChannelsList = [];
 
+function channelHandle(channel) {
+  if (typeof channel === "string") return channel.trim().replace(/^@/, "");
+  return String((channel && channel.handle) || "").trim().replace(/^@/, "");
+}
+
+async function loadYourChannels() {
+  if (!ycList) return;
+  try {
+    const res = await fetch(`${SERVER}/channels`, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      headers: {
+        "X-Uoink-Token": await STC.getToken()
+      }
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      throw new Error((data && data.error) || `HTTP ${res.status}`);
+    }
+    yourChannelsList = Array.isArray(data.channels) ? data.channels : [];
+    renderYcList();
+    updateCreatorToolsVisibility();
+  } catch (err) {
+    if (ycStatus) {
+      ycStatus.textContent = "Channels unavailable (helper offline)";
+      ycStatus.className = "settings-status warn";
+    }
+  }
+}
+
+async function removeYourChannel(handle) {
+  try {
+    const res = await fetch(`${SERVER}/channels/remove`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Uoink-Token": await STC.getToken()
+      },
+      body: JSON.stringify({ handle })
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      throw new Error((data && data.error) || `HTTP ${res.status}`);
+    }
+    await loadYourChannels();
+    if (ycStatus) {
+      ycStatus.textContent = `Removed @${handle}`;
+      ycStatus.className = "settings-status ok";
+    }
+  } catch (err) {
+    if (ycStatus) {
+      ycStatus.textContent = (err && err.message) || "Remove failed";
+      ycStatus.className = "settings-status warn";
+    }
+  }
+}
+
 function renderYcList() {
   if (!ycList) return;
   ycList.innerHTML = "";
@@ -1455,7 +1511,8 @@ function renderYcList() {
     return;
   }
   
-  yourChannelsList.forEach((chan, idx) => {
+  yourChannelsList.forEach((chan) => {
+    const handle = channelHandle(chan);
     const row = document.createElement("div");
     row.className = "correction-row yc-item";
     row.style.margin = "4px 0";
@@ -1463,12 +1520,16 @@ function renderYcList() {
     const leftWrap = document.createElement("div");
     const nameVal = document.createElement("div");
     nameVal.className = "correction-title";
-    nameVal.textContent = chan;
+    nameVal.textContent = (chan && chan.name)
+      ? `${chan.name} (@${handle})`
+      : `@${handle}`;
     
     const statusVal = document.createElement("div");
     statusVal.className = "yc-item-status";
     statusVal.style.cssText = "font-size: 11px; color: var(--text-mute);";
-    statusVal.textContent = "Added";
+    statusVal.textContent = (chan && chan.verified_at)
+      ? "Verified"
+      : "Added — not verified";
     
     leftWrap.appendChild(nameVal);
     leftWrap.appendChild(statusVal);
@@ -1482,18 +1543,17 @@ function renderYcList() {
     verifyBtn.style.cssText = "padding: 4px 8px; font-size: 11px; font-weight: 600; height: auto;";
     verifyBtn.textContent = "Verify";
     verifyBtn.addEventListener("click", () => {
-      verifyChannel(chan, statusVal, verifyBtn);
+      verifyChannel(handle, statusVal, verifyBtn);
     });
     
     const removeBtn = document.createElement("span");
     removeBtn.className = "remove-chip yc-remove-btn";
     removeBtn.style.cssText = "cursor: pointer; font-size: 16px; color: var(--text-mute); padding: 0 4px;";
     removeBtn.textContent = "×";
-    removeBtn.addEventListener("click", () => {
-      yourChannelsList.splice(idx, 1);
-      renderYcList();
-      updateCreatorToolsVisibility();
-      saveV3Settings();
+    removeBtn.addEventListener("click", async () => {
+      removeBtn.style.pointerEvents = "none";
+      await removeYourChannel(handle);
+      removeBtn.style.pointerEvents = "";
     });
     
     rightWrap.appendChild(verifyBtn);
@@ -1522,7 +1582,7 @@ function updateTargetLengthDisplay(val) {
   ctLengthDisplay.textContent = lenVals[val] || "5m";
 }
 
-async function verifyChannel(channelName, statusEl, btnEl) {
+async function verifyChannel(handle, statusEl, btnEl) {
   statusEl.textContent = "Verifying...";
   statusEl.style.color = "var(--text-mute)";
   btnEl.disabled = true;
@@ -1536,12 +1596,13 @@ async function verifyChannel(channelName, statusEl, btnEl) {
         "Content-Type": "application/json",
         "X-Yoink-Token": token
       },
-      body: JSON.stringify({ channel: channelName })
+      body: JSON.stringify({ handle })
     });
     const data = await res.json();
     if (res.ok && data && data.ok) {
       statusEl.textContent = "Verified ✓";
       statusEl.style.color = "var(--ok)";
+      await loadYourChannels();
     } else {
       statusEl.textContent = (data && data.error) || `Failed (HTTP ${res.status})`;
       statusEl.style.color = "var(--vermillion)";
@@ -1567,7 +1628,6 @@ async function saveV3Settings() {
   const sourcesArray = sourcesText ? sourcesText.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
 
   const body = {
-    your_channels: yourChannelsList,
     default_workspace_format: ctWorkspaceFormat ? ctWorkspaceFormat.value : "markdown",
     default_target_length: ctTargetLength ? (lenVals[ctTargetLength.value] || "5m") : "5m",
     style_anchors_source: selectedStyleSource,
@@ -1611,10 +1671,6 @@ async function loadPendingV3Settings() {
     const pending = items.uoink_settings_pending;
     if (pending) {
       if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
-      if (pending.your_channels !== undefined) {
-        yourChannelsList = pending.your_channels;
-        renderYcList();
-      }
       if (pending.default_workspace_format !== undefined && ctWorkspaceFormat) {
         ctWorkspaceFormat.value = pending.default_workspace_format;
       }
@@ -1649,14 +1705,36 @@ async function loadPendingV3Settings() {
 
 // Wire up events
 if (ycAddBtn && ycChannelInput) {
-  const addChannel = () => {
+  const addChannel = async () => {
     const val = ycChannelInput.value.trim();
     if (val) {
-      if (!yourChannelsList.includes(val)) {
-        yourChannelsList.push(val);
-        renderYcList();
-        updateCreatorToolsVisibility();
-        saveV3Settings();
+      ycAddBtn.disabled = true;
+      try {
+        const res = await fetch(`${SERVER}/channels`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Uoink-Token": await STC.getToken()
+          },
+          body: JSON.stringify({ handle: val })
+        });
+        const data = await res.json();
+        if (!res.ok || !data || !data.ok) {
+          throw new Error((data && data.error) || `HTTP ${res.status}`);
+        }
+        await loadYourChannels();
+        if (ycStatus) {
+          ycStatus.textContent = `Added @${data.channel.handle}`;
+          ycStatus.className = "settings-status ok";
+        }
+      } catch (err) {
+        if (ycStatus) {
+          ycStatus.textContent = (err && err.message) || "Add failed";
+          ycStatus.className = "settings-status warn";
+        }
+      } finally {
+        ycAddBtn.disabled = false;
       }
       ycChannelInput.value = "";
     }
@@ -1665,7 +1743,7 @@ if (ycAddBtn && ycChannelInput) {
   ycChannelInput.addEventListener("keydown", (ev) => {
     if (ev.key === "Enter") {
       ev.preventDefault();
-      addChannel();
+      void addChannel();
     }
   });
 }
@@ -1689,7 +1767,7 @@ if (ycRecognizeBtn) {
       const data = await res.json();
       if (res.ok && data && data.ok) {
         if (ycStatus) {
-          ycStatus.textContent = "Backfill recognition started ✓";
+          ycStatus.textContent = `Recognition complete: scanned ${data.scanned}, tagged ${data.tagged}.`;
           ycStatus.className = "settings-status ok";
         }
       } else {
