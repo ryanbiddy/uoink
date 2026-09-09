@@ -2,7 +2,8 @@
 
 Local integration candidate, 2026-09-09. Phases 3–6 are accepted with the
 conditions below. The complete candidate test run is failed, with a demonstrated
-frozen-fixture cleanup problem awaiting Ryan's ruling. The installer has been
+frozen-fixture cleanup problem. Ryan authorized five narrow corrections on
+2026-09-09; their committed full-tree verification is pending. The installer has been
 built locally and its bundled runtime checked. This document does not approve
 installation or release.
 
@@ -71,8 +72,9 @@ Service acceptance and later stage audits are recorded in
 [Stage 4 audit](STAGE4-AUDIT-2026-09-08.md).
 
 Stage 4 P2-7 quality remains **failed**: 39/46 timed and 6/11 text judgments.
-The 0.90 strict-precision decision is Ryan's. Label application remains false;
-the candidate does not silently activate classification or apply shelves.
+Ryan selected option 3 on 2026-09-09: retain 0.90 for autonomous filing and
+ship proposals as reviewable suggestions. `librarian_apply_enabled` remains
+false. This scope decision does not change the failed quality measurement.
 
 ## Phase 3: standing capture
 
@@ -151,7 +153,12 @@ are not a real-client or installed-package receipt. See the final disposition
 in `PHASE5-BA4-2026-09-08.md`, `PHASE5-AZ5G2-INTEGRATOR-2026-09-08.md`,
 and the G2 and supplement proof directories.
 
-## Phase 6: chapters, local speaker labels and cited ranges
+## Phase 6: chapters and cited ranges
+
+Ryan's 2026-09-09 release ruling: Phase 6 ships chapters and cited ranges
+without speaker attribution claims. The speaker gate stays blocked and no
+diarization run is authorized. Stored local-label support is not evidence of
+verified identity or attribution accuracy.
 
 The `phase6-v1` contract adds revision-bound media annotations while
 preserving stored clip text, boundaries and excerpt identities. Publication
@@ -188,8 +195,9 @@ binding for the next fixture. No process or exclusion lock remains. Production
 stop/kill cleanup forgets that binding; four independent lifecycle controls
 succeeded without resetting global state. The original tests remain unchanged.
 
-Ryan must authorize consistent fixture teardown before a corrected full-tree
-run. The 67 failures remain failed; neither the diagnosis nor the controls
+Ryan authorized consistent fixture teardown and four other narrow corrections
+on 2026-09-09. Their corrected full-tree result will be recorded separately.
+The 67 failures remain failed; neither the diagnosis nor the controls
 turn them into passes. The old D15 assertion did not fail in this contaminated
 run, which does not override its earlier frozen failure. See
 [the investigation brief](CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md) and
@@ -211,22 +219,17 @@ changed to manufacture a passing result.
 ## Open decisions and receipts for Ryan
 
 - Phase 2 strict precision remains failed: 39/46 timed and 6/11 text cases.
-  `STAGE4-AUDIT-2026-09-08.md` recommends the owner-review option; Ryan
-  decides whether to retain the 0.90 rule, change it, or ship with review.
+  Ryan chose option 3: reviewable suggestions, 0.90 retained for autonomous
+  filing, and label application disabled. This decision is resolved.
 - Installed Inno receipts for Phase 3 C22 and Phase 4.
-- Phase 4's original X source returned HTTP 403. Retain the blocked-link
-  condition or authorize a documented access repair; no successful click is
-  claimed and no replacement source was captured.
-- Frozen fixture rulings documented in
-  `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. Behavioral assertions
-  remain unchanged; corrected setup needs Ryan's explicit ruling.
-- AW-11's direct private-helper teardown leaves a dead originating binding
-  for later tests. Authorize fixture cleanup through the production stop/
-  forget path while preserving its foreign-helper assertions; the failed
-  full-tree result remains until a documented corrected run is authorized.
-- Already-held diarization output and independent human labels for 30
-  passages across five items. The speaker gate requires at least 95%
-  accuracy and 80% coverage; no speaker pass is claimed.
+- Phase 4's original X source remains a documented HTTP 403 blocked-link
+  condition under Ryan's ruling. No access repair or new fetch.
+- The five fixture corrections are authorized and documented in
+  `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. All behavior assertions
+  remain unchanged. Any residual full-tree failure is a product defect,
+  with a repair brief required and no further fixture edits permitted.
+- Speaker gate remains blocked. Phase 6 ships chapters and cited ranges
+  without speaker attribution claims; no diarization runs.
 - Any new fetch scope and merge to main. Standing orchestration signature,
   watchdog installation, PR strategy and adapter allow-list decisions
   remain in the handoff.

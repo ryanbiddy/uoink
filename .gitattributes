@@ -61,3 +61,5 @@ docs/library/proof/aw-client-01-*/** -text
 docs/library/proof/aw-client-02-*/** -text
 docs/library/proof/candidate-full-*/** -text
 docs/library/proof/candidate-package-*/** -text
+docs/library/patches/ryan-fixture-corrections-2026-09-09.patch -text
+docs/library/proof/ryan-corrected-*/** -text

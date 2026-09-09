@@ -256,8 +256,6 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
             assert release.wait(3)
             original_replace(src, dst)
             published.append(target.read_bytes())
-            if observe == "user_edit":
-                target.write_bytes(personal)
             return
         return original_replace(src, dst)
 
@@ -272,6 +270,9 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
     try:
         result = env.mirror.resync(budget_s=0.1)
         assert entered.is_set() and not result["ok"]
+        if observe == "user_edit":
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(personal)
     finally:
         release.set()
         assert finished.wait(3)
@@ -345,7 +346,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
 
 def test_d15_failed_destination_binding_persistence_does_not_allow_readoption(env, monkeypatch):
     binding = env.mirror._dest_binding_path()
-    original = Path.write_text
+    original = env.mirror._atomic_local
 
     def unavailable(path, *args, **kwargs):
         if path == binding:
@@ -353,7 +354,7 @@ def test_d15_failed_destination_binding_persistence_does_not_allow_readoption(en
         return original(path, *args, **kwargs)
 
     with monkeypatch.context() as blocked:
-        blocked.setattr(Path, "write_text", unavailable)
+        blocked.setattr(env.mirror, "_atomic_local", unavailable)
         first = env.mirror.resync()
     if not first["ok"]:
         return  # A failed durable binding must refuse initialization.

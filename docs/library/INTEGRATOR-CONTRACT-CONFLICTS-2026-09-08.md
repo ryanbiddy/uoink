@@ -1,5 +1,10 @@
 # Acceptance fixture conflicts found during integration
 
+Current authority: Ryan's 2026-09-09 ruling authorizes only the five corrections
+recorded below. The earlier requests for permission remain as history. Behavior
+assertions stay unchanged; any failure after the corrected full tree is a product
+defect requiring a repair brief, with no further fixture edits.
+
 Reviewer: Astra, 2026-09-08. Checkout: `dad34eb`. This is a source-inspection
 finding, not a passing runtime receipt. Preserve the existing acceptance files.
 The implementation work continues; these conflicts grant no waiver for unsafe
@@ -84,3 +89,31 @@ witness-failure tests cover that actual boundary and pass. Preserve this
 ninth frozen setup failure. Ryan must authorize moving its failure injection
 to the real persistence boundary without weakening its authority assertions,
 or give another ruling. Do not restore the direct write to satisfy the test.
+
+## Ryan's authorized fixture corrections, 2026-09-09
+
+Base: `ee1293f20e95e330516467f0ce4d093142391031`, on
+`cc/living-library-candidate`. The [complete six-file diff](patches/ryan-fixture-corrections-2026-09-09.patch)
+is 23,425 bytes, SHA-256
+`4e6689d0bf434bea8a83694c7c4c1ea2b2dd5a60074ab852032fd8688f552718`.
+It is the authoritative diff for every change described here.
+
+| Authorized change | Exact diff and reason |
+|---|---|
+| AW-11 teardown | In `test_phase4_aw11_foreign_helper_acceptance.py`, add `env.mirror._stop_vault_io(session)` before the existing death assertion; remove direct assignment of `_vault_io = None`. Production stop/forget clears the originating binding after death. The original termination assertion and foreign-thread assertions remain. |
+| D13 user-edit ordering | In `test_phase4_aw3_acceptance.py`, move the conditional personal-file write out of the blocked replace callback and after the timeout assertion, before releasing the callback. Create its parent if needed. The user edit no longer depends on the forbidden publication occurring. Visibility, timeout and personal-byte assertions are unchanged. |
+| D15 atomic persistence | In the same file, intercept the instance's `_atomic_local` instead of `Path.write_text`, at the identical binding path with the identical injected PermissionError. Keep the failed-initialization branch and all subsequent ownership assertions. |
+| Phase 5 unary clock probe | In `test_phase5_acceptance3.py`, change the local wrapper to `read(args, *, clock=NOW)` and forward that clock to the real reader. The shared caller's frozen clock now reaches the probe. The simulated three-second cost and final deadline assertion are unchanged. |
+| Phase 6 build-time tickets | In `test_phase6_evaluation.py`, add an explicit optional publication connection to the synthetic builder. It mints a ticket before copying inputs or constructing cues/artifacts, and stores that ticket on the fixture. `_publish` only forwards it; it never mints one. Correct successful legacy callers there, in `test_phase6_bc2.py` and `test_phase6_bd_acceptance.py`. Initial Index setup gets its ticket before fixture construction; each crash scenario constructs its replacement under its own ticket and retries reuse that exact ticket. The malformed-sidecar probe gets its ticket before the mutation is built. Intentionally omitted/foreign/malformed ticket cases retain their inputs and assertions. |
+
+Scope review: 690 assertion syntax trees across the six files are identical to
+the base, in the same traversal order. No expected values, thresholds, parameter
+cases, skips or xfails changed. No product source changed. The existing parent-
+process syscall interceptors are outside this authorization and remain unchanged.
+Some old refusal-code expectations may still fail; do not mint a fresh ticket
+for stale input or change an assertion to avoid that result.
+
+See the [one-page review verdict](FIXTURE-CORRECTIONS-REVIEW-2026-09-09.md).
+The corrected full tree will be run on the committed candidate with only S21
+excluded under the standing command. Its actual result will be recorded by SHA;
+every residual failure becomes a product repair item under Ryan's ruling.

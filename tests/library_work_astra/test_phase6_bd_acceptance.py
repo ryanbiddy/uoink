@@ -28,14 +28,14 @@ def test_bd01_never_published_stale_snapshot_requires_original_ticket(sandbox, e
     idx = _open_index(env) if entry == "index" else None
     conn = idx._conn if idx else _db(env)
     try:
-        base = _fixture(env, key="bd01", origin="none")
+        base = _fixture(env, key="bd01", origin="none", publication_conn=conn if idx else None)
         (_seed_index(idx, base) if idx else _seed(conn, base))
         raw_a = copy.deepcopy(RAW_FIXTURES[1])
         raw_b = copy.deepcopy(raw_a)
         raw_a[0] = (0.0, 22.0, "A was built against the original source.", None)
         raw_b[0] = (0.0, 22.0, "B is the newer published source.", None)
         stale = _fixture(env, key="bd01", raw=raw_a, origin="none")
-        newer = _fixture(env, key="bd01", raw=raw_b, origin="none")
+        newer = _fixture(env, key="bd01", raw=raw_b, origin="none", publication_conn=conn)
         _published(_publish(conn, newer))
         before = _snapshot(conn, newer)
         try:
@@ -92,7 +92,7 @@ def test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media(sandbox):
     conn = _db(sandbox)
     old = _fixture(sandbox, key="bd03")
     _seed(conn, old)
-    newer = _fixture(sandbox, key="bd03", origin="none")
+    newer = _fixture(sandbox, key="bd03", origin="none", publication_conn=conn)
     _published(_publish(conn, newer))
     before = _snapshot(conn, newer)
     try:

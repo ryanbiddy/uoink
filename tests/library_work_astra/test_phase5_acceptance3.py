@@ -397,8 +397,8 @@ def test_phase5_ba3_final_wire_serialization_is_inside_deadline(db, monkeypatch)
     monotonic = time.monotonic
     finished = [False]
     elapsed = [0.0]
-    def read(args):
-        packet = real_read(args)
+    def read(args, *, clock=NOW):
+        packet = real_read(args, clock=clock)
         finished[0] = True
         return packet
     def wire(payload):

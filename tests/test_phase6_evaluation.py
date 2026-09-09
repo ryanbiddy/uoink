@@ -308,11 +308,14 @@ WINDOWS = {
 
 
 def _fixture(env, number=1, *, key=None, raw=None, chapters=None, origin="run",
-             state=None, corpus=None, playback=None, source_type=None, duration="default"):
+             state=None, corpus=None, playback=None, source_type=None, duration="default",
+             publication_conn=None):
     key = key or {1: "pod-phase6-001", 2: "yt-phase6-002", 3: "pod-phase6-003"}[number]
+    folder = env.root / _sha(key.encode("utf-8"))[:20]
+    publication_ticket = (media.begin_publication(publication_conn, key, folder=folder)
+                          if publication_conn is not None else None)
     raw = copy.deepcopy(RAW_FIXTURES[number] if raw is None else raw)
     chapter_rows = copy.deepcopy(CHAPTER_FIXTURES[number] if chapters is None else chapters)
-    folder = env.root / _sha(key.encode("utf-8"))[:20]
     folder.mkdir(exist_ok=True)
     corpus = "# Synthetic media fixture\n\nStored source introduction.\n" if corpus is None else corpus
     url = "https://systems.example.fm/episodes/42#transcript"
@@ -406,7 +409,8 @@ def _fixture(env, number=1, *, key=None, raw=None, chapters=None, origin="run",
     files = {str(input_path): original_bytes, item["corpus_path"]: corpus.encode("utf-8"),
              item["sidecar_path"]: _json(sidecar).encode("utf-8")}
     return SimpleNamespace(item=item, cues=cues, block=block, sidecar=sidecar, files=files,
-                           card=card, corpus=corpus, old_clips=old_clips, raw=raw)
+                           card=card, corpus=corpus, old_clips=old_clips, raw=raw,
+                           publication_ticket=publication_ticket)
 
 
 def _write_files(f):
@@ -1227,7 +1231,8 @@ def _operation_refusal(call, code):
 
 def _publish(conn, f):
     return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
-                                    media_block=f.block, artifacts=f.files)
+                                    media_block=f.block, artifacts=f.files,
+                                    ticket=f.publication_ticket)
 
 
 def test_phase6_rebuild_and_publication_recovery(sandbox):
@@ -1249,7 +1254,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
                                     timestamp_start=12.0, text="screenshot caption", youtube_deep_link=""))
     conn.commit()
     screenshots = [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "screenshot"]
-    shorter = _fixture(env, raw=RAW_FIXTURES[1][:2], chapters=[], corpus="# Revised capture\n\nShorter transcript.\n")
+    shorter = _fixture(env, raw=RAW_FIXTURES[1][:2], chapters=[], corpus="# Revised capture\n\nShorter transcript.\n",
+                       publication_conn=conn)
     _published(_publish(conn, shorter))
     assert [r["text"] for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "transcript_chunk"] == [r[2] for r in RAW_FIXTURES[1][:2]]
     assert [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "screenshot"] == screenshots
@@ -1264,7 +1270,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
     _operation_refusal(lambda: _publish(conn, shorter), "revision_unavailable")
     assert Path(shorter.item["corpus_path"]).read_text() == "User-edited corpus; preserve me.\n"
     _write_files(shorter)
-    empty = _fixture(env, raw=[], chapters=[], origin="none", corpus="# Empty replacement\n")
+    empty = _fixture(env, raw=[], chapters=[], origin="none", corpus="# Empty replacement\n",
+                     publication_conn=conn)
     _published(_publish(conn, empty))
     assert _rows(conn, "clips", f.item["video_id"]) == []
     assert [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "transcript_chunk"] == []
@@ -1273,10 +1280,10 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
     # First record the real publication's replacement boundaries, then replay
     # each with an injected stop. No artificial crash hook is required in media.
     old = _fixture(env, key="crash-publication")
-    new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
-                   corpus="# New capture\n\nNew complete source bytes.\n")
     trace_conn = _db(env, "trace")
     _seed(trace_conn, old)
+    new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
+                   corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=trace_conn)
     destinations = []
     real_replace = os.replace
 
@@ -1300,6 +1307,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
         assert folder.is_relative_to(env.root) and folder != env.root
         shutil.rmtree(folder)
         _seed(db, old)
+        new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
+                       corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=db)
         calls = []
 
         def crash_replace(src, dst, *args, **kwargs):
@@ -1384,7 +1393,8 @@ def test_phase6_stale_citation_and_delete_refusals(sandbox):
     old_id = f.card["excerpts"][1]["excerpt_id"]
     raw = copy.deepcopy(RAW_FIXTURES[1])
     raw[3] = (60.0, 95.0, "New evidence at the old sequence number.", "SPEAKER_01")
-    replacement = _fixture(env, key=f.item["video_id"], raw=raw, corpus="# New source\n\nReplacement.\n")
+    replacement = _fixture(env, key=f.item["video_id"], raw=raw, corpus="# New source\n\nReplacement.\n",
+                           publication_conn=conn)
     _published(_publish(conn, replacement))
     _refusal(_export(env, conn, replacement, excerpt_id=old_id), "revision_unavailable")
     other = _fixture(env, key="other-item")

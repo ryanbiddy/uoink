@@ -44,6 +44,6 @@ def test_foreign_thread_cannot_adopt_current_mirror_session(env, operation):
         print(json.dumps(observations, sort_keys=True))
         assert after == original, observations
     finally:
+        env.mirror._stop_vault_io(session)
         assert session.terminate(), "task-owned writer death was not confirmed"
         thread.join(3)
-        env.mirror._vault_io = None

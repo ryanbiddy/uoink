@@ -1,0 +1,36 @@
+{
+  "files": [
+    {
+      "file": "tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py",
+      "assertions": 3,
+      "assertions_unchanged": true
+    },
+    {
+      "file": "tests/library_work_astra/test_phase4_aw3_acceptance.py",
+      "assertions": 45,
+      "assertions_unchanged": true
+    },
+    {
+      "file": "tests/library_work_astra/test_phase5_acceptance3.py",
+      "assertions": 60,
+      "assertions_unchanged": true
+    },
+    {
+      "file": "tests/library_work_astra/test_phase6_bd_acceptance.py",
+      "assertions": 23,
+      "assertions_unchanged": true
+    },
+    {
+      "file": "tests/test_phase6_bc2.py",
+      "assertions": 226,
+      "assertions_unchanged": true
+    },
+    {
+      "file": "tests/test_phase6_evaluation.py",
+      "assertions": 333,
+      "assertions_unchanged": true
+    }
+  ],
+  "patch_bytes": 23425,
+  "patch_sha256": "4e6689d0bf434bea8a83694c7c4c1ea2b2dd5a60074ab852032fd8688f552718"
+}

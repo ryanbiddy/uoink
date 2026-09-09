@@ -35,6 +35,28 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 - Ryan's gates: main merge, paid spend, the 0.90 strict-precision rule (Phase 2), the
   installed Inno receipts (Phase 3 C22, Phase 4), any new fetch scope (Phase 6 study).
 
+### Ryan's rulings, 2026-09-09 (supersede earlier conflicting instructions)
+
+- Five fixture corrections are authorized: AW-11 production stop/forget cleanup,
+  D13 independent user-edit ordering, D15 atomic-persistence interception, Phase 6
+  legacy build-time tickets, and the Phase 5 unary clock probe. Behavior assertions
+  stay unchanged. Record the exact diff/reason and one-page review, then run the
+  corrected full tree on a committed candidate. Any remaining failure is a product
+  defect: write a repair brief; do not edit fixtures further.
+- Phase 2 option 3: retain 0.90 for autonomous filing, apply remains false, and
+  proposals ship as reviewable suggestions. The failed quality measurement remains.
+- Phase 4's X HTTP 403 stays a documented blocked-link condition. No access repair
+  or new fetch. Phase 6 ships chapters and cited ranges without speaker attribution
+  claims; its speaker gate stays blocked and no diarization run is authorized.
+- Backup push is authorized only as `git push origin cc/living-library`. No main
+  merge, no candidate-branch push, no publication. Advance the local backup branch
+  by fast-forward to the completed candidate so the authorized push backs up this
+  work; do not overwrite divergent work or force-push.
+- Rebuild/reseal only if production source changes. Finish
+  `INSTALL-RECEIPT-RUNBOOK-2026-09-09.md` for Ryan's one disposable Windows-profile
+  receipt session covering AS-7's C22 list, Phase 4 and everyday flows. Phase 5
+  Part B is deferred. Live-index, 5179 and paid-API prohibitions remain in force.
+
 ## How runs work
 
 - Dispatch: `node bin/control-room.mjs run "uoink-library" "<goal: open <brief> first...>" --mode work --strategy parallel --agents <engine> --lead <engine> --approve`.
@@ -57,12 +79,12 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
+| 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | Implementation and required Claude Code/stdio behavior accepted with conditions; 286 passed / nine frozen failures in both roots, broader AW-4 113 passed | `PHASE4-CLIENT-02-2026-09-09.md` closes the planned supplement: complete packets, action evidence, missing-index refusals, Recall and vault accounting | Ryan: installed Inno, frozen fixture rulings and retained X-source HTTP 403 condition. No implementation repair remains identified |
-| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Dashboard byte target remains missed. Part B is not built | Ryan's unary/clock fixture ruling; Part B is outside this candidate |
-| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Ryan's fixture ruling and speaker material; failed fixtures and blocked speaker gate retained |
-| Integration | Local candidate built from `e47e4f2`, 339,042,658 bytes; bundled-runtime observation 02 passed its synthetic scope. Full tree on `6c313ea`: 2,102 passed / 92 failed, only S21 excluded | Release notes and 28-file package seal complete. Reduced pair demonstrates frozen AW-11 teardown contamination; failed full tree and first runtime attempt retained | No active worker or unbriefed rerun. Ryan's fixture rulings, installed receipts and other gates below; no merge/push/install |
+| 4 | Prior conditional acceptance retained as history; authorized fixture corrections now under review | X HTTP 403 accepted as a blocked-link condition; no repair or fetch | Corrected full tree, residual product briefs and Ryan's installed receipt |
+| 5 | Part A implementation and measurements retained; unary/clock correction authorized | Old SDK-route failure and missed dashboard byte target remain recorded | Corrected tree; Part B deferred |
+| 6 | Chapters and cited ranges ship without speaker attribution claims; ticket setup corrections authorized | Speaker gate stays blocked; no diarization runs | Corrected tree; speaker claims remain unaccepted |
+| Integration | Candidate `ee1293f`; existing installer source `e47e4f2`; prior full tree 2,102 passed / 92 failed | Five corrections prepared in six files with 690 assertion syntax trees unchanged | Commit/review, one corrected full tree, residual defect briefs, install runbook and authorized branch backup |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -76,6 +98,19 @@ I/O binding for subsequent fixtures. No corrected full-tree run occurred.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
+
+Current continuation under Ryan's 2026-09-09 rulings:
+
+1. Commit the five corrections and `FIXTURE-CORRECTIONS-REVIEW-2026-09-09.md`;
+   run the full corrected tree with only S21 excluded. Freeze the tested SHA.
+2. Preserve actual pass/fail counts and full evidence. Any residual failure is a
+   product defect; write its repair brief and make no further fixture edits.
+3. Keep the existing installer unless production source changes; finish Ryan's
+   installation receipt runbook with AS-7 C22, Phase 4 and everyday-flow coverage.
+4. Update State/Queue/release notes, commit, and back up only `cc/living-library`
+   with the authorized push. No merge to main or install by the integrator.
+
+The queue history below records completed/rejected runs and their earlier authority.
 
 Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e929e1d`
 finished but rejected; AV-5m1 gemini `b31e890f` integrated at `9489141`.
@@ -168,35 +203,15 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Phase 2: keep 0.90 strict, change the rule, or ship with owner review.
 - Installed Inno package receipts (Phase 3 C22, Phase 4).
-- Phase 4 external source: the text-only item's exact retained X URL returned
-  HTTP 403 in the isolated browser. Keep this explicitly blocked link condition,
-  or authorize an access repair and a documented follow-up. The successful
-  timed YouTube observation is separate; no replacement source was fetched.
-- Candidate full tree: frozen AW-11 foreign-helper teardown directly calls
-  `session.terminate()` and discards `env.mirror._vault_io`, leaving a dead
-  `_IO_CTX.session` on the test thread. A following ordinary export then refuses.
-  Authorize consistent teardown through production stop/forget cleanup while
-  keeping the same behavior assertions. Two order diagnostics retain this
-  failure; four production lifecycle controls succeed without state resets.
-  No test was changed and the 92-failure full tree stays failed. See
-  `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md` and its 17-file proof seal.
-- Acceptance-fixture rulings: D13's user-edit fixture creates its edit only after
-  the publication forbidden by its visibility case, and eight old Phase 4
-  parent-process interceptors cannot observe the new isolated writer's syscall;
-  D15 intercepts the removed direct binding write rather than atomic persistence;
-  Phase 6's legacy successful
-  publication setup omits the build-time tickets now required by BD-01; Phase 5's
-  final-wire probe is unary but its shared helper calls it with `clock=NOW`. See
-  `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. Authorize corrected fixture setup
-  without weakening the behavior assertions, or give another explicit ruling.
-  Existing tests remain unchanged; unfinished implementation remains Astra's work.
-- Phase 6: the navigation study passed numerically; the speaker gate is blocked on already-held
-  diarization output plus independent human annotations for 30 passages across five items
-  (BD lists the exact requirement). BD-27 is now observed in normal Comet with
-  retained playback, chapter-list and 0:34 screenshots; prior Chrome/503 attempts remain partial.
+- Phase 6 speaker gate remains blocked by Ryan's explicit ruling. No diarization
+  runs or attribution claims; chapters and cited ranges are the release scope.
+- Main merge remains unauthorized. No new fetch scope is authorized.
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
+
+The five fixture decisions, Phase 2 option 3 and retained X-link condition are
+resolved owner rulings. Residual test failures after the corrected tree belong
+in product repair briefs, not under Blockers for Ryan.
 
 ## Integrator log
 
@@ -1218,3 +1233,18 @@ The 2,102-pass/92-failure full-tree result and every owner condition remain.
 No product or acceptance-test source changed after final verification. All
 Control Room/client work is finished; further acceptance work requires Ryan's
 listed rulings or material. No push, merge, installation or live-index access.
+
+### 2026-09-09 07:25 PDT - Ryan rulings and reviewed fixture correction
+
+Ryan authorized exactly five setup/cleanup corrections and the branch-only backup.
+The six-file patch is retained with its SHA in the conflicts log. All 690 assertion
+syntax trees remain identical; no production source, threshold, parameter case or
+skip/xfail changed. Phase 6 acquires tickets before constructing replacement inputs
+and retains original tickets across retries. Missing-ticket negative cases remain.
+The other Phase 4 syscall interceptors were not included in the authorization.
+
+The one-page review approves execution only. Commit this state before the full
+tree; only S21 is excluded under the standing command. Any residual failure is
+a product defect under Ryan's new ruling, with a repair brief and no further
+fixture edits. Phase 2 option 3 and the X blocked-link condition are resolved;
+speaker attribution stays unaccepted, no diarization, and Part B is deferred.
