@@ -80,11 +80,11 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | C22 plus supplements integrated: 92 passed / two frozen failures in both roots; bundled observation, final tree and Ryan's installed receipt next |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 57 passes in both roots; first bundled scope nine passed / two failed / three unexecuted | Startup backfill repair f9e2c921, new package and final observations before Ryan's installed receipt |
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Both setup proposals pending; both receipt kits integrated; finish bundled C22, final tree and portable bundle |
+| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits integrated; bundled provenance repair confirmed; new startup transaction race requires product repair/build | Both setup proposals pending; integrate f9e2c921, rebuild, final bundled/full-tree observations and portable bundle |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -2035,3 +2035,14 @@ It owns server.py and new regressions. Verify both named groups, integrate the
 raw diff and repeat them in checkout before rebuilding. No existing fixture
 change is authorized. Preserve package-02; a new source/package seal is owed
 if the product repair changes its compiled input.
+
+### 2026-09-09 — original bundled provenance confirms the compatibility repair
+
+At 0724558, the corrected command imports all seven original modules from the
+explicit bundled app and reports MCP 1.27.1 under Python 3.11.9. Exit zero,
+no import errors, no checkout/user-site fallback; guard removed and _pth bytes
+unchanged. This narrow probe starts no helper, Setup, client or model and does
+not close the startup transaction repair or installed gate. Eleven files are
+sealed at proof/ryan-c22-provenance-02-2026-09-09/SHA256.json.
+Future bundled observations must also gate unexpected helper ERROR/CRITICAL
+lines, preserving the exact expected launch/registration injection exceptions.

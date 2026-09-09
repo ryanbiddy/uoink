@@ -1,0 +1,49 @@
+{
+  "scope": "Original bundled provenance imports after compatibility repair; no helper or installed claim",
+  "files": {
+    "observation.json": {
+      "bytes": 9335,
+      "sha256": "f2334959106c26b4415e8514d617aac02f976a6b009f6005238a1bb2d7a90bc1"
+    },
+    "observe_c22_provenance.py": {
+      "bytes": 2491,
+      "sha256": "61b7ebacb52677ef1966fa037d7149f2fb33b2bb74ba6354682aa33500c11cdd"
+    },
+    "receipt/guards.json": {
+      "bytes": 3280,
+      "sha256": "500a131aae205cc3f0def3cde3812f83618b58423899dfec6acafc9babb80309"
+    },
+    "receipt/inputs.json": {
+      "bytes": 1355,
+      "sha256": "822469d24c2653de10779e76bd93efca458d7d3c20e7b9c98c8eaf1b97a7dcb3"
+    },
+    "receipt/journal.jsonl": {
+      "bytes": 12762,
+      "sha256": "4c6adf39c9fc3c9dff92c77ff0cecbbf2b69ec71108b427d4af33bd9e80e65c1"
+    },
+    "receipt/manifest.used.json": {
+      "bytes": 1947,
+      "sha256": "f9c9d10fe45ee115b4c5687b66b71b48fee8cc64c1a64972252b2b159475f89e"
+    },
+    "receipt/runner.json": {
+      "bytes": 1622,
+      "sha256": "74e9de716546dfed36384d56935d0611774f314b3152e2c62e6df5156d176035"
+    },
+    "receipt/commands/20260909T202055Z-bundled-provenance.json": {
+      "bytes": 2843,
+      "sha256": "8a8be363e34d7affba084b1699605ea45565cf7c22ccdaf104e5ddb53227ab93"
+    },
+    "receipt/commands/20260909T202055Z-bundled-provenance.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "receipt/commands/20260909T202055Z-bundled-provenance.stdout.log": {
+      "bytes": 2706,
+      "sha256": "f0605fccbfd8ef6b01b7809b12f214f6079245a91c67765cb18afa520082c3ab"
+    },
+    "receipt/profiles/empty/c22-guard-events.jsonl": {
+      "bytes": 1182,
+      "sha256": "b1c7239d24437ca7ff52768ddfafceed1e41199cbc4566ab6746811eedec2a8f"
+    }
+  }
+}

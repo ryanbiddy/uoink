@@ -1,0 +1,36 @@
+{
+  "status": "prepared",
+  "inputs": {
+    "schema": "c22-runner-inputs-v1",
+    "created_utc": "2026-09-09T20:20:55.366968+00:00",
+    "synthetic": true,
+    "userprofile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-provenance-02\\environment\\USERPROFILE",
+    "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "installed_app": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+      "server_py": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+      "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "has_space": false,
+      "bundled_python": true
+    },
+    "package": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+      "bytes": 339059131,
+      "sha256": "d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1",
+      "matched_supplied_digest": true
+    },
+    "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-provenance-02\\receipt\\profiles\\empty",
+    "isolated_port": 18351,
+    "manifest": {
+      "path": null,
+      "sealed_by": null,
+      "expected_package_sha256": null,
+      "candidate_sha": null,
+      "installer_source_sha": null
+    }
+  },
+  "updated_utc": "2026-09-09T20:20:55.368026+00:00",
+  "receipt_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-provenance-02\\receipt"
+}

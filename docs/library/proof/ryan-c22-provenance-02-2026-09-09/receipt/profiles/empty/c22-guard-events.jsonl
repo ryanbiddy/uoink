@@ -1,0 +1,10 @@
+{"event": "guard_loaded", "pid": 61584, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-provenance-02\\receipt\\profiles\\empty", "injection": ""}
+{"event": "subprocess_attempt", "pid": 61584, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""}
+{"event": "forbidden_attempt", "pid": 61584, "operation": "subprocess.Popen", "resource": "provenance_descendant"}
+{"event": "forbidden_attempt", "pid": 61584, "reason": "C22 guard: provenance may not spawn descendants"}
+{"event": "subprocess_attempt", "pid": 61584, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"command /c ver\""}
+{"event": "forbidden_attempt", "pid": 61584, "operation": "subprocess.Popen", "resource": "provenance_descendant"}
+{"event": "forbidden_attempt", "pid": 61584, "reason": "C22 guard: provenance may not spawn descendants"}
+{"event": "subprocess_attempt", "pid": 61584, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"cmd /c ver\""}
+{"event": "forbidden_attempt", "pid": 61584, "operation": "subprocess.Popen", "resource": "provenance_descendant"}
+{"event": "forbidden_attempt", "pid": 61584, "reason": "C22 guard: provenance may not spawn descendants"}
