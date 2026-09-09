@@ -16,6 +16,9 @@ Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
 proof, the generated third-party notice date and the authorized test fixtures.
 Production source is unchanged through the corrected tree. Under Ryan's ruling,
 the existing installer and package seal are retained without a rebuild/reseal.
+Results/runbook checkpoint `ba3d256` is backed up on `origin/cc/living-library`;
+the remote SHA was independently verified. This is a branch backup of a failed
+candidate, with no merge to main or artifact publication.
 
 Local artifact: [Uoink-Setup-3.8.0.exe](../../build/Uoink-Setup-3.8.0.exe),
 339,042,658 bytes (323.3 MiB). SHA-256:

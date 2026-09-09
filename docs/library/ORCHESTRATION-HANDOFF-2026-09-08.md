@@ -84,7 +84,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Thirteen mirror checks fail on corrected tree; required prior client evidence retained | Five lifecycle and eight interrupted-write/ownership failures; X HTTP 403 stays blocked, no repair/fetch | Product brief sections 2–3; installed receipt after isolation repair |
 | 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
 | 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
-| Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit; authorized backup of this checkpoint |
+| Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; results/runbook checkpoint `ba3d256` backed up to `origin/cc/living-library` | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -1309,3 +1309,28 @@ missing its environment value; isolated standard-library execution then sealed
 the already-completed output. This was not another test or product observation.
 The authorized backup will include this failed checkpoint and its open briefs;
 no main merge, install, new fetch, diarization or paid API occurred.
+
+### 2026-09-09 07:44 PDT - Authorized branch backup verified
+
+Results, product briefs, release notes and the blocked installation runbook
+are committed at `ba3d2569754758f18eb53bb2743674dd6bb8ba50`. The local
+`cc/living-library` ref was advanced from `9217846` to that descendant after
+checking ancestry and confirming it was not checked out in another worktree.
+`git push origin cc/living-library` succeeded; `git ls-remote` independently
+reported that exact SHA at `refs/heads/cc/living-library`. The candidate branch
+was not pushed and no main ref was merged or updated.
+
+The initial push waited on Git Credential Manager and failed because no
+terminal prompt was available. Its task-owned waiting credential helper was
+stopped. GitHub CLI already held Ryan's authenticated `ryanbiddy` account;
+an ephemeral credential-helper setting reused that sign-in for the successful
+push. No token was printed or stored in the repository and no persistent
+credential configuration was changed.
+
+Before the results commit, all 13 corrected-run proof files and all 28 retained
+package proof files matched their seals and staged bytes. The installer hash
+and 339,042,658-byte size matched. The exact fixture patch and all 690 unchanged
+assertions verified again; all twenty failures are named in the product brief.
+There is no source/test change after the measured `4a35316`. This log-only
+backup receipt will be committed and included in the same authorized branch
+backup. Product repairs and the executable installed operator kit remain open.
