@@ -108,10 +108,16 @@ a session without the file is a failed run"). A brief that names a path in backt
 required committed input (never write `_scratch/` in backticks). `git config --global
 core.longpaths true` must stay set (worktree checkouts fail without it).
 
-## Blockers for Ryan (unchanged)
+## Blockers for Ryan
 
 - Phase 2: keep 0.90 strict, change the rule, or ship with owner review.
 - Installed Inno package receipts (Phase 3 C22, Phase 4).
+- Acceptance-fixture rulings: D13's user-edit fixture creates its edit only after
+  the publication forbidden by its visibility case; Phase 6's legacy successful
+  publication setup omits the build-time tickets now required by BD-01. See
+  `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. Authorize corrected fixture setup
+  without weakening the behavior assertions, or give another explicit ruling.
+  Existing tests remain unchanged; unfinished implementation remains Astra's work.
 - Phase 6: the navigation study passed numerically; the speaker gate is blocked on already-held
   diarization output plus independent human annotations for 30 passages across five items
   (BD lists the exact requirement); the BD-27 player observation needs a network session where
@@ -220,3 +226,16 @@ It requires a frozen repaired candidate, full stdio/client action evidence and
 the five AW-3 requirements. Preparation verified Claude Code 2.1.261 with claude.ai
 Max subscription authentication and no API key; no model ran. Execute only after
 AV-5m2 and AW-4. No client or installed receipt is credited by this preparation.
+
+### 2026-09-08 17:05 PDT — Draft review and conflicting acceptance setup
+
+The three Grok runs are active and executing tests. Control Room buffers their
+message output; recent task-local tool logs establish activity. Do not infer a
+stalled run solely from an empty `agent_runs.output` field.
+
+AV-5m2's draft introspects an acceptance fixture closure to select cancellation
+behavior. BC-3a2's draft exempts empty raw publications from its ticket rule and
+edits legacy BC-2 tests. These drafts are not integrated. The source inspection
+in `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md` explains the underlying fixture
+conflicts and the Ryan rulings required under the prohibition on acceptance-test
+edits. Reject test-specific production exceptions; continue the general repairs.
