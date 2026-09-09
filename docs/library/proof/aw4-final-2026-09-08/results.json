@@ -1,0 +1,26 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_stdio_clip_tools.py",
+      "tests/test_phase0_registry_capture.py",
+      "tests/test_library_adapters.py",
+      "tests/test_docs_live_contracts.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw4final-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw4final\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw4final\\tests.log"
+  }
+]

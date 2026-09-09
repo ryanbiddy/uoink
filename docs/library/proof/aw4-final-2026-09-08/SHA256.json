@@ -1,0 +1,20 @@
+{
+  "files": {
+    "docs/library/proof/aw4-final-2026-09-08/receipt.json": {
+      "sha256": "d4b66c6943e5e6935e670dd570daa222b45ef875fa59de7308460468c10b9d3b",
+      "bytes": 627
+    },
+    "docs/library/proof/aw4-final-2026-09-08/results.json": {
+      "sha256": "4f1f0c6ac5e84ee86b69b4be2a2abc0096503bec1c92253c224c4ffadeaee316",
+      "bytes": 807
+    },
+    "docs/library/proof/aw4-final-2026-09-08/tests.log": {
+      "sha256": "7e8882eeb87297ef9afcd07a3cf20fd144c88b30a186dc8629c82c68a79c8417",
+      "bytes": 183
+    },
+    "docs/library/proof/aw4-final-2026-09-08/tests.xml": {
+      "sha256": "2c66cf78e1f10759c4ec30d7589d9a253225d4d834bf153db180db51990356bd",
+      "bytes": 17440
+    }
+  }
+}

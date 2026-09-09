@@ -59,7 +59,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | B7 plus Astra's AW-12 correction integrated at `6858b81`; both roots 286 passed / nine frozen failures | The observed implementation findings are closed; Phase 4 still awaits broader AW-4 and actual client acceptance | Finish AW-4 broader regression, then the real-client rerun. Frozen fixture and installed Inno rulings are Ryan's |
+| 4 | B7 plus Astra's AW-12 correction integrated at `6858b81`; both roots 286 passed / nine frozen failures; broader AW-4 113 passed | Final AW-4 closes observed implementation findings; actual client acceptance remains | Run the real-client receipt on the frozen source. Frozen fixture and installed Inno rulings are Ryan's |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -117,8 +117,9 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AW-9. B5 is rejected after AW-10; B6 after AW-11. B7 plus the bounded
    integrator correction in `PHASE4-AW12-2026-09-08.md` is integrated at
    `6858b81`, with 286 passed / nine frozen failures in both roots. Original
-   B7 and all failed observations remain retained. Finish AW-4's four broader
-   companion files, then the real-client rerun (AW-3
+   B7 and all failed observations remain retained. Final AW-4's four broader
+   companion files passed 113 tests; see `PHASE4-AW4-FINAL-2026-09-08.md`.
+   Run the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
@@ -1018,3 +1019,16 @@ registry capture, library adapters and live documentation contracts. The full
 named implementation union has just been checked in both roots; record the
 broader result separately. The actual client receipt and eventual candidate
 full tree remain required. Phase 4 is not yet accepted.
+
+### 2026-09-08 - AW-4 implementation review closed
+
+The four broader companion files passed **113 tests**, 1.27 seconds, on
+`fad7e87` with unchanged production bytes from `6858b81`. Their separate
+result is sealed under `proof/aw4-final-2026-09-08/`. All 38 final AW-12
+proof hashes match committed bytes. `PHASE4-AW4-FINAL-2026-09-08.md` closes
+the observed implementation findings and states the remaining scope and limits.
+
+The real-client receipt can now begin from the clean committed SHA. Use a
+fresh archived-copy fixture and separate Claude profile, keep usage credits
+off and apply false, and retain the actual client/model/launch bindings.
+This is still a required observation, not a Ryan blocker or a phase pass.
