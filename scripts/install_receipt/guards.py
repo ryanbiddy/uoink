@@ -77,6 +77,19 @@ def _denied(reason):
     return PermissionError(reason)
 
 
+def _urllib3_ipv6_query():
+    frame = sys._getframe(1)
+    while frame is not None:
+        module = sys.modules.get("urllib3.util.connection")
+        function = getattr(module, "_has_ipv6", None)
+        if (function is not None and frame.f_code is getattr(function, "__code__", None)
+                and frame.f_globals.get("__name__") == "urllib3.util.connection"
+                and frame.f_code.co_filename.replace("\\", "/").lower().endswith("/urllib3/util/connection.py")):
+            return True
+        frame = frame.f_back
+    return False
+
+
 def audit(event, args):
     if event in ("open", "sqlite3.connect"):
         value = args[0] if args else None
@@ -111,6 +124,10 @@ def audit(event, args):
             return
         if port_i == FORBIDDEN_PORT:
             raise _denied("C22 guard: port 5179 forbidden")
+        if event == "socket.bind" and host == "::1" and port_i == 0 and _urllib3_ipv6_query():
+            _event("blocked_capability_probe", operation=event, address=str(addr),
+                   dependency="urllib3.util.connection._has_ipv6", bound=False)
+            raise PermissionError("C22 guard: IPv6 capability bind deliberately refused")
         if host not in LOOPBACK:
             raise _denied("C22 guard: non-loopback network forbidden")
         if port_i not in ALLOWED and event != "socket.bind":
@@ -308,26 +325,27 @@ def _wrap_popen():
         return
     original = subprocess.Popen
 
-    def wrapped(*a, **k):
-        ctx = None
-        try:
-            import source_subscriptions as ss
-            ctx = ss.current_capture_context()
-        except Exception:
+    class GuardedPopen(original):
+        def __init__(self, *a, **k):
             ctx = None
-        if ctx and INJECT == "launch_interrupt":
-            raise OSError("C22 declared launch interruption after launch intent")
-        if ctx and INJECT in ("spawn_child", "registration_failure"):
-            sleeper = [sys.executable, "-B", "-c",
-                       "import time; time.sleep(%s)" % (
-                           os.environ.get("C22_SLEEPER_SECONDS") or "8")]
-            a = (sleeper,) + a[1:]
-            proc = original(*a, **k)
-            _record_inject_child(proc)
-            return proc
-        return original(*a, **k)
+            try:
+                import source_subscriptions as ss
+                ctx = ss.current_capture_context()
+            except Exception:
+                ctx = None
+            if ctx and INJECT == "launch_interrupt":
+                raise OSError("C22 declared launch interruption after launch intent")
+            injected = ctx and INJECT in ("spawn_child", "registration_failure")
+            if injected:
+                sleeper = [sys.executable, "-B", "-c",
+                           "import time; time.sleep(%s)" % (
+                               os.environ.get("C22_SLEEPER_SECONDS") or "8")]
+                a = (sleeper,) + a[1:]
+            super().__init__(*a, **k)
+            if injected:
+                _record_inject_child(self)
 
-    subprocess.Popen = wrapped
+    subprocess.Popen = GuardedPopen
     subprocess._c22_popen_wrapped = True
 
 

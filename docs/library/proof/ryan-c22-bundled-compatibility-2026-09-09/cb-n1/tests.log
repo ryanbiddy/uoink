@@ -1,0 +1,66 @@
+FFFFFF.                                                                  [100%]
+================================== FAILURES ===================================
+____ test_provenance_resolves_only_explicit_app_without_cwd_or_pythonpath _____
+tests\test_install_receipt_c22_bundled_compatibility.py:26: in test_provenance_resolves_only_explicit_app_without_cwd_or_pythonpath
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: {"schema": "c22-provenance-v1", "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe", "version": "3.14.6", "nousersite": true, "prefix": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native", "path": ["", "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python314.zip", "C:\\Python314\\DLLs", "C:\\Python314\\Lib", "C:\\Python314", "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native", "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Lib\\site-packages", "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages", "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32", "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib", "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin", "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-full-as9\\guard", "C:\\Python314\\Lib\\site-packages"], "usersite_scheme": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\cb-n1\\Python\\Python314\\site-packages", "usersite_on_path": false, "modules": {"server": {"ok": false, "error": "ModuleNotFoundError"}, "source_subscriptions": {"ok": false, "error": "ModuleNotFoundError"}, "index": {"ok": false, "error": "ModuleNotFoundError"}, "uoink_mcp": {"ok": false, "error": "ModuleNotFoundError"}, "source_manifest": {"ok": false, "error": "ModuleNotFoundError"}, "podcasts": {"ok": false, "error": "ModuleNotFoundError"}, "library_work": {"ok": false, "error": "ModuleNotFoundError"}}, "mcp_version": "1.28.1", "import_errors": [{"module": "server", "type": "ModuleNotFoundError", "message": "No module named 'server'"}, {"module": "source_subscriptions", "type": "ModuleNotFoundError", "message": "No module named 'source_subscriptions'"}, {"module": "index", "type": "ModuleNotFoundError", "message": "No module named 'index'"}, {"module": "uoink_mcp", "type": "ModuleNotFoundError", "message": "No module named 'uoink_mcp'"}, {"module": "source_manifest", "type": "ModuleNotFoundError", "message": "No module named 'source_manifest'"}, {"module": "podcasts", "type": "ModuleNotFoundError", "message": "No module named 'podcasts'"}, {"module": "library_work", "type": "ModuleNotFoundError", "message": "No module named 'library_work'"}]}
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe', ...module": "library_work", "type": "ModuleNotFoundError", "message": "No module named \'library_work\'"}]}\n', stderr='').returncode
+___________ test_guard_preserves_popen_class_and_windows_asyncio[] ____________
+tests\test_install_receipt_c22_bundled_compatibility.py:55: in test_guard_preserves_popen_class_and_windows_asyncio
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\cb-n1-0\t1\probe.py", line 4, in <module>
+E         assert isinstance(subprocess.Popen, type), 'Popen must remain subclassable'
+E                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+E     AssertionError: Popen must remain subclassable
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe', ...emain subclassable\'\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Popen must remain subclassable\n').returncode
+______ test_guard_preserves_popen_class_and_windows_asyncio[spawn_child] ______
+tests\test_install_receipt_c22_bundled_compatibility.py:55: in test_guard_preserves_popen_class_and_windows_asyncio
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\cb-n1-0\t2\probe.py", line 4, in <module>
+E         assert isinstance(subprocess.Popen, type), 'Popen must remain subclassable'
+E                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+E     AssertionError: Popen must remain subclassable
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe', ...emain subclassable\'\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Popen must remain subclassable\n').returncode
+___ test_guard_preserves_popen_class_and_windows_asyncio[launch_interrupt] ____
+tests\test_install_receipt_c22_bundled_compatibility.py:55: in test_guard_preserves_popen_class_and_windows_asyncio
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\cb-n1-0\t3\probe.py", line 4, in <module>
+E         assert isinstance(subprocess.Popen, type), 'Popen must remain subclassable'
+E                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+E     AssertionError: Popen must remain subclassable
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe', ...emain subclassable\'\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Popen must remain subclassable\n').returncode
+_ test_guard_preserves_popen_class_and_windows_asyncio[registration_failure] __
+tests\test_install_receipt_c22_bundled_compatibility.py:55: in test_guard_preserves_popen_class_and_windows_asyncio
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\cb-n1-0\t4\probe.py", line 4, in <module>
+E         assert isinstance(subprocess.Popen, type), 'Popen must remain subclassable'
+E                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+E     AssertionError: Popen must remain subclassable
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe', ...emain subclassable\'\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Popen must remain subclassable\n').returncode
+______ test_ipv6_query_is_still_refused_and_callsite_is_accounted[True] _______
+tests\test_install_receipt_c22_bundled_compatibility.py:88: in test_ipv6_query_is_still_refused_and_callsite_is_accounted
+    assert sum(e["event"] == expected for e in events) == 1
+E   assert 0 == 1
+E    +  where 0 = sum(<generator object test_ipv6_query_is_still_refused_and_callsite_is_accounted.<locals>.<genexpr> at 0x000002471D4A73E0>)
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_provenance_resolves_only_explicit_app_without_cwd_or_pythonpath
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_guard_preserves_popen_class_and_windows_asyncio[]
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_guard_preserves_popen_class_and_windows_asyncio[spawn_child]
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_guard_preserves_popen_class_and_windows_asyncio[launch_interrupt]
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_guard_preserves_popen_class_and_windows_asyncio[registration_failure]
+FAILED tests/test_install_receipt_c22_bundled_compatibility.py::test_ipv6_query_is_still_refused_and_callsite_is_accounted[True]
+6 failed, 1 passed in 1.44s

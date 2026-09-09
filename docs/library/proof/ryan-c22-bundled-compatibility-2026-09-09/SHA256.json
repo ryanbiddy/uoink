@@ -1,0 +1,50 @@
+{
+  "scope": "C22 compatibility/accounting supplement; original bundled and full-tree observations still required",
+  "summaries": {
+    "cb-n1": "6 failed, 1 passed in 1.44s",
+    "cb-w1": "57 passed, 1 deselected in 3.03s",
+    "cb-c1": "57 passed, 1 deselected in 3.01s"
+  },
+  "files": {
+    "integrated.patch": {
+      "bytes": 9981,
+      "sha256": "0a2b8f31795bac4a82d1e62a290a358d358357694d335d6f0b29b8084e58110f"
+    },
+    "cb-c1/results.json": {
+      "bytes": 940,
+      "sha256": "0ac48d429874063113b449d7e4ac6c18bc2e283a8e6b74eb975875055588da18"
+    },
+    "cb-c1/tests.log": {
+      "bytes": 115,
+      "sha256": "678e260b863de5d2f59b28c7a2d3023bec06dedd933b2498565528e510ae30ba"
+    },
+    "cb-c1/tests.xml": {
+      "bytes": 8785,
+      "sha256": "faaa1903c0b5893cd029413acf679d2b6e251c2d0ac157c4d0e082274d0e4fa4"
+    },
+    "cb-n1/results.json": {
+      "bytes": 830,
+      "sha256": "a71a6449bf03e3e0f93046e9954e8f3d8368ffe86ac03d2bde97a13d16a1b6e5"
+    },
+    "cb-n1/tests.log": {
+      "bytes": 8395,
+      "sha256": "4ba8afccca9a103ffcb257a3c5d555cf6c9365107ee7101aaaa88f37600d6e76"
+    },
+    "cb-n1/tests.xml": {
+      "bytes": 15299,
+      "sha256": "efb6e80bbbe219f8356730c95e28d29756db54232783141f0f0d5c8c0743616a"
+    },
+    "cb-w1/results.json": {
+      "bytes": 1081,
+      "sha256": "498df09b36a3338731caa9896110147fbd81615d6dea4a1f4c5c917f84e05a0a"
+    },
+    "cb-w1/tests.log": {
+      "bytes": 115,
+      "sha256": "0b59fe11e4b3cd60d3b9009a32e43349b5df3f6ceb6f14dac312e6b5621a8979"
+    },
+    "cb-w1/tests.xml": {
+      "bytes": 8785,
+      "sha256": "891ad7b9f27c5f5784d854f427428a01b41c1625d6f6d35d7a6628534cd2d0c0"
+    }
+  }
+}

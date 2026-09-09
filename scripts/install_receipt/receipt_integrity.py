@@ -212,6 +212,7 @@ def guard_event_summary(profiles):
         summaries[name] = {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if not error else None,
             "event_count": len(rows), "guard_loads": sum(r.get("event") == "guard_loaded" for r in rows),
             "subprocess_attempts": [r for r in rows if r.get("event") == "subprocess_attempt"],
+            "blocked_capability_probes": [r for r in rows if r.get("event") == "blocked_capability_probe"],
             "forbidden_attempts": blocked, "error": error,
             "ok": not error and bool(rows) and any(r.get("event") == "guard_loaded" for r in rows) and not blocked}
     return {"profiles": summaries, "ok": all(r["ok"] for r in summaries.values()) and bool(summaries),

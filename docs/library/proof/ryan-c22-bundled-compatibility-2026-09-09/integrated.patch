@@ -1,0 +1,207 @@
+diff --git a/scripts/install_receipt/guards.py b/scripts/install_receipt/guards.py
+index dc0cc5056c800f47f33cc84949ea7cf9acc4803b..0c99d7490cb499f4af4dbf5fd1e6f3f43edd2fd8 100644
+--- a/scripts/install_receipt/guards.py
++++ b/scripts/install_receipt/guards.py
+@@ -77,6 +77,19 @@ def _denied(reason):
+     return PermissionError(reason)
+ 
+ 
++def _urllib3_ipv6_query():
++    frame = sys._getframe(1)
++    while frame is not None:
++        module = sys.modules.get("urllib3.util.connection")
++        function = getattr(module, "_has_ipv6", None)
++        if (function is not None and frame.f_code is getattr(function, "__code__", None)
++                and frame.f_globals.get("__name__") == "urllib3.util.connection"
++                and frame.f_code.co_filename.replace("\\", "/").lower().endswith("/urllib3/util/connection.py")):
++            return True
++        frame = frame.f_back
++    return False
++
++
+ def audit(event, args):
+     if event in ("open", "sqlite3.connect"):
+         value = args[0] if args else None
+@@ -111,6 +124,10 @@ def audit(event, args):
+             return
+         if port_i == FORBIDDEN_PORT:
+             raise _denied("C22 guard: port 5179 forbidden")
++        if event == "socket.bind" and host == "::1" and port_i == 0 and _urllib3_ipv6_query():
++            _event("blocked_capability_probe", operation=event, address=str(addr),
++                   dependency="urllib3.util.connection._has_ipv6", bound=False)
++            raise PermissionError("C22 guard: IPv6 capability bind deliberately refused")
+         if host not in LOOPBACK:
+             raise _denied("C22 guard: non-loopback network forbidden")
+         if port_i not in ALLOWED and event != "socket.bind":
+@@ -308,26 +325,27 @@ def _wrap_popen():
+         return
+     original = subprocess.Popen
+ 
+-    def wrapped(*a, **k):
+-        ctx = None
+-        try:
+-            import source_subscriptions as ss
+-            ctx = ss.current_capture_context()
+-        except Exception:
++    class GuardedPopen(original):
++        def __init__(self, *a, **k):
+             ctx = None
+-        if ctx and INJECT == "launch_interrupt":
+-            raise OSError("C22 declared launch interruption after launch intent")
+-        if ctx and INJECT in ("spawn_child", "registration_failure"):
+-            sleeper = [sys.executable, "-B", "-c",
+-                       "import time; time.sleep(%s)" % (
+-                           os.environ.get("C22_SLEEPER_SECONDS") or "8")]
+-            a = (sleeper,) + a[1:]
+-            proc = original(*a, **k)
+-            _record_inject_child(proc)
+-            return proc
+-        return original(*a, **k)
+-
+-    subprocess.Popen = wrapped
++            try:
++                import source_subscriptions as ss
++                ctx = ss.current_capture_context()
++            except Exception:
++                ctx = None
++            if ctx and INJECT == "launch_interrupt":
++                raise OSError("C22 declared launch interruption after launch intent")
++            injected = ctx and INJECT in ("spawn_child", "registration_failure")
++            if injected:
++                sleeper = [sys.executable, "-B", "-c",
++                           "import time; time.sleep(%s)" % (
++                               os.environ.get("C22_SLEEPER_SECONDS") or "8")]
++                a = (sleeper,) + a[1:]
++            super().__init__(*a, **k)
++            if injected:
++                _record_inject_child(self)
++
++    subprocess.Popen = GuardedPopen
+     subprocess._c22_popen_wrapped = True
+ 
+ 
+diff --git a/scripts/install_receipt/launcher.py b/scripts/install_receipt/launcher.py
+index db4b4ca8e38904dbecc43800a97180114b7e76d9..2ca0ba28fc8c18052ae80929a03ff144a288a0a0 100644
+--- a/scripts/install_receipt/launcher.py
++++ b/scripts/install_receipt/launcher.py
+@@ -154,7 +154,10 @@ PROVENANCE_CODE = (
+ 
+ def provenance_argv(installed_app: Path, *, synthetic: bool = False) -> list[str]:
+     interpreter = resolve_interpreter(installed_app, synthetic=synthetic)
+-    return [str(interpreter), "-B", "-s", "-c", PROVENANCE_CODE]
++    code = ("import pathlib, sys\n"
++            "sys.path.insert(0, str(pathlib.Path(sys.argv[1]).resolve(strict=True)))\n"
++            + PROVENANCE_CODE)
++    return [str(interpreter), "-B", "-s", "-c", code, str(installed_app)]
+ 
+ 
+ class InstalledHelperLauncher:
+diff --git a/scripts/install_receipt/receipt_integrity.py b/scripts/install_receipt/receipt_integrity.py
+index 959beb5f4601707259bb034a8ca287b6090c6349..8ff3d0df4fb42e8828ac989cf1ce33b3a27a6f80 100644
+--- a/scripts/install_receipt/receipt_integrity.py
++++ b/scripts/install_receipt/receipt_integrity.py
+@@ -212,6 +212,7 @@ def guard_event_summary(profiles):
+         summaries[name] = {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if not error else None,
+             "event_count": len(rows), "guard_loads": sum(r.get("event") == "guard_loaded" for r in rows),
+             "subprocess_attempts": [r for r in rows if r.get("event") == "subprocess_attempt"],
++            "blocked_capability_probes": [r for r in rows if r.get("event") == "blocked_capability_probe"],
+             "forbidden_attempts": blocked, "error": error,
+             "ok": not error and bool(rows) and any(r.get("event") == "guard_loaded" for r in rows) and not blocked}
+     return {"profiles": summaries, "ok": all(r["ok"] for r in summaries.values()) and bool(summaries),
+diff --git a/tests/test_install_receipt_c22_bundled_compatibility.py b/tests/test_install_receipt_c22_bundled_compatibility.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..3c9ec9eb191579166e088ddaaef0f70a56cadd58
+--- /dev/null
++++ b/tests/test_install_receipt_c22_bundled_compatibility.py
+@@ -0,0 +1,91 @@
++"""Embedded command/import compatibility; no installed acceptance or network probe."""
++import json
++import os
++from pathlib import Path
++import subprocess
++import sys
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
++from install_receipt import launcher
++from install_receipt.guards import SITECUSTOMIZE_SOURCE
++
++
++def test_provenance_resolves_only_explicit_app_without_cwd_or_pythonpath(tmp_path, monkeypatch):
++    app = tmp_path / "Explicit App"
++    app.mkdir()
++    names = ("server", "source_subscriptions", "index", "uoink_mcp", "source_manifest", "podcasts", "library_work")
++    for name in names:
++        (app / (name + ".py")).write_text("MARKER = 'unit-only-original-path'\n", encoding="utf8")
++    monkeypatch.setattr(launcher, "resolve_interpreter", lambda *a, **k: Path(sys.executable))
++    env = os.environ.copy()
++    env.pop("PYTHONPATH", None)
++    result = subprocess.run(launcher.provenance_argv(app, synthetic=True), cwd=tmp_path,
++                            env=env, capture_output=True, text=True, timeout=20)
++    assert result.returncode == 0, result.stdout + result.stderr
++    payload = json.loads(result.stdout.strip().splitlines()[-1])
++    assert all(Path(payload["modules"][name]["file"]) == app / (name + ".py") for name in names)
++
++
++def _guarded_probe(tmp_path, code, inject=""):
++    guard = tmp_path / "receipt_guard.py"
++    guard.write_text(SITECUSTOMIZE_SOURCE, encoding="utf8")
++    probe = tmp_path / "probe.py"
++    probe.write_text("import runpy\nrunpy.run_path(" + repr(str(guard)) + ")\n" + code, encoding="utf8")
++    env = os.environ.copy()
++    env.update(C22_INJECT=inject, C22_EVENTS_PATH=str(tmp_path / "events.jsonl"), C22_ALLOWED_PORTS="18381")
++    result = subprocess.run([sys.executable, "-I", "-S", "-B", str(probe)], env=env,
++                            cwd=tmp_path, capture_output=True, text=True, timeout=15)
++    events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text(encoding="utf8").splitlines()]
++    return result, events
++
++
++@pytest.mark.parametrize("inject", ["", "spawn_child", "launch_interrupt", "registration_failure"])
++def test_guard_preserves_popen_class_and_windows_asyncio(tmp_path, inject):
++    result, events = _guarded_probe(tmp_path, """import subprocess, os
++assert isinstance(subprocess.Popen, type), 'Popen must remain subclassable'
++class Compatible(subprocess.Popen):
++    pass
++if os.name == 'nt':
++    import asyncio.windows_utils
++    assert issubclass(asyncio.windows_utils.Popen, subprocess.Popen)
++print('class-compatible')
++""", inject)
++    assert result.returncode == 0, result.stdout + result.stderr
++    assert result.stdout.strip() == "class-compatible"
++    assert not any(e["event"] == "subprocess_attempt" for e in events)
++
++
++@pytest.mark.parametrize("declared", [True, False])
++def test_ipv6_query_is_still_refused_and_callsite_is_accounted(tmp_path, declared):
++    query = """import socket
++def _has_ipv6(host):
++    sock = socket.socket(socket.AF_INET6)
++    try:
++        try:
++            sock.bind((host, 0))
++        except PermissionError:
++            return False
++        raise AssertionError('the bind must never execute')
++    finally:
++        sock.close()
++assert _has_ipv6('::1') is False
++"""
++    if declared:
++        path = tmp_path / "urllib3" / "util" / "connection.py"
++        path.parent.mkdir(parents=True)
++        path.write_text(query, encoding="utf8")
++        code = ("import importlib.util, sys\n"
++                "spec=importlib.util.spec_from_file_location('urllib3.util.connection', " + repr(str(path)) + ")\n"
++                "module=importlib.util.module_from_spec(spec)\n"
++                "sys.modules[spec.name]=module\nspec.loader.exec_module(module)\n")
++    else:
++        code = query
++    result, events = _guarded_probe(tmp_path, code)
++    assert result.returncode == 0, result.stdout + result.stderr
++    expected = "blocked_capability_probe" if declared else "forbidden_attempt"
++    assert sum(e["event"] == expected for e in events) == 1
++    assert sum(e["event"] == "network_attempt" for e in events) == 1
++    if declared:
++        assert not any(e["event"] == "forbidden_attempt" for e in events)

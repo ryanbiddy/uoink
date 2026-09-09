@@ -2019,3 +2019,19 @@ Only this observation-created marker was removed after owned cleanup; all 142
 source bindings and installer bytes remain unchanged. Complete failed evidence:
 proof/ryan-c22-bundled-01-2026-09-09/SHA256.json (105 files). Browser hold was
 not attempted after the failed verdict. No Setup, client/model or new fetch ran.
+
+### 2026-09-09 — C22 compatibility correction integrated; startup worker active
+
+Astra's cb-n1 negatives are six failed / one passed, 1.44 s. Corrected cb-w1
+has 57 passed / one deselected, 3.03 s; three-way checkout cb-c1 has 57 passed /
+one deselected, 3.01 s. See RYAN-C22-BUNDLED-COMPATIBILITY-REVIEW-2026-09-09.md
+and its ten-file seal. No original test or packaged product source changed.
+The exact refused urllib3 capability query stays blocked and explicitly counted;
+other undeclared binds remain forbidden. The first bundled result stays failed.
+
+Production worker f9e2c921-de5e-418f-9c7b-de259b6f5cfa (Grok) runs from e23d782
+in worktree f9e2c921-de5/grok under the startup backfill transaction brief.
+It owns server.py and new regressions. Verify both named groups, integrate the
+raw diff and repeat them in checkout before rebuilding. No existing fixture
+change is authorized. Preserve package-02; a new source/package seal is owed
+if the product repair changes its compiled input.

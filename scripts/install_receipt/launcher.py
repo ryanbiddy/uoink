@@ -154,7 +154,10 @@ PROVENANCE_CODE = (
 
 def provenance_argv(installed_app: Path, *, synthetic: bool = False) -> list[str]:
     interpreter = resolve_interpreter(installed_app, synthetic=synthetic)
-    return [str(interpreter), "-B", "-s", "-c", PROVENANCE_CODE]
+    code = ("import pathlib, sys\n"
+            "sys.path.insert(0, str(pathlib.Path(sys.argv[1]).resolve(strict=True)))\n"
+            + PROVENANCE_CODE)
+    return [str(interpreter), "-B", "-s", "-c", code, str(installed_app)]
 
 
 class InstalledHelperLauncher:
