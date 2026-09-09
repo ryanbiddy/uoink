@@ -88,7 +88,7 @@ Build order (each lands as its own commit): `/jobs/stream` ✅ → `/update/chec
 {
   "anthropic_key_set": true,
   "anthropic_key_masked": "sk-ant-…a1b2",
-  "output_dir": "C:\\Users\\hello\\Desktop\\Uoink",
+  "output_dir": "C:\\Users\\<you>\\Desktop\\Uoink",
   "autostart": true,
   "screenshot_count": 4,
   "topics": [{"name":"AI and ML","keywords":["llm","agent","claude"]}],
