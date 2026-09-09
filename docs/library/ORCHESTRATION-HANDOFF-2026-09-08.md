@@ -166,6 +166,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    receipt still substitutes direct child-record calls for helper recovery,
    miscounts charges and compares protected state only after all scenarios.
    Follow `RYAN-C22-SCENARIO-TRUTH-REPAIR-BRIEF-2026-09-09.md`; no installed credit.
+   Second Phase 4 kit has 20 independent passes / one frozen failure, and an
+   incomplete original-route observation. Follow
+   `RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md` for manifest/guard,
+   bounded transport, complete evidence and executable operator corrections.
    Existing-preview read repair is reviewed in `RYAN-PREVIEW-RESTART-REVIEW-2026-09-09.md`:
    nine new passes; broader 212 passed / eight known mirror-hook failures. The
    six initial subprocess failures proved storage mutation, not missing service.
@@ -1636,3 +1640,17 @@ Nine new tests pass (7.67 s); the named union has 212 passed / eight failed
 (72.66 s), all eight the existing mirror interception cases. No frozen test
 changed. Fourteen raw files are sealed under proof/ryan-preview-read-2026-09-09.
 Final committed-tree and packaged original-entry checks must include this repair.
+
+### 2026-09-09 — Second Phase 4 kit is retained, not installed credit
+
+Grok a75cec28 has 20 independent passes / one failure (20.39 s); the frozen
+first kit still expects the obsolete profile/Uoink/settings.json location.
+Its original source-runtime observation returns 32/5/4 but both native saved
+preview calls fail feature_unavailable. Exact replies and raw frames are in
+the 12-file seal proof/ryan-p4-kit-review-02-2026-09-09. e86bc16 supplies the
+pure preview reader; the next observation must use it unchanged.
+Review also found a 40-versus-64-character source-commit error, commented
+import-site guard bypass, unbounded stdin writes, incomplete tree cleanup
+claims, partial packet acceptance and deletion of the held original database
+if a replacement appears. Follow RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md.
+The old failed observation and frozen test remain; no installed claim is made.

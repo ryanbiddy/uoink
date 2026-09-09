@@ -1,0 +1,52 @@
+{
+  "files": {
+    "expected.json": {
+      "bytes": 46232,
+      "sha256": "2f7d88b401517eae5fb0cde762ea5d91fabfac517a8aa6091b180a619efd3411"
+    },
+    "original.patch": {
+      "bytes": 260153,
+      "sha256": "5d43191b1661bd02b533f5359160a78460ed0ba8f2039dc7896504f27513e7c9"
+    },
+    "preparation.json": {
+      "bytes": 4195,
+      "sha256": "011afd3de240c59874a2465cc6b79c4a2f86ddd22e91b58801b5e93e3cacfed7"
+    },
+    "prompt-observations.json": {
+      "bytes": 9463,
+      "sha256": "a37d0c688c1037bf15034ef019deda74416300fa8536ebdcc4639089d93e20f9"
+    },
+    "results.json": {
+      "bytes": 868,
+      "sha256": "671baf8a83a701c8791fbb77b6d397415fed593addd297877a45b0f16f4226e0"
+    },
+    "source-runtime.json": {
+      "bytes": 7478,
+      "sha256": "2bbfd4550a7d1ddb808d27ea563116fb98ff5cb2c71ecea60051e41a0aec0fd0"
+    },
+    "tests.log": {
+      "bytes": 1595,
+      "sha256": "613ba0ddcd963aa7b391502ccf5cb05430a44b9a5c7a8b7030b4d717edf5ccee"
+    },
+    "tests.xml": {
+      "bytes": 4231,
+      "sha256": "a61f9dea0fea1ea75d28fdc8334bdd373a799d29962981395a15787875399fa3"
+    },
+    "records/originalinstalleda-68964/events.jsonl": {
+      "bytes": 137845,
+      "sha256": "5af79fea16d9e52d58e01a94ec2ca5a2a2afa6722d6d04634e6cce23ff868dfe"
+    },
+    "records/originalinstalledb-70260/events.jsonl": {
+      "bytes": 137845,
+      "sha256": "126d8450270d3f022d009e926998272c2113213a13438c219c1a11d29853fcee"
+    },
+    "records/originalinstalledtransport-67100/events.jsonl": {
+      "bytes": 4291,
+      "sha256": "f05af329109b85fb4891ad57d28ce72ff0d2e971ec258e2f8a99615bf727c8f0"
+    },
+    "records/originalinstalledunavail-70288/events.jsonl": {
+      "bytes": 7370,
+      "sha256": "5a50020046c4f4977d0964c5a06e1b6ec3b8c3837bbac9e1be09c29667103118"
+    }
+  }
+}
