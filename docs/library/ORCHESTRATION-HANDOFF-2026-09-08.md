@@ -53,14 +53,14 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 17:53 PDT; implementation/review HEAD `270e569`; not pushed)
+## State at handoff (updated 2026-09-08 18:18 PDT; implementation/review HEAD `3d2fa9f`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m3 (`270e569`) integrated as intermediate work: 209 passed / eight unchanged parent-interceptor failures in both roots. AW-4 adds four failed ownership/staging cases plus lifecycle findings | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a (gemini binding/temp/staging) and AV-5m4b (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5a3g integrated (`d437b59`): BA-3 41/52, dashboard3 7/7, fixtures 28/28. AZ-5d rejected for test-wrapper introspection despite 393 passes / four measurement failures | `PHASE5-AZ5D2-BRIEF-2026-09-08.md`; one frozen deadline-probe setup also needs Ryan's ruling | AZ-5d2 (grok), then AZ-5g (gemini BA-14), then BA-4 (codex) |
+| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g (gemini), then BA-4 (codex) |
 | 6 | BC-3a3 (`00fe216`) integrated: frozen BD 11/14, five new implementation tests pass. BD-2 reproduces stale-input replacement in capture and podcast owners | `PHASE6-BD2-2026-09-08.md`: two new failures, one passing ledger-history control; prior 11 omitted-ticket failures retained. BD-27 observed | BC-3d (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -89,8 +89,8 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
-   Run AZ-5d2 (grok) from `PHASE5-AZ5D2-BRIEF-2026-09-08.md`; verify/integrate,
-   then dispatch AZ-5g (gemini) from `PHASE5-AZ5-BRIEF-2026-09-08.md`.
+   AZ-5d2 is verified and integrated. Dispatch AZ-5g (gemini) from
+   `PHASE5-AZ5G-BRIEF-2026-09-08.md` and the original AZ-5 brief.
    BA-4 (codex review) follows on the integrated candidate.
 3. AV-5m3 is integrated at `270e569`; AV-5m2 remains rejected. Dispatch/verify
    AV-5m4a (gemini) and AV-5m4b (grok) from their separate `PHASE4-AV5M4A-BRIEF-2026-09-08.md`
@@ -360,3 +360,24 @@ inspection also finds unchecked job assignment/death, mutable state reused by
 a surviving old parent thread, and temp-root-dependent exclusion. AV-5m4a and
 AV-5m4b reserve separate repair regions; integrate both with three-way apply
 and review their overlap. None of these implementation gaps is a Ryan blocker.
+
+### 2026-09-08 18:18 PDT — AZ-5d2 verified and integrated
+
+AZ-5d2 Grok `7afd1cb4` independently produced **470 passed, five failed**
+in both roots (123.01 s worker, 109.21 s checkout). Logs/XML/commands:
+worker `_scratch/az5d2-wi`, checkout `_scratch/az5d2-ci`. Three-way apply
+was clean. No existing tests changed. BA-3 is 51/52; its unary/clock
+fixture TypeError remains failed for Ryan. Both new implementation tests
+pass. Four measurement-document failures remain AZ-5g, now governed by
+`PHASE5-AZ5G-BRIEF-2026-09-08.md`; no current measurement pass is claimed.
+
+BC-3d finished and independently has 158 passed / 11 omitted-ticket
+failures in its worktree (79.87 s). Its three BD-2 races pass, but a new
+review probe shows identical cue text with newer transcript provenance
+can still be overwritten. Preserve this failed observation and brief a
+complete consumed-input binding repair after integration.
+
+AV-5m4a Gemini `eb32f3b4` timed out without its required report. Its
+partial diff is under independent verification; it is not accepted. The
+draft still directly writes a new binding, swallows witness failures and
+fallbacks from identity-checked unlink on TypeError. AV-5m4b remains active.
