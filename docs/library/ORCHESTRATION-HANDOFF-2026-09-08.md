@@ -84,7 +84,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Latest full tree remains `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s | Production source changed; retain old installer and rebuild after remaining integrations. Exact eight-case interception fixture proposal awaits Ryan; existing tests remain frozen | Verify installation mechanism/kits, then committed full tree, package and complete operator runbook |
+| Integration | Latest full tree remains `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; startup seed repair `db95457` has 21 passes | First installer and receipt kits need review repairs; original patches retained. Exact eight-case interception fixture proposal awaits Ryan; existing tests remain frozen | Finish three bounded installation/kit repairs, then committed full tree, rebuilt package and complete operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -140,6 +140,14 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    `RYAN-INSTALLED-C22-KIT-BRIEF-2026-09-09.md` from `c9b5407`.
    Phase 4 kit worker `81060797-d8be-4e56-8d7c-6f8b0dd30a94` follows
    `RYAN-INSTALLED-PHASE4-KIT-BRIEF-2026-09-09.md` from `1063843`.
+   Review disposition: original isolation `fd647a72` and C22 `9c866bb0`
+   are rejected with archived patches. Replacement isolation `3a3bd6cb`
+   follows `RYAN-INSTALL-ISOLATION-REVIEW-BRIEF-2026-09-09.md`; replacement
+   C22 `6accc421` follows `RYAN-C22-KIT-REPAIR-BRIEF-2026-09-09.md`.
+   Phase 4's 11-case instrument check passes independently, but original-route
+   coverage and packaging/guard gaps require `RYAN-PHASE4-KIT-REPAIR-BRIEF-2026-09-09.md`.
+   Startup anchor repair `db95457` has 21 focused passes; verify the complete
+   real helper after the isolation repair. No original kit is installed credit.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1515,3 +1523,15 @@ style/writing and source-migration files. The intermediate 18-pass/three-fail
 adapter observation is retained. No existing tests changed. See the startup
 anchor review and proof seal. Full-helper startup verification remains next
 after the installer source is ready; no installed receipt is claimed.
+
+### 2026-09-09 - Phase 4 instrument check passes; installed kit coverage incomplete
+
+The original Phase 4 kit independently passes 11 instrument tests in 4.49
+seconds (`proof/ryan-p4-kit-review-2026-09-09`). Source review finds its
+original route only initializes/lists tools; full packets and bounds are
+checked only against a synthetic child. The blocking read has no deadline,
+the profile path nests Uoink contrary to the supported mechanism, and the
+embedded-runtime guard/package provenance are incomplete. The original patch
+is retained. `RYAN-PHASE4-KIT-REPAIR-BRIEF-2026-09-09.md` governs replacement;
+these instrument passes do not make an installed receipt. No current package
+or installed pass is claimed. C22 repair `6accc421` is active from `24a5fe0`.
