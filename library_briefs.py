@@ -57,6 +57,7 @@ import os
 import re
 import secrets
 import shutil
+import sqlite3
 import threading
 import time
 import unicodedata
@@ -1010,11 +1011,11 @@ class BriefStore:
         if conn is None or not hasattr(conn, "execute"):
             yield
             return
+        # An already-open caller transaction is authoritative work. Do not
+        # roll it back to start exclusion; reuse it for the publication window.
         if getattr(conn, "in_transaction", False):
-            try:
-                conn.rollback()
-            except sqlite3.Error:
-                pass
+            yield
+            return
         begun = False
         try:
             conn.execute("BEGIN IMMEDIATE")
@@ -1026,7 +1027,8 @@ class BriefStore:
         finally:
             if begun:
                 try:
-                    conn.rollback()
+                    if getattr(conn, "in_transaction", False):
+                        conn.rollback()
                 except sqlite3.Error:
                     pass
 

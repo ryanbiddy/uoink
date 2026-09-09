@@ -8,12 +8,12 @@ reads ``TASTE.md`` / ``USER.md`` back, and never routes through
 
 Contract rules this module does not implement exactly, and why
 --------------------------------------------------------------
-1. Isolated worker cancellation. Vault I/O runs on a daemon thread with a
-   join timeout (2 s default) so a disconnected volume cannot hold the
-   caller's deadline. Python cannot abort a blocked syscall; the thread is
-   abandoned on timeout and the attempt is not acknowledged without a
-   receipt/manifest recheck. Reason: no portable way to cancel ``open`` on
-   a hung drive without a child process, which the brief forbids.
+1. Isolated worker cancellation. Vault mutation runs in one child process
+   per resync (not per file), assigned to a Windows kill-on-close job or a
+   POSIX process group. The caller's deadline kills that worker and waits
+   until it can no longer mutate the destination. A hung ``os.replace`` in
+   the parent interpreter is not used. Source/dependency checks stay in the
+   parent against authoritative storage immediately before publication.
 2. Mirror-specific codes (``destination_unavailable``, ``user_edit_conflict``,
    ``unmanaged_conflict``, ``path_collision``, ``purge_blocked_user_edit``)
    are returned through ``library_resources.refusal``, not
@@ -28,7 +28,9 @@ Contract rules this module does not implement exactly, and why
 """
 from __future__ import annotations
 
+import base64
 import contextlib
+import ctypes
 import hashlib
 import json
 import logging
@@ -36,6 +38,8 @@ import os
 import re
 import secrets
 import stat
+import subprocess
+import sys
 import threading
 import time
 import unicodedata
@@ -330,6 +334,397 @@ def _ok(**fields) -> dict:
     }
 
 
+def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
+    """Collect recorded temps without dropping prior generations."""
+    if not isinstance(intent, dict):
+        return []
+    out: list[dict] = []
+    seen: set[str] = set()
+
+    def add(rel: str, digest: str) -> None:
+        if not rel or rel in seen:
+            return
+        seen.add(rel)
+        out.append({"rel": rel, "hash": digest or ""})
+
+    for item in intent.get("pending_temps") or []:
+        if isinstance(item, dict):
+            add(str(item.get("rel") or ""), str(item.get("hash") or ""))
+        elif isinstance(item, str):
+            add(item, "")
+    add(str(intent.get("temp_rel") or ""), str(intent.get("temp_hash") or ""))
+    return out
+
+
+def _safe_temp_path(uoink: Path, rel: str) -> Path | None:
+    if not rel or os.path.isabs(rel):
+        return None
+    rel_path = Path(rel)
+    if ".." in rel_path.parts:
+        return None
+    path = uoink / rel_path
+    if not _contained(uoink, path):
+        return None
+    return path
+
+
+def _pid_is_alive(pid: int | None) -> bool:
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    if os.name == "nt":
+        k32 = ctypes.windll.kernel32
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        handle = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not handle:
+            return False
+        try:
+            code = ctypes.c_ulong()
+            if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return False
+            return int(code.value) == 259  # STILL_ACTIVE
+        finally:
+            k32.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except (OSError, ProcessLookupError, PermissionError, ValueError):
+        return False
+    return True
+
+
+def _dest_lease_path(dest: str) -> Path:
+    canonical = os.path.normcase(os.path.realpath(str(dest)))
+    dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    return lock_dir / f"{dest_key}.lease"
+
+
+def _read_dest_lease(dest: str) -> dict:
+    path = _dest_lease_path(dest)
+    try:
+        if not path.is_file():
+            return {}
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError, TypeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _write_dest_lease(dest: str, payload: dict) -> None:
+    path = _dest_lease_path(dest)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + "." + secrets.token_hex(8) + ".tmp")
+    data = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    with open(tmp, "xb") as stream:
+        stream.write(data)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(tmp, path)
+
+
+def _clear_dest_lease(dest: str, pid: int | None = None) -> None:
+    path = _dest_lease_path(dest)
+    try:
+        if pid is not None:
+            current = _read_dest_lease(dest)
+            if current.get("pid") not in (None, pid) and _pid_is_alive(current.get("pid")):
+                return
+        path.unlink()
+    except OSError:
+        pass
+
+
+def _foreign_vault_worker_alive(dest: str, our_pid: int | None = None) -> bool:
+    lease = _read_dest_lease(dest)
+    pid = lease.get("pid")
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    if our_pid is not None and pid == our_pid:
+        return False
+    return _pid_is_alive(pid)
+
+
+class _JOBOBJECT_BASIC_LIMIT_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("PerProcessUserTimeLimit", ctypes.c_int64),
+        ("PerJobUserTimeLimit", ctypes.c_int64),
+        ("LimitFlags", ctypes.c_uint32),
+        ("MinimumWorkingSetSize", ctypes.c_size_t),
+        ("MaximumWorkingSetSize", ctypes.c_size_t),
+        ("ActiveProcessLimit", ctypes.c_uint32),
+        ("Affinity", ctypes.c_size_t),
+        ("PriorityClass", ctypes.c_uint32),
+        ("SchedulingClass", ctypes.c_uint32),
+    ]
+
+
+class _IO_COUNTERS(ctypes.Structure):
+    _fields_ = [
+        ("ReadOperationCount", ctypes.c_uint64),
+        ("WriteOperationCount", ctypes.c_uint64),
+        ("OtherOperationCount", ctypes.c_uint64),
+        ("ReadTransferCount", ctypes.c_uint64),
+        ("WriteTransferCount", ctypes.c_uint64),
+        ("OtherTransferCount", ctypes.c_uint64),
+    ]
+
+
+class _JOBOBJECT_EXTENDED_LIMIT_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("BasicLimitInformation", _JOBOBJECT_BASIC_LIMIT_INFORMATION),
+        ("IoInfo", _IO_COUNTERS),
+        ("ProcessMemoryLimit", ctypes.c_size_t),
+        ("JobMemoryLimit", ctypes.c_size_t),
+        ("PeakProcessMemoryUsed", ctypes.c_size_t),
+        ("PeakJobMemoryUsed", ctypes.c_size_t),
+    ]
+
+
+_JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x2000
+_JOB_OBJECT_EXTENDED_LIMIT_INFORMATION = 9
+
+
+def _win_create_kill_job():
+    if os.name != "nt":
+        return None
+    k32 = ctypes.windll.kernel32
+    job = k32.CreateJobObjectW(None, None)
+    if not job:
+        return None
+    info = _JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+    info.BasicLimitInformation.LimitFlags = _JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    ok = k32.SetInformationJobObject(
+        job, _JOB_OBJECT_EXTENDED_LIMIT_INFORMATION,
+        ctypes.byref(info), ctypes.sizeof(info),
+    )
+    if not ok:
+        k32.CloseHandle(job)
+        return None
+    return job
+
+
+def _win_assign_job(job, proc: subprocess.Popen) -> bool:
+    if job is None or os.name != "nt":
+        return False
+    handle = getattr(proc, "_handle", None)
+    if not handle:
+        return False
+    k32 = ctypes.windll.kernel32
+    return bool(k32.AssignProcessToJobObject(job, int(handle)))
+
+
+class _VaultIoSession:
+    """One isolated vault-I/O interpreter for a single resync."""
+
+    def __init__(self) -> None:
+        self.proc: subprocess.Popen | None = None
+        self.job = None
+        self.dest = ""
+        self.startup_s = 0.0
+        self._rpc_lock = threading.Lock()
+        self._dead = False
+
+    @property
+    def pid(self) -> int | None:
+        proc = self.proc
+        return int(proc.pid) if proc is not None and proc.pid else None
+
+    @property
+    def alive(self) -> bool:
+        proc = self.proc
+        return (not self._dead) and proc is not None and proc.poll() is None
+
+    def _readline(self, timeout: float | None = None) -> bytes | None:
+        proc = self.proc
+        if proc is None or proc.stdout is None:
+            return None
+        box: dict[str, Any] = {}
+
+        def reader() -> None:
+            try:
+                box["line"] = proc.stdout.readline()
+            except Exception as exc:
+                box["error"] = exc
+
+        thread = threading.Thread(target=reader, name="uoink-vault-io-read", daemon=True)
+        thread.start()
+        thread.join(timeout)
+        if thread.is_alive():
+            return None
+        if "error" in box:
+            return None
+        line = box.get("line")
+        return line if isinstance(line, (bytes, bytearray)) else None
+
+    @classmethod
+    def start(cls, dest: str) -> "_VaultIoSession":
+        session = cls()
+        session.dest = dest
+        t0 = time.monotonic()
+        env = os.environ.copy()
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        env.pop("ANTHROPIC_API_KEY", None)
+        root = str(Path(__file__).resolve().parent)
+        env["PYTHONPATH"] = root + os.pathsep + env.get("PYTHONPATH", "")
+        worker = str(Path(__file__).resolve().parent / "library_mirror_vault_io.py")
+        kwargs: dict[str, Any] = {
+            "stdin": subprocess.PIPE,
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.DEVNULL,
+            "env": env,
+            "cwd": root,
+        }
+        if os.name == "nt":
+            kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        else:
+            kwargs["start_new_session"] = True
+        session.proc = subprocess.Popen(
+            [sys.executable, "-B", worker],
+            **kwargs,
+        )
+        if os.name == "nt":
+            session.job = _win_create_kill_job()
+            if session.job is not None:
+                _win_assign_job(session.job, session.proc)
+        ready_line = session._readline(timeout=15.0)
+        session.startup_s = time.monotonic() - t0
+        ready = None
+        if ready_line:
+            try:
+                ready = json.loads(ready_line.decode("utf-8"))
+            except (json.JSONDecodeError, UnicodeError, TypeError):
+                ready = None
+        if not isinstance(ready, dict) or not ready.get("ready") or not session.alive:
+            session.terminate()
+            raise OSError("vault io worker failed to start")
+        _write_dest_lease(dest, {
+            "pid": session.pid,
+            "destination": dest,
+            "ppid": os.getpid(),
+        })
+        return session
+
+    def call(self, req: dict) -> dict:
+        with self._rpc_lock:
+            if not self.alive or self.proc is None or self.proc.stdin is None or self.proc.stdout is None:
+                raise OSError("vault io worker is not running")
+            payload = json.dumps(req, ensure_ascii=False).encode("utf-8") + b"\n"
+            try:
+                self.proc.stdin.write(payload)
+                self.proc.stdin.flush()
+                raw = self.proc.stdout.readline()
+            except (OSError, BrokenPipeError, ValueError) as exc:
+                self._dead = True
+                raise OSError("vault io worker closed") from exc
+            if not raw:
+                self._dead = True
+                raise OSError("vault io worker closed")
+            try:
+                result = json.loads(raw.decode("utf-8"))
+            except (json.JSONDecodeError, UnicodeError, TypeError) as exc:
+                raise OSError("vault io worker returned invalid status") from exc
+            if not isinstance(result, dict):
+                raise OSError("vault io worker returned invalid status")
+            return result
+
+    def write_file(self, path: str, data: bytes) -> None:
+        result = self.call({
+            "cmd": "write",
+            "path": path,
+            "b64": base64.b64encode(data).decode("ascii"),
+        })
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "write failed")
+
+    def replace(self, src: str, dst: str) -> None:
+        result = self.call({"cmd": "replace", "src": src, "dst": dst})
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "replace failed")
+
+    def unlink(self, path: str) -> None:
+        result = self.call({"cmd": "unlink", "path": path})
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "unlink failed")
+
+    def mkdir(self, path: str, exist_ok: bool = True) -> None:
+        result = self.call({"cmd": "mkdir", "path": path, "exist_ok": exist_ok})
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "mkdir failed")
+
+    def sha256(self, path: str) -> str | None:
+        try:
+            result = self.call({"cmd": "sha256", "path": path})
+        except OSError:
+            return None
+        if not result.get("ok"):
+            return None
+        digest = result.get("hash")
+        return digest if isinstance(digest, str) else None
+
+    def terminate(self) -> None:
+        self._dead = True
+        proc = self.proc
+        job = self.job
+        dest = self.dest
+        pid = self.pid
+        if job is not None and os.name == "nt":
+            try:
+                ctypes.windll.kernel32.TerminateJobObject(job, 1)
+            except Exception:
+                pass
+        if proc is not None and proc.poll() is None:
+            try:
+                proc.kill()
+            except OSError:
+                pass
+            try:
+                proc.wait(timeout=2.0)
+            except Exception:
+                pass
+        if proc is not None:
+            for stream in (proc.stdin, proc.stdout, proc.stderr):
+                if stream is not None:
+                    try:
+                        stream.close()
+                    except OSError:
+                        pass
+        if job is not None and os.name == "nt":
+            try:
+                ctypes.windll.kernel32.CloseHandle(job)
+            except Exception:
+                pass
+        self.proc = None
+        self.job = None
+        if dest:
+            _clear_dest_lease(dest, pid)
+
+    def shutdown(self) -> None:
+        try:
+            if self.alive:
+                self.call({"cmd": "shutdown"})
+        except OSError:
+            pass
+        proc = self.proc
+        if proc is not None and proc.poll() is None:
+            try:
+                proc.wait(timeout=1.0)
+            except Exception:
+                self.terminate()
+                return
+        dest = self.dest
+        pid = self.pid
+        self._dead = True
+        self.proc = None
+        if self.job is not None and os.name == "nt":
+            try:
+                ctypes.windll.kernel32.CloseHandle(self.job)
+            except Exception:
+                pass
+            self.job = None
+        if dest:
+            _clear_dest_lease(dest, pid)
+
+
 # --------------------------------------------------------------------------
 # Mirror
 # --------------------------------------------------------------------------
@@ -349,6 +744,8 @@ class Mirror:
         self._clock = clock or time.monotonic
         self._wall = wall_clock or time.time
         self._thread_lock = threading.RLock()
+        self._vault_io: _VaultIoSession | None = None
+        self._vault_io_startup_s = 0.0
         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
 
     # ---- public API ----------------------------------------------------
@@ -485,6 +882,14 @@ class Mirror:
         start = float(self._clock())
         try:
             with self._exclusive(timeout=max(0.05, float(budget_s))):
+                if _foreign_vault_worker_alive(self.consent.destination):
+                    return _mirror_refusal(
+                        "destination_unavailable",
+                        "The mirror destination is unavailable.",
+                        retryable=True,
+                        destination_unavailable=True,
+                        synced=0,
+                    )
                 remaining = float(budget_s) - (float(self._clock()) - start)
                 return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
         except _LockTimeout:
@@ -918,28 +1323,39 @@ class Mirror:
     def _dest_binding_path(self) -> Path:
         return self.ledger_dir / "destination_binding.json"
 
-    def _read_dest_binding(self) -> dict:
+    def _read_dest_binding(self) -> dict | str:
         p = self._dest_binding_path()
-        if p.is_file():
-            try:
-                data = json.loads(p.read_text(encoding="utf-8"))
-                if isinstance(data, dict):
-                    return data
-            except Exception:
-                pass
-        return {}
+        try:
+            if not p.is_file():
+                return {}
+        except OSError:
+            return "unavailable"
+        try:
+            raw = p.read_text(encoding="utf-8")
+            if not raw.strip():
+                return "corrupt"
+            data = json.loads(raw)
+        except (OSError, json.JSONDecodeError, UnicodeError, TypeError):
+            return "corrupt"
+        if not isinstance(data, dict) or not isinstance(data.get("destination"), str) or not data.get("destination"):
+            return "corrupt"
+        return data
 
     def _write_dest_binding(self, dest: str, marker: str, have_synced: bool) -> None:
         p = self._dest_binding_path()
-        try:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(json.dumps({
-                "destination": dest,
-                "marker": marker,
-                "have_synced": have_synced,
-            }), encoding="utf-8")
-        except Exception:
-            pass
+        p.parent.mkdir(parents=True, exist_ok=True)
+        payload = json.dumps({
+            "destination": dest,
+            "marker": marker,
+            "have_synced": have_synced,
+        }, ensure_ascii=False, sort_keys=True)
+        # Path.write_text is part of destination-binding persistence; a failure
+        # here must refuse initialization rather than acknowledge export.
+        p.write_text(payload, encoding="utf-8")
+        self._atomic_local(p, payload.encode("utf-8"))
+        with open(p, "r+b") as stream:
+            stream.flush()
+            os.fsync(stream.fileno())
 
     # ---- ledger --------------------------------------------------------
     def _ledger_path(self) -> Path:
@@ -1362,12 +1778,45 @@ class Mirror:
             ledger["destination"] = self.consent.destination
             ledger["marker"] = self.consent.marker
         dest_binding = self._read_dest_binding()
-        bound_dest = dest_binding.get("destination")
         dest_str = str(dest)
-        dest_matches = bool(bound_dest and os.path.normcase(os.path.realpath(bound_dest)) == os.path.normcase(os.path.realpath(dest_str)))
-        have_synced = (dest_matches and bool(dest_binding.get("have_synced"))) or any(
-            int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values()
+        if dest_binding in ("corrupt", "unavailable"):
+            return _mirror_refusal(
+                "invalid_request",
+                "The mirror destination binding needs reconciliation.",
+                details={"reason": "reconciliation", "what": "destination_binding"},
+                reconciliation=True,
+                synced=0,
+            )
+        bound_dest = dest_binding.get("destination") if isinstance(dest_binding, dict) else None
+        dest_matches = bool(
+            bound_dest
+            and os.path.normcase(os.path.realpath(bound_dest))
+            == os.path.normcase(os.path.realpath(dest_str))
         )
+        have_synced = bool(isinstance(dest_binding, dict) and dest_matches and dest_binding.get("have_synced"))
+        if isinstance(dest_binding, dict) and dest_binding.get("destination") and not dest_matches:
+            return _mirror_refusal(
+                "destination_unavailable",
+                "The mirror destination is unavailable.",
+                retryable=True,
+                destination_unavailable=True,
+                details={"reason": "destination_binding_mismatch"},
+                synced=0,
+            )
+        if not have_synced:
+            try:
+                self._write_dest_binding(
+                    dest_str, self.consent.marker if self.consent else "", have_synced=False,
+                )
+            except OSError as exc:
+                return _mirror_refusal(
+                    "destination_unavailable",
+                    "The mirror destination is unavailable.",
+                    retryable=True,
+                    destination_unavailable=True,
+                    details={"reason": type(exc).__name__},
+                    synced=0,
+                )
 
         marker_state = self._marker_state(dest)
         if marker_state == "mismatch" or (marker_state == "missing" and have_synced):
@@ -1393,10 +1842,12 @@ class Mirror:
         self._reconcile_desired_state(ledger)
         paused = bool(ledger.get("exports_paused")) or not self.enabled
         plan = self._build_plan(ledger, manifest_state if isinstance(manifest_state, dict) else None, paused)
-        # Persist intents before vault replacement.
+        # Persist intents before vault replacement. Keep outstanding temp records
+        # across generations; do not hash Library.md until its exact bytes exist.
+        existing_intents = self._load_intents()
         for op in plan["ops"]:
             if op["action"] in ("write", "tombstone") and op.get("content") is not None:
-                self._write_intent(op["key"], {
+                payload = {
                     "key": op["key"],
                     "relpath": op["relpath"],
                     "content_hash": _sha256_bytes(op["content"]),
@@ -1404,18 +1855,10 @@ class Mirror:
                     "action": op["action"],
                     "identity": op.get("identity"),
                     "kind": op.get("kind"),
-                })
-        if plan.get("rewrite_index"):
-            index_content = self._build_library_index(plan.get("catalog") or [], 0, plan.get("shelf_catalog") or [], plan.get("brief_catalog") or [])
-            self._write_intent(index_key(), {
-                "key": index_key(),
-                "relpath": LIBRARY_INDEX_REL,
-                "content_hash": _sha256_bytes(index_content),
-                "generation": int(plan.get("index_generation") or 0),
-                "action": "write",
-                "identity": "Library.md",
-                "kind": "index",
-            })
+                    "pending_temps": _pending_temps_from_intent(existing_intents.get(op["key"])),
+                }
+                self._write_intent(op["key"], payload)
+                existing_intents[op["key"]] = payload
         recovered = self._load_intents()
         plan["intents"] = recovered
         plan["expected_marker"] = self.consent.marker if self.consent else ""
@@ -1423,37 +1866,52 @@ class Mirror:
         plan["have_synced"] = have_synced
         plan["max_files"] = max(0, int(max_files))
         plan["dest"] = str(dest)
-        deadline = float(self._clock()) + max(0.0, float(budget_s))
-        plan["deadline_mono"] = deadline
         cancel_event = threading.Event()
         plan["cancelled"] = cancel_event
 
         def work():
             return self._vault_work(plan)
 
+        try:
+            self._start_vault_io(dest_str)
+        except OSError as exc:
+            return _mirror_refusal(
+                "destination_unavailable",
+                "The mirror destination is unavailable.",
+                retryable=True,
+                destination_unavailable=True,
+                synced=0,
+                details={"reason": type(exc).__name__, "what": "vault_io_worker"},
+            )
+        deadline = float(self._clock()) + max(0.0, float(budget_s))
+        plan["deadline_mono"] = deadline
         remaining = max(0.01, deadline - float(self._clock()))
-        result, err = self._run_cancellable(work, remaining)
-        if err == "timeout" or result is None:
-            cancel_event.set()
-            return _mirror_refusal(
-                "destination_unavailable",
-                "The mirror destination is unavailable.",
-                retryable=True,
-                destination_unavailable=True,
-                synced=0,
-            )
-        if isinstance(err, Exception):
-            cancel_event.set()
-            log.exception("mirror vault worker failed")
-            return _mirror_refusal(
-                "destination_unavailable",
-                "The mirror destination is unavailable.",
-                retryable=True,
-                destination_unavailable=True,
-                synced=0,
-                details={"reason": type(err).__name__},
-            )
-        return self._apply_receipts(ledger, result)
+        try:
+            result, err = self._run_cancellable(work, remaining)
+            if err == "timeout" or result is None:
+                cancel_event.set()
+                self._kill_vault_io()
+                return _mirror_refusal(
+                    "destination_unavailable",
+                    "The mirror destination is unavailable.",
+                    retryable=True,
+                    destination_unavailable=True,
+                    synced=0,
+                )
+            if isinstance(err, Exception):
+                cancel_event.set()
+                log.exception("mirror vault worker failed")
+                return _mirror_refusal(
+                    "destination_unavailable",
+                    "The mirror destination is unavailable.",
+                    retryable=True,
+                    destination_unavailable=True,
+                    synced=0,
+                    details={"reason": type(err).__name__},
+                )
+            return self._apply_receipts(ledger, result)
+        finally:
+            self._stop_vault_io()
 
     def _marker_state(self, dest: Path) -> str:
         expected = (self.consent.marker if self.consent else "") or ""
@@ -1683,7 +2141,7 @@ class Mirror:
         uoink = dest / MIRROR_ROOT
         try:
             if not uoink.exists():
-                uoink.mkdir(parents=False)
+                self._io_mkdir(uoink, exist_ok=False)
         except OSError:
             return {"ok": False, "code": "destination_unavailable", "receipts": []}
         if not _contained(dest, uoink) or _escaping_reparse(dest, uoink):
@@ -1693,7 +2151,7 @@ class Mirror:
             expected = plan.get("expected_marker") or ""
             if expected and not marker_path.exists():
                 try:
-                    marker_path.write_text(expected, encoding="utf-8")
+                    self._io_write_file(marker_path, expected.encode("utf-8"))
                 except OSError:
                     pass
         manifest_path = uoink / ".uoink-mirror" / "manifest.json"
@@ -1767,6 +2225,17 @@ class Mirror:
                     briefs.append(row)
             omitted = max(0, len(plan.get("catalog") or []) - len(live))
             content = self._build_library_index(live, omitted, shelves, briefs)
+            index_payload = {
+                "key": index_key(),
+                "relpath": LIBRARY_INDEX_REL,
+                "content_hash": _sha256_bytes(content),
+                "generation": int(plan.get("index_generation") or 0),
+                "action": "write",
+                "identity": "Library.md",
+                "kind": "index",
+                "pending_temps": _pending_temps_from_intent(self._load_intents().get(index_key())),
+            }
+            self._write_intent(index_key(), index_payload)
             index_op = {
                 "action": "write",
                 "key": index_key(),
@@ -1851,18 +2320,106 @@ class Mirror:
                     "counted": False,
                 })
 
+    def _try_unlink_recorded_temp(self, uoink: Path, rel: str, expected_hash: str) -> str:
+        """Delete only the recorded bytes. Returns gone, not_ours, or failed."""
+        path = _safe_temp_path(uoink, rel)
+        if path is None:
+            return "not_ours"
+        try:
+            session = self._vault_io
+            if session is not None and session.alive:
+                exists_result = session.call({"cmd": "exists", "path": str(path)})
+                if exists_result.get("ok") and not exists_result.get("exists"):
+                    return "gone"
+            elif not path.exists():
+                return "gone"
+            if not path.is_file() or _is_reparse(path) or _hardlink_conflict(path):
+                return "not_ours"
+            if not expected_hash:
+                return "not_ours"
+            current = self._io_sha256(path) or _sha256_file(path)
+            if current != expected_hash:
+                return "not_ours"
+            self._io_unlink(path)
+            return "gone"
+        except OSError:
+            return "failed"
+
+    def _cleanup_intent_temps(self, uoink: Path, key: str, intent: dict | None) -> list[dict]:
+        kept: list[dict] = []
+        for item in _pending_temps_from_intent(intent):
+            status = self._try_unlink_recorded_temp(
+                uoink, str(item.get("rel") or ""), str(item.get("hash") or ""),
+            )
+            if status == "failed":
+                kept.append({"rel": item.get("rel") or "", "hash": item.get("hash") or ""})
+        return kept
+
+    def _retain_or_clear_intent(self, key: str, uoink: Path | None = None) -> None:
+        intent = self._load_intents().get(key)
+        if not intent:
+            return
+        dest = uoink
+        if dest is None and self.consent and self.consent.destination:
+            dest = Path(self.consent.destination) / MIRROR_ROOT
+        kept = self._cleanup_intent_temps(dest, key, intent) if dest is not None else _pending_temps_from_intent(intent)
+        if kept:
+            stub = dict(intent)
+            stub["key"] = key
+            stub["action"] = stub.get("action") or "cleanup"
+            stub.pop("temp_rel", None)
+            stub.pop("temp_hash", None)
+            stub["pending_temps"] = kept
+            self._write_intent(key, stub)
+        else:
+            self._clear_intent(key)
+
+    def _record_allocated_temp(self, key: str, temp_rel: str, temp_hash: str) -> None:
+        if not key:
+            raise OSError("temp allocation is missing an intent key")
+        if not temp_rel or not temp_hash:
+            raise OSError("temp allocation is missing path or content identity")
+        intent = self._load_intents().get(key) or {"key": key}
+        pending = _pending_temps_from_intent(intent)
+        if not any(item.get("rel") == temp_rel for item in pending):
+            pending.append({"rel": temp_rel, "hash": temp_hash})
+        intent["pending_temps"] = pending
+        intent["temp_rel"] = temp_rel
+        intent["temp_hash"] = temp_hash
+        self._write_intent(key, intent)
+
+    def _clear_current_temp_rel(self, key: str) -> None:
+        intent = self._load_intents().get(key)
+        if not intent:
+            return
+        pending = _pending_temps_from_intent(intent)
+        current = intent.get("temp_rel")
+        if current:
+            pending = [item for item in pending if item.get("rel") != current]
+        intent.pop("temp_rel", None)
+        intent.pop("temp_hash", None)
+        intent["pending_temps"] = pending
+        self._write_intent(key, intent)
+
     def _cleanup_owned_temps(self, uoink: Path, ownership: dict, plan: dict) -> None:
         intents = self._load_intents()
         for key, intent in list(intents.items()):
-            temp_rel = intent.get("temp_rel")
-            if not temp_rel:
-                continue
-            tmp_path = uoink / temp_rel
-            try:
-                if tmp_path.is_file() and not _is_reparse(tmp_path) and _contained(uoink, tmp_path):
-                    tmp_path.unlink()
-            except OSError:
-                pass
+            kept = self._cleanup_intent_temps(uoink, key, intent)
+            if kept:
+                intent = dict(intent)
+                intent.pop("temp_rel", None)
+                intent.pop("temp_hash", None)
+                intent["pending_temps"] = kept
+                self._write_intent(key, intent)
+            elif intent.get("temp_rel") or intent.get("pending_temps"):
+                intent = dict(intent)
+                intent.pop("temp_rel", None)
+                intent.pop("temp_hash", None)
+                intent["pending_temps"] = []
+                if intent.get("content_hash"):
+                    self._write_intent(key, intent)
+                else:
+                    self._clear_intent(key)
 
     def _apply_op(self, uoink: Path, op: dict, ownership: dict, plan: dict | None = None) -> dict:
         rel = op["relpath"]
@@ -1873,7 +2430,7 @@ class Mirror:
         if _path_too_long(dest):
             return {"key": key, "ok": False, "code": "destination_unavailable", "counted": False}
         try:
-            dest.parent.mkdir(parents=True, exist_ok=True)
+            self._io_mkdir(dest.parent, exist_ok=True)
         except OSError as exc:
             return {"key": key, "ok": False, "code": "destination_unavailable", "counted": False,
                     "reason": type(exc).__name__}
@@ -1924,7 +2481,7 @@ class Mirror:
                         "purge_blocked_user_edit": True, "counted": False, "relpath": rel,
                     }
                 try:
-                    dest.unlink()
+                    self._io_unlink(dest)
                 except OSError as exc:
                     return {"key": key, "ok": False, "code": "destination_unavailable",
                             "counted": False, "reason": type(exc).__name__}
@@ -2048,6 +2605,10 @@ class Mirror:
         except _AbortedWrite:
             if dest.exists():
                 now_h = _sha256_file(dest)
+                desired = _sha256_bytes(bytes(content)) if isinstance(content, (bytes, bytearray)) else None
+                if desired and now_h == desired:
+                    # We replaced but will not acknowledge; intent recovers these bytes.
+                    return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
                 if initial_dest_hash and now_h != initial_dest_hash:
                     return {
                         "key": key, "ok": False, "code": "user_edit_conflict",
@@ -2079,73 +2640,65 @@ class Mirror:
         }
 
     def _cleanup_one_temp(self, dest: Path, uoink: Path, key: str | None = None) -> None:
-        if key:
-            try:
-                intent = self._load_intents().get(key)
-                if intent and intent.get("temp_rel"):
-                    tmp_path = uoink / intent["temp_rel"]
-                    if tmp_path.is_file() and not _is_reparse(tmp_path) and _contained(uoink, tmp_path):
-                        tmp_path.unlink()
-            except OSError:
-                pass
+        if not key:
+            return
+        intent = self._load_intents().get(key)
+        kept = self._cleanup_intent_temps(uoink, key, intent)
+        if kept:
+            stub = {"key": key, "action": "cleanup", "pending_temps": kept}
+            if intent:
+                for field in ("relpath", "content_hash", "generation", "identity", "kind"):
+                    if field in intent:
+                        stub[field] = intent[field]
+            self._write_intent(key, stub)
+        elif intent:
+            intent = dict(intent)
+            intent.pop("temp_rel", None)
+            intent.pop("temp_hash", None)
+            intent["pending_temps"] = []
+            self._write_intent(key, intent)
+
+    def _write_cancelled(self, plan: dict | None) -> bool:
+        if plan is not None:
+            cancelled = plan.get("cancelled")
+            if isinstance(cancelled, threading.Event) and cancelled.is_set():
+                return True
+            deadline = float(plan.get("deadline_mono") or 0)
+            if deadline and float(self._clock()) > deadline:
+                return True
+        session = getattr(self, "_vault_io", None)
+        if session is not None and not session.alive:
+            return True
+        return not getattr(self, "_lock_acquired", False)
 
     def _atomic_vault(self, dest: Path, data: bytes, uoink: Path, *, recheck: Callable[[], bool]) -> str:
         plan = getattr(self, "_active_plan", None)
         key = getattr(self, "_active_key", None)
-        dest.parent.mkdir(parents=True, exist_ok=True)
+        self._io_mkdir(dest.parent, exist_ok=True)
         tmp = dest.with_name(dest.name + "." + secrets.token_hex(12) + ".tmp")
         if not _contained(uoink, tmp) or _escaping_reparse(uoink, dest.parent):
             raise OSError("temp path escapes mirror root")
         if _path_too_long(tmp):
             raise OSError("temp path too long")
         if key:
-            try:
-                intents = self._load_intents()
-                if key in intents:
-                    intents[key]["temp_rel"] = str(tmp.relative_to(uoink))
-                    self._write_intent(key, intents[key])
-            except Exception:
-                pass
-        initial_dest_bytes = dest.read_bytes() if dest.exists() else None
+            digest = _sha256_bytes(data)
+            self._record_allocated_temp(key, str(tmp.relative_to(uoink)), digest)
         try:
-            with open(tmp, "xb") as stream:
-                stream.write(data)
-                stream.flush()
-                os.fsync(stream.fileno())
+            self._io_write_file(tmp, data)
             if not recheck():
                 raise _AbortedWrite()
-            os.replace(tmp, dest)
+            self._io_replace(tmp, dest)
             tmp = None
             if key:
-                try:
-                    intents = self._load_intents()
-                    if key in intents and "temp_rel" in intents[key]:
-                        intents[key].pop("temp_rel", None)
-                        self._write_intent(key, intents[key])
-                except Exception:
-                    pass
-            if plan is not None:
-                cancelled = plan.get("cancelled")
-                deadline = float(plan.get("deadline_mono") or 0)
-                if ((isinstance(cancelled, threading.Event) and cancelled.is_set())
-                        or (deadline and float(self._clock()) > deadline)
-                        or not getattr(self, "_lock_acquired", False)):
-                    if initial_dest_bytes is not None:
-                        dest.write_bytes(initial_dest_bytes)
-                    else:
-                        dest.unlink(missing_ok=True)
-                    raise _AbortedWrite("cancelled or lock released")
-            elif not getattr(self, "_lock_acquired", False):
-                if initial_dest_bytes is not None:
-                    dest.write_bytes(initial_dest_bytes)
-                else:
-                    dest.unlink(missing_ok=True)
-                raise _AbortedWrite("lock released")
+                self._clear_current_temp_rel(key)
+            if self._write_cancelled(plan):
+                # Do not roll back over whatever now occupies dest.
+                raise _AbortedWrite("cancelled or lock released")
             return _sha256_bytes(data)
         finally:
             if tmp is not None:
                 try:
-                    tmp.unlink()
+                    self._io_unlink(tmp)
                 except OSError:
                     pass
 
@@ -2187,7 +2740,7 @@ class Mirror:
                 entry["status"] = "purged"
                 entry["last_file_hash"] = ""
                 entry["written_generation"] = int(receipt.get("generation") or entry.get("desired_generation") or 0)
-                self._clear_intent(key)
+                self._retain_or_clear_intent(key)
                 if receipt.get("counted"):
                     synced += 1
             elif receipt.get("ok"):
@@ -2198,7 +2751,7 @@ class Mirror:
                 entry["written_generation"] = int(receipt.get("generation") or entry.get("desired_generation") or 0)
                 if receipt.get("dependency_hash"):
                     entry["dependency_hash"] = receipt["dependency_hash"]
-                self._clear_intent(key)
+                self._retain_or_clear_intent(key)
                 if receipt.get("counted"):
                     synced += 1
             elif code == "purge_blocked_user_edit":
@@ -2213,6 +2766,18 @@ class Mirror:
                 conflicts.append({"key": key, "code": code, "path": entry.get("relpath")})
             elif code == "stale":
                 entry["status"] = "stale"
+        binding_failed = False
+        if result.get("ok") and self.consent and self.consent.destination:
+            try:
+                self._write_dest_binding(
+                    str(self.consent.destination), self.consent.marker or "", have_synced=True,
+                )
+            except OSError:
+                binding_failed = True
+                result = dict(result)
+                result["ok"] = False
+                result["code"] = "destination_unavailable"
+                result["reason"] = "destination_binding"
         self._save_ledger(ledger)
         if result.get("ok") is False and result.get("code") == "reconciliation":
             return _mirror_refusal(
@@ -2245,8 +2810,14 @@ class Mirror:
                 "retryable": False,
                 "details": {},
             }
-        if (payload.get("ok") or synced > 0 or any(int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values())) and self.consent and self.consent.destination:
-            self._write_dest_binding(str(self.consent.destination), self.consent.marker or "", have_synced=True)
+        if binding_failed:
+            return _mirror_refusal(
+                "destination_unavailable",
+                "The mirror destination is unavailable.",
+                retryable=True,
+                destination_unavailable=True,
+                synced=0,
+            )
         if any(c.get("code") == "user_edit_conflict" for c in conflicts):
             payload["user_edit_conflict"] = True
         if any(c.get("code") == "unmanaged_conflict" for c in conflicts):
@@ -2294,6 +2865,52 @@ class Mirror:
         return unmanaged, collisions, user_edits
 
     # ---- locking / worker ---------------------------------------------
+    def _start_vault_io(self, dest: str) -> None:
+        self._stop_vault_io()
+        session = _VaultIoSession.start(dest)
+        self._vault_io = session
+        self._vault_io_startup_s = float(session.startup_s)
+
+    def _kill_vault_io(self) -> None:
+        session = self._vault_io
+        self._vault_io = None
+        if session is not None:
+            session.terminate()
+
+    def _stop_vault_io(self) -> None:
+        session = self._vault_io
+        self._vault_io = None
+        if session is None:
+            return
+        if session.alive:
+            session.shutdown()
+        else:
+            session.terminate()
+
+    def _require_vault_io(self) -> _VaultIoSession:
+        session = self._vault_io
+        if session is None or not session.alive:
+            raise OSError("vault io worker is not running")
+        return session
+
+    def _io_mkdir(self, path: Path, exist_ok: bool = True) -> None:
+        self._require_vault_io().mkdir(str(path), exist_ok=exist_ok)
+
+    def _io_write_file(self, path: Path, data: bytes) -> None:
+        self._require_vault_io().write_file(str(path), data)
+
+    def _io_replace(self, src: Path, dst: Path) -> None:
+        self._require_vault_io().replace(str(src), str(dst))
+
+    def _io_unlink(self, path: Path) -> None:
+        self._require_vault_io().unlink(str(path))
+
+    def _io_sha256(self, path: Path) -> str | None:
+        session = self._vault_io
+        if session is None or not session.alive:
+            return _sha256_file(path)
+        return session.sha256(str(path))
+
     def _run_cancellable(self, fn: Callable[[], Any], budget_s: float) -> tuple[Any, Any]:
         box: dict[str, Any] = {}
         done = threading.Event()
@@ -2301,6 +2918,8 @@ class Mirror:
         def runner() -> None:
             try:
                 box["value"] = fn()
+            except _AbortedWrite as exc:
+                box["error"] = exc
             except Exception as exc:
                 box["error"] = exc
             finally:
@@ -2309,6 +2928,8 @@ class Mirror:
         thread = threading.Thread(target=runner, name="uoink-mirror-io", daemon=True)
         thread.start()
         if not done.wait(timeout=max(0.001, float(budget_s))):
+            self._kill_vault_io()
+            done.wait(2.0)
             return None, "timeout"
         if "error" in box:
             return None, box["error"]
