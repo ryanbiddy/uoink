@@ -334,6 +334,16 @@ def _ok(**fields) -> dict:
     }
 
 
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed
+
+
 def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
     """Collect recorded temps without dropping prior generations."""
     if not isinstance(intent, dict):
@@ -341,18 +351,33 @@ def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
     out: list[dict] = []
     seen: set[str] = set()
 
-    def add(rel: str, digest: str) -> None:
+    def add(rel: str, digest: str, file_id: int | None = None, volume_id: int | None = None) -> None:
         if not rel or rel in seen:
             return
         seen.add(rel)
-        out.append({"rel": rel, "hash": digest or ""})
+        entry: dict[str, Any] = {"rel": rel, "hash": digest or ""}
+        if file_id:
+            entry["file_id"] = file_id
+        if volume_id is not None:
+            entry["volume_id"] = volume_id
+        out.append(entry)
 
     for item in intent.get("pending_temps") or []:
         if isinstance(item, dict):
-            add(str(item.get("rel") or ""), str(item.get("hash") or ""))
+            add(
+                str(item.get("rel") or ""),
+                str(item.get("hash") or ""),
+                _optional_int(item.get("file_id")),
+                _optional_int(item.get("volume_id")),
+            )
         elif isinstance(item, str):
             add(item, "")
-    add(str(intent.get("temp_rel") or ""), str(intent.get("temp_hash") or ""))
+    add(
+        str(intent.get("temp_rel") or ""),
+        str(intent.get("temp_hash") or ""),
+        _optional_int(intent.get("temp_file_id")),
+        _optional_int(intent.get("temp_volume_id")),
+    )
     return out
 
 
@@ -627,7 +652,7 @@ class _VaultIoSession:
                 raise OSError("vault io worker returned invalid status")
             return result
 
-    def write_file(self, path: str, data: bytes) -> None:
+    def write_file(self, path: str, data: bytes) -> dict:
         result = self.call({
             "cmd": "write",
             "path": path,
@@ -635,16 +660,50 @@ class _VaultIoSession:
         })
         if not result.get("ok"):
             raise OSError(result.get("error") or "write failed")
+        return result
 
     def replace(self, src: str, dst: str) -> None:
         result = self.call({"cmd": "replace", "src": src, "dst": dst})
         if not result.get("ok"):
             raise OSError(result.get("error") or "replace failed")
 
-    def unlink(self, path: str) -> None:
-        result = self.call({"cmd": "unlink", "path": path})
+    def unlink(
+        self,
+        path: str,
+        expected_file_id: int | None = None,
+        expected_hash: str | None = None,
+        expected_volume_id: int | None = None,
+    ) -> dict:
+        req: dict[str, Any] = {"cmd": "unlink", "path": path}
+        if expected_file_id is not None:
+            req["expected_file_id"] = int(expected_file_id)
+        if expected_volume_id is not None:
+            req["expected_volume_id"] = int(expected_volume_id)
+        if expected_hash is not None:
+            req["expected_hash"] = str(expected_hash)
+        result = self.call(req)
+        if result.get("not_ours") or result.get("gone"):
+            return result
         if not result.get("ok"):
             raise OSError(result.get("error") or "unlink failed")
+        return result
+
+    def file_identity(self, path: str) -> tuple[int | None, int | None]:
+        try:
+            result = self.call({"cmd": "file_id", "path": path})
+        except OSError:
+            return None, None
+        if not result.get("ok"):
+            return None, None
+        fid = _optional_int(result.get("file_id"))
+        vol = _optional_int(result.get("volume_id"))
+        if not fid:
+            return None, None
+        return fid, vol
+
+    def file_id(self, path: str) -> int | None:
+        fid, _vol = self.file_identity(path)
+        return fid
 
     def mkdir(self, path: str, exist_ok: bool = True) -> None:
         result = self.call({"cmd": "mkdir", "path": path, "exist_ok": exist_ok})
@@ -746,6 +805,7 @@ class Mirror:
         self._thread_lock = threading.RLock()
         self._vault_io: _VaultIoSession | None = None
         self._vault_io_startup_s = 0.0
+        self._unlink_expected: dict[str, Any] | None = None
         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
 
     # ---- public API ----------------------------------------------------
@@ -1323,13 +1383,81 @@ class Mirror:
     def _dest_binding_path(self) -> Path:
         return self.ledger_dir / "destination_binding.json"
 
-    def _read_dest_binding(self) -> dict | str:
-        p = self._dest_binding_path()
+    def _authority_witness_path(self) -> Path:
+        return self.ledger_dir / "authority_witness.json"
+
+    def _consent_time_ms(self) -> int:
+        return int(self.consent.consented_at_ms if self.consent else 0)
+
+    def _read_authority_witness(self) -> dict | str | None:
+        p = self._authority_witness_path()
         try:
             if not p.is_file():
-                return {}
+                return None
+            raw = p.read_text(encoding="utf-8")
+            if not raw.strip():
+                return "corrupt"
+            data = json.loads(raw)
         except OSError:
             return "unavailable"
+        except (json.JSONDecodeError, UnicodeError, TypeError):
+            return "corrupt"
+        if not isinstance(data, dict) or not isinstance(data.get("destination"), str) or not data.get("destination"):
+            return "corrupt"
+        return data
+
+    def _write_authority_witness(self, dest: str, marker: str, have_synced: bool) -> None:
+        p = self._authority_witness_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        payload = json.dumps({
+            "destination": dest,
+            "marker": marker,
+            "have_synced": have_synced,
+            "consented_at_ms": self._consent_time_ms(),
+        }, ensure_ascii=False, sort_keys=True)
+        self._atomic_local(p, payload.encode("utf-8"))
+
+    def _newer_consent_authorizes_dest_change(self, prior_dest: str, prior_consented_at: int, dest_str: str) -> bool:
+        if not dest_str or not prior_dest or not self.consent:
+            return False
+        try:
+            dest_changed = os.path.normcase(os.path.realpath(dest_str)) != os.path.normcase(os.path.realpath(prior_dest))
+        except OSError:
+            return False
+        return bool(dest_changed and self._consent_time_ms() > int(prior_consented_at or 0))
+
+    def _has_prior_authority(self) -> tuple[bool, str, int]:
+        witness = self._read_authority_witness()
+        if witness in ("corrupt", "unavailable"):
+            return True, "", 0
+        if isinstance(witness, dict) and witness.get("destination") and witness.get("have_synced"):
+            return True, str(witness.get("destination")), int(witness.get("consented_at_ms") or 0)
+        ledger = self._load_ledger()
+        if ledger.get("destination"):
+            entries = ledger.get("entries", {})
+            has_synced_entry = any(
+                int(e.get("written_generation") or 0) > 0 or e.get("status") == "synced"
+                for e in entries.values()
+            )
+            if has_synced_entry:
+                consented_at = 0
+                if isinstance(witness, dict):
+                    consented_at = int(witness.get("consented_at_ms") or 0)
+                return True, str(ledger.get("destination")), consented_at
+        return False, "", 0
+
+    def _read_dest_binding(self) -> dict | str:
+        p = self._dest_binding_path()
+        dest_str = str(self.consent.destination) if self.consent and self.consent.destination else ""
+        try:
+            present = p.is_file()
+        except OSError:
+            return "unavailable"
+        if not present:
+            has_prior, prior_dest, prior_consented_at = self._has_prior_authority()
+            if has_prior and not self._newer_consent_authorizes_dest_change(prior_dest, prior_consented_at, dest_str):
+                return "missing"
+            return {}
         try:
             raw = p.read_text(encoding="utf-8")
             if not raw.strip():
@@ -1343,19 +1471,40 @@ class Mirror:
 
     def _write_dest_binding(self, dest: str, marker: str, have_synced: bool) -> None:
         p = self._dest_binding_path()
+        w = self._authority_witness_path()
         p.parent.mkdir(parents=True, exist_ok=True)
         payload = json.dumps({
             "destination": dest,
             "marker": marker,
             "have_synced": have_synced,
+            "consented_at_ms": self._consent_time_ms(),
         }, ensure_ascii=False, sort_keys=True)
-        # Path.write_text is part of destination-binding persistence; a failure
-        # here must refuse initialization rather than acknowledge export.
-        p.write_text(payload, encoding="utf-8")
-        self._atomic_local(p, payload.encode("utf-8"))
-        with open(p, "r+b") as stream:
-            stream.flush()
-            os.fsync(stream.fileno())
+        try:
+            binding_existed = p.is_file()
+        except OSError:
+            binding_existed = False
+        try:
+            witness_existed = w.is_file()
+        except OSError:
+            witness_existed = False
+        try:
+            self._write_authority_witness(dest, marker, have_synced)
+            self._atomic_local(p, payload.encode("utf-8"))
+            with open(p, "r+b") as stream:
+                stream.flush()
+                os.fsync(stream.fileno())
+        except Exception:
+            if not binding_existed:
+                try:
+                    p.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            if not witness_existed:
+                try:
+                    w.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            raise
 
     # ---- ledger --------------------------------------------------------
     def _ledger_path(self) -> Path:
@@ -1779,7 +1928,7 @@ class Mirror:
             ledger["marker"] = self.consent.marker
         dest_binding = self._read_dest_binding()
         dest_str = str(dest)
-        if dest_binding in ("corrupt", "unavailable"):
+        if dest_binding in ("corrupt", "unavailable", "missing"):
             return _mirror_refusal(
                 "invalid_request",
                 "The mirror destination binding needs reconciliation.",
@@ -1795,14 +1944,19 @@ class Mirror:
         )
         have_synced = bool(isinstance(dest_binding, dict) and dest_matches and dest_binding.get("have_synced"))
         if isinstance(dest_binding, dict) and dest_binding.get("destination") and not dest_matches:
-            return _mirror_refusal(
-                "destination_unavailable",
-                "The mirror destination is unavailable.",
-                retryable=True,
-                destination_unavailable=True,
-                details={"reason": "destination_binding_mismatch"},
-                synced=0,
+            user_auth_change = bool(
+                self.consent
+                and int(self.consent.consented_at_ms or 0) > int(dest_binding.get("consented_at_ms") or 0)
             )
+            if not user_auth_change:
+                return _mirror_refusal(
+                    "destination_unavailable",
+                    "The mirror destination is unavailable.",
+                    retryable=True,
+                    destination_unavailable=True,
+                    details={"reason": "destination_binding_mismatch"},
+                    synced=0,
+                )
         if not have_synced:
             try:
                 self._write_dest_binding(
@@ -2320,39 +2474,58 @@ class Mirror:
                     "counted": False,
                 })
 
-    def _try_unlink_recorded_temp(self, uoink: Path, rel: str, expected_hash: str) -> str:
-        """Delete only the recorded bytes. Returns gone, not_ours, or failed."""
+    def _try_unlink_recorded_temp(
+        self,
+        uoink: Path,
+        rel: str,
+        expected_hash: str,
+        expected_file_id: int | None = None,
+        expected_volume_id: int | None = None,
+    ) -> str:
+        """Delete only the recorded file. Returns gone, not_ours, or failed."""
         path = _safe_temp_path(uoink, rel)
         if path is None:
             return "not_ours"
+        if not expected_file_id:
+            return "failed"
+        if not expected_hash:
+            return "not_ours"
+        self._unlink_expected = {
+            "path": str(path),
+            "file_id": int(expected_file_id),
+            "volume_id": int(expected_volume_id) if expected_volume_id is not None else None,
+            "hash": str(expected_hash),
+        }
         try:
-            session = self._vault_io
-            if session is not None and session.alive:
-                exists_result = session.call({"cmd": "exists", "path": str(path)})
-                if exists_result.get("ok") and not exists_result.get("exists"):
+            unlink_res = self._io_unlink(path)
+            if isinstance(unlink_res, dict):
+                if unlink_res.get("not_ours"):
+                    return "not_ours"
+                if unlink_res.get("gone") or unlink_res.get("ok"):
                     return "gone"
-            elif not path.exists():
-                return "gone"
-            if not path.is_file() or _is_reparse(path) or _hardlink_conflict(path):
-                return "not_ours"
-            if not expected_hash:
-                return "not_ours"
-            current = self._io_sha256(path) or _sha256_file(path)
-            if current != expected_hash:
-                return "not_ours"
-            self._io_unlink(path)
             return "gone"
         except OSError:
             return "failed"
+        finally:
+            self._unlink_expected = None
 
     def _cleanup_intent_temps(self, uoink: Path, key: str, intent: dict | None) -> list[dict]:
         kept: list[dict] = []
         for item in _pending_temps_from_intent(intent):
+            rel = str(item.get("rel") or "")
+            digest = str(item.get("hash") or "")
+            fid = _optional_int(item.get("file_id"))
+            vol = _optional_int(item.get("volume_id"))
             status = self._try_unlink_recorded_temp(
-                uoink, str(item.get("rel") or ""), str(item.get("hash") or ""),
+                uoink, rel, digest, expected_file_id=fid, expected_volume_id=vol,
             )
             if status == "failed":
-                kept.append({"rel": item.get("rel") or "", "hash": item.get("hash") or ""})
+                kept_entry: dict[str, Any] = {"rel": rel, "hash": digest}
+                if fid:
+                    kept_entry["file_id"] = fid
+                if vol is not None:
+                    kept_entry["volume_id"] = vol
+                kept.append(kept_entry)
         return kept
 
     def _retain_or_clear_intent(self, key: str, uoink: Path | None = None) -> None:
@@ -2369,23 +2542,68 @@ class Mirror:
             stub["action"] = stub.get("action") or "cleanup"
             stub.pop("temp_rel", None)
             stub.pop("temp_hash", None)
+            stub.pop("temp_file_id", None)
+            stub.pop("temp_volume_id", None)
             stub["pending_temps"] = kept
             self._write_intent(key, stub)
         else:
             self._clear_intent(key)
 
-    def _record_allocated_temp(self, key: str, temp_rel: str, temp_hash: str) -> None:
+    def _record_allocated_temp(
+        self,
+        key: str,
+        temp_rel: str,
+        temp_hash: str,
+        file_id: int | None = None,
+        volume_id: int | None = None,
+    ) -> None:
         if not key:
             raise OSError("temp allocation is missing an intent key")
         if not temp_rel or not temp_hash:
             raise OSError("temp allocation is missing path or content identity")
+        if not file_id:
+            dest = None
+            if self.consent and self.consent.destination:
+                dest = Path(self.consent.destination) / MIRROR_ROOT
+            elif getattr(self, "_vault_io", None) and getattr(self._vault_io, "dest", None):
+                dest = Path(self._vault_io.dest) / MIRROR_ROOT
+            if dest is not None:
+                path = _safe_temp_path(dest, temp_rel)
+                if path is not None:
+                    try:
+                        file_id, volume_id = self._io_file_identity(path)
+                    except OSError:
+                        file_id, volume_id = None, None
         intent = self._load_intents().get(key) or {"key": key}
         pending = _pending_temps_from_intent(intent)
-        if not any(item.get("rel") == temp_rel for item in pending):
-            pending.append({"rel": temp_rel, "hash": temp_hash})
+        entry: dict[str, Any] = {"rel": temp_rel, "hash": temp_hash}
+        if file_id:
+            entry["file_id"] = int(file_id)
+        if volume_id is not None:
+            entry["volume_id"] = int(volume_id)
+        updated = False
+        for item in pending:
+            if item.get("rel") == temp_rel:
+                item["hash"] = temp_hash
+                if file_id:
+                    item["file_id"] = int(file_id)
+                if volume_id is not None:
+                    item["volume_id"] = int(volume_id)
+                updated = True
+                break
+        if not updated:
+            pending.append(entry)
         intent["pending_temps"] = pending
         intent["temp_rel"] = temp_rel
         intent["temp_hash"] = temp_hash
+        if file_id:
+            intent["temp_file_id"] = int(file_id)
+        else:
+            intent.pop("temp_file_id", None)
+        if volume_id is not None:
+            intent["temp_volume_id"] = int(volume_id)
+        else:
+            intent.pop("temp_volume_id", None)
         self._write_intent(key, intent)
 
     def _clear_current_temp_rel(self, key: str) -> None:
@@ -2398,6 +2616,8 @@ class Mirror:
             pending = [item for item in pending if item.get("rel") != current]
         intent.pop("temp_rel", None)
         intent.pop("temp_hash", None)
+        intent.pop("temp_file_id", None)
+        intent.pop("temp_volume_id", None)
         intent["pending_temps"] = pending
         self._write_intent(key, intent)
 
@@ -2409,12 +2629,16 @@ class Mirror:
                 intent = dict(intent)
                 intent.pop("temp_rel", None)
                 intent.pop("temp_hash", None)
+                intent.pop("temp_file_id", None)
+                intent.pop("temp_volume_id", None)
                 intent["pending_temps"] = kept
                 self._write_intent(key, intent)
             elif intent.get("temp_rel") or intent.get("pending_temps"):
                 intent = dict(intent)
                 intent.pop("temp_rel", None)
                 intent.pop("temp_hash", None)
+                intent.pop("temp_file_id", None)
+                intent.pop("temp_volume_id", None)
                 intent["pending_temps"] = []
                 if intent.get("content_hash"):
                     self._write_intent(key, intent)
@@ -2655,6 +2879,8 @@ class Mirror:
             intent = dict(intent)
             intent.pop("temp_rel", None)
             intent.pop("temp_hash", None)
+            intent.pop("temp_file_id", None)
+            intent.pop("temp_volume_id", None)
             intent["pending_temps"] = []
             self._write_intent(key, intent)
 
@@ -2680,11 +2906,23 @@ class Mirror:
             raise OSError("temp path escapes mirror root")
         if _path_too_long(tmp):
             raise OSError("temp path too long")
+        digest = _sha256_bytes(data)
+        rel = str(tmp.relative_to(uoink))
         if key:
-            digest = _sha256_bytes(data)
-            self._record_allocated_temp(key, str(tmp.relative_to(uoink)), digest)
+            self._record_allocated_temp(key, rel, digest)
         try:
-            self._io_write_file(tmp, data)
+            write_res = self._io_write_file(tmp, data)
+            file_id = None
+            volume_id = None
+            if isinstance(write_res, dict):
+                file_id = _optional_int(write_res.get("file_id"))
+                volume_id = _optional_int(write_res.get("volume_id"))
+            if key:
+                if not file_id:
+                    raise OSError("temp allocation is missing file identity")
+                self._record_allocated_temp(
+                    key, rel, digest, file_id=file_id, volume_id=volume_id,
+                )
             if not recheck():
                 raise _AbortedWrite()
             self._io_replace(tmp, dest)
@@ -2896,14 +3134,36 @@ class Mirror:
     def _io_mkdir(self, path: Path, exist_ok: bool = True) -> None:
         self._require_vault_io().mkdir(str(path), exist_ok=exist_ok)
 
-    def _io_write_file(self, path: Path, data: bytes) -> None:
-        self._require_vault_io().write_file(str(path), data)
+    def _io_write_file(self, path: Path, data: bytes) -> dict:
+        return self._require_vault_io().write_file(str(path), data)
 
     def _io_replace(self, src: Path, dst: Path) -> None:
         self._require_vault_io().replace(str(src), str(dst))
 
-    def _io_unlink(self, path: Path) -> None:
-        self._require_vault_io().unlink(str(path))
+    def _io_unlink(self, path: Path) -> dict:
+        session = self._require_vault_io()
+        expected = self._unlink_expected
+        expected_file_id = None
+        expected_hash = None
+        expected_volume_id = None
+        if expected and expected.get("path") == str(path):
+            expected_file_id = _optional_int(expected.get("file_id"))
+            expected_volume_id = _optional_int(expected.get("volume_id"))
+            raw_hash = expected.get("hash")
+            expected_hash = str(raw_hash) if raw_hash else None
+        return session.unlink(
+            str(path),
+            expected_file_id=expected_file_id,
+            expected_hash=expected_hash,
+            expected_volume_id=expected_volume_id,
+        )
+
+    def _io_file_identity(self, path: Path) -> tuple[int | None, int | None]:
+        return self._require_vault_io().file_identity(str(path))
+
+    def _io_file_id(self, path: Path) -> int | None:
+        fid, _vol = self._io_file_identity(path)
+        return fid
 
     def _io_sha256(self, path: Path) -> str | None:
         session = self._vault_io

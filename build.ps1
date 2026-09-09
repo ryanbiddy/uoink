@@ -309,6 +309,7 @@ foreach ($f in @(
     'library_prompts.py',
     'library_briefs.py',
     'library_mirror.py',
+    'library_mirror_vault_io.py',
     'library_media.py',
     'library_faithfulness.py',
     'reddit_extractor.py',
@@ -529,6 +530,7 @@ Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_media.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
