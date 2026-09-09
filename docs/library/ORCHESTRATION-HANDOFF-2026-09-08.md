@@ -120,6 +120,11 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    truthfully, repair Phase 4 lifecycle and interrupted-write/ownership behavior,
    Phase 5 SDK settlement and Phase 6 refusal semantics. Review each production
    diff before a fresh named run. No further fixture edits or measurement waivers.
+   Ryan reiterated continuing through release readiness on 2026-09-09.
+   Astra is recovering Phase 3 originals locally; independent bounded worker
+   briefs are `RYAN-PHASE4-LIFECYCLE-REPAIR-2026-09-09.md`,
+   `RYAN-PHASE5-SDK-REPAIR-2026-09-09.md` and
+   `RYAN-PHASE6-REFUSAL-REPAIR-2026-09-09.md`, dispatched in that order.
 2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
    and helper launch use 5179, even from another Windows profile. Provide a
    supported isolated product path and complete operator kit. Do not ask Ryan
@@ -1334,3 +1339,21 @@ assertions verified again; all twenty failures are named in the product brief.
 There is no source/test change after the measured `4a35316`. This log-only
 backup receipt will be committed and included in the same authorized branch
 backup. Product repairs and the executable installed operator kit remain open.
+
+### 2026-09-09 - Continued release work; originals located
+
+Ryan explicitly asked Astra to continue until the product works and the release
+notes/package are ready, rather than stopping at another checkpoint. All earlier
+specific restrictions remain. The original AT6 scratch root still exists; all
+eight artifact hashes match the original receipt, including the four missing
+archive entries. A separate original receipt for feed 64703 also exists. The
+feed 49557 overlay retains its original database/WAL and launch log, but no
+completion receipt. Recovery will preserve original bytes and distinguish
+post-hoc state recovery from a contemporaneous receipt. No new capture, source
+request or successful exit status is inferred from those files.
+
+Three bounded product briefs prepare independent Phase 4 lifecycle, Phase 5
+SDK and Phase 6 refusal work while Astra completes evidence recovery. Workers
+must preserve all existing tests and failed observations; integration remains
+sequential with independent verification in each root. The eight Phase 4
+interception cases and installation isolation remain separate work afterward.
