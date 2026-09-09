@@ -1,0 +1,44 @@
+{
+  "files": {
+    "original.patch": {
+      "bytes": 299246,
+      "sha256": "2cd24eeedff376026b07a68e110e9df36b2b25f912e32310a190ea54505608db"
+    },
+    "iso-repair-g1/results.json": {
+      "bytes": 1389,
+      "sha256": "f950ca500dca209b901e53602f24ce757471ecce19f9a141ee2548fe222b94f9"
+    },
+    "iso-repair-g1/tests.log": {
+      "bytes": 2217,
+      "sha256": "a14343bff5061b593c5be671e3b3108b797c00936830901ab72317d87bd1deff"
+    },
+    "iso-repair-g1/tests.xml": {
+      "bytes": 15853,
+      "sha256": "9ab39242bc08f8fd6b782f7386b2bffcad6916e43d8f756df7df111000845099"
+    },
+    "iso-repair-r1/results.json": {
+      "bytes": 782,
+      "sha256": "c0904038d2b1985c332fc3f43c18c3128e25e7e05e93de6d24c49677081b5a8a"
+    },
+    "iso-repair-r1/tests.log": {
+      "bytes": 100,
+      "sha256": "f397ef9634063d81e537b9e8d1ddf14c20471abd6e45773b319b6354bc68ad69"
+    },
+    "iso-repair-r1/tests.xml": {
+      "bytes": 1314,
+      "sha256": "e955466323115e1c7720c621afe114b8ae8f098c3828b3bea58155d2f08547c4"
+    },
+    "iso-w3/results.json": {
+      "bytes": 1434,
+      "sha256": "a9261e9f3babe9c97b51f1207b2c04628f164a2819e231262e841230d55fd5fa"
+    },
+    "iso-w3/tests.log": {
+      "bytes": 2203,
+      "sha256": "20c0abd4421b2fbb209e3312de7663913c51798111a850bbfc8904faf6fa7faf"
+    },
+    "iso-w3/tests.xml": {
+      "bytes": 15825,
+      "sha256": "50afda7d27ea89c417e9421b0d83c5a969ca4e9afcd9893925668326cd6b65f6"
+    }
+  }
+}

@@ -158,6 +158,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    coverage and packaging/guard gaps require `RYAN-PHASE4-KIT-REPAIR-BRIEF-2026-09-09.md`.
    Startup anchor repair `db95457` has 21 focused passes; verify the complete
    real helper after the isolation repair. No original kit is installed credit.
+   Replacement isolation has 113 independent passes / one skip, but Inno review
+   found active Restart Manager closing, non-gating uninstall errors and path /
+   marker parsing gaps. Follow `RYAN-INNO-FINAL-BOUNDARY-REPAIR-BRIEF-2026-09-09.md`
+   before integration. The second raw patch and all three observations are sealed.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1580,3 +1584,15 @@ probes. Installer repair `3a3bd6cb` currently reports 113 passes / one skip;
 its compilation/review must finish before independent acceptance. Phase 4 kit
 replacement `a75cec28` is active from `80e4c3c`; C22 `6accc421` remains active.
 No new package or installed receipt is claimed.
+
+### 2026-09-09 — second isolation review retains Inno defects
+
+Astra independently reproduced 113 passes / one skip, 17.47 seconds, for
+3a3bd6cb using the native private verifier. The worker's 113 / one skip and
+seven review passes remain separate. Proof is sealed under
+proof/ryan-install-review-02-2026-09-09. Source review still rejects the Inno
+boundary: ShouldSkipPage never receives wpPreparing, registering no extra
+resources does not disable Restart Manager, and InitializeUninstall accepts
+damaged metadata without a checked stop before deletion. Path aliases and
+ambiguous marker parsing also need the bounded repair brief. Compilation and
+Python tests cannot establish these installed runtime guarantees.

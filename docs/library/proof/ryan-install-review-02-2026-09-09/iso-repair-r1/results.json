@@ -1,0 +1,23 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_isolation_integrator_review.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\3a3bd6cb-d98\\grok\\_scratch\\iso-repair-r1-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\3a3bd6cb-d98\\grok\\_scratch\\iso-repair-r1\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\3a3bd6cb-d98\\grok\\_scratch\\iso-repair-r1\\tests.log"
+  }
+]
