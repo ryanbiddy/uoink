@@ -53,14 +53,14 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review HEAD `986b555`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review HEAD `45bb2f6`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures; AW-6 and four new identity tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5h (`8e3e4f0`): both roots 561 passed / six retained failures; seven actual-entry cases pass | BA-5 reproduces reset domain deadline and oversized refusal. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5h2 (grok), then AZ-5g2 measured refresh (grok), final BA-4 |
+| 5 | AZ-5h2 (`45bb2f6`): both roots 570 passed / six retained failures; both BA-5 and seven new cases pass | BA-5 repaired. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5g2 measured refresh (grok), final BA-4 |
 | 6 | BC-3f (`986b555`) integrated: both roots 174 passed / 11 omitted-ticket failures; BD-2/3/4 and six new publisher-boundary cases pass | BD-4 repaired. Final broader BD-2 and combined transport review remain; BD-27 observed | Finish BD-2 after the shared transport repair. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -83,8 +83,8 @@ AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
 AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
 complete/partial diffs as described below. Active at this update: BC-3f
 Grok `33751bb7` integrated at `986b555`.
-AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` and AV-5m4b3 Grok `260ef22c`
-are active from `533ef6f`.
+AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integrated at `45bb2f6`;
+AV-5m4b3 Grok `260ef22c` is active from `533ef6f`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -93,8 +93,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
    record (474 passed / one frozen failure in independent verification).
-   Verify AZ-5h2 (grok, `098fb14d`) from `PHASE5-AZ5H2-BRIEF-2026-09-08.md`,
-   then AZ-5g2 (grok) from
+   AZ-5h2 is integrated at `45bb2f6`. Dispatch/verify AZ-5g2 (grok) from
    `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
    measurement stays retained and is not integrated.
 3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
@@ -627,3 +626,26 @@ and real-service recheck passed once in 0.85 seconds (`aw-prompt-prep-synthetic`
 This is instrument preparation only. Actual archive/client work still waits
 for AW-4 and the shared transport repair. Create the 15-minute preview only
 when the client can immediately observe it.
+
+### 2026-09-08 - AZ-5h2 integrated; measurement refresh next
+
+AZ-5h2 Grok `098fb14d` integrated at `45bb2f6` after clean three-way apply.
+Independent full union: **570 passed, six failed** in each root, 136.49
+seconds worker and 127.55 seconds checkout. Logs/XML/commands: worker
+scratch `az5h2-wi`, checkout scratch `az5h2-ci`. Both frozen BA-5 cases
+and all seven new cases pass. Activity uses the original inbound stamp
+through remaining SQLite waits; excessive envelopes refuse before domain
+work, and completed refusal frames are capped. Ordinary accepted IDs and
+busy-timeout restoration pass.
+
+The six retained failures are unchanged: unary/clock setup for Ryan, four
+measurement-document assertions for AZ-5g2, and the old BA-4 SDK route.
+The shipped entry is covered independently; the old route remains failed.
+AZ-5g2 must now measure this integrated transport, with complete packets,
+wire bytes and actual commit/tree IDs. Final BA-4 and broader BD-2 follow.
+
+B3 also hit the PowerShell `$args` collision while rerunning groups and
+started a bare full suite. It stopped only its own named task successfully
+and switched to explicit selectors. Its earlier correctly named union is
+separate evidence; the unintended invocation is aborted, not a full-tree
+result. Apply this setup lesson to every further worker brief.

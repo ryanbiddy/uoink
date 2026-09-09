@@ -47,3 +47,17 @@ Write `docs/library/PHASE5-AZ5G2-GROK-2026-09-08.md` with exact commands,
 results and limits. No live index, port 5179, model, API key, paid API,
 commits, pushes or subagents. Apply remains false. Disposable roots only.
 Astra verifies both roots and completes BA-4 on the integrated result.
+
+## Dispatch addendum after AZ-5h2
+
+AZ-5h2 is integrated at `45bb2f6`, independently **570 passed, six failed**
+in each root (136.49 / 127.55 seconds). Its original-inbound deadline and
+completed-refusal cap replace the pre-H2 behavior. Include both BA-5 and
+all seven AZ-5h2 tests in the named verification union. The measurement
+must drive this actual shipped entry and preserve any real refusal.
+
+Use explicit named pytest selectors or a task-specific variable. PowerShell
+`$args` is an automatic variable: two mirror workers accidentally launched
+bare full suites by reusing it. Do not use it or claim an unintended run
+as named verification. Terminate only processes established to belong to
+this exact run; no broad Python or pytest kill.
