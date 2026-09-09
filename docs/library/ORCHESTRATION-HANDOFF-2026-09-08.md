@@ -186,8 +186,8 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    incomplete original-route observation. Follow
    `RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md` for manifest/guard,
    bounded transport, complete evidence and executable operator corrections.
-   Third C22 source worker reports 41 passes / two frozen failures; Astra
-   independently verifies it. Further review finds non-independent protected-state
+   Third C22 instrument independently has 41 passes / two frozen failures,
+   666.34 s; its original source observations are sealed separately. Further review finds non-independent protected-state
    allowances, missing child-survival/relaunch gates, permissive provenance and
    guard/resume defects. Follow `RYAN-C22-FINAL-ORACLE-REPAIR-BRIEF-2026-09-09.md`
    using its archived input; no earlier status supplies installed credit.
@@ -322,8 +322,8 @@ Together both proposals touch four files and preserve 163 assertion trees.
 No fixture edit or pass is inferred from this diagnosis.
 
 - Installed Inno package receipts (Phase 3 C22, Phase 4), once product work
-  supplies a no-5179 installed path and exact operator kit. Ryan has no safe
-  installation action to take with the current package.
+  supplies the final reviewed operator kit. The isolated package is built;
+  keep the operator session pending while both instruments finish review.
 - Phase 6 speaker gate remains blocked by Ryan's explicit ruling. No diarization
   runs or attribution claims; chapters and cited ranges are the release scope.
 - Main merge remains unauthorized. No new fetch scope is authorized.
@@ -1796,3 +1796,22 @@ bytes; continuation regenerates baselines. Its original input and worker union
 41/2 are retained in `proof/ryan-c22-review-03-input-2026-09-09/SHA256.json`.
 Independent union continues separately. Follow the final-oracle repair brief;
 passing status assertions do not substitute for these missing observations.
+
+### 2026-09-09 — third C22 independent result and branch backup
+
+Independent 7a3c3ae2 kit union completed: 41 passed / two failed, 666.34 s,
+native guarded interpreter, label c22-w3. Original Inno-flag and stub-helper
+assertions remain failed. Raw log/XML, source protocol, helper commands and
+scenario snapshots are sealed in `proof/ryan-c22-review-03-verify-2026-09-09/SHA256.json`.
+The recorded source scenario status flags remain subject to the final-oracle
+review; the original third input has not been integrated.
+
+Correction workers dispatched: P4 1f64672e-95b7-4608-9fa6-5823b7e8eeda from
+12f830e, C22 6a890eee-6163-49bf-836b-cb4b8736b169 from 3347be8. Both follow
+their committed briefs, frozen test assertions, no product edits, no Inno or
+installed-credit claims. Verify complete worker diffs and suites before integration.
+
+Authorized branch backup fast-forwarded from 022ff43 to
+cee17ced3cd461e2a178376cc31c936dd8904cd0; push succeeded and ls-remote confirmed
+that exact origin/cc/living-library SHA. Process-local GitHub CLI credentials
+avoided the GCM prompt; no global auth config changed, no force or main push.

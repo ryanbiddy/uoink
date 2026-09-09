@@ -1,0 +1,13 @@
+executable E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe
+version 3.14.6
+nousersite 1
+prefix E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native
+path0 
+usersite_scheme C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-w3\Python\Python314\site-packages
+usersite_on_path 0
+module server C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\server.py 0f0b53351279bc67c243e6b43735d1999717aea4f483bdf53f08756207aac52d
+module source_subscriptions C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\source_subscriptions.py c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7
+module index C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\index.py b2fa9ca28e6de0bdcf1e7c0d7fe444341de1c2cfc465b95dc9276673de572ea6
+module uoink_mcp C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\uoink_mcp.py 8952c6ee167969b816c90787059a489b55fc5f2bceb23862022cae5d9c1937ce
+module source_manifest C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\source_manifest.py 0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4
+module podcasts C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\podcasts.py 628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0

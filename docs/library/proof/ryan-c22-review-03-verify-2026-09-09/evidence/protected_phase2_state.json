@@ -1,0 +1,225 @@
+{
+  "id": "protected_phase2_state",
+  "status": "pass",
+  "empty_compare": {
+    "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [
+      {
+        "table": "library_meta",
+        "before_count": 0,
+        "after_count": 1,
+        "new_row_identities": [
+          "singleton:1"
+        ],
+        "mutated_prior": [],
+        "allowed": [
+          {
+            "scenario": "empty",
+            "table": "library_meta",
+            "new_rows": [
+              {
+                "singleton": 1,
+                "projection_revision": 0,
+                "active_version_id": null,
+                "last_operation_sequence": 0,
+                "recovery_state": "ready"
+              }
+            ],
+            "reason": "migration created library_meta singleton"
+          }
+        ]
+      }
+    ],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "populated_compare": {
+    "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "extra_compares": {
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "one-off",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "migration created library_meta singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "manual-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "migration created library_meta singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "c53dac6b693d28f1748304823629b3344a0bb8aae1299633c0ce1128ec845c76",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "migration created library_meta singleton"
+            }
+          ]
+        },
+        {
+          "table": "source_classification_outbox",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "capture_key:podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "source_classification_outbox",
+              "new_rows": [
+                {
+                  "capture_key": "podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2",
+                  "video_id": "episode_e112bb7e637",
+                  "committed_at_ms": 1788976393574,
+                  "state": "pending",
+                  "run_id": null,
+                  "version_id": null,
+                  "prompt_hash": null,
+                  "source_revision": null,
+                  "work_id": null,
+                  "last_error_code": null,
+                  "updated_at_ms": 1788976393574
+                }
+              ],
+              "apply": false
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "empty": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "populated": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "baseline_recorded_before_scenarios": true,
+  "librarian_apply_enabled": false
+}

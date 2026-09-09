@@ -1,0 +1,45 @@
+2026-09-09 10:52:37,850 INFO install migration: skipped_isolated_install
+2026-09-09 10:52:37,851 INFO install migration: skipped_isolated_install
+2026-09-09 10:52:37,861 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 10:52:37,865 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 10:52:37,866 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 10:52:37,868 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 10:52:37,870 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 10:52:37,871 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 10:52:37,873 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 10:52:37,875 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 10:52:37,876 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 10:52:37,877 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 10:52:37,879 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 10:52:37,881 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 10:52:37,883 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 10:52:37,884 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 10:52:37,886 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 10:52:37,887 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 10:52:37,889 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 10:52:37,890 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 10:52:37,891 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 10:52:37,893 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 10:52:37,895 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 10:52:37,896 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 10:52:37,899 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 10:52:37,900 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 10:52:37,902 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 10:52:37,904 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 10:52:37,905 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 10:52:37,907 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 10:52:37,910 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 10:52:37,921 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 10:52:37,923 INFO seeded 5 default style anchors
+2026-09-09 10:52:37,923 INFO default style anchors: seeded 5 on first run
+2026-09-09 10:52:37,923 INFO Restored 0 job record(s) from the library index
+2026-09-09 10:52:37,926 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 10:52:37,937 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 10:52:37,957 INFO Uoink server v3.8.0 running on http://127.0.0.1:52509
+2026-09-09 10:52:37,957 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 10:52:37,957 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\receipt\profiles\one-off\output
+2026-09-09 10:52:37,957 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\7a3c3ae2-a8d\grok\_scratch\c22-t\t-h8bdle50\Uoink Installed\server.log
+2026-09-09 10:52:37,972 INFO desktop notification queued: notifications disabled
+2026-09-09 10:52:38,269 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 10:52:38,315 INFO POST /extract -> 400 (URL must be a YouTube, X, TikTok, or Instagram Reel video link)
+2026-09-09 10:52:38,517 INFO desktop notification queued: notifications disabled

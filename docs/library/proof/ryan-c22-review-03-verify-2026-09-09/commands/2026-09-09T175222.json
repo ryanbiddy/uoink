@@ -1,0 +1,27 @@
+{
+  "name": "bundled-provenance",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "-c",
+    "import hashlib, importlib, pathlib, sys, sysconfig\nprint('executable', pathlib.Path(sys.executable).resolve())\nprint('version', sys.version.split()[0])\nprint('nousersite', int(sys.flags.no_user_site))\nprint('prefix', sys.prefix)\nprint('path0', sys.path[0] if sys.path else '')\nusersite = sysconfig.get_path('purelib', scheme='nt_user') if sys.platform=='win32' else ''\nprint('usersite_scheme', usersite)\nprint('usersite_on_path', int(any(usersite and p.lower().startswith(str(usersite).lower()) for p in sys.path)))\nfor name in ('server','source_subscriptions','index','uoink_mcp','source_manifest','podcasts'):\n    try:\n        mod = importlib.import_module(name)\n        path = pathlib.Path(getattr(mod, '__file__', '') or '')\n        digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None\n        print('module', name, path.resolve() if path else None, digest)\n    except Exception as exc:\n        print('module', name, 'ERROR', type(exc).__name__, exc)\n"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\Uoink Installed",
+  "started_utc": "2026-09-09T17:52:22.402683+00:00",
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\commands\\2026-09-09T175222.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\commands\\2026-09-09T175222.stderr.log",
+  "synthetic": true,
+  "child": {
+    "pid": 43292,
+    "created_ms": 1788976342404,
+    "observed_ms": 1788976342405
+  },
+  "exit": 0,
+  "finished_utc": "2026-09-09T17:52:23.761252+00:00",
+  "wall_seconds": 1.359,
+  "stdout_sha256": "b6cce3a0274fdefc21122fc4d971a7b8bbdb7ddd3b7f655b2349de4121e067ad",
+  "stdout_bytes": 1751,
+  "stderr_sha256": "0198a5c2cbf09203bd933d09df08702b783b05e3d79deee48e059bb5da9eaa92",
+  "stderr_bytes": 71
+}

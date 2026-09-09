@@ -1,0 +1,27 @@
+{
+  "name": "helper-relaunch-2",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\relaunch",
+    "--isolated-port",
+    "52509"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\Uoink Installed",
+  "started_utc": "2026-09-09T17:53:16Z",
+  "child": {
+    "pid": 74444,
+    "created_ms": 1788976396774,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1788976396775,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 74444,
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\commands\\20260909T175316Z-helper-relaunch-2.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\commands\\20260909T175316Z-helper-relaunch-2.stderr.log",
+  "synthetic": true
+}

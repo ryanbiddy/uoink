@@ -1,0 +1,756 @@
+{
+  "id": "launch_interruption",
+  "status": "pass",
+  "injection": "launch_interrupt",
+  "driven": {
+    "consented": {
+      "register_source": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "created": true,
+        "source": {
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "kind": "podcast_rss",
+          "canonical_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0,
+          "detection_enabled": true,
+          "archived": false,
+          "poll_interval_min": 60,
+          "boundary": "none",
+          "enrollment": {
+            "cap": 25,
+            "enrolled": 0,
+            "initial_completed": false,
+            "known_candidates": 0,
+            "pending": false,
+            "remaining_initial_slots": 25,
+            "coverage": "unknown",
+            "initial_completed_ms": null
+          },
+          "allowance": {
+            "utc_day": "2026-09-09",
+            "cap": 10,
+            "reserved": 0,
+            "charged": 0,
+            "remaining": 10,
+            "resets_at_ms": 1788998400000,
+            "capture_not_before_ms": 0,
+            "hold_reason": null,
+            "hold_until_ms": null
+          },
+          "detection": {
+            "cursor_revision": 0,
+            "enabled": true,
+            "last_poll_attempt_ms": null,
+            "last_poll_success_ms": null,
+            "next_poll_at_ms": 1788976442580,
+            "observed_count": 0,
+            "coverage": "unknown",
+            "truncated": false,
+            "consecutive_failures": 0,
+            "poll_in_progress": false,
+            "error": null
+          },
+          "item_counts": {
+            "observed": 0,
+            "eligible": 0,
+            "reserved": 0,
+            "started": 0,
+            "uncertain": 0,
+            "committed": 0,
+            "failed": 0,
+            "deleted": 0
+          },
+          "in_flight": [],
+          "capture_status": "off",
+          "legacy": {
+            "feed_id": 1,
+            "playlist_id": null
+          },
+          "created_at_ms": 1788976442580,
+          "updated_at_ms": 1788976442580
+        },
+        "_http_status": 200
+      },
+      "add_feed": {
+        "ok": true,
+        "feed": {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "title": null,
+          "description": null,
+          "homepage": null,
+          "last_polled_at": null,
+          "last_etag": null,
+          "last_modified": null,
+          "poll_interval_min": 60,
+          "enabled": 1,
+          "added_at": "2026-09-09T17:54:02Z",
+          "error_count": 0,
+          "last_error": null,
+          "auto_ingest": 0,
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509"
+        },
+        "_http_status": 200
+      },
+      "list_sources": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "sources": [
+          {
+            "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+            "kind": "podcast_rss",
+            "canonical_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+            "display_name": null,
+            "adapter": "podcast_rss_v1",
+            "consent_state": "off",
+            "revision": 0,
+            "consent_epoch": 0,
+            "detection_enabled": true,
+            "archived": false,
+            "poll_interval_min": 60,
+            "boundary": "none",
+            "enrollment": {
+              "cap": 25,
+              "enrolled": 0,
+              "initial_completed": false,
+              "known_candidates": 0,
+              "pending": false,
+              "remaining_initial_slots": 25,
+              "coverage": "unknown",
+              "initial_completed_ms": null
+            },
+            "allowance": {
+              "utc_day": "2026-09-09",
+              "cap": 10,
+              "reserved": 0,
+              "charged": 0,
+              "remaining": 10,
+              "resets_at_ms": 1788998400000,
+              "capture_not_before_ms": 0,
+              "hold_reason": null,
+              "hold_until_ms": null
+            },
+            "detection": {
+              "cursor_revision": 0,
+              "enabled": true,
+              "last_poll_attempt_ms": null,
+              "last_poll_success_ms": null,
+              "next_poll_at_ms": 1788976442580,
+              "observed_count": 0,
+              "coverage": "unknown",
+              "truncated": false,
+              "consecutive_failures": 0,
+              "poll_in_progress": false,
+              "error": null
+            },
+            "item_counts": {
+              "observed": 0,
+              "eligible": 0,
+              "reserved": 0,
+              "started": 0,
+              "uncertain": 0,
+              "committed": 0,
+              "failed": 0,
+              "deleted": 0
+            },
+            "in_flight": [],
+            "capture_status": "off",
+            "legacy": {
+              "feed_id": 1,
+              "playlist_id": null
+            },
+            "created_at_ms": 1788976442580,
+            "updated_at_ms": 1788976442580
+          }
+        ],
+        "next_cursor": null,
+        "as_of_ms": 1788976442611,
+        "_http_status": 200
+      },
+      "list_feeds": {
+        "ok": true,
+        "feeds": [
+          {
+            "id": 1,
+            "feed_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+            "title": null,
+            "description": null,
+            "homepage": null,
+            "last_polled_at": null,
+            "last_etag": null,
+            "last_modified": null,
+            "poll_interval_min": 60,
+            "enabled": 1,
+            "added_at": "2026-09-09T17:54:02Z",
+            "error_count": 0,
+            "last_error": null,
+            "auto_ingest": 0,
+            "episode_count": 0,
+            "latest_episode_published_at": null,
+            "last_episode_title": null
+          }
+        ],
+        "count": 1,
+        "_http_status": 200
+      },
+      "loopback_register_refused": false,
+      "feed_id": 1,
+      "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+      "consent_intent": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "user_intent_token": "wEV5PyhTUY2GpNNyRUKxGWc0mTRO7xnp00Nkk_IOlWQ",
+        "expires_ms": 1788976742627,
+        "source": {
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "kind": "podcast_rss",
+          "canonical_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0,
+          "detection_enabled": true,
+          "archived": false,
+          "poll_interval_min": 60,
+          "boundary": "none",
+          "enrollment": {
+            "cap": 25,
+            "enrolled": 0,
+            "initial_completed": false,
+            "known_candidates": 0,
+            "pending": false,
+            "remaining_initial_slots": 25,
+            "coverage": "unknown",
+            "initial_completed_ms": null
+          },
+          "allowance": {
+            "utc_day": "2026-09-09",
+            "cap": 10,
+            "reserved": 0,
+            "charged": 0,
+            "remaining": 10,
+            "resets_at_ms": 1788998400000,
+            "capture_not_before_ms": 0,
+            "hold_reason": null,
+            "hold_until_ms": null
+          },
+          "detection": {
+            "cursor_revision": 0,
+            "enabled": true,
+            "last_poll_attempt_ms": null,
+            "last_poll_success_ms": null,
+            "next_poll_at_ms": 1788976442580,
+            "observed_count": 0,
+            "coverage": "unknown",
+            "truncated": false,
+            "consecutive_failures": 0,
+            "poll_in_progress": false,
+            "error": null
+          },
+          "item_counts": {
+            "observed": 0,
+            "eligible": 0,
+            "reserved": 0,
+            "started": 0,
+            "uncertain": 0,
+            "committed": 0,
+            "failed": 0,
+            "deleted": 0
+          },
+          "in_flight": [],
+          "capture_status": "off",
+          "legacy": {
+            "feed_id": 1,
+            "playlist_id": null
+          },
+          "created_at_ms": 1788976442580,
+          "updated_at_ms": 1788976442580
+        },
+        "confirmation": {
+          "source": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "consent_state": "on",
+          "effect": "Standing capture will start automatically for this source: up to 25 back-catalog items, then newly published items, at most 10 starts per UTC day.",
+          "back_catalog_cap": 25,
+          "daily_cap": 10
+        },
+        "_http_status": 200
+      },
+      "consent": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "operation_key": "c22-interrupt-on",
+        "changed": true,
+        "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_state": "on",
+        "consent_epoch": 1,
+        "boundary": "initial",
+        "released_reservations": 0,
+        "in_flight": [],
+        "recorded_at_ms": 1788976442642,
+        "authority": "local_user",
+        "_http_status": 200
+      }
+    },
+    "refresh": {
+      "ok": true,
+      "schema_version": 1,
+      "contract_version": "phase3-v1-2026-09-07",
+      "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+      "outcome": "snapshot",
+      "poll": {
+        "ok": true,
+        "outcome": "snapshot",
+        "scan_revision": 1,
+        "coverage": "complete",
+        "truncated": false,
+        "rejected": 0,
+        "conflicts": 0,
+        "stale_epoch": false,
+        "enrollment": {
+          "boundary": "initial",
+          "enrolled": 1,
+          "cohort": [
+            "si_b362bf471601e298653641d01ad6a6438cf2bfa0658f3b396615ed1bebff31fe"
+          ]
+        },
+        "inserted": 1,
+        "updated": 0,
+        "linked": 0,
+        "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+        "kind": "podcast_rss"
+      },
+      "_http_status": 200
+    },
+    "standing": {
+      "counts": {
+        "schema_version": 29,
+        "yoinks": 0,
+        "yoinks_fts": 0,
+        "yoinks_fts_data": 2,
+        "yoinks_fts_idx": 0,
+        "yoinks_fts_content": 0,
+        "yoinks_fts_docsize": 0,
+        "yoinks_fts_config": 1,
+        "jobs": 1,
+        "taxonomy": 0,
+        "sqlite_sequence": 5,
+        "entities": 0,
+        "entity_mentions": 0,
+        "taxonomy_corrections": 0,
+        "pending_yoinks": 0,
+        "yoink_tags": 0,
+        "engagement_events": 0,
+        "memory_layer": 1,
+        "user_channels": 0,
+        "workspaces": 0,
+        "workspace_critique_log": 0,
+        "claims": 0,
+        "scripts": 0,
+        "podcast_feeds": 1,
+        "podcast_episodes": 1,
+        "monitored_playlists": 0,
+        "mobile_queue_events": 0,
+        "writing_pieces": 0,
+        "style_anchors": 5,
+        "allowed_sites": 4,
+        "writing_drafts": 0,
+        "citations": 0,
+        "clips": 0,
+        "clips_fts": 0,
+        "clips_fts_data": 2,
+        "clips_fts_idx": 0,
+        "clips_fts_docsize": 0,
+        "clips_fts_config": 1,
+        "shelves": 0,
+        "shelf_versions": 0,
+        "shelf_nodes": 0,
+        "library_meta": 1,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_work": 0,
+        "library_attempts": 0,
+        "library_submissions": 0,
+        "library_proposals": 0,
+        "item_shelves": 0,
+        "library_item_policy": 0,
+        "library_previews": 0,
+        "library_operation_receipts": 0,
+        "library_user_intents": 0,
+        "library_applies": 0,
+        "source_subscriptions": 1,
+        "source_consent_receipts": 1,
+        "source_user_intents": 1,
+        "source_detection_cursors": 1,
+        "source_items": 1,
+        "source_capture_starts": 1,
+        "source_classification_policy": 0,
+        "source_classification_outbox": 0,
+        "media_depth": 0,
+        "diarization_runs": 0,
+        "chapters": 0
+      },
+      "starts": [
+        {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "item_id": "si_b362bf471601e298653641d01ad6a6438cf2bfa0658f3b396615ed1bebff31fe",
+          "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-09",
+          "slot": 1,
+          "state": "uncertain",
+          "reserved_at_ms": 1788976472202,
+          "reservation_expires_ms": 1788976592202,
+          "started_at_ms": 1788976472205,
+          "finished_at_ms": null,
+          "owner_token": "vvi1Cf_Eo8_BwlO4ReHLC3D2K8HJVyMZQM05BX2UtYY",
+          "owner_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "backend_kind": "server_capture",
+          "backend_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "charged_starts": [
+        {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "item_id": "si_b362bf471601e298653641d01ad6a6438cf2bfa0658f3b396615ed1bebff31fe",
+          "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-09",
+          "slot": 1,
+          "state": "uncertain",
+          "reserved_at_ms": 1788976472202,
+          "reservation_expires_ms": 1788976592202,
+          "started_at_ms": 1788976472205,
+          "finished_at_ms": null,
+          "owner_token": "vvi1Cf_Eo8_BwlO4ReHLC3D2K8HJVyMZQM05BX2UtYY",
+          "owner_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "backend_kind": "server_capture",
+          "backend_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "standing_starts": [
+        {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "item_id": "si_b362bf471601e298653641d01ad6a6438cf2bfa0658f3b396615ed1bebff31fe",
+          "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-09",
+          "slot": 1,
+          "state": "uncertain",
+          "reserved_at_ms": 1788976472202,
+          "reservation_expires_ms": 1788976592202,
+          "started_at_ms": 1788976472205,
+          "finished_at_ms": null,
+          "owner_token": "vvi1Cf_Eo8_BwlO4ReHLC3D2K8HJVyMZQM05BX2UtYY",
+          "owner_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "backend_kind": "server_capture",
+          "backend_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "standing_charge_count": 1,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [
+        {
+          "item_id": "si_b362bf471601e298653641d01ad6a6438cf2bfa0658f3b396615ed1bebff31fe",
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "entry_id": "c22-child-interrupt-ep-1",
+          "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+          "canonical_url": "http://c22-fixture.invalid/child-interrupt/episode",
+          "title": "C22 launch-interrupt episode",
+          "published_at_ms": 1788782400000,
+          "first_seen_ms": 1788976442674,
+          "last_seen_ms": 1788976442674,
+          "first_scan_revision": 1,
+          "first_seen_consent_epoch": 1,
+          "metadata_json": "{\"audio_url\":\"http://c22-fixture.invalid/child-interrupt/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 12:00:00 GMT\"}",
+          "legacy_episode_id": 1,
+          "eligibility": "back_catalog",
+          "enrolled_epoch": 1,
+          "state": "uncertain",
+          "actual_starts": 1,
+          "preflight_failures": 0,
+          "retry_at_ms": null,
+          "blocked_reason": null,
+          "video_id": null,
+          "committed_at_ms": null
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-interrupt-on",
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "request_hash": "cbec15b9ec2aabace04e863779d9bfccd1578e3697b8fa692bf6492b5843a7f0",
+          "session_hash": "24c3c2e72d509c952e096c584dccb26550f81e991e45f1439b25092f31140b3e",
+          "authority": "local_user",
+          "old_state": "off",
+          "new_state": "on",
+          "before_revision": 0,
+          "after_revision": 1,
+          "consent_epoch": 1,
+          "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"c22-interrupt-on\",\"recorded_at_ms\":1788976442642,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509\"}",
+          "created_at_ms": 1788976442642
+        }
+      ],
+      "subscriptions": [
+        {
+          "source_id": "src_0263ca1423e48d36445ef52ce6407b552276001540535c102cadf7590a596509",
+          "kind": "podcast_rss",
+          "source_key": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "canonical_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "legacy_feed_id": 1,
+          "legacy_playlist_id": null,
+          "detection_enabled": 1,
+          "archived": 0,
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1,
+          "boundary": "none",
+          "initial_enrollment_completed_ms": 1788976442674,
+          "back_catalog_enrolled": 1,
+          "poll_interval_min": 60,
+          "capture_not_before_ms": 1788980072205,
+          "accounting_hold_until_ms": 0,
+          "last_observed_ms": 1788976472202,
+          "created_at_ms": 1788976442580,
+          "updated_at_ms": 1788976472205
+        }
+      ],
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+          "title": null,
+          "description": null,
+          "homepage": null,
+          "last_polled_at": null,
+          "last_etag": null,
+          "last_modified": null,
+          "poll_interval_min": 60,
+          "enabled": 1,
+          "added_at": "2026-09-09T17:54:02Z",
+          "error_count": 0,
+          "last_error": null,
+          "auto_ingest": 0
+        }
+      ],
+      "episodes": [
+        {
+          "id": 1,
+          "feed_id": 1,
+          "guid": "c22-child-interrupt-ep-1",
+          "title": "C22 launch-interrupt episode",
+          "audio_url": "http://c22-fixture.invalid/child-interrupt/fixture.mp3",
+          "duration_seconds": null,
+          "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+          "description": null,
+          "status": "new",
+          "yoink_video_id": null,
+          "discovered_at": "2026-09-09T17:54:02Z",
+          "audio_local_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\fixture.mp3",
+          "audio_downloaded_at": null,
+          "audio_size_bytes": null,
+          "audio_download_error": null,
+          "transcript_local_path": null,
+          "transcript_status": "none",
+          "transcript_model_used": null,
+          "diarization_ran": 0,
+          "transcript_finished_at": null,
+          "transcript_error": null,
+          "episode_page_url": "http://c22-fixture.invalid/child-interrupt/episode",
+          "auto_ingest_requested": 0
+        }
+      ],
+      "yoinks": [],
+      "publication_count": 0,
+      "capture_keys": [
+        "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83"
+      ],
+      "video_ids": [],
+      "episode_ids": [
+        "1"
+      ]
+    },
+    "synthetic_url": "http://c22-fixture.invalid/child-interrupt/feed.xml",
+    "episode_guid": "c22-child-interrupt-ep-1",
+    "episode_title": "C22 launch-interrupt episode",
+    "ownership": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_children\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+        "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "unresolved_ms": 1788976472213
+        }
+      }
+    ],
+    "helper_state": {
+      "incarnations": [
+        {
+          "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_instances\\ac255514d1e22672.json",
+          "name": "ac255514d1e22672.json",
+          "payload": {
+            "host": "Ryan-PC",
+            "root": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt",
+            "token": "ac255514d1e22672",
+            "pid": 11304,
+            "created_ms": 1788976441193,
+            "minted_ms": 1788976442190
+          }
+        }
+      ],
+      "claims": [
+        {
+          "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_claims\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+          "name": "8342c01f67384e667555ea5eb577673e72f762b6.json",
+          "payload": {
+            "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+            "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+            "owner_token_hash": "e5817c6f476a1d77dd13423003b342dddd44fe938ea62fd7fc6283cbbbc64c51",
+            "instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+            "pid": 11304,
+            "created_ms": 1788976441193,
+            "claimed_ms": 1788976472206
+          }
+        }
+      ],
+      "children": [
+        {
+          "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_children\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "unresolved_launch": true,
+          "children": [],
+          "record": {
+            "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+            "children": [],
+            "unresolved_launch": true,
+            "unresolved_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+            "unresolved_ms": 1788976472213
+          }
+        }
+      ],
+      "locks": [
+        {
+          "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\capture_locks\\66325453d0eca9f1c75ffe8e8db94ab5009c70b0.lock",
+          "name": "66325453d0eca9f1c75ffe8e8db94ab5009c70b0.lock"
+        }
+      ]
+    },
+    "inject_child_file": null
+  },
+  "unresolved": [
+    {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_children\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+      "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+      "unresolved_launch": true,
+      "children": [],
+      "record": {
+        "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+        "children": [],
+        "unresolved_launch": true,
+        "unresolved_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+        "unresolved_ms": 1788976472213
+      }
+    }
+  ],
+  "helper_state": {
+    "incarnations": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_instances\\ac255514d1e22672.json",
+        "name": "ac255514d1e22672.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt",
+          "token": "ac255514d1e22672",
+          "pid": 11304,
+          "created_ms": 1788976441193,
+          "minted_ms": 1788976442190
+        }
+      }
+    ],
+    "claims": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_claims\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+        "name": "8342c01f67384e667555ea5eb577673e72f762b6.json",
+        "payload": {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "capture_key": "podcast:537e974001f99b19e9b9a355d807f92826cc76dd5c3d76e8db4a762c66b96c83",
+          "owner_token_hash": "e5817c6f476a1d77dd13423003b342dddd44fe938ea62fd7fc6283cbbbc64c51",
+          "instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "pid": 11304,
+          "created_ms": 1788976441193,
+          "claimed_ms": 1788976472206
+        }
+      }
+    ],
+    "children": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_children\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+        "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "unresolved_ms": 1788976472213
+        }
+      }
+    ],
+    "locks": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\capture_locks\\66325453d0eca9f1c75ffe8e8db94ab5009c70b0.lock",
+        "name": "66325453d0eca9f1c75ffe8e8db94ab5009c70b0.lock"
+      }
+    ]
+  },
+  "instrument": {
+    "instrument": {
+      "product_module": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\Uoink Installed\\source_subscriptions.py",
+      "helper_driven": true,
+      "inject": "launch_interrupt"
+    },
+    "ownership": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt\\source_children\\8342c01f67384e667555ea5eb577673e72f762b6.json",
+        "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "st_57213f0a66b0f2a3dccdb6e36463eebc",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "Ryan-PC:C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\7a3c3ae2-a8d\\grok\\_scratch\\c22-t\\t-h8bdle50\\receipt\\profiles\\child-interrupt#ac255514d1e22672",
+          "unresolved_ms": 1788976472213
+        }
+      }
+    ]
+  }
+}
