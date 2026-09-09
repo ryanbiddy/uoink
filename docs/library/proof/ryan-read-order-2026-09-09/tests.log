@@ -1,0 +1,15 @@
+..F.                                                                     [100%]
+================================== FAILURES ===================================
+_______ test_read_open_does_not_migrate_then_explicit_backend_promotes ________
+tests\test_existing_index_read_open.py:38: in test_read_open_does_not_migrate_then_explicit_backend_promotes
+    assert writer is reader
+E   assert <index.Index object at 0x000002730A9606E0> is <index.Index object at 0x000002730BD260D0>
+============================== warnings summary ===============================
+tests/test_discovery_route.py::test_discovery_route
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_existing_index_read_open.py::test_read_open_does_not_migrate_then_explicit_backend_promotes
+1 failed, 3 passed, 1 warning in 1.25s

@@ -1,0 +1,24 @@
+{
+  "files": {
+    "proposal.json": {
+      "bytes": 655,
+      "sha256": "baefc6dc0c2e1fb2d0cafc17c0b76f2c6bdc839f1a0496019bced34ec2b1566b"
+    },
+    "propose_read_fixture.py": {
+      "bytes": 2187,
+      "sha256": "cc49c37202cd7d9bad576bb01bc02667b31d8060ecedaf48eeffc8fa9fffefce"
+    },
+    "results.json": {
+      "bytes": 715,
+      "sha256": "2bbc203ba86079dba4cdb9b898850ee7afaacec2cc0650e4f7ab122005e5b1d2"
+    },
+    "tests.log": {
+      "bytes": 1270,
+      "sha256": "3ae0f3ea5893f5323d9d6ce6aad552697324b7441cca816598415c3b5989104a"
+    },
+    "tests.xml": {
+      "bytes": 1140,
+      "sha256": "6293affe09d238430cb0d0c372c56ffabf4ec40af60327298ace7235c061169a"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "applied": false,
+  "patch": "docs/library/patches/ryan-proposed-read-fixture-2026-09-09.patch",
+  "bytes": 649,
+  "sha256": "32ecbcce8d4040308324cc739914eb56106535e91e780991d7cc02683659a0f5",
+  "unchanged_assertions": 13,
+  "reproduction": "3 passed, 1 failed, 1 warning, 1.25 s; unchanged discovery-route file then read-opening file",
+  "cause": "tests/test_discovery_route.py directly leaves server._get_index as a lambda returning its own fixture Index; production getter is not called",
+  "proposed_change": "Capture production getter during collection; monkeypatch that original callable only for the new test. No behavior assertion changes."
+}

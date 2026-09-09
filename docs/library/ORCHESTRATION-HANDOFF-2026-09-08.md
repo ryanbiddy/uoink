@@ -298,6 +298,15 @@ All 150 assertion syntax trees are unchanged. Approval was requested because
 Ryan froze further fixture edits. The proposal has not been applied or run.
 This does not waive the separate missing historical AT6 child exit status.
 
+Additional 2026-09-09 proposal: `RYAN-READ-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
+documents the new read-opening test's two-line setup correction. The earlier
+discovery-route test leaves the backend getter replaced; the ordered pair
+reproduces one failure / three passes. All 13 assertions remain identical.
+Exact unapplied patch: 649 bytes, SHA-256
+`32ecbcce8d4040308324cc739914eb56106535e91e780991d7cc02683659a0f5`.
+Together both proposals touch four files and preserve 163 assertion trees.
+No fixture edit or pass is inferred from this diagnosis.
+
 - Installed Inno package receipts (Phase 3 C22, Phase 4), once product work
   supplies a no-5179 installed path and exact operator kit. Ryan has no safe
   installation action to take with the current package.
@@ -1710,3 +1719,14 @@ focused and integration unions passed. Investigate an earlier route fixture's
 direct getter substitution with the named brief before claiming a product
 repair or seeking a setup correction. Twelve raw files are sealed in
 proof/ryan-integrated-tree-02-2026-09-09. The result remains failed.
+
+### 2026-09-09 — New ordered failure is a substituted test getter
+
+The unchanged discovery-route file followed by the unchanged new read-opening
+file reproduces three passes / one failure in 1.25 s. The older test leaves
+server._get_index as its fixture lambda, so the new check never calls production
+promotion. The two-line proposal captures/binds the real getter for this test;
+all 13 assertions are preserved. It is unapplied and the failed observations
+stay failed. The exact patch/review and five-file proof are in the named
+RYAN-READ-FIXTURE-PROPOSAL-REVIEW report. Continue both receipt workers while
+Ryan considers the four-file total of this and the existing mirror proposal.

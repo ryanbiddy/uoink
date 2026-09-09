@@ -127,3 +127,17 @@ with only S21 excluded: **2,174 passed, 20 failed, three skipped, one xfailed**,
 The [sealed complete result](proof/ryan-corrected-01-2026-09-09/SHA256.json)
 retains the command, log, XML, comparison and assertion audit. No further
 fixture correction or product source edit followed that run.
+
+## Proposed read-opening setup correction, not authorized or applied
+
+Full tree 8fc6a40 fails Astra's new read-promotion test because the earlier
+unchanged test_discovery_route.py leaves server._get_index replaced by its
+fixture lambda. Ordered reproduction pre-o1 has three passed / one failed,
+1.25 s. This is not an observed production getter failure: that getter is
+not invoked. The same production checks passed focused verification.
+Exact proposed two-line setup diff: patches/ryan-proposed-read-fixture-2026-09-09.patch,
+649 bytes, SHA-256 32ecbcce8d4040308324cc739914eb56106535e91e780991d7cc02683659a0f5.
+Capture the original production getter during collection and bind it for the
+new test with monkeypatch; keep every assertion and the older fixture unchanged.
+All 13 assertion trees match. Review: RYAN-READ-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md.
+No correction has been applied. Ryan's further-fixture freeze remains in force.
