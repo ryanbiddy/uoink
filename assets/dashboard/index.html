@@ -3613,7 +3613,7 @@
                 <div class="panel-head">
                   <div class="panel-title" id="scriptTitle">Script</div>
                   <div class="inline-row">
-                    <button class="button ghost" type="button" id="reviseScript">Revise</button>
+                    <button class="button ghost" type="button" id="reviseScript">Prepare revision</button>
                     <button class="button" type="button" id="deriveShotList">Derive shot list</button>
                   </div>
                 </div>
@@ -3633,7 +3633,8 @@
                 <div class="panel-body">
                   <textarea class="field draft-box" id="scriptRevisionNotes" placeholder="Paste critique findings or revision target."></textarea>
                   <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script to save as the next version."></textarea>
-                  <button class="button primary" type="button" id="saveScriptRevision">Run revision / save version</button>
+                  <div class="soft-note">Uoink prepares context for a connected agent. Paste a revised script to save a new version.</div>
+                  <button class="button primary" type="button" id="saveScriptRevision">Prepare revision context</button>
                   <div id="scriptRevisionResult"></div>
                 </div>
               </div>
@@ -4745,6 +4746,7 @@
       scriptDetail: document.getElementById("scriptDetail"),
       scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
+      saveScriptRevision: document.getElementById("saveScriptRevision"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       writingNavCount: document.getElementById("writingNavCount"),
       writingAnchorSelect: document.getElementById("writingAnchorSelect"),
@@ -7358,6 +7360,12 @@
       }
     }
 
+    function syncScriptRevisionAction() {
+      els.saveScriptRevision.textContent = els.scriptRevisionDraft.value.trim()
+        ? "Save pasted revision"
+        : "Prepare revision context";
+    }
+
     async function reviseCurrentScript({ persist = false } = {}) {
       const script = state.currentScript;
       if (!script || !script.id) return showToast("Select a script first.");
@@ -7379,13 +7387,15 @@
       }
       try {
         const data = await authFetch("/script/revise", { method: "POST", body: JSON.stringify(payload) });
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
         if (data.id) {
+          showToast(`Script v${data.version || ""} saved.`);
           await loadScripts();
           await selectScript(data.id);
+          return;
         }
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Revision context ready for a connected agent</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Couldn't revise that script.");
+        showToast("Couldn't prepare or save that revision.");
       }
     }
 
@@ -10887,7 +10897,9 @@
       document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
       document.getElementById("reloadScripts").addEventListener("click", loadScripts);
       document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
-      document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
+      els.saveScriptRevision.addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
+      els.scriptRevisionDraft.addEventListener("input", syncScriptRevisionAction);
+      syncScriptRevisionAction();
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
       els.scriptForm.addEventListener("submit", generateScriptFromForm);
       els.scriptSourceSearch.addEventListener("focus", () => toggleScriptSourceCombo(true));
