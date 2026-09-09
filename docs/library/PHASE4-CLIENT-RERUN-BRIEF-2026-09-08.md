@@ -140,3 +140,26 @@ as a wall-clock limit. This is a planned configuration, not a measured bound.
 Retain actual request/connection timestamps, failure and any explicit reconnect;
 the 15-second acceptance gate still requires an observation. Recheck subscription
 authentication immediately before launch, with API-key and bare modes absent.
+
+## Complete-packet inspection
+
+`proof/aw-rerun-2026-09-08/inspect_client_evidence.py` reads the recorder's
+complete frames, validates their lengths and hashes, correlates requests
+within each connection and compares every character of the frozen card and
+excerpt text on both native-resource and fallback-tool routes. It retains
+discovery inventories, full native prompt messages, tool actions, unmatched
+responses and unanswered requests. Missing evidence and changed tails fail
+its packet/prompt subset; that subset never establishes phase acceptance.
+
+Authoring verification: four synthetic checks passed in 1.70 seconds
+(checkout scratch `aw-evidence-inspector-01`). They cover exact equality,
+changed tails with identical prefixes, missing native prompt exchanges and
+a corrupted frame hash. No client/model or archived copy was used.
+
+The fixture client's built-in tool list must retain `ListMcpResourcesTool`
+and `ReadMcpResourceTool`, the names in Anthropic's
+[tools reference](https://code.claude.com/docs/en/tools-reference). An empty
+built-in tool list would remove these native resource routes. Restrict other
+capabilities explicitly and retain the observed session inventory; the
+[MCP documentation](https://code.claude.com/docs/en/mcp) describes native
+resource mentions and prompt commands, but the receipt requires actual traffic.
