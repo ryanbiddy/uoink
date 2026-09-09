@@ -82,7 +82,9 @@ BC-3d at `897f0d2`, BC-3e at `d792875`, AV-5m4a2 at `b833167`, and
 AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
 AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
 complete/partial diffs as described below. Active at this update: BC-3f
-Grok `33751bb7` and AV-5m4a3 Grok `888d4940`. AZ-5h2 and AV-5m4b3 are next.
+Grok `33751bb7` and AV-5m4a3 Grok `888d4940` have finished and are under
+independent verification. AZ-5h2 Grok `098fb14d` and AV-5m4b3 Grok `260ef22c`
+are active from `533ef6f`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -91,7 +93,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
    record (474 passed / one frozen failure in independent verification).
-   Dispatch AZ-5h2 (grok) from `PHASE5-AZ5H2-BRIEF-2026-09-08.md`,
+   Verify AZ-5h2 (grok, `098fb14d`) from `PHASE5-AZ5H2-BRIEF-2026-09-08.md`,
    then AZ-5g2 (grok) from
    `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
    measurement stays retained and is not integrated.
@@ -543,3 +545,25 @@ The broader BD-2 check on `831714d` produced **382 passed, four failed**,
 podcast, clip and resource files. Failures are only the unchanged AS-7
 superseded-evidence cases. Logs/XML/expanded command are in checkout scratch
 `bd2-broader-bc3e`. Later BC-3f/AZ-5h integration still needs final verification.
+
+### 2026-09-08 - Follow-on runs and process-isolation lesson
+
+AZ-5h2 Grok `098fb14d-115d-42c8-b40b-35e37a009d81` and AV-5m4b3
+Grok `260ef22c-4a89-42c4-ad46-695f7e0ed80e` started from `533ef6f`
+at 19:20 PDT. BC-3f and AV-5m4a3 have finished; their independent named
+worker unions are running. No result is credited before verification.
+
+During A3, a PowerShell automatic-variable collision with `$args` launched
+bare pytest instead of the named suites. Its task-specific kill succeeded.
+Automatic approval review rejected a separate machine-wide Python/pytest
+kill because it could stop unrelated work; there is no evidence that broad
+kill executed. Use explicit selectors or a task-specific variable and stop
+only processes whose ownership by the exact run is established. Preserve
+the accidental invocation as aborted, not as a verification result.
+
+Client preparation found that `reshelve-review` requires an attached Phase 2
+service and a valid preview. The standalone unattached reader correctly
+returns `feature_unavailable`. A valid-prompt observation must document its
+fixture service/preview preconditioning before freezing before-and-after
+state, and distinguish that setup from the default unattached launch. No
+real-client session or archive-copy preparation has run yet.
