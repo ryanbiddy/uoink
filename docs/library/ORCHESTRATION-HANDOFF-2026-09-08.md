@@ -192,6 +192,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    Include this source in the final tree and packaged original-route observation.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
+   Current product is measured at 8fc6a40; build the isolated replacement while
+   kits finish under `RYAN-ISOLATED-PACKAGE-BUILD-BRIEF-2026-09-09.md`. If later
+   packaged source is unchanged, retain its build SHA and verify exact bindings
+   against the final kit-inclusive validation commit rather than rebuilding notes.
    Replace the runbook's stop preflight with exact reviewed install/restart and
    scenario commands, then Ryan supplies C22 and Phase 4 installed receipts.
 4. Preserve Phase 2 option 3, blocked X link, chapters/ranges without attribution,
