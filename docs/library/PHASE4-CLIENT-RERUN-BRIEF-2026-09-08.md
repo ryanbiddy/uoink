@@ -103,3 +103,28 @@ the actual client version/mode/allowlist before any client observation.
 During authoring only syntax, guard syntax and synthetic rebinding are checked.
 No current candidate or measured-copy receipt is credited until this script
 actually runs after AW-4 closes its implementation findings.
+
+## Valid-preview application fixture
+
+The default stdio entry does not attach a Phase 2 work service. Preserve its
+`feature_unavailable` behavior and original `mcp.json` configuration. To
+observe a valid native `reshelve-review`, run
+`proof/aw-rerun-2026-09-08/prepare_prompt_session.py` once on the prepared
+fixture immediately before the client observation. It creates a separate
+`mcp-attached.json` and application fixture launcher using the real service
+and shipped stdio entry. Record this launch distinction explicitly.
+
+Preconditioning approves a synthetic, inactive taxonomy, makes a run whose
+two held items are explicitly excluded from classification, and creates an
+unapproved report-only preview. Apply stays false; no assignment is created.
+All setup calls/results, the original and post-setup semantic state, preview
+expiry, and launch/config hashes are retained. Compare client actions against
+that post-setup state. Do not treat synthetic exclusions as a classifier result.
+The preview expires after 15 minutes; a missed window is a retained failed
+observation and requires a documented fresh-fixture repair before retry.
+
+Authoring verification used two synthetic items, source staging and the real
+service recheck: **one passed**, 0.85 seconds (checkout scratch
+`aw-prompt-prep-synthetic`). Apply remained false, assignments unchanged, and
+service reattachment preserved the semantic state. No archived copy, actual
+client/model, native prompt request or phase acceptance is credited by that test.

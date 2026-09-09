@@ -615,3 +615,15 @@ This is not a final B3 verdict. Its final review must close the actual
 mutation gap or leave a repair in our queue. The probe is a retained
 diagnostic of the parent syscall, not a new frozen fixture that assumes
 a future isolated child must execute that parent interceptor.
+
+### 2026-09-08 - Native-prompt fixture preparation
+
+The optional `prepare_prompt_session.py` helper preserves the default
+unattached launch and creates a separately named application fixture that
+attaches the real Phase 2 service. Its valid preview uses two synthetic
+exclusions, with apply false and no assignment. All setup calls and semantic
+before/after state are frozen before the client starts. The synthetic staging
+and real-service recheck passed once in 0.85 seconds (`aw-prompt-prep-synthetic`).
+This is instrument preparation only. Actual archive/client work still waits
+for AW-4 and the shared transport repair. Create the 15-minute preview only
+when the client can immediately observe it.
