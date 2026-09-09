@@ -852,3 +852,15 @@ AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` started at
 the complete B5 union and new alias/operation-ownership evidence. All 19
 AW-10 sealed files match committed bytes. No B5 production change has been
 integrated; the checkout remains on the accepted A3 production baseline.
+
+### 2026-09-08 21:38 PDT - Explicit client configuration prepared
+
+The AW preparation now generates fresh, explicit client settings and launch
+arguments from the frozen staged inventory. Only two native resource tools,
+three bounded reads and the inert sentinel are allowed; other uoink tools
+are explicitly denied. Ordinary and Recall settings are separate. Hook
+commands use executable/argument arrays, and the original MCP configuration
+is preserved. Two synthetic checks passed in 0.68 seconds; five artifacts
+are sealed in the client-config-check archive. These are preparation checks,
+not client observations. B6 is still active; real-client execution waits for
+its integrated result and final AW-4 ruling.

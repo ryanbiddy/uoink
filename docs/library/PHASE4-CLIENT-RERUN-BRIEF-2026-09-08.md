@@ -188,3 +188,28 @@ and silent missing-index Recall with no replacement database. The URI guard's
 initial failure and repair, packet-inspector checks, and observer checks are
 retained under the adjacent preparation-checks archive. These are authoring
 results, not a client or phase acceptance receipt.
+
+## Explicit client launch configuration
+
+After prompt preconditioning, `prepare_client_config.py --fixture-root ...`
+creates fresh files under the fixture's client directory: recorded MCP
+configuration, ordinary and Recall-only settings, a session UUID and argument
+vector. It starts no process. Recheck subscription authentication before using
+that vector; retain actual settings-load evidence because print mode can
+silently ignore invalid settings.
+
+The client retains the two native resource tools, the three bounded uoink
+reads and the inert sentinel. Every other tool in the staged registry gets
+an explicit deny entry. The original server configuration stays unchanged.
+The new configuration sets 10-second MCP timeouts and loads the explicit
+servers at startup. Hooks use direct executable/argument arrays, as documented
+in the [hook reference](https://code.claude.com/docs/en/hooks), so spaced paths
+are not interpreted as shell commands. Auto memory is disabled only for this
+fixture session; [settings documentation](https://code.claude.com/docs/en/settings)
+describes that session setting. Normal client settings are not edited.
+
+Two synthetic checks passed in 0.68 seconds. They cover exact tool exposure,
+preservation of the input configuration, separate Recall activation, spaced
+argument paths, and refusal of unexpected servers or incomplete metadata.
+The five sealed artifacts are in `client-config-check/`. No actual client,
+archived database or acceptance gate was exercised by those checks.

@@ -1,0 +1,24 @@
+{
+  "files": {
+    "docs/library/proof/aw-rerun-2026-09-08/client-config-check/results.json": {
+      "sha256": "827639e197a841d3207906a6c1b35afc671a3d4a96cce4cbba495a6757ade582",
+      "bytes": 710
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/client-config-check/test_aw_client_config.py": {
+      "sha256": "6e18c18fc2483b1e05992cf9e07e8f611683f1f49292a38e707d61e41447e4b8",
+      "bytes": 2739
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/client-config-check/tests.log": {
+      "sha256": "fb23dca02bcd3ea283afc96d31de4fbf2512ce4a6872d0624bdfc21e47f20615",
+      "bytes": 100
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/client-config-check/tests.xml": {
+      "sha256": "b2288e6686410b535b1480b0969ca4d275c14858ed67da7ae5018c9d7a9c8e7d",
+      "bytes": 513
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/prepare_client_config.py": {
+      "sha256": "7177c2cb42ed9fcd6c48df7a7d263a74929bc93728d0d9aec9aac2f994053cca",
+      "bytes": 7235
+    }
+  }
+}
