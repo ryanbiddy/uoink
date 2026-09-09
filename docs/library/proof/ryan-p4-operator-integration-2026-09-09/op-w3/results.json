@@ -1,0 +1,27 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_receipt_operator_final.py",
+      "tests/test_install_receipt_p4_kit.py",
+      "tests/test_install_receipt_p4_kit_repair.py",
+      "tests/test_install_receipt_p4_kit_final.py",
+      "tests/test_install_receipt_p4_kit_truth.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\op-w3-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\op-w3\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\op-w3\\tests.log"
+  }
+]

@@ -1,0 +1,49 @@
+{
+  "scope": "Fourth P4 plus reviewed operator supplement: worker 57 passed / one failed 26.27s; checkout 57 passed / one failed 25.39s",
+  "files": {
+    "checkout-source-runtime.json": {
+      "bytes": 6595,
+      "sha256": "1ee2a4da92cbde9763b7f094aa6c75d95484b586058e2b8b144ba7c1ad446ebf"
+    },
+    "integrated.patch": {
+      "bytes": 435520,
+      "sha256": "ee5e3949c118530bd40c9b0668c6969a49daabab6464019da75014eeba97c2e7"
+    },
+    "op-c1/results.json": {
+      "bytes": 885,
+      "sha256": "a199ff726658c569190fc9a2bbfda23c84e938d7aabf22cfdf51be125488d933"
+    },
+    "op-c1/tests.log": {
+      "bytes": 1548,
+      "sha256": "9a2de236e2dafa122299cc7e86000a3ec4f97ec058194a755463b3ab6e8cc1dd"
+    },
+    "op-c1/tests.xml": {
+      "bytes": 9418,
+      "sha256": "917c49d020dfcef828e7236c0c4cd1641b82298063375c49a173d53bb79c38b6"
+    },
+    "op-w2/results.json": {
+      "bytes": 1026,
+      "sha256": "edf195ae0312a0ba04540a4dbd00fd1cd5bef48acbe272bc80fa973d57527e17"
+    },
+    "op-w2/tests.log": {
+      "bytes": 1595,
+      "sha256": "bbdc1dd4b27f26b6c37cfbf31d3fda7a24c2fc58f04b1895b9972f5c74d1d979"
+    },
+    "op-w2/tests.xml": {
+      "bytes": 9512,
+      "sha256": "9bf4f1a84a815d698b46bb9a58702141007bc3e299b638044d4ae2555f4f1a1e"
+    },
+    "op-w3/results.json": {
+      "bytes": 1026,
+      "sha256": "e7256bbca8ed7c7b646fd0845bc4b2a40dbda52ff9968eba5478132323cddffc"
+    },
+    "op-w3/tests.log": {
+      "bytes": 1595,
+      "sha256": "c57458c77d436564cd59d5941bc7f2b9bc232ca732a28d3ba98e6ee437d601f1"
+    },
+    "op-w3/tests.xml": {
+      "bytes": 9512,
+      "sha256": "b9cb3e2a340113dfc0b1e05a064621439f4c0f5fae1d7e02c1f72b3d0096a201"
+    }
+  }
+}

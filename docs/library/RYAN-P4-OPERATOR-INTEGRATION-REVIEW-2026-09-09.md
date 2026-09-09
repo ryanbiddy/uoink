@@ -43,3 +43,15 @@ in this finished worktree and the checkout, followed by actual bundled tools
 without Setup or a client, and the final committed full tree. Preserve any
 failure; existing tests are not edited. Installation, real client use and visual
 acceptance remain unobserved until Ryan's receipt is independently reviewed.
+
+
+## Integration result
+
+Final worker `op-w3`: **57 passed / one failed, 26.27 s**. Three-way checkout
+`op-c1`: **57 passed / one failed, 25.39 s**. All ten new operator checks pass;
+the frozen nested settings-path assertion is unchanged. The preceding `op-w2`
+was 57 passed / one failed, 26.36 s; the final guard also keeps the integrator's
+absolute forbidden path across canary overrides. Proof and exact integrated
+diff: `proof/ryan-p4-operator-integration-2026-09-09/SHA256.json` (eleven files).
+Accept this reviewed integration for bundled observation; no installed/client
+acceptance or all-green tree is claimed.

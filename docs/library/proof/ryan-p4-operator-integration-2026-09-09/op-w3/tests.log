@@ -1,0 +1,18 @@
+..................F.......................................               [100%]
+================================== FAILURES ===================================
+______ test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false _______
+tests\test_install_receipt_p4_kit.py:453: in test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false
+    settings = json.loads((profile / "Uoink" / "settings.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:771: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\1f64672e-95b\\grok\\_scratch\\op-w3-0\\t18\\r\\p\\Uoink\\settings.json'
+------------------------------ Captured log call ------------------------------
+WARNING  uoink.whisper_runner:whisper_runner.py:105 whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false
+1 failed, 57 passed in 26.27s

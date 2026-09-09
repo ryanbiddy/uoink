@@ -81,7 +81,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Finish C22 worker 6a890eee, verify/integrate, then Ryan's actual installed receipt |
-| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | Fourth P4 input independently 47 passed / one frozen path failure; both original prompts succeed. Operator supplement under review; X HTTP 403 stays blocked | Verify/integrate the completed 1f64672e plus bounded operator supplement, final tree and Ryan's installed/client receipt |
+| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator supplement integrated: 57 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Observe bundled operator kit, final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
 | Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Both setup proposals pending; finish two receipt kits, final tree and complete operator bundle/runbook |
@@ -126,7 +126,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    `RYAN-C22-FINAL-ORACLE-REPAIR-BRIEF-2026-09-09.md`, and the independent P4
    correction `1f64672e-95b7-4608-9fa6-5823b7e8eeda` under
    `RYAN-P4-EVIDENCE-COMPLETENESS-REPAIR-BRIEF-2026-09-09.md`. They may finish
-   in either order; do useful independent work while waiting. Finished third
+   in either order; do useful independent work while waiting. P4 plus the bounded
+   operator supplement is integrated with 57 passed / one failed in both roots;
+   its bundled command path remains to be observed. Finished third
    versions remain rejected as complete receipt instruments. No new original
    product or installed acceptance is inferred from their status flags.
 2. Verify each finished full diff in its worktree using the named suites. Preserve
@@ -1862,3 +1864,26 @@ corrections, final full-tree/packaged-kit work, portable bundle and Ryan's sessi
 Earlier queue text remains explicitly historical so a future integrator does not
 redispatch rejected or completed runs. Release notes were refreshed at cee17ce;
 the final kit-inclusive counts and operator commands still need completion.
+
+
+## Integrator log — 2026-09-09, P4 operator integration
+
+P4 worker 1f64672e completed. Independent original fourth union: 47 passed /
+one failed, 56.03 s. Its raw input and 23 evidence files are sealed in
+proof/ryan-p4-kit-review-04-2026-09-09. Default-store generator v2 fixes both
+original reshelve prompts; prior invalid-preview measurements stay unchanged.
+
+Astra's operator supplement is reviewed in RYAN-P4-OPERATOR-INTEGRATION-REVIEW-
+2026-09-09.md. Worker op-w3: 57 passed / one failed, 26.27 s; three-way checkout
+op-c1: 57 passed / one failed, 25.39 s. Ten new operator regressions pass,
+including all three previously failing UI cases. The only failure is the frozen
+nested settings path; no existing test was changed. Eleven proof files retain
+the integrated patch and both-root outcomes. Product source is unchanged.
+
+The actual client now binds the original entry. Visual/client observations remain
+pending independent review, synthetic sentinel checks have no actual-client
+credit, and a guarded command driver preserves full output and confirmed child-job
+cleanup. Modified guard bytes cannot be reported as restored. The provenance wait
+has an actual process deadline. Next: bundled operator observation without Setup
+or a client; C22 fourth worker remains running. Final full-tree and portable
+runbook/bundle remain agent work. Both exact fixture proposals remain unapplied.
