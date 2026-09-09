@@ -1841,6 +1841,12 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
     return candidates[0]
 
 
+def _require_reliability_boolean(value: object, field: str) -> bool:
+    if not isinstance(value, bool):
+        raise TypeError(f"{field} must be a boolean")
+    return value
+
+
 def _compute_transcript_reliability(
     video_id: str,
     *,
@@ -1856,6 +1862,10 @@ def _compute_transcript_reliability(
     extraction-time call passes the just-downloaded video file before it is
     deleted, avoiding a second network request.
     """
+    allow_model_download = _require_reliability_boolean(
+        allow_model_download, "allow_model_download"
+    )
+    force = _require_reliability_boolean(force, "force")
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
@@ -11214,11 +11224,22 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": "threshold must be a number",
                 })
+        flags = {}
+        for field in ("allow_model_download", "force"):
+            try:
+                flags[field] = _require_reliability_boolean(
+                    body.get(field, False), field
+                )
+            except TypeError as e:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": str(e),
+                })
         result = _compute_transcript_reliability(
             video_id,
             threshold=threshold,
-            allow_model_download=bool(body.get("allow_model_download")),
-            force=bool(body.get("force")),
+            allow_model_download=flags["allow_model_download"],
+            force=flags["force"],
         )
         self._send_json(200, result)
 
