@@ -1,0 +1,25 @@
+{
+  "scope": "Three independent failing negative UI evidence checks on preserved third collector; no product/client/UI execution",
+  "files": {
+    "original-p4_collect_evidence.py": {
+      "bytes": 21553,
+      "sha256": "7005c81d39db532bfc3b99f91760c6b477a2e78efe0b1935a99240b158261cf5"
+    },
+    "results.json": {
+      "bytes": 819,
+      "sha256": "cf09cc116020601a9ba1b2320780cf3404d2dc0b21de8834abb15642526ac073"
+    },
+    "tests.log": {
+      "bytes": 1573,
+      "sha256": "245e127c2d2d541ff7a41f808f24dff9da6bd5140a5bebbb53a7dd80df34979f"
+    },
+    "tests.xml": {
+      "bytes": 1737,
+      "sha256": "87b6186e3af27e4f2b1d187f76fb4e72784bd15a893ac5640a998de033faa1d3"
+    },
+    "test_install_receipt_operator_final.py": {
+      "bytes": 2426,
+      "sha256": "92afc35ac67736552c67a38f17773ce542de4337484ed8e3ece14c0bd068657c"
+    }
+  }
+}

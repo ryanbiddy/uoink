@@ -67,3 +67,13 @@ edits still need Ryan's explicit narrow approval. Preserve all failures. The
 bundle contains exact installer bytes, source bindings, reviewed kit/migrations,
 runbook, complete release notes and a per-file manifest; verify the ZIP members
 independently. Building the bundle never installs or publishes it.
+
+## Initial negative observation
+
+Before correction, three new independent checks on the preserved third collector
+all fail: matching chapter fields with no image, a player boolean/URL with no image,
+and a file containing no player image each receive status passed. Label op-w1:
+zero passed / three failed, 0.24 s. Source collector, new test and full log/XML
+are sealed at `proof/ryan-operator-ui-repro-2026-09-09/SHA256.json`. The existing
+fourth worker is untouched. Bring this new test into the completed fourth worktree
+and verify the bounded correction there and in checkout before integration.

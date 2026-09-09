@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.163" timestamp="2026-09-09T11:07:58.346441-07:00" hostname="Ryan-PC"><testcase classname="tests.test_install_receipt_operator_final" name="test_matching_chapter_fields_without_an_image_remain_unobserved" time="0.015"><failure message="AssertionError: assert 'passed' == 'unobserved'&#10;  &#10;  - unobserved&#10;  + passed">tests\test_install_receipt_operator_final.py:37: in test_matching_chapter_fields_without_an_image_remain_unobserved
+    assert row["status"] == "unobserved"
+E   AssertionError: assert 'passed' == 'unobserved'
+E     
+E     - unobserved
+E     + passed</failure></testcase><testcase classname="tests.test_install_receipt_operator_final" name="test_player_boolean_and_url_without_an_image_remain_unobserved" time="0.008"><failure message="AssertionError: assert 'passed' == 'unobserved'&#10;  &#10;  - unobserved&#10;  + passed">tests\test_install_receipt_operator_final.py:43: in test_player_boolean_and_url_without_an_image_remain_unobserved
+    assert row["status"] == "unobserved"
+E   AssertionError: assert 'passed' == 'unobserved'
+E     
+E     - unobserved
+E     + passed</failure></testcase><testcase classname="tests.test_install_receipt_operator_final" name="test_unreviewed_image_file_does_not_prove_displayed_player_time" time="0.012"><failure message="AssertionError: assert 'passed' != 'passed'">tests\test_install_receipt_operator_final.py:52: in test_unreviewed_image_file_does_not_prove_displayed_player_time
+    assert row["status"] != "passed"
+E   AssertionError: assert 'passed' != 'passed'</failure></testcase></testsuite></testsuites>
