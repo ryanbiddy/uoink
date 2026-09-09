@@ -1,0 +1,19 @@
+{
+  "candidate": "e47e4f2e8e1b6a83ecb1171436092b9077186430",
+  "stage": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+  "interpreter_sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec",
+  "entry_sha256": "ceed81aa2aff13a16a8b597f86f8ae9031fefe85b74be410a2c4bd06dcb5f9cd",
+  "seed_sha256": "457db4a0c2ba754e42cc2e9f239d5b8ae4c8119ab9b126fe0764d27c5b544f71",
+  "launcher_sha256": "f82f5838eed9a7cbdbadf9109967fb1c3f513c2f1c0f1ee2838aa23857260196",
+  "environment": {
+    "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-01\\profile",
+    "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-01\\profile",
+    "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-01\\profile",
+    "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-01\\profile",
+    "UOINK_INDEX_PATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\packaged-runtime-01\\profile\\unused.db",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1"
+  },
+  "scope": "Actual bundled runtime and synthetic stdio caller, not installed client or model"
+}

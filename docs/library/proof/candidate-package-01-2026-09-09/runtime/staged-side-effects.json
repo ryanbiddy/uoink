@@ -1,0 +1,20 @@
+{
+  "side_effects": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.log",
+      "bytes": 606,
+      "created_utc": "2026-09-09T07:25:16.8917465Z",
+      "modified_utc": "2026-09-09T07:33:33.0192501Z"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\token.txt",
+      "bytes": 43,
+      "created_utc": "2026-09-09T07:31:36.3040018Z",
+      "modified_utc": "2026-09-09T07:31:36.3040018Z"
+    }
+  ],
+  "not_in_inno_source_list": true,
+  "token_contents_retained": false,
+  "task_created_staged_token_removed": true,
+  "cleanup_utc": "2026-09-09T07:35:28.5518749+00:00"
+}

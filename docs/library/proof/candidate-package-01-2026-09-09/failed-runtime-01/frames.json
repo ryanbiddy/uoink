@@ -1,0 +1,9 @@
+[
+  {
+    "direction": "client_to_server",
+    "ns": 401722616550700,
+    "base64": "eyJqc29ucnBjIjoiMi4wIiwiaWQiOjEsIm1ldGhvZCI6ImluaXRpYWxpemUiLCJwYXJhbXMiOnsicHJvdG9jb2xWZXJzaW9uIjoiMjAyNC0xMS0wNSIsImNhcGFiaWxpdGllcyI6e30sImNsaWVudEluZm8iOnsibmFtZSI6InBhY2thZ2VkLXJ1bnRpbWUtc3ludGhldGljLXByb2JlIiwidmVyc2lvbiI6IjEifX19Cg==",
+    "sha256": "d442a007acf2cdcafbd32bfcbde87af9f959d5675b19fee3d584182d41863ad6",
+    "bytes": 178
+  }
+]

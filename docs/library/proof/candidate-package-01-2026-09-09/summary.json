@@ -1,0 +1,65 @@
+{
+  "build_source": "e47e4f2e8e1b6a83ecb1171436092b9077186430",
+  "artifact": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "bytes": 339042658,
+    "sha256": "9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d"
+  },
+  "build_elapsed_s": 368.9345401,
+  "staged_files": 32202,
+  "staged_bytes": 2194533858,
+  "source_bindings": 141,
+  "unmapped_source_files": [],
+  "inventory_scope": "Post-observation staged compiler inputs, normalized timestamp verified. server.log and token.txt are excluded only after checking the explicit Inno source patterns; side effects and token cleanup recorded separately. This is not an extraction of installer bytes.",
+  "inno_definition_sha256": "81ef2634a5b45f04b56621c7301cf1f93ff2e3cd60dbe1e87195d63b4e4e82c1",
+  "dependency_lock": "142 packages verified by build log",
+  "runtime": {
+    "status": "passed within synthetic staged-runtime scope",
+    "runtime": {
+      "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "mcp": "1.27.1",
+      "schema": 30,
+      "items": 1
+    },
+    "child_pid": 63236,
+    "installed": false,
+    "protocol": "2024-11-05",
+    "tools": 32,
+    "templates": 5,
+    "prompts": 4,
+    "card_native_fallback_equal": true,
+    "activity_ok": true,
+    "native_prompt": true,
+    "child_exit": 0,
+    "stdout_drained": true,
+    "stderr_drained": true,
+    "completed_utc": "2026-09-09T07:33:33.087738+00:00"
+  },
+  "failed_runtime_observation_01": {
+    "status": "failed",
+    "runtime": {
+      "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "mcp": "1.27.1",
+      "schema": 30,
+      "items": 1
+    },
+    "child_pid": 59824,
+    "installed": false,
+    "error": "Empty()",
+    "child_exit": 1,
+    "stdout_drained": true,
+    "stderr_drained": true,
+    "completed_utc": "2026-09-09T07:32:15.467007+00:00"
+  },
+  "runtime_repair_brief": "CANDIDATE-PACKAGED-RUNTIME-REPAIR-BRIEF-2026-09-09.md",
+  "scope": "Local Inno compilation and original staged embedded runtime with a synthetic stdio caller; no installation, resident helper, model inference or release publish.",
+  "candidate_full_tree": {
+    "passed": 2102,
+    "failed": 92,
+    "skipped": 3,
+    "xfail": 1,
+    "only_exclusion": "tests/library_work_astra/test_phase3_s21.py"
+  },
+  "generated_notice_change": "Source-bound generation date only: 2026-07-25 to 2026-09-09; dependency table unchanged.",
+  "completed_utc": "2026-09-09T07:35:33.777950+00:00"
+}

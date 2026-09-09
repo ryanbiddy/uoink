@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\packaged-runtime-01\launch.py", line 17, in <module>
+    runpy.run_path('E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_mcp.py',run_name="__main__")
+  File "<frozen runpy>", line 291, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\uoink_mcp.py", line 1150, in <module>
+    mcp.run(transport="stdio")
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\python\Lib\site-packages\mcp\server\fastmcp\server.py", line 296, in run
+    anyio.run(self.run_stdio_async)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\python\Lib\site-packages\anyio\_core\_eventloop.py", line 83, in run
+    return async_backend.run(func, args, {}, backend_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\python\Lib\site-packages\anyio\_backends\_asyncio.py", line 2480, in run
+    with Runner(debug=debug, loop_factory=loop_factory) as runner:
+  File "asyncio\runners.py", line 59, in __enter__
+  File "asyncio\runners.py", line 137, in _lazy_init
+  File "asyncio\events.py", line 810, in new_event_loop
+  File "asyncio\events.py", line 699, in new_event_loop
+  File "asyncio\windows_events.py", line 315, in __init__
+  File "asyncio\proactor_events.py", line 639, in __init__
+  File "asyncio\proactor_events.py", line 784, in _make_self_pipe
+  File "socket.py", line 633, in socketpair
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\packaged-runtime-01\launch.py", line 11, in audit
+    raise PermissionError('Network forbidden in staged runtime observation')
+PermissionError: Network forbidden in staged runtime observation
+Exception ignored in: <function BaseEventLoop.__del__ at 0x000001C85EAC3EC0>
+Traceback (most recent call last):
+  File "asyncio\base_events.py", line 695, in __del__
+  File "asyncio\proactor_events.py", line 696, in close
+  File "asyncio\proactor_events.py", line 776, in _close_self_pipe
+AttributeError: 'ProactorEventLoop' object has no attribute '_ssock'

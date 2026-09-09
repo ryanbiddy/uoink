@@ -2,17 +2,48 @@
 
 Local integration candidate, 2026-09-09. Phases 3–6 are accepted with the
 conditions below. The complete candidate test run is failed, with a demonstrated
-frozen-fixture cleanup problem awaiting Ryan's ruling. The installer field
-will be completed from its actual receipt. This document does not approve
+frozen-fixture cleanup problem awaiting Ryan's ruling. The installer has been
+built locally and its bundled runtime checked. This document does not approve
 installation or release.
 
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
-`9217846da45cecbf1b91614d9031fd7a16b7d16f`. Build-source SHA, installer
-SHA-256 and packaged-runtime smoke: pending. This is a local package for Ryan's
-installed receipts; it has not been installed, published, pushed or merged to
-main. Label application remains disabled.
+`9217846da45cecbf1b91614d9031fd7a16b7d16f`. Installer build source:
+`e47e4f2e8e1b6a83ecb1171436092b9077186430`. The later receipt commit updates
+documentation, proof and the generated third-party notice date; it does not
+change the production source used by this installer.
+
+Local artifact: [Uoink-Setup-3.8.0.exe](../../build/Uoink-Setup-3.8.0.exe),
+339,042,658 bytes (323.3 MiB). SHA-256:
+`9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d`.
+Compilation completed on 2026-09-09 at 00:30 PDT after 368.93 seconds.
+This is a local package for Ryan's installed receipts; it has not been
+installed, published, pushed or merged to main. Label application remains
+disabled.
+
+The build verified the exact 142-package dependency lock, schema 30, version
+3.8.0 in the helper and extension, and packaged tray, dashboard, splash and
+WhisperX imports. The separate original-entry stdio observation used the
+bundled Python 3.11.9 and MCP 1.27.1 with a synthetic one-item database. It
+observed 32 tools, five resource templates, four prompts, equal complete card
+contents through native and fallback reads, a native consult prompt and a
+successful small activity request. Its child exited zero with both output
+drains complete. This does not establish installed behavior, model inference
+or speaker quality.
+
+The first stdio attempt remains failed: its isolation guard also blocked
+Windows Python's internal event-loop socket pair. A
+[documented guard repair](CANDIDATE-PACKAGED-RUNTIME-REPAIR-BRIEF-2026-09-09.md)
+permitted only that standard-library loopback pair, with port 5179 still
+forbidden, before observation 02. Both original attempts are retained in
+the [28-file package receipt seal](proof/candidate-package-01-2026-09-09/SHA256.json).
+The archive inventories 32,202 staged input files and binds 141 source files
+to the frozen checkout. It is not an extraction of the installer. The
+post-observation token and log are excluded from that inventory because
+Inno's explicit source list does not package them; their metadata is retained
+separately and the task-created token was removed. No token contents or
+fixture databases are in the archive.
 
 ## Phases 0 and 1: reliable capture and searchable evidence
 

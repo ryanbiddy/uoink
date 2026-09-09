@@ -53,16 +53,16 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review base `6858b81`; not pushed)
+## State at handoff (updated 2026-09-09; implementation base `6858b81`, installer source `e47e4f2`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | Implementation and required Claude Code/stdio behavior accepted with conditions; 286 passed / nine frozen failures in both roots, broader AW-4 113 passed | `PHASE4-CLIENT-02-2026-09-09.md` closes the planned supplement: complete packets, action evidence, missing-index refusals, Recall and vault accounting | Ryan: installed Inno, frozen fixture rulings and retained X-source HTTP 403 condition. No implementation repair remains identified |
-| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
-| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
-| Integration | Candidate from `9217846`; full tree on `6c313ea`: 2,102 passed / 92 failed, only S21 excluded | Reduced pair demonstrates frozen AW-11 teardown contamination; all 67 extra failures passed the earlier focused union. Four production lifecycle controls succeeded | Ryan owns the fixture-cleanup ruling. Preserve failed full tree; build local installer for review with that condition |
+| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Dashboard byte target remains missed. Part B is not built | Ryan's unary/clock fixture ruling; Part B is outside this candidate |
+| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Ryan's fixture ruling and speaker material; failed fixtures and blocked speaker gate retained |
+| Integration | Local candidate built from `e47e4f2`, 339,042,658 bytes; bundled-runtime observation 02 passed its synthetic scope. Full tree on `6c313ea`: 2,102 passed / 92 failed, only S21 excluded | Release notes and 28-file package seal complete. Reduced pair demonstrates frozen AW-11 teardown contamination; failed full tree and first runtime attempt retained | No active worker or unbriefed rerun. Ryan's fixture rulings, installed receipts and other gates below; no merge/push/install |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -148,9 +148,16 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    Candidate branch was cut from `9217846`; release notes are now tracked.
    Full tree on `6c313ea` finished with 2,102 passed / 92 failed. The new
    order-dependent fixture-cleanup ruling is under Blockers for Ryan; original
-   tests remain unchanged. Build the local installer with this explicit
-   condition and record its actual bundled-runtime result. Do not manufacture
-   a green full tree with reordered or reset fixtures.
+   tests remain unchanged. Local installer completed from `e47e4f2` on
+   2026-09-09 at 00:30 PDT: `build/Uoink-Setup-3.8.0.exe`, 339,042,658 bytes,
+   SHA-256 `9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d`.
+   Bundled Python 3.11.9/MCP 1.27.1 observation 02 passed its synthetic stdio
+   scope after the documented guard repair; observation 01 remains failed.
+   See `CANDIDATE-PACKAGED-RUNTIME-REPAIR-BRIEF-2026-09-09.md`, the release
+   notes and `proof/candidate-package-01-2026-09-09/SHA256.json` (28 files).
+   Candidate work is complete for local review. Next actions depend on Ryan's
+   gates; no worker or client session remains active. Do not manufacture a
+   green full tree with reordered or reset fixtures.
 
 Worker notes: claude worker = no shell, one session at a time, shares the subscription (tell it
 "no subagents; targeted searches; write early"); gemini has shell, times out on big sets (3-5
@@ -1172,3 +1179,42 @@ result, both diagnostics, full comparisons and production control. Release
 notes and Blockers for Ryan retain the failed result and additional teardown
 condition. Continue the local installer build from the clean receipt commit;
 it is a review package, with installation/main merge still Ryan's decisions.
+
+### 2026-09-09 00:36 PDT - Local installer and bundled-runtime receipt complete
+
+Built `build/Uoink-Setup-3.8.0.exe` from frozen candidate `e47e4f2`, ending
+at 00:30 PDT after 368.93 seconds. The 339,042,658-byte artifact has SHA-256
+`9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d`.
+The exact 142-package inventory verified. Staged schema/version, tray,
+dashboard, splash and WhisperX import checks passed. Build regeneration changed
+only the third-party notice date from 2026-07-25 to the source-bound 2026-09-09;
+the package table is unchanged. No installation or inference occurred.
+
+The first original-entry stdio attempt failed because its blanket socket
+guard blocked Windows asyncio's internal socket pair. Its child exited one;
+the caller timed out with no initialization response. The repair brief was
+written before observation 02. The new guard permits only the original
+standard-library socket-pair function's verified local bind/connect; 5179,
+all other network access and nested processes remain forbidden.
+
+Observation 02 on the unchanged bundled Python 3.11.9 and MCP 1.27.1 passed:
+32 tools, five templates, four prompts, full native/fallback card equality,
+native consult prompt and a successful small activity call. Child exit was
+zero and both drains completed. This is synthetic staged-runtime evidence,
+not an installed C22/Phase 4 or speaker receipt. The original failed attempt
+is preserved and never becomes a pass.
+
+The archive collector initially rejected the staged token/log generated by
+server imports. Inspection confirmed neither is an Inno source input. The
+token was created after compilation, and it was removed after both children
+exited. The collector now records that side effect separately; no runtime or
+build was rerun for the archive correction. The seal retains 28 files, a
+32,202-file staged input inventory and 141 source bindings. Input timestamps
+still match the frozen source epoch. Token contents and fixture databases
+are excluded from proof. The inventory is not an extracted installer listing.
+
+Release notes, State and Queue now identify the completed local candidate.
+The 2,102-pass/92-failure full-tree result and every owner condition remain.
+No product or acceptance-test source changed after final verification. All
+Control Room/client work is finished; further acceptance work requires Ryan's
+listed rulings or material. No push, merge, installation or live-index access.
