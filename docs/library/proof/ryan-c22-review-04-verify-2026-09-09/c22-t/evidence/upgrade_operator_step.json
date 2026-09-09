@@ -1,0 +1,21 @@
+{
+  "id": "upgrade_operator_step",
+  "status": "unexecuted",
+  "reason": "real installed upgrade/reinstall is Ryan's operator step",
+  "planned_argv": [
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-t\\t-gj1rm5oh\\Uoink-Setup-synthetic.exe",
+    "/VERYSILENT",
+    "/NORESTART",
+    "/SUPPRESSMSGBOXES",
+    "/DIR=\"C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-t\\t-gj1rm5oh\\Uoink Installed\"",
+    "/ISOLATED=1",
+    "/PROFILE=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-t\\t-gj1rm5oh\\receipt\\profiles\\empty",
+    "/PORT=55447",
+    "/NOCLOSEAPPLICATIONS",
+    "/NORESTARTAPPLICATIONS"
+  ],
+  "unspecified_kind": "unspecified_pending_inventory",
+  "same_version_label": "same_version_reinstall",
+  "agreed_inno_shape": true,
+  "mislabel_guard": "same-version reinstall is not a cross-version upgrade"
+}

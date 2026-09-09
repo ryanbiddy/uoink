@@ -1,0 +1,10 @@
+2026-09-09 11:55:19,043 INFO install migration: skipped_isolated_install
+2026-09-09 11:55:19,060 INFO Restored 1 job record(s) from the library index
+2026-09-09 11:55:19,094 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 11:55:19,337 INFO Uoink server v3.8.0 running on http://127.0.0.1:55447
+2026-09-09 11:55:19,337 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 11:55:19,337 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\populated\output
+2026-09-09 11:55:19,337 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\populated\server.log
+2026-09-09 11:55:19,339 INFO desktop notification queued: notifications disabled
+2026-09-09 11:55:19,463 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 11:55:19,509 INFO GET /health from 127.0.0.1 -> ok

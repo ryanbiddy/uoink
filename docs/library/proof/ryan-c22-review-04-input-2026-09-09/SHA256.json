@@ -1,0 +1,85 @@
+{
+  "scope": "Original fourth C22 input; worker 61 passed / two failed; new negative checks one passed / 11 failed; independent union archived separately",
+  "files": {
+    "new-negative-tests.py": {
+      "bytes": 3801,
+      "sha256": "2c42025aa6614873860a736e63204c95879e65296d874309763764ec81da1eb7"
+    },
+    "original.patch": {
+      "bytes": 413705,
+      "sha256": "19c0af7baa4a4cca07a842bf8a2498feb3b43435516e9750deaf9b8552ef7a92"
+    },
+    "c22f1/results.json": {
+      "bytes": 893,
+      "sha256": "18cbad5b0e2c22bd2415dc48d777adef0fc4fa72287fceab35e281038128ae58"
+    },
+    "c22f1/tests.log": {
+      "bytes": 115,
+      "sha256": "6390cfe9469833d5bef17f25ec055301d3b3b1e6d984e87aa861946a34051dd3"
+    },
+    "c22f1/tests.xml": {
+      "bytes": 2927,
+      "sha256": "6ca50c2df9ff9903f5803ddbc476c7b3ab5fe9f2e972e62a4d08b9b264c0dcd4"
+    },
+    "c22f2/results.json": {
+      "bytes": 867,
+      "sha256": "dbd5ba02d6b0d10bb26db9ea2ba195c686fd3e039c1f9ba789b0d9fccbacf20d"
+    },
+    "c22f2/tests.log": {
+      "bytes": 925,
+      "sha256": "285687586252ce1760fe328d93a9698b1bd474e7aa9eba1dc8094740cfb6d828"
+    },
+    "c22f2/tests.xml": {
+      "bytes": 892,
+      "sha256": "038ae44c86cfe1dc12f8e290f52bf593eb73ec1c7dc2ae38be9d59e196995427"
+    },
+    "c22f3/results.json": {
+      "bytes": 867,
+      "sha256": "ec5cd3947a051820ed4ee962df6281996c3baca73cdde050458cbb0d19c7ed18"
+    },
+    "c22f3/tests.log": {
+      "bytes": 936,
+      "sha256": "490cc35bd7432e45ffc9470cd9edebcf3215ab2774dbb9882eb319d739856c71"
+    },
+    "c22f3/tests.xml": {
+      "bytes": 894,
+      "sha256": "51c1d147979ec46dac9016f4e20bfcdf2f2f33b09666c93459188aa89dcd8293"
+    },
+    "c22f4/results.json": {
+      "bytes": 867,
+      "sha256": "73da0f3812b262f912dfa034bb250f27bdb2012b8d9c930a23075035e9ab7cfb"
+    },
+    "c22f4/tests.log": {
+      "bytes": 112,
+      "sha256": "46ad82cedccf353b6264982f48acf38d8c982a70efdb2e780fd6ee540d126923"
+    },
+    "c22f4/tests.xml": {
+      "bytes": 380,
+      "sha256": "bca2b334bfdde275ac8f38f8695e71262e27271fc860b62a97e4f7236fae5547"
+    },
+    "c22u1/results.json": {
+      "bytes": 984,
+      "sha256": "99f255c27adff09a6b75420791fa23570b63583f20c48800276df2e5e83cc51a"
+    },
+    "c22u1/tests.log": {
+      "bytes": 2113,
+      "sha256": "0f380461467bef019143fffc1f6dac51ef915b399b85df9620068c33ddfdb156"
+    },
+    "c22u1/tests.xml": {
+      "bytes": 10287,
+      "sha256": "14c2c0dc8cfe0dda20faecbafd37618e20283a78b5298de171a24d81b3ecc6de"
+    },
+    "ci-n1/results.json": {
+      "bytes": 827,
+      "sha256": "525ee202fdd9bfaf0b1ddfde7e6c27a450b11f4e3fe335204ff26922ae4afeb2"
+    },
+    "ci-n1/tests.log": {
+      "bytes": 4852,
+      "sha256": "6d95c8e1c8b32c573d1661b605b2f9acee4c571b6469393429c6a7175a3e29e1"
+    },
+    "ci-n1/tests.xml": {
+      "bytes": 5190,
+      "sha256": "1138f5069d1c51f56a6f5e7e13cbe12cc8aed89e842bd93399a4071590fb9f14"
+    }
+  }
+}

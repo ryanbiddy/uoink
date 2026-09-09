@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="12" time="0.204" timestamp="2026-09-09T11:56:21.040612-07:00" hostname="Ryan-PC"><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_meta_requires_complete_schema_shape" time="0.000"><failure message="AssertionError: assert True is False&#10; +  where True = library_meta_matches_schema_default({'singleton': 1})">tests\test_install_receipt_c22_integrator_oracles.py:27: in test_meta_requires_complete_schema_shape
+    assert library_meta_matches_schema_default({"singleton": 1}) is False
+E   AssertionError: assert True is False
+E    +  where True = library_meta_matches_schema_default({'singleton': 1})</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_meta_extra_field_is_not_a_default" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:31: in test_meta_extra_field_is_not_a_default
+    assert compare_new("library_meta", [dict(LIBRARY_META_SCHEMA_DEFAULTS, extra=1)])["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_duplicate_meta_is_not_one_singleton" time="0.000" /><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_known_video_does_not_authorize_classification_work" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:41: in test_known_video_does_not_authorize_classification_work
+    assert compare_new("library_work", [row], {"ledger": {"video_ids": ["admitted"]}})["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_outbox_cannot_authorize_itself_from_ledger_id[row0]" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:50: in test_outbox_cannot_authorize_itself_from_ledger_id
+    assert compare_new("source_classification_outbox", [row],
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_outbox_cannot_authorize_itself_from_ledger_id[row1]" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:50: in test_outbox_cannot_authorize_itself_from_ledger_id
+    assert compare_new("source_classification_outbox", [row],
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_outbox_cannot_authorize_itself_from_ledger_id[row2]" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:50: in test_outbox_cannot_authorize_itself_from_ledger_id
+    assert compare_new("source_classification_outbox", [row],
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_taxonomy_disappearance_is_not_migration[after_files0]" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:59: in test_taxonomy_disappearance_is_not_migration
+    assert settings_and_pins_unchanged(before, after)["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_taxonomy_disappearance_is_not_migration[after_files1]" time="0.000"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:59: in test_taxonomy_disappearance_is_not_migration
+    assert settings_and_pins_unchanged(before, after)["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_provenance_does_not_accept_sibling_prefix" time="0.003"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:65: in test_provenance_does_not_accept_sibling_prefix
+    assert modules_inside_app(report, app)["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_empty_module_report_does_not_pass" time="0.002"><failure message="assert True is False">tests\test_install_receipt_c22_integrator_oracles.py:69: in test_empty_module_report_does_not_pass
+    assert modules_inside_app({"modules": {}}, tmp_path / "app")["ok"] is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_install_receipt_c22_integrator_oracles" name="test_child_status_flags_without_raw_settlement_do_not_pass" time="0.001"><failure message="AssertionError: assert 'pass' == 'fail'&#10;  &#10;  - fail&#10;  + pass">tests\test_install_receipt_c22_integrator_oracles.py:82: in test_child_status_flags_without_raw_settlement_do_not_pass
+    assert scenario._child_lifetime()["status"] == "fail"
+E   AssertionError: assert 'pass' == 'fail'
+E     
+E     - fail
+E     + pass</failure></testcase></testsuite></testsuites>

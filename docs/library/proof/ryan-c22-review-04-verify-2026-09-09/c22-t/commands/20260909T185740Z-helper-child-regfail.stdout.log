@@ -1,0 +1,67 @@
+2026-09-09 11:57:41,302 INFO install migration: skipped_isolated_install
+2026-09-09 11:57:41,313 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 11:57:41,316 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 11:57:41,318 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 11:57:41,319 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 11:57:41,321 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 11:57:41,322 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 11:57:41,324 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 11:57:41,326 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 11:57:41,327 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 11:57:41,328 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 11:57:41,330 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 11:57:41,332 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 11:57:41,334 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 11:57:41,335 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 11:57:41,337 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 11:57:41,339 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 11:57:41,340 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 11:57:41,341 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 11:57:41,343 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 11:57:41,345 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 11:57:41,346 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 11:57:41,348 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 11:57:41,351 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 11:57:41,352 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 11:57:41,354 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 11:57:41,355 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 11:57:41,357 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 11:57:41,359 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 11:57:41,362 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 11:57:41,374 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 11:57:41,375 INFO seeded 5 default style anchors
+2026-09-09 11:57:41,375 INFO default style anchors: seeded 5 on first run
+2026-09-09 11:57:41,375 INFO Restored 0 job record(s) from the library index
+2026-09-09 11:57:41,379 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 11:57:41,389 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 11:57:41,648 INFO Uoink server v3.8.0 running on http://127.0.0.1:55447
+2026-09-09 11:57:41,648 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 11:57:41,648 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\child-regfail\output
+2026-09-09 11:57:41,648 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\child-regfail\server.log
+2026-09-09 11:57:41,650 INFO desktop notification queued: notifications disabled
+2026-09-09 11:57:41,705 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 11:58:11,435 ERROR capture backend raised for st_fe903e216222547370f9e74a7c297783
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\source_subscriptions.py", line 3842, in execute_started
+    outcome = self.backend.run(dict(start), dict(item), dict(source))
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\server.py", line 8365, in run
+    outcome = self._run_podcast(start, item, source)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\server.py", line 8391, in _run_podcast
+    downloaded = podcasts.download_episode_audio(
+        _get_index(), episode_id, data_root=DATA_ROOT)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\injection\sitecustomize.py", line 229, in download
+    _drive_original_run_subprocess()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\injection\sitecustomize.py", line 194, in _drive_original_run_subprocess
+    return run(
+        [sys.executable, "-B", "-c", "print('c22-capture-child')"],
+        timeout=20, check=False,
+    )
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\server.py", line 3402, in _run_subprocess
+    source_subscriptions.record_child_start(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\injection\sitecustomize.py", line 294, in record_child_start
+    raise OSError("C22 declared registration failure")
+OSError: C22 declared registration failure

@@ -1,0 +1,52 @@
+{
+  "schema": "c22-operator-manifest-v1",
+  "kit_date": "2026-09-09",
+  "sealed_by": null,
+  "seal_note": "Astra fills expected_package_sha256, candidate_sha and installer_source_sha when sealing. This kit refuses to invent them.",
+  "expected_package_sha256": null,
+  "candidate_sha": null,
+  "installer_source_sha": null,
+  "isolation_flags": {
+    "profile": "--isolated-profile",
+    "port": "--isolated-port",
+    "from_install_dir": "--isolated-from-install-dir",
+    "token": "<profile>/token.txt",
+    "marker": "isolated-install.json",
+    "implemented_by": "isolation worker; this kit only consumes them"
+  },
+  "inno_isolated_args_template": [
+    "/VERYSILENT",
+    "/NORESTART",
+    "/SUPPRESSMSGBOXES",
+    "/DIR=\"{installed_app_path}\"",
+    "/ISOLATED=1",
+    "/PROFILE={isolated_profile}",
+    "/PORT={isolated_port}",
+    "/NOCLOSEAPPLICATIONS",
+    "/NORESTARTAPPLICATIONS"
+  ],
+  "inno_isolated_args_note": "Agreed Inno surface is /ISOLATED=1 /PROFILE=<root> /PORT=<non5179> /DIR=<app> /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS. Positive /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /RESTARTAPPLICATIONS overrides are refused. This kit records the command and does not execute Inno.",
+  "upgrade": {
+    "same_version_reinstall_label": "same_version_reinstall",
+    "cross_version_upgrade_label": "cross_version_upgrade",
+    "do_not_mislabel": true
+  },
+  "legacy_fixture_version": "c22-legacy-populated-v1-schema27",
+  "scenarios": [
+    "install",
+    "installed_provenance",
+    "empty_migration_replay",
+    "populated_legacy_replay",
+    "one_off_capture",
+    "manual_first",
+    "standing_first",
+    "whole_helper_relaunch",
+    "registered_child_lifetime",
+    "launch_interruption",
+    "registration_failure",
+    "browser_state_checkpoint",
+    "protected_phase2_state",
+    "upgrade_operator_step"
+  ],
+  "phase4_client_scope": "astra_separate_not_this_kit"
+}

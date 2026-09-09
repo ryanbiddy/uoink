@@ -1,0 +1,11 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________ test_final_source_runtime_corrected_oracles _________________
+tests\test_install_receipt_c22_final_oracles.py:442: in test_final_source_runtime_corrected_oracles
+    require_measured_pass(outcomes["empty_migration_replay"],
+scripts\install_receipt\oracles.py:362: in require_measured_pass
+    raise C22ValidationError(
+E   install_receipt.validation.C22ValidationError: empty_migration_replay measured status is 'fail', not pass
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_final_oracles.py::test_final_source_runtime_corrected_oracles - install_receipt.validation.C22ValidationError: empty_migration_replay measured status is 'fail', not pass
+1 failed in 44.69s

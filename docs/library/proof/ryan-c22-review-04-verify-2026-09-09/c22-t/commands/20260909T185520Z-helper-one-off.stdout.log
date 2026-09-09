@@ -1,0 +1,73 @@
+2026-09-09 11:55:21,577 INFO install migration: skipped_isolated_install
+2026-09-09 11:55:21,590 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 11:55:21,594 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 11:55:21,595 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 11:55:21,597 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 11:55:21,598 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 11:55:21,599 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 11:55:21,602 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 11:55:21,603 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 11:55:21,604 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 11:55:21,605 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 11:55:21,607 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 11:55:21,609 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 11:55:21,611 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 11:55:21,612 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 11:55:21,614 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 11:55:21,616 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 11:55:21,617 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 11:55:21,619 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 11:55:21,620 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 11:55:21,622 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 11:55:21,624 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 11:55:21,625 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 11:55:21,628 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 11:55:21,629 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 11:55:21,631 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 11:55:21,632 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 11:55:21,634 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 11:55:21,636 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 11:55:21,639 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 11:55:21,659 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 11:55:21,660 INFO seeded 5 default style anchors
+2026-09-09 11:55:21,660 INFO default style anchors: seeded 5 on first run
+2026-09-09 11:55:21,660 INFO Restored 0 job record(s) from the library index
+2026-09-09 11:55:21,663 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 11:55:21,664 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 11:55:21,673 ERROR source watch tick could not select due polls
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\index.py", line 576, in write_transaction
+    self._conn.execute("BEGIN IMMEDIATE")
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: not an error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\server.py", line 8954, in _podcast_feed_scheduler_tick
+    due = _standing_due_polls()
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\server.py", line 8772, in _standing_due_polls
+    service.expire_poll_leases()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\source_subscriptions.py", line 3030, in expire_poll_leases
+    with self.store.write() as conn:
+         ~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\source_subscriptions.py", line 1990, in write
+    with self.index.write_transaction() as conn:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\Uoink Installed\index.py", line 582, in write_transaction
+    self._conn.rollback()
+    ~~~~~~~~~~~~~~~~~~~^^
+sqlite3.OperationalError: cannot rollback - no transaction is active
+2026-09-09 11:55:21,711 INFO Uoink server v3.8.0 running on http://127.0.0.1:55447
+2026-09-09 11:55:21,712 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 11:55:21,712 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\one-off\output
+2026-09-09 11:55:21,712 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-t\t-gj1rm5oh\receipt\profiles\one-off\server.log
+2026-09-09 11:55:21,940 INFO desktop notification queued: notifications disabled
+2026-09-09 11:55:22,012 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 11:55:22,059 INFO POST /extract -> 400 (URL must be a YouTube, X, TikTok, or Instagram Reel video link)
+2026-09-09 11:55:22,230 INFO desktop notification queued: notifications disabled
