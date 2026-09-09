@@ -948,3 +948,22 @@ without its refresh credential, and account metadata. The temporary credential
 was deleted after exit. The real client run must also use a separate profile
 and freeze its own launch/model metadata. B7 remains active; the archived copy
 and native library prompts still wait for the accepted implementation.
+
+### 2026-09-08 22:36 PDT - B7 first union; final review preparation
+
+B7's first focused seven cases passed. Its first combined union has **281
+passed, ten failed**, 137.89 seconds: the nine frozen failures plus its new
+originating-helper control. The worker is repairing that regression; focused
+passes do not replace this failed union. Final independent verification waits
+for finished source and retained repair notes.
+
+All eight capacity-preflight proof hashes match committed blobs at `b5207ff`.
+The candidate build wrapper is prepared in scratch, with exact branch/SHA and
+recursive-target checks plus a disposable data profile; parsing passed, but
+no full build ran. Build cache and installer staging are absent. The final
+AW-4 report draft is also in scratch with pending fields clearly marked.
+
+The scratch AW12-THREAD-IDENTITY-REVIEW-BRIEF specifies a final check of B7's
+integer-thread-ID helper fallback. Python permits those IDs to be reused;
+any diagnostic must distinguish simulated ID reuse from observed Windows
+allocation. No such diagnostic has run and no new result is claimed.
