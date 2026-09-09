@@ -73,7 +73,8 @@ unchanged and explicitly correct this interpretation in your new report.
 ## Required verification
 
 Use `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`
-and its `_scratch/integrator_verify.py` wrapper, IG_FORBIDDEN_LIVE already bound,
+and the committed `docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py`
+wrapper, IG_FORBIDDEN_LIVE already bound,
 all API keys unset. Fresh short labels. Run the three frozen kit files plus the
 new truth suite, retaining exact log/XML/pass/fail counts. Source copy excludes
 build, .git, _scratch, caches and dependencies. Retain exact requests, replies,
@@ -81,3 +82,7 @@ state and cleaned process evidence; report any still-failing scenarios without
 turning instrument diagnostics into acceptance. Final report includes source
 hashes, changed files and executable operator commands. Astra independently
 verifies before integrating.
+
+Dispatch preflight: the first attempt stopped before creating a worker because
+the wrapper reference pointed to ignored scratch. The committed identical-purpose
+wrapper above is the repaired required input; no measurement was rerun.
