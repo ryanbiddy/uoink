@@ -241,7 +241,7 @@ This one's about trust. Every surface that used to fake it (silent saves, phanto
 - **Captions-only retry for long videos.** When a long source keeps failing, "Retry, captions only" runs a lite pass: transcript kept, screenshots capped at roughly 1 per 5 minutes, comments skipped.
 - **Smart Generate inputs.** Topic and channel pickers with corpus counts, hook chips, target-length presets with units, CTA and style-anchor pickers. They pull from your actual corpus instead of asking for raw values.
 - **`/resurface` and `/taste/anchors` routes.** The dashboard's For You tab and the extension popup/setup called endpoints the helper never served (silent 404 on every load). The helper now serves `GET /resurface`, `/resurface/today`, and `/taste/anchors`.
-- **Source-first recovery actions.** Detail and Evidence expose Open folder, Open transcript file, Re-capture, Re-transcribe, and Run claim scan where they help, so dead-end empty states have a way out.
+- **Source-first recovery actions.** Detail exposes Open folder, Open transcript file, Re-capture, and Re-transcribe where they help. Evidence reloads claims submitted by a connected agent and says plainly when none are saved.
 - **Newsletter output mode**, and BYO thread mode now prompts as an actual thread instead of a single tweet.
 
 ### Changed

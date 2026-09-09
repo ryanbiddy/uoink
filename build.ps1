@@ -25,7 +25,8 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Clean
+    [switch]$Clean,
+    [switch]$Release
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,6 +44,7 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
+$setReleaseInstallerLink = Join-Path $RepoRoot 'scripts\set_release_installer_link.ps1'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
@@ -74,6 +76,9 @@ $ManifestJson = Get-Content -Raw $ManifestPath | ConvertFrom-Json
 $ManifestVersion = [string]$ManifestJson.version
 if ($ManifestVersion -ne $VERSION) {
     throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
+}
+if ($Release -and -not (Test-Path -LiteralPath $setReleaseInstallerLink -PathType Leaf)) {
+    throw "Missing release installer-link guard: $setReleaseInstallerLink"
 }
 
 # Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
@@ -271,6 +276,7 @@ foreach ($f in @(
     'corpus_intelligence.py',
     'writer_peer.py',
     'engagement_contract.py',
+    'record_id_contract.py',
     'media_handoff.py',
     'suite_service.py',
     'memory_layer.py',
@@ -497,6 +503,7 @@ Copy-Item (Join-Path $RepoRoot 'corpus_provider.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'corpus_intelligence.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'writer_peer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'engagement_contract.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'record_id_contract.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'media_handoff.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'suite_service.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'page_extractor.py') $StagingDir -Force
@@ -554,6 +561,10 @@ Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\b
 # v3.1.3: ship the unpacked Chrome extension beside the helper so the
 # first-run hint can point Chrome's "Load unpacked" flow at a real folder.
 Copy-Item (Join-Path $RepoRoot 'extension') (Join-Path $StagingDir 'extension') -Recurse -Force
+if ($Release) {
+    $stagedSetupScript = Join-Path $StagingDir 'extension\setup.js'
+    & $setReleaseInstallerLink -SetupScript $stagedSetupScript -ExpectedVersion $VERSION
+}
 # v2.2.0: canonical rust-U mark used by the tray glyph loader AND by
 # installer\generate_icon.py. Shipping it makes the tray's PNG source-of-truth
 # pattern work post-install (uoink_tray loads {app}\assets\logo-mark-color.png).
@@ -577,7 +588,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py record_id_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

@@ -1,10 +1,18 @@
 # Tier 2 (v2.2) — cross-agent contracts (owned by CC)
 
-Status: **DRAFT / WIP** — CC owns these surfaces (helper backend + pywebview shells + wizard). Codex (dashboard UI, splash HTML, `uoink-card`/`uoink-running-pill`) and AG (extension popup) consume them. This is the source of truth; CC updates it as the helper code lands. A copy lives at `uoink-handoff/TIER-2-CONTRACTS-FROM-CC.md`.
+Status: **HISTORICAL** — this is the implementation-era Tier 2 contract between
+the helper backend, pywebview shells, dashboard, splash, and extension popup.
+It is retained as a record of that work, not as the current whole-product
+contract.
 
 Base: branched off `main @ ca674b7` (already includes v2.1.1 + Tier 1 install: tray, wizard bitmaps, `[Code]` migrating page). Tier 2 **extends** those files, does not duplicate them.
 
-All endpoints are on the existing loopback helper `http://127.0.0.1:5179`. Auth is the existing `X-Uoink-Token` header (token in `%LOCALAPPDATA%\Uoink\token.txt`, fetched via `GET /token`) **except** the public `GET /diagnose`, `/health`, `/splash`.
+All endpoints are on the existing loopback helper `http://127.0.0.1:5179`. This
+document records the Tier 2 auth posture at the time of that work; it is not an
+exhaustive list of the current public routes. Current auth rules and the complete
+public-route inventory live in [`docs/security.md`](security.md). Token-gated
+requests use `X-Uoink-Token`; the extension bootstraps it through `GET /token`
+with the required `X-Uoink-Client` header.
 
 ---
 

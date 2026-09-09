@@ -480,6 +480,7 @@ function onServerUp() {
   setCIControlsEnabled(true);
   loadAIPricing();
   loadCISettings();
+  loadYourChannels();
   loadHookCorrections();
   loadTasteAnchors();
   loadMCPConfig();
@@ -566,20 +567,10 @@ function setCIControlsEnabled(enabled) {
     ycChannelInput,
     ycAddBtn,
     ycRecognizeBtn,
-    ctWorkspaceFormat,
-    ctTargetLength,
     ctObsidianPath,
-    ctObsidianMirror,
-    cvEnabled,
-    cvSources,
   ];
   for (const el of els) {
     if (el) el.disabled = !enabled;
-  }
-  if (ctStyleSourceRadios) {
-    for (const r of ctStyleSourceRadios) {
-      r.disabled = !enabled;
-    }
   }
   if (!enabled) setCIStatus("Start Uoink Server to manage settings.", "warn");
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
@@ -610,37 +601,10 @@ function renderCISettings(settings) {
               settings.anthropic_key_set ? "ok" : "warn");
   renderAICostEstimate();
 
-  // Populate Your Channels
-  yourChannelsList = settings.your_channels || [];
-  renderYcList();
-  
-  // Populate Creator Tools
-  if (ctWorkspaceFormat) ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
-  if (ctTargetLength) {
-    const len = settings.default_target_length || "5m";
-    const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
-    ctTargetLength.value = lenToVal[len] !== undefined ? lenToVal[len] : 2;
-    updateTargetLengthDisplay(ctTargetLength.value);
-  }
-  if (ctStyleSourceRadios) {
-    const source = settings.style_anchors_source || "taste";
-    for (const r of ctStyleSourceRadios) {
-      r.checked = r.value === source;
-    }
-  }
+  // Populate the live memory-mirror setting. Your Channels no longer come from
+  // this settings payload; they load from the persisted /channels registry via
+  // loadYourChannels().
   if (ctObsidianPath) ctObsidianPath.value = settings.obsidian_vault_path || "";
-  if (ctObsidianMirror) ctObsidianMirror.checked = !!settings.mirror_scripts_to_obsidian;
-  
-  // Populate Claim Verification
-  if (cvEnabled) cvEnabled.checked = !!settings.claim_verification_enabled;
-  if (cvSources) {
-    const sources = Array.isArray(settings.default_evidence_sources)
-      ? settings.default_evidence_sources.join("\n")
-      : (settings.default_evidence_sources || "");
-    cvSources.value = sources;
-  }
-  
-  updateCreatorToolsVisibility();
 }
 
 async function fetchPricingWithToken(token) {
@@ -1286,7 +1250,7 @@ if (tcSaveBtn) {
       // Fallback to local storage
       console.warn("Failed to POST taste profile, falling back to local storage", e);
       chrome.storage.local.set({ uoink_taste_pending: profile }, () => {
-        tcStatus.textContent = "Taste profile saved locally (syncs later) ✓";
+        tcStatus.textContent = "Taste calibration stored only in this browser; it is not synced to the helper.";
         tcStatus.className = "settings-status ok";
         if (tcPendingNote) tcPendingNote.classList.remove("hidden");
         scrollToNext();
@@ -1427,22 +1391,71 @@ const ycList = document.getElementById("yc-list");
 const ycRecognizeBtn = document.getElementById("yc-recognize-btn");
 const ycStatus = document.getElementById("yc-status");
 
-const creatorToolsSection = document.getElementById("creator-tools-settings");
-const ctWorkspaceFormat = document.getElementById("ct-workspace-format");
-const ctTargetLength = document.getElementById("ct-target-length");
-const ctLengthDisplay = document.getElementById("ct-length-display");
-const ctStyleSourceRadios = document.getElementsByName("ct-style-source");
-const ctScriptsPath = document.getElementById("ct-scripts-path");
 const ctObsidianPath = document.getElementById("ct-obsidian-path");
-const ctObsidianMirror = document.getElementById("ct-obsidian-mirror");
 
-const cvEnabled = document.getElementById("cv-enabled");
-const cvSources = document.getElementById("cv-sources");
 const cvOverrideInfo = document.getElementById("cv-override-info");
 
 const settingsPendingBanner = document.getElementById("settings-pending-banner");
 
 let yourChannelsList = [];
+
+function channelHandle(channel) {
+  if (typeof channel === "string") return channel.trim().replace(/^@/, "");
+  return String((channel && channel.handle) || "").trim().replace(/^@/, "");
+}
+
+async function loadYourChannels() {
+  if (!ycList) return;
+  try {
+    const res = await fetch(`${SERVER}/channels`, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      headers: {
+        "X-Uoink-Token": await STC.getToken()
+      }
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      throw new Error((data && data.error) || `HTTP ${res.status}`);
+    }
+    yourChannelsList = Array.isArray(data.channels) ? data.channels : [];
+    renderYcList();
+  } catch (err) {
+    if (ycStatus) {
+      ycStatus.textContent = "Channels unavailable (helper offline)";
+      ycStatus.className = "settings-status warn";
+    }
+  }
+}
+
+async function removeYourChannel(handle) {
+  try {
+    const res = await fetch(`${SERVER}/channels/remove`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Uoink-Token": await STC.getToken()
+      },
+      body: JSON.stringify({ handle })
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      throw new Error((data && data.error) || `HTTP ${res.status}`);
+    }
+    await loadYourChannels();
+    if (ycStatus) {
+      ycStatus.textContent = `Removed @${handle}`;
+      ycStatus.className = "settings-status ok";
+    }
+  } catch (err) {
+    if (ycStatus) {
+      ycStatus.textContent = (err && err.message) || "Remove failed";
+      ycStatus.className = "settings-status warn";
+    }
+  }
+}
 
 function renderYcList() {
   if (!ycList) return;
@@ -1455,7 +1468,8 @@ function renderYcList() {
     return;
   }
   
-  yourChannelsList.forEach((chan, idx) => {
+  yourChannelsList.forEach((chan) => {
+    const handle = channelHandle(chan);
     const row = document.createElement("div");
     row.className = "correction-row yc-item";
     row.style.margin = "4px 0";
@@ -1463,12 +1477,16 @@ function renderYcList() {
     const leftWrap = document.createElement("div");
     const nameVal = document.createElement("div");
     nameVal.className = "correction-title";
-    nameVal.textContent = chan;
+    nameVal.textContent = (chan && chan.name)
+      ? `${chan.name} (@${handle})`
+      : `@${handle}`;
     
     const statusVal = document.createElement("div");
     statusVal.className = "yc-item-status";
     statusVal.style.cssText = "font-size: 11px; color: var(--text-mute);";
-    statusVal.textContent = "Added";
+    statusVal.textContent = (chan && chan.verified_at)
+      ? "Verified"
+      : "Added — not verified";
     
     leftWrap.appendChild(nameVal);
     leftWrap.appendChild(statusVal);
@@ -1482,18 +1500,17 @@ function renderYcList() {
     verifyBtn.style.cssText = "padding: 4px 8px; font-size: 11px; font-weight: 600; height: auto;";
     verifyBtn.textContent = "Verify";
     verifyBtn.addEventListener("click", () => {
-      verifyChannel(chan, statusVal, verifyBtn);
+      verifyChannel(handle, statusVal, verifyBtn);
     });
     
     const removeBtn = document.createElement("span");
     removeBtn.className = "remove-chip yc-remove-btn";
     removeBtn.style.cssText = "cursor: pointer; font-size: 16px; color: var(--text-mute); padding: 0 4px;";
     removeBtn.textContent = "×";
-    removeBtn.addEventListener("click", () => {
-      yourChannelsList.splice(idx, 1);
-      renderYcList();
-      updateCreatorToolsVisibility();
-      saveV3Settings();
+    removeBtn.addEventListener("click", async () => {
+      removeBtn.style.pointerEvents = "none";
+      await removeYourChannel(handle);
+      removeBtn.style.pointerEvents = "";
     });
     
     rightWrap.appendChild(verifyBtn);
@@ -1506,23 +1523,7 @@ function renderYcList() {
   });
 }
 
-function updateCreatorToolsVisibility() {
-  if (creatorToolsSection) {
-    if (yourChannelsList.length >= 1) {
-      creatorToolsSection.classList.remove("hidden");
-    } else {
-      creatorToolsSection.classList.add("hidden");
-    }
-  }
-}
-
-function updateTargetLengthDisplay(val) {
-  if (!ctLengthDisplay) return;
-  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
-  ctLengthDisplay.textContent = lenVals[val] || "5m";
-}
-
-async function verifyChannel(channelName, statusEl, btnEl) {
+async function verifyChannel(handle, statusEl, btnEl) {
   statusEl.textContent = "Verifying...";
   statusEl.style.color = "var(--text-mute)";
   btnEl.disabled = true;
@@ -1536,12 +1537,13 @@ async function verifyChannel(channelName, statusEl, btnEl) {
         "Content-Type": "application/json",
         "X-Yoink-Token": token
       },
-      body: JSON.stringify({ channel: channelName })
+      body: JSON.stringify({ handle })
     });
     const data = await res.json();
     if (res.ok && data && data.ok) {
       statusEl.textContent = "Verified ✓";
       statusEl.style.color = "var(--ok)";
+      await loadYourChannels();
     } else {
       statusEl.textContent = (data && data.error) || `Failed (HTTP ${res.status})`;
       statusEl.style.color = "var(--vermillion)";
@@ -1555,26 +1557,8 @@ async function verifyChannel(channelName, statusEl, btnEl) {
 }
 
 async function saveV3Settings() {
-  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
-  let selectedStyleSource = "taste";
-  if (ctStyleSourceRadios) {
-    for (const r of ctStyleSourceRadios) {
-      if (r.checked) selectedStyleSource = r.value;
-    }
-  }
-  
-  const sourcesText = cvSources ? cvSources.value.trim() : "";
-  const sourcesArray = sourcesText ? sourcesText.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
-
   const body = {
-    your_channels: yourChannelsList,
-    default_workspace_format: ctWorkspaceFormat ? ctWorkspaceFormat.value : "markdown",
-    default_target_length: ctTargetLength ? (lenVals[ctTargetLength.value] || "5m") : "5m",
-    style_anchors_source: selectedStyleSource,
-    obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : "",
-    mirror_scripts_to_obsidian: ctObsidianMirror ? !!ctObsidianMirror.checked : false,
-    claim_verification_enabled: cvEnabled ? !!cvEnabled.checked : false,
-    default_evidence_sources: sourcesArray
+    obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : ""
   };
 
   if (aiSettings) {
@@ -1611,52 +1595,45 @@ async function loadPendingV3Settings() {
     const pending = items.uoink_settings_pending;
     if (pending) {
       if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
-      if (pending.your_channels !== undefined) {
-        yourChannelsList = pending.your_channels;
-        renderYcList();
-      }
-      if (pending.default_workspace_format !== undefined && ctWorkspaceFormat) {
-        ctWorkspaceFormat.value = pending.default_workspace_format;
-      }
-      if (pending.default_target_length !== undefined && ctTargetLength) {
-        const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
-        ctTargetLength.value = lenToVal[pending.default_target_length] !== undefined ? lenToVal[pending.default_target_length] : 2;
-        updateTargetLengthDisplay(ctTargetLength.value);
-      }
-      if (pending.style_anchors_source !== undefined && ctStyleSourceRadios) {
-        for (const r of ctStyleSourceRadios) {
-          r.checked = r.value === pending.style_anchors_source;
-        }
-      }
       if (pending.obsidian_vault_path !== undefined && ctObsidianPath) {
         ctObsidianPath.value = pending.obsidian_vault_path;
       }
-      if (pending.mirror_scripts_to_obsidian !== undefined && ctObsidianMirror) {
-        ctObsidianMirror.checked = !!pending.mirror_scripts_to_obsidian;
-      }
-      if (pending.claim_verification_enabled !== undefined && cvEnabled) {
-        cvEnabled.checked = !!pending.claim_verification_enabled;
-      }
-      if (pending.default_evidence_sources !== undefined && cvSources) {
-        cvSources.value = Array.isArray(pending.default_evidence_sources)
-          ? pending.default_evidence_sources.join("\n")
-          : pending.default_evidence_sources;
-      }
-      updateCreatorToolsVisibility();
     }
   });
 }
 
 // Wire up events
 if (ycAddBtn && ycChannelInput) {
-  const addChannel = () => {
+  const addChannel = async () => {
     const val = ycChannelInput.value.trim();
     if (val) {
-      if (!yourChannelsList.includes(val)) {
-        yourChannelsList.push(val);
-        renderYcList();
-        updateCreatorToolsVisibility();
-        saveV3Settings();
+      ycAddBtn.disabled = true;
+      try {
+        const res = await fetch(`${SERVER}/channels`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Uoink-Token": await STC.getToken()
+          },
+          body: JSON.stringify({ handle: val })
+        });
+        const data = await res.json();
+        if (!res.ok || !data || !data.ok) {
+          throw new Error((data && data.error) || `HTTP ${res.status}`);
+        }
+        await loadYourChannels();
+        if (ycStatus) {
+          ycStatus.textContent = `Added @${data.channel.handle}`;
+          ycStatus.className = "settings-status ok";
+        }
+      } catch (err) {
+        if (ycStatus) {
+          ycStatus.textContent = (err && err.message) || "Add failed";
+          ycStatus.className = "settings-status warn";
+        }
+      } finally {
+        ycAddBtn.disabled = false;
       }
       ycChannelInput.value = "";
     }
@@ -1665,7 +1642,7 @@ if (ycAddBtn && ycChannelInput) {
   ycChannelInput.addEventListener("keydown", (ev) => {
     if (ev.key === "Enter") {
       ev.preventDefault();
-      addChannel();
+      void addChannel();
     }
   });
 }
@@ -1689,7 +1666,7 @@ if (ycRecognizeBtn) {
       const data = await res.json();
       if (res.ok && data && data.ok) {
         if (ycStatus) {
-          ycStatus.textContent = "Backfill recognition started ✓";
+          ycStatus.textContent = `Recognition complete: scanned ${data.scanned}, tagged ${data.tagged}.`;
           ycStatus.className = "settings-status ok";
         }
       } else {
@@ -1706,37 +1683,8 @@ if (ycRecognizeBtn) {
   });
 }
 
-if (ctTargetLength) {
-  ctTargetLength.addEventListener("input", (ev) => {
-    updateTargetLengthDisplay(ev.target.value);
-    saveV3Settings();
-  });
-}
-
-if (ctWorkspaceFormat) {
-  ctWorkspaceFormat.addEventListener("change", () => saveV3Settings());
-}
-
-if (ctStyleSourceRadios) {
-  for (const r of ctStyleSourceRadios) {
-    r.addEventListener("change", () => saveV3Settings());
-  }
-}
-
 if (ctObsidianPath) {
   ctObsidianPath.addEventListener("change", () => saveV3Settings());
-}
-
-if (ctObsidianMirror) {
-  ctObsidianMirror.addEventListener("change", () => saveV3Settings());
-}
-
-if (cvEnabled) {
-  cvEnabled.addEventListener("change", () => saveV3Settings());
-}
-
-if (cvSources) {
-  cvSources.addEventListener("change", () => saveV3Settings());
 }
 
 if (cvOverrideInfo) {

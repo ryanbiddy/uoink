@@ -204,6 +204,72 @@ def test_stdio_handshake_under_embeddable_path_rules():
             client.close()
 
 
+def test_stdio_entry_rejects_unknown_flags_and_answers_help():
+    if not HAVE_MCP_SDK:
+        return _skip("mcp SDK not installed; pip install mcp to run the "
+                     "stdio CLI boundary check")
+    with tempfile.TemporaryDirectory() as tmp:
+        command = [sys.executable, "-P", str(ROOT / "uoink_mcp.py")]
+        unknown = subprocess.run(
+            [*command, "--unknown"],
+            cwd=tmp,
+            env=_isolated_env(tmp),
+            input="",
+            text=True,
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+        _assert(unknown.returncode == 2,
+                f"unknown flag exited {unknown.returncode}: "
+                f"stdout={unknown.stdout!r}, stderr={unknown.stderr!r}")
+        _assert("unknown argument '--unknown'" in unknown.stderr,
+                f"unknown flag was not explained: {unknown.stderr!r}")
+
+        help_result = subprocess.run(
+            [*command, "--help"],
+            cwd=tmp,
+            env=_isolated_env(tmp),
+            input="",
+            text=True,
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+        _assert(help_result.returncode == 0,
+                f"help exited {help_result.returncode}: {help_result.stderr!r}")
+        _assert("usage: python uoink_mcp.py" in help_result.stdout,
+                f"help did not print usage: {help_result.stdout!r}")
+
+
+def test_stdio_entry_preserves_exact_diagnostic_delegation():
+    import uoink_mcp
+
+    delegated = []
+    original_cli = uoink_mcp.server.run_cli
+    original_stdio = uoink_mcp.mcp.run
+    try:
+        def unexpected_stdio(**kwargs):
+            raise AssertionError(
+                f"diagnostic flag started stdio: {kwargs}"
+            )
+
+        uoink_mcp.server.run_cli = (
+            lambda argv: delegated.append(list(argv)) or 17
+        )
+        uoink_mcp.mcp.run = unexpected_stdio
+
+        _assert(uoink_mcp.run(["--doctor"]) == 17,
+                "--doctor did not preserve the server CLI result")
+        _assert(uoink_mcp.run(["--migrate-dry-run"]) == 17,
+                "--migrate-dry-run did not preserve the server CLI result")
+        _assert(delegated == [["--doctor"], ["--migrate-dry-run"]],
+                f"unexpected diagnostic delegation: {delegated}")
+    finally:
+        uoink_mcp.server.run_cli = original_cli
+        uoink_mcp.mcp.run = original_stdio
+
+
 def test_doctor_carries_the_selfcheck():
     """The gate's second half: doctor can never report green while the
     stdio path is dead. Static wiring check (running the full doctor spawns
@@ -251,6 +317,8 @@ def main():
     test_doctor_carries_the_selfcheck()
     test_removed_aliases_are_rejected_and_manifest_matches()
     test_stdio_handshake_under_embeddable_path_rules()
+    test_stdio_entry_rejects_unknown_flags_and_answers_help()
+    test_stdio_entry_preserves_exact_diagnostic_delegation()
     print("\nall green")
 
 

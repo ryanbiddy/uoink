@@ -3539,8 +3539,8 @@
                   <div class="workspace-pane" data-workspace-pane="critique">
                     <textarea class="field draft-box" id="workspaceDraft" placeholder="Paste a draft hook, outline, or rough script."></textarea>
                     <div class="inline-row">
-                      <button class="button primary" type="button" id="runWorkspaceCritique">Run critique</button>
-                      <span class="soft-note">Any agent can post findings back; Uoink stores them here.</span>
+                      <button class="button primary" type="button" id="prepareWorkspaceCritiqueContext">Prepare critique context</button>
+                      <span class="soft-note">This prepares corpus context for a connected agent; Uoink does not run the critique itself.</span>
                     </div>
                     <div id="workspaceCritiqueResult"></div>
                   </div>
@@ -3613,7 +3613,7 @@
                 <div class="panel-head">
                   <div class="panel-title" id="scriptTitle">Script</div>
                   <div class="inline-row">
-                    <button class="button ghost" type="button" id="reviseScript">Revise</button>
+                    <button class="button ghost" type="button" id="reviseScript">Prepare revision</button>
                     <button class="button" type="button" id="deriveShotList">Derive shot list</button>
                   </div>
                 </div>
@@ -3633,7 +3633,8 @@
                 <div class="panel-body">
                   <textarea class="field draft-box" id="scriptRevisionNotes" placeholder="Paste critique findings or revision target."></textarea>
                   <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script to save as the next version."></textarea>
-                  <button class="button primary" type="button" id="saveScriptRevision">Run revision / save version</button>
+                  <div class="soft-note">Uoink prepares context for a connected agent. Paste a revised script to save a new version.</div>
+                  <button class="button primary" type="button" id="saveScriptRevision">Prepare revision context</button>
                   <div id="scriptRevisionResult"></div>
                 </div>
               </div>
@@ -3876,7 +3877,6 @@
               <p class="lede">Assistance only. Uoink surfaces checkable claims and evidence signals; you decide what the evidence means.</p>
             </div>
             <div class="inline-row">
-              <button class="button ghost" type="button" id="runEvidenceClaims" disabled>Run claim scan</button>
               <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
             </div>
           </div>
@@ -4320,9 +4320,8 @@
             </div>
 
             <div class="setting-block">
-              <h2>Claim verification</h2>
-              <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
-              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+              <h2>Claim evidence</h2>
+              <p class="setting-copy">Claim extraction and evidence review are agent-initiated. Uoink does not search the web or automatically scan every capture; use the Evidence tab with a connected agent, then decide what submitted evidence means.</p>
             </div>
 
             <div class="setting-block">
@@ -4638,7 +4637,7 @@
       ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
       ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
       ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
-      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
+      ["Capture", "podcast-feeds", "Podcast feeds", "Save RSS feeds, then poll, download, and transcribe episodes on demand through local tools.", "https://uoink.app/features/podcast-feeds"],
       ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
       ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
       ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
@@ -4661,7 +4660,7 @@
     const SOURCE_CAPABILITIES = [
       ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
       ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
-      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
+      ["Podcasts / RSS", "shipped", "Saved RSS feed; on-demand poll, download, and transcribe tools", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
       ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and research objections"],
@@ -4745,6 +4744,7 @@
       scriptDetail: document.getElementById("scriptDetail"),
       scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
+      saveScriptRevision: document.getElementById("saveScriptRevision"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       writingNavCount: document.getElementById("writingNavCount"),
       writingAnchorSelect: document.getElementById("writingAnchorSelect"),
@@ -4794,11 +4794,9 @@
       claimCount: document.getElementById("claimCount"),
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
-      claimVerificationToggle: document.getElementById("claimVerificationToggle"),
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
-      runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
       yoinkTitle: document.getElementById("yoinkTitle"),
@@ -6098,21 +6096,6 @@
       }
     }
 
-    async function runClaimsForSelectedEvidence() {
-      const videoId = state.selectedEvidenceVideo || evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
-      if (!videoId) return showToast("Pick a uoink before running a claim scan.");
-      try {
-        await authFetch("/claims/extract", {
-          method: "POST",
-          body: JSON.stringify({ video_id: videoId, claims: [], mode: "agent" }),
-        });
-        showToast("Claim scan ready for an agent pass.");
-        await loadEvidence();
-      } catch (err) {
-        showToast("Couldn't prepare the claim scan.");
-      }
-    }
-
     function normalizedScore(row) {
       const score = Number(row && (row.value_score ?? row.score ?? row.engagement_score));
       return Number.isFinite(score) ? score : 0;
@@ -6469,7 +6452,7 @@
           body: JSON.stringify(body),
         });
         if (universalState.source === "podcast_feed") {
-          showToast("Podcast feed added. New episodes transcribe locally.");
+          showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -6932,19 +6915,19 @@
       }
     }
 
-    async function runWorkspaceCritique() {
+    async function prepareWorkspaceCritiqueContext() {
       const ws = state.currentWorkspace;
       const draft = els.workspaceDraft.value.trim();
       if (!ws || !ws.id) return showToast("Select a workspace first.");
-      if (!draft) return showToast("Paste a draft before running critique.");
+      if (!draft) return showToast("Paste a draft before preparing critique context.");
       try {
         const data = await authFetch("/workspace/critique", {
           method: "POST",
           body: JSON.stringify({ workspace_id: ws.id, draft_text: draft }),
         });
-        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
+        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">Context ready for a connected agent</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Couldn't run critique yet.");
+        showToast("Couldn't prepare critique context yet.");
       }
     }
 
@@ -7358,6 +7341,12 @@
       }
     }
 
+    function syncScriptRevisionAction() {
+      els.saveScriptRevision.textContent = els.scriptRevisionDraft.value.trim()
+        ? "Save pasted revision"
+        : "Prepare revision context";
+    }
+
     async function reviseCurrentScript({ persist = false } = {}) {
       const script = state.currentScript;
       if (!script || !script.id) return showToast("Select a script first.");
@@ -7379,13 +7368,15 @@
       }
       try {
         const data = await authFetch("/script/revise", { method: "POST", body: JSON.stringify(payload) });
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
         if (data.id) {
+          showToast(`Script v${data.version || ""} saved.`);
           await loadScripts();
           await selectScript(data.id);
+          return;
         }
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Revision context ready for a connected agent</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Couldn't revise that script.");
+        showToast("Couldn't prepare or save that revision.");
       }
     }
 
@@ -7422,7 +7413,6 @@
 
     async function loadEvidence() {
       const videoId = state.selectedEvidenceVideo;
-      els.runEvidenceClaims.disabled = !videoId;
       if (!videoId) {
         renderEvidenceEmpty();
         return;
@@ -7430,10 +7420,7 @@
       els.evidenceContext.innerHTML = `
         <div class="job-row">
           <div class="job-title">${htmlEscape(state.selectedEvidenceTitle || videoId)}</div>
-          <div class="job-sub">Ready for an evidence review. Uoink stores signals here for your judgment.</div>
-          <div class="inline-row">
-            <button class="button ghost" type="button" data-run-claims>Run claim scan</button>
-          </div>
+          <div class="job-sub">A connected agent must submit claims before they appear here. Reload after the agent finishes.</div>
         </div>
       `;
       try {
@@ -7451,7 +7438,6 @@
       state.claims = [];
       if (els.evidenceNavCount) els.evidenceNavCount.textContent = "0";
       els.claimCount.textContent = "0";
-      els.runEvidenceClaims.disabled = true;
       els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their evidence notes into this panel.</p></div>`;
       els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence notes</div><strong>Evidence signals appear after selection.</strong><p>Uoink records signals for your review. You still decide what the evidence means.</p></div>`;
     }
@@ -7495,10 +7481,7 @@
         : `
           <div class="job-row">
             <div class="job-title">No claims saved for this uoink yet.</div>
-            <div class="job-sub">Run a claim scan with an agent, then Uoink will store evidence notes here.</div>
-            <div class="inline-row">
-              <button class="button" type="button" data-run-claims>Run claim scan</button>
-            </div>
+            <div class="job-sub">A connected agent must submit claims before they appear here. Reload after the agent finishes.</div>
           </div>
         `;
     }
@@ -8829,7 +8812,6 @@
         renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         els.autostartToggle.checked = Boolean(state.settings.autostart);
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
-        els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
@@ -10504,7 +10486,7 @@
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
           "No podcast feeds yet.",
-          "Paste an RSS feed URL to track new episodes locally."
+          "Paste an RSS feed URL to save it for on-demand processing."
         );
         return;
       }
@@ -10564,7 +10546,7 @@
           body: JSON.stringify({ feed_url: feedUrl }),
         });
         els.podcastFeedUrl.value = "";
-        showToast("Podcast feed added.");
+        showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
         loadPodcastFeedSettings();
       } catch (err) {
         showToast("Couldn't add that feed.");
@@ -10884,10 +10866,12 @@
       });
       els.workspaceForm.addEventListener("submit", createWorkspaceFromForm);
       document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
-      document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
+      document.getElementById("prepareWorkspaceCritiqueContext").addEventListener("click", prepareWorkspaceCritiqueContext);
       document.getElementById("reloadScripts").addEventListener("click", loadScripts);
       document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
-      document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
+      els.saveScriptRevision.addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
+      els.scriptRevisionDraft.addEventListener("input", syncScriptRevisionAction);
+      syncScriptRevisionAction();
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
       els.scriptForm.addEventListener("submit", generateScriptFromForm);
       els.scriptSourceSearch.addEventListener("focus", () => toggleScriptSourceCombo(true));
@@ -10998,7 +10982,6 @@
       });
       els.defaultAnchorsModal.addEventListener("keydown", (event) => trapModalFocus(event, els.defaultAnchorsModal, closeDefaultAnchorsModal));
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
-      els.runEvidenceClaims.addEventListener("click", runClaimsForSelectedEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
         if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Couldn't open that folder."));
@@ -11123,7 +11106,6 @@
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
-      els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       if (els.autoUoinkToggle) {
         els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
       }
@@ -11372,11 +11354,6 @@
         const verifyClaim = event.target.closest("[data-verify-claim]");
         if (verifyClaim) {
           recordClaimEvidence(verifyClaim.dataset.verifyClaim);
-          return;
-        }
-        const runClaims = event.target.closest("[data-run-claims]");
-        if (runClaims) {
-          runClaimsForSelectedEvidence();
           return;
         }
         const skipClaimButton = event.target.closest("[data-skip-claim]");

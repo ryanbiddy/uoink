@@ -239,30 +239,34 @@ this guide does not promise a portable editor for a specific release.
 
 ## Launch checklist
 
-Before updating the extension's download button for a new release:
+Before building a release:
 
-1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-<VERSION>.exe`.
-2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
-3. **Set the approved version from the repository:** in PowerShell, run
+1. **Set the approved version from the repository:** in PowerShell, run
    `$version = (Get-Content VERSION -Raw).Trim()` and confirm the approved
    release tag will be `v$version`. Tagging and pushing happen only after the
    release owner approves the build.
+2. **Build the release artifact:** `.\build.ps1 -Release` produces
+   `build\Uoink-Setup-<VERSION>.exe`. Release mode rewrites only the staged
+   copy of `extension/setup.js` to `<VERSION>` before Inno packages it. The
+   tracked development copy continues to point at the latest public release.
+3. **Smoke-test on a clean Windows VM** (see Testing matrix below). Open the
+   installed extension's setup page and confirm its Windows button names
+   `Uoink-Setup-$version.exe`. The URL will not resolve while the release is
+   still a draft.
 4. **Prepare the GitHub release as a draft:**
    - Create a new release at `https://github.com/ryanbiddy/uoink/releases/new`.
    - Tag: `v$version`. Title: `Uoink v$version`.
    - Attach `build\Uoink-Setup-$version.exe`.
    - Keep the release in draft until the release owner approves publication.
-5. **After the non-draft release asset exists, update the extension link:**
-   - Set `PUBLISHED_INSTALLER_VERSION` in `extension/setup.js` to the published
-     version.
-   - Reload the extension, visit `setup.html`, and verify the Windows button
-     resolves to
-     `https://github.com/ryanbiddy/uoink/releases/download/v$version/Uoink-Setup-$version.exe`.
+5. **After the non-draft release asset exists, verify the public link:**
+   `https://github.com/ryanbiddy/uoink/releases/download/v$version/Uoink-Setup-$version.exe`.
+   Then update the tracked `PUBLISHED_INSTALLER_VERSION` for development
+   builds and reload the extension to verify the same link.
 6. **Publish the extension** only as a separate, explicit release-owner action.
 
-There is no separate boolean publication switch. The versioned asset URL is
-the control: update it only after that exact public asset exists, so the
-shipped extension never points users at a draft or missing installer.
+`-Release` is a packaging switch, not publication authority. It makes the
+unpublished installer self-consistent; it does not create a release, upload an
+asset, push a tag, or publish anything.
 
 ## Testing matrix
 

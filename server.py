@@ -102,6 +102,7 @@ import notes  # noqa: E402  -- context-layer item 1: quick notes / musings captu
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
 import engagement_contract  # noqa: E402  -- suite engagement batch boundary
+import record_id_contract  # noqa: E402  -- strict IDs at destructive boundaries
 import media_handoff  # noqa: E402  -- authenticated kept-media boundary
 import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
@@ -1841,6 +1842,12 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
     return candidates[0]
 
 
+def _require_reliability_boolean(value: object, field: str) -> bool:
+    if not isinstance(value, bool):
+        raise TypeError(f"{field} must be a boolean")
+    return value
+
+
 def _compute_transcript_reliability(
     video_id: str,
     *,
@@ -1856,6 +1863,10 @@ def _compute_transcript_reliability(
     extraction-time call passes the just-downloaded video file before it is
     deleted, avoiding a second network request.
     """
+    allow_model_download = _require_reliability_boolean(
+        allow_model_download, "allow_model_download"
+    )
+    force = _require_reliability_boolean(force, "force")
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
@@ -5189,7 +5200,10 @@ _CAPTURE_SOURCES = {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
         "payload_key": "feed_url",
-        "note": "Adds the RSS feed so new episodes transcribe locally.",
+        "note": (
+            "Adds the RSS feed. Poll, download, and transcribe episodes "
+            "on demand."
+        ),
     },
     "web_page": {
         "label": "Article / web page",
@@ -9747,11 +9761,9 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_claims_verify(self, bare: str, body):
         """POST /claims/<id>/verify  -- record evidence for one claim.
 
-        Opt-in per claim: the user (or the agent acting on the user's
-        behalf) explicitly verifies a claim. The /settings flag
-        `claim_verification_enabled` gates batch / auto-verify flows
-        upstream of this endpoint, but the endpoint itself is always
-        available -- a single explicit verification is consent enough."""
+        Verification is explicit: the user or calling agent submits the
+        evidence. This endpoint records that supplied evidence; it does not
+        retrieve sources or launch automatic verification."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
@@ -10124,11 +10136,9 @@ class Handler(BaseHTTPRequestHandler):
             "idle_days": self._RESURFACE_TODAY_IDLE_DAYS})
 
     # ---- v3.1 podcast RSS feeds ---------------------------------------
-    # Feed registry + polling. Episode rows materialise as metadata-only
-    # rows when a feed is polled; the audio download + WhisperX
-    # transcription pipelines land in subsequent PRs (CC's queue track B
-    # step 2 + step 3). User opts in to download per-episode by moving
-    # the row from 'new' -> 'queued' via /podcasts/episodes/set-status.
+    # Adding a feed only registers it. An explicit poll materialises
+    # metadata-only episode rows; separate on-demand endpoints download
+    # audio and run WhisperX. There is no background feed scheduler.
 
     def _parse_feed_id(self, body):
         try:
@@ -10170,7 +10180,11 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        feed_id, err = self._parse_feed_id(body)
+        # Destructive: identity is validated before the index is touched.
+        # _parse_feed_id's int() would coerce true/"1"/1.0 to feed 1 and
+        # cascade-delete its episodes.
+        feed_id, err = record_id_contract.parse_record_id(
+            body.get("feed_id"), "feed_id")
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
@@ -10202,8 +10216,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_podcasts_feed_poll(self, body):
         """Manual poll. Body: {feed_id}. Returns the structured
-        per-feed result -- used by the dashboard's "refresh" button +
-        the future background poller can call the same function."""
+        per-feed result used by HTTP clients and the matching MCP tool."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
@@ -10319,6 +10332,24 @@ class Handler(BaseHTTPRequestHandler):
         except (TypeError, ValueError):
             return self._send_json(400, {
                 "ok": False, "error": "episode_id (integer) required"})
+        settings = _read_settings() or {}
+        if "diarize" in body:
+            diarize_value = body["diarize"]
+        else:
+            diarize_value = settings.get("diarization_default", False)
+            if diarize_value is None:
+                diarize_value = False
+        try:
+            diarize = whisper_runner.require_boolean(
+                diarize_value, "diarize")
+            consent_given = whisper_runner.require_boolean(
+                body.get("consent_given", False),
+                "consent_given",
+            )
+        except ValueError as error:
+            return self._send_json(400, {
+                "ok": False,
+                "error": str(error)})
 
         episode = podcasts.get_episode(_get_index(), episode_id)
         if episode is None:
@@ -10338,13 +10369,8 @@ class Handler(BaseHTTPRequestHandler):
                           "not bundled with the helper to keep the "
                           "install footprint small).")})
 
-        settings = _read_settings() or {}
         model = whisper_runner.normalize_model(
             body.get("model") or settings.get("whisper_model"))
-        diarize = bool(body.get("diarize")
-                         if body.get("diarize") is not None
-                         else settings.get("diarization_default"))
-        consent_given = bool(body.get("consent_given"))
         language = body.get("language")
 
         # Flip the row state so the dashboard's Activity tab shows the
@@ -10454,7 +10480,11 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        playlist_id, err = self._parse_monitored_playlist_id(body)
+        # Destructive: identity is validated before the index is touched.
+        # _parse_monitored_playlist_id's int() would coerce true/"1"/1.0
+        # to playlist 1 and cascade-delete its discovery events.
+        playlist_id, err = record_id_contract.parse_record_id(
+            body.get("playlist_id"), "playlist_id")
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
@@ -10872,6 +10902,18 @@ class Handler(BaseHTTPRequestHandler):
         line included -> persist + scan + return."""
         if not isinstance(body, dict):
             return 400, {"ok": False, "error": "json object required"}
+        try:
+            for field in (
+                "skip_voice_dna_this_time",
+                "suppress_credit",
+            ):
+                if field in body:
+                    writing_studio._require_boolean(body[field], field)
+        except ValueError as e:
+            return getattr(e, "http_status", 400), {
+                "ok": False,
+                "error": str(e),
+            }
         yoink_id = (body.get("source_yoink_id")
                       or body.get("yoink_id") or "").strip() or None
         style_anchor_ids = body.get("style_anchor_ids") or []
@@ -10939,9 +10981,9 @@ class Handler(BaseHTTPRequestHandler):
                 parent_id=body.get("parent_id"),
                 voice_dna_warnings_enabled=bool(
                     settings.get("voice_dna_warnings_enabled", True)),
-                skip_voice_dna_this_time=bool(
-                    body.get("skip_voice_dna_this_time")),
-                suppress_credit=bool(body.get("suppress_credit")),
+                skip_voice_dna_this_time=body.get(
+                    "skip_voice_dna_this_time", False),
+                suppress_credit=body.get("suppress_credit", False),
             )
         except ValueError as e:
             status = getattr(e, "http_status", 400)
@@ -11094,7 +11136,12 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         render_mode = (body.get("render_mode")
                          or page_extractor.RENDER_MODE_JS).strip().lower()
-        include_screenshot = bool(body.get("include_screenshot", True))
+        include_screenshot = body.get("include_screenshot", True)
+        if not isinstance(include_screenshot, bool):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "include_screenshot must be a boolean",
+            })
         try:
             follow_depth = int(body.get("follow_links_depth", 0))
         except (TypeError, ValueError):
@@ -11214,11 +11261,22 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": "threshold must be a number",
                 })
+        flags = {}
+        for field in ("allow_model_download", "force"):
+            try:
+                flags[field] = _require_reliability_boolean(
+                    body.get(field, False), field
+                )
+            except TypeError as e:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": str(e),
+                })
         result = _compute_transcript_reliability(
             video_id,
             threshold=threshold,
-            allow_model_download=bool(body.get("allow_model_download")),
-            force=bool(body.get("force")),
+            allow_model_download=flags["allow_model_download"],
+            force=flags["force"],
         )
         self._send_json(200, result)
 
@@ -11539,10 +11597,20 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/mcp/v1/tools/call" or (bare == "/mcp/v1" and method == "tools/call"):
             params = body.get("params") if isinstance(body.get("params"), dict) else body
             name = params.get("name")
-            args = params.get("arguments") or {}
+            args = params.get("arguments", {})
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
-            payload = _mcp_tools_module().call_tool(name, args)
+            tools = _mcp_tools_module()
+            spec = tools.TOOL_REGISTRY.get(name)
+            if spec is not None:
+                validation_error = openapi_bridge.validate_arguments(
+                    args, spec.input_schema
+                )
+                if validation_error:
+                    return self._send_mcp_error(
+                        request_id, -32602, validation_error
+                    )
+            payload = tools.call_tool(name, args)
             return self._send_mcp_result(request_id, self._mcp_tool_call_result(payload))
         return self._send_mcp_error(request_id, -32601, "method not found")
 
@@ -14314,6 +14382,42 @@ def doctor_payload() -> dict:
     }
 
 
+_CLI_USAGE = (
+    "usage: python server.py "
+    "[--show-dashboard | --doctor | --migrate-dry-run | "
+    "--heal-paths [folder] | --export-corpus | --import-corpus <file> | "
+    "--rebuild-index [folder] | --backfill-authors [--dry-run]]"
+)
+_CLI_SINGLE_FLAGS = {
+    "--show-dashboard",
+    "--doctor",
+    "--migrate-dry-run",
+    "--heal-paths",
+    "--export-corpus",
+    "--import-corpus",
+    "--rebuild-index",
+    "--backfill-authors",
+}
+_CLI_KNOWN_FLAGS = _CLI_SINGLE_FLAGS | {"-h", "--help", "--dry-run"}
+_CLI_OPTIONAL_PATH_FLAGS = {"--heal-paths", "--rebuild-index"}
+
+
+def _cli_arguments_valid(argv: list[str]) -> bool:
+    if not argv:
+        return True
+    if len(argv) == 1 and argv[0] in _CLI_SINGLE_FLAGS:
+        return True
+    if argv == ["--backfill-authors", "--dry-run"]:
+        return True
+    if (
+        len(argv) == 2
+        and argv[0] in _CLI_OPTIONAL_PATH_FLAGS | {"--import-corpus"}
+        and not argv[1].startswith("--")
+    ):
+        return True
+    return False
+
+
 def run_cli(argv: list[str]) -> int:
     """Tiny CLI dispatcher for the helper. Returns a process exit code.
 
@@ -14334,6 +14438,21 @@ def run_cli(argv: list[str]) -> int:
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if argv in (["-h"], ["--help"]):
+        print(_CLI_USAGE)
+        return 0
+    if not _cli_arguments_valid(argv):
+        unknown = next(
+            (arg for arg in argv if arg.startswith("-")
+             and arg not in _CLI_KNOWN_FLAGS),
+            None,
+        )
+        if unknown is not None:
+            detail = f"unknown argument {unknown!r}"
+        else:
+            detail = f"unsupported argument combination: {argv!r}"
+        print(f"{detail}\n{_CLI_USAGE}", file=sys.stderr)
+        return 2
     if "--backfill-authors" in argv:
         # Phase 2 (categorization): the SQL migration set platform + YouTube
         # author; this reads each non-YouTube sidecar for the real author and

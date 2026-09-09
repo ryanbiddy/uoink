@@ -8,7 +8,7 @@
 
 **Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — full transcript, timestamped screenshots, comments, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge.
+Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — available transcript, timestamped screenshots, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge. For YouTube captures, top comments are fetched in the background and added to the saved corpus after the initial clipboard copy.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
 - **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
@@ -17,7 +17,7 @@ Free, open source (MIT), and local-first: no account, no Uoink cloud, no require
 
 You see a video that's clearly working and you want to know why. So you paste the YouTube link into Claude and hope it can "watch" it. It can't — it hallucinates the quotes, invents the title, and gives up past the first paragraph. You end up watching the whole thing on 2x, taking notes by hand.
 
-Uoink fixes that. Click the **Uoink** button under any video (or right-click a link, or press `Alt+U`) and you get the full transcript, timestamped screenshots, top comments, channel context, and metadata — copied to your clipboard and saved on disk, ready for Claude, ChatGPT, or your notes app. Or tell your AI agent *"uoink that video and decode the hook"* and it does both, with no clipboard step.
+Uoink fixes that. Click the **Uoink** button under any video (or right-click a link, or press `Alt+U`) and you get the available transcript, timestamped screenshots, channel context, and metadata — copied to your clipboard and saved on disk, ready for Claude, ChatGPT, or your notes app. Uoink then adds top comments to the saved corpus in the background; they are not part of the initial clipboard copy. Or tell your AI agent *"uoink that video and decode the hook"* and it does both, with no clipboard step.
 
 The corpus compounds. Every source you save lands in one local library your AI can search, cite, and write from — in your voice.
 
@@ -25,7 +25,7 @@ The corpus compounds. Every source you save lands in one local library your AI c
 
 | Source | Captured |
 |---|---|
-| **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
+| **YouTube** (flagship) | Available timestamped transcript, screenshots, channel context, metadata, JSON sidecar; top comments added to the saved corpus in the background |
 | **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
 | **Podcasts** | RSS feeds and episodes, local Whisper transcription, speaker diarization |
 | **Web pages / articles** | Readable text extraction into the same corpus format |
@@ -78,7 +78,7 @@ For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Bu
 
 ## How it works
 
-**Extension flow:** click Uoink under a video → Uoink extracts transcript, screenshots, comments, metadata → Markdown corpus lands on your clipboard (screenshots embedded) and the full set saves to disk → paste, run a prompt, get analysis.
+**Extension flow:** click Uoink under a video → Uoink extracts the available transcript, screenshots, channel context, and metadata → the initial Markdown corpus lands on your clipboard (screenshots embedded) and saves to disk → Uoink fetches top comments in the background and updates the saved corpus → paste, run a prompt, get analysis.
 
 **Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
 

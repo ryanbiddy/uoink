@@ -23,6 +23,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+import record_id_contract as _record_id_contract
+
 
 _backend = None
 
@@ -683,12 +685,14 @@ def list_podcast_feeds(args: dict[str, Any]) -> dict[str, Any]:
 
 def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 podcast: delete a feed + cascade its episodes."""
+    # Identity is validated before the backend is touched: int() would
+    # coerce true/"1"/1.0 to feed 1 and cascade-delete its episodes.
+    feed_id, id_error = _record_id_contract.parse_record_id(
+        args.get("feed_id"), "feed_id")
+    if id_error:
+        return _err(id_error)
     server = _b()
     import podcasts as _pod
-    try:
-        feed_id = int(args.get("feed_id"))
-    except (TypeError, ValueError):
-        return _err("feed_id (integer) is required")
     try:
         removed = _pod.remove_feed(server._get_index(), feed_id)
     except Exception as e:
@@ -743,8 +747,8 @@ def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     Synchronous. Returns when the file lands at
     <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp
     errors. Idempotent -- skips re-download when the canonical path
-    already has a non-zero file. The transcription pipeline (next
-    PR in CC's queue) reads audio_local_path to feed WhisperX."""
+    already has a non-zero file. The live transcription pipeline reads
+    audio_local_path to feed WhisperX."""
     server = _b()
     import podcasts as _pod
     try:
@@ -794,6 +798,21 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
         episode_id = int(args.get("episode_id"))
     except (TypeError, ValueError):
         return _err("episode_id (integer) is required")
+    settings = server._read_settings() or {}
+    if "diarize" in args:
+        diarize_value = args["diarize"]
+    else:
+        diarize_value = settings.get("diarization_default", False)
+        if diarize_value is None:
+            diarize_value = False
+    try:
+        diarize = _wr.require_boolean(diarize_value, "diarize")
+        consent_given = _wr.require_boolean(
+            args.get("consent_given", False),
+            "consent_given",
+        )
+    except ValueError as error:
+        return _err(str(error))
     episode = _pod.get_episode(server._get_index(), episode_id)
     if episode is None:
         return _err("episode not found")
@@ -803,13 +822,8 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     if not _wr.is_whisperx_available():
         return _err("whisperx runtime not installed; "
                      "use the Setup page to install (consent-gated dep).")
-    settings = server._read_settings() or {}
     model = _wr.normalize_model(
         args.get("model") or settings.get("whisper_model"))
-    diarize = bool(args.get("diarize")
-                     if args.get("diarize") is not None
-                     else settings.get("diarization_default"))
-    consent_given = bool(args.get("consent_given"))
     language = args.get("language")
     _wr.update_episode_transcript_state(
         server._get_index(), episode_id,
@@ -886,12 +900,14 @@ def list_monitored_playlists(args: dict[str, Any]) -> dict[str, Any]:
 def remove_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 mobile bridge: delete a playlist + cascade its discovery
     events."""
+    # Identity is validated before the backend is touched: int() would
+    # coerce true/"1"/1.0 to playlist 1 and cascade-delete its events.
+    playlist_id, id_error = _record_id_contract.parse_record_id(
+        args.get("playlist_id"), "playlist_id")
+    if id_error:
+        return _err(id_error)
     server = _b()
     import mobile_playlists as _mp
-    try:
-        playlist_id = int(args.get("playlist_id"))
-    except (TypeError, ValueError):
-        return _err("playlist_id (integer) is required")
     try:
         removed = _mp.remove_playlist(server._get_index(), playlist_id)
     except Exception as e:
@@ -1288,8 +1304,8 @@ def _byo_generate(kind, args):
             angle=args.get("angle"),
             target_length=target_length,
             parent_id=args.get("parent_id"),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=credit or args.get("source_credit_line"),
             mode=_ws.COMPUTE_MODE_BYO_KEY)
     except ValueError as e:
@@ -1333,9 +1349,23 @@ def _byo_extract_json(text):
 def _byo_requested(args) -> bool:
     """True when the caller asked the helper to generate server-side (Path C)
     rather than just return grounding for an agent to write."""
-    if args.get("generate") in (True, "true", "1", 1):
+    if args.get("generate") is True:
         return True
     return args.get("compute_mode") == "byo_key"
+
+
+def _writing_boolean_defect(args, ws) -> str | None:
+    try:
+        for field in (
+            "generate",
+            "skip_voice_dna_this_time",
+            "suppress_credit",
+        ):
+            if field in args:
+                ws._require_boolean(args[field], field)
+    except ValueError as error:
+        return str(error)
+    return None
 
 
 def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
@@ -1346,6 +1376,9 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
     `body` present -> persists + scans + returns warnings (NEVER
     auto-blocks; see VOICE-DNA.md soft-warn policy)."""
     import writing_studio as _ws  # noqa: WPS433
+    boolean_defect = _writing_boolean_defect(args, _ws)
+    if boolean_defect is not None:
+        return _err(boolean_defect)
     kind = args.get("kind") or _ws.KIND_TWEET
     if kind not in (_ws.KIND_TWEET, _ws.KIND_THREAD):
         return _err("kind must be tweet or thread")
@@ -1379,9 +1412,9 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
             angle=args.get("angle"),
             target_length=args.get("target_length_chars"),
             parent_id=args.get("parent_id"),
-            suppress_credit=bool(args.get("suppress_credit")),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            suppress_credit=args.get("suppress_credit", False),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=args.get("source_credit_line"))
     except ValueError as e:
         return _err(str(e))
@@ -1399,6 +1432,9 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Writing Studio (blog): same two-phase contract as
     write_tweet. Phase 2 also accepts `title`, `dek`, `tags`."""
     import writing_studio as _ws  # noqa: WPS433
+    boolean_defect = _writing_boolean_defect(args, _ws)
+    if boolean_defect is not None:
+        return _err(boolean_defect)
     if args.get("kind") not in (None, "", _ws.KIND_BLOG):
         return _err("kind must be blog")
     yoink_id = (args.get("source_yoink_id")
@@ -1431,9 +1467,9 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
             angle=args.get("angle"),
             target_length=args.get("target_length_words"),
             parent_id=args.get("parent_id"),
-            suppress_credit=bool(args.get("suppress_credit")),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            suppress_credit=args.get("suppress_credit", False),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=args.get("source_credit_line"))
     except ValueError as e:
         return _err(str(e))
@@ -1550,7 +1586,9 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err("url (string) is required")
     render_mode = (args.get("render_mode")
                     or _pe.RENDER_MODE_JS).strip().lower()
-    include_screenshot = bool(args.get("include_screenshot", True))
+    include_screenshot = args.get("include_screenshot", True)
+    if not isinstance(include_screenshot, bool):
+        return _err("include_screenshot must be a boolean")
     try:
         follow_depth = int(args.get("follow_links_depth", 0))
     except (TypeError, ValueError):

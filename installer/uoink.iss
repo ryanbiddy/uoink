@@ -118,6 +118,7 @@ Source: "staging\corpus_provider.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\corpus_intelligence.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\writer_peer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\engagement_contract.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\record_id_contract.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\media_handoff.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\suite_service.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
