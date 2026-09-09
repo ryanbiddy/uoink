@@ -72,3 +72,15 @@ runs. Ryan must authorize compatible fixture setup, preserving the deadline
 assertion, or provide a ruling. Existing tests remain unchanged. AZ-5d2 removes
 the production workaround and adds an independent actual-handler test; it must
 report the frozen setup failure separately.
+
+## Phase 4: D15 intercepts the removed direct binding write
+
+AV-5m4a2 removes `Path.write_text` from binding persistence as required by
+AW-4. `test_d15_failed_destination_binding_persistence_does_not_allow_readoption`
+patches that removed method on the binding pathname. Its injected failure is
+never reached, so the assertion that no binding exists fails. The binding is
+now written through `_atomic_local`; the independent initial-failure and
+witness-failure tests cover that actual boundary and pass. Preserve this
+ninth frozen setup failure. Ryan must authorize moving its failure injection
+to the real persistence boundary without weakening its authority assertions,
+or give another ruling. Do not restore the direct write to satisfy the test.
