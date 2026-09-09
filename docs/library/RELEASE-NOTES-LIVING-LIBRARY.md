@@ -1,93 +1,71 @@
 # Living Library integration candidate
 
-Integration candidate, 2026-09-09. **Release is not ready yet.** Latest complete
-tree `8fc6a40` has **2,254 passed, ten failed, three skipped and one xfailed**,
-183 warnings, 573.49 seconds. It includes 62 new cases and loses no earlier
-case. One new read-promotion check fails under full-suite ordering and is being
-investigated; the previous nine failures remain. Both receipt kits still need
-final verification before the owed package rebuild.
+Version 3.8.0, 2026-09-09. **Not yet approved for release.** The replacement
+installer is built and the original bundled application passes its focused
+evidence-reading and isolated-helper observation. The latest complete test tree
+has **2,254 passed, ten failed, three skipped and one xfailed**. Receipt tools
+are undergoing final review; the final kit-inclusive tree and Ryan's installed
+receipts remain open. No merge to main or artifact publication has occurred.
 
-The preceding integrated product tree on `263b7e4` had **2,193 passed, nine failed, three
-skipped and one xfailed**, 183 warnings, 728.37 seconds. Eleven of the
-previous 20 failures now pass, with no new failures or missing test cases.
-Eight new regression cases pass. Existing tests remain unchanged since
-Ryan's five authorized corrections; the further mirror-hook proposal is
-pending and has not been applied. The installer and executable receipt kits
-are being repaired before the final build and Ryan's installed session.
+## What this candidate adds
 
-Subsequent recovery `239dbbd` closes three Phase 3 archive gaps in focused
-verification: AS-7/8/9 is 22 passed / one failed, strict Phase 3 is 181 passed /
-one failed. The original AT6 child exit status remains missing. These focused
-results do not replace the corrected full tree. Follow-on mirror repair
-`1063843` has 163 passed / eight failed in both roots. The reviewed SDK repair
-at `0ad33d4` has 267 passes in both roots. The Phase 6 refusal repair at
-`512fecb` has
-71 passes in both roots, including both originally failing stale-publication
-checks. No omitted ticket is minted or allowed to publish. Installation isolation and executable receipt
-kits are in progress; no new package is sealed yet. Default style seeding
-at `db95457` now commits before standing-capture startup and rolls back a
-partial seed; its three new ownership/durability checks pass in the full tree.
+The library can retrieve bounded evidence with citations, propose reviewable
+shelves, capture consented standing sources, expose native library resources and
+prompts, maintain an optional consented mirror, describe saved-library activity,
+and publish chapters and cited ranges. Evidence keeps its source and revision.
+The per-phase details and remaining limits are below.
 
-The later existing-preview repair prevents a read from initializing storage or
-replaying recovery. Nine new checks pass, including unchanged files and SQLite
-contents through the original stdio entry after restart. Its broader companion
-run has 212 passed / the same eight mirror-hook failures. It still needs the
-final complete-tree and bundled-runtime observations.
+Ryan's release scope is explicit: autonomous filing keeps the 0.90 rule,
+`librarian_apply_enabled=false`, and proposals ship as reviewable suggestions.
+Phase 5 Part B is deferred. Phase 6 makes no speaker-attribution claim and runs
+no diarization. The Phase 4 X source remains a documented HTTP 403 blocked link;
+no access repair or replacement fetch is included.
 
-The isolated-install source is reviewed: 118 worker checks pass, and 130 pass
-in checkout with the read/startup companions; each run retains one Windows
-privilege skip. Setup requires explicit isolated app/profile/port arguments
-and close/restart suppression. Uninstall validates saved identity and confirms
-owned termination before deletion. This source has compiled with dummy staging;
-real installation, registry persistence and uninstall remain unexecuted.
+## Exact package
 
-## Package and scope
+| Item | Value |
+|---|---|
+| Branch | `cc/living-library-candidate` |
+| Installer build source | `8a607c37095cb4f3b66d2aee285cfb710ab5e586` |
+| Last complete product tree | `8fc6a40a049f704a654d72998a9fb89455fe9293` |
+| Local executable | `build/Uoink-Setup-3.8.0.exe` |
+| Size | 339,059,131 bytes |
+| SHA-256 | `d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1` |
+| Bundled runtime | Python 3.11.9, MCP 1.27.1, schema 30 |
+| Build | 2026-09-09 10:33–10:39 PDT, 327.57 seconds |
 
-Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
-`9217846da45cecbf1b91614d9031fd7a16b7d16f`. Installer build source:
-`e47e4f2e8e1b6a83ecb1171436092b9077186430`. That retained package predates the
-current mirror and SDK repairs. Production source changed after the corrected
-tree; a new build and seal are required after the remaining verified integrations.
-The original installer and proof remain retained as historical artifacts.
-Checkpoint `512fecb` is backed up on `origin/cc/living-library`;
-the remote SHA was independently verified. This is a branch backup of a failed
-candidate, with no merge to main or artifact publication.
+The build verifies the exact 142-package lock and packaged helper, extension,
+tray, dashboard, splash and WhisperX imports. The sealed compiler-input inventory
+contains 32,203 files and 142 exact source/Git bindings. It is not an extraction
+of installer bytes. See [the package seal](proof/candidate-package-02-2026-09-09/SHA256.json).
 
-Local artifact: [Uoink-Setup-3.8.0.exe](../../build/Uoink-Setup-3.8.0.exe),
-339,042,658 bytes (323.3 MiB). SHA-256:
+The isolated path now takes an explicit app directory, profile and non-5179 port.
+Inno requires close/restart suppression; uninstall validates its persisted
+identity and confirms owned termination before deletion. Focused verification
+has 118 passes / one skip in the corrected worker and 130 passes / one skip in
+checkout with read/startup companions. Actual Inno installation, registry effects
+and uninstall are still unexecuted. The operator runbook must use the sealed
+receipt kit before Ryan starts that session; ordinary launch defaults are not
+the receipt path.
+
+At `175bcef`, the original bundled stdio entry observed 32 tools, five resource
+templates, four prompts, exact native/fallback card equality and successful
+native consult-library and reshelve-review. SQLite logical state and library
+files were unchanged by reads. Original server.py then reported schema 30,
+apply disabled and no loaded Whisper model on the explicit isolated profile and
+port 18191; authenticated quit and both process exits were zero. The automatic
+guard canary passed and its temporary bytes were restored. All 142 source
+bindings and package bytes still matched the build afterward.
+
+This [18-file bundled observation](proof/ryan-bundled-runtime-03-2026-09-09/SHA256.json)
+uses a synthetic caller and fixture. It does not establish installed behavior,
+real-client acceptance, child-survival recovery or speaker quality.
+
+The older e47e4f2 executable is retained separately, SHA-256
 `9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d`.
-Compilation completed on 2026-09-09 at 00:30 PDT after 368.93 seconds.
-This package has not been installed, published or merged to main. The authorized
-branch backup is separate from artifact publication. Label application remains
-disabled. **Do not install this artifact under the current receipt constraints:**
-Inno preparation probes port 5179, and the ordinary helper launcher probes/binds
-it. Silent installation and a throwaway account do not remove that behavior.
-The [runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md) stops before installation;
-the [product repair brief](INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md) defines
-the required repair and operator kit. Installed C22/Phase 4 remain unexecuted.
-
-The build verified the exact 142-package dependency lock, schema 30, version
-3.8.0 in the helper and extension, and packaged tray, dashboard, splash and
-WhisperX imports. The separate original-entry stdio observation used the
-bundled Python 3.11.9 and MCP 1.27.1 with a synthetic one-item database. It
-observed 32 tools, five resource templates, four prompts, equal complete card
-contents through native and fallback reads, a native consult prompt and a
-successful small activity request. Its child exited zero with both output
-drains complete. This does not establish installed behavior, model inference
-or speaker quality.
-
-The first stdio attempt remains failed: its isolation guard also blocked
-Windows Python's internal event-loop socket pair. A
-[documented guard repair](CANDIDATE-PACKAGED-RUNTIME-REPAIR-BRIEF-2026-09-09.md)
-permitted only that standard-library loopback pair, with port 5179 still
-forbidden, before observation 02. Both original attempts are retained in
-the [28-file package receipt seal](proof/candidate-package-01-2026-09-09/SHA256.json).
-The archive inventories 32,202 staged input files and binds 141 source files
-to the frozen checkout. It is not an extraction of the installer. The
-post-observation token and log are excluded from that inventory because
-Inno's explicit source list does not package them; their metadata is retained
-separately and the task-created token was removed. No token contents or
-fixture databases are in the archive.
+Its earlier failed guard observation and repaired narrow observation remain in
+[the historical package seal](proof/candidate-package-01-2026-09-09/SHA256.json).
+It predates the isolated installer and is not the package for Ryan's receipt.
 
 ## Phases 0 and 1: reliable capture and searchable evidence
 
@@ -179,7 +157,8 @@ access repair or new fetch. The five lifetime failures pass after `1063843`,
 including in the complete `263b7e4` tree. Eight parent-interception checks
 still fail; the exact three-file fixture proposal preserves all 150 assertion
 syntax trees and awaits Ryan's explicit approval. The proposal is unapplied.
-The installed receipt additionally awaits the isolated installation repair.
+The isolated installation repair is built. The complete installed receipt kit
+and Ryan's installation observation remain outstanding.
 
 ## Phase 5: descriptive library activity
 
@@ -231,8 +210,8 @@ passed 382 tests with four superseded AS-7 evidence failures.
 Ryan authorized the setup correction. The subsequent refusal repair passes
 all 71 named checks in both roots. Validated snapshots already in committed
 history receive the expected stale-revision refusal; other omitted tickets
-remain invalid and cannot publish. The failed full-tree result remains until
-the new complete tree runs. Speaker material stays blocked under the explicit
+remain invalid and cannot publish. These repaired refusal checks also pass in the complete `8fc6a40` tree.
+That whole-tree observation still has ten failures elsewhere. Speaker material stays blocked under the explicit
 release scope above.
 
 The frozen navigation study reduced mean absolute error from 72.06 seconds
@@ -243,89 +222,71 @@ retained at `1217dbf` and byte preservation at `82d81d1`. The earlier Chrome
 subsecond player timing. See `PHASE6-BD2-2026-09-08.md` and
 `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md`.
 
-## Combined verification
+## Integrated repairs and verification
 
-Integrated product checkpoint `263b7e422a4cb5b0c3357a86e4ac957eec28a4cf`:
-**2,193 passed, nine failed, three skipped, one xfailed**, 183 warnings,
-**728.37 seconds**. Only S21 is excluded. Compared by exact JUnit case
-identity with `4a35316`, eleven failures now pass, eight new regressions pass,
-no earlier case is missing and no new failure appears. All nine failures
-remain failed. See `proof/ryan-integrated-tree-01-2026-09-09/SHA256.json`.
-This uses the native Python 3.14.6 private verification runtime, with vendor
-hashes and inherited guard proof retained separately. It precedes the pending
-installer/kit integrations and their required final complete-tree check.
+| Repair | Commit | Verification |
+|---|---|---|
+| Original Phase 3 evidence recovery | `239dbbd` | AS-7/8/9: 22 passed / one failed; strict Phase 3: 181 passed / one failed. Historical AT6 child exit is still absent. |
+| Mirror writer lifetime and conservative ownership | `1063843` | 163 passed / eight failed in both roots; five lifetime failures close in the complete tree. |
+| SDK response settlement at the outgoing frame | `0ad33d4` | 267 passed in worker and checkout; original SDK failure closes in the complete tree. |
+| Media stale-input refusal | `512fecb` | 71 passed in both roots; stale snapshots refuse without minting tickets or publishing. |
+| Durable default-style initialization | `db95457` | 21 focused passes; partial initialization rolls back and startup commits before capture begins. |
+| Existing reads and preview recovery isolation | `e86bc16` | Nine focused passes; broader 212 passed / eight known failures. Reads do not migrate, backfill or replay recovery. |
+| Isolated helper and Inno ownership | `022ff43` | 130 passed / one skip in checkout; compiled and included in the replacement package. Installed receipt remains open. |
 
-Corrected candidate `4a3531642692736d4aaa4098077ab8fde464aeb4`: **2,174 passed,
-20 failed, three skipped, one xfailed**, 183 warnings, **607.27 seconds**.
-Only S21 was excluded under the standing command. The six authorized fixture
-files retain all 690 assertion syntax trees. Python 3.14.6, pytest 9.1.1 and
-MCP 1.28.1 were used in the isolated checkout run; this is not the bundled
-Python 3.11.9/MCP 1.27.1 installed-runtime receipt.
+Complete observations are separate results; none replaces the recorded status of
+an earlier run. Only S21 is excluded in the complete trees below.
 
-The 20 failures comprise four Phase 3 evidence checks, thirteen Phase 4 mirror
-checks, one Phase 5 SDK serialization check and two Phase 6 refusal checks.
-All 20 also failed in the previous tree; 72 previous failures pass in this
-separate observation. No test cases were added, removed or additionally
-deselected. See the [complete sealed result](proof/ryan-corrected-01-2026-09-09/SHA256.json)
-and [product repair brief](CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md).
-The result is failed, with no further fixture-correction round.
+| Committed tree | Passed | Failed | Skipped | Xfailed | Seconds |
+|---|---:|---:|---:|---:|---:|
+| `8fc6a40` | 2,254 | 10 | 3 | 1 | 573.49 |
+| `263b7e4` | 2,193 | 9 | 3 | 1 | 728.37 |
+| `4a35316`, five authorized corrections | 2,174 | 20 | 3 | 1 | 607.27 |
+| `6c313ea`, earlier candidate | 2,102 | 92 | 3 | 1 | 550.41 |
 
-Historical candidate `6c313ea` full tree: **2,102 passed, 92 failed, three skipped,
-one existing xfail**, 550.41 seconds. Only S21 was excluded; every closed
-Phase 4 reproduction was included. This is a failed full-tree result.
+The latest tree adds 62 cases and loses none; it closes none of the prior nine
+failures and adds one ordered read-opening failure. That new test encounters a
+backend getter left replaced by an older fixture. The exact two-line proposed
+setup correction preserves all 13 assertions. The other proposal moves eight
+mirror failure injections to the production child-writer boundary, preserving
+all 150 assertions. Both are unapplied pending Ryan's explicit ruling, because
+the September 9 instruction froze further fixture edits.
 
-All 67 additional mirror failures had passed in the prior focused union on
-the same production source. A reduced ordered pair demonstrates why the
-first ordinary export fails: AW-11's private-helper fixture directly terminates
-its session and drops the Mirror pointer, leaving a dead thread-local I/O
-binding for the next fixture. No process or exclusion lock remains. Production
-stop/kill cleanup forgets that binding; four independent lifecycle controls
-succeeded without resetting global state. The tests were unchanged for that run.
+The remaining historical AT6 failure concerns an exit status discarded by the
+original shell wrapper. Its original artifacts were recovered; that missing
+exit cannot be reconstructed or inferred from the successful replacement AT7.
+It is separate from C22 and remains failed.
 
-Ryan authorized consistent fixture teardown and four other narrow corrections
-on 2026-09-09. Their corrected full-tree result is recorded separately above.
-The 67 failures remain failed; neither the diagnosis nor the controls
-turn them into passes. The old D15 assertion did not fail in this contaminated
-run, which does not override its earlier frozen failure. See
-[the investigation brief](CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md) and
-`proof/candidate-full-01-2026-09-09/summary.json` for the complete comparison,
-two failed order diagnostics and lifecycle control.
+The complete run used the private native Python 3.14.6 verification runtime,
+pytest 9.1.1 and MCP 1.28.1 with inherited guards. It is not the bundled-runtime
+receipt. Its three skips and one existing xfail remain disclosed in the raw
+JUnit/log; the xfail concerns the existing non-ASCII FTS case. See the
+[latest complete-tree seal](proof/ryan-integrated-tree-02-2026-09-09/SHA256.json),
+[previous tree](proof/ryan-integrated-tree-01-2026-09-09/SHA256.json) and
+[authorized-correction tree](proof/ryan-corrected-01-2026-09-09/SHA256.json).
 
-The latest pre-Phase-4 closure run on `44968d9` had 2,106 passes, 26 failures,
-three skips and one existing xfail in 514.25 seconds. S21 and the then-open
-AW-5/AW-7 reproduction files were excluded. Its 26 failures comprise four
-superseded AS-7 assertions, nine frozen Phase 4 setup cases, eleven omitted-
-ticket Phase 6 calls, one Phase 5 unary/clock case and the old BA-4 SDK
-route. No additional failure appeared. The final candidate result must
-identify its actual exclusions and failures separately from this baseline.
+Receipt instrument results remain separate from product acceptance. C22 and
+Phase 4 worker checks have exposed missing provenance, cleanup and completeness
+conditions; rejected patches and original failed or partial measurements remain
+archived. They will not earn installed credit through a passing status flag.
 
-Proof files retain full outputs and hashes. Rejected worker patches and
-failed or partial measurements remain archived. The authorized setup/cleanup
-diff and review are retained; behavior assertions were not changed.
+## Remaining release gates
 
-## Open decisions and receipts for Ryan
+- Finish review and integration of both executable receipt kits, then record
+  a final complete tree on its exact commit. Rebuild only if packaged source
+  changes; otherwise retain the build SHA and recheck every source binding.
+- Ryan's explicit ruling on the two exact fixture proposals. No assertion,
+  threshold, skipped case or failed measurement is changed by inference.
+- Ryan's actual installed Inno/C22 and Phase 4 receipts from one throwaway
+  Windows profile using the final [operator runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md).
+  The session covers evidence retrieval, following a citation, opening a brief,
+  jumping to a chapter, and the required recovery/failure observations.
+- The historical AT6 exit gap remains recorded; main merge and publication
+  remain Ryan's decisions. No new fetch scope is authorized.
+- Speaker material stays blocked under the narrowed Phase 6 release scope.
+  Part B stays deferred. The failed shelf-quality and dashboard-byte measurements
+  remain failed as described above.
 
-- Phase 2 strict precision remains failed: 39/46 timed and 6/11 text cases.
-  Ryan chose option 3: reviewable suggestions, 0.90 retained for autonomous
-  filing, and label application disabled. This decision is resolved.
-- Nine checks remain failed in the latest complete tree: eight mirror
-  interception cases and the missing historical AT6 child exit status. The
-  reviewed mirror-fixture proposal awaits Ryan; no waiver or edit is inferred.
-  The installed-path and kit repairs remain product/instrument work.
-- Installed Inno receipts for Phase 3 C22 and Phase 4, after the product repair
-  supplies a safe, exact operator kit. The current runbook is blocked before
-  installation and does not yet provide executable installed scenario commands.
-- Phase 4's original X source remains a documented HTTP 403 blocked-link
-  condition under Ryan's ruling. No access repair or new fetch.
-- The five fixture corrections are authorized and documented in
-  `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md`. All behavior assertions
-  remain unchanged. Any residual full-tree failure is a product defect,
-  with a repair brief required and no further fixture edits permitted.
-- Speaker gate remains blocked. Phase 6 ships chapters and cited ranges
-  without speaker attribution claims; no diarization runs.
-- Any new fetch scope and merge to main. Standing orchestration signature,
-  watchdog installation, PR strategy and adapter allow-list decisions
-  remain in the handoff.
-
-No live index or resident helper was used for integration verification.
-No paid API was used, and no live labels were applied.
+No live index or resident helper was used for integration verification. No paid
+API was used and no live labels were applied. Branch backup is authorized only
+to origin/cc/living-library; it is separate from merging or publishing a release.
