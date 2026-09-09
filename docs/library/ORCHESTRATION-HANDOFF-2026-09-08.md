@@ -60,7 +60,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m3 (`270e569`) integrated as intermediate work: 209 passed / eight unchanged parent-interceptor failures in both roots. AW-4 adds four failed ownership/staging cases plus lifecycle findings | `PHASE4-ACCEPTANCE-4-2026-09-08.md`: Phase 4 remains unaccepted | AV-5m4a2 (grok binding/temp/staging retry) and AV-5m4b (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g (gemini), then BA-4 (codex) |
+| 5 | AZ-5d2 integrated: both roots 470 passed / five failed, BA-3 51/52, dashboard3 7/7, fixtures 28/28. Forbidden wrapper inspection removed | Four measurement failures remain; the unary/clock fixture conflict is Ryan's. Independent actual-handler deadline and nested-admission tests pass | AZ-5g (gemini), AZ-5h transport repair (grok), measured refresh and final BA-4 |
 | 6 | BC-3d (`897f0d2`) integrated: both roots 158 passed / 11 omitted-ticket failures; all three BD-2 cases pass. New BD-3 provenance case fails | Consumed capture binding omits provenance and other plan inputs. Phase 6 remains unaccepted; BD-27 observed | BC-3e (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -91,7 +91,9 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 is verified and integrated. Dispatch AZ-5g (gemini) from
    `PHASE5-AZ5G-BRIEF-2026-09-08.md` and the original AZ-5 brief.
-   BA-4 (codex review) follows on the integrated candidate.
+   Preliminary BA-4 found a final SDK-serialization gap. Retain and review
+   AZ-5g, then dispatch AZ-5h (grok) from `PHASE5-AZ5H-BRIEF-2026-09-08.md`.
+   A briefed measurement refresh and final BA-4 follow the transport repair.
 3. AV-5m3 is integrated at `270e569`; AV-5m2 remains rejected. Dispatch/verify
    AV-5m4a2 (grok) from `PHASE4-AV5M4A2-BRIEF-2026-09-08.md`; AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b (grok) remains active
@@ -401,3 +403,20 @@ in `patches/av5m4a-gemini-timeout-rejected-2026-09-08.patch`. No portion
 is integrated. AV-5m4a2 has a bounded Grok repair brief; AV-5m4b retains
 its separate lifetime/exclusion scope. AZ-5g Gemini was dispatched from
 `14f9e1b`; source-only client preparation is still unexecuted.
+
+### 2026-09-08 18:26 PDT — final SDK serialization gap; active runs
+
+Preliminary BA-4 added an independent actual SDK stdio probe on the current
+AZ-5d2 implementation. It injects elapsed time at final JSON-RPC serialization
+after the handler returns. **One failure**, 1.19 s: success is emitted after
+the deadline, with active admission zero. `_scratch/ba4-sdk` retains the
+command/log/XML. The prior passing handler probe remains a pass for its
+narrower boundary; it does not prove the later SDK writer.
+`PHASE5-BA4-2026-09-08.md` records the distinction. AZ-5h is briefed to
+repair the actual transport, after retaining AZ-5g's current measurements.
+No acceptance test/helper was changed and no model was involved in the probe.
+
+Active Control Room IDs: AZ-5g Gemini `5e9baea5` (base `14f9e1b`),
+BC-3e Grok `21cb8de9` and AV-5m4a2 Grok `53f50b6f` (base `d9ccba5`),
+AV-5m4b Grok `5c22dbae` (base `98d8b35`). The first three started at
+18:16/18:20/18:20 PDT; AV-5m4b remains on its original lifetime scope.
