@@ -269,7 +269,7 @@ Uoink v3 ships **claim extraction + verification assistance** inspired by [Libr-
 
 **Outbound surface.** The verification step (step 4 of the Loki pipeline) is the *first new outbound surface* in A2: when an agent retrieves evidence for a claim, it uses its own web-search tooling under the user's direction. The helper records the resulting source URLs + quotes verbatim. The helper itself does not initiate any web requests for claim verification.
 
-**Opt-in by default.** A new settings flag `claim_verification_enabled` (default `false`) gates batch / auto-extract flows. Single-claim verification through the endpoint is always available because a single explicit verification is consent enough.
+**Explicit workflow.** Claim extraction and verification are agent-initiated through the HTTP/MCP contracts above. No current automatic claim scan consumes the legacy `claim_verification_enabled` settings flag, and the helper does not search the web for evidence. Single-claim verification through the endpoint remains available because the explicit call supplies the user's intent.
 
 ## Reporting
 
