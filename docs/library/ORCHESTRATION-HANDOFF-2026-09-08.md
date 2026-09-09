@@ -86,7 +86,8 @@ Grok `33751bb7` integrated at `986b555`.
 AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integrated at `45bb2f6`;
 AV-5m4b3 Grok `260ef22c` is rejected with its complete diff retained.
 AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is active from `d1d5fb8`
-(19:54 PDT). AV-5m4b4 is next.
+(19:54 PDT). AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c`
+is active from `564836c` (20:09 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -101,7 +102,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
-   rejected after AW-5/AW-7. B3 is rejected after AW-8; dispatch AV-5m4b4 (grok) under
+   rejected after AW-5/AW-7. B3 is rejected after AW-8; verify active AV-5m4b4 (grok) under
    `PHASE4-AV5M4B4-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
@@ -681,3 +682,13 @@ Current full-tree verification is next. No navigation or speaker result changed.
 
 AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` started at 19:54 PDT
 from `d1d5fb8`. Its measured refresh must still be verified before integration.
+
+### 2026-09-08 20:10 PDT - B4 dispatched; Phase 6 closure full tree
+
+AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c` started from
+`564836c`. All ten AW-8 proof hashes match working files and committed blobs.
+The Phase 6 closure full tree will run on this handoff commit with S21 excluded
+as required, plus only the still-open AW-5 and AW-7 reproduction files excluded
+under their B4 repair ruling. Other frozen and stale-document failures remain
+included. The checkout will remain fixed during that run. This does not credit
+the excluded cases or replace any earlier failed or aborted invocation.
