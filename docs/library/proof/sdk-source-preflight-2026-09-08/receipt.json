@@ -1,0 +1,23 @@
+{
+  "status": "source comparison only; packaged runtime not executed",
+  "installed_user_sdk": "1.28.1",
+  "installer_pin": "1.27.1",
+  "download_command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-B",
+    "-m",
+    "pip",
+    "download",
+    "--no-deps",
+    "--only-binary=:all:",
+    "--no-cache-dir",
+    "--dest",
+    "_scratch/packaged-sdk-preflight",
+    "mcp==1.27.1"
+  ],
+  "wheel_retained_in_scratch": true,
+  "wheel_bytes": 216260,
+  "wheel_sha256": "1af3c4203b329430fde7a87b4fcb6392a041f5cb851fd68fc674016ab4e7c06f",
+  "observation": "SessionMessage, stdio and types files are byte-identical. FastMCP server differs only in client_id documentation comments. The embedded Python/dependency graph still needs its own smoke."
+}

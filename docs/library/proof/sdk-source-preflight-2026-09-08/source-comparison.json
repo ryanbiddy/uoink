@@ -1,0 +1,32 @@
+{
+  "wheel": "mcp-1.27.1-py3-none-any.whl",
+  "wheel_sha256": "1af3c4203b329430fde7a87b4fcb6392a041f5cb851fd68fc674016ab4e7c06f",
+  "bytes": 216260,
+  "source_only": true,
+  "files": [
+    {
+      "path": "mcp/shared/message.py",
+      "pinned_sha256": "2bbc32fdf09a3e8ee9d2bf3fd8f776db701bd10f4330006e0a2b4adf1ab47102",
+      "installed_sha256": "2bbc32fdf09a3e8ee9d2bf3fd8f776db701bd10f4330006e0a2b4adf1ab47102",
+      "byte_equal": true
+    },
+    {
+      "path": "mcp/server/stdio.py",
+      "pinned_sha256": "1469644bfc9afc3a230933fe2fbad8846ec5f2dc13f6392826bcb060e8c94141",
+      "installed_sha256": "1469644bfc9afc3a230933fe2fbad8846ec5f2dc13f6392826bcb060e8c94141",
+      "byte_equal": true
+    },
+    {
+      "path": "mcp/server/fastmcp/server.py",
+      "pinned_sha256": "abd25bd81df8a0308eeba90cde1b728307d852c7efe0abb9e0a5c6acf5b7b9b7",
+      "installed_sha256": "6feed1a5c112acf1cf3f35e887463b54920c695484bcfeea29f86b6f4c2e0127",
+      "byte_equal": false
+    },
+    {
+      "path": "mcp/types.py",
+      "pinned_sha256": "6824109cd1eabaf43c5dab829a83015b1b88ec9ae149765e6814afaf23f9bde5",
+      "installed_sha256": "6824109cd1eabaf43c5dab829a83015b1b88ec9ae149765e6814afaf23f9bde5",
+      "byte_equal": true
+    }
+  ]
+}

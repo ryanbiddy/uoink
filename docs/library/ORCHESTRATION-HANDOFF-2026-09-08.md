@@ -874,3 +874,16 @@ draft is in checkout scratch as `RELEASE-NOTES-LIVING-LIBRARY-draft.md`.
 Phase 3/5/6 dispositions and retained results are filled in; Phase 4, final
 full-tree, candidate SHA and installer fields remain explicitly pending.
 Promote it only after the Queue's candidate prerequisites are satisfied.
+
+### 2026-09-08 - Installer SDK source comparison
+
+The installer pins MCP 1.27.1 while current user-site verification uses
+1.28.1. The 216,260-byte pinned public wheel was downloaded to checkout
+scratch for read-only source inspection; no package was installed. Its
+SessionMessage, stdio and types sources are byte-identical to the installed
+version. FastMCP's server differs only in client-id documentation comments.
+The hashes and diff are in `proof/sdk-source-preflight-2026-09-08/`. This
+reduces the specific source-API uncertainty; it does not replace a smoke
+against the installer's embedded Python and full pinned dependency graph.
+B6's first full worker union had 229 passed / 55 failed and is under repair;
+its focused 23 passes do not override those regressions.

@@ -1,0 +1,16 @@
+{
+  "files": {
+    "docs/library/proof/sdk-source-preflight-2026-09-08/mcp_server_fastmcp_server.py.diff": {
+      "bytes": 726,
+      "sha256": "0af2e42cc2e636500e1493b1a62464086428b8e6ac9d8a4115cb4c291eccc79f"
+    },
+    "docs/library/proof/sdk-source-preflight-2026-09-08/receipt.json": {
+      "bytes": 769,
+      "sha256": "c9846add2dca4a79298566d7542b6cffb7ea151776474f1a5e657e86cb26bbb5"
+    },
+    "docs/library/proof/sdk-source-preflight-2026-09-08/source-comparison.json": {
+      "bytes": 1267,
+      "sha256": "6987dc16979e889fc297a4669fe171bf237d8dec737800a84422e17299523fec"
+    }
+  }
+}
