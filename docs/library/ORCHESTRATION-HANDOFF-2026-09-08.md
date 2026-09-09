@@ -296,3 +296,8 @@ See `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md` and its sealed raw images. This
 satisfies the playback observation only and preserves both previous partial
 Chrome runs. No claim is made about subsecond physical seek accuracy or speaker
 accuracy. No capture button or resident-helper request was issued by the observer.
+
+BD-27 receipt/images are committed at `1217dbf`. All seven artifact hashes match
+both the working files and committed blobs. The `bd-player-*` proof directory
+also needs `-text` attributes so a future Windows checkout cannot change its
+sealed JSON line endings; that preservation rule is recorded with this entry.
