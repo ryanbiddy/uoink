@@ -1,0 +1,162 @@
+{
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_at6_receipt_records_process_exit_status": {
+    "status": "failed",
+    "seconds": 0.0,
+    "detail": {
+      "message": "AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nassert ({})",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status\n    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (\nE   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nE   assert ({})"
+    }
+  },
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_all_at6_artifact_bytes_are_archived": {
+    "status": "failed",
+    "seconds": 0.004,
+    "detail": {
+      "message": "AssertionError: {'missing_artifacts': ['helper\\\\server.log', 'source_instances\\\\81ea2cd742d9bc80.json', 'Podcasts\\\\untitled-podcast\\\\s...898789.json', 'Podcasts\\\\untitled-podcast\\\\s21-controlled-capture-7fc8c898789\\\\s21-controlled-capture-7fc8c898789.md']}\nassert ['helper\\\\ser...c8c898789.md'] == []\n  \n  Left contains 4 more items, first extra item: 'helper\\\\server.log'\n  Use -v to get more diff",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:92: in test_as7_c21_all_at6_artifact_bytes_are_archived\n    assert missing == [], {'missing_artifacts': missing}\nE   AssertionError: {'missing_artifacts': ['helper\\\\server.log', 'source_instances\\\\81ea2cd742d9bc80.json', 'Podcasts\\\\untitled-podcast\\\\s...898789.json', 'Podcasts\\\\untitled-podcast\\\\s21-controlled-capture-7fc8c898789\\\\s21-controlled-capture-7fc8c898789.md']}\nE   assert ['helper\\\\ser...c8c898789.md'] == []\nE     \nE     Left contains 4 more items, first extra item: 'helper\\\\server.log'\nE     Use -v to get more diff"
+    }
+  },
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_browser_run_has_retained_receipt_and_database[at6-browser]": {
+    "status": "failed",
+    "seconds": 0.001,
+    "detail": {
+      "message": "AssertionError: {'missing_browser_run_feed_port': 64703, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}\nassert []",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:100: in test_as7_c21_browser_run_has_retained_receipt_and_database\n    assert matching, {'missing_browser_run_feed_port': feed_port,\nE   AssertionError: {'missing_browser_run_feed_port': 64703, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}\nE   assert []"
+    }
+  },
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_browser_run_has_retained_receipt_and_database[c21-pill-browser]": {
+    "status": "failed",
+    "seconds": 0.001,
+    "detail": {
+      "message": "AssertionError: {'missing_browser_run_feed_port': 49557, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}\nassert []",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:100: in test_as7_c21_browser_run_has_retained_receipt_and_database\n    assert matching, {'missing_browser_run_feed_port': feed_port,\nE   AssertionError: {'missing_browser_run_feed_port': 49557, 'retained_feed_urls': ['http://127.0.0.1:59403/feed.xml', 'http://127.0.0.1:6...ed.xml', 'http://127.0.0.1:49194/feed.xml', 'http://127.0.0.1:60407/feed.xml', 'http://127.0.0.1:59403/feed.xml', ...]}\nE   assert []"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw2_acceptance::test_d13_replace_syscall_cannot_complete_after_timeout": {
+    "status": "failed",
+    "seconds": 0.593,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x1f05857b4d0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout\n    assert entered.is_set() and result[\"ok\"] is False\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x1f05857b4d0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_retry_keeps_ownership_of_interrupted_temp": {
+    "status": "failed",
+    "seconds": 0.944,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_control_hard_purge_removes_unedited_recorded_temp": {
+    "status": "failed",
+    "seconds": 0.954,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement": {
+    "status": "failed",
+    "seconds": 0.957,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]": {
+    "status": "failed",
+    "seconds": 0.609,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x1f0578b21b0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes\n    assert entered.is_set() and not result[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x1f0578b21b0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]": {
+    "status": "failed",
+    "seconds": 0.576,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x1f0578b2750: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes\n    assert entered.is_set() and not result[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x1f0578b2750: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync": {
+    "status": "failed",
+    "seconds": 0.625,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x1f0578b1eb0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:330: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync\n    assert entered.is_set() and not first[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x1f0578b1eb0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw_acceptance::test_purge_removes_intent_owned_actual_temp_name": {
+    "status": "failed",
+    "seconds": 1.039,
+    "detail": {
+      "message": "assert 0 == 1\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name\n    assert len(orphans) == 1\nE   assert 0 == 1\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase5_ba4_acceptance::test_ba4_actual_sdk_serialization_retains_admission_and_deadline": {
+    "status": "failed",
+    "seconds": 0.083,
+    "detail": {
+      "message": "AssertionError: Expired actual serialization emitted success; active admissions=[0]\nassert False",
+      "text": "tests\\library_work_astra\\test_phase5_ba4_acceptance.py:95: in test_ba4_actual_sdk_serialization_retains_admission_and_deadline\n    assert result[\"isError\"], f\"Expired actual serialization emitted success; active admissions={observed_active}\"\nE   AssertionError: Expired actual serialization emitted success; active admissions=[0]\nE   assert False"
+    }
+  },
+  "tests.test_phase4_av5m4b_lifetime::test_job_assignment_failure_refuses_before_mutation": {
+    "status": "failed",
+    "seconds": 0.049,
+    "detail": {
+      "message": "AssertionError: assert not True\n +  where True = <function _foreign_vault_worker_alive at 0x000001F05A3CD7A0>('E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\igr1-0\\\\j0\\\\v')\n +    where <function _foreign_vault_worker_alive at 0x000001F05A3CD7A0> = mirror._foreign_vault_worker_alive\n +    and   'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\igr1-0\\\\j0\\\\v' = str(WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igr1-0/j0/v'))",
+      "text": "tests\\test_phase4_av5m4b_lifetime.py:224: in test_job_assignment_failure_refuses_before_mutation\n    assert not mirror._foreign_vault_worker_alive(str(dest))\nE   AssertionError: assert not True\nE    +  where True = <function _foreign_vault_worker_alive at 0x000001F05A3CD7A0>('E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\igr1-0\\\\j0\\\\v')\nE    +    where <function _foreign_vault_worker_alive at 0x000001F05A3CD7A0> = mirror._foreign_vault_worker_alive\nE    +    and   'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\igr1-0\\\\j0\\\\v' = str(WindowsPath('E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/igr1-0/j0/v'))"
+    }
+  },
+  "tests.test_phase4_av5m4b_lifetime::test_child_boundary_timeout_confirms_death_and_keeps_user_edit": {
+    "status": "failed",
+    "seconds": 0.1,
+    "detail": {
+      "message": "AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nassert False",
+      "text": "tests\\test_phase4_av5m4b_lifetime.py:231: in test_child_boundary_timeout_confirms_death_and_keeps_user_edit\n    export(env)\ntests\\library_work_astra\\test_phase4_aw_acceptance.py:65: in export\n    assert result[\"ok\"], result\nE   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nE   assert False"
+    }
+  },
+  "tests.test_phase4_av5m4b_lifetime::test_timed_out_parent_cannot_use_later_resync_session": {
+    "status": "failed",
+    "seconds": 0.099,
+    "detail": {
+      "message": "AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nassert False",
+      "text": "tests\\test_phase4_av5m4b_lifetime.py:270: in test_timed_out_parent_cannot_use_later_resync_session\n    export(env)\ntests\\library_work_astra\\test_phase4_aw_acceptance.py:65: in export\n    assert result[\"ok\"], result\nE   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nE   assert False"
+    }
+  },
+  "tests.test_phase4_av5m4b_lifetime::test_second_process_with_different_temp_root_is_excluded": {
+    "status": "failed",
+    "seconds": 0.127,
+    "detail": {
+      "message": "AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nassert False",
+      "text": "tests\\test_phase4_av5m4b_lifetime.py:300: in test_second_process_with_different_temp_root_is_excluded\n    export(env)\ntests\\library_work_astra\\test_phase4_aw_acceptance.py:65: in export\n    assert result[\"ok\"], result\nE   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nE   assert False"
+    }
+  },
+  "tests.test_phase4_av5m4b_lifetime::test_corrupt_lease_does_not_grant_destination": {
+    "status": "failed",
+    "seconds": 0.101,
+    "detail": {
+      "message": "AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nassert False",
+      "text": "tests\\test_phase4_av5m4b_lifetime.py:364: in test_corrupt_lease_does_not_grant_destination\n    export(env)\ntests\\library_work_astra\\test_phase4_aw_acceptance.py:65: in export\n    assert result[\"ok\"], result\nE   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {'reason': 'OSError'}}, ...}\nE   assert False"
+    }
+  },
+  "tests.test_phase6_bc2::test_bc2_publication_fence_refuses_every_stale_publisher": {
+    "status": "failed",
+    "seconds": 0.256,
+    "detail": {
+      "message": "AssertionError: assert 'invalid_request' == 'revision_unavailable'\n  \n  - revision_unavailable\n  + invalid_request",
+      "text": "tests\\test_phase6_bc2.py:185: in test_bc2_publication_fence_refuses_every_stale_publisher\n    assert caught.value.code == \"revision_unavailable\"\nE   AssertionError: assert 'invalid_request' == 'revision_unavailable'\nE     \nE     - revision_unavailable\nE     + invalid_request"
+    }
+  },
+  "tests.test_phase6_evaluation::test_phase6_rebuild_and_publication_recovery": {
+    "status": "failed",
+    "seconds": 0.253,
+    "detail": {
+      "message": "AssertionError: assert 'invalid_request' == 'revision_unavailable'\n  \n  - revision_unavailable\n  + invalid_request",
+      "text": "tests\\test_phase6_evaluation.py:1225: in _operation_refusal\n    result = call()\n             ^^^^^^\ntests\\test_phase6_evaluation.py:1267: in <lambda>\n    _operation_refusal(lambda: _publish(conn, f), \"revision_unavailable\")\n                               ^^^^^^^^^^^^^^^^^\ntests\\test_phase6_evaluation.py:1233: in _publish\n    return media.publish_transcript(conn, f.item[\"video_id\"], cues=f.cues,\nlibrary_media.py:2180: in publish_transcript\n    raise _request(\"publication_ticket_required\")\nE   library_media.MediaError: The request is invalid.\n\nDuring handling of the above exception, another exception occurred:\ntests\\test_phase6_evaluation.py:1267: in test_phase6_rebuild_and_publication_recovery\n    _operation_refusal(lambda: _publish(conn, f), \"revision_unavailable\")\ntests\\test_phase6_evaluation.py:1227: in _operation_refusal\n    assert exc.code == code\nE   AssertionError: assert 'invalid_request' == 'revision_unavailable'\nE     \nE     - revision_unavailable\nE     + invalid_request"
+    }
+  }
+}

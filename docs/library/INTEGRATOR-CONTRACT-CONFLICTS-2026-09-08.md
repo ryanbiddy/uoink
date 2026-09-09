@@ -114,6 +114,10 @@ Some old refusal-code expectations may still fail; do not mint a fresh ticket
 for stale input or change an assertion to avoid that result.
 
 See the [one-page review verdict](FIXTURE-CORRECTIONS-REVIEW-2026-09-09.md).
-The corrected full tree will be run on the committed candidate with only S21
-excluded under the standing command. Its actual result will be recorded by SHA;
-every residual failure becomes a product repair item under Ryan's ruling.
+The corrected full tree ran on `4a3531642692736d4aaa4098077ab8fde464aeb4`,
+with only S21 excluded: **2,174 passed, 20 failed, three skipped, one xfailed**,
+183 warnings, 607.27 seconds. Every remaining failure is assigned in
+[the product repair brief](CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md).
+The [sealed complete result](proof/ryan-corrected-01-2026-09-09/SHA256.json)
+retains the command, log, XML, comparison and assertion audit. No further
+fixture correction or product source edit followed that run.

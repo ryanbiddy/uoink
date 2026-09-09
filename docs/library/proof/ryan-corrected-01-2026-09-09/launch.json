@@ -1,0 +1,10 @@
+{
+  "candidate": "4a3531642692736d4aaa4098077ab8fde464aeb4",
+  "started_utc": "2026-09-09T14:23:47.936460+00:00",
+  "runner": "_scratch/integrator_verify.py",
+  "label": "igr1",
+  "selectors": [
+    "tests",
+    "--ignore=tests/library_work_astra/test_phase3_s21.py"
+  ]
+}

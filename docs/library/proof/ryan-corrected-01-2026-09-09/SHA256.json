@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "path": "assertion-audit.json",
+      "bytes": 990,
+      "sha256": "f8d00f4fea96db4c4f8bb987f97922fc0f78c0bd6c252c7cf2f10b8f61885989"
+    },
+    {
+      "path": "cases.json",
+      "bytes": 406725,
+      "sha256": "8b45e312c01bf24794af4414ed692caba4ba72b531dac1bb488ff73a96731ee4"
+    },
+    {
+      "path": "comparison.json",
+      "bytes": 8313,
+      "sha256": "8ed11678b2f345c5d5a08e5c2b7284f93cc6e011ec81017e62748d6d6e9e1c32"
+    },
+    {
+      "path": "environment.json",
+      "bytes": 1168,
+      "sha256": "357c093f08d1fb088740de92fa969b3227511dc5ffb7931a979fc08bed6bb1f2"
+    },
+    {
+      "path": "failures.json",
+      "bytes": 17091,
+      "sha256": "44f29e89fd74605e0bd97aea5c5d76b56b5c23b4131b3da6f4adcc665c11dcf1"
+    },
+    {
+      "path": "ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "path": "integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "path": "launch.json",
+      "bytes": 283,
+      "sha256": "f33f0ef0b590bf763c4f83fee08a6386ea61917775bd625826512c8ef3def6b4"
+    },
+    {
+      "path": "results.json",
+      "bytes": 700,
+      "sha256": "d3df1788dbb39279fb6aa1bc8b18ef492e339dd426e654330509843c247b8535"
+    },
+    {
+      "path": "sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1176,
+      "sha256": "892019c6757f16a2912fb019059f8ff24abcc6a622a0c10f6d4bfdb1225de129"
+    },
+    {
+      "path": "tests.log",
+      "bytes": 25251,
+      "sha256": "f38433de81d321962af3d439de2ca1125559d35d7e7b157b8e2e4ee88f0bb5e0"
+    },
+    {
+      "path": "tests.xml",
+      "bytes": 322207,
+      "sha256": "523f024494e5ff9fd1d3ce4c07651be46e91f683963d1785bbf7ef8f838e6157"
+    }
+  ]
+}

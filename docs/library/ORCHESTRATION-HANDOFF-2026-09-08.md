@@ -75,40 +75,62 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; implementation base `6858b81`, installer source `e47e4f2`; not pushed)
+## State at handoff (updated 2026-09-09; corrected tree `4a35316`, implementation base `6858b81`, installer source `e47e4f2`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | Prior conditional acceptance retained as history; authorized fixture corrections now under review | X HTTP 403 accepted as a blocked-link condition; no repair or fetch | Corrected full tree, residual product briefs and Ryan's installed receipt |
-| 5 | Part A implementation and measurements retained; unary/clock correction authorized | Old SDK-route failure and missed dashboard byte target remain recorded | Corrected tree; Part B deferred |
-| 6 | Chapters and cited ranges ship without speaker attribution claims; ticket setup corrections authorized | Speaker gate stays blocked; no diarization runs | Corrected tree; speaker claims remain unaccepted |
-| Integration | Candidate `ee1293f`; existing installer source `e47e4f2`; prior full tree 2,102 passed / 92 failed | Five corrections prepared in six files with 690 assertion syntax trees unchanged | Commit/review, one corrected full tree, residual defect briefs, install runbook and authorized branch backup |
+| 3 | AS-9 `6807361` retained as historical conditional acceptance; four evidence checks still fail on `4a35316` | All four are product/evidence defects under Ryan's latest ruling; do not fabricate old receipts or treat replacements as passes | Product brief section 1; C22 after installation isolation repair |
+| 4 | Thirteen mirror checks fail on corrected tree; required prior client evidence retained | Five lifecycle and eight interrupted-write/ownership failures; X HTTP 403 stays blocked, no repair/fetch | Product brief sections 2–3; installed receipt after isolation repair |
+| 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
+| 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
+| Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit; authorized backup of this checkpoint |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest candidate full tree, `6c313ea`: **2,102 passed, 92 failed, three skipped,
+Latest corrected full tree, `4a35316`: **2,174 passed, 20 failed, three skipped,
+one existing xfail**, 183 warnings, 607.27 seconds. Only S21 excluded; case
+membership is unchanged from `6c313ea`. All 20 failures also failed there,
+and 72 previous failures pass in this new observation. See
+`proof/ryan-corrected-01-2026-09-09/SHA256.json` and
+`CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md`. No further fixture edits.
+
+Historical candidate full tree, `6c313ea`: **2,102 passed, 92 failed, three skipped,
 one existing xfail**, 550.41 seconds, with only S21 excluded. The preceding
 `44968d9` run had 2,106 passed / 26 failed, excluding the then-open AW-5/AW-7
 files as well. All 67 additional mirror failures passed the focused union on
 the same source; a reduced pair proves AW-11's direct teardown leaves a dead
-I/O binding for subsequent fixtures. No corrected full-tree run occurred.
+I/O binding for subsequent fixtures. No corrected full-tree run had occurred
+at that checkpoint; the authorized correction and new result are above.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
 Current continuation under Ryan's 2026-09-09 rulings:
 
-1. Commit the five corrections and `FIXTURE-CORRECTIONS-REVIEW-2026-09-09.md`;
-   run the full corrected tree with only S21 excluded. Freeze the tested SHA.
-2. Preserve actual pass/fail counts and full evidence. Any residual failure is a
-   product defect; write its repair brief and make no further fixture edits.
-3. Keep the existing installer unless production source changes; finish Ryan's
-   installation receipt runbook with AS-7 C22, Phase 4 and everyday-flow coverage.
-4. Update State/Queue/release notes, commit, and back up only `cc/living-library`
-   with the authorized push. No merge to main or install by the integrator.
+Completed: five corrections/review committed at `4a35316`; one corrected full
+tree sealed with actual counts. All remaining failures are assigned in
+`CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md`. The package is retained
+because production source is unchanged. The runbook documents the complete
+receipt requirements but is blocked before installation; it is not an
+executable installed scenario kit yet. Backup result is recorded in the log.
+
+1. Follow product brief sections 1–5 in phase order: recover Phase 3 evidence
+   truthfully, repair Phase 4 lifecycle and interrupted-write/ownership behavior,
+   Phase 5 SDK settlement and Phase 6 refusal semantics. Review each production
+   diff before a fresh named run. No further fixture edits or measurement waivers.
+2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
+   and helper launch use 5179, even from another Windows profile. Provide a
+   supported isolated product path and complete operator kit. Do not ask Ryan
+   to waive the no-5179 rule or execute the current installer.
+3. After source repairs, run applicable suites in worker/checkout and the full
+   tree at a committed SHA; rebuild/reseal only when production source changed.
+   Replace the runbook's stop preflight with exact reviewed install/restart and
+   scenario commands, then Ryan supplies C22 and Phase 4 installed receipts.
+4. Preserve Phase 2 option 3, blocked X link, chapters/ranges without attribution,
+   and deferred Phase 5 Part B. Update this handoff after every integration.
+   Backup push remains `git push origin cc/living-library` only; never main.
 
 The queue history below records completed/rejected runs and their earlier authority.
 
@@ -203,7 +225,9 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Installed Inno package receipts (Phase 3 C22, Phase 4).
+- Installed Inno package receipts (Phase 3 C22, Phase 4), once product work
+  supplies a no-5179 installed path and exact operator kit. Ryan has no safe
+  installation action to take with the current package.
 - Phase 6 speaker gate remains blocked by Ryan's explicit ruling. No diarization
   runs or attribution claims; chapters and cited ranges are the release scope.
 - Main merge remains unauthorized. No new fetch scope is authorized.
@@ -212,6 +236,9 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 The five fixture decisions, Phase 2 option 3 and retained X-link condition are
 resolved owner rulings. Residual test failures after the corrected tree belong
 in product repair briefs, not under Blockers for Ryan.
+
+The installation-path defect is also product work. Do not treat a missing
+safe installer command as a request for another owner permission.
 
 ## Integrator log
 
@@ -1248,3 +1275,37 @@ tree; only S21 is excluded under the standing command. Any residual failure is
 a product defect under Ryan's new ruling, with a repair brief and no further
 fixture edits. Phase 2 option 3 and the X blocked-link condition are resolved;
 speaker attribution stays unaccepted, no diarization, and Part B is deferred.
+
+### 2026-09-09 07:39 PDT - Corrected tree failed; product briefs and installation blocker
+
+Fixture/review commit `4a3531642692736d4aaa4098077ab8fde464aeb4` is the
+tested candidate. Full tree `igr1` completed with **2,174 passed, 20 failed,
+three skipped, one xfailed**, 183 warnings, 607.27 seconds. Only S21 was
+excluded. The complete log/XML, commands, Python/dependency provenance,
+unchanged-assertion audit and case comparison are sealed under
+`proof/ryan-corrected-01-2026-09-09`. All 20 failures were present in the
+previous tree; 72 previous failures pass here. Neither result replaces the
+other. The failures are four Phase 3 evidence checks, thirteen Phase 4 mirror
+checks, one Phase 5 SDK serialization check and two Phase 6 refusal checks.
+`CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md` assigns all twenty;
+there was no further fixture edit or runtime rerun.
+
+Installation source inspection found an additional product blocker:
+`installer/uoink.iss:447` invokes upgrade preparation, and
+`installer/upgrade_prep.ps1:61` performs a TCP probe of 5179. The normal
+helper path probes and binds that fixed port as well. Silent Inno mode and
+a throwaway Windows account do not isolate the port. No installer/helper
+was launched for this finding. The new installation repair brief defines
+the supported isolated path and operator kit needed before Ryan can act.
+The requested runbook includes AS-7 C22, installed Phase 4, evidence return
+and the four everyday checks, but its only current executable step records
+a preflight block. Complete installed execution commands remain product work.
+
+Production source did not change, so the `e47e4f2` installer and its existing
+28-file seal are retained without rebuilding or resealing. The runbook's
+PowerShell preflight was syntax-parsed only. A metadata-sealing helper's first
+launch was blocked before execution by an inherited old Python startup guard
+missing its environment value; isolated standard-library execution then sealed
+the already-completed output. This was not another test or product observation.
+The authorized backup will include this failed checkpoint and its open briefs;
+no main merge, install, new fetch, diarization or paid API occurred.

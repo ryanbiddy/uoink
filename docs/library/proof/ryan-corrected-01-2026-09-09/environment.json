@@ -1,0 +1,24 @@
+{
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+  "dependency_location": "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages",
+  "selected_dependency_versions": {
+    "anyio": "4.14.1",
+    "httpx": "0.28.1",
+    "mcp": "1.28.1",
+    "pydantic": "2.13.4",
+    "pytest": "9.1.1"
+  },
+  "environment_policy": {
+    "PHASE3_REQUIRE_IMPLEMENTATION": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+    "pytest_cache": "disabled",
+    "ANTHROPIC_API_KEY": "removed in runner child environment",
+    "profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\igr1",
+    "network": "Python audit guard refuses external destinations and 5179",
+    "live_index": "Python audit guard refuses original-profile Uoink/index.db",
+    "model_processes": "Python audit guard refuses claude/codex/gemini/grok"
+  },
+  "limits": "Guard source and exact runner retained. No claim of an independent OS-wide access or process audit."
+}

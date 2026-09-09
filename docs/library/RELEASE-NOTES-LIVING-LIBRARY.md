@@ -1,27 +1,34 @@
 # Living Library integration candidate
 
-Local integration candidate, 2026-09-09. Phases 3–6 are accepted with the
-conditions below. The complete candidate test run is failed, with a demonstrated
-frozen-fixture cleanup problem. Ryan authorized five narrow corrections on
-2026-09-09; their committed full-tree verification is pending. The installer has been
-built locally and its bundled runtime checked. This document does not approve
-installation or release.
+Integration candidate, 2026-09-09. **Release is blocked on product repairs.**
+After Ryan's five authorized fixture corrections, the full tree on `4a35316`
+has **2,174 passed, 20 failed, three skipped and one xfailed**. All remaining
+failures have product-repair briefs; no further fixture edits are authorized.
+Historical phase acceptances below do not waive this result. The existing
+installer also needs a supported isolated installation/startup path before
+Ryan can obtain the installed receipts without contacting port 5179.
 
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
 `9217846da45cecbf1b91614d9031fd7a16b7d16f`. Installer build source:
-`e47e4f2e8e1b6a83ecb1171436092b9077186430`. The later receipt commit updates
-documentation, proof and the generated third-party notice date; it does not
-change the production source used by this installer.
+`e47e4f2e8e1b6a83ecb1171436092b9077186430`. Later changes are documentation,
+proof, the generated third-party notice date and the authorized test fixtures.
+Production source is unchanged through the corrected tree. Under Ryan's ruling,
+the existing installer and package seal are retained without a rebuild/reseal.
 
 Local artifact: [Uoink-Setup-3.8.0.exe](../../build/Uoink-Setup-3.8.0.exe),
 339,042,658 bytes (323.3 MiB). SHA-256:
 `9defc2a98ba680f8b4cdf06bdd09eadbb1153f2028070881b5472ce97f7e927d`.
 Compilation completed on 2026-09-09 at 00:30 PDT after 368.93 seconds.
-This is a local package for Ryan's installed receipts; it has not been
-installed, published, pushed or merged to main. Label application remains
-disabled.
+This package has not been installed, published or merged to main. The authorized
+branch backup is separate from artifact publication. Label application remains
+disabled. **Do not install this artifact under the current receipt constraints:**
+Inno preparation probes port 5179, and the ordinary helper launcher probes/binds
+it. Silent installation and a throwaway account do not remove that behavior.
+The [runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md) stops before installation;
+the [product repair brief](INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md) defines
+the required repair and operator kit. Installed C22/Phase 4 remain unexecuted.
 
 The build verified the exact 142-package dependency lock, schema 30, version
 3.8.0 in the helper and extension, and packaged tray, dashboard, splash and
@@ -85,12 +92,15 @@ most 25 back-catalog items and 10 starts per source per UTC day. Successful
 publication exposes an unfiled item before assignment scheduling. Source
 opt-in does not enable model downloads or label application.
 
-AS-9, integrated at `6807361`, accepts this phase subject only to C22, Ryan's
+AS-9, integrated at `6807361`, historically accepted this phase subject to C22, Ryan's
 installed Inno receipt. Independent confirmation passed 11 tests in both
 roots; the strict suite had 178 passes and four retained assertions against
 superseded evidence. Companion suites passed 394 and dashboard tests 35 in
 both roots. Replacement AT7 evidence was verified; the old failed assertions
 were preserved. See `PHASE3-ACCEPTANCE-9-2026-09-08.md` and the handoff.
+The corrected full tree still fails those four evidence checks. Ryan's latest
+ruling makes them open product/evidence defects; replacement evidence does not
+turn the old assertions into passes. They are separate from installed C22.
 
 ## Phase 4: bounded access and optional mirror
 
@@ -126,7 +136,10 @@ Native template discovery was not requested by the client; five templates
 remain source/stdio-test evidence. The original timed YouTube link played,
 while the text-only source's original X URL returned HTTP 403 and stays
 blocked. Null card source metadata and text-only timing were preserved.
-Installed Inno and frozen fixture rulings remain Ryan's separate gates.
+Ryan retained the X HTTP 403 as a documented blocked-link condition, with no
+access repair or new fetch. The fixture ruling is resolved. Thirteen mirror
+tests still fail in the corrected full tree and require product repairs.
+The installed receipt additionally awaits the isolated installation repair.
 
 ## Phase 5: descriptive library activity
 
@@ -137,11 +150,12 @@ a publication trend. Creator hints are not verified person identities.
 Evidence pagination preserves the metric's denominator. Unsupported ratios
 remain null. Engagement analysis and Part B remain absent.
 
-Part A is accepted with conditions at `a39c7e6`; Ryan must rule on the
-unchanged unary/clock fixture. Both roots produced 574 passes and two
-retained failures. Final BA-4 accepts the supported product stdio entry;
-the old SDK-route test still fails and is retained as such. That route
-classification is already resolved by the review.
+Part A's historical acceptance at `a39c7e6` had 574 passes and two retained
+failures in both roots. Ryan authorized the unary/clock correction; that test
+now passes. The actual SDK-route deadline/admission test still fails and is
+an open product defect under the latest ruling. Final BA-4's supported-entry
+observation remains historical evidence, not a waiver of this failure.
+Part B is explicitly deferred.
 
 G2's sealed synthetic measurements include full responses and evidence
 pagination, plus an independent transport supplement. Primary serialized
@@ -168,10 +182,14 @@ Unsupported podcast seeking has null fields; coarse timing does not acquire
 precise range-export authority. Annotation retention and virtual unsupported
 views preserve the accepted source and deletion behavior.
 
-The final BD-2 disposition accepts Phase 6 subject to Ryan's omitted-ticket
+The historical BD-2 disposition accepted Phase 6 subject to the omitted-ticket
 fixture ruling and speaker material. BC-3f `986b555` produced 174 passes and
 11 retained omitted-ticket failures in each root. The final broader check
 passed 382 tests with four superseded AS-7 evidence failures.
+Ryan authorized the setup correction. Two unchanged stale-publication checks
+still fail because they receive `invalid_request` instead of
+`revision_unavailable`; both remain product repairs. Speaker material stays
+blocked under the explicit release scope above.
 
 The frozen navigation study reduced mean absolute error from 72.06 seconds
 to zero over all 50 tasks. BD-27 playback was observed in normal Comet at
@@ -183,7 +201,22 @@ subsecond player timing. See `PHASE6-BD2-2026-09-08.md` and
 
 ## Combined verification
 
-Candidate `6c313ea` full tree: **2,102 passed, 92 failed, three skipped,
+Corrected candidate `4a3531642692736d4aaa4098077ab8fde464aeb4`: **2,174 passed,
+20 failed, three skipped, one xfailed**, 183 warnings, **607.27 seconds**.
+Only S21 was excluded under the standing command. The six authorized fixture
+files retain all 690 assertion syntax trees. Python 3.14.6, pytest 9.1.1 and
+MCP 1.28.1 were used in the isolated checkout run; this is not the bundled
+Python 3.11.9/MCP 1.27.1 installed-runtime receipt.
+
+The 20 failures comprise four Phase 3 evidence checks, thirteen Phase 4 mirror
+checks, one Phase 5 SDK serialization check and two Phase 6 refusal checks.
+All 20 also failed in the previous tree; 72 previous failures pass in this
+separate observation. No test cases were added, removed or additionally
+deselected. See the [complete sealed result](proof/ryan-corrected-01-2026-09-09/SHA256.json)
+and [product repair brief](CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md).
+The result is failed, with no further fixture-correction round.
+
+Historical candidate `6c313ea` full tree: **2,102 passed, 92 failed, three skipped,
 one existing xfail**, 550.41 seconds. Only S21 was excluded; every closed
 Phase 4 reproduction was included. This is a failed full-tree result.
 
@@ -193,10 +226,10 @@ first ordinary export fails: AW-11's private-helper fixture directly terminates
 its session and drops the Mirror pointer, leaving a dead thread-local I/O
 binding for the next fixture. No process or exclusion lock remains. Production
 stop/kill cleanup forgets that binding; four independent lifecycle controls
-succeeded without resetting global state. The original tests remain unchanged.
+succeeded without resetting global state. The tests were unchanged for that run.
 
 Ryan authorized consistent fixture teardown and four other narrow corrections
-on 2026-09-09. Their corrected full-tree result will be recorded separately.
+on 2026-09-09. Their corrected full-tree result is recorded separately above.
 The 67 failures remain failed; neither the diagnosis nor the controls
 turn them into passes. The old D15 assertion did not fail in this contaminated
 run, which does not override its earlier frozen failure. See
@@ -213,15 +246,20 @@ route. No additional failure appeared. The final candidate result must
 identify its actual exclusions and failures separately from this baseline.
 
 Proof files retain full outputs and hashes. Rejected worker patches and
-failed or partial measurements remain archived. No acceptance test was
-changed to manufacture a passing result.
+failed or partial measurements remain archived. The authorized setup/cleanup
+diff and review are retained; behavior assertions were not changed.
 
 ## Open decisions and receipts for Ryan
 
 - Phase 2 strict precision remains failed: 39/46 timed and 6/11 text cases.
   Ryan chose option 3: reviewable suggestions, 0.90 retained for autonomous
   filing, and label application disabled. This decision is resolved.
-- Installed Inno receipts for Phase 3 C22 and Phase 4.
+- Twenty failed tests require the named product repairs. These are not pending
+  owner fixture rulings. The installer isolation repair is an additional source
+  finding, not a twenty-first test failure.
+- Installed Inno receipts for Phase 3 C22 and Phase 4, after the product repair
+  supplies a safe, exact operator kit. The current runbook is blocked before
+  installation and does not yet provide executable installed scenario commands.
 - Phase 4's original X source remains a documented HTTP 403 blocked-link
   condition under Ryan's ruling. No access repair or new fetch.
 - The five fixture corrections are authorized and documented in
