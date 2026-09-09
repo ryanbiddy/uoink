@@ -2713,21 +2713,25 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
                            sidecar_path: Path, plan: dict | None = None) -> bool:
-    """Phase 6 (BC-2/BC-3d): publish the helper capture through the shared
-    media publisher. The ownership ticket is minted first. Exact consumed
-    sidecar inputs (transcript cores and source chapters) are then checked
-    against disk; a newer owner's file refuses ``revision_unavailable``
-    instead of rebuilding the already-read cues under that newer base.
-    A caller-supplied plan is kept only when it still matches those owned
-    inputs (sealed study artifacts). The indexed row and corpus bytes on
-    disk are the source revision's inputs; the sealed block, artifact and
-    complete sidecar are replaced by the fenced operation."""
+    """Phase 6 (BC-2/BC-3e): publish the helper capture through the shared
+    media publisher. The consumed sidecar binding is frozen, then the
+    ownership ticket is minted. Every input the plan consumes (cue links,
+    speaker/provenance, transcript kind/provider, source/playback identity,
+    chapters and artifact metadata) is checked against disk after mint and
+    again at the publication boundary; a newer owner's file refuses
+    ``revision_unavailable`` instead of rebuilding already-read inputs
+    under that newer base. A caller-supplied plan is kept only when those
+    consumed inputs still match (sealed study artifact bytes may differ).
+    The indexed row and corpus bytes on disk are the source revision's
+    inputs; the sealed block, artifact and complete sidecar are replaced
+    by the fenced operation."""
     import library_cards  # noqa: WPS433
     import library_media  # noqa: WPS433
     import clips as _clips  # noqa: WPS433
     video_id = (sidecar.get("video_id") or "").strip()
+    consumed_binding = library_media.capture_sidecar_inputs(sidecar)
     ticket = idx.begin_media_publication(video_id, folder=folder)
-    library_media.require_unchanged_capture_inputs(sidecar_path, sidecar)
+    library_media.require_capture_binding(sidecar_path, consumed_binding)
     row = idx.get_yoink(video_id)
     if row is None:
         raise library_media.MediaError("resource_not_found")
@@ -2751,7 +2755,17 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
         playback=plan["playback"], transcript_kind=plan["transcript_kind"],
         transcript_provider=plan["transcript_provider"],
         chapter_rows=plan["chapter_rows"], recorded_at=sidecar.get("yoinked_at"), item=row)
-    library_media.require_unchanged_capture_inputs(sidecar_path, sidecar)
+    # Publication boundary: a file check after mint is not a lock. Re-read
+    # disk and rebuild the owned plan from those bytes before the publisher
+    # writes. Sealed artifact overrides remain allowed only while this
+    # consumed-input binding still holds.
+    library_media.require_capture_binding(sidecar_path, consumed_binding)
+    disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
+    if disk_side is not None:
+        disk_plan = _capture_media_plan(disk_side, folder, item=row)
+        if disk_plan is None or not library_media.capture_plan_matches(plan, disk_plan):
+            raise library_media.MediaError(
+                "revision_unavailable", details={"reason": "publication_input_changed"})
     published = dict(sidecar, media_depth=block)
     idx.publish_media_snapshot(
         video_id, cues=plan["cues"], media_block=block,
@@ -2827,14 +2841,15 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     }
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
-    # Phase 6 (BC-2/BD-08/BC-3d): a Phase 6 capture publishes through the
+    # Phase 6 (BC-2/BD-08/BC-3e): a Phase 6 capture publishes through the
     # shared fenced publisher. The plan is not built until the ticket is
-    # held and the consumed sidecar still matches disk; a newer owner
-    # inserted before mint is refused rather than overwritten with already-
-    # read cues. ``library_unavailable`` is propagated. Other refusals are
-    # logged and leave the existing snapshot (the row-indexed True return
-    # does not certify that new media was published). Legacy sidecars keep
-    # the legacy citation write. An empty Phase 6 replacement publishes
+    # held and every consumed sidecar input still matches disk; a newer
+    # owner inserted before mint is refused rather than overwritten with
+    # already-read cues, links, provenance or artifact metadata.
+    # ``library_unavailable`` is propagated. Other refusals are logged and
+    # leave the existing snapshot (the row-indexed True return does not
+    # certify that new media was published). Legacy sidecars keep the
+    # legacy citation write. An empty Phase 6 replacement publishes
     # through the complete operation (BD-09).
     published = None
     if corpus_path is not None and corpus_path.exists():

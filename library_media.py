@@ -29,7 +29,11 @@ the literal BD-0 wording, read before relying on the behaviour:
    validate the exact consumed sidecar/transcript bytes under that fence
    and refuse ``revision_unavailable`` when those inputs changed; they
    never mint a current ticket as a license to publish already-read stale
-   cues, and never rebuild old cues under a newer base. Reconstruction
+   cues, and never rebuild old cues under a newer base. Capture ownership
+   binds every input the plan consumes (cue links, speaker provenance,
+   transcript kind/provider, source/playback identity, chapters and
+   artifact metadata), not only start/end/text, and rechecks that binding
+   at the publication boundary as well as after mint. Reconstruction
    consults the same ledger and
    will not restore a superseded sidecar while disk still names the
    current publication. Non-owned sidecar keys, including a key another
@@ -1784,27 +1788,72 @@ def _bind_sidecar_carrier(sidecar: dict, sidecar_path: Path, ticket: Publication
     return raw
 
 
+def _binding_json(value):
+    """Canonical comparable form of a JSON-shaped consumed value."""
+    try:
+        return _json(value)
+    except (TypeError, ValueError):
+        return ("unserializable", type(value).__name__)
+
+
+def _sidecar_entry_binding(entry: dict) -> tuple:
+    """Fields ``_citations_from_sidecar`` consumes from one transcript row.
+
+    Link-field *presence* is part of the binding: an explicit null is not
+    a missing key. A speaker label without a provenance object is not
+    attributed evidence.
+    """
+    provenance = entry.get("speaker_provenance")
+    speaker = entry.get("speaker") if isinstance(provenance, dict) else None
+    return (
+        entry.get("start"),
+        entry.get("end"),
+        entry.get("text"),
+        "source_url" in entry,
+        entry.get("source_url") if "source_url" in entry else None,
+        "source_deep_link" in entry,
+        entry.get("source_deep_link") if "source_deep_link" in entry else None,
+        "youtube_deep_link" in entry,
+        entry.get("youtube_deep_link") if "youtube_deep_link" in entry else None,
+        speaker if isinstance(speaker, str) else None,
+        _binding_json(provenance) if isinstance(provenance, dict) else None,
+    )
+
+
 def capture_sidecar_inputs(sidecar: dict) -> tuple:
-    """The mutable capture inputs an owner consumes: transcript cores and
-    the held source-chapter list. Compared after mint so a newer owner's
-    disk sidecar cannot be replaced by a pre-read plan."""
+    """Every mutable input ``_capture_media_plan`` consumes from a sidecar.
+
+    Start/end/text alone cannot certify an unchanged capture: cue links,
+    attributed speaker/provenance, transcript kind/provider, source and
+    playback identity, the held chapter list (including extra keys archived
+    in the producer artifact) and artifact metadata are bound too.
+    Non-owned sidecar keys are not part of this binding.
+    """
     if not isinstance(sidecar, dict):
-        return ((), None)
-    transcript = tuple(
-        (e.get("start"), e.get("end"), e.get("text"))
-        for e in (sidecar.get("transcript") or [])
-        if isinstance(e, dict)
+        return ()
+    entries = tuple(
+        _sidecar_entry_binding(entry)
+        for entry in (sidecar.get("transcript") or [])
+        if isinstance(entry, dict)
     )
     if "source_chapters" not in sidecar:
-        return (transcript, None)
-    raw = sidecar.get("source_chapters")
-    if not isinstance(raw, list):
-        return (transcript, ())
-    chapters = tuple(
-        (c.get("start_time"), c.get("end_time"), c.get("title")) if isinstance(c, dict) else None
-        for c in raw
+        chapters = None
+    else:
+        raw = sidecar.get("source_chapters")
+        chapters = _binding_json(raw) if isinstance(raw, list) else ()
+    video_id = sidecar.get("video_id")
+    video_id = video_id.strip() if isinstance(video_id, str) else video_id
+    return (
+        video_id,
+        sidecar.get("source_type"),
+        sidecar.get("source_url"),
+        sidecar.get("url"),
+        sidecar.get("yoinked_at"),
+        sidecar.get("duration_seconds"),
+        sidecar.get("transcript_source"),
+        entries,
+        chapters,
     )
-    return (transcript, chapters)
 
 
 def read_owned_sidecar(sidecar_path, fallback=None):
@@ -1825,24 +1874,70 @@ def read_owned_sidecar(sidecar_path, fallback=None):
     return parsed if isinstance(parsed, dict) else fallback
 
 
-def require_unchanged_capture_inputs(sidecar_path, consumed: dict) -> None:
-    """Refuse when the on-disk sidecar's capture inputs no longer match
-    the exact dict this owner already consumed."""
+def require_capture_binding(sidecar_path, consumed_binding) -> None:
+    """Refuse when the on-disk sidecar no longer matches a frozen binding."""
     owned = read_owned_sidecar(sidecar_path, fallback=None)
     if owned is None:
         return
-    if capture_sidecar_inputs(owned) != capture_sidecar_inputs(consumed):
+    if capture_sidecar_inputs(owned) != consumed_binding:
         raise _stale("publication_input_changed")
 
 
+def require_unchanged_capture_inputs(sidecar_path, consumed: dict) -> None:
+    """Refuse when the on-disk sidecar's capture inputs no longer match
+    the exact dict this owner already consumed."""
+    require_capture_binding(sidecar_path, capture_sidecar_inputs(consumed))
+
+
+def _plan_cue_binding(cue: dict) -> tuple:
+    provenance = cue.get("speaker_provenance")
+    speaker = cue.get("speaker")
+    return (
+        cue.get("seq"),
+        cue.get("timestamp_start"),
+        cue.get("timestamp_end"),
+        cue.get("text"),
+        cue.get("source_url"),
+        cue.get("source_deep_link"),
+        cue.get("youtube_deep_link"),
+        speaker if isinstance(speaker, str) else None,
+        _binding_json(provenance) if isinstance(provenance, dict) else None,
+    )
+
+
+def capture_plan_inputs(plan: dict) -> tuple:
+    """Consumed plan fields the owner must still hold at publication.
+
+    Artifact bytes, digest, markdown and the sealed block are not in this
+    binding: a supported sealed-study override may replace producer bytes
+    only while these inputs remain bound.
+    """
+    if not isinstance(plan, dict):
+        return ()
+    cues = tuple(
+        _plan_cue_binding(cue)
+        for cue in (plan.get("cues") or [])
+        if isinstance(cue, dict)
+    )
+    return (
+        cues,
+        _binding_json(list(plan.get("chapter_rows") or [])),
+        _binding_json(plan.get("playback")),
+        plan.get("transcript_kind"),
+        plan.get("transcript_provider"),
+    )
+
+
 def capture_plan_matches(plan: dict, owned_plan: dict) -> bool:
-    """True when two capture plans consume the same cue cores and chapters."""
+    """True when two capture plans consume the same bound inputs.
+
+    Artifact bytes are a supported sealed-study override and are ignored
+    here; they are not an exemption from cue, provenance, playback or
+    chapter ownership.
+    """
     if not isinstance(plan, dict) or not isinstance(owned_plan, dict):
         return False
-    left = [cue_core(c) for c in (plan.get("cues") or [])]
-    right = [cue_core(c) for c in (owned_plan.get("cues") or [])]
-    return left == right and list(plan.get("chapter_rows") or []) == list(
-        owned_plan.get("chapter_rows") or [])
+    return capture_plan_inputs(plan) == capture_plan_inputs(owned_plan)
 
 
 def require_unchanged_input_bytes(path, expected: bytes) -> None:
