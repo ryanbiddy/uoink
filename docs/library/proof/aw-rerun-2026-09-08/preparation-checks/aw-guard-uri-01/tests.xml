@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.181" timestamp="2026-09-08T20:58:28.998693-07:00" hostname="Ryan-PC"><testcase classname="_scratch.test_aw_guard_uri" name="test_safe_fixture_sqlite_file_uri_remains_allowed" time="0.113"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py&quot;, line 23, in &lt;module&gt;&#10;      c=sqlite3.connect('file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/aw-guard-uri-01-0/t0/fixture%20evidence.db?mode=ro',uri=True)&#10;    File &quot;E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py&quot;, line 11, in audit&#10;      raise PermissionError('AW database outside fixture')&#10;  PermissionError: AW database outside fixture&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe',... in audit\n    raise PermissionError(\'AW database outside fixture\')\nPermissionError: AW database outside fixture\n').returncode">_scratch\test_aw_guard_uri.py:19: in test_safe_fixture_sqlite_file_uri_remains_allowed
+    assert r.returncode==0,r.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py", line 23, in &lt;module&gt;
+E         c=sqlite3.connect('file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/aw-guard-uri-01-0/t0/fixture%20evidence.db?mode=ro',uri=True)
+E       File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py", line 11, in audit
+E         raise PermissionError('AW database outside fixture')
+E     PermissionError: AW database outside fixture
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe',... in audit\n    raise PermissionError(\'AW database outside fixture\')\nPermissionError: AW database outside fixture\n').returncode</failure></testcase></testsuite></testsuites>

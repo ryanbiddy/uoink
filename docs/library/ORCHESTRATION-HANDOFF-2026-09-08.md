@@ -785,3 +785,23 @@ full B4 union, plus proof that the gate becomes available after proven
 physical death. AW-9 and full-tree proof seals matched every staged blob
 before the preceding commit. The real-client run remains gated on the
 finished implementation review; source/client preparation can continue.
+
+### 2026-09-08 21:04 PDT - Client receipt instrumentation prepared
+
+`cd3d444` adds complete packet/prompt inspection. Four synthetic checks
+passed (1.70 seconds), including changed-tail and missing-native-prompt
+failures of the checker. Native resource tools must remain in the client
+built-in allowlist; an empty list would remove that route.
+
+A safe SQLite file URI exposed a fixture-guard setup defect: one failed in
+1.19 seconds. The documented repair decodes local URIs before applying the
+same resolved containment check and rejects remote authorities. The unchanged
+case plus three escape negatives passed (0.36 seconds). This is not a product
+or client failure. The first output is retained with the repaired output.
+
+The action observer's four synthetic checks passed (3.20 seconds). It records
+full tool-hook inputs/decisions, supplies an inert action sentinel and wraps
+only a separate Recall fixture. Client validation rejections may precede
+hooks, so retain the full client stream in addition to hook logs. All these
+checks are sealed under the AW rerun preparation-checks directory. No archived
+copy, actual client/model, live index or port 5179 was used. B5 remains active.

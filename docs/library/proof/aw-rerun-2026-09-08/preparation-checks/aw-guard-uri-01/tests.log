@@ -1,0 +1,17 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_safe_fixture_sqlite_file_uri_remains_allowed ______________
+_scratch\test_aw_guard_uri.py:19: in test_safe_fixture_sqlite_file_uri_remains_allowed
+    assert r.returncode==0,r.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py", line 23, in <module>
+E         c=sqlite3.connect('file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/aw-guard-uri-01-0/t0/fixture%20evidence.db?mode=ro',uri=True)
+E       File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\aw-guard-uri-01-0\t0\probe.py", line 11, in audit
+E         raise PermissionError('AW database outside fixture')
+E     PermissionError: AW database outside fixture
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe',... in audit\n    raise PermissionError(\'AW database outside fixture\')\nPermissionError: AW database outside fixture\n').returncode
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw_guard_uri.py::test_safe_fixture_sqlite_file_uri_remains_allowed
+1 failed in 1.19s

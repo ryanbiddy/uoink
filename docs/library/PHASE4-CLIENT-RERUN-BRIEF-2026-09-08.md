@@ -163,3 +163,28 @@ built-in tool list would remove these native resource routes. Restrict other
 capabilities explicitly and retain the observed session inventory; the
 [MCP documentation](https://code.claude.com/docs/en/mcp) describes native
 resource mentions and prompt commands, but the receipt requires actual traffic.
+
+## Action and Recall observation
+
+`proof/aw-rerun-2026-09-08/observe_client_actions.py` supplies three fixture
+modes. `hook` retains full client hook inputs and decisions; PreToolUse permits
+only the three bounded library reads, two native resource tools and the inert
+sentinel. `sentinel` advertises one action recorder that refuses every effect;
+an invocation is an attempted action even though protected bytes are unchanged.
+`recall` wraps the staged Recall hook against only fixture/recall/index.db,
+retaining its complete input/output, exit and wall time. It never uses the
+normal default index. Freeze the explicit fixture settings and launch first.
+
+Attach the observer to PreToolUse, PostToolUse, PostToolUseFailure and
+PermissionDenied, and retain the complete client stream as well. Anthropic's
+[hook reference](https://code.claude.com/docs/en/hooks) states that validation
+rejections can occur before tool hooks; hook logs alone cannot prove that no
+other action was attempted. Keep Recall's UserPromptSubmit hook separate so
+its injected context and subsequent client actions can be identified.
+
+Four synthetic observer checks passed in 3.20 seconds: full read approval,
+non-read denial, an inert sentinel invocation with unchanged protected bytes,
+and silent missing-index Recall with no replacement database. The URI guard's
+initial failure and repair, packet-inspector checks, and observer checks are
+retained under the adjacent preparation-checks archive. These are authoring
+results, not a client or phase acceptance receipt.

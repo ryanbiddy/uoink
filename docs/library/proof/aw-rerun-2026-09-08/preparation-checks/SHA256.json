@@ -1,0 +1,65 @@
+{
+  "scope": "Preparation checks only; no archived copy or actual client/model",
+  "files": {
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-action-observer-01/results.json": {
+      "sha256": "c4f6c8849b9c0a393717d38105e13f17b09933cc2175c2d4e5ca6a8d6ea8fc7d",
+      "bytes": 718
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-action-observer-01/tests.log": {
+      "sha256": "ccf1a823cc0becff85df8a86cf8785ca6829339513b1fa0737c897e021bf5d24",
+      "bytes": 100
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-action-observer-01/tests.xml": {
+      "sha256": "6ff809b2e8ac4ed47f8ee0f09cd0844826e541c0954b3a15c5c61153b7138272",
+      "bytes": 799
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-evidence-inspector-01/results.json": {
+      "sha256": "a5975f0d167dc017f55e67bd86473dc94ce23b00a552a965dde64247e8e01296",
+      "bytes": 730
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-evidence-inspector-01/tests.log": {
+      "sha256": "68789d96ac528e2bea0cae680ea3ea462d6dd154fe1c4c7d093a7cc3f3ddb988",
+      "bytes": 100
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-evidence-inspector-01/tests.xml": {
+      "sha256": "a387e42c8c1c4a9bf46eef99f0d608512be5c84f96f1978c1c4e3ecd74b9e98a",
+      "bytes": 748
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-01/results.json": {
+      "sha256": "1c94bf213af769bc1c1037b461ec6449753d7bbf18ab14a5649de31758d77bd4",
+      "bytes": 694
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-01/tests.log": {
+      "sha256": "016e2de30b29418bd6bbb3452439e0cf8ae037a77d83970b347fc33ab36048e9",
+      "bytes": 1422
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-01/tests.xml": {
+      "sha256": "cf2f86e85341b49ce0a255426be3383c75c49fe0f91e5ac7b4e23598dae03211",
+      "bytes": 2274
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-repaired/results.json": {
+      "sha256": "57a048987c750b092e1e955abe15bb03930a1db478b7c898d85a7c9b4db03802",
+      "bytes": 712
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-repaired/tests.log": {
+      "sha256": "4390a15087fb53f30048a9b623cfc0d68a91b0bf21829369808eb8e45841cafc",
+      "bytes": 100
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/aw-guard-uri-repaired/tests.xml": {
+      "sha256": "ce62407bd9cffcfdeffaab4fce5b4ec63b8d1a7be23d1eec1b8e45938587470e",
+      "bytes": 782
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/test_aw_action_observer.py": {
+      "sha256": "56424bd3cd11c1960561da9ecfd373736a19d599778600cc9a7f22d8f53cbf19",
+      "bytes": 2735
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/test_aw_evidence_inspector.py": {
+      "sha256": "7b5dd9fe45d5844915aed04f7c463400d9e313787ec9d1f91c583cee2209704b",
+      "bytes": 3292
+    },
+    "docs/library/proof/aw-rerun-2026-09-08/preparation-checks/test_aw_guard_uri.py": {
+      "sha256": "a62ff32a75d0827604b74409735df45950e360fe9cdb9680e7719d20bd77ab6a",
+      "bytes": 2083
+    }
+  }
+}
