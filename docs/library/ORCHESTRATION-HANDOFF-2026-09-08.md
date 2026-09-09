@@ -80,7 +80,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Finish C22 worker 6a890eee, verify/integrate, then Ryan's actual installed receipt |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Fourth C22 independently 61 passed / two frozen failures; apply bounded evidence supplement, then Ryan's installed receipt |
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
@@ -121,7 +121,7 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
-1. Review and integrate the already running C22 correction
+1. Review and integrate the completed C22 correction
    `6a890eee-6163-49bf-836b-cb4b8736b169` under
    `RYAN-C22-FINAL-ORACLE-REPAIR-BRIEF-2026-09-09.md`, and the independent P4
    correction `1f64672e-95b7-4608-9fa6-5823b7e8eeda` under
@@ -1932,3 +1932,28 @@ evidence, not installed or actual-client acceptance. Proof:
 proof/ryan-p4-bundled-02-2026-09-09/SHA256.json. First observation remains failed.
 C22 fourth worker is still finishing its complete union. Final tree/runbook/bundle
 remain queued; neither pending fixture patch was applied.
+
+### 2026-09-09 — fourth C22 verification and integrator supplement
+
+Original fourth C22 input is archived in `proof/ryan-c22-review-04-input-2026-09-09/SHA256.json`.
+Independent c22-w4: 61 passed / two failed, 930.91 s. Worker c22u1 reported
+61 passed / two failed, 931.71 s. The obsolete Inno-flag assertion and stub
+manual-capture expectation remain failed. Both source-runtime observations,
+original commands and raw ownership snapshots are archived separately at
+`proof/ryan-c22-review-04-verify-2026-09-09/SHA256.json`.
+
+Twelve new pure negative checks against the original fourth implementation:
+one passed / 11 failed, 0.23 s (ci-n1). Matching IDs still self-authorize excess
+protected rows, missing taxonomy bytes count as migration, provenance containment
+uses a string prefix, and child status flags pass without raw settlement.
+The original child receipt retains claims after its observed child death; it
+does not measure the later reconciliation/release. Follow the committed bounded
+`RYAN-C22-INTEGRATOR-ORACLE-SUPPLEMENT-2026-09-09.md` and operator-path brief.
+No existing test or product file may change. The fourth input is not accepted
+as a complete C22 instrument until the supplement and both-root suites finish.
+
+Backup push succeeded for origin/cc/living-library at
+daa7bb8d823fbb205bda75053b28267d202f7bfc, independently confirmed with ls-remote.
+No candidate branch/main push or publication. Installer d024baf5 remains unchanged.
+
+Archive assembly initially stopped because the final test has no source_runtime.json. Commit 622e315 preserves that partial archive; the completed seal selects each retained registered-child outcome and includes both raw source observations. No scenario was rerun or relabeled.
