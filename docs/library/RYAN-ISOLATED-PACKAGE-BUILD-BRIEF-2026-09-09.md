@@ -29,3 +29,14 @@ changes, rebuild and reseal; if only notes, kit or fixtures change, verify all
 packaged source bindings remain identical and retain this package's original
 build commit. Final notes state both build source and validation commit. The
 complete operator runbook receives the actual hash and executable kit commands.
+
+## Preflight correction before compilation
+
+The first source comparison used a recursive *.py pathspec that also selected
+archived proof scripts under docs; it stopped before checking the retained
+artifact. A separate wrapper invocation supplied an incorrect short candidate
+argument and was refused by its exact-SHA check before any build began. Neither
+attempt compiled or changed the installer. Preserve both as failed preflights.
+Correct the comparison by excluding docs and tests, verify the retained package
+hash, and pass the actual full git rev-parse HEAD result to the wrapper. These
+are argument/check corrections, not product changes or test edits.
