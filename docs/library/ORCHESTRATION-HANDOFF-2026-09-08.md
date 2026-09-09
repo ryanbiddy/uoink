@@ -95,7 +95,8 @@ finished from `564836c` and is rejected after AW-9. AV-5m4b5 Grok
 rejected after AW-10. Its complete diff and independent proof are retained.
 AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` finished from
 `17f3714` and is rejected after AW-11. Its complete diff and independent proof
-are retained. AV-5m4b7 is next.
+are retained. AV-5m4b7 Grok `b00703c8-7ca0-4e4b-b3ba-c6f1bad3d6ac`
+is active from `7995c0e` (22:16 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -112,7 +113,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. B5 is rejected after AW-10; B6 after AW-11. Dispatch AV-5m4b7 (grok) under
+   AW-9. B5 is rejected after AW-10; B6 after AW-11. Verify active AV-5m4b7 (grok) under
    `PHASE4-AV5M4B7-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
@@ -906,7 +907,7 @@ BRIEF and its two diagnostic files define these checks before execution.
 They are hypotheses, not reported failures. No B6 production bytes have been
 integrated, and the actual client receipt still waits for AW-4.
 
-### 2026-09-08 22:17 PDT - B6 independently verified; AW-11 requires repair
+### 2026-09-08 22:16 PDT - B6 independently verified; AW-11 requires repair
 
 B6 independently reproduced **275 passed, nine failed**, 153.63 seconds.
 All four final production source hashes remained unchanged across verification
@@ -922,3 +923,12 @@ and delete an intent through the current Mirror writer. All task-owned child
 cleanup was confirmed. These are implementation defects, not Ryan gates.
 The three new frozen cases and B7 brief require retained launch transitions
 and explicit helper-operation ownership while preserving existing controls.
+
+### 2026-09-08 22:18 PDT - B7 dispatched
+
+AV-5m4b7 Grok `b00703c8-7ca0-4e4b-b3ba-c6f1bad3d6ac` started at
+22:16 PDT from `7995c0e`. Its brief limits the repair to the two AW-11
+boundaries, requires the complete B6 union and all three unchanged AW-11
+cases, and adds actual Popen-handoff coverage. All 25 AW-11 proof hashes
+match committed blobs. The checkout remains on the accepted A3 production
+baseline; no B-series production change has been integrated.
