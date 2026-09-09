@@ -75,7 +75,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; integrated tree `8fc6a40`, installer source `e47e4f2`)
+## State at handoff (updated 2026-09-09; integrated tree `8fc6a40`, installer source `8a607c3`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -84,7 +84,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Lifecycle repair retained; original stdio read repair has nine new passes and broader 212 passed / eight failed | Existing reads no longer migrate/backfill or recover authoritative storage; eight parent-interception failures remain; X HTTP 403 stays blocked | Include read repair in final committed tree and bundled original entry; finish installed receipt kit |
 | 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Isolate new failure; finish two receipt kits, final tree, rebuilt package and operator runbook |
+| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Isolate new failure; finish two receipt kits, final tree, rebuilt package and operator runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -186,6 +186,11 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    incomplete original-route observation. Follow
    `RYAN-P4-FINAL-INSTRUMENT-REPAIR-BRIEF-2026-09-09.md` for manifest/guard,
    bounded transport, complete evidence and executable operator corrections.
+   Third Phase 4 instrument has 36 independent passes / one frozen failure,
+   24.86 s. Its completeness flag wrongly accepts a refused reshelve prompt and
+   aggregates sessions; cleanup can block on a full stdin pipe and failed canary
+   does not stop product launch. Preserve `ryan-p4-kit-review-03-2026-09-09` and
+   follow `RYAN-P4-EVIDENCE-COMPLETENESS-REPAIR-BRIEF-2026-09-09.md`.
    Existing-preview read repair is reviewed in `RYAN-PREVIEW-RESTART-REVIEW-2026-09-09.md`:
    nine new passes; broader 212 passed / eight known mirror-hook failures. The
    six initial subprocess failures proved storage mutation, not missing service.
@@ -1734,3 +1739,25 @@ all 13 assertions are preserved. It is unapplied and the failed observations
 stay failed. The exact patch/review and five-file proof are in the named
 RYAN-READ-FIXTURE-PROPOSAL-REVIEW report. Continue both receipt workers while
 Ryan considers the four-file total of this and the existing mirror proposal.
+
+### 2026-09-09 — replacement package built; third P4 instrument needs correction
+
+Real installer build completed at exact source `8a607c37095cb4f3b66d2aee285cfb710ab5e586`.
+Artifact: `build/Uoink-Setup-3.8.0.exe`, 339,059,131 bytes, SHA-256
+`d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1`.
+Staged smoke succeeded; dependency inventory verifies 142 packages. Before any
+receipt instrumentation, 32,203 compiler-input files and 142 exact Git/source
+bindings were captured in `proof/candidate-package-02-2026-09-09/SHA256.json`.
+This proves build inputs and package bytes, not extraction, installed behavior
+or release acceptance. Old installer remains retained separately. No setup ran.
+
+Third P4 worker f3723b7a independently produces 36 passes / one frozen failure,
+24.86 s. Original raw patch and logs/frames are sealed in
+`proof/ryan-p4-kit-review-03-2026-09-09/SHA256.json`. Review found false completeness
+on a refused valid-preview prompt, cross-session aggregation, a possible close
+deadlock after a blocked buffered write, unknown job queries treated as empty,
+and canary failure followed by original product launch. Do not integrate it as
+complete. The bounded correction brief above preserves existing assertions and
+requires positive complete-session and large-write oracles. The refusal's exact
+cause must be diagnosed before any product repair or fixture-generator rerun.
+Both previously proposed fixture patches remain unapplied pending Ryan's answer.

@@ -1,0 +1,29 @@
+{
+  "scope": "Build and compiler inputs before runtime observation; not installed",
+  "files": {
+    "build-receipt.json": {
+      "bytes": 1387,
+      "sha256": "909a7fe4ab6bd0b99a0a8b982d03f8c5f4a4fad953747c47cf9d383ff568b76c"
+    },
+    "build.log": {
+      "bytes": 43121,
+      "sha256": "65cb7f481517ef6c82be8cbb122a991c501e95cd752a44be05f66148fa0ed25f"
+    },
+    "package-manifest.json": {
+      "bytes": 40526,
+      "sha256": "a41434b8c97b815bbe14f9bf4e000b406f612e7bf71545548ed2796e022fcb5e"
+    },
+    "seal_package_inputs.py": {
+      "bytes": 4182,
+      "sha256": "9b99d2084d147886fe37447dcbbbbb1726c254dc11149ef3c029320dde113db5"
+    },
+    "source-bindings.json": {
+      "bytes": 40014,
+      "sha256": "da47f187ab099aaba82283b91993e7a19348eedb7cbadefdb8a168adfd871a75"
+    },
+    "staged-inventory.json": {
+      "bytes": 6462461,
+      "sha256": "3f08afe206e06d5974e0a5bba776d8fed51350eadd0810c4ab2c1cbadb668653"
+    }
+  }
+}

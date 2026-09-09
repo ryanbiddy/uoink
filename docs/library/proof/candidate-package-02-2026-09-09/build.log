@@ -1,0 +1,565 @@
+Building Uoink version 3.8.0
+==> Fetching dependencies
+    cached: python-3.11.9-embed-amd64.zip
+    Python embeddable hash OK
+    cached: ffmpeg-win64-lgpl.zip
+    ffmpeg hash OK
+    cached: get-pip.py
+    get-pip.py hash OK
+==> Staging
+    extracting Python embeddable...
+    bootstrapping pip in embeddable Python...
+Collecting pip==26.1.2
+  Downloading pip-26.1.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting setuptools==83.0.0
+  Downloading setuptools-83.0.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel==0.47.0
+  Downloading wheel-0.47.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting packaging==26.2
+  Downloading packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+Downloading pip-26.1.2-py3-none-any.whl (1.8 MB)
+   ---------------------------------------- 1.8/1.8 MB 33.0 MB/s  0:00:00
+Downloading setuptools-83.0.0-py3-none-any.whl (1.0 MB)
+   ---------------------------------------- 1.0/1.0 MB ?  0:00:00
+Downloading wheel-0.47.0-py3-none-any.whl (32 kB)
+Downloading packaging-26.2-py3-none-any.whl (100 kB)
+Installing collected packages: setuptools, pip, packaging, wheel
+
+Successfully installed packaging-26.2 pip-26.1.2 setuptools-83.0.0 wheel-0.47.0
+    installing yt-dlp==2026.07.04 + Pillow==10.4.0 + mcp==1.27.1 + keyring==25.7.0 + pystray==0.19.5 + pywebview==5.4 + pythonnet==3.0.5 + faster-whisper==1.2.1 + whisperx==3.8.6...
+Collecting yt-dlp==2026.07.04
+  Downloading yt_dlp-2026.7.4-py3-none-any.whl.metadata (183 kB)
+Collecting Pillow==10.4.0
+  Downloading pillow-10.4.0-cp311-cp311-win_amd64.whl.metadata (9.3 kB)
+Collecting mcp==1.27.1
+  Downloading mcp-1.27.1-py3-none-any.whl.metadata (8.2 kB)
+Collecting keyring==25.7.0
+  Downloading keyring-25.7.0-py3-none-any.whl.metadata (21 kB)
+Collecting pystray==0.19.5
+  Downloading pystray-0.19.5-py2.py3-none-any.whl.metadata (9.4 kB)
+Collecting pywebview==5.4
+  Downloading pywebview-5.4-py3-none-any.whl.metadata (4.5 kB)
+Collecting pythonnet==3.0.5
+  Downloading pythonnet-3.0.5-py3-none-any.whl.metadata (6.6 kB)
+Collecting faster-whisper==1.2.1
+  Downloading faster_whisper-1.2.1-py3-none-any.whl.metadata (16 kB)
+Collecting whisperx==3.8.6
+  Downloading whisperx-3.8.6-py3-none-any.whl.metadata (16 kB)
+Collecting anyio>=4.5 (from mcp==1.27.1)
+  Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting httpx-sse>=0.4 (from mcp==1.27.1)
+  Downloading httpx_sse-0.4.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting httpx<1.0.0,>=0.27.1 (from mcp==1.27.1)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting jsonschema>=4.20.0 (from mcp==1.27.1)
+  Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting pydantic-settings>=2.5.2 (from mcp==1.27.1)
+  Downloading pydantic_settings-2.14.2-py3-none-any.whl.metadata (3.4 kB)
+Collecting pydantic<3.0.0,>=2.11.0 (from mcp==1.27.1)
+  Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+Collecting pyjwt>=2.10.1 (from pyjwt[crypto]>=2.10.1->mcp==1.27.1)
+  Downloading pyjwt-2.13.0-py3-none-any.whl.metadata (3.4 kB)
+Collecting python-multipart>=0.0.9 (from mcp==1.27.1)
+  Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+Collecting pywin32>=310 (from mcp==1.27.1)
+  Downloading pywin32-312-cp311-cp311-win_amd64.whl.metadata (11 kB)
+Collecting sse-starlette>=1.6.1 (from mcp==1.27.1)
+  Downloading sse_starlette-3.4.6-py3-none-any.whl.metadata (15 kB)
+Collecting starlette>=0.27 (from mcp==1.27.1)
+  Downloading starlette-1.3.1-py3-none-any.whl.metadata (6.4 kB)
+Collecting typing-extensions>=4.9.0 (from mcp==1.27.1)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.1 (from mcp==1.27.1)
+  Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting uvicorn>=0.31.1 (from mcp==1.27.1)
+  Downloading uvicorn-0.51.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting pywin32-ctypes>=0.2.0 (from keyring==25.7.0)
+  Downloading pywin32_ctypes-0.2.3-py3-none-any.whl.metadata (3.9 kB)
+Collecting importlib_metadata>=4.11.4 (from keyring==25.7.0)
+  Downloading importlib_metadata-9.0.0-py3-none-any.whl.metadata (4.5 kB)
+Collecting jaraco.classes (from keyring==25.7.0)
+  Downloading jaraco.classes-3.4.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting jaraco.functools (from keyring==25.7.0)
+  Downloading jaraco_functools-4.6.0-py3-none-any.whl.metadata (2.9 kB)
+Collecting jaraco.context (from keyring==25.7.0)
+  Downloading jaraco_context-6.1.2-py3-none-any.whl.metadata (4.2 kB)
+Collecting six (from pystray==0.19.5)
+  Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting proxy_tools (from pywebview==5.4)
+  Downloading proxy_tools-0.1.0.tar.gz (3.0 kB)
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting bottle (from pywebview==5.4)
+  Downloading bottle-0.13.4-py2.py3-none-any.whl.metadata (1.6 kB)
+Collecting clr_loader<0.3.0,>=0.2.7 (from pythonnet==3.0.5)
+  Downloading clr_loader-0.2.10-py3-none-any.whl.metadata (1.5 kB)
+Collecting ctranslate2<5,>=4.0 (from faster-whisper==1.2.1)
+  Downloading ctranslate2-4.8.1-cp311-cp311-win_amd64.whl.metadata (11 kB)
+Collecting huggingface-hub>=0.21 (from faster-whisper==1.2.1)
+  Downloading huggingface_hub-0.36.2-py3-none-any.whl.metadata (15 kB)
+Collecting tokenizers<1,>=0.13 (from faster-whisper==1.2.1)
+  Downloading tokenizers-0.22.2-cp39-abi3-win_amd64.whl.metadata (7.4 kB)
+Collecting onnxruntime<2,>=1.14 (from faster-whisper==1.2.1)
+  Downloading onnxruntime-1.27.0-cp311-cp311-win_amd64.whl.metadata (5.6 kB)
+Collecting av>=11 (from faster-whisper==1.2.1)
+  Downloading av-18.0.0-cp311-abi3-win_amd64.whl.metadata (4.7 kB)
+Collecting tqdm (from faster-whisper==1.2.1)
+  Downloading tqdm-4.69.0-py3-none-any.whl.metadata (57 kB)
+Collecting nltk>=3.9.1 (from whisperx==3.8.6)
+  Downloading nltk-3.10.0-py3-none-any.whl.metadata (3.2 kB)
+Collecting numpy>=2.1.0 (from whisperx==3.8.6)
+  Downloading numpy-2.4.6-cp311-cp311-win_amd64.whl.metadata (6.6 kB)
+Collecting omegaconf>=2.3.0 (from whisperx==3.8.6)
+  Downloading omegaconf-2.3.1-py3-none-any.whl.metadata (4.5 kB)
+Collecting pandas>=2.2.3 (from whisperx==3.8.6)
+  Downloading pandas-3.0.5-cp311-cp311-win_amd64.whl.metadata (19 kB)
+Collecting pyannote-audio>=4.0.0 (from whisperx==3.8.6)
+  Downloading pyannote_audio-4.0.7-py3-none-any.whl.metadata (13 kB)
+Collecting torch~=2.8.0 (from whisperx==3.8.6)
+  Downloading torch-2.8.0-cp311-cp311-win_amd64.whl.metadata (30 kB)
+Collecting torchaudio~=2.8.0 (from whisperx==3.8.6)
+  Downloading torchaudio-2.8.0-cp311-cp311-win_amd64.whl.metadata (7.2 kB)
+Collecting torchvision~=0.23.0 (from whisperx==3.8.6)
+  Downloading torchvision-0.23.0-cp311-cp311-win_amd64.whl.metadata (6.1 kB)
+Collecting torchcodec<0.8.0,>=0.6.0 (from whisperx==3.8.6)
+  Downloading torchcodec-0.7.0-cp311-cp311-win_amd64.whl.metadata (9.7 kB)
+Collecting transformers>=4.48.0 (from whisperx==3.8.6)
+  Downloading transformers-4.57.6-py3-none-any.whl.metadata (43 kB)
+Collecting cffi>=1.17 (from clr_loader<0.3.0,>=0.2.7->pythonnet==3.0.5)
+  Downloading cffi-2.1.0-cp311-cp311-win_amd64.whl.metadata (2.6 kB)
+Requirement already satisfied: setuptools in .\installer\staging\python\Lib\site-packages (from ctranslate2<5,>=4.0->faster-whisper==1.2.1) (83.0.0)
+Collecting pyyaml<7,>=5.3 (from ctranslate2<5,>=4.0->faster-whisper==1.2.1)
+  Downloading pyyaml-6.0.3-cp311-cp311-win_amd64.whl.metadata (2.4 kB)
+Collecting certifi (from httpx<1.0.0,>=0.27.1->mcp==1.27.1)
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1.0.0,>=0.27.1->mcp==1.27.1)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx<1.0.0,>=0.27.1->mcp==1.27.1)
+  Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1.0.0,>=0.27.1->mcp==1.27.1)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting filelock (from huggingface-hub>=0.21->faster-whisper==1.2.1)
+  Downloading filelock-3.32.0-py3-none-any.whl.metadata (2.0 kB)
+Collecting fsspec>=2023.5.0 (from huggingface-hub>=0.21->faster-whisper==1.2.1)
+  Downloading fsspec-2026.6.0-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: packaging>=20.9 in .\installer\staging\python\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper==1.2.1) (26.2)
+Collecting requests (from huggingface-hub>=0.21->faster-whisper==1.2.1)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting flatbuffers (from onnxruntime<2,>=1.14->faster-whisper==1.2.1)
+  Downloading flatbuffers-25.12.19-py2.py3-none-any.whl.metadata (1.0 kB)
+Collecting protobuf>=4.25.8 (from onnxruntime<2,>=1.14->faster-whisper==1.2.1)
+  Downloading protobuf-7.35.1-cp310-abi3-win_amd64.whl.metadata (595 bytes)
+Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.11.0->mcp==1.27.1)
+  Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.4 (from pydantic<3.0.0,>=2.11.0->mcp==1.27.1)
+  Downloading pydantic_core-2.46.4-cp311-cp311-win_amd64.whl.metadata (6.7 kB)
+Collecting sympy>=1.13.3 (from torch~=2.8.0->whisperx==3.8.6)
+  Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx (from torch~=2.8.0->whisperx==3.8.6)
+  Downloading networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)
+Collecting jinja2 (from torch~=2.8.0->whisperx==3.8.6)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting pycparser (from cffi>=1.17->clr_loader<0.3.0,>=0.2.7->pythonnet==3.0.5)
+  Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Collecting zipp>=3.20 (from importlib_metadata>=4.11.4->keyring==25.7.0)
+  Downloading zipp-4.1.0-py3-none-any.whl.metadata (3.6 kB)
+Collecting attrs>=22.2.0 (from jsonschema>=4.20.0->mcp==1.27.1)
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=4.20.0->mcp==1.27.1)
+  Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting referencing>=0.28.4 (from jsonschema>=4.20.0->mcp==1.27.1)
+  Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting rpds-py>=0.25.0 (from jsonschema>=4.20.0->mcp==1.27.1)
+  Downloading rpds_py-2026.6.3-cp311-cp311-win_amd64.whl.metadata (4.2 kB)
+Collecting defusedxml (from nltk>=3.9.1->whisperx==3.8.6)
+  Downloading defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+Collecting click (from nltk>=3.9.1->whisperx==3.8.6)
+  Downloading click-8.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting joblib (from nltk>=3.9.1->whisperx==3.8.6)
+  Downloading joblib-1.5.3-py3-none-any.whl.metadata (5.5 kB)
+Collecting regex>=2021.8.3 (from nltk>=3.9.1->whisperx==3.8.6)
+  Downloading regex-2026.7.19-cp311-cp311-win_amd64.whl.metadata (41 kB)
+Collecting antlr4-python3-runtime==4.9.* (from omegaconf>=2.3.0->whisperx==3.8.6)
+  Downloading antlr4-python3-runtime-4.9.3.tar.gz (117 kB)
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting python-dateutil>=2.8.2 (from pandas>=2.2.3->whisperx==3.8.6)
+  Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting tzdata (from pandas>=2.2.3->whisperx==3.8.6)
+  Downloading tzdata-2026.3-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting asteroid-filterbanks>=0.4.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading asteroid_filterbanks-0.4.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting einops>=0.8.1 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading einops-0.8.2-py3-none-any.whl.metadata (13 kB)
+Collecting lightning>=2.4 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading lightning-2.6.5-py3-none-any.whl.metadata (44 kB)
+Collecting matplotlib>=3.10.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading matplotlib-3.11.1-cp311-cp311-win_amd64.whl.metadata (80 kB)
+Collecting opentelemetry-api>=1.34.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_api-1.44.0-py3-none-any.whl.metadata (1.4 kB)
+Collecting opentelemetry-exporter-otlp>=1.34.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_exporter_otlp-1.44.0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-sdk>=1.34.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_sdk-1.44.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting pyannote-core>=6.0.1 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyannote_core-6.0.1-py3-none-any.whl.metadata (1.9 kB)
+Collecting pyannote-database>=6.1.1 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyannote_database-6.1.1-py3-none-any.whl.metadata (30 kB)
+Collecting pyannote-metrics>=4.0.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyannote_metrics-4.1-py3-none-any.whl.metadata (2.3 kB)
+Collecting pyannote-pipeline>=4.0.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyannote_pipeline-4.0.0-py3-none-any.whl.metadata (5.4 kB)
+Collecting pyannoteai-sdk>=0.3.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyannoteai_sdk-0.4.0-py3-none-any.whl.metadata (2.4 kB)
+Collecting pytorch-metric-learning>=2.8.1 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pytorch_metric_learning-2.9.0-py3-none-any.whl.metadata (18 kB)
+Collecting rich>=13.9.4 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting safetensors>=0.5.2 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading safetensors-0.8.0-cp310-abi3-win_amd64.whl.metadata (4.2 kB)
+Collecting torch-audiomentations>=0.12.0 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading torch_audiomentations-0.12.0-py3-none-any.whl.metadata (15 kB)
+Collecting torchmetrics>=1.6.1 (from pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading torchmetrics-1.9.0-py3-none-any.whl.metadata (23 kB)
+Collecting lightning-utilities<2.0,>=0.10.0 (from lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading lightning_utilities-0.15.3-py3-none-any.whl.metadata (5.5 kB)
+Collecting pytorch-lightning (from lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pytorch_lightning-2.6.5-py3-none-any.whl.metadata (21 kB)
+Collecting aiohttp!=4.0.0a0,!=4.0.0a1 (from fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading aiohttp-3.14.3-cp311-cp311-win_amd64.whl.metadata (8.5 kB)
+Collecting colorama (from tqdm->faster-whisper==1.2.1)
+  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting frozenlist>=1.1.1 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading frozenlist-1.8.0-cp311-cp311-win_amd64.whl.metadata (21 kB)
+Collecting multidict<7.0,>=4.5 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading multidict-6.7.1-cp311-cp311-win_amd64.whl.metadata (5.5 kB)
+Collecting propcache>=0.2.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading propcache-0.5.2-cp311-cp311-win_amd64.whl.metadata (17 kB)
+Collecting yarl<2.0,>=1.17.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading yarl-1.24.5-cp311-cp311-win_amd64.whl.metadata (107 kB)
+Collecting contourpy>=1.0.1 (from matplotlib>=3.10.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading contourpy-1.3.3-cp311-cp311-win_amd64.whl.metadata (5.5 kB)
+Collecting cycler>=0.10 (from matplotlib>=3.10.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.28.2 (from matplotlib>=3.10.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading fonttools-4.63.0-cp311-cp311-win_amd64.whl.metadata (121 kB)
+Collecting kiwisolver>=1.3.1 (from matplotlib>=3.10.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading kiwisolver-1.5.0-cp311-cp311-win_amd64.whl.metadata (5.2 kB)
+Collecting pyparsing>=3 (from matplotlib>=3.10.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pyparsing-3.3.2-py3-none-any.whl.metadata (5.8 kB)
+Collecting opentelemetry-exporter-otlp-proto-grpc==1.44.0 (from opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_exporter_otlp_proto_grpc-1.44.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-exporter-otlp-proto-http==1.44.0 (from opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_exporter_otlp_proto_http-1.44.0-py3-none-any.whl.metadata (2.4 kB)
+Collecting googleapis-common-protos~=1.57 (from opentelemetry-exporter-otlp-proto-grpc==1.44.0->opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading googleapis_common_protos-1.75.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting grpcio<2.0.0,>=1.63.2 (from opentelemetry-exporter-otlp-proto-grpc==1.44.0->opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading grpcio-1.82.1-cp311-cp311-win_amd64.whl.metadata (3.8 kB)
+Collecting opentelemetry-exporter-otlp-proto-common==1.44.0 (from opentelemetry-exporter-otlp-proto-grpc==1.44.0->opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_exporter_otlp_proto_common-1.44.0-py3-none-any.whl.metadata (1.8 kB)
+Collecting opentelemetry-proto==1.44.0 (from opentelemetry-exporter-otlp-proto-grpc==1.44.0->opentelemetry-exporter-otlp>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_proto-1.44.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting opentelemetry-semantic-conventions==0.65b0 (from opentelemetry-sdk>=1.34.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading opentelemetry_semantic_conventions-0.65b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting charset_normalizer<4,>=2 (from requests->huggingface-hub>=0.21->faster-whisper==1.2.1)
+  Downloading charset_normalizer-3.4.9-cp311-cp311-win_amd64.whl.metadata (42 kB)
+Collecting urllib3<3,>=1.26 (from requests->huggingface-hub>=0.21->faster-whisper==1.2.1)
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting sortedcontainers>=2.4.0 (from pyannote-core>=6.0.1->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl.metadata (10 kB)
+Collecting scikit-learn>=1.6.1 (from pyannote-metrics>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading scikit_learn-1.9.0-cp311-cp311-win_amd64.whl.metadata (11 kB)
+Collecting scipy>=1.15.1 (from pyannote-metrics>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading scipy-1.17.1-cp311-cp311-win_amd64.whl.metadata (60 kB)
+Collecting optuna>=4.2.0 (from pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading optuna-4.9.0-py3-none-any.whl.metadata (15 kB)
+Collecting alembic>=1.5.0 (from optuna>=4.2.0->pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading alembic-1.18.5-py3-none-any.whl.metadata (7.2 kB)
+Collecting colorlog (from optuna>=4.2.0->pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading colorlog-6.11.0-py3-none-any.whl.metadata (11 kB)
+Collecting sqlalchemy>=1.4.2 (from optuna>=4.2.0->pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading sqlalchemy-2.0.51-cp311-cp311-win_amd64.whl.metadata (9.8 kB)
+Collecting Mako (from alembic>=1.5.0->optuna>=4.2.0->pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading mako-1.3.12-py3-none-any.whl.metadata (2.9 kB)
+Collecting python-dotenv>=0.21.0 (from pydantic-settings>=2.5.2->mcp==1.27.1)
+  Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting cryptography>=3.4.0 (from pyjwt[crypto]>=2.10.1->mcp==1.27.1)
+  Downloading cryptography-49.0.0-cp311-abi3-win_amd64.whl.metadata (4.3 kB)
+Collecting markdown-it-py>=2.2.0 (from rich>=13.9.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting pygments<3.0.0,>=2.13.0 (from rich>=13.9.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.9.4->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting narwhals>=2.0.1 (from scikit-learn>=1.6.1->pyannote-metrics>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading narwhals-2.24.0-py3-none-any.whl.metadata (15 kB)
+Collecting threadpoolctl>=3.5.0 (from scikit-learn>=1.6.1->pyannote-metrics>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+Collecting greenlet>=1 (from sqlalchemy>=1.4.2->optuna>=4.2.0->pyannote-pipeline>=4.0.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading greenlet-3.5.4-cp311-cp311-win_amd64.whl.metadata (3.9 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch~=2.8.0->whisperx==3.8.6)
+  Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting julius<0.3,>=0.2.3 (from torch-audiomentations>=0.12.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading julius-0.2.8-py3-none-any.whl.metadata (7.6 kB)
+Collecting torch-pitch-shift>=1.2.2 (from torch-audiomentations>=0.12.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading torch_pitch_shift-1.2.5-py3-none-any.whl.metadata (2.5 kB)
+Collecting primePy>=1.3 (from torch-pitch-shift>=1.2.2->torch-audiomentations>=0.12.0->pyannote-audio>=4.0.0->whisperx==3.8.6)
+  Downloading primePy-1.3-py3-none-any.whl.metadata (4.8 kB)
+Collecting more-itertools (from jaraco.classes->keyring==25.7.0)
+  Downloading more_itertools-11.1.0-py3-none-any.whl.metadata (41 kB)
+Collecting backports.tarfile (from jaraco.context->keyring==25.7.0)
+  Downloading backports.tarfile-1.2.0-py3-none-any.whl.metadata (2.0 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch~=2.8.0->whisperx==3.8.6)
+  Downloading markupsafe-3.0.3-cp311-cp311-win_amd64.whl.metadata (2.8 kB)
+Downloading yt_dlp-2026.7.4-py3-none-any.whl (3.2 MB)
+   ---------------------------------------- 3.2/3.2 MB 91.3 MB/s  0:00:00
+Downloading pillow-10.4.0-cp311-cp311-win_amd64.whl (2.6 MB)
+   ---------------------------------------- 2.6/2.6 MB 143.3 MB/s  0:00:00
+Downloading mcp-1.27.1-py3-none-any.whl (216 kB)
+Downloading keyring-25.7.0-py3-none-any.whl (39 kB)
+Downloading pystray-0.19.5-py2.py3-none-any.whl (49 kB)
+Downloading pywebview-5.4-py3-none-any.whl (475 kB)
+Downloading pythonnet-3.0.5-py3-none-any.whl (297 kB)
+Downloading faster_whisper-1.2.1-py3-none-any.whl (1.1 MB)
+   ---------------------------------------- 1.1/1.1 MB ?  0:00:00
+Downloading whisperx-3.8.6-py3-none-any.whl (16.5 MB)
+   ---------------------------------------- 16.5/16.5 MB 147.5 MB/s  0:00:00
+Downloading clr_loader-0.2.10-py3-none-any.whl (56 kB)
+Downloading ctranslate2-4.8.1-cp311-cp311-win_amd64.whl (19.2 MB)
+   ---------------------------------------- 19.2/19.2 MB 201.7 MB/s  0:00:00
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+   ---------------------------------------- 566.4/566.4 kB ?  0:00:00
+Downloading onnxruntime-1.27.0-cp311-cp311-win_amd64.whl (13.4 MB)
+   ---------------------------------------- 13.4/13.4 MB 278.6 MB/s  0:00:00
+Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+Downloading pydantic_core-2.46.4-cp311-cp311-win_amd64.whl (2.1 MB)
+   ---------------------------------------- 2.1/2.1 MB 120.6 MB/s  0:00:00
+Downloading pyyaml-6.0.3-cp311-cp311-win_amd64.whl (158 kB)
+Downloading tokenizers-0.22.2-cp39-abi3-win_amd64.whl (2.7 MB)
+   ---------------------------------------- 2.7/2.7 MB ?  0:00:00
+Downloading torch-2.8.0-cp311-cp311-win_amd64.whl (241.4 MB)
+   ---------------------------------------- 241.4/241.4 MB 154.4 MB/s  0:00:01
+Downloading torchaudio-2.8.0-cp311-cp311-win_amd64.whl (2.5 MB)
+   ---------------------------------------- 2.5/2.5 MB 28.8 MB/s  0:00:00
+Downloading torchcodec-0.7.0-cp311-cp311-win_amd64.whl (1.6 MB)
+   ---------------------------------------- 1.6/1.6 MB 81.3 MB/s  0:00:00
+Downloading torchvision-0.23.0-cp311-cp311-win_amd64.whl (1.6 MB)
+   ---------------------------------------- 1.6/1.6 MB ?  0:00:00
+Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+Downloading av-18.0.0-cp311-abi3-win_amd64.whl (27.6 MB)
+   ---------------------------------------- 27.6/27.6 MB 158.7 MB/s  0:00:00
+Downloading cffi-2.1.0-cp311-cp311-win_amd64.whl (185 kB)
+Downloading fsspec-2026.6.0-py3-none-any.whl (203 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading httpx_sse-0.4.3-py3-none-any.whl (9.0 kB)
+Downloading idna-3.18-py3-none-any.whl (65 kB)
+Downloading importlib_metadata-9.0.0-py3-none-any.whl (27 kB)
+Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Downloading nltk-3.10.0-py3-none-any.whl (1.7 MB)
+   ---------------------------------------- 1.7/1.7 MB 96.9 MB/s  0:00:00
+Downloading numpy-2.4.6-cp311-cp311-win_amd64.whl (12.6 MB)
+   ---------------------------------------- 12.6/12.6 MB 262.7 MB/s  0:00:00
+Downloading omegaconf-2.3.1-py3-none-any.whl (79 kB)
+Downloading pandas-3.0.5-cp311-cp311-win_amd64.whl (10.0 MB)
+   ---------------------------------------- 10.0/10.0 MB 313.1 MB/s  0:00:00
+Downloading protobuf-7.35.1-cp310-abi3-win_amd64.whl (439 kB)
+Downloading pyannote_audio-4.0.7-py3-none-any.whl (894 kB)
+   ---------------------------------------- 894.6/894.6 kB ?  0:00:00
+Downloading asteroid_filterbanks-0.4.0-py3-none-any.whl (29 kB)
+Downloading einops-0.8.2-py3-none-any.whl (65 kB)
+Downloading lightning-2.6.5-py3-none-any.whl (848 kB)
+   ---------------------------------------- 848.6/848.6 kB ?  0:00:00
+Downloading lightning_utilities-0.15.3-py3-none-any.whl (31 kB)
+Downloading torchmetrics-1.9.0-py3-none-any.whl (983 kB)
+   ---------------------------------------- 983.4/983.4 kB ?  0:00:00
+Downloading tqdm-4.69.0-py3-none-any.whl (676 kB)
+   ---------------------------------------- 676.7/676.7 kB ?  0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading aiohttp-3.14.3-cp311-cp311-win_amd64.whl (481 kB)
+Downloading multidict-6.7.1-cp311-cp311-win_amd64.whl (45 kB)
+Downloading yarl-1.24.5-cp311-cp311-win_amd64.whl (97 kB)
+Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading frozenlist-1.8.0-cp311-cp311-win_amd64.whl (44 kB)
+Downloading matplotlib-3.11.1-cp311-cp311-win_amd64.whl (9.3 MB)
+   ---------------------------------------- 9.3/9.3 MB 282.9 MB/s  0:00:00
+Downloading contourpy-1.3.3-cp311-cp311-win_amd64.whl (225 kB)
+Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Downloading fonttools-4.63.0-cp311-cp311-win_amd64.whl (2.4 MB)
+   ---------------------------------------- 2.4/2.4 MB 130.9 MB/s  0:00:00
+Downloading kiwisolver-1.5.0-cp311-cp311-win_amd64.whl (73 kB)
+Downloading opentelemetry_api-1.44.0-py3-none-any.whl (60 kB)
+Downloading opentelemetry_exporter_otlp-1.44.0-py3-none-any.whl (6.7 kB)
+Downloading opentelemetry_exporter_otlp_proto_grpc-1.44.0-py3-none-any.whl (19 kB)
+Downloading opentelemetry_exporter_otlp_proto_common-1.44.0-py3-none-any.whl (17 kB)
+Downloading opentelemetry_exporter_otlp_proto_http-1.44.0-py3-none-any.whl (21 kB)
+Downloading opentelemetry_proto-1.44.0-py3-none-any.whl (72 kB)
+Downloading googleapis_common_protos-1.75.0-py3-none-any.whl (300 kB)
+Downloading grpcio-1.82.1-cp311-cp311-win_amd64.whl (5.0 MB)
+   ---------------------------------------- 5.0/5.0 MB 148.4 MB/s  0:00:00
+Downloading opentelemetry_sdk-1.44.0-py3-none-any.whl (137 kB)
+Downloading opentelemetry_semantic_conventions-0.65b0-py3-none-any.whl (204 kB)
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.4.9-cp311-cp311-win_amd64.whl (161 kB)
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading propcache-0.5.2-cp311-cp311-win_amd64.whl (42 kB)
+Downloading pyannote_core-6.0.1-py3-none-any.whl (57 kB)
+Downloading pyannote_database-6.1.1-py3-none-any.whl (53 kB)
+Downloading pyannote_metrics-4.1-py3-none-any.whl (52 kB)
+Downloading pyannote_pipeline-4.0.0-py3-none-any.whl (22 kB)
+Downloading filelock-3.32.0-py3-none-any.whl (97 kB)
+Downloading optuna-4.9.0-py3-none-any.whl (425 kB)
+Downloading alembic-1.18.5-py3-none-any.whl (264 kB)
+Downloading pyannoteai_sdk-0.4.0-py3-none-any.whl (8.9 kB)
+Downloading pydantic_settings-2.14.2-py3-none-any.whl (61 kB)
+Downloading pyjwt-2.13.0-py3-none-any.whl (31 kB)
+Downloading cryptography-49.0.0-cp311-abi3-win_amd64.whl (3.8 MB)
+   ---------------------------------------- 3.8/3.8 MB 221.7 MB/s  0:00:00
+Downloading pyparsing-3.3.2-py3-none-any.whl (122 kB)
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+Downloading pytorch_metric_learning-2.9.0-py3-none-any.whl (127 kB)
+Downloading pywin32-312-cp311-cp311-win_amd64.whl (6.9 MB)
+   ---------------------------------------- 6.9/6.9 MB 215.1 MB/s  0:00:00
+Downloading pywin32_ctypes-0.2.3-py3-none-any.whl (30 kB)
+Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+Downloading regex-2026.7.19-cp311-cp311-win_amd64.whl (277 kB)
+Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+Downloading pygments-2.20.0-py3-none-any.whl (1.2 MB)
+   ---------------------------------------- 1.2/1.2 MB ?  0:00:00
+Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading rpds_py-2026.6.3-cp311-cp311-win_amd64.whl (223 kB)
+Downloading safetensors-0.8.0-cp310-abi3-win_amd64.whl (355 kB)
+Downloading scikit_learn-1.9.0-cp311-cp311-win_amd64.whl (8.3 MB)
+   ---------------------------------------- 8.3/8.3 MB 258.4 MB/s  0:00:00
+Downloading joblib-1.5.3-py3-none-any.whl (309 kB)
+Downloading narwhals-2.24.0-py3-none-any.whl (461 kB)
+Downloading scipy-1.17.1-cp311-cp311-win_amd64.whl (36.6 MB)
+   ---------------------------------------- 36.6/36.6 MB 290.8 MB/s  0:00:00
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Downloading sqlalchemy-2.0.51-cp311-cp311-win_amd64.whl (2.1 MB)
+   ---------------------------------------- 2.1/2.1 MB 117.7 MB/s  0:00:00
+Downloading greenlet-3.5.4-cp311-cp311-win_amd64.whl (246 kB)
+Downloading sse_starlette-3.4.6-py3-none-any.whl (16 kB)
+Downloading starlette-1.3.1-py3-none-any.whl (73 kB)
+Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ---------------------------------------- 6.3/6.3 MB 402.5 MB/s  0:00:00
+Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ---------------------------------------- 536.2/536.2 kB ?  0:00:00
+Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Downloading torch_audiomentations-0.12.0-py3-none-any.whl (48 kB)
+Downloading julius-0.2.8-py3-none-any.whl (21 kB)
+Downloading torch_pitch_shift-1.2.5-py3-none-any.whl (5.0 kB)
+Downloading primePy-1.3-py3-none-any.whl (4.0 kB)
+Downloading transformers-4.57.6-py3-none-any.whl (12.0 MB)
+   ---------------------------------------- 12.0/12.0 MB 249.6 MB/s  0:00:00
+Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Downloading uvicorn-0.51.0-py3-none-any.whl (73 kB)
+Downloading click-8.4.2-py3-none-any.whl (119 kB)
+Downloading zipp-4.1.0-py3-none-any.whl (10 kB)
+Downloading bottle-0.13.4-py2.py3-none-any.whl (103 kB)
+Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Downloading colorlog-6.11.0-py3-none-any.whl (12 kB)
+Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+Downloading flatbuffers-25.12.19-py2.py3-none-any.whl (26 kB)
+Downloading jaraco.classes-3.4.0-py3-none-any.whl (6.8 kB)
+Downloading jaraco_context-6.1.2-py3-none-any.whl (7.9 kB)
+Downloading backports.tarfile-1.2.0-py3-none-any.whl (30 kB)
+Downloading jaraco_functools-4.6.0-py3-none-any.whl (11 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-win_amd64.whl (15 kB)
+Downloading mako-1.3.12-py3-none-any.whl (78 kB)
+Downloading more_itertools-11.1.0-py3-none-any.whl (72 kB)
+Downloading networkx-3.6.1-py3-none-any.whl (2.1 MB)
+   ---------------------------------------- 2.1/2.1 MB 112.9 MB/s  0:00:00
+Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+Downloading pytorch_lightning-2.6.5-py3-none-any.whl (852 kB)
+   ---------------------------------------- 852.4/852.4 kB ?  0:00:00
+Downloading tzdata-2026.3-py2.py3-none-any.whl (348 kB)
+Building wheels for collected packages: antlr4-python3-runtime, proxy_tools
+  Building wheel for antlr4-python3-runtime (pyproject.toml): started
+  Building wheel for antlr4-python3-runtime (pyproject.toml): finished with status 'done'
+  Created wheel for antlr4-python3-runtime: filename=antlr4_python3_runtime-4.9.3-py3-none-any.whl size=144613 sha256=d54249c8154ae47f11db7fe6bfc53630a4712e07d6cc7f69566ba0140ca1b005
+  Stored in directory: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\candidate-build-20260909-103337\profile\pip-ephem-wheel-cache-e4ls1cjb\wheels\1a\97\32\461f837398029ad76911109f07047fde1d7b661a147c7c56d1
+  Building wheel for proxy_tools (pyproject.toml): started
+  Building wheel for proxy_tools (pyproject.toml): finished with status 'done'
+  Created wheel for proxy_tools: filename=proxy_tools-0.1.0-py3-none-any.whl size=2943 sha256=ccf4cf0c5a92d30ee68ea79d72e91779a05be05775ce21f9d8b228c3fcf75208
+  Stored in directory: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\candidate-build-20260909-103337\profile\pip-ephem-wheel-cache-e4ls1cjb\wheels\2b\5f\96\7e96e7cbf06e426e168a6891a6ca2226787cc79fc816830dd4
+Successfully built antlr4-python3-runtime proxy_tools
+Installing collected packages: sortedcontainers, proxy_tools, primePy, mpmath, flatbuffers, bottle, antlr4-python3-runtime, zipp, yt-dlp, urllib3, tzdata, typing-extensions, torchcodec, threadpoolctl, sympy, six, safetensors, rpds-py, regex, pyyaml, pywin32-ctypes, pywin32, python-multipart, python-dotenv, pyparsing, pyjwt, pygments, pycparser, protobuf, propcache, Pillow, numpy, networkx, narwhals, multidict, more-itertools, mdurl, MarkupSafe, kiwisolver, joblib, idna, httpx-sse, h11, greenlet, fsspec, frozenlist, fonttools, filelock, einops, defusedxml, cycler, colorama, charset_normalizer, certifi, backports.tarfile, av, attrs, annotated-types, aiohappyeyeballs, yarl, typing-inspection, tqdm, sqlalchemy, scipy, requests, referencing, python-dateutil, pystray, pydantic-core, opentelemetry-proto, opentelemetry-api, onnxruntime, omegaconf, markdown-it-py, Mako, lightning-utilities, jinja2, jaraco.functools, jaraco.context, jaraco.classes, importlib_metadata, httpcore, grpcio, googleapis-common-protos, ctranslate2, contourpy, colorlog, click, cffi, anyio, aiosignal, uvicorn, torch, starlette, scikit-learn, rich, pydantic, pyannoteai-sdk, pandas, opentelemetry-semantic-conventions, opentelemetry-exporter-otlp-proto-common, nltk, matplotlib, keyring, jsonschema-specifications, huggingface-hub, httpx, cryptography, clr_loader, alembic, aiohttp, torchvision, torchmetrics, torchaudio, tokenizers, sse-starlette, pytorch-metric-learning, pythonnet, pydantic-settings, pyannote-core, optuna, opentelemetry-sdk, julius, jsonschema, asteroid-filterbanks, transformers, torch-pitch-shift, pywebview, pytorch-lightning, pyannote-database, opentelemetry-exporter-otlp-proto-http, opentelemetry-exporter-otlp-proto-grpc, mcp, faster-whisper, torch-audiomentations, pyannote-pipeline, pyannote-metrics, opentelemetry-exporter-otlp, lightning, pyannote-audio, whisperx
+
+Successfully installed Mako-1.3.12 MarkupSafe-3.0.3 Pillow-10.4.0 aiohappyeyeballs-2.7.1 aiohttp-3.14.3 aiosignal-1.4.0 alembic-1.18.5 annotated-types-0.7.0 antlr4-python3-runtime-4.9.3 anyio-4.14.2 asteroid-filterbanks-0.4.0 attrs-26.1.0 av-18.0.0 backports.tarfile-1.2.0 bottle-0.13.4 certifi-2026.7.22 cffi-2.1.0 charset_normalizer-3.4.9 click-8.4.2 clr_loader-0.2.10 colorama-0.4.6 colorlog-6.11.0 contourpy-1.3.3 cryptography-49.0.0 ctranslate2-4.8.1 cycler-0.12.1 defusedxml-0.7.1 einops-0.8.2 faster-whisper-1.2.1 filelock-3.32.0 flatbuffers-25.12.19 fonttools-4.63.0 frozenlist-1.8.0 fsspec-2026.6.0 googleapis-common-protos-1.75.0 greenlet-3.5.4 grpcio-1.82.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 httpx-sse-0.4.3 huggingface-hub-0.36.2 idna-3.18 importlib_metadata-9.0.0 jaraco.classes-3.4.0 jaraco.context-6.1.2 jaraco.functools-4.6.0 jinja2-3.1.6 joblib-1.5.3 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 julius-0.2.8 keyring-25.7.0 kiwisolver-1.5.0 lightning-2.6.5 lightning-utilities-0.15.3 markdown-it-py-4.2.0 matplotlib-3.11.1 mcp-1.27.1 mdurl-0.1.2 more-itertools-11.1.0 mpmath-1.3.0 multidict-6.7.1 narwhals-2.24.0 networkx-3.6.1 nltk-3.10.0 numpy-2.4.6 omegaconf-2.3.1 onnxruntime-1.27.0 opentelemetry-api-1.44.0 opentelemetry-exporter-otlp-1.44.0 opentelemetry-exporter-otlp-proto-common-1.44.0 opentelemetry-exporter-otlp-proto-grpc-1.44.0 opentelemetry-exporter-otlp-proto-http-1.44.0 opentelemetry-proto-1.44.0 opentelemetry-sdk-1.44.0 opentelemetry-semantic-conventions-0.65b0 optuna-4.9.0 pandas-3.0.5 primePy-1.3 propcache-0.5.2 protobuf-7.35.1 proxy_tools-0.1.0 pyannote-audio-4.0.7 pyannote-core-6.0.1 pyannote-database-6.1.1 pyannote-metrics-4.1 pyannote-pipeline-4.0.0 pyannoteai-sdk-0.4.0 pycparser-3.0 pydantic-2.13.4 pydantic-core-2.46.4 pydantic-settings-2.14.2 pygments-2.20.0 pyjwt-2.13.0 pyparsing-3.3.2 pystray-0.19.5 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 python-multipart-0.0.32 pythonnet-3.0.5 pytorch-lightning-2.6.5 pytorch-metric-learning-2.9.0 pywebview-5.4 pywin32-312 pywin32-ctypes-0.2.3 pyyaml-6.0.3 referencing-0.37.0 regex-2026.7.19 requests-2.34.2 rich-15.0.0 rpds-py-2026.6.3 safetensors-0.8.0 scikit-learn-1.9.0 scipy-1.17.1 six-1.17.0 sortedcontainers-2.4.0 sqlalchemy-2.0.51 sse-starlette-3.4.6 starlette-1.3.1 sympy-1.14.0 threadpoolctl-3.6.0 tokenizers-0.22.2 torch-2.8.0 torch-audiomentations-0.12.0 torch-pitch-shift-1.2.5 torchaudio-2.8.0 torchcodec-0.7.0 torchmetrics-1.9.0 torchvision-0.23.0 tqdm-4.69.0 transformers-4.57.6 typing-extensions-4.16.0 typing-inspection-0.4.2 tzdata-2026.3 urllib3-2.7.0 uvicorn-0.51.0 whisperx-3.8.6 yarl-1.24.5 yt-dlp-2026.7.4 zipp-4.1.0
+
+[notice] A new release of pip is available: 26.1.2 -> 26.2.1
+[notice] To update, run: E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\python\python.exe -m pip install --upgrade pip
+==> Generating THIRD-PARTY-NOTICES.md
+Collecting pip-licenses==5.0.0
+  Downloading pip_licenses-5.0.0-py3-none-any.whl.metadata (32 kB)
+Collecting prettytable>=2.3.0 (from pip-licenses==5.0.0)
+  Downloading prettytable-3.18.0-py3-none-any.whl.metadata (37 kB)
+Collecting tomli>=2 (from pip-licenses==5.0.0)
+  Downloading tomli-2.4.1-cp311-cp311-win_amd64.whl.metadata (10 kB)
+Collecting wcwidth>=0.3.5 (from prettytable>=2.3.0->pip-licenses==5.0.0)
+  Downloading wcwidth-0.8.3-py3-none-any.whl.metadata (43 kB)
+Downloading pip_licenses-5.0.0-py3-none-any.whl (20 kB)
+Downloading prettytable-3.18.0-py3-none-any.whl (37 kB)
+Downloading tomli-2.4.1-cp311-cp311-win_amd64.whl (108 kB)
+Downloading wcwidth-0.8.3-py3-none-any.whl (331 kB)
+Installing collected packages: wcwidth, tomli, prettytable, pip-licenses
+
+Successfully installed pip-licenses-5.0.0 prettytable-3.18.0 tomli-2.4.1 wcwidth-0.8.3
+wrote E:\AI\projects\uoink\checkouts\Yoink-library\THIRD-PARTY-NOTICES.md (142 python packages, source: pip-licenses)
+Found existing installation: pip-licenses 5.0.0
+Uninstalling pip-licenses-5.0.0:
+  Successfully uninstalled pip-licenses-5.0.0
+Found existing installation: prettytable 3.18.0
+Uninstalling prettytable-3.18.0:
+  Successfully uninstalled prettytable-3.18.0
+Found existing installation: tomli 2.4.1
+Uninstalling tomli-2.4.1:
+  Successfully uninstalled tomli-2.4.1
+Found existing installation: wcwidth 0.8.3
+Uninstalling wcwidth-0.8.3:
+  Successfully uninstalled wcwidth-0.8.3
+==> Generating uoink.ico
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\uoink.ico (7 sizes: 16x..256x)
+    trimming embeddable...
+    verifying final dependency inventory...
+installer dependency lock verified: 142 packages
+    extracting ffmpeg...
+    copying server source + templates...
+==> Staged smoke
+smoke: Index.open OK, schema_version=30
+smoke: import server OK, version=3.8.0
+smoke: extension manifest OK, version=3.8.0
+smoke: import uoink_tray OK
+smoke: import uoink_splash + uoink_dashboard OK
+smoke: import whisperx OK
+    Staged smoke OK
+==> Generating wizard bitmaps
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-large-100.bmp (164x314, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-small-100.bmp (58x58, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-large-125.bmp (205x393, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-small-125.bmp (73x73, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-large-150.bmp (246x471, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-small-150.bmp (87x87, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-large-200.bmp (328x628, 24-bit BMP)
+  wrote E:\AI\projects\uoink\checkouts\Yoink-library\installer\assets\wizard-small-200.bmp (116x116, 24-bit BMP)
+    normalized package timestamps to 2026-09-09T17:33:36.0000000Z
+==> Compiling installer
+    using C:\Program Files (x86)\Inno Setup 6\ISCC.exe
+
+Built E:\AI\projects\uoink\checkouts\Yoink-library\build\Uoink-Setup-3.8.0.exe (323.4 MB)

@@ -1,0 +1,76 @@
+{
+  "files": {
+    "expected.json": {
+      "bytes": 46225,
+      "sha256": "5e007341ad37e08ee3997842321cabb0910b44525556cb12d589aa0b1cb60e2d"
+    },
+    "original.patch": {
+      "bytes": 354213,
+      "sha256": "cf7b03a358bb16ead95bbf8ed8df8700925dd31956fc8248aa81b57ae898740a"
+    },
+    "preparation.json": {
+      "bytes": 4346,
+      "sha256": "17434034c8cbe027487e0c8bba6c2c7634aa940a90c687488272016d3fba008e"
+    },
+    "prompt-preconditioning-calls.json": {
+      "bytes": 5874,
+      "sha256": "781c7838397af073a0a3fe6ab9b4efb14d2919b8af3dd30fa2ba710599afb1c5"
+    },
+    "source-runtime.json": {
+      "bytes": 10198,
+      "sha256": "ce7185bacadd7e84f1ba8794a7eb4fa96f01996c70ad6153cada098d28f2507d"
+    },
+    "p4-w3/results.json": {
+      "bytes": 918,
+      "sha256": "c3629442d74af3b0cfc7aed51b6074355b77218a524a02dacdc84e5c308b8899"
+    },
+    "p4-w3/tests.log": {
+      "bytes": 1594,
+      "sha256": "388600513aad9ed0811fb7eda387272b8d950f5f0a6d69407f3c2bccbc3d6082"
+    },
+    "p4-w3/tests.xml": {
+      "bytes": 6489,
+      "sha256": "36fc0e8bfde5ae3d6fe81b5e4e8d0438a6c49a657c2271cd022a0aa696c29652"
+    },
+    "p4f-kit/results.json": {
+      "bytes": 924,
+      "sha256": "c1962f6014dd8538c565f7217b0997005aad044993379c04d49e7827421d6037"
+    },
+    "p4f-kit/tests.log": {
+      "bytes": 1806,
+      "sha256": "e4e17817ea54f307e14f6c6cdf02e491b9d06165417f76481495f6b5ac2d36fe"
+    },
+    "p4f-kit/tests.xml": {
+      "bytes": 6494,
+      "sha256": "903f0cb59ecb169470d9e8e1b1be135393cc8fa4993e546cbe3ba99d460236d9"
+    },
+    "p4f-n1/results.json": {
+      "bytes": 820,
+      "sha256": "f8735486869818b9e9e612d6def3f23430cd3de84425cdba21bab6559d15cb7e"
+    },
+    "p4f-n1/tests.log": {
+      "bytes": 101,
+      "sha256": "ff4e82df017593a34f73661e99a121b100665129c768ec3264c0ad1aea3c3046"
+    },
+    "p4f-n1/tests.xml": {
+      "bytes": 2504,
+      "sha256": "3e2ca326917c070a1b0e37628a7ac281db1c8130243caa5fe6c78f59fda455a2"
+    },
+    "records/originalinstalleda-36500/events.jsonl": {
+      "bytes": 138661,
+      "sha256": "b2258b9f6c0b29283694d9c15f154d3d4fc7a206f6c23fd6aacdaeedc1a9a1ae"
+    },
+    "records/originalinstalledb-74024/events.jsonl": {
+      "bytes": 138661,
+      "sha256": "4a621c0851072356d26000e3e04131fc56e61b43b693301395783af9b4cb2d44"
+    },
+    "records/originalinstalledtransport-53936/events.jsonl": {
+      "bytes": 4305,
+      "sha256": "7659fe918e269547ea3a33a0881fa638d20ed6fe817527ea235f4808767c57f4"
+    },
+    "records/originalinstalledunavail-60216/events.jsonl": {
+      "bytes": 8158,
+      "sha256": "67b56fb3c548d70f60a025a66cefcbefe631a881c69c9064b27656625c501e86"
+    }
+  }
+}
