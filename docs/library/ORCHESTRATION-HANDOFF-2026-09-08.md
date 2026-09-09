@@ -61,7 +61,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; seven D12-D15 cases open. AV-5m2 rejected despite 210 passes: test-specific cancellation and uncancellable OS replacement | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; retained failed diff and `PHASE4-AV5M3-BRIEF-2026-09-08.md` | AV-5m3 (grok); then AW-4 (codex); then the real-client rerun. D13 fixture ruling is Ryan's; the implementation still needs repair |
 | 5 | AZ-5a3g integrated (`d437b59`), preserving AZ-5b/5c/5e/5f: BA-3 acceptance 41/52, dashboard3 7/7, fixtures 28/28. Measurements3 0/3; one stale BA-2 measurement assertion also fails | Worker and checkout each 382 passed / 15 failed; all 18 BA-01/03 and 23 earlier BA-3 cases pass | AZ-5d (grok BA-09/10/11), then AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass. BC-3a2 rejected: ticketless empty-publication exception and edited legacy tests | Original-test verification: 156 passed / five omitted-ticket failures; `PHASE6-BC3A3-BRIEF-2026-09-08.md` | BC-3a3 (grok), then BD-2 (codex). Legacy fixture setup ruling, BD-27 observation and speaker material are Ryan gates; implementation still needs repair |
+| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass. BC-3a2 rejected. BD-27 normal-Comet playback observation now satisfied | Original-test verification: 156 passed / five omitted-ticket failures; `PHASE6-BC3A3-BRIEF-2026-09-08.md`; `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md` | BC-3a3 (grok), then BD-2 (codex). Legacy fixture setup ruling and speaker material are Ryan gates; implementation still needs repair |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -93,7 +93,8 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3c is integrated; BC-3a2 is rejected. Verify BC-3a3 (grok `855b1d16`)
    from `PHASE6-BC3A3-BRIEF-2026-09-08.md`; preserve both rejected diffs and the quota failure.
-   Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
+   Then BD-2 (codex). BD-27 normal-Comet observation is recorded as satisfied;
+   the speaker gate remains Ryan's.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
    --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
    (deselect only the reproduction files that are still open by ruling, and say so).
@@ -122,8 +123,8 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   Existing tests remain unchanged; unfinished implementation remains Astra's work.
 - Phase 6: the navigation study passed numerically; the speaker gate is blocked on already-held
   diarization output plus independent human annotations for 30 passages across five items
-  (BD lists the exact requirement); the BD-27 player observation needs a network session where
-  googlevideo streams load (attempt 1 hit 503).
+  (BD lists the exact requirement). BD-27 is now observed in normal Comet with
+  retained playback, chapter-list and 0:34 screenshots; prior Chrome/503 attempts remain partial.
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
 
 ## Integrator log
@@ -278,3 +279,20 @@ request or model itself. The client rerun brief records its use and the official
 native MCP prompt syntax; neither preparation nor documentation lookup is a
 client receipt. The real observation still waits for the repaired/frozen AW-4
 candidate. No client model has run during this takeover.
+
+### 2026-09-08 17:26 PDT — BD-27 observed through Windows computer-use
+
+Correction to the earlier browser inventory: the browser connector exposes only
+the in-app browser, but a separate deferred `node_repl` tool plus the installed
+Windows computer-use skill reaches the user's normal Comet window. Read and use
+that skill's documented runtime; do not conclude all native app access is absent
+from the browser connector's inventory alone. Claude Desktop also appears in
+the Windows app inventory; no client observation of it has occurred yet.
+
+The new Comet tab loaded the supplied BD-27 URL and played at observed 0:35.
+The source description lists 00:34 Why computer use; its link played at observed
+0:36. The final still is paused at exactly displayed 0:34 after manual positioning.
+See `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md` and its sealed raw images. This
+satisfies the playback observation only and preserves both previous partial
+Chrome runs. No claim is made about subsecond physical seek accuracy or speaker
+accuracy. No capture button or resident-helper request was issued by the observer.
