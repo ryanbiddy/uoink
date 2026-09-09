@@ -53,7 +53,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review HEAD `ffdbef4`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review HEAD `986b555`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -61,7 +61,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures; AW-6 and four new identity tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | AZ-5h (`8e3e4f0`): both roots 561 passed / six retained failures; seven actual-entry cases pass | BA-5 reproduces reset domain deadline and oversized refusal. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5h2 (grok), then AZ-5g2 measured refresh (grok), final BA-4 |
-| 6 | BC-3e (`d792875`) integrated: both roots 167 passed / 11 omitted-ticket failures; BD-2, BD-3 and eight new implementation tests pass | BD-4 reproduces a changed caption overwritten at publisher entry. Phase 6 remains unaccepted; BD-27 observed | BC-3f (grok), then finish BD-2. Legacy fixture ruling and speaker material remain Ryan gates |
+| 6 | BC-3f (`986b555`) integrated: both roots 174 passed / 11 omitted-ticket failures; BD-2/3/4 and six new publisher-boundary cases pass | BD-4 repaired. Final broader BD-2 and combined transport review remain; BD-27 observed | Finish BD-2 after the shared transport repair. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -82,7 +82,7 @@ BC-3d at `897f0d2`, BC-3e at `d792875`, AV-5m4a2 at `b833167`, and
 AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
 AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
 complete/partial diffs as described below. Active at this update: BC-3f
-Grok `33751bb7` has finished and is under independent verification.
+Grok `33751bb7` integrated at `986b555`.
 AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` and AV-5m4b3 Grok `260ef22c`
 are active from `533ef6f`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
@@ -106,8 +106,8 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
    BC-3d integrated at `897f0d2`; BC-3e integrated at `d792875`.
-   Dispatch BC-3f (grok) from `PHASE6-BC3F-BRIEF-2026-09-08.md`,
-   then verify/integrate and finish BD-2 (codex). Preserve both
+   BC-3f integrated at `986b555`. Finish broader BD-2 (codex) after AZ-5h2,
+   preserving its original eleven failed fixture results. Preserve both
    rejected diffs and the quota failure.
    BD-27 normal-Comet observation is recorded as satisfied;
    the speaker gate remains Ryan's.
@@ -586,3 +586,32 @@ checkout scratch `aw8-unicode`); it found no additional defect.
 B3 must preserve `_IO_CTX.authority`, bound replace/unlink and the child
 write-error implementation while adding session lifetime and local intent
 exclusion. Phase 4 remains unaccepted until B3, AW-4 and the client rerun.
+
+### 2026-09-08 - BC-3f integrated; B3 draft intent diagnostic
+
+BC-3f Grok `33751bb7` integrated at `986b555` after clean three-way apply.
+Independent full named union: **174 passed, eleven failed** in each root,
+171.71 seconds worker and 185.87 seconds checkout. Logs/XML/commands:
+worker scratch `bc3f-wi`, checkout scratch `bc3f-ci`. BD-2/3/4 and all
+six new publisher-boundary cases pass. The frozen omitted-ticket calls
+remain failed for Ryan. The broader final BD-2 review waits for AZ-5h2's
+shared transport repair; no navigation or speaker measurement was rerun.
+
+The original consumed binding, exact sidecar path and podcast transcript
+bytes now reach the actual publisher. Checks run before publication writes
+and before the final carrier replacement. A late conflict leaves the
+sidecar and committed DB snapshot intact, although owned artifacts/corpus
+can remain in the documented interrupted state for retry. The disk reread
+is not a general filesystem lock.
+
+B3 is still active. A draft-only diagnostic at its actual parent
+`os.replace` boundary produced **one failure**, 0.29 seconds: old operation
+A replaced operation B's newer local intent after B took the generation.
+The draft source hash was
+`3a55774ffa95d194d7202890e17516bb20b831f14685c8ed1440fa58d11dc29f`.
+The source, probe, command, log and XML are retained together in checkout
+scratch `aw8-draft-retained`; worker output is in `aw8-draft-intent`.
+This is not a final B3 verdict. Its final review must close the actual
+mutation gap or leave a repair in our queue. The probe is a retained
+diagnostic of the parent syscall, not a new frozen fixture that assumes
+a future isolated child must execute that parent interceptor.
