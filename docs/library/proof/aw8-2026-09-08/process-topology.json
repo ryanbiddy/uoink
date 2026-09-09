@@ -1,0 +1,19 @@
+{
+  "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+  "session_pid": 72308,
+  "children": [
+    {
+      "ProcessId": 70836,
+      "ParentProcessId": 72308,
+      "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe",
+      "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4"
+    },
+    {
+      "ProcessId": 60848,
+      "ParentProcessId": 72308,
+      "ExecutablePath": "C:\\Python314\\python.exe",
+      "CommandLine": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe -B C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\260ef22c-4a8\\grok\\library_mirror_vault_io.py"
+    }
+  ],
+  "failed_stall": "{'pid': 72308, 'suspended': True, 'platform': 'nt', 'open_error': 0, ...}\nassert False"
+}

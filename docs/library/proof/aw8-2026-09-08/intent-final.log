@@ -1,0 +1,13 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_old_intent_replace_cannot_complete_over_new_operation __________
+_scratch\test_aw8_intent_boundary.py:37: in test_old_intent_replace_cannot_complete_over_new_operation
+    assert path.read_bytes()==b"current operation B", "Old parent replaced a newer operation's durable intent"
+E   AssertionError: Old parent replaced a newer operation's durable intent
+E   assert b'stale operation A' == b'current operation B'
+E     
+E     At index 0 diff: b's' != b'c'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw8_intent_boundary.py::test_old_intent_replace_cannot_complete_over_new_operation
+1 failed in 0.32s

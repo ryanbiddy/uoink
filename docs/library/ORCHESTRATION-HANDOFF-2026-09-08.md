@@ -53,15 +53,15 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review HEAD `45bb2f6`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review base `d1d5fb8`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures; AW-6 and four new identity tests pass. AV-5m4b2 rejected after AW-7 proves a late lease write | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b3 (grok lifecycle/exclusion), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
+| 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures. B3 rejected after 240 passed / 14 failed and AW-8's final-mutation/death diagnostics | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b4 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
 | 5 | AZ-5h2 (`45bb2f6`): both roots 570 passed / six retained failures; both BA-5 and seven new cases pass | BA-5 repaired. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5g2 measured refresh (grok), final BA-4 |
-| 6 | BC-3f (`986b555`) integrated: both roots 174 passed / 11 omitted-ticket failures; BD-2/3/4 and six new publisher-boundary cases pass | BD-4 repaired. Final broader BD-2 and combined transport review remain; BD-27 observed | Finish BD-2 after the shared transport repair. Legacy fixture ruling and speaker material remain Ryan gates |
+| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed | Current full tree; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -81,10 +81,12 @@ AV-5m3 integrated at `270e569`, BC-3a3 at `00fe216`, AZ-5d2 at `3d2fa9f`,
 BC-3d at `897f0d2`, BC-3e at `d792875`, AV-5m4a2 at `b833167`, and
 AZ-5h at `8e3e4f0`. These integrations are not Phase 4/5/6 acceptance.
 AZ-5d, AV-5m4a, AV-5m4b, AV-5m4b2 and AZ-5g are rejected with retained
-complete/partial diffs as described below. Active at this update: BC-3f
+complete/partial diffs as described below. BC-3f
 Grok `33751bb7` integrated at `986b555`.
 AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integrated at `45bb2f6`;
-AV-5m4b3 Grok `260ef22c` is active from `533ef6f`.
+AV-5m4b3 Grok `260ef22c` is rejected with its complete diff retained.
+AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is active from `d1d5fb8`
+(19:54 PDT). AV-5m4b4 is next.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -93,21 +95,22 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
    record (474 passed / one frozen failure in independent verification).
-   AZ-5h2 is integrated at `45bb2f6`. Dispatch/verify AZ-5g2 (grok) from
+   AZ-5h2 is integrated at `45bb2f6`. Verify the active AZ-5g2 (grok) from
    `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
    measurement stays retained and is not integrated.
 3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
-   rejected after AW-5/AW-7; dispatch AV-5m4b3 (grok) under
-   `PHASE4-AV5M4B3-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
+   rejected after AW-5/AW-7. B3 is rejected after AW-8; dispatch AV-5m4b4 (grok) under
+   `PHASE4-AV5M4B4-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
    BC-3d integrated at `897f0d2`; BC-3e integrated at `d792875`.
-   BC-3f integrated at `986b555`. Finish broader BD-2 (codex) after AZ-5h2,
-   preserving its original eleven failed fixture results. Preserve both
-   rejected diffs and the quota failure.
+   BC-3f integrated at `986b555`. Final BD-2 on `d1d5fb8` closes implementation
+   review, preserving eleven failed fixture results and four broader superseded-
+   evidence failures. Phase 6 is accepted subject to Ryan's fixture and speaker
+   gates. Preserve both rejected diffs and the quota failure.
    BD-27 normal-Comet observation is recorded as satisfied;
    the speaker gate remains Ryan's.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
@@ -649,3 +652,32 @@ started a bare full suite. It stopped only its own named task successfully
 and switched to explicit selectors. Its earlier correctly named union is
 separate evidence; the unintended invocation is aborted, not a full-tree
 result. Apply this setup lesson to every further worker brief.
+
+### 2026-09-08 - B3 rejected; final BD-2 disposition; G2 active
+
+B3 Grok `260ef22c` independently produced **240 passed, fourteen failed**,
+81.11 seconds (worker scratch `av5m4b3-wi`). Nine are frozen Phase 4 setup
+failures, one is AW-6 already repaired by A3, and four are unproven child-stall
+setups. Its complete final diff is retained, unapplied. AW-8 also records a
+final intent-mutation failure (0.32 seconds) and an unconfirmed-death tracking
+failure (0.31 seconds). These remain implementation work. B4's brief requires
+actual final mutation exclusion, retained uncertain-child ownership and a
+real writer-stall observation under the integrator's runtime.
+
+The Windows virtual environment can launch a redirector PID that starts a
+separate Python writer. Suspending the redirector alone does not prove that
+the writer stopped. AW-8 retains the actual process topology and all failed
+results. Its ten proof artifacts are sealed with hashes and `-text` attributes.
+Cancellation also does not establish physical death: never discard an uncertain
+child merely because a logical dead flag makes `alive` false.
+
+Final BD-2 on `d1d5fb8` closes Phase 6 implementation review subject to Ryan's
+eleven frozen omitted-ticket calls and speaker material. The broader named
+regression has **382 passed, four failed**, 61.29 seconds, with only the old
+AS-7 evidence assertions failed. Scratch `bd2-broader-final-h2-fixed` retains
+the result. The earlier launch ran no tests because the guard environment
+was absent; `BD2-FINAL-ENV-REPAIR.md` records its repair and exit propagation.
+Current full-tree verification is next. No navigation or speaker result changed.
+
+AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` started at 19:54 PDT
+from `d1d5fb8`. Its measured refresh must still be verified before integration.
