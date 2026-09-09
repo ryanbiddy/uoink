@@ -44,3 +44,28 @@ uninstall, client/model, paid API, live index or port 5179 operation is authoriz
 The branch backup is verified through daa7bb8d823fbb205bda75053b28267d202f7bfc.
 The installer bytes remain bound to build source 8a607c3; receipt tooling alone
 does not trigger a rebuild.
+
+## First supplement observation and final operator corrections
+
+ci-w1: 87 passed / two frozen failures, 932.07 s. All 26 integrator regressions
+pass; original helper observations verify exact registered-child survival,
+restart uncertainty, post-death worker_lost settlement, released ownership and
+the reusable OS capture lock. Both unresolved-launch cases retain their claim
+and charge across an actual helper restart. Full commands/snapshots and guard
+events are sealed at `proof/ryan-c22-supplement-01-2026-09-09/SHA256.json`.
+
+The original fourth provenance ran before its own guard. The supplement now
+establishes and proves the target guard before original imports, checks all
+142 compiler bindings for a bundled app, records the MCP distribution version,
+forbids provenance descendants and bounds its owned process to 60 seconds.
+Runtime guard events retain process/network attempts and synthetic transcript
+calls. A blocked forbidden attempt cannot count as zero attempts.
+
+Five additional pure operator negatives (ce-n1) fail, 0.24 s: failed scenario
+exit status, browser continuation omitting app/package/profile revalidation,
+JSON boolean/integer equivalence in settings/default checks, and accepting an
+unaffirmed helper stop. Correct those bounded tool paths, without changing the
+six existing test files or product code, then run the six-file union in worker
+and checkout. Browser continuation also checks the installed compiler bindings
+again before its original helper starts. Keep absent images unobserved and
+retained images pending review.

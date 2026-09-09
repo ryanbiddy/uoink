@@ -1,0 +1,13 @@
+{"event": "guard_loaded", "pid": 62960, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\empty", "injection": ""}
+{"event": "guard_loaded", "pid": 74200, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 74200, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 74200, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 74200, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "guard_loaded", "pid": 77460, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 77460, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 77460, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 77460, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "guard_loaded", "pid": 72764, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 72764, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 72764, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 72764, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}

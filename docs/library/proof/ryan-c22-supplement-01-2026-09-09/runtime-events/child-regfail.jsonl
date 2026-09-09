@@ -1,0 +1,12 @@
+{"event": "guard_loaded", "pid": 70516, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 70516, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 70516, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 70516, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 70516, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51402)"}
+{"event": "network_attempt", "pid": 70516, "operation": "socket.connect", "address": "('127.0.0.1', 51402)"}
+{"event": "subprocess_attempt", "pid": 70516, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe -B -c \"import time; time.sleep(8)\""}
+{"event": "guard_loaded", "pid": 65144, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "guard_loaded", "pid": 62436, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 62436, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 62436, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 62436, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}

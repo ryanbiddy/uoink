@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-regfail",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-regfail",
+    "--isolated-port",
+    "51401"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed",
+  "started_utc": "2026-09-09T19:26:41Z",
+  "child": {
+    "pid": 70516,
+    "created_ms": 1788982001210,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1788982001213,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 70516,
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\commands\\20260909T192641Z-helper-child-regfail.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\commands\\20260909T192641Z-helper-child-regfail.stderr.log",
+  "synthetic": true
+}

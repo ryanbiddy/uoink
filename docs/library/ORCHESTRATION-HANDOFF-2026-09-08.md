@@ -1957,3 +1957,21 @@ daa7bb8d823fbb205bda75053b28267d202f7bfc, independently confirmed with ls-remote
 No candidate branch/main push or publication. Installer d024baf5 remains unchanged.
 
 Archive assembly initially stopped because the final test has no source_runtime.json. Commit 622e315 preserves that partial archive; the completed seal selects each retained registered-child outcome and includes both raw source observations. No scenario was rerun or relabeled.
+
+### 2026-09-09 — first integrator C22 supplement
+
+ci-w1 independently records 87 passed / two failed, 932.07 s. Its 26 added
+regressions pass. The original final source observation now records three exact
+helper incarnations, registered child survival/death, unchanged one charge,
+worker_lost settlement, released claims/children and an acquired/released OS
+capture lock. Launch interruption and registration failure each preserve
+unresolved ownership across an actual helper restart. The package is unchanged.
+Five later operator negatives fail under ce-n1 and have bounded corrections in
+the supplement brief; six-file worker/checkout verification is still owed.
+Seal: `proof/ryan-c22-supplement-01-2026-09-09/SHA256.json`.
+
+The runbook draft now includes exact install/reinstall commands and targeted
+registry/shortcut effects, secret-free subscription sign-in and receipt return.
+Its eight PowerShell blocks parse without execution. The first extraction used
+the wrong text encoding and the next assumed seven blocks; both preparation
+errors were corrected before the eight-block parse. No installer was run.

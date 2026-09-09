@@ -1,0 +1,389 @@
+{
+  "id": "installed_provenance",
+  "status": "fail",
+  "inventory": {
+    "installed_app": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed",
+    "interpreter": null,
+    "files": {
+      "server.py": {
+        "present": true,
+        "sha256": "b5ef486b6354f0bcd9ad6ae961909dd5a8dbc82aa15147348601dfb52bf7ca66",
+        "bytes": 808627
+      },
+      "source_subscriptions.py": {
+        "present": true,
+        "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7",
+        "bytes": 250605
+      },
+      "index.py": {
+        "present": true,
+        "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395",
+        "bytes": 112774
+      },
+      "uoink_mcp.py": {
+        "present": true,
+        "sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+        "bytes": 53340
+      },
+      "uoink_install_isolation.py": {
+        "present": true,
+        "sha256": "1b9337040b2ea954b0e2fb8ff6db4554db3dd313ffc808f7362cbc50ebaeb9a3",
+        "bytes": 48563
+      },
+      "migrations/0028_source_subscriptions.sql": {
+        "present": true,
+        "sha256": "b74e8fb3f23d9f6e049cfbd3d2e6974b020eed93aa8507bdeb36785909591e47",
+        "bytes": 10027
+      },
+      "migrations/0030_media_depth.sql": {
+        "present": true,
+        "sha256": "54ed1be45f0a2017c36af17ada563486f2238b8154992b77e7c09c418d108bd4",
+        "bytes": 4310
+      },
+      "VERSION": {
+        "present": true,
+        "sha256": "af88cc86a71fca3a89139c024a168b0919360213f5fe9e34472d68ccfb98e26c",
+        "bytes": 7
+      },
+      "isolated-install.json": {
+        "present": true,
+        "sha256": "ccf90c4db4cef9d5666d5b0cc482ba93e77280a73be1cdc0a24b1adb83870af8",
+        "bytes": 375
+      }
+    },
+    "note": "module __file__ provenance requires the running installed child"
+  },
+  "provenance": {
+    "name": "bundled-provenance",
+    "argv": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-s",
+      "-c",
+      "import hashlib, importlib, importlib.metadata, json, pathlib, sys, sysconfig\nrequired = ('server','source_subscriptions','index','uoink_mcp','source_manifest','podcasts','library_work')\nmodules = {}\nerrors = []\nfor name in required:\n    try:\n        mod = importlib.import_module(name)\n        path = pathlib.Path(getattr(mod, '__file__', '') or '')\n        resolved = str(path.resolve()) if path else None\n        digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None\n        modules[name] = {'ok': True, 'file': resolved, 'sha256': digest}\n    except Exception as exc:\n        errors.append({'module': name, 'type': type(exc).__name__, 'message': str(exc)})\n        modules[name] = {'ok': False, 'error': type(exc).__name__}\nmcp_version = None\ntry:\n    import mcp\n    mcp_version = importlib.metadata.version('mcp')\nexcept Exception as exc:\n    errors.append({'module': 'mcp', 'type': type(exc).__name__, 'message': str(exc)})\nusersite = ''\ntry:\n    usersite = sysconfig.get_path('purelib', scheme='nt_user') if sys.platform=='win32' else ''\nexcept Exception:\n    usersite = ''\nreport = {\n    'schema': 'c22-provenance-v1',\n    'executable': str(pathlib.Path(sys.executable).resolve()),\n    'version': sys.version.split()[0],\n    'nousersite': bool(sys.flags.no_user_site),\n    'prefix': sys.prefix,\n    'path': [str(p) for p in sys.path],\n    'usersite_scheme': usersite,\n    'usersite_on_path': bool(usersite and any(str(p).lower().startswith(str(usersite).lower()) for p in sys.path)),\n    'modules': modules,\n    'mcp_version': mcp_version,\n    'import_errors': errors,\n}\nprint(json.dumps(report))\nraise SystemExit(0 if not errors else 2)\n"
+    ],
+    "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed",
+    "started_utc": "2026-09-09T19:24:06Z",
+    "child": {
+      "pid": 62960,
+      "created_ms": 1788981846506,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1788981846507,
+      "from_popen": true,
+      "poll": null
+    },
+    "pid": 62960,
+    "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\commands\\20260909T192406Z-bundled-provenance.stdout.log",
+    "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\commands\\20260909T192406Z-bundled-provenance.stderr.log",
+    "synthetic": true,
+    "exit": 2,
+    "_stop_result": {
+      "identity": {
+        "pid": 62960,
+        "created_ms": 1788981846506,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1788981846507,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": null,
+      "token_present": false,
+      "exit": 2,
+      "stopped": true,
+      "port_freed": true,
+      "opened_live_index": false,
+      "hashed_live_index": false
+    },
+    "cleanup": {
+      "identity": {
+        "pid": 62960,
+        "created_ms": 1788981846506,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1788981846507,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": null,
+      "token_present": false,
+      "exit": 2,
+      "stopped": true,
+      "port_freed": true,
+      "opened_live_index": false,
+      "hashed_live_index": false
+    },
+    "structured": {
+      "schema": "c22-provenance-v1",
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "version": "3.14.6",
+      "nousersite": true,
+      "prefix": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native",
+      "path": [
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed",
+        "",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\injection",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python314.zip",
+        "C:\\Python314\\DLLs",
+        "C:\\Python314\\Lib",
+        "C:\\Python314",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Lib\\site-packages",
+        "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages",
+        "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32",
+        "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib",
+        "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-full-as9\\guard",
+        "C:\\Python314\\Lib\\site-packages"
+      ],
+      "usersite_scheme": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\ci-w1\\Python\\Python314\\site-packages",
+      "usersite_on_path": false,
+      "modules": {
+        "server": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\server.py",
+          "sha256": "b5ef486b6354f0bcd9ad6ae961909dd5a8dbc82aa15147348601dfb52bf7ca66"
+        },
+        "source_subscriptions": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\source_subscriptions.py",
+          "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7"
+        },
+        "index": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\index.py",
+          "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395"
+        },
+        "uoink_mcp": {
+          "ok": false,
+          "error": "TypeError"
+        },
+        "source_manifest": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\source_manifest.py",
+          "sha256": "0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4"
+        },
+        "podcasts": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\podcasts.py",
+          "sha256": "628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0"
+        },
+        "library_work": {
+          "ok": true,
+          "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\library_work.py",
+          "sha256": "050a8f6eb3a65638f8ae7ebc283f3ab8d0a0a6bde5f79325dc4f34ced633ab8a"
+        }
+      },
+      "mcp_version": null,
+      "import_errors": [
+        {
+          "module": "uoink_mcp",
+          "type": "TypeError",
+          "message": "function() argument 'code' must be code, not str"
+        },
+        {
+          "module": "mcp",
+          "type": "NameError",
+          "message": "name 'base_events' is not defined"
+        }
+      ]
+    },
+    "source_bindings": null,
+    "structured_ok": false,
+    "exit_nonzero_on_import_error": true
+  },
+  "provenance_json": {
+    "schema": "c22-provenance-v1",
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "version": "3.14.6",
+    "nousersite": true,
+    "prefix": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native",
+    "path": [
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed",
+      "",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\injection",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python314.zip",
+      "C:\\Python314\\DLLs",
+      "C:\\Python314\\Lib",
+      "C:\\Python314",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Lib\\site-packages",
+      "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages",
+      "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32",
+      "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib",
+      "C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-full-as9\\guard",
+      "C:\\Python314\\Lib\\site-packages"
+    ],
+    "usersite_scheme": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\ci-w1\\Python\\Python314\\site-packages",
+    "usersite_on_path": false,
+    "modules": {
+      "server": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\server.py",
+        "sha256": "b5ef486b6354f0bcd9ad6ae961909dd5a8dbc82aa15147348601dfb52bf7ca66"
+      },
+      "source_subscriptions": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\source_subscriptions.py",
+        "sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7"
+      },
+      "index": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\index.py",
+        "sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395"
+      },
+      "uoink_mcp": {
+        "ok": false,
+        "error": "TypeError"
+      },
+      "source_manifest": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\source_manifest.py",
+        "sha256": "0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4"
+      },
+      "podcasts": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\podcasts.py",
+        "sha256": "628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0"
+      },
+      "library_work": {
+        "ok": true,
+        "file": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\Uoink Installed\\library_work.py",
+        "sha256": "050a8f6eb3a65638f8ae7ebc283f3ab8d0a0a6bde5f79325dc4f34ced633ab8a"
+      }
+    },
+    "mcp_version": null,
+    "import_errors": [
+      {
+        "module": "uoink_mcp",
+        "type": "TypeError",
+        "message": "function() argument 'code' must be code, not str"
+      },
+      {
+        "module": "mcp",
+        "type": "NameError",
+        "message": "name 'base_events' is not defined"
+      }
+    ]
+  },
+  "location": {
+    "import_ok": false,
+    "inside_app": true,
+    "checkout_fallback": false,
+    "usersite_on_path": false,
+    "outside": [],
+    "checkout_hits": [],
+    "missing_modules": [],
+    "ok": false
+  },
+  "sealed_candidate": {
+    "installer_source_sha": "8a607c37095cb4f3b66d2aee285cfb710ab5e586",
+    "package_sha256": "d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1",
+    "package_bytes": 339059131,
+    "invented": false,
+    "schema": "candidate-package-02"
+  },
+  "installed_credit": false,
+  "source_runtime": true,
+  "provenance_stdout": "{\"schema\": \"c22-provenance-v1\", \"executable\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-native\\\\Scripts\\\\python.exe\", \"version\": \"3.14.6\", \"nousersite\": true, \"prefix\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-native\", \"path\": [\"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\6a890eee-616\\\\grok\\\\_scratch\\\\c22-f\\\\f-pcwog2gm\\\\Uoink Installed\", \"\", \"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\6a890eee-616\\\\grok\\\\_scratch\\\\c22-f\\\\f-pcwog2gm\\\\receipt\\\\injection\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-native\\\\Scripts\\\\python314.zip\", \"C:\\\\Python314\\\\DLLs\", \"C:\\\\Python314\\\\Lib\", \"C:\\\\Python314\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-native\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-native\\\\Lib\\\\site-packages\", \"C:\\\\Users\\\\hello\\\\AppData\\\\Roaming\\\\Python\\\\Python314\\\\site-packages\", \"C:\\\\Users\\\\hello\\\\AppData\\\\Roaming\\\\Python\\\\Python314\\\\site-packages\\\\win32\", \"C:\\\\Users\\\\hello\\\\AppData\\\\Roaming\\\\Python\\\\Python314\\\\site-packages\\\\win32\\\\lib\", \"C:\\\\Users\\\\hello\\\\AppData\\\\Roaming\\\\Python\\\\Python314\\\\site-packages\\\\pythonwin\", \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\ig-full-as9\\\\guard\", \"C:\\\\Python314\\\\Lib\\\\site-packages\"], \"usersite_scheme\": \"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\6a890eee-616\\\\grok\\\\_scratch\\\\ci-w1\\\\Python\\\\Python314\\\\site-packages\", \"usersite_on_path\": false, \"modules\": {\"server\": {\"ok\": true, \"file\": \"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\6a890eee-616\\\\grok\\\\_scratch\\\\c22-f\\\\f-pcwog2gm\\\\Uoink Installed\\\\server.py\", \"sha256\": \"b5ef486b6354f0bcd9ad6ae961909dd5a8dbc82aa15147348601dfb52bf7ca66\"}, \"source_subscriptions\": {\"ok\": true, \"file\": \"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\6a890eee-616\\\\grok\\\\_scratch\\\\c22-f\\\\f-pcwog2gm\\\\Uoink Inst",
+  "child_report": {
+    "health": {
+      "ok": true,
+      "version": "3.8.0",
+      "migration_version": 30,
+      "migration_pending": false,
+      "last_successful_tick_at": "2026-09-09T19:24:09Z",
+      "heartbeat": {
+        "last_tick_completed_at": "2026-09-09T19:24:09Z",
+        "last_successful_tick_at": "2026-09-09T19:24:09Z",
+        "last_successful_poll_at": null,
+        "last_failed_poll_at": null,
+        "last_poll_error": null,
+        "last_ingest_completed_at": null,
+        "last_tick": {
+          "ok": true,
+          "polls": 0,
+          "failed_polls": 0
+        },
+        "counts": {
+          "ticks": 1,
+          "polls_ok": 0,
+          "polls_failed": 0,
+          "ingests": 0
+        },
+        "tick_interval_sec": 30,
+        "freshness": {
+          "state": "fresh",
+          "age_sec": 0.0,
+          "stale_after_sec": 300
+        }
+      },
+      "whisperx_available": true,
+      "whisper_model": "base",
+      "whisperx_model_loaded": true,
+      "index_recovering": false,
+      "output_root_fallback": false,
+      "path_integrity": {
+        "ok": true,
+        "checked": 0,
+        "missing": 0
+      },
+      "library": {
+        "status": "idle",
+        "waiting_for_client": false,
+        "ready": 0,
+        "leased": 0,
+        "run_revision": null,
+        "recovery_state": "ready",
+        "error_code": null,
+        "apply_enabled": false,
+        "contract_version": "phase2-v1-2026-09-04"
+      },
+      "_http_status": 200
+    },
+    "identity": {
+      "pid": 74200,
+      "created_ms": 1788981848067,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1788981848071,
+      "from_popen": true,
+      "poll": null
+    },
+    "helper_stop": {
+      "identity": {
+        "pid": 74200,
+        "created_ms": 1788981848067,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1788981848071,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": {
+        "status": 200,
+        "body": "{\"ok\": true, \"stopping\": true}"
+      },
+      "token_present": true,
+      "exit": 0,
+      "stopped": true,
+      "port_freed": true,
+      "opened_live_index": false,
+      "hashed_live_index": false,
+      "live_index_forbidden": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+        "opened": false,
+        "hashed": false,
+        "exists_probed": false,
+        "mtime_ns": null,
+        "sha256": null,
+        "bytes": null,
+        "note": "forbidden live index path recorded as a string only"
+      }
+    }
+  },
+  "schema": {
+    "expected": 30,
+    "actual": 30,
+    "ok": true
+  },
+  "health_migration_version": 30,
+  "reason": "required import failed; ERROR lines are not installed credit"
+}

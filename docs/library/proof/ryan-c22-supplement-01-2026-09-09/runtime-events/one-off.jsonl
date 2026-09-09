@@ -1,0 +1,7 @@
+{"event": "guard_loaded", "pid": 48788, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\one-off", "injection": ""}
+{"event": "network_attempt", "pid": 48788, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 48788, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 48788, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 48788, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51402)"}
+{"event": "network_attempt", "pid": 48788, "operation": "socket.connect", "address": "('127.0.0.1', 51402)"}
+{"event": "synthetic_transcript", "pid": 48788, "model_invoked": false}

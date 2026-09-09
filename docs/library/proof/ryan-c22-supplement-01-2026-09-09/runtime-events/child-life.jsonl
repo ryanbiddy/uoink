@@ -1,0 +1,16 @@
+{"event": "guard_loaded", "pid": 72812, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 72812, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 72812, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 72812, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 72812, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51402)"}
+{"event": "network_attempt", "pid": 72812, "operation": "socket.connect", "address": "('127.0.0.1', 51402)"}
+{"event": "subprocess_attempt", "pid": 72812, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe -B -c \"import time; time.sleep(8)\""}
+{"event": "guard_loaded", "pid": 77056, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "guard_loaded", "pid": 77504, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 77504, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 77504, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 77504, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}
+{"event": "guard_loaded", "pid": 50372, "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\profiles\\child-life", "injection": "spawn_child"}
+{"event": "network_attempt", "pid": 50372, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 50372, "operation": "socket.connect", "address": "('127.0.0.1', 51401)"}
+{"event": "network_attempt", "pid": 50372, "operation": "socket.bind", "address": "('127.0.0.1', 51401)"}

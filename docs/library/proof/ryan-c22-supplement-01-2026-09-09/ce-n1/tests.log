@@ -1,0 +1,43 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+________________ test_failed_scenario_produces_failed_cli_exit ________________
+tests\test_install_receipt_c22_operator_edges.py:31: in test_failed_scenario_produces_failed_cli_exit
+    assert result == 1
+E   assert 0 == 1
+---------------------------- Captured stdout call -----------------------------
+{
+  "receipt_root": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\ce-n1-0\\t0",
+  "verdict": {
+    "installed_pass_claimed": false,
+    "counts": {
+      "fail": 1
+    }
+  }
+}
+______ test_browser_continue_revalidates_actual_app_package_and_profile _______
+tests\test_install_receipt_c22_operator_edges.py:47: in test_browser_continue_revalidates_actual_app_package_and_profile
+    assert captured.get("installed_app_path") == inputs["installed_app"]["path"]
+E   AssertionError: assert None == 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\ce-n1-0\\t1\\app'
+E    +  where None = <built-in method get of dict object at 0x0000027CAC260F00>('installed_app_path')
+E    +    where <built-in method get of dict object at 0x0000027CAC260F00> = {'receipt_root': WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6a890eee-616/grok/_scratch/ce-n1-0/t1'), 'synthetic': False, 'require_space': True, 'require_bundled_python': True}.get
+_____________ test_settings_preservation_distinguishes_json_types _____________
+tests\test_install_receipt_c22_operator_edges.py:57: in test_settings_preservation_distinguishes_json_types
+    assert settings_and_pins_unchanged(before, after)["ok"] is False
+E   assert True is False
+____________ test_schema_default_does_not_treat_boolean_as_integer ____________
+tests\test_install_receipt_c22_operator_edges.py:62: in test_schema_default_does_not_treat_boolean_as_integer
+    assert library_meta_matches_schema_default(row) is False
+E   AssertionError: assert True is False
+E    +  where True = library_meta_matches_schema_default({'singleton': True, 'projection_revision': 0, 'active_version_id': None, 'last_operation_sequence': 0, ...})
+________________ test_helper_wrapper_requires_affirmed_cleanup ________________
+tests\test_install_receipt_c22_operator_edges.py:77: in test_helper_wrapper_requires_affirmed_cleanup
+    with pytest.raises(C22ValidationError, match="cleanup|stop"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE C22ValidationError
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_operator_edges.py::test_failed_scenario_produces_failed_cli_exit
+FAILED tests/test_install_receipt_c22_operator_edges.py::test_browser_continue_revalidates_actual_app_package_and_profile
+FAILED tests/test_install_receipt_c22_operator_edges.py::test_settings_preservation_distinguishes_json_types
+FAILED tests/test_install_receipt_c22_operator_edges.py::test_schema_default_does_not_treat_boolean_as_integer
+FAILED tests/test_install_receipt_c22_operator_edges.py::test_helper_wrapper_requires_affirmed_cleanup
+5 failed in 0.24s

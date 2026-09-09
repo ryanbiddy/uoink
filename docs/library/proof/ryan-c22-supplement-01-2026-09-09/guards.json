@@ -1,0 +1,57 @@
+{
+  "sitecustomize": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\injection\\sitecustomize.py",
+    "sha256": "adb0d0f894787b5442305c049c87f8108a3708a7966f05d44dabc710651524b4",
+    "bytes": 14043
+  },
+  "bundled": null,
+  "canary_proof": {
+    "canary": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6a890eee-616\\grok\\_scratch\\c22-f\\f-pcwog2gm\\receipt\\guard-canary\\index.canary",
+    "rejected": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "automatic_sitecustomize": true,
+    "explicit_exec": false,
+    "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "pth": null,
+    "stdout": "CANARY_REJECTED\nC22 guard: live index forbidden\n"
+  },
+  "forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "guard_original": null,
+  "pth": {
+    "path": null,
+    "present": false,
+    "import_site_active": null,
+    "bytes": null,
+    "sha256": null,
+    "note": "no python._pth; non-embeddable interpreter uses default site"
+  },
+  "target_interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+  "env_keys": [
+    "C22_ALLOWED_PORTS",
+    "C22_EVENTS_PATH",
+    "C22_FIXTURE_LOOPBACK",
+    "C22_FORBIDDEN_LIVE",
+    "C22_INJECT",
+    "C22_ISOLATED_PROFILE",
+    "C22_SLEEPER_SECONDS",
+    "C22_SYNTHETIC",
+    "C22_SYNTHETIC_AUDIO_PATH",
+    "C22_SYNTHETIC_HOST",
+    "C22_SYNTHETIC_TRANSCRIPT_PATH",
+    "IG_FORBIDDEN_LIVE",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONNOUSERSITE",
+    "PYTHONPATH",
+    "PYTHONUTF8",
+    "librarian_apply_enabled"
+  ],
+  "allowed_ports": [
+    51401,
+    51402
+  ],
+  "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "c22_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+}

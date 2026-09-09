@@ -1,0 +1,59 @@
+2026-09-09 12:24:24,858 INFO install migration: skipped_isolated_install
+2026-09-09 12:24:24,869 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 12:24:24,872 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 12:24:24,874 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 12:24:24,875 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 12:24:24,877 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 12:24:24,878 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 12:24:24,880 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 12:24:24,881 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 12:24:24,883 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 12:24:24,884 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 12:24:24,886 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 12:24:24,887 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 12:24:24,890 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 12:24:24,891 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 12:24:24,893 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 12:24:24,894 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 12:24:24,896 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 12:24:24,897 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 12:24:24,899 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 12:24:24,900 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 12:24:24,902 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 12:24:24,903 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 12:24:24,906 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 12:24:24,908 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 12:24:24,910 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 12:24:24,911 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 12:24:24,912 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 12:24:24,915 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 12:24:24,917 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 12:24:24,929 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 12:24:24,931 INFO seeded 5 default style anchors
+2026-09-09 12:24:24,931 INFO default style anchors: seeded 5 on first run
+2026-09-09 12:24:24,931 INFO Restored 0 job record(s) from the library index
+2026-09-09 12:24:24,934 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 12:24:24,945 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 12:24:24,945 ERROR standing capture pass crashed
+Traceback (most recent call last):
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\Uoink Installed\server.py", line 8982, in _podcast_feed_scheduler_tick
+    _standing_capture_pass()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\Uoink Installed\server.py", line 8796, in _standing_capture_pass
+    outcomes = _source_service().capture_pass(limit=1)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\Uoink Installed\source_subscriptions.py", line 3397, in capture_pass
+    with self.store.read() as conn:
+         ~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\Uoink Installed\source_subscriptions.py", line 2013, in read
+    self.conn.execute("BEGIN")
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^
+sqlite3.OperationalError: cannot start a transaction within a transaction
+2026-09-09 12:24:24,969 INFO Uoink server v3.8.0 running on http://127.0.0.1:51401
+2026-09-09 12:24:24,971 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 12:24:24,971 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\receipt\profiles\manual-first\output
+2026-09-09 12:24:24,971 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\6a890eee-616\grok\_scratch\c22-f\f-pcwog2gm\receipt\profiles\manual-first\server.log
+2026-09-09 12:24:25,211 INFO desktop notification queued: notifications disabled
+2026-09-09 12:24:25,277 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 12:24:25,517 INFO desktop notification queued: notifications disabled
