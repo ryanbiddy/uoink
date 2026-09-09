@@ -25,12 +25,28 @@ from p4_common import (
     record_product_finding,
     sha_bytes,
     sha_file,
+    save_json_exclusive,
     write_guard,
 )
 
 UNOBSERVED = "unobserved"
 PASSED = "passed"
 FAILED = "failed"
+
+
+def deletion_evidence_ok(evidence: dict) -> bool:
+    """Require concrete deletion bytes, owned-path absence and accounted residuals."""
+    return bool(
+        evidence.get("soft_delete_committed") is True
+        and evidence.get("content_free_tombstone") is True
+        and evidence.get("purge_committed") is True
+        and evidence.get("owned_paths")
+        and all(row.get("absent") is True for row in evidence["owned_paths"])
+        and evidence.get("unaccounted_pending_keys") == []
+        and evidence.get("remaining_temp_paths") == []
+        and evidence.get("user_edit_preserved") is True
+        and evidence.get("unmanaged_preserved") is True
+    )
 
 
 def _bind_before_import(profile: Path, app: Path, port: int) -> None:
@@ -232,7 +248,48 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
         after_edit = edit_target.read_bytes()
         preserved = after_edit == edited
         unmanaged_after = unmanaged.read_bytes() if unmanaged.is_file() else b""
-        deletion = reconnected.tombstone("p4fx-timed-01")
+        item_id = "p4fx-timed-01"
+        ledger_before = reconnected._load_ledger()
+        before_item = idx.get_yoink(item_id)
+        item_entry = ledger_before["entries"]["item:" + item_id]
+        item_path = vault / "Uoink" / item_entry["relpath"]
+        owned_paths = [row["relpath"] for row in ledger_before["entries"].values()
+                       if row.get("identity") == item_id or item_id in row.get("dependencies", [])]
+        deleted = idx.soft_delete_yoink(item_id)
+        deletion = reconnected.tombstone(item_id)
+        tombstone = item_path.read_bytes() if item_path.is_file() else b""
+        content_free = b"deleted: true" in tombstone.lower()
+        for text in (before_item.get("title"), before_item.get("url")):
+            if text and text.encode("utf8") in tombstone:
+                content_free = False
+        idx.delete_yoink(item_id)
+        purged = reconnected.purge(item_id)
+        ledger_after = reconnected._load_ledger()
+        intents_after = reconnected._load_intents()
+        pending = [key for key, entry in ledger_after["entries"].items()
+                   if entry.get("pending_action", "none") != "none"
+                   and not (key == "index:Library.md" and entry.get("status") == "user_edit_conflict")]
+        temp_paths = []
+        for intent in intents_after.values():
+            for temp in intent.get("pending_temps", []):
+                candidate = vault / "Uoink" / temp["rel"]
+                if candidate.is_file():temp_paths.append(str(candidate))
+        evidence = {
+            "generator_version": "p4-mirror-real-delete-v2",
+            "soft_delete_committed": bool(deleted and deleted.get("deleted_at")),
+            "content_free_tombstone": content_free,
+            "tombstone_bytes": tombstone.decode("utf8", "replace"),
+            "tombstone_sha256": sha_bytes(tombstone),
+            "purge_committed": idx.get_yoink(item_id) is None and purged.get("ok") is True,
+            "owned_paths": [{"relpath": rel, "absent": not (vault / "Uoink" / rel).exists()} for rel in owned_paths],
+            "ledger_before": ledger_before, "ledger_after": ledger_after,
+            "intents_after": intents_after,
+            "unaccounted_pending_keys": pending,
+            "remaining_temp_paths": temp_paths,
+            "user_edit_preserved": edit_target.read_bytes() == edited,
+            "unmanaged_preserved": unmanaged.read_bytes() == unmanaged_before,
+        }
+        save_json_exclusive(profile / "mirror-execution-v2.json", evidence)
         status_after = reconnected.status()
         accounted = {
             "owned": status_after.get("synced"),
@@ -243,7 +300,7 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
         }
         checkpoints.append({
             "name": "mirror_disconnect_reconnect",
-            "status": PASSED if dest_unavailable else FAILED,
+            "status": PASSED if dest_unavailable and up.get("ok") is True and first.get("ok") is True else FAILED,
             "disconnected": dest_unavailable,
             "reconnected": up.get("ok") is not False,
             "pending_after_disconnect": down.get("pending"),
@@ -263,8 +320,9 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
         })
         checkpoints.append({
             "name": "deletion_cleanup",
-            "status": PASSED if all(k in accounted for k in ("owned", "temp", "pending", "conflict")) else FAILED,
+            "status": PASSED if deletion_evidence_ok(evidence) else FAILED,
             "accounted": accounted,
+            "exact_evidence": evidence,
             "tombstone": {k: deletion.get(k) for k in ("ok", "code") if isinstance(deletion, dict)},
             "fixture_only": True,
             "operator_boolean_used": False,

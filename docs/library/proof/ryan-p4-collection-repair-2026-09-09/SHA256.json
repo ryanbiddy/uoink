@@ -1,0 +1,45 @@
+{
+  "scope": "P4 collection repair exact patch and both-root 68 passed / one frozen failure",
+  "files": {
+    "integrated.patch": {
+      "bytes": 10606,
+      "sha256": "c21c956e0f3f6d9d9f3be508c34b80f151afafa68c53c222f84003a7342c1aef"
+    },
+    "pc-c1/results.json": {
+      "bytes": 945,
+      "sha256": "12079f0e52c82ccc3222edfd983e77cb60ecf1f9e91200b2526675205f3025cf"
+    },
+    "pc-c1/tests.log": {
+      "bytes": 1548,
+      "sha256": "0e2bc6a8b8222f63725902030ce35ff8743973832967b471a65dc63a5b82135a"
+    },
+    "pc-c1/tests.xml": {
+      "bytes": 11128,
+      "sha256": "1e93a904365983612a4ac4668890644c0370c2083376fb57e2c9b8912b0b84c5"
+    },
+    "pc-w1/results.json": {
+      "bytes": 1086,
+      "sha256": "f24f8cddc6ae36424e74436ea033741c925ce0e46829a92c1670087d8b135871"
+    },
+    "pc-w1/tests.log": {
+      "bytes": 1595,
+      "sha256": "7888b0dab267f7e7c1d5ce7dd2de7fb9598668506499eb5c49642da3331056e8"
+    },
+    "pc-w1/tests.xml": {
+      "bytes": 11222,
+      "sha256": "2e825037b8d65defa7b965932e2a9704451b6f38b2a2dc4b7b531c23a24799f0"
+    },
+    "pc-w2/results.json": {
+      "bytes": 1086,
+      "sha256": "76f70f177319c90d38819233d0c6437214685568597a2a8f32d4ea0dcf66c767"
+    },
+    "pc-w2/tests.log": {
+      "bytes": 1595,
+      "sha256": "08b4810c73b735e0205f692db1945a1b449f989b7ce407f0a9c355bd487dc41b"
+    },
+    "pc-w2/tests.xml": {
+      "bytes": 11222,
+      "sha256": "8172971e970b274e3c4d28e172ac1856a035c1b946e446a5216d3fca80739ae4"
+    }
+  }
+}

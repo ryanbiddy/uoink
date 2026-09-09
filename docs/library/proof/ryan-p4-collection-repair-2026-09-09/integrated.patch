@@ -1,0 +1,208 @@
+diff --git a/scripts/install_receipt/p4_collect_evidence.py b/scripts/install_receipt/p4_collect_evidence.py
+index b5f3416484b4b4379fdacd6173dd82702c211c53..0ef85be3e2925d620d867fdca3efb5b1afec8936 100644
+--- a/scripts/install_receipt/p4_collect_evidence.py
++++ b/scripts/install_receipt/p4_collect_evidence.py
+@@ -10,6 +10,7 @@ import argparse
+ from datetime import datetime, timezone
+ import json
+ import os
++import re
+ from pathlib import Path
+ import sys
+ 
+@@ -79,6 +80,17 @@ def _load_operator(path: Path | None) -> dict:
+     return json.loads(path.read_text(encoding="utf-8"))
+ 
+ 
++def packet_scenario_records(records: list[Path]) -> tuple[list[Path], list[Path]]:
++    """Purpose is fixed by the driver name, never inferred from pass/fail data."""
++    full, negative = [], []
++    for path in records:
++        if re.fullmatch(r"originalinstalled(?:transport|unavail)-\d+", path.parent.name):
++            negative.append(path)
++        else:
++            full.append(path)
++    return full, negative
++
++
+ def operator_sequence(binding: dict) -> dict:
+     """Argument arrays preserve spaces; a missing binding never becomes a command."""
+     profile = Path(binding["isolated_profile"])
+@@ -117,6 +129,8 @@ def operator_sequence(binding: dict) -> dict:
+         {"stage": stage, "args_after_system_python_I_S": [str(kit / "p4_operator.py"), stage, *common]}
+         for stage in ("prepare", "check", "prepare-client", "collect")
+     ]
++    if commands:
++        commands[-1]["args_after_system_python_I_S"].extend(["--operator-json", str(profile / "operator.json")])
+     return {
+         "commands": commands, "missing_inputs": missing,
+         "refused_missing_inputs": bool(missing),
+@@ -160,12 +174,14 @@ def collect(binding: dict, operator: dict) -> dict:
+         if "originalinstalled" in path.parent.name.replace("-", "").lower()
+         or "original-installed" in str(path)
+     ]
++    original_records, negative_records = packet_scenario_records(original_records)
+     inspection = None
+     if original_records:
+         inspection = inspect(expected, original_records, required_route="original-installed")
+         add("protocol_packets", PASSED if inspection["packet_and_prompt_subset_complete"] else FAILED,
+             packet_and_prompt_subset_complete=inspection["packet_and_prompt_subset_complete"],
+-            original_sessions=inspection.get("session_reports"), source="original-installed")
++            original_sessions=inspection.get("session_reports"), source="original-installed",
++            separately_measured_failure_scenarios=[str(path) for path in negative_records])
+     elif records:
+         inspection = inspect(expected, records)
+         add("protocol_packets",
+diff --git a/scripts/install_receipt/p4_execute_checks.py b/scripts/install_receipt/p4_execute_checks.py
+index 5ec7a27e08ba82528d481aee96055f8bebddd52f..d92e6a8498c14853004cbe42ff90369aae0c204c 100644
+--- a/scripts/install_receipt/p4_execute_checks.py
++++ b/scripts/install_receipt/p4_execute_checks.py
+@@ -25,6 +25,7 @@ from p4_common import (
+     record_product_finding,
+     sha_bytes,
+     sha_file,
++    save_json_exclusive,
+     write_guard,
+ )
+ 
+@@ -33,6 +34,21 @@ PASSED = "passed"
+ FAILED = "failed"
+ 
+ 
++def deletion_evidence_ok(evidence: dict) -> bool:
++    """Require concrete deletion bytes, owned-path absence and accounted residuals."""
++    return bool(
++        evidence.get("soft_delete_committed") is True
++        and evidence.get("content_free_tombstone") is True
++        and evidence.get("purge_committed") is True
++        and evidence.get("owned_paths")
++        and all(row.get("absent") is True for row in evidence["owned_paths"])
++        and evidence.get("unaccounted_pending_keys") == []
++        and evidence.get("remaining_temp_paths") == []
++        and evidence.get("user_edit_preserved") is True
++        and evidence.get("unmanaged_preserved") is True
++    )
++
++
+ def _bind_before_import(profile: Path, app: Path, port: int) -> None:
+     os.environ["P4_ISOLATED_PROFILE"] = str(profile)
+     os.environ["P4_FIXTURE_ROOT"] = str(profile)
+@@ -232,7 +248,48 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
+         after_edit = edit_target.read_bytes()
+         preserved = after_edit == edited
+         unmanaged_after = unmanaged.read_bytes() if unmanaged.is_file() else b""
+-        deletion = reconnected.tombstone("p4fx-timed-01")
++        item_id = "p4fx-timed-01"
++        ledger_before = reconnected._load_ledger()
++        before_item = idx.get_yoink(item_id)
++        item_entry = ledger_before["entries"]["item:" + item_id]
++        item_path = vault / "Uoink" / item_entry["relpath"]
++        owned_paths = [row["relpath"] for row in ledger_before["entries"].values()
++                       if row.get("identity") == item_id or item_id in row.get("dependencies", [])]
++        deleted = idx.soft_delete_yoink(item_id)
++        deletion = reconnected.tombstone(item_id)
++        tombstone = item_path.read_bytes() if item_path.is_file() else b""
++        content_free = b"deleted: true" in tombstone.lower()
++        for text in (before_item.get("title"), before_item.get("url")):
++            if text and text.encode("utf8") in tombstone:
++                content_free = False
++        idx.delete_yoink(item_id)
++        purged = reconnected.purge(item_id)
++        ledger_after = reconnected._load_ledger()
++        intents_after = reconnected._load_intents()
++        pending = [key for key, entry in ledger_after["entries"].items()
++                   if entry.get("pending_action", "none") != "none"
++                   and not (key == "index:Library.md" and entry.get("status") == "user_edit_conflict")]
++        temp_paths = []
++        for intent in intents_after.values():
++            for temp in intent.get("pending_temps", []):
++                candidate = vault / "Uoink" / temp["rel"]
++                if candidate.is_file():temp_paths.append(str(candidate))
++        evidence = {
++            "generator_version": "p4-mirror-real-delete-v2",
++            "soft_delete_committed": bool(deleted and deleted.get("deleted_at")),
++            "content_free_tombstone": content_free,
++            "tombstone_bytes": tombstone.decode("utf8", "replace"),
++            "tombstone_sha256": sha_bytes(tombstone),
++            "purge_committed": idx.get_yoink(item_id) is None and purged.get("ok") is True,
++            "owned_paths": [{"relpath": rel, "absent": not (vault / "Uoink" / rel).exists()} for rel in owned_paths],
++            "ledger_before": ledger_before, "ledger_after": ledger_after,
++            "intents_after": intents_after,
++            "unaccounted_pending_keys": pending,
++            "remaining_temp_paths": temp_paths,
++            "user_edit_preserved": edit_target.read_bytes() == edited,
++            "unmanaged_preserved": unmanaged.read_bytes() == unmanaged_before,
++        }
++        save_json_exclusive(profile / "mirror-execution-v2.json", evidence)
+         status_after = reconnected.status()
+         accounted = {
+             "owned": status_after.get("synced"),
+@@ -243,7 +300,7 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
+         }
+         checkpoints.append({
+             "name": "mirror_disconnect_reconnect",
+-            "status": PASSED if dest_unavailable else FAILED,
++            "status": PASSED if dest_unavailable and up.get("ok") is True and first.get("ok") is True else FAILED,
+             "disconnected": dest_unavailable,
+             "reconnected": up.get("ok") is not False,
+             "pending_after_disconnect": down.get("pending"),
+@@ -263,8 +320,9 @@ def mirror_fixture_checks(profile: Path, app: Path, port: int) -> list:
+         })
+         checkpoints.append({
+             "name": "deletion_cleanup",
+-            "status": PASSED if all(k in accounted for k in ("owned", "temp", "pending", "conflict")) else FAILED,
++            "status": PASSED if deletion_evidence_ok(evidence) else FAILED,
+             "accounted": accounted,
++            "exact_evidence": evidence,
+             "tombstone": {k: deletion.get(k) for k in ("ok", "code") if isinstance(deletion, dict)},
+             "fixture_only": True,
+             "operator_boolean_used": False,
+diff --git a/tests/test_install_receipt_p4_collection_final.py b/tests/test_install_receipt_p4_collection_final.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f67f2ea96e646ff09d4067c565875e97b99a052d
+--- /dev/null
++++ b/tests/test_install_receipt_p4_collection_final.py
+@@ -0,0 +1,43 @@
++"""Declared negative sessions and incomplete deletion evidence cannot earn credit."""
++import copy
++from pathlib import Path
++import sys
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts/install_receipt"))
++from p4_collect_evidence import packet_scenario_records
++from p4_execute_checks import deletion_evidence_ok
++
++
++def test_only_declared_negative_scenarios_leave_packet_scope(tmp_path):
++    names = ["originalinstalleda-1", "originalinstalledb-2", "originalinstalledunavail-3",
++             "originalinstalledtransport-4", "originalinstalled-partial-5",
++             "originalinstalledtransport-malformed"]
++    paths = [tmp_path / name / "events.jsonl" for name in names]
++    full, negative = packet_scenario_records(paths)
++    assert full == [paths[0], paths[1], paths[4], paths[5]]
++    assert negative == [paths[2], paths[3]]
++
++
++def test_deletion_counts_and_keys_are_not_owned_file_evidence():
++    assert not deletion_evidence_ok({"owned": 2, "temp": 2, "pending": 2,
++                                     "conflict": [], "deletion_pending": 1})
++
++
++@pytest.mark.parametrize("change", [
++    {"content_free_tombstone": False}, {"soft_delete_committed": False},
++    {"purge_committed": False}, {"owned_paths": [{"absent": False}]},
++    {"owned_paths": []}, {"unaccounted_pending_keys": ["item:unexplained"]},
++    {"remaining_temp_paths": ["Library/owned.tmp"]},
++    {"user_edit_preserved": False}, {"unmanaged_preserved": False},
++])
++def test_each_missing_deletion_obligation_refuses_acceptance(change):
++    complete = {"soft_delete_committed": True, "content_free_tombstone": True,
++                "purge_committed": True, "owned_paths": [{"absent": True}],
++                "unaccounted_pending_keys": [], "remaining_temp_paths": [],
++                "user_edit_preserved": True, "unmanaged_preserved": True}
++    assert deletion_evidence_ok(complete)
++    incomplete = copy.deepcopy(complete)
++    incomplete.update(change)
++    assert not deletion_evidence_ok(incomplete)

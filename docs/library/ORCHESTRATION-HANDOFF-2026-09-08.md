@@ -81,7 +81,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Finish C22 worker 6a890eee, verify/integrate, then Ryan's actual installed receipt |
-| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator supplement integrated: 57 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Observe bundled operator kit, final tree and Ryan's installed/client receipt |
+| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Observe bundled operator kit, final tree and Ryan's installed/client receipt |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
 | Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Both setup proposals pending; finish two receipt kits, final tree and complete operator bundle/runbook |
@@ -127,7 +127,7 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    correction `1f64672e-95b7-4608-9fa6-5823b7e8eeda` under
    `RYAN-P4-EVIDENCE-COMPLETENESS-REPAIR-BRIEF-2026-09-09.md`. They may finish
    in either order; do useful independent work while waiting. P4 plus the bounded
-   operator supplement is integrated with 57 passed / one failed in both roots;
+   operator and collection supplements are integrated with 68 passed / one failed in both roots;
    its bundled command path remains to be observed. Finished third
    versions remain rejected as complete receipt instruments. No new original
    product or installed acceptance is inferred from their status flags.
@@ -1902,3 +1902,16 @@ RYAN-P4-BUNDLED-COLLECTION-REPAIR-BRIEF-2026-09-09.md before any fresh observati
 No Setup/client/model ran. All command jobs cleaned, guard removed, original
 _pth/installer/142 packaged source bindings unchanged. Proof:
 proof/ryan-p4-bundled-01-2026-09-09/SHA256.json. C22 fourth worker still running.
+
+
+## Integrator log — 2026-09-09, bundled collection correction integrated
+
+P4 collector now distinguishes exact declared negative scenarios from normal
+packet sessions. Its mirror deletion check follows real synthetic index mutations
+and inspects tombstone/purged bytes, ledger/intents and preserved independent
+files. Worker pc-w2 68 passed / one failed, 26.24 s; three-way checkout pc-c1
+68 passed / one failed, 25.65 s. Existing assertions unchanged. Ten proof files
+and review are linked from RYAN-P4-BUNDLED-COLLECTION-REPAIR-BRIEF-2026-09-09.md.
+Next is fresh p4-bundled-02 under that brief; p4-bundled-01 remains failed.
+Claude 2.1.261 local --help confirms restricted/strict-mcp-config/include-hook-
+events flags; this help/version check starts no model or receipt client.

@@ -32,3 +32,23 @@ claims. Verify the new negatives and complete P4/operator union in the finished
 worktree and checkout. Then observe a fresh `p4-bundled-02` fixture using the same
 sealed installer/compiler inputs. Any real product failure gets a repair brief;
 do not weaken the oracle or overwrite the first observation.
+
+
+## Astra review and integration result
+
+Accept the instrument correction for a fresh bundled observation. Full packet
+scope excludes only the two exact driver-declared negative scenario prefixes;
+unknown and partial normal sessions remain in scope. All raw recordings remain.
+The deletion scenario now performs Index.soft_delete_yoink, observes tombstone
+bytes with source title/URL stripped, then deletes the synthetic index row and
+purges. Its result requires owned item/dependent-brief absence, no unaccounted
+pending keys or extant temporary files, and preserved edited/unmanaged bytes.
+The complete ledger and intents are retained. No product or existing test edits.
+
+Final worker pc-w2: **68 passed / one failed, 26.24 s**. Three-way checkout pc-c1:
+**68 passed / one failed, 25.65 s**. Eleven new checks pass. The frozen nested
+settings-path assertion remains the only failure. Preceding pc-w1 was 68/1,
+26.42 s before adding the explicit operator-json argument to generated collection
+commands. Ten proof files preserve every result and the exact patch at
+proof/ryan-p4-collection-repair-2026-09-09/SHA256.json. These unit/source results do
+not establish installed acceptance or the next bundled deletion observation.

@@ -10,6 +10,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import os
+import re
 from pathlib import Path
 import sys
 
@@ -79,6 +80,17 @@ def _load_operator(path: Path | None) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def packet_scenario_records(records: list[Path]) -> tuple[list[Path], list[Path]]:
+    """Purpose is fixed by the driver name, never inferred from pass/fail data."""
+    full, negative = [], []
+    for path in records:
+        if re.fullmatch(r"originalinstalled(?:transport|unavail)-\d+", path.parent.name):
+            negative.append(path)
+        else:
+            full.append(path)
+    return full, negative
+
+
 def operator_sequence(binding: dict) -> dict:
     """Argument arrays preserve spaces; a missing binding never becomes a command."""
     profile = Path(binding["isolated_profile"])
@@ -117,6 +129,8 @@ def operator_sequence(binding: dict) -> dict:
         {"stage": stage, "args_after_system_python_I_S": [str(kit / "p4_operator.py"), stage, *common]}
         for stage in ("prepare", "check", "prepare-client", "collect")
     ]
+    if commands:
+        commands[-1]["args_after_system_python_I_S"].extend(["--operator-json", str(profile / "operator.json")])
     return {
         "commands": commands, "missing_inputs": missing,
         "refused_missing_inputs": bool(missing),
@@ -160,12 +174,14 @@ def collect(binding: dict, operator: dict) -> dict:
         if "originalinstalled" in path.parent.name.replace("-", "").lower()
         or "original-installed" in str(path)
     ]
+    original_records, negative_records = packet_scenario_records(original_records)
     inspection = None
     if original_records:
         inspection = inspect(expected, original_records, required_route="original-installed")
         add("protocol_packets", PASSED if inspection["packet_and_prompt_subset_complete"] else FAILED,
             packet_and_prompt_subset_complete=inspection["packet_and_prompt_subset_complete"],
-            original_sessions=inspection.get("session_reports"), source="original-installed")
+            original_sessions=inspection.get("session_reports"), source="original-installed",
+            separately_measured_failure_scenarios=[str(path) for path in negative_records])
     elif records:
         inspection = inspect(expected, records)
         add("protocol_packets",
