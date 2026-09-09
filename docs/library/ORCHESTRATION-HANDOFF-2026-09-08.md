@@ -53,7 +53,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 17:12 PDT; implementation/review HEAD `d437b59`; not pushed)
+## State at handoff (updated 2026-09-08 17:40 PDT; implementation/review HEAD `00fe216`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -61,7 +61,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; seven D12-D15 cases open. AV-5m2 rejected despite 210 passes: test-specific cancellation and uncancellable OS replacement | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; retained failed diff and `PHASE4-AV5M3-BRIEF-2026-09-08.md` | AV-5m3 (grok); then AW-4 (codex); then the real-client rerun. D13 fixture ruling is Ryan's; the implementation still needs repair |
 | 5 | AZ-5a3g integrated (`d437b59`), preserving AZ-5b/5c/5e/5f: BA-3 acceptance 41/52, dashboard3 7/7, fixtures 28/28. Measurements3 0/3; one stale BA-2 measurement assertion also fails | Worker and checkout each 382 passed / 15 failed; all 18 BA-01/03 and 23 earlier BA-3 cases pass | AZ-5d (grok BA-09/10/11), then AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass. BC-3a2 rejected. BD-27 normal-Comet playback observation now satisfied | Original-test verification: 156 passed / five omitted-ticket failures; `PHASE6-BC3A3-BRIEF-2026-09-08.md`; `PHASE6-BD27-PLAYER-RECEIPT-2026-09-08.md` | BC-3a3 (grok), then BD-2 (codex). Legacy fixture setup ruling and speaker material are Ryan gates; implementation still needs repair |
+| 6 | BC-3a3 (`00fe216`) integrated with BC-3b/3c: strict tickets at both entry points, ledger reconstruction and sidecar edit/removal protection. BD set 11/14; five new implementation tests pass. BD-27 observed | Worker and checkout each 155 passed / 11 unchanged omitted-ticket failures; `PHASE6-BC3A3-GROK-2026-09-08.md` | BD-2 (codex) now reviewing owning-call timing. Legacy fixture ruling and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -77,8 +77,8 @@ with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no 
 AZ-5a3g grok `54108a1f` integrated at `d437b59`. AV-5m2 grok `6b5e5f1e`
 and BC-3a2 grok `5aca8450` finished and are rejected; both complete original diffs
 are retained in the patches directory. New repair briefs below govern retries.
-AZ-5d grok `e739a5ec`, AV-5m3 grok `c5f611c8` and BC-3a3 grok `855b1d16`
-are running from `79f6961` (started 17:12 PDT).
+AZ-5d grok `e739a5ec` and AV-5m3 grok `c5f611c8` are running from
+`79f6961` (started 17:12 PDT). BC-3a3 grok `855b1d16` integrated at `00fe216`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -91,9 +91,10 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    (grok `c5f611c8`) from `PHASE4-AV5M3-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: BC-3c is integrated; BC-3a2 is rejected. Verify BC-3a3 (grok `855b1d16`)
-   from `PHASE6-BC3A3-BRIEF-2026-09-08.md`; preserve both rejected diffs and the quota failure.
-   Then BD-2 (codex). BD-27 normal-Comet observation is recorded as satisfied;
+4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
+   Complete BD-2 (codex) on the combined candidate, including the owning callers'
+   input-read/ticket ordering. Preserve both rejected diffs and the quota failure.
+   BD-27 normal-Comet observation is recorded as satisfied;
    the speaker gate remains Ryan's.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
    --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
@@ -301,3 +302,19 @@ BD-27 receipt/images are committed at `1217dbf`. All seven artifact hashes match
 both the working files and committed blobs. The `bd-player-*` proof directory
 also needs `-text` attributes so a future Windows checkout cannot change its
 sealed JSON line endings; that preservation rule is recorded with this entry.
+
+### 2026-09-08 17:40 PDT — BC-3a3 integrated; BD-2 review started
+
+BC-3a3 integrated with three-way apply at `00fe216`. Worker and checkout each
+have **155 passed, 11 failed** (67.37 s / 62.73 s), including all five new
+implementation tests. Every failure is an omitted-ticket call in an unchanged
+fixture; two expect corrupt-input errors but now meet the ticket requirement
+first. They remain failed. Logs and exact commands are in worker-local
+`_scratch/bc3a3-w` and checkout-local `_scratch/bc3a3-c`.
+
+The raw and Index boundaries now reject every missing ticket. Sidecar key
+removals and edits during ledger work survive the final carrier write. BD-2
+still needs to review the whole operation: source inspection shows podcast
+transcripts and capture plans can be read before their owning caller mints
+the ticket. That timing concern is being reproduced; no new finding or Phase 6
+acceptance is claimed from inspection alone.
