@@ -80,11 +80,11 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Recovery `239dbbd` retains historical AT6 exit gap; isolation now reviewed with 130 checkout passes / one skip | Exact isolated process stop and Inno path/identity controls integrated; real installed behavior unexecuted | Finish C22 executable scenarios, final tree/package and Ryan's installed receipt |
-| 4 | Lifecycle repair retained; original stdio read repair has nine new passes and broader 212 passed / eight failed | Existing reads no longer migrate/backfill or recover authoritative storage; eight parent-interception failures remain; X HTTP 403 stays blocked | Include read repair in final committed tree and bundled original entry; finish installed receipt kit |
-| 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
-| 6 | Reviewed refusal repair: 71 passed / zero failed in worker and checkout | Both stale-refusal failures close without publishing or minting a missing ticket; chapters/cited ranges only | Full tree/package; speaker gate remains blocked |
-| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Isolate new failure; finish two receipt kits, final tree, rebuilt package and operator runbook |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Isolated package built; original bundled helper starts and exits zero. Third C22 instrument 41 passed / two failed, with reviewed oracle gaps | Finish C22 worker 6a890eee, verify/integrate, then Ryan's actual installed receipt |
+| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | Original bundled card/native prompts pass and reads preserve state; P4 instrument correction remains active; X HTTP 403 stays blocked | Verify/integrate P4 worker 1f64672e, final tree and Ryan's installed/client receipt |
+| 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
+| 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
+| Integration | Installer built/sealed at `8a607c3`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | 62 new cases, no missing cases; one new read-promotion ordered failure; eight-case fixture proposal and historical exit gap remain | Both setup proposals pending; finish two receipt kits, final tree and complete operator bundle/runbook |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -120,6 +120,45 @@ at that checkpoint; the authorized correction and new result are above.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
+
+1. Review and integrate the already running C22 correction
+   `6a890eee-6163-49bf-836b-cb4b8736b169` under
+   `RYAN-C22-FINAL-ORACLE-REPAIR-BRIEF-2026-09-09.md`, and the independent P4
+   correction `1f64672e-95b7-4608-9fa6-5823b7e8eeda` under
+   `RYAN-P4-EVIDENCE-COMPLETENESS-REPAIR-BRIEF-2026-09-09.md`. They may finish
+   in either order; do useful independent work while waiting. Finished third
+   versions remain rejected as complete receipt instruments. No new original
+   product or installed acceptance is inferred from their status flags.
+2. Verify each finished full diff in its worktree using the named suites. Preserve
+   staged AND unstaged content with git diff HEAD, including new files. Apply the
+   raw patch with three-way apply in this checkout, rerun the same suites, record
+   exact counts and the review verdict, then commit the integration and handoff.
+   Do not edit any existing test assertion or fixture to make a new kit green.
+3. Both exact setup proposals under Blockers for Ryan remain unapplied. If Ryan
+   explicitly approves them, apply only their sealed diffs, record the ruling,
+   assertion audit and review, verify the ordered read pair and affected mirror
+   union, then include them in the committed complete tree. Waiting is not approval.
+   The separate original AT6 exit status remains unavailable; never invent it.
+4. Run the final kit-inclusive complete tree at a committed SHA under a new
+   documented final-verification brief. Use the guarded native runtime and only
+   exclude S21. Seal exact case membership/counts/log/XML; retain every failure.
+   Any newly exposed product defect needs its own repair brief and fresh evidence.
+5. Package build source is 8a607c3, current executable SHA-256 d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1.
+   Its compiler inputs and bundled original-entry/helper observation are sealed.
+   Run the completed kits against the bundled runtime with disposable fixtures,
+   retaining pre-Inno labels. Rebuild/reseal only if packaged source changes;
+   otherwise verify all 142 source bindings against the final validation commit.
+6. Finish the portable operator bundle and replace the runbook's old blocked
+   preflight with exact hash-bound commands for Ryan's one throwaway Windows-profile
+   session. Include migrations required by the fixture generator, original installed
+   routes, C22/P4 manifests, full release notes, everyday-flow checks and receipt
+   collection/restoration steps. Do not run Setup/uninstall or claim their receipts.
+7. Update the release notes, State table and remaining Ryan items. Fast-forward
+   the authorized backup branch and push only origin/cc/living-library, without
+   force, then verify the remote SHA. Report actual counts, build/validation/backup
+   commits, artifacts and open gates. No main merge or publication.
+
+### Earlier continuation record (historical; active queue above supersedes it)
 
 Current continuation under Ryan's 2026-09-09 rulings:
 
@@ -1815,3 +1854,11 @@ Authorized branch backup fast-forwarded from 022ff43 to
 cee17ced3cd461e2a178376cc31c936dd8904cd0; push succeeded and ls-remote confirmed
 that exact origin/cc/living-library SHA. Process-local GitHub CLI credentials
 avoided the GCM prompt; no global auth config changed, no force or main push.
+
+### 2026-09-09 — active release queue consolidated
+
+The front State table and active Queue now identify the two actual in-flight
+corrections, final full-tree/packaged-kit work, portable bundle and Ryan's session.
+Earlier queue text remains explicitly historical so a future integrator does not
+redispatch rejected or completed runs. Release notes were refreshed at cee17ce;
+the final kit-inclusive counts and operator commands still need completion.
