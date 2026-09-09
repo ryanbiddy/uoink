@@ -1,6 +1,6 @@
 # Phase 4 client rerun after AW-4
 
-Run only after AV-5m3 and any AW-4 repairs are integrated and the candidate SHA
+Run only after AV-5m4a/4b and any further AW-4 repairs are integrated and the candidate SHA
 is frozen. The earlier [AW receipt](PHASE4-AW-RECEIPT-2026-09-08.md) is partial
 and belongs to `d4d99bb`; preserve it. The repaired observation must satisfy
 all five requirements in [AW-3](PHASE4-ACCEPTANCE-3-2026-09-08.md), including
@@ -56,10 +56,11 @@ A quota refusal is a retained failed/partial observation and cannot be called
 a passing client receipt. No model execution occurred during this preparation.
 
 Record Claude Desktop separately if an isolated desktop session is available.
-At preparation the connected browser inventory exposed only the Codex in-app
-browser and no native app surface. Missing desktop or player observation must
-be stated explicitly and handed to Ryan with exact remaining actions. Desktop
-evidence cannot waive the required Claude Code/stdio workflow.
+The browser connector initially exposed only the in-app browser. The separate
+Windows computer-use runtime later found normal Comet and Claude Desktop.
+That inventory does not establish an isolated desktop client configuration.
+Any missing desktop observation must be stated with exact remaining actions;
+it cannot waive the required Claude Code/stdio workflow.
 
 Keep raw private evidence internal, seal every retained artifact with SHA-256,
 and distinguish any redacted copy by its own hash. No live labels, settings,
@@ -89,3 +90,16 @@ route. Observe the actual `prompts/get` exchange for both required prompts; a
 documentation lookup, slash-command-looking model text or fixture probe is not
 an invocation receipt. Keep bare/API-key mode disabled and stop on a quota
 refusal; no upgrade or additional paid usage is authorized.
+
+`proof/aw-rerun-2026-09-08/prepare_fixture.py` prepares a fresh fixture only
+after the prerequisites above. It requires the exact clean committed SHA,
+checks the archived source bytes/hash, rebinds SQL/embedded JSON and copied
+sidecar paths, stages source, and freezes complete expected cards/excerpts
+from stored rows plus canonical pure construction. It never starts a client
+or model. Run it with --repo, a fresh --fixture-root under checkout scratch,
+and --candidate. Freeze its resulting preparation/expected/config files and
+the actual client version/mode/allowlist before any client observation.
+
+During authoring only syntax, guard syntax and synthetic rebinding are checked.
+No current candidate or measured-copy receipt is credited until this script
+actually runs after AW-4 closes its implementation findings.

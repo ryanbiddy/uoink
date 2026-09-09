@@ -80,7 +80,9 @@ are retained in the patches directory. New repair briefs below govern retries.
 AV-5m3 grok `c5f611c8` integrated at `270e569` as intermediate work, not acceptance.
 BC-3a3 grok `855b1d16` integrated at `00fe216`. AZ-5d grok `e739a5ec`
 finished and is rejected; its full diff is retained. AZ-5d2 and BC-3d are
-running from `90151e7` (started 17:44-17:45 PDT). AV-5m4a/4b are next.
+running from `90151e7` (started 17:44-17:45 PDT): AZ-5d2 `7afd1cb4`, BC-3d
+`31d2ed06`. AV-5m4a gemini `eb32f3b4` and AV-5m4b grok `5c22dbae` started
+17:53 PDT on `98d8b35`.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
