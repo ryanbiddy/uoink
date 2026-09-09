@@ -11,17 +11,19 @@ Ryan can obtain the installed receipts without contacting port 5179.
 Subsequent recovery `239dbbd` closes three Phase 3 archive gaps in focused
 verification: AS-7/8/9 is 22 passed / one failed, strict Phase 3 is 181 passed /
 one failed. The original AT6 child exit status remains missing. These focused
-results do not replace the corrected full tree. Product repair and installer
-workers are undergoing independent review; no new package is sealed yet.
+results do not replace the corrected full tree. Follow-on mirror repair
+`1063843` has 163 passed / eight failed in both roots. The reviewed SDK repair
+has 267 passes in both roots. Installation isolation and executable receipt
+kits are in progress; no new package is sealed yet.
 
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from
 `9217846da45cecbf1b91614d9031fd7a16b7d16f`. Installer build source:
-`e47e4f2e8e1b6a83ecb1171436092b9077186430`. Later changes are documentation,
-proof, the generated third-party notice date and the authorized test fixtures.
-Production source is unchanged through the corrected tree. Under Ryan's ruling,
-the existing installer and package seal are retained without a rebuild/reseal.
+`e47e4f2e8e1b6a83ecb1171436092b9077186430`. That retained package predates the
+current mirror and SDK repairs. Production source changed after the corrected
+tree; a new build and seal are required after the remaining verified integrations.
+The original installer and proof remain retained as historical artifacts.
 Results/runbook checkpoint `ba3d256` is backed up on `origin/cc/living-library`;
 the remote SHA was independently verified. This is a branch backup of a failed
 candidate, with no merge to main or artifact publication.

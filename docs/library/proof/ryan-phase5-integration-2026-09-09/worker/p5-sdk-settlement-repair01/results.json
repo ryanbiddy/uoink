@@ -1,0 +1,25 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_phase5_sdk_settlement_review.py",
+      "tests/test_phase5_sdk_original_route.py",
+      "tests/library_work_astra/test_phase5_ba4_acceptance.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\p5-sdk-settlement-repair01-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\p5-sdk-settlement-repair01\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\p5-sdk-settlement-repair01\\tests.log"
+  }
+]

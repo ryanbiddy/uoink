@@ -1,0 +1,39 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/library_work_astra/test_phase5_ba4_acceptance.py",
+      "tests/library_work_astra/test_phase5_acceptance.py",
+      "tests/library_work_astra/test_phase5_acceptance2.py",
+      "tests/library_work_astra/test_phase5_acceptance3.py",
+      "tests/library_work_astra/test_phase5_ba5_acceptance.py",
+      "tests/library_work_astra/test_phase5_dashboard.py",
+      "tests/library_work_astra/test_phase5_dashboard2.py",
+      "tests/library_work_astra/test_phase5_dashboard3.py",
+      "tests/library_work_astra/test_phase5_measurements.py",
+      "tests/library_work_astra/test_phase5_measurements2.py",
+      "tests/library_work_astra/test_phase5_measurements3.py",
+      "tests/test_library_analysis_fixtures.py",
+      "tests/test_phase5_az5d2.py",
+      "tests/test_phase5_az5h.py",
+      "tests/test_phase5_az5h2.py",
+      "tests/test_phase5_sdk_original_route.py",
+      "tests/test_phase4_stdio.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-union-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-union\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-union\\tests.log"
+  }
+]

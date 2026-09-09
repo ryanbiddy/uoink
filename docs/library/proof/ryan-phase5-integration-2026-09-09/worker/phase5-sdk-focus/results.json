@@ -1,0 +1,24 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/library_work_astra/test_phase5_ba4_acceptance.py",
+      "tests/test_phase5_sdk_original_route.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-focus-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-focus\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok\\_scratch\\phase5-sdk-focus\\tests.log"
+  }
+]

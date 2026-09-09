@@ -1,0 +1,113 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "applied.patch": {
+      "sha256": "9f4c4c3ee36fdf01e0f4bc2bb587e059d5541c17530dd6379a72078175423860",
+      "bytes": 22606
+    },
+    "checkout/p5-sdk-ci01/results.json": {
+      "sha256": "2f1fe05c8112135a4e2aaef35f4de60b226da0023c297d7dee39ef20141ae919",
+      "bytes": 1630
+    },
+    "checkout/p5-sdk-ci01/tests.log": {
+      "sha256": "51b4f68d727236df9d5b7f3d47ed6d459028fd6f070c81f029a16ad02a372d20",
+      "bytes": 357
+    },
+    "checkout/p5-sdk-ci01/tests.xml": {
+      "sha256": "79d40d21d49baa472557f76879bde9d6dbc321121da05ae5283d85dd2fe46722",
+      "bytes": 40734
+    },
+    "ig_paths.py": {
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "bytes": 106
+    },
+    "integrator_verify.py": {
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+      "bytes": 4420
+    },
+    "provenance.json": {
+      "sha256": "386b1b00b41e3f5844e4577b731e3a323eb513f23f00ee869ed5d540e1a855d3",
+      "bytes": 2109
+    },
+    "sitecustomize.py": {
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "bytes": 1216
+    },
+    "worker/p5-sdk-settlement-repair01/results.json": {
+      "sha256": "0d5b18a9be3c379cab108e6cf124c9f46ef9864a5588787742cd113bbc53cc47",
+      "bytes": 996
+    },
+    "worker/p5-sdk-settlement-repair01/tests.log": {
+      "sha256": "b4e93c7eccba6f3b0f4d11c8738faea16a6a5b093b938e14b1131bdc06d5e839",
+      "bytes": 100
+    },
+    "worker/p5-sdk-settlement-repair01/tests.xml": {
+      "sha256": "93ce1c072ac0d3b6ae4f351e87a3c1ad6aa9eb022db97b1ed2bbf026d9cd5b64",
+      "bytes": 827
+    },
+    "worker/p5-sdk-settlement-review01/results.json": {
+      "sha256": "b8b77eeb6c67bd4b41b0e13b22a2cf81a9e59d6f7451d048cfc325bc12becf87",
+      "bytes": 881
+    },
+    "worker/p5-sdk-settlement-review01/tests.log": {
+      "sha256": "b62f939bf914a1814e69940ea486392e475161bdb57b9b97b5d1ea5da038b12c",
+      "bytes": 803
+    },
+    "worker/p5-sdk-settlement-review01/tests.xml": {
+      "sha256": "6e5f3f500261c3fe6327447394f80a611895f28e416eb388b12a6da2e6deb544",
+      "bytes": 938
+    },
+    "worker/p5-sdk-wi01/results.json": {
+      "sha256": "94014e0f674ad213f87f21765e3a53ee171ac28cf5c6e4f725150d31b8ae7a5f",
+      "bytes": 1718
+    },
+    "worker/p5-sdk-wi01/tests.log": {
+      "sha256": "07c1d33a727955cf76e9819acc42eb3b3742122dc5672e1d911a8e683983b054",
+      "bytes": 357
+    },
+    "worker/p5-sdk-wi01/tests.xml": {
+      "sha256": "a464c63e1ef67b9249e4f8a87cfd4f6b5d8d848decd3984b2cfa754fdadd2c05",
+      "bytes": 40588
+    },
+    "worker/p5-sdk-wi02/results.json": {
+      "sha256": "a1e58d5bb4ae6de56132bb70fab72e42c428cd24986d66b7d734b248911a7674",
+      "bytes": 1771
+    },
+    "worker/p5-sdk-wi02/tests.log": {
+      "sha256": "6b4a8e9b51fcbfd33c6e4c60a1540aee54c607469418b06907c01fd04222eb31",
+      "bytes": 357
+    },
+    "worker/p5-sdk-wi02/tests.xml": {
+      "sha256": "f933fe1dbe539c3b745badd6ad175593537c60ef2b4d7a9d10da847f63d3f3c2",
+      "bytes": 40734
+    },
+    "worker/phase5-sdk-focus/results.json": {
+      "sha256": "05e9b3ff864a55a1a1b1ead7e5c7e0d8773b31f57f1d7c8b08dea31ef529fa81",
+      "bytes": 846
+    },
+    "worker/phase5-sdk-focus/tests.log": {
+      "sha256": "ee2ba53f5f723b88db1ab2bcbe391a1f44b8d761183b9ac9b27650917667d537",
+      "bytes": 100
+    },
+    "worker/phase5-sdk-focus/tests.xml": {
+      "sha256": "5e7f83f5cf4110fab725aa50c7e5b6df3f4476afa7b9d43c51424bbf96e640db",
+      "bytes": 681
+    },
+    "worker/phase5-sdk-union/results.json": {
+      "sha256": "95a69996a2b7d1559f07033442905c3ba4c64cb4545a0ad999a10bf4f2a04687",
+      "bytes": 1666
+    },
+    "worker/phase5-sdk-union/tests.log": {
+      "sha256": "9e3a662fdbe70bf8d13ee8a4b239ba94f8256851178a72ac9c31c6c38e3199ee",
+      "bytes": 357
+    },
+    "worker/phase5-sdk-union/tests.xml": {
+      "sha256": "4bebb2e9463e9f35f47f4f001bf54139c9af6729341d86c31b9f42d03992672a",
+      "bytes": 40588
+    },
+    "worker-original.patch": {
+      "sha256": "0744110c75b54c6ae1ba35f06061fce18278ef9f63c70a05ee224727da0ea937",
+      "bytes": 20415
+    }
+  }
+}

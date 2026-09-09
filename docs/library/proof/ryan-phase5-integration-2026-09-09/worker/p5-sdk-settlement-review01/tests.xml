@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.769" timestamp="2026-09-09T08:25:44.148105-07:00" hostname="Ryan-PC"><testcase classname="tests.test_phase5_sdk_settlement_review" name="test_local_response_copy_does_not_settle_the_outgoing_request" time="0.089"><failure message="AssertionError: [(1, 0, False)]&#10;assert [(1, 0, False)] == [(1, 1, True)]&#10;  &#10;  At index 0 diff: (1, 0, False) != (1, 1, True)&#10;  Use -v to get more diff">tests\test_phase5_sdk_settlement_review.py:30: in test_local_response_copy_does_not_settle_the_outgoing_request
+    assert observations == [(1, 1, True)], observations
+E   AssertionError: [(1, 0, False)]
+E   assert [(1, 0, False)] == [(1, 1, True)]
+E     
+E     At index 0 diff: (1, 0, False) != (1, 1, True)
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

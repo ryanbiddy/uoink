@@ -1,0 +1,85 @@
+{
+  "worker": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\8cef3e8a-3ad\\grok",
+  "worker_base": "a74385cd0cca237c3c6bdbdb3c0676cad8a799e9",
+  "checkout_before": "1063843c4a43e308e7bb40c9ee439914284a7824",
+  "final_worker_source": {
+    "uoink_mcp.py": {
+      "sha256": "e8204b15db5cc6b1ede3fa6d260aab6a499fcf79d4daf52ae1434a5fffd3fd10",
+      "bytes": 52901,
+      "lf_sha256": "08f00cca5d8d2b1df611d5a2cb727db9d56069f886acad99fde5d44fa417c173"
+    }
+  },
+  "final_checkout_source": {
+    "uoink_mcp.py": {
+      "sha256": "8952c6ee167969b816c90787059a489b55fc5f2bceb23862022cae5d9c1937ce",
+      "bytes": 52978
+    }
+  },
+  "observations": [
+    {
+      "label": "checkout/p5-sdk-ci01",
+      "cases": 267,
+      "passed": 267,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p5-sdk-settlement-repair01",
+      "cases": 4,
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p5-sdk-settlement-review01",
+      "cases": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failures": [
+        "tests.test_phase5_sdk_settlement_review::test_local_response_copy_does_not_settle_the_outgoing_request"
+      ]
+    },
+    {
+      "label": "worker/p5-sdk-wi01",
+      "cases": 266,
+      "passed": 266,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p5-sdk-wi02",
+      "cases": 267,
+      "passed": 267,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/phase5-sdk-focus",
+      "cases": 3,
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/phase5-sdk-union",
+      "cases": 266,
+      "passed": 266,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

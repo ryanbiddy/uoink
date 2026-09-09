@@ -1,0 +1,518 @@
+diff --git a/docs/library/RYAN-PHASE5-SDK-WORKER-2026-09-09.md b/docs/library/RYAN-PHASE5-SDK-WORKER-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..59c7b33edc2009e4ace5aa10cce0a9c035eb0739
+--- /dev/null
++++ b/docs/library/RYAN-PHASE5-SDK-WORKER-2026-09-09.md
+@@ -0,0 +1,133 @@
++# Phase 5 SDK serialization repair (grok)
++
++Worker: grok
++Worktree: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\8cef3e8a-3ad\grok`
++Brief: `docs/library/RYAN-PHASE5-SDK-REPAIR-2026-09-09.md`
++Do not commit or push. No existing test/fixture/assertion edits. No installed
++SDK edits. No subagents. Part B remains deferred. No live index, port 5179,
++paid API, or `ANTHROPIC_API_KEY`.
++
++## Status
++
++Complete as an uncommitted implementation candidate. The installed SDK
++`stdio_server` + registered `Server.run` route now retains one process-guard
++admission through the actual `JSONRPCMessage.model_dump_json` call, then
++refuses expired or oversize success with the same envelopes as the shipped
++writer. The shipped `bounded_stdio_server` entry is unchanged in behavior.
++
++Named union required by the brief: **266 passed, 0 failed, 0 skipped**,
++134.26 seconds. BA-4 passes. The corrected unary-clock probe passes. Astra
++verifies independently in both roots before integration. No acceptance claim
++for the full tree.
++
++## Sealed baseline (not rerun as a second unlabeled measurement)
++
++Corrected tree `4a35316`, retained under
++`docs/library/proof/ryan-corrected-01-2026-09-09`:
++
++`tests/library_work_astra/test_phase5_ba4_acceptance.py::test_ba4_actual_sdk_serialization_retains_admission_and_deadline`
++
++```
++AssertionError: Expired actual serialization emitted success; active admissions=[0]
++```
++
++The probe imports `mcp.server.stdio.stdio_server` and runs
++`uoink_mcp.mcp._mcp_server.run` on those streams. Admission was released in
++the tool handler before the SDK writer's `model_dump_json`. The historical
++"old route" classification is not treated as a pass.
++
++## Repair
++
++Product change is confined to `uoink_mcp.py`. Direct handler/HTTP callers and
++the shipped bounded writer keep their existing admit/release.
++
++1. Budgeted requests that never entered `bounded_stdio_server` admit once in
++   the registered `_handle_request` wrapper
++   (`_ensure_inbound_transport_scope`). Duplicate ids reuse the inbound
++   scope, so the shipped entry does not take a second slot.
++2. `Server.run` on the original SDK stdio streams installs an outermost
++   `JSONRPCMessage.model_dump_json` around whatever is currently bound,
++   including a test patch. The SDK writer still performs the dump. After that
++   dump returns, expired success becomes retryable `deadline_exceeded`,
++   oversize success becomes `resource_too_large`, the completed-frame cap
++   still applies, and the slot is released. Typed errors pass through.
++3. While `bounded_stdio_server` is entered, `Server.run` does not install that
++   wrapper. `_deliver_bounded_outbound` remains the settlement path for the
++   shipped entry.
++
++Independent cases in `tests/test_phase5_sdk_original_route.py` (new; existing
++tests untouched) drive the SDK `stdio_server` route for a complete success
++packet and for the delayed-dump refusal.
++
++## Repair / retry record
++
++| Step | Question | Result |
++|---|---|---|
++| Sealed baseline `4a35316` | Does BA-4 fail on the SDK `stdio_server` route with `_active==0` during dump? | Yes. Retained in `proof/ryan-corrected-01-2026-09-09`. Not rerun. |
++| Repair R1 | Hold admission through actual SDK dump on `Server.run` when the product writer is not in use; refuse expired success. | Source in `uoink_mcp.py`. |
++| Post-repair focus | BA-4 + new original-route cases | **3 passed**, 1.86 s. No retry. |
++| Post-repair named union | Brief selectors | **266 passed**, 134.26 s. No retry. |
++
++No second repair. Failed sealed outcome retained. Part B not run.
++
++## Environment
++
++- Python `C:\Python314\python.exe` 3.14.6
++- Installed MCP `1.28.1` at user site-packages
++- Runner: retained
++  `docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py`
++  (bytecode disabled, `pytest -p no:cacheprovider`, `ig_paths`, audit guard)
++- `PYTHONDONTWRITEBYTECODE=1`, `PYTHONUTF8=1`,
++  `PHASE3_REQUIRE_IMPLEMENTATION=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`
++- `ANTHROPIC_API_KEY` removed in the child
++- `PYTHONPATH`: scratch guard, worktree, user site-packages, pywin32 paths
++  (resolved before APPDATA redirect)
++- Scratch profile/temp under `_scratch/phase5-sdk-focus` and
++  `_scratch/phase5-sdk-union`; `UOINK_INDEX_PATH` is an unused scratch file
++- Guard refuses live `%LOCALAPPDATA%\Uoink\index.db`, port 5179, external
++  sockets, and real model processes
++
++`git diff --check` clean.
++
++## Commands and outcomes
++
++Focus (post-repair):
++
++```
++python -B docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py --root <worktree> --label phase5-sdk-focus tests/library_work_astra/test_phase5_ba4_acceptance.py tests/test_phase5_sdk_original_route.py
++```
++
++**3 passed**, 1.86 s. Log/XML: `_scratch/phase5-sdk-focus/`.
++
++Named union:
++
++```
++python -B docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py --root <worktree> --label phase5-sdk-union tests/library_work_astra/test_phase5_ba4_acceptance.py tests/library_work_astra/test_phase5_acceptance.py tests/library_work_astra/test_phase5_acceptance2.py tests/library_work_astra/test_phase5_acceptance3.py tests/library_work_astra/test_phase5_ba5_acceptance.py tests/library_work_astra/test_phase5_dashboard.py tests/library_work_astra/test_phase5_dashboard2.py tests/library_work_astra/test_phase5_dashboard3.py tests/library_work_astra/test_phase5_measurements.py tests/library_work_astra/test_phase5_measurements2.py tests/library_work_astra/test_phase5_measurements3.py tests/test_library_analysis_fixtures.py tests/test_phase5_az5d2.py tests/test_phase5_az5h.py tests/test_phase5_az5h2.py tests/test_phase5_sdk_original_route.py tests/test_phase4_stdio.py
++```
++
++**266 passed, 0 failed, 0 skipped**, 134.26 s (`tests.xml` `tests="266"`).
++Includes BA-4, the unary-clock probe, BA-5, AZ-5d2/h/h2, analysis fixtures,
++and Phase 4 stdio. Log/XML: `_scratch/phase5-sdk-union/`.
++
++## Limits
++
++- Full tree not run. Astra verifies both roots before integration.
++- Dashboard 24,576-byte target remains a separate failed measurement. This
++  brief does not relabel or repeat it.
++- Part B remains deferred.
++- No installed-package or real-client receipt is inferred.
++- Original SDK route settlement wraps `model_dump_json` only for the lifetime
++  of `Server.run` when the product writer is not active. Installed SDK files
++  were not edited.
++
++## Files changed
++
++- `uoink_mcp.py` — admit budgeted requests on the registered low-level
++  handler when no transport scope exists; settle the actual SDK dump on
++  `Server.run` for that route; keep `bounded_stdio_server` as the shipped
++  writer
++- `tests/test_phase5_sdk_original_route.py` — new independent original-route
++  cases
++- `docs/library/RYAN-PHASE5-SDK-WORKER-2026-09-09.md` — this report
++
++No existing test, fixture, assertion, skip, or parameter was edited.
+diff --git a/tests/test_phase5_sdk_original_route.py b/tests/test_phase5_sdk_original_route.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..a9e0b9601fee5d75070d4b58bbbfdd6827d9c148
+--- /dev/null
++++ b/tests/test_phase5_sdk_original_route.py
+@@ -0,0 +1,158 @@
++"""Independent product cases for the installed SDK stdio route.
++
++Frozen BA-4/AZ-5h files are not edited. These cases drive
++`mcp.server.stdio.stdio_server` plus the registered low-level server, and
++the shipped `bounded_stdio_server` entry, using disposable fixture data.
++"""
++from __future__ import annotations
++
++import json
++import time
++from datetime import datetime, timezone
++
++import anyio
++import pytest
++from mcp import types
++from mcp.server.stdio import stdio_server
++
++import library_analysis as analysis
++import library_resources
++import uoink_mcp
++from tests import test_library_analysis_fixtures as seed
++
++
++NOW = datetime(2026, 9, 8, 12, tzinfo=timezone.utc)
++INTERVAL = {"start": "2026-09-05T00:00:00.000Z", "end": "2026-09-07T00:00:00.000Z"}
++
++
++@pytest.fixture(autouse=True)
++def isolate_reader(monkeypatch):
++    analysis.reset_rate_limiter()
++    monkeypatch.setattr(analysis, "_analysis_db_override", None)
++    yield
++    analysis.reset_rate_limiter()
++
++
++@pytest.fixture
++def db(tmp_path):
++    conn = seed.create_fixture_db(tmp_path)
++    yield conn
++    conn.close()
++
++
++class _Input:
++    def __init__(self, stream):
++        self.stream = stream
++
++    def __aiter__(self):
++        return self
++
++    async def __anext__(self):
++        try:
++            return await self.stream.receive()
++        except anyio.EndOfStream:
++            raise StopAsyncIteration
++
++
++class _Output:
++    def __init__(self, stream):
++        self.stream = stream
++
++    async def write(self, text):
++        await self.stream.send(text)
++
++    async def flush(self):
++        pass
++
++
++def _initialize():
++    return {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
++        "protocolVersion": "2025-06-18", "capabilities": {},
++        "clientInfo": {"name": "sdk-original-route", "version": "1"}}}
++
++
++def _activity_call(request_id=2):
++    return {"jsonrpc": "2.0", "id": request_id, "method": "tools/call", "params": {
++        "name": "get_library_activity", "arguments": {"interval": INTERVAL}}}
++
++
++def _run_original_stdio(send_lines, collect=1):
++    async def exchange():
++        incoming, input_stream = anyio.create_memory_object_stream(4)
++        output_stream, outgoing = anyio.create_memory_object_stream(4)
++        responses = []
++
++        async def serve():
++            async with stdio_server(_Input(input_stream), _Output(output_stream)) as (reads, writes):
++                low = uoink_mcp.mcp._mcp_server
++                await low.run(reads, writes, low.create_initialization_options())
++
++        async with anyio.create_task_group() as group:
++            group.start_soon(serve)
++            await incoming.send(json.dumps(_initialize()) + "\n")
++            assert json.loads(await outgoing.receive())["id"] == 1
++            await incoming.send(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
++            for line in send_lines:
++                await incoming.send(json.dumps(line) + "\n")
++            for _ in range(collect):
++                responses.append(json.loads(await outgoing.receive()))
++            group.cancel_scope.cancel()
++        return responses
++
++    return anyio.run(exchange)
++
++
++def test_original_sdk_route_success_keeps_complete_packet(db, monkeypatch):
++    seed.insert_yoink(db, "sdk-ok", yoinked_at="2026-09-05T12:00:00.000Z")
++    db.commit()
++    monkeypatch.setattr(analysis, "_analysis_db_override", db)
++    original_read = analysis.get_library_activity
++    monkeypatch.setattr(analysis, "get_library_activity", lambda args: original_read(args, clock=NOW))
++
++    response = _run_original_stdio([_activity_call()])[0]
++    assert response["id"] == 2
++    result = response["result"]
++    assert result.get("isError") is not True
++    text = result["content"][0]["text"]
++    open_at = text.index(library_resources.DOCUMENT_FENCE_OPEN) + len(library_resources.DOCUMENT_FENCE_OPEN)
++    close_at = text.index(library_resources.DOCUMENT_FENCE_CLOSE)
++    envelope = json.loads(text[open_at:close_at])
++    assert envelope["ok"] is True
++    assert envelope["interval"] == INTERVAL
++    assert "items" in envelope
++    assert "provenance" in envelope
++    assert "pagination" in envelope
++    assert library_resources.process_guard()._active == 0
++
++
++def test_original_sdk_route_refuses_expired_actual_serialization(db, monkeypatch):
++    seed.insert_yoink(db, "sdk-deadline", yoinked_at="2026-09-05T12:00:00.000Z")
++    db.commit()
++    monkeypatch.setattr(analysis, "_analysis_db_override", db)
++    original_read = analysis.get_library_activity
++    monkeypatch.setattr(analysis, "get_library_activity", lambda args: original_read(args, clock=NOW))
++    original_dump = types.JSONRPCMessage.model_dump_json
++    original_clock = time.monotonic
++    clock_shift = [0.0]
++    observed_active = []
++
++    def expensive_actual_serialization(message, *args, **kwargs):
++        text = original_dump(message, *args, **kwargs)
++        if isinstance(message.root, types.JSONRPCResponse) and message.root.id == 2:
++            observed_active.append(library_resources.process_guard()._active)
++            clock_shift[0] += 3.0
++        return text
++
++    monkeypatch.setattr(types.JSONRPCMessage, "model_dump_json", expensive_actual_serialization)
++    monkeypatch.setattr(time, "monotonic", lambda: original_clock() + clock_shift[0])
++
++    response = _run_original_stdio([_activity_call()])[0]
++    assert response["id"] == 2
++    result = response["result"]
++    assert observed_active, "The actual SDK serializer was not exercised"
++    assert result["isError"], f"Expired actual serialization emitted success; active={observed_active}"
++    envelope = json.loads(result["content"][0]["text"])
++    assert envelope["error"]["code"] == "deadline_exceeded"
++    assert envelope["error"]["retryable"] is True
++    assert all(count > 0 for count in observed_active), observed_active
++    assert library_resources.process_guard()._active == 0
+diff --git a/tests/test_phase5_sdk_settlement_review.py b/tests/test_phase5_sdk_settlement_review.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b1a192d8e84ecae81b426a688fe84529848bdfa0
+--- /dev/null
++++ b/tests/test_phase5_sdk_settlement_review.py
+@@ -0,0 +1,31 @@
++"""Final transport settlement must not be triggered by a local diagnostic dump."""
++import json
++from mcp import types
++import library_analysis as analysis
++import library_resources
++from tests.test_phase5_sdk_original_route import (
++    NOW, _activity_call, _run_original_stdio, db, isolate_reader, seed,
++)
++
++
++def test_local_response_copy_does_not_settle_the_outgoing_request(db, monkeypatch):
++    seed.insert_yoink(db, 'sdk-local-copy', yoinked_at='2026-09-05T12:00:00.000Z')
++    db.commit()
++    monkeypatch.setattr(analysis, '_analysis_db_override', db)
++    read = analysis.get_library_activity
++    observations = []
++
++    def read_with_diagnostic(args):
++        before = library_resources.process_guard()._active
++        copy = types.JSONRPCMessage(types.JSONRPCResponse(
++            jsonrpc='2.0', id=2, result={'diagnostic': 'local copy only'}))
++        assert json.loads(copy.model_dump_json())['id'] == 2
++        observations.append((before, library_resources.process_guard()._active,
++                             library_resources.transport_scope(2) is not None))
++        return read(args, clock=NOW)
++
++    monkeypatch.setattr(analysis, 'get_library_activity', read_with_diagnostic)
++    response = _run_original_stdio([_activity_call()])[0]
++    assert response['result'].get('isError') is not True
++    assert observations == [(1, 1, True)], observations
++    assert library_resources.process_guard()._active == 0
+diff --git a/uoink_mcp.py b/uoink_mcp.py
+index e812f596b8e993c2a764268088719f6b1830730a..ef59990bf42082845a260eaa8fa8b390adc386ae 100644
+--- a/uoink_mcp.py
++++ b/uoink_mcp.py
+@@ -19,11 +19,13 @@ v3. Run E (2026-09-04) added the two Phase 1 clip tools, `search_clips` and
+ Phase 5 run AZ (2026-09-08) added `get_library_activity` (contract phase5-v1),
+ making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
+ requests keep one admission through the real SDK JSON-RPC dump, then
+-release.
++release. The registered low-level server applies the same settlement when
++it runs on the installed SDK stdio streams.
+ """
+ 
+ from __future__ import annotations
+ 
++import contextvars
+ import json
+ import sys
+ import time
+@@ -696,7 +698,9 @@ def _register_phase4_stdio() -> None:
+         async def _handle_request_with_transport_scope(
+             message, req, session, lifespan_context, raise_exceptions=False,
+         ):
+-            token = library_resources.bind_transport_scope(getattr(message, "request_id", None))
++            request_id = getattr(message, "request_id", None)
++            _ensure_inbound_transport_scope(request_id, req)
++            token = library_resources.bind_transport_scope(request_id)
+             try:
+                 scope = library_resources.current_transport_scope()
+                 if scope is not None and scope.refusal is not None:
+@@ -712,6 +716,7 @@ def _register_phase4_stdio() -> None:
+                 library_resources.reset_bound_transport_scope(token)
+ 
+         low._handle_request = _handle_request_with_transport_scope
++        _bind_sdk_serialization_settlement(low)
+ 
+     handlers = getattr(low, "request_handlers", None)
+     if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
+@@ -853,6 +858,123 @@ def _stdio_param(params, key: str):
+     return getattr(params, key, None)
+ 
+ 
++# Product-owned stdio writer depth. When > 0, `_deliver_bounded_outbound`
++# already holds admission through the real SDK dump. The installed SDK
++# `stdio_server` route stays at 0 and settles in `_sdk_serialize_and_settle`.
++_bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
++
++
++def _stdio_request_budget_identity(req):
++    method = getattr(req, "method", None) or ""
++    tool_name = None
++    if method == "tools/call":
++        tool_name = _stdio_param(getattr(req, "params", None), "name")
++    return method, tool_name
++
++
++def _ensure_inbound_transport_scope(request_id, req) -> None:
++    """Admit once for a budgeted request that did not enter the product writer."""
++    import library_resources
++    if request_id is None or library_resources.transport_scope(request_id) is not None:
++        return
++    method, tool_name = _stdio_request_budget_identity(req)
++    if not library_resources.is_budgeted_stdio_request(method, tool_name):
++        return
++    library_resources.begin_transport_request(request_id, method, tool_name)
++
++
++def _settle_original_sdk_dump(message, text, scope, orig_dump, *args, **kwargs) -> str:
++    """Refuse expired or oversize success after the actual SDK dump, then release."""
++    import library_resources
++    root = getattr(message, "root", None)
++    if root is None or isinstance(root, mcp_types.JSONRPCNotification):
++        return text
++    request_id = getattr(root, "id", None)
++    if scope is None:
++        return text
++    if not scope.cancel_requested and not _stdio_jsonrpc_is_error(root):
++        if scope.expired():
++            text = orig_dump(
++                _stdio_budget_refusal_message(scope, request_id, "deadline_exceeded"),
++                *args,
++                **kwargs,
++            )
++        elif len(text.encode("utf-8")) > library_resources.LIMITS["max_response_bytes"]:
++            text = orig_dump(
++                _stdio_budget_refusal_message(scope, request_id, "resource_too_large"),
++                *args,
++                **kwargs,
++            )
++    return _stdio_enforce_completed_frame(text, request_id, scope)
++
++
++class _SdkOutboundMessage(mcp_types.JSONRPCMessage):
++    """Only a frame handed to the SDK writer owns serialization settlement."""
++
++    def model_dump_json(self, *args, **kwargs):
++        import library_resources
++        scope = getattr(self, "_uoink_frame_scope", None)
++        serializer = mcp_types.JSONRPCMessage.model_dump_json
++        try:
++            text = serializer(self, *args, **kwargs)
++            return _settle_original_sdk_dump(self, text, scope, serializer, *args, **kwargs)
++        finally:
++            if scope is not None:
++                if library_resources.transport_scope(scope.request_id) is scope:
++                    library_resources.finish_transport_request(scope.request_id)
++                else:
++                    scope.release()
++
++
++class _SdkSettlementStream:
++    """Keep the SDK writer and its real dump; attach ownership to its frames."""
++
++    def __init__(self, stream):
++        self._stream = stream
++
++    async def send(self, session_message):
++        import library_resources
++        from mcp.shared.message import SessionMessage
++        message = session_message.message
++        if isinstance(message.root, (mcp_types.JSONRPCResponse, mcp_types.JSONRPCError)):
++            scope = library_resources.transport_scope(message.root.id)
++            if scope is not None:
++                owned = _SdkOutboundMessage.model_construct(root=message.root)
++                object.__setattr__(owned, "_uoink_frame_scope", scope)
++                session_message = SessionMessage(owned, metadata=session_message.metadata)
++        await self._stream.send(session_message)
++
++    async def __aenter__(self):
++        await self._stream.__aenter__()
++        return self
++
++    async def __aexit__(self, *args):
++        return await self._stream.__aexit__(*args)
++
++    async def aclose(self):
++        await self._stream.aclose()
++
++
++def _bind_sdk_serialization_settlement(low) -> None:
++    if getattr(low, "_uoink_sdk_settlement_bound", False):
++        return
++    _orig_run = low.run
++
++    async def _run_with_sdk_serialization_settlement(
++        read_stream, write_stream, *args, **kwargs
++    ):
++        if _bounded_stdio_writer_depth.get() > 0:
++            return await _orig_run(read_stream, write_stream, *args, **kwargs)
++        try:
++            return await _orig_run(read_stream, _SdkSettlementStream(write_stream), *args, **kwargs)
++        finally:
++            import library_resources
++            library_resources.release_all_transport_scopes()
++
++    low.run = _run_with_sdk_serialization_settlement
++    low._uoink_sdk_settlement_bound = True
++
++
+ def _stdio_refusal_server_result(req, exc):
+     import library_analysis
+     import library_resources
+@@ -1072,6 +1194,15 @@ def _bounded_stdio_server(stdin=None, stdout=None):
+ 
+     @asynccontextmanager
+     async def _cm(stdin=stdin, stdout=stdout):
++        token = _bounded_stdio_writer_depth.set(_bounded_stdio_writer_depth.get() + 1)
++        try:
++            async with _bounded_stdio_cm(stdin, stdout) as streams:
++                yield streams
++        finally:
++            _bounded_stdio_writer_depth.reset(token)
++
++    @asynccontextmanager
++    async def _bounded_stdio_cm(stdin, stdout):
+         import library_resources
+         if not stdin:
+             stdin = anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace"))

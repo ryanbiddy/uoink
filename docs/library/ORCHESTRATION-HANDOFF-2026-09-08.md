@@ -82,7 +82,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
 | 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
-| 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
+| 5 | Reviewed SDK repair: 267 passed / zero failed in worker and checkout | BA-4 and corrected unary-clock probe pass; missed dashboard byte target remains failed | Final full tree/package; Part B deferred |
 | 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
 | Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; results/runbook checkpoint `ba3d256` backed up to `origin/cc/living-library` | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit |
 
@@ -125,9 +125,9 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    briefs are `RYAN-PHASE4-LIFECYCLE-REPAIR-2026-09-09.md`,
    `RYAN-PHASE5-SDK-REPAIR-2026-09-09.md` and
    `RYAN-PHASE6-REFUSAL-REPAIR-2026-09-09.md`, dispatched in that order.
-   Phase 4 lifecycle plus Astra's conservative-lease correction is verified in
-   both roots. Phase 5's outgoing-frame supplement has 267 worker passes; Phase 6
-   has 71 independent worker passes. Integrate those next, with checkout checks.
+   Phase 4 lifecycle plus Astra's conservative-lease correction is integrated at
+   `1063843`. Phase 5's outgoing-frame supplement has 267 passes in both roots.
+   Phase 6 has 71 independent worker passes; integrate it next with checkout checks.
 2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
    and helper launch use 5179, even from another Windows profile. Implementation
    worker `fd647a72-24b6-468a-905f-ddfdfa5899ac` follows
@@ -136,7 +136,8 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    to waive the no-5179 rule or execute the current installer.
    C22 kit worker `9c866bb0-cb4d-4008-894b-df359998b5f1` follows
    `RYAN-INSTALLED-C22-KIT-BRIEF-2026-09-09.md` from `c9b5407`.
-   Dispatch the separate `RYAN-INSTALLED-PHASE4-KIT-BRIEF-2026-09-09.md` next.
+   Phase 4 kit worker `81060797-d8be-4e56-8d7c-6f8b0dd30a94` follows
+   `RYAN-INSTALLED-PHASE4-KIT-BRIEF-2026-09-09.md` from `1063843`.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1426,3 +1427,19 @@ named cases pass in the worker; checkout integration remains next. Phase 6's
 The original full tree remains the `4a35316` failed result until a fresh committed
 tree is measured. Production source has now changed, so a new package is owed
 after the remaining verified integrations. The old package/proof stay retained.
+
+### 2026-09-09 - SDK settlement integrated; three installation workers active
+
+The reviewed SDK supplement independently has **267 passes, zero failures**
+in worker and checkout, 127.82 / 138.83 seconds. The original worker's 266-pass
+union and the failed local-copy probe are preserved. The applied code binds
+settlement to the outgoing frame and leaves the shared SDK serializer unchanged.
+No existing tests changed. See `RYAN-PHASE5-SDK-INTEGRATOR-2026-09-09.md` and
+its 27-file proof seal. Phase 6's 71-case checkout verification is next.
+
+Three independent Grok workers now cover the installation finish: isolation
+`fd647a72`, C22 scenario kit `9c866bb0`, and Phase 4/everyday kit `81060797`.
+The last started from `1063843`. They may write new tooling and tests, but
+cannot run Inno, the normal helper, actual clients/models or any forbidden
+data/port. Astra still verifies and assembles the exact operator runbook and
+hash-bound package before Ryan's actual receipt session.

@@ -1,0 +1,13 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_local_response_copy_does_not_settle_the_outgoing_request ________
+tests\test_phase5_sdk_settlement_review.py:30: in test_local_response_copy_does_not_settle_the_outgoing_request
+    assert observations == [(1, 1, True)], observations
+E   AssertionError: [(1, 0, False)]
+E   assert [(1, 0, False)] == [(1, 1, True)]
+E     
+E     At index 0 diff: (1, 0, False) != (1, 1, True)
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/test_phase5_sdk_settlement_review.py::test_local_response_copy_does_not_settle_the_outgoing_request
+1 failed in 1.77s

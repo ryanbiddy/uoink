@@ -19,11 +19,13 @@ v3. Run E (2026-09-04) added the two Phase 1 clip tools, `search_clips` and
 Phase 5 run AZ (2026-09-08) added `get_library_activity` (contract phase5-v1),
 making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
 requests keep one admission through the real SDK JSON-RPC dump, then
-release.
+release. The registered low-level server applies the same settlement when
+it runs on the installed SDK stdio streams.
 """
 
 from __future__ import annotations
 
+import contextvars
 import json
 import sys
 import time
@@ -696,7 +698,9 @@ def _register_phase4_stdio() -> None:
         async def _handle_request_with_transport_scope(
             message, req, session, lifespan_context, raise_exceptions=False,
         ):
-            token = library_resources.bind_transport_scope(getattr(message, "request_id", None))
+            request_id = getattr(message, "request_id", None)
+            _ensure_inbound_transport_scope(request_id, req)
+            token = library_resources.bind_transport_scope(request_id)
             try:
                 scope = library_resources.current_transport_scope()
                 if scope is not None and scope.refusal is not None:
@@ -712,6 +716,7 @@ def _register_phase4_stdio() -> None:
                 library_resources.reset_bound_transport_scope(token)
 
         low._handle_request = _handle_request_with_transport_scope
+        _bind_sdk_serialization_settlement(low)
 
     handlers = getattr(low, "request_handlers", None)
     if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
@@ -851,6 +856,123 @@ def _stdio_param(params, key: str):
     if isinstance(params, dict):
         return params.get(key)
     return getattr(params, key, None)
+
+
+# Product-owned stdio writer depth. When > 0, `_deliver_bounded_outbound`
+# already holds admission through the real SDK dump. The installed SDK
+# `stdio_server` route stays at 0 and settles in `_sdk_serialize_and_settle`.
+_bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
+
+
+def _stdio_request_budget_identity(req):
+    method = getattr(req, "method", None) or ""
+    tool_name = None
+    if method == "tools/call":
+        tool_name = _stdio_param(getattr(req, "params", None), "name")
+    return method, tool_name
+
+
+def _ensure_inbound_transport_scope(request_id, req) -> None:
+    """Admit once for a budgeted request that did not enter the product writer."""
+    import library_resources
+    if request_id is None or library_resources.transport_scope(request_id) is not None:
+        return
+    method, tool_name = _stdio_request_budget_identity(req)
+    if not library_resources.is_budgeted_stdio_request(method, tool_name):
+        return
+    library_resources.begin_transport_request(request_id, method, tool_name)
+
+
+def _settle_original_sdk_dump(message, text, scope, orig_dump, *args, **kwargs) -> str:
+    """Refuse expired or oversize success after the actual SDK dump, then release."""
+    import library_resources
+    root = getattr(message, "root", None)
+    if root is None or isinstance(root, mcp_types.JSONRPCNotification):
+        return text
+    request_id = getattr(root, "id", None)
+    if scope is None:
+        return text
+    if not scope.cancel_requested and not _stdio_jsonrpc_is_error(root):
+        if scope.expired():
+            text = orig_dump(
+                _stdio_budget_refusal_message(scope, request_id, "deadline_exceeded"),
+                *args,
+                **kwargs,
+            )
+        elif len(text.encode("utf-8")) > library_resources.LIMITS["max_response_bytes"]:
+            text = orig_dump(
+                _stdio_budget_refusal_message(scope, request_id, "resource_too_large"),
+                *args,
+                **kwargs,
+            )
+    return _stdio_enforce_completed_frame(text, request_id, scope)
+
+
+class _SdkOutboundMessage(mcp_types.JSONRPCMessage):
+    """Only a frame handed to the SDK writer owns serialization settlement."""
+
+    def model_dump_json(self, *args, **kwargs):
+        import library_resources
+        scope = getattr(self, "_uoink_frame_scope", None)
+        serializer = mcp_types.JSONRPCMessage.model_dump_json
+        try:
+            text = serializer(self, *args, **kwargs)
+            return _settle_original_sdk_dump(self, text, scope, serializer, *args, **kwargs)
+        finally:
+            if scope is not None:
+                if library_resources.transport_scope(scope.request_id) is scope:
+                    library_resources.finish_transport_request(scope.request_id)
+                else:
+                    scope.release()
+
+
+class _SdkSettlementStream:
+    """Keep the SDK writer and its real dump; attach ownership to its frames."""
+
+    def __init__(self, stream):
+        self._stream = stream
+
+    async def send(self, session_message):
+        import library_resources
+        from mcp.shared.message import SessionMessage
+        message = session_message.message
+        if isinstance(message.root, (mcp_types.JSONRPCResponse, mcp_types.JSONRPCError)):
+            scope = library_resources.transport_scope(message.root.id)
+            if scope is not None:
+                owned = _SdkOutboundMessage.model_construct(root=message.root)
+                object.__setattr__(owned, "_uoink_frame_scope", scope)
+                session_message = SessionMessage(owned, metadata=session_message.metadata)
+        await self._stream.send(session_message)
+
+    async def __aenter__(self):
+        await self._stream.__aenter__()
+        return self
+
+    async def __aexit__(self, *args):
+        return await self._stream.__aexit__(*args)
+
+    async def aclose(self):
+        await self._stream.aclose()
+
+
+def _bind_sdk_serialization_settlement(low) -> None:
+    if getattr(low, "_uoink_sdk_settlement_bound", False):
+        return
+    _orig_run = low.run
+
+    async def _run_with_sdk_serialization_settlement(
+        read_stream, write_stream, *args, **kwargs
+    ):
+        if _bounded_stdio_writer_depth.get() > 0:
+            return await _orig_run(read_stream, write_stream, *args, **kwargs)
+        try:
+            return await _orig_run(read_stream, _SdkSettlementStream(write_stream), *args, **kwargs)
+        finally:
+            import library_resources
+            library_resources.release_all_transport_scopes()
+
+    low.run = _run_with_sdk_serialization_settlement
+    low._uoink_sdk_settlement_bound = True
 
 
 def _stdio_refusal_server_result(req, exc):
@@ -1072,6 +1194,15 @@ def _bounded_stdio_server(stdin=None, stdout=None):
 
     @asynccontextmanager
     async def _cm(stdin=stdin, stdout=stdout):
+        token = _bounded_stdio_writer_depth.set(_bounded_stdio_writer_depth.get() + 1)
+        try:
+            async with _bounded_stdio_cm(stdin, stdout) as streams:
+                yield streams
+        finally:
+            _bounded_stdio_writer_depth.reset(token)
+
+    @asynccontextmanager
+    async def _bounded_stdio_cm(stdin, stdout):
         import library_resources
         if not stdin:
             stdin = anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace"))
