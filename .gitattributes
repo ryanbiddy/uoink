@@ -63,3 +63,4 @@ docs/library/proof/candidate-full-*/** -text
 docs/library/proof/candidate-package-*/** -text
 docs/library/patches/ryan-fixture-corrections-2026-09-09.patch -text
 docs/library/proof/ryan-corrected-*/** -text
+docs/library/proof/p3-original-checks-*/** -text

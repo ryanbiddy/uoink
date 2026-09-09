@@ -8,6 +8,12 @@ Historical phase acceptances below do not waive this result. The existing
 installer also needs a supported isolated installation/startup path before
 Ryan can obtain the installed receipts without contacting port 5179.
 
+Subsequent recovery `239dbbd` closes three Phase 3 archive gaps in focused
+verification: AS-7/8/9 is 22 passed / one failed, strict Phase 3 is 181 passed /
+one failed. The original AT6 child exit status remains missing. These focused
+results do not replace the corrected full tree. Product repair and installer
+workers are undergoing independent review; no new package is sealed yet.
+
 ## Package and scope
 
 Application version: 3.8.0. Branch `cc/living-library-candidate`, cut from

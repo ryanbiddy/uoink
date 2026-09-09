@@ -80,7 +80,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Four evidence checks failed on `4a35316`; original AT6/64703 artifacts and C21 WAL state now recovered for verification | 33 original/derived archive files, exact hash bindings; AT6 child exit status remains unrecorded and is not inferred | Run unchanged AS-7/8/9 on committed recovery; C22 after installation isolation repair |
+| 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
 | 4 | Thirteen mirror checks fail on corrected tree; required prior client evidence retained | Five lifecycle and eight interrupted-write/ownership failures; X HTTP 403 stays blocked, no repair/fetch | Product brief sections 2–3; installed receipt after isolation repair |
 | 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
 | 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
@@ -121,12 +121,14 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    Phase 5 SDK settlement and Phase 6 refusal semantics. Review each production
    diff before a fresh named run. No further fixture edits or measurement waivers.
    Ryan reiterated continuing through release readiness on 2026-09-09.
-   Astra is recovering Phase 3 originals locally; independent bounded worker
+   Phase 3 originals and verification are sealed; its exit gap remains. Independent bounded worker
    briefs are `RYAN-PHASE4-LIFECYCLE-REPAIR-2026-09-09.md`,
    `RYAN-PHASE5-SDK-REPAIR-2026-09-09.md` and
    `RYAN-PHASE6-REFUSAL-REPAIR-2026-09-09.md`, dispatched in that order.
 2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
-   and helper launch use 5179, even from another Windows profile. Provide a
+   and helper launch use 5179, even from another Windows profile. Implementation
+   worker `fd647a72-24b6-468a-905f-ddfdfa5899ac` follows
+   `RYAN-INSTALL-ISOLATION-IMPLEMENTATION-2026-09-09.md` from `5bae13c`. Provide a
    supported isolated product path and complete operator kit. Do not ask Ryan
    to waive the no-5179 rule or execute the current installer.
 3. After source repairs, run applicable suites in worker/checkout and the full
@@ -1378,3 +1380,21 @@ removed for each dispatch; subscription only, no existing-test edits. A
 nonessential mailgraph MCP startup handshake failed in their normal CLI
 startup; no success or acceptance is inferred from the absence of streamed
 worker text. Wait for completed source/results and independently verify.
+
+### 2026-09-09 - Recovery verification sealed; installer repair dispatched
+
+On committed recovery `239dbbd`, AS-7/8/9 has **22 passed, one failed**,
+1.38 seconds. Strict Phase 3 has **181 passed, one failed**, 45.43 seconds;
+both failures concern the missing original AT6 child exit status. Confirmation
+has 11 passes and dashboard 35. Companion groups have 377 passes / 17 failures;
+all 17 are the Phase 4 historical driver's blocked isolated subprocesses.
+Preserve the original driver and failed output; the companion note defines
+the current guarded invocation after a documented Phase 4 repair. No existing
+test changes. The 23-file seal is `proof/p3-original-checks-2026-09-09/SHA256.json`.
+
+Installer worker Grok `fd647a72-24b6-468a-905f-ddfdfa5899ac` started from
+`5bae13c` under the implementation brief. It owns the supported mechanism;
+Astra still owns the complete operator kit, independent verification and build.
+Phase 5 SDK and Phase 6 refusal workers have finished; independent review is
+in progress. Phase 4 lifecycle is still active. No worker output is accepted
+before verification in both roots.

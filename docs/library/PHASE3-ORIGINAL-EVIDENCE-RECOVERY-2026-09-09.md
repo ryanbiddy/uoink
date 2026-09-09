@@ -3,8 +3,9 @@
 Astra recovered 33 archive files from the original disposable fixtures on
 2026-09-09, under the companion recovery brief. No capture, helper, browser,
 model or source request was run. Existing test files and historical receipt
-bytes are unchanged. Verification of the corrected archive is pending at this
-commit; the earlier 20-failure full tree remains failed.
+bytes are unchanged. Independent verification on `239dbbd` has 22 passed and
+one failed in AS-7/8/9, and 181 passed and one failed in the strict Phase 3
+suite. The earlier 20-failure full tree remains failed.
 
 AT6's original `s21-0w_h99w2` fixture retains all eight artifacts with exactly
 the hashes recorded in `receipt-at6-candidate-1830b7a.json`. This includes the
@@ -51,3 +52,13 @@ checks. Preserve the outstanding exit-status failure unless actual original
 process-exit evidence becomes available. AS-8/AS-9's complete replacement
 observation remains separate and does not retroactively supply that value.
 This review grants no installed C22/Phase 4 or release approval.
+
+The wider verification also has 11 confirmation passes, 35 dashboard passes,
+and 377 companion passes with 17 failures. Those 17 are from the historical
+Phase 4 companion driver, whose subprocess prohibition prevents the current
+isolated mirror writer from starting. Its audit records the blocked Popen
+calls. The result stays failed; see
+`PHASE3-COMPANION-DRIVER-NOTE-2026-09-09.md` for the reviewed future invocation
+after the Phase 4 product repair. Groups overlap and are not unique totals.
+The full outputs, commands, runner and guard are sealed in
+`proof/p3-original-checks-2026-09-09/SHA256.json` (23 files).

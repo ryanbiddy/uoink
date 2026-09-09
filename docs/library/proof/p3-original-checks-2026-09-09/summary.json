@@ -1,0 +1,578 @@
+{
+  "tested_commit": "239dbbd70b9b6515051fee7c746b02f424b4aa2b",
+  "observations": [
+    {
+      "label": "p3original01",
+      "name": "tests",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-ra",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "ig_paths",
+        "tests/library_work_astra/test_phase3_acceptance7.py",
+        "tests/library_work_astra/test_phase3_acceptance8.py",
+        "tests/library_work_astra/test_phase3_acceptance9.py",
+        "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3original01-0",
+        "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3original01\\tests.xml"
+      ],
+      "exit": 1,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3original01\\tests.log",
+      "counts": {
+        "passed": 22,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "summary_lines": [
+        "1 failed, 22 passed in 1.38s"
+      ]
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "confirmation",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-ra",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "ig_paths",
+        "tests/library_work_astra/test_phase3_acceptance8.py",
+        "tests/library_work_astra/test_phase3_acceptance9.py",
+        "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-0",
+        "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\confirmation.xml"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\confirmation.log",
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "summary_lines": [
+        "11 passed in 0.37s"
+      ]
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "strict",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-ra",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "ig_paths",
+        "tests\\library_work_astra\\test_phase3_acceptance3.py",
+        "tests\\library_work_astra\\test_phase3_acceptance4.py",
+        "tests\\library_work_astra\\test_phase3_acceptance5.py",
+        "tests\\library_work_astra\\test_phase3_acceptance6.py",
+        "tests\\library_work_astra\\test_phase3_acceptance7.py",
+        "tests\\library_work_astra\\test_phase3_acceptance8.py",
+        "tests\\library_work_astra\\test_phase3_acceptance9.py",
+        "tests\\library_work_astra\\test_phase3_concurrency.py",
+        "tests\\library_work_astra\\test_phase3_harness.py",
+        "tests\\library_work_astra\\test_phase3_integration.py",
+        "tests\\library_work_astra\\test_phase3_migration.py",
+        "tests\\library_work_astra\\test_phase3_publication.py",
+        "tests\\library_work_astra\\test_phase3_recovery.py",
+        "tests\\library_work_astra\\test_phase3_repairs.py",
+        "tests\\library_work_astra\\test_phase3_support.py",
+        "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-1",
+        "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\strict.xml"
+      ],
+      "exit": 1,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\strict.log",
+      "counts": {
+        "passed": 181,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "summary_lines": [
+        "1 failed, 181 passed, 6 warnings in 45.43s"
+      ]
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-service",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "service"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-service.log",
+      "summary_lines": [
+        "111 passed, 5 warnings in 11.84s"
+      ],
+      "driver_audit": {
+        "group": "service",
+        "selectors": [
+          "tests/test_source_subscriptions_detection.py",
+          "tests/test_source_subscriptions_handoff.py",
+          "tests/test_source_subscriptions_ledger.py",
+          "tests/test_source_subscriptions_migration.py",
+          "tests/test_source_subscriptions_registry.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": []
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-dashboard",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "dashboard"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-dashboard.log",
+      "summary_lines": [
+        "31 passed in 0.19s"
+      ],
+      "driver_audit": {
+        "group": "dashboard",
+        "selectors": [
+          "tests/test_dashboard_sources_api.py",
+          "tests/test_dashboard_sources_ui.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": []
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-legacy",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "legacy"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-legacy.log",
+      "summary_lines": [
+        "27 passed, 19 warnings in 1.72s"
+      ],
+      "driver_audit": {
+        "group": "legacy",
+        "selectors": [
+          "tests/test_auto_uoink_poll.py",
+          "tests/test_phase0_liveness.py",
+          "tests/test_phase0_podcast_repair.py",
+          "tests/test_podcast_watch.py",
+          "tests/test_quiet_notifications.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-adapter",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "adapter"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-adapter.log",
+      "summary_lines": [
+        "98 passed in 0.87s"
+      ],
+      "driver_audit": {
+        "group": "adapter",
+        "selectors": [
+          "tests/test_library_adapters.py",
+          "tests/test_phase0_registry_capture.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-podcast",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "podcast"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-podcast.log",
+      "summary_lines": [
+        "30 passed, 74 warnings in 2.75s"
+      ],
+      "driver_audit": {
+        "group": "podcast",
+        "selectors": [
+          "tests/test_podcast_background_jobs.py",
+          "tests/test_podcast_corpus_bridge.py",
+          "tests/test_podcast_durability.py",
+          "tests/test_podcast_url_validation.py",
+          "tests/test_podcast_workflow_truth.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-packaging",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "packaging"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-packaging.log",
+      "summary_lines": [
+        "6 passed in 0.85s"
+      ],
+      "driver_audit": {
+        "group": "packaging",
+        "selectors": [
+          "tests/test_build_guide_accuracy.py",
+          "tests/test_installer_files_complete.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": []
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-heartbeat",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "heartbeat"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-heartbeat.log",
+      "summary_lines": [
+        "10 passed in 0.05s"
+      ],
+      "driver_audit": {
+        "group": "heartbeat",
+        "selectors": [
+          "tests/test_heartbeat_semantics.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-extra",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "extra"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-extra.log",
+      "summary_lines": [
+        "49 passed in 4.85s"
+      ],
+      "driver_audit": {
+        "group": "extra",
+        "selectors": [
+          "tests/test_phase0_cli.py",
+          "tests/test_phase0_provenance.py",
+          "tests/test_phase0_x_full_text.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 0,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "companion-phase4",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "tests/library_work_astra/run_phase3_companions.py",
+        "phase4"
+      ],
+      "exit": 1,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-phase4.log",
+      "summary_lines": [
+        "17 failed, 15 passed in 9.70s"
+      ],
+      "driver_audit": {
+        "group": "phase4",
+        "selectors": [
+          "tests/library_work_astra/test_phase4_aw_acceptance.py"
+        ],
+        "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+        "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52",
+        "exit_code": 1,
+        "blocked_attempts": [
+          {
+            "event": "import",
+            "detail": "whisperx"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          },
+          {
+            "event": "subprocess.Popen",
+            "detail": "None"
+          }
+        ]
+      }
+    },
+    {
+      "label": "p3originalwide01",
+      "name": "dashboard",
+      "command": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-ra",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "ig_paths",
+        "tests/test_dashboard_sources_api.py",
+        "tests/test_dashboard_sources_ui.py",
+        "tests/test_dashboard_v324_ui.py",
+        "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-11",
+        "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\dashboard.xml"
+      ],
+      "exit": 0,
+      "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\dashboard.log",
+      "counts": {
+        "passed": 35,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "summary_lines": [
+        "35 passed in 0.26s"
+      ]
+    }
+  ],
+  "limits": [
+    "Observations overlap; do not sum as unique cases.",
+    "Historical companion phase4 driver refuses subprocess.Popen required by isolated mirror writer; its 17 failures remain failures.",
+    "Original AT6 child exit status is not recorded; its unchanged acceptance check still fails.",
+    "No existing tests or product source changed during recovery. No installed receipt."
+  ]
+}

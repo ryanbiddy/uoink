@@ -1,0 +1,181 @@
+[
+  {
+    "name": "confirmation",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/library_work_astra/test_phase3_acceptance8.py",
+      "tests/library_work_astra/test_phase3_acceptance9.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\confirmation.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\confirmation.log"
+  },
+  {
+    "name": "strict",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests\\library_work_astra\\test_phase3_acceptance3.py",
+      "tests\\library_work_astra\\test_phase3_acceptance4.py",
+      "tests\\library_work_astra\\test_phase3_acceptance5.py",
+      "tests\\library_work_astra\\test_phase3_acceptance6.py",
+      "tests\\library_work_astra\\test_phase3_acceptance7.py",
+      "tests\\library_work_astra\\test_phase3_acceptance8.py",
+      "tests\\library_work_astra\\test_phase3_acceptance9.py",
+      "tests\\library_work_astra\\test_phase3_concurrency.py",
+      "tests\\library_work_astra\\test_phase3_harness.py",
+      "tests\\library_work_astra\\test_phase3_integration.py",
+      "tests\\library_work_astra\\test_phase3_migration.py",
+      "tests\\library_work_astra\\test_phase3_publication.py",
+      "tests\\library_work_astra\\test_phase3_recovery.py",
+      "tests\\library_work_astra\\test_phase3_repairs.py",
+      "tests\\library_work_astra\\test_phase3_support.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-1",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\strict.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\strict.log"
+  },
+  {
+    "name": "companion-service",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "service"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-service.log"
+  },
+  {
+    "name": "companion-dashboard",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "dashboard"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-dashboard.log"
+  },
+  {
+    "name": "companion-legacy",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "legacy"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-legacy.log"
+  },
+  {
+    "name": "companion-adapter",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "adapter"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-adapter.log"
+  },
+  {
+    "name": "companion-podcast",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "podcast"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-podcast.log"
+  },
+  {
+    "name": "companion-packaging",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "packaging"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-packaging.log"
+  },
+  {
+    "name": "companion-heartbeat",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "heartbeat"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-heartbeat.log"
+  },
+  {
+    "name": "companion-extra",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "extra"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-extra.log"
+  },
+  {
+    "name": "companion-phase4",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "tests/library_work_astra/run_phase3_companions.py",
+      "phase4"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\companion-phase4.log"
+  },
+  {
+    "name": "dashboard",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_dashboard_sources_api.py",
+      "tests/test_dashboard_sources_ui.py",
+      "tests/test_dashboard_v324_ui.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01-11",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\dashboard.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p3originalwide01\\dashboard.log"
+  }
+]

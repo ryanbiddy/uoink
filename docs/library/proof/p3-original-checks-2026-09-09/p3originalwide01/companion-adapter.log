@@ -1,0 +1,37 @@
+whisperx unavailable: ImportError: AS6 blocks model imports: whisperx
+.................................................................2026-09-09 08:09:54,078 ERROR library list_library_work (list_work) raised
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\uoink_mcp_tools.py", line 3091, in _library_invoke
+    result = _library_dispatch(service, fn, args, context)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\uoink_mcp_tools.py", line 3062, in _library_dispatch
+    return fn(dict(args), context)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_service_fake.py", line 237, in boom
+    raise RuntimeError("sqlite3.OperationalError: C:\\Users\\someone\\index.db is locked")
+RuntimeError: sqlite3.OperationalError: C:\Users\someone\index.db is locked
+..2026-09-09 08:09:54,081 ERROR library list_library_work: service returned a malformed response
+..... [ 73%]
+....2026-09-09 08:09:54,087 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 08:09:54,088 INFO GET /health from 127.0.0.1 -> ok
+.2026-09-09 08:09:54,088 INFO GET /health from 127.0.0.1 -> ok
+2026-09-09 08:09:54,088 ERROR library status: list_work raised
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\uoink_mcp_tools.py", line 3305, in library_status
+    result = (_library_dispatch(service, fn, {"limit": 1}, context)
+              ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\uoink_mcp_tools.py", line 3062, in _library_dispatch
+    return fn(dict(args), context)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_service_fake.py", line 237, in boom
+    raise RuntimeError("sqlite3.OperationalError: C:\\Users\\someone\\index.db is locked")
+RuntimeError: sqlite3.OperationalError: C:\Users\someone\index.db is locked
+.2026-09-09 08:09:54,089 INFO GET /health from 127.0.0.1 -> ok
+...2026-09-09 08:09:54,093 INFO auth: rejected POST /library/intent (token mismatch)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='chrome-extension://abcdefghijklmnop', sec-fetch-site=None)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='https://www.youtube.com', sec-fetch-site=None)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='http://127.0.0.1:1', sec-fetch-site=None)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='https://127.0.0.1:5179', sec-fetch-site=None)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='http://evil.example', sec-fetch-site=None)
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin='http://127.0.0.1:5179', sec-fetch-site='cross-site')
+2026-09-09 08:09:54,093 INFO POST /library/intent rejected (origin=None, sec-fetch-site='same-site')
+.................                                               [100%]
+98 passed in 0.87s
+AS6_RESULT {"group": "adapter", "selectors": ["tests/test_library_adapters.py", "tests/test_phase0_registry_capture.py"], "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]", "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52", "exit_code": 0, "blocked_attempts": [{"event": "import", "detail": "whisperx"}]}

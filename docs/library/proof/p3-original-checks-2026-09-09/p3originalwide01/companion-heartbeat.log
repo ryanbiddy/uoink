@@ -1,0 +1,15 @@
+whisperx unavailable: ImportError: AS6 blocks model imports: whisperx
+.2026-09-09 08:09:59,889 ERROR source watch tick failed for 7
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\as6-heartbeat-0n4hrzsj\helper\server.py", line 8934, in _podcast_feed_scheduler_tick
+    result = _poll_source_for_watch(claim)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\test_heartbeat_semantics.py", line 73, in <lambda>
+    lambda claim: fn(claim["source_id"]))
+                  ~~^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\test_heartbeat_semantics.py", line 103, in boom
+    raise RuntimeError("feed exploded: https://user:pw@show.example/feed")
+RuntimeError: feed exploded: https://user:pw@show.example/feed
+......2026-09-09 08:09:59,895 INFO GET /health from 127.0.0.1 -> ok
+...                                                               [100%]
+10 passed in 0.05s
+AS6_RESULT {"group": "heartbeat", "selectors": ["tests/test_heartbeat_semantics.py"], "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]", "server_sha256": "a9248d669aec1543f94ea7ac0e571572c27fb4f4fd11bc898c4480aa5bdfdc52", "exit_code": 0, "blocked_attempts": [{"event": "import", "detail": "whisperx"}]}
