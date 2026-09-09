@@ -715,6 +715,31 @@ def _io_ctx_session():
     return getattr(_IO_CTX, "session", None)
 
 
+def _unbind_dead_session_from_this_thread(
+    session: "_VaultIoSession | None", *, proven_dead: bool,
+) -> None:
+    """Drop this thread's binding after this session is proven dead.
+
+    Only the originating Thread object may unbind. A foreign caller cannot
+    clear the originator's context. Launch or assignment still in flight
+    keeps the binding. This does not drop retain/exclusion and does not
+    adopt a later session.
+    """
+    if session is None:
+        return
+    if _session_launch_open(session):
+        return
+    if not proven_dead and session.physically_alive():
+        return
+    origin = getattr(session, "_origin_thread", None)
+    if origin is not None and origin is not threading.current_thread():
+        return
+    if getattr(_IO_CTX, "session", None) is session:
+        _IO_CTX.session = None
+        if getattr(_IO_CTX, "token", None) == getattr(session, "token", None):
+            _IO_CTX.token = None
+
+
 def _bound_session_must_refuse_dest() -> bool:
     """True when a bound operation exists and must not touch the destination."""
     session = _io_ctx_session()
@@ -1672,6 +1697,7 @@ class _VaultIoSession:
         self._popen_in_progress = False
         _drop_retained_session(self)
         self._release_held_exclusion()
+        _unbind_dead_session_from_this_thread(self, proven_dead=True)
 
     def _adopt_owned_tree(self) -> None:
         self.owned_pids()
@@ -1977,6 +2003,7 @@ class _VaultIoSession:
             self.job = None
             _drop_retained_session(self)
             self._release_held_exclusion()
+            _unbind_dead_session_from_this_thread(self, proven_dead=True)
         self.termination_s = time.monotonic() - t0
         return confirmed
 
@@ -4559,10 +4586,7 @@ class Mirror:
             return
         if self._session_blocks_start(session):
             return
-        if getattr(_IO_CTX, "session", None) is session:
-            _IO_CTX.session = None
-            if getattr(_IO_CTX, "token", None) == getattr(session, "token", None):
-                _IO_CTX.token = None
+        _unbind_dead_session_from_this_thread(session, proven_dead=True)
         _drop_retained_session(session)
         session._release_held_exclusion()
         if self._vault_io is session:

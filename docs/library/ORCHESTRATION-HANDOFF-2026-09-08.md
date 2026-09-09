@@ -81,7 +81,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Recovery `239dbbd`: AS-7/8/9 22 passed / one failed; strict 181 passed / one failed | Three original evidence gaps recovered; AT6 child exit status remains unrecorded and is not inferred | Preserve exit gap; C22 after installation isolation repair |
-| 4 | Thirteen mirror checks fail on corrected tree; required prior client evidence retained | Five lifecycle and eight interrupted-write/ownership failures; X HTTP 403 stays blocked, no repair/fetch | Product brief sections 2–3; installed receipt after isolation repair |
+| 4 | Reviewed lifecycle repair: 163 passed / eight failed in worker and checkout | Five lifetime failures closed in the named union; eight parent-interception failures remain; X HTTP 403 stays blocked | Full tree after remaining source integrations; installed receipt kit after isolation repair |
 | 5 | Corrected unary-clock test passes; one SDK deadline/admission test fails | Remaining SDK failure is product work; missed dashboard byte target remains failed | Product brief section 4; Part B deferred |
 | 6 | Corrected ticket setup retained; two stale-refusal checks fail | Chapters/cited ranges only; speaker gate stays blocked with no diarization | Product brief section 5; no speaker attribution claims |
 | Integration | Corrected tree `4a35316`: 2,174 passed / 20 failed / 3 skipped / 1 xfailed, 607.27 s; results/runbook checkpoint `ba3d256` backed up to `origin/cc/living-library` | Six corrected files retain all 690 assertions. Source unchanged; existing installer/seal retained. Runbook stops before installation because shipped prep/startup use 5179 | Product repair briefs, then verified source/rebuild if changed and executable installed receipt kit |
@@ -125,12 +125,18 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    briefs are `RYAN-PHASE4-LIFECYCLE-REPAIR-2026-09-09.md`,
    `RYAN-PHASE5-SDK-REPAIR-2026-09-09.md` and
    `RYAN-PHASE6-REFUSAL-REPAIR-2026-09-09.md`, dispatched in that order.
+   Phase 4 lifecycle plus Astra's conservative-lease correction is verified in
+   both roots. Phase 5's outgoing-frame supplement has 267 worker passes; Phase 6
+   has 71 independent worker passes. Integrate those next, with checkout checks.
 2. Follow `INSTALL-ISOLATION-REPAIR-BRIEF-2026-09-09.md`: the current Inno prep
    and helper launch use 5179, even from another Windows profile. Implementation
    worker `fd647a72-24b6-468a-905f-ddfdfa5899ac` follows
    `RYAN-INSTALL-ISOLATION-IMPLEMENTATION-2026-09-09.md` from `5bae13c`. Provide a
    supported isolated product path and complete operator kit. Do not ask Ryan
    to waive the no-5179 rule or execute the current installer.
+   C22 kit worker `9c866bb0-cb4d-4008-894b-df359998b5f1` follows
+   `RYAN-INSTALLED-C22-KIT-BRIEF-2026-09-09.md` from `c9b5407`.
+   Dispatch the separate `RYAN-INSTALLED-PHASE4-KIT-BRIEF-2026-09-09.md` next.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1398,3 +1404,25 @@ Astra still owns the complete operator kit, independent verification and build.
 Phase 5 SDK and Phase 6 refusal workers have finished; independent review is
 in progress. Phase 4 lifecycle is still active. No worker output is accepted
 before verification in both roots.
+
+### 2026-09-09 - Lifecycle integration and final SDK review
+
+Phase 4 lifecycle is independently **163 passed / eight failed** in both roots,
+176.98 / 174.21 seconds. All five lifetime cases pass; the eight parent-process
+interception failures remain. Astra's new real-owner probe rejected the worker's
+unreadable-lease exception (one failure, 0.90 seconds), then passed after its
+removal. A separate cancelled-plan control passed before repair. The original
+worker patch, failed probe and corrected observations are retained. See the
+lifecycle integrator report and its 24-file seal. Only `.gitattributes` had a
+three-way conflict; both raw-proof rules were preserved. No existing test edits.
+
+The SDK worker independently passed 266 cases, then the local-response-copy
+review failed: its global serializer hook released a request before the real
+outgoing frame. Astra's documented message/stream adapter removes that hook and
+binds settlement to the actual outgoing frame. Four focused cases and all 267
+named cases pass in the worker; checkout integration remains next. Phase 6's
+71 independent worker checks also pass, with no publication without a ticket.
+
+The original full tree remains the `4a35316` failed result until a fresh committed
+tree is measured. Production source has now changed, so a new package is owed
+after the remaining verified integrations. The old package/proof stay retained.

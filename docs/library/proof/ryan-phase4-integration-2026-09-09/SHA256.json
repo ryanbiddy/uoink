@@ -1,0 +1,101 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "applied.patch": {
+      "sha256": "0f146ed5587c91503cf7fe2e757e702c1490e966dd8607f41bfab3fe038c196d",
+      "bytes": 787655
+    },
+    "checkout/p4-life-ci01/results.json": {
+      "sha256": "f15c944c9d85aaa2b6f9d6f12146e272c975a085feeabce5c50762c2ddf9c984",
+      "bytes": 2169
+    },
+    "checkout/p4-life-ci01/tests.log": {
+      "sha256": "2c8600124da92d793b5f7fa16da22a7d77b54c703645f7b57de0b7e8f0e6a91f",
+      "bytes": 4802
+    },
+    "checkout/p4-life-ci01/tests.xml": {
+      "sha256": "61a17888d47cece694b9b34f6b916a120a70490661e8bddec59f273cf35880eb",
+      "bytes": 28897
+    },
+    "ig_paths.py": {
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "bytes": 106
+    },
+    "integrator_verify.py": {
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+      "bytes": 4420
+    },
+    "provenance.json": {
+      "sha256": "6c43c12f486661222adab2a8e146b1912860e45043e030b4938314b1dac31c64",
+      "bytes": 5025
+    },
+    "sitecustomize.py": {
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "bytes": 1216
+    },
+    "worker/p4-life-foreign-review01/results.json": {
+      "sha256": "908beb1dd335225babb1b30ef8a15028def4ab145144d7ff8b26d2587b6065b2",
+      "bytes": 884
+    },
+    "worker/p4-life-foreign-review01/tests.log": {
+      "sha256": "413302693b3a4511ccf620bd0c804d8ed1eb7f51806578f82f4feebc81099488",
+      "bytes": 1838
+    },
+    "worker/p4-life-foreign-review01/tests.xml": {
+      "sha256": "13aee4d4bfe89bcde02164961b2a60809b3b4cced5a2491c1e7bafeb4c9f8c3c",
+      "bytes": 3026
+    },
+    "worker/p4-life-plan-review01/results.json": {
+      "sha256": "780319533768a90e1b7d4d12b316b3fc0eea08d7d76712ce2d6f038ac0be134a",
+      "bytes": 866
+    },
+    "worker/p4-life-plan-review01/tests.log": {
+      "sha256": "16bf8ec884a36e217ab993ab399e0c564e45caf3b5f8a45906e7c2539cb70dbf",
+      "bytes": 100
+    },
+    "worker/p4-life-plan-review01/tests.xml": {
+      "sha256": "c922503ba6b175eeac6af98dfa0abb3fb650c90bde4bd3b9a7c4453189bbe119",
+      "bytes": 388
+    },
+    "worker/p4-life-review-repair01/results.json": {
+      "sha256": "cbef554a9c142ad1e31d39ce8563c83870cdfd0e549118c3945148abeec4bcf8",
+      "bytes": 1029
+    },
+    "worker/p4-life-review-repair01/tests.log": {
+      "sha256": "2c5eea660e6317168cb3d1bf396da0e07dee89e732af06f05347bcac58426aea",
+      "bytes": 102
+    },
+    "worker/p4-life-review-repair01/tests.xml": {
+      "sha256": "1a23039bca475aaaedea530cf52307f2d41514785f27e9ed53fc3d657010bcf3",
+      "bytes": 2042
+    },
+    "worker/p4-life-wi01/results.json": {
+      "sha256": "ccf691b384b8d18eff4d3e3d6d3ce4bc5526bacbab06093191f641ee4222bc4c",
+      "bytes": 2195
+    },
+    "worker/p4-life-wi01/tests.log": {
+      "sha256": "cce04c0117ab84277bc61b144f207cff59c9486de64682801a689f8415f209f4",
+      "bytes": 4802
+    },
+    "worker/p4-life-wi01/tests.xml": {
+      "sha256": "4fff30cc1f121e873fed37a1376d80b5e150221155a1a8996dff039f495d9c9b",
+      "bytes": 28598
+    },
+    "worker/p4-life-wi02/results.json": {
+      "sha256": "c503ebbd7e926b3ef81b6742f75d1b9a2ff909004c368b7ba0aa82ce68770564",
+      "bytes": 2310
+    },
+    "worker/p4-life-wi02/tests.log": {
+      "sha256": "36109e58cd062fb4ee97ce8dd8768d5c43159cbccb0a98473e6c8edbfc25f7c3",
+      "bytes": 4802
+    },
+    "worker/p4-life-wi02/tests.xml": {
+      "sha256": "65ade6520470b45a2be74824a3b27e923558aaf8d30566f366b9ef7df6dc6db0",
+      "bytes": 28897
+    },
+    "worker-original.patch": {
+      "sha256": "c5c21002f1e5fc3483f39e3225df144a776c2726f9b47588965c8854f6ecf2cb",
+      "bytes": 783195
+    }
+  }
+}

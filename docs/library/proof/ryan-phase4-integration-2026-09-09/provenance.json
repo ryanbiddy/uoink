@@ -1,0 +1,103 @@
+{
+  "worker": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok",
+  "worker_base": "a74385cd0cca237c3c6bdbdb3c0676cad8a799e9",
+  "checkout_before": "c9b5407a1605ce87da16af1480688d97bf4ba3d8",
+  "final_worker_source": {
+    "library_mirror.py": {
+      "sha256": "adab284f08c1e52b99b9153e3453b4b92aadbb9723f7e24357ce3b337612a99c",
+      "bytes": 203805,
+      "lf_sha256": "a3859fd35dc6a04d96bad9e93bfc6219c0d838fc9e905e12017eafe10bbeb1ad"
+    }
+  },
+  "final_checkout_source": {
+    "library_mirror.py": {
+      "sha256": "b5205249721a64e6300f4e0bb950c2b1da8de77d0acd00a461c9615a8bc86c17",
+      "bytes": 203807
+    }
+  },
+  "observations": [
+    {
+      "label": "checkout/p4-life-ci01",
+      "cases": 171,
+      "passed": 163,
+      "failed": 8,
+      "errors": 0,
+      "skipped": 0,
+      "failures": [
+        "tests.library_work_astra.test_phase4_aw2_acceptance::test_d13_replace_syscall_cannot_complete_after_timeout",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_retry_keeps_ownership_of_interrupted_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_control_hard_purge_removes_unedited_recorded_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync",
+        "tests.library_work_astra.test_phase4_aw_acceptance::test_purge_removes_intent_owned_actual_temp_name"
+      ]
+    },
+    {
+      "label": "worker/p4-life-foreign-review01",
+      "cases": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failures": [
+        "tests.test_phase4_lifecycle_foreign_lease_review::test_dead_bound_context_still_blocks_an_actual_foreign_lease"
+      ]
+    },
+    {
+      "label": "worker/p4-life-plan-review01",
+      "cases": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p4-life-review-repair01",
+      "cases": 13,
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "label": "worker/p4-life-wi01",
+      "cases": 169,
+      "passed": 161,
+      "failed": 8,
+      "errors": 0,
+      "skipped": 0,
+      "failures": [
+        "tests.library_work_astra.test_phase4_aw2_acceptance::test_d13_replace_syscall_cannot_complete_after_timeout",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_retry_keeps_ownership_of_interrupted_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_control_hard_purge_removes_unedited_recorded_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync",
+        "tests.library_work_astra.test_phase4_aw_acceptance::test_purge_removes_intent_owned_actual_temp_name"
+      ]
+    },
+    {
+      "label": "worker/p4-life-wi02",
+      "cases": 171,
+      "passed": 163,
+      "failed": 8,
+      "errors": 0,
+      "skipped": 0,
+      "failures": [
+        "tests.library_work_astra.test_phase4_aw2_acceptance::test_d13_replace_syscall_cannot_complete_after_timeout",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_retry_keeps_ownership_of_interrupted_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_control_hard_purge_removes_unedited_recorded_temp",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]",
+        "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync",
+        "tests.library_work_astra.test_phase4_aw_acceptance::test_purge_removes_intent_owned_actual_temp_name"
+      ]
+    }
+  ]
+}

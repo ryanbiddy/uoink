@@ -1,0 +1,28 @@
+F.F                                                                      [100%]
+================================== FAILURES ===================================
+__________ test_real_brief_mirror_is_removed_when_dependency_deleted __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:312: in test_real_brief_mirror_is_removed_when_dependency_deleted
+    assert exported.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a0/v/Uoink/Briefs/2026-09-08-bb3fd186f0d55c5eaea32e31d2951145b9cc6b26cd45e5805c08fdb38479289d.md').exists
+------------------------------ Captured log call ------------------------------
+WARNING  uoink.whisper_runner:whisper_runner.py:105 whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+____________ test_d09_fresh_resync_exports_shelf_and_brief[brief] _____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:280: in test_d09_fresh_resync_exports_shelf_and_brief
+    assert (env.vault / mirror.MIRROR_ROOT / expected).is_file()
+E   AssertionError: assert False
+E    +  where False = is_file()
+E    +    where is_file = ((WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v') / 'Uoink') / 'Briefs/2026-09-08-c8cd28bc52a154a2c80e296fdd9bb6c16e8f56b807e35e67002ebf996175d6d6.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v') = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_s...c391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v'), mirror=<library_mirror.Mirror object at 0x000001A8D0B41D10>).vault
+E    +      and   'Uoink' = mirror.MIRROR_ROOT
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_real_brief_mirror_is_removed_when_dependency_deleted - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a0/v/Uoink/Briefs/2026-09-08-bb3fd186f0d55c5eaea32e31d2951145b9cc6b26cd45e5805c08fdb38479289d.md').exists
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_fresh_resync_exports_shelf_and_brief[brief] - AssertionError: assert False
+ +  where False = is_file()
+ +    where is_file = ((WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v') / 'Uoink') / 'Briefs/2026-09-08-c8cd28bc52a154a2c80e296fdd9bb6c16e8f56b807e35e67002ebf996175d6d6.md').is_file
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v') = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_s...c391d36-97f/grok/_scratch/p4life-baseline-briefs-0/a2/v'), mirror=<library_mirror.Mirror object at 0x000001A8D0B41D10>).vault
+ +      and   'Uoink' = mirror.MIRROR_ROOT
+2 failed, 1 passed in 3.20s

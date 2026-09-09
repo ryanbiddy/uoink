@@ -1,0 +1,67 @@
+........................................................................ [ 42%]
+......F.............FFFFF.F....................................F........ [ 85%]
+.........................                                                [100%]
+================================== FAILURES ===================================
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1bd9f0b97f0: unset>.is_set
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1bda02a5670: unset>.is_set
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1bda02962d0: unset>.is_set
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:330: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1bd9f0b9d30: unset>.is_set
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name
+    assert len(orphans) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name
+8 failed, 161 passed in 180.44s (0:03:00)

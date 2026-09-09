@@ -1,0 +1,101 @@
+...................................................................F...F [ 42%]
+........................F......F.............FFFFF.F.................... [ 85%]
+.........................                                                [100%]
+================================== FAILURES ===================================
+__________ test_real_brief_mirror_is_removed_when_dependency_deleted __________
+tests\library_work_astra\test_phase4_aw_acceptance.py:312: in test_real_brief_mirror_is_removed_when_dependency_deleted
+    assert exported.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a61/v/Uoink/Briefs/2026-09-08-bb3fd186f0d55c5eaea32e31d2951145b9cc6b26cd45e5805c08fdb38479289d.md').exists
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name
+    assert len(orphans) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+____________ test_d09_fresh_resync_exports_shelf_and_brief[brief] _____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:280: in test_d09_fresh_resync_exports_shelf_and_brief
+    assert (env.vault / mirror.MIRROR_ROOT / expected).is_file()
+E   AssertionError: assert False
+E    +  where False = is_file()
+E    +    where is_file = ((WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v') / 'Uoink') / 'Briefs/2026-09-08-c8cd28bc52a154a2c80e296fdd9bb6c16e8f56b807e35e67002ebf996175d6d6.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v') = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_s...cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v'), mirror=<library_mirror.Mirror object at 0x0000017CF392A8A0>).vault
+E    +      and   'Uoink' = mirror.MIRROR_ROOT
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x17cf397bd10: unset>.is_set
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x17cf4bdbdd0: unset>.is_set
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x17cf4bd8fb0: unset>.is_set
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:330: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x17cf4bd8ef0: unset>.is_set
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_real_brief_mirror_is_removed_when_dependency_deleted - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a61/v/Uoink/Briefs/2026-09-08-bb3fd186f0d55c5eaea32e31d2951145b9cc6b26cd45e5805c08fdb38479289d.md').exists
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d09_fresh_resync_exports_shelf_and_brief[brief] - AssertionError: assert False
+ +  where False = is_file()
+ +    where is_file = ((WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v') / 'Uoink') / 'Briefs/2026-09-08-c8cd28bc52a154a2c80e296fdd9bb6c16e8f56b807e35e67002ebf996175d6d6.md').is_file
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v') = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_s...cc391d36-97f/grok/_scratch/p4life-repair1-union-0/a90/v'), mirror=<library_mirror.Mirror object at 0x0000017CF392A8A0>).vault
+ +      and   'Uoink' = mirror.MIRROR_ROOT
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x17cf397bd10: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x17cf4bdbdd0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x17cf4bd8fb0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x17cf4bd8ef0: unset>.is_set
+10 failed, 159 passed in 154.28s (0:02:34)

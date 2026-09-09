@@ -1,0 +1,14 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_dead_bound_context_still_blocks_an_actual_foreign_lease _________
+tests\test_phase4_lifecycle_foreign_lease_review.py:41: in test_dead_bound_context_still_blocks_an_actual_foreign_lease
+    assert mirror._foreign_vault_worker_alive(str(env.vault)), state
+E   AssertionError: {'session': <library_mirror._VaultIoSession object at 0x000001B98796D590>}
+E   assert False
+E    +  where False = <function _foreign_vault_worker_alive at 0x000001B987906770>('C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok\\_scratch\\p4-life-foreign-review01-0\\a0\\v')
+E    +    where <function _foreign_vault_worker_alive at 0x000001B987906770> = mirror._foreign_vault_worker_alive
+E    +    and   'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok\\_scratch\\p4-life-foreign-review01-0\\a0\\v' = str(WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4-life-foreign-review01-0/a0/v'))
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_scratch/p4-life-foreign-review01-0/a0/v') = namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cc391d36-97f/grok/_s...91d36-97f/grok/_scratch/p4-life-foreign-review01-0/a0/v'), mirror=<library_mirror.Mirror object at 0x000001B98788C590>).vault
+=========================== short test summary info ===========================
+FAILED tests/test_phase4_lifecycle_foreign_lease_review.py::test_dead_bound_context_still_blocks_an_actual_foreign_lease
+1 failed in 0.90s

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_phase4_lifecycle_foreign_lease_review.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok\\_scratch\\p4-life-foreign-review01-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok\\_scratch\\p4-life-foreign-review01\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cc391d36-97f\\grok\\_scratch\\p4-life-foreign-review01\\tests.log"
+  }
+]
