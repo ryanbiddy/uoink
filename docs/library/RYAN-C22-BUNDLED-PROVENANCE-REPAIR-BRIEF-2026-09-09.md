@@ -54,3 +54,14 @@ The two declaration-driven capture exceptions are expected injected scenarios;
 the source-watch transaction exceptions are not. A changed product needs a new
 package seal before the final bundled C22 observation. Retain candidate-package-02
 and its old package hash as historical evidence.
+
+The narrow repaired import observation c22-provenance-02 at 0724558 exits zero
+and resolves all modules, but retains refused Windows version subprocess queries
+from the standard library's platform._syscmd_ver. Its imports-only result does
+not establish a zero-attempt guard result. Add a separate regression file for
+the exact stdlib callsite and an unrelated command. Keep every descendant spawn
+blocked. Account only the stdlib function's exact cmd.exe version-query command
+forms as blocked capability probes, with spawned=false and retained raw attempts;
+all other descendant attempts remain forbidden. Repeat the focused compatibility
+union in both roots before the fresh final bundled observation. Do not edit the
+existing seven compatibility regressions or apply this classification to old data.
