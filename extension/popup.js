@@ -1671,14 +1671,14 @@ async function runPopupUoinkCurrent() {
       return;
     }
 
-    // Podcast feed: subscribe so new episodes transcribe locally.
+    // Podcast feed: save the subscription; processing stays on demand.
     if (src.action === "podcast") {
       const res = await STC.postPodcastFeed(src.canonical);
       if (!res || !res.ok) {
         showToast(STC.friendlyError(res && res.error) || "Couldn't add that feed.");
         return;
       }
-      showToast("Podcast added. New episodes will transcribe locally.");
+      showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
       return;
     }
 
@@ -1793,7 +1793,7 @@ async function runAddPodcastFeed() {
       showToast(STC.friendlyError(res && res.error) || "Couldn't add that feed.");
       return;
     }
-    showToast("Podcast added. New episodes will transcribe locally.");
+    showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
     uoinkPodcastBtn.classList.add("hidden");
   } catch (e) {
     showToast(`Couldn't add feed: ${e && e.message || e}`);

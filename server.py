@@ -5189,7 +5189,10 @@ _CAPTURE_SOURCES = {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
         "payload_key": "feed_url",
-        "note": "Adds the RSS feed so new episodes transcribe locally.",
+        "note": (
+            "Adds the RSS feed. Poll, download, and transcribe episodes "
+            "on demand."
+        ),
     },
     "web_page": {
         "label": "Article / web page",
@@ -10124,11 +10127,9 @@ class Handler(BaseHTTPRequestHandler):
             "idle_days": self._RESURFACE_TODAY_IDLE_DAYS})
 
     # ---- v3.1 podcast RSS feeds ---------------------------------------
-    # Feed registry + polling. Episode rows materialise as metadata-only
-    # rows when a feed is polled; the audio download + WhisperX
-    # transcription pipelines land in subsequent PRs (CC's queue track B
-    # step 2 + step 3). User opts in to download per-episode by moving
-    # the row from 'new' -> 'queued' via /podcasts/episodes/set-status.
+    # Adding a feed only registers it. An explicit poll materialises
+    # metadata-only episode rows; separate on-demand endpoints download
+    # audio and run WhisperX. There is no background feed scheduler.
 
     def _parse_feed_id(self, body):
         try:
@@ -10202,8 +10203,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_podcasts_feed_poll(self, body):
         """Manual poll. Body: {feed_id}. Returns the structured
-        per-feed result -- used by the dashboard's "refresh" button +
-        the future background poller can call the same function."""
+        per-feed result used by HTTP clients and the matching MCP tool."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
