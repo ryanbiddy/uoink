@@ -1,4 +1,18 @@
-**PHASE 5 PART A NOT ACCEPTED**
+**PHASE 5 PART A ACCEPTED WITH CONDITIONS — final review at `a39c7e6`.**
+
+The remaining condition is Ryan's frozen unary/clock fixture ruling. The
+original BA-4 SDK-route probe also remains failed; the reviewer accepts the
+supported replacement entry on its independent final-wire evidence. See
+[final BA-4](PHASE5-BA4-2026-09-08.md) and
+[G2 integration verification](PHASE5-AZ5G2-INTEGRATOR-2026-09-08.md).
+Both roots reproduced **574 passed, two failed** (117.69 / 126.97 seconds).
+No failure is renamed a pass. The final measurement record includes complete
+packets, raw response bytes, request/flush observations and explicit tracing
+limits; the 24 KiB dashboard target remains missed. Part B remains absent.
+
+## Original BA verdict and evidence, retained
+
+**PHASE 5 PART A NOT ACCEPTED** on the original candidate below.
 
 Run BA, 2026-09-08. Reviewer: codex. Contract: [phase5-v1](PHASE5-CONTRACT-2026-09-08.md).
 Candidate reviewed: `df5ece2edc81d8b2d5db85362aeb2143b87e8344`, including AZ-2

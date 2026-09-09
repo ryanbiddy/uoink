@@ -53,15 +53,15 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08; implementation/review base `d1d5fb8`; not pushed)
+## State at handoff (updated 2026-09-08; implementation/review base `a39c7e6`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5m4a3 (`ffdbef4`): both roots 224 passed / nine frozen setup failures. B3 rejected after 240 passed / 14 failed and AW-8's final-mutation/death diagnostics | Phase 4 remains unaccepted; binding/temp/staging improvements retained | AV-5m4b4 (grok), then finish AW-4 and real-client rerun. Frozen fixture ruling is Ryan's |
-| 5 | AZ-5h2 (`45bb2f6`): both roots 570 passed / six retained failures; both BA-5 and seven new cases pass | BA-5 repaired. Four measurement failures and unary/clock fixture remain; original BA-4 probe uses the replaced SDK route | AZ-5g2 measured refresh (grok), final BA-4 |
-| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed | Current full tree; retain the failed fixtures and blocked speaker gate |
+| 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Phase closure full tree, then combined candidate/build |
+| 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -88,8 +88,8 @@ complete/partial diffs as described below. BC-3f
 Grok `33751bb7` integrated at `986b555`.
 AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integrated at `45bb2f6`;
 AV-5m4b3 Grok `260ef22c` is rejected with its complete diff retained.
-AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is active from `d1d5fb8`
-(19:54 PDT). AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c`
+AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is integrated at `a39c7e6`
+with an independent supplement. AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c`
 is active from `564836c` (20:09 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
@@ -99,9 +99,10 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
    AZ-5d2 and AZ-5h are integrated. AZ-5g finished with a rejected incomplete
    record (474 passed / one frozen failure in independent verification).
-   AZ-5h2 is integrated at `45bb2f6`. Verify the active AZ-5g2 (grok) from
-   `PHASE5-AZ5G2-BRIEF-2026-09-08.md` and finish BA-4. The original partial
-   measurement stays retained and is not integrated.
+   AZ-5h2 is integrated at `45bb2f6`; G2 and its supplement at `a39c7e6`.
+   Final BA-4 accepts Part A with the unary/clock condition for Ryan. Run the
+   closure full tree. The original partial measurement stays retained and
+   is not integrated; its raw patch bytes are separately preserved by G2.
 3. AV-5m3, AV-5m4a2 and AV-5m4a3 (`ffdbef4`) are integrated.
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
@@ -712,3 +713,35 @@ Read-only client preparation reconfirmed Claude Code's claude.ai Max
 authentication with no API key. Its documented startup and per-server tool
 timeouts permit a declared 10-second limit for the later broken-transport
 observation. No client/model or archived-copy preparation has run.
+
+### 2026-09-08 - G2 integrated; final BA-4 accepted with conditions
+
+AZ-5g2 Grok `769107e6` integrated at `a39c7e6`. Independent full union:
+**574 passed, two failed** in both roots (117.69 seconds worker, 126.97
+seconds checkout). Logs/XML/commands: `az5g2-wi` / `az5g2-ci`. Three-way
+apply conflicted only in `.gitattributes`; both proof preservation rules
+were retained. All 49 sealed artifact hashes match the staged blobs.
+
+G2's complete activity packets and measured response bytes are retained.
+The original record lacked initialization response bytes and directly observed
+replay only on 548. The separately briefed integrator supplement adds all 24
+input and 16 output frames, serialization/write/flush timestamps and replay
+observations on both 548 and 10k. All eight response flushes held admission;
+the six immutable synthetic database hashes are unchanged. It is in-memory
+shipped-writer evidence, not a physical-pipe or real-client receipt. The old
+helper's hardcoded replay path label remains disclosed with exact DB identities.
+
+The old rejected Gemini patch's observed CRLF bytes differ from its existing
+LF Git blob. G2's original manifest is preserved, with an explicit mapping to
+a separate byte-exact archive; the original patch is unchanged. Preserve
+raw logs with force-add when global ignore rules would hide them. Both G2's
+failed SDK import and nonwaiting union launcher are archived separately from
+its successful measurement and two-failure union.
+
+Final BA-4 accepts Part A subject to Ryan's unary/clock fixture ruling. The
+original SDK-route test remains failed; the supported replacement route is
+accepted on independent final-wire evidence, not waived to Ryan. Four stale
+document failures are closed. Primary JSON-RPC sizes are 64,732 / 64,601 bytes
+before newline; the 24 KiB dashboard target remains missed. Run the full tree
+on this handoff commit with S21 and still-open AW-5/AW-7 excluded, as before.
+B4 remains active; Phase 4 implementation/client work remains our queue.
