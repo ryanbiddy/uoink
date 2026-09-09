@@ -39,6 +39,10 @@
     "iso-w3/tests.xml": {
       "bytes": 15825,
       "sha256": "50afda7d27ea89c417e9421b0d83c5a969ca4e9afcd9893925668326cd6b65f6"
+    },
+    "omitted-suite-service.patch": {
+      "bytes": 2767,
+      "sha256": "be2694ef7696537411c0c3d9e45579d80dceb3525d1cb8ce0c1a97c52535a99d"
     }
   }
 }

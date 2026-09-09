@@ -1,0 +1,71 @@
+{
+  "id": "protected_phase2_state",
+  "status": "pass",
+  "empty_compare": {
+    "before_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": true,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "populated_compare": {
+    "before_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": true,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "empty": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "populated": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "allowed_enqueue_changes": [
+    {
+      "scenario": "one_off_capture",
+      "table": "library_work",
+      "change": "one optional classification work row",
+      "apply": false
+    }
+  ],
+  "librarian_apply_enabled": false
+}

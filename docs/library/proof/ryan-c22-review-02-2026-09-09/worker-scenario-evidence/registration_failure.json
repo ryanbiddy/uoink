@@ -1,0 +1,149 @@
+{
+  "id": "registration_failure",
+  "status": "pass",
+  "injection": "registration_failure",
+  "distinct_from": "launch_interrupt",
+  "instrument": {
+    "command": {
+      "name": "child-instrument-registration_failure",
+      "argv": [
+        "C:\\Python314\\python.exe",
+        "-B",
+        "-s",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\scripts\\install_receipt\\child_instrument.py",
+        "--profile",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+        "--inject",
+        "registration_failure",
+        "--start-id",
+        "c22-regfail",
+        "--out",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\evidence\\child-instrument-registration_failure.json"
+      ],
+      "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed",
+      "started_utc": "2026-09-09T16:30:57.381830+00:00",
+      "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\commands\\2026-09-09T163057.stdout.log",
+      "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\commands\\2026-09-09T163057.stderr.log",
+      "synthetic": true,
+      "child": {
+        "pid": 76336,
+        "created_ms": 1788971457386,
+        "observed_ms": 1788971457391
+      },
+      "exit": 0,
+      "finished_utc": "2026-09-09T16:30:57.584829+00:00",
+      "wall_seconds": 0.203,
+      "stdout_sha256": "4845197ecaf2462e72fabcdba07aa61840b10e55bfe51b141a83176148fa8988",
+      "stdout_bytes": 678,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    },
+    "instrument": {
+      "inject": "registration_failure",
+      "start_id": "c22-regfail",
+      "instance": "c22-instrument",
+      "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+      "product_module": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed\\source_subscriptions.py",
+      "methods": [
+        "record_child_launch_intent",
+        "record_child_start",
+        "resolve_child_launch_intent"
+      ],
+      "intent_recorded": true,
+      "spawned": true,
+      "child_pid": 73072,
+      "record_child_start_skipped": true,
+      "surviving_unregistered": true
+    },
+    "ownership": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\5a04dd14a3aa83aa1927927e2f288938ca22893e.json",
+        "start_id": "c22-regfail",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "c22-regfail",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "c22-instrument",
+          "unresolved_ms": 1788971457561
+        }
+      },
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\6cc81808825e871d25cdc1361cf15e69bc9d7b13.json",
+        "start_id": "c22-interrupt",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "c22-interrupt",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "c22-instrument",
+          "unresolved_ms": 1788971454739
+        }
+      },
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\cf03714ef98c20b82d77c36f34c1f12bb439c6dc.json",
+        "start_id": "c22-child-life",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 71908,
+            "created_ms": 1788971451888,
+            "instance": "c22-instrument",
+            "started_ms": 1788971451905,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "c22-child-life",
+          "children": [
+            {
+              "pid": 71908,
+              "created_ms": 1788971451888,
+              "instance": "c22-instrument",
+              "started_ms": 1788971451905,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ]
+  },
+  "unresolved": [
+    {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\5a04dd14a3aa83aa1927927e2f288938ca22893e.json",
+      "start_id": "c22-regfail",
+      "unresolved_launch": true,
+      "children": [],
+      "record": {
+        "start_id": "c22-regfail",
+        "children": [],
+        "unresolved_launch": true,
+        "unresolved_instance": "c22-instrument",
+        "unresolved_ms": 1788971457561
+      }
+    },
+    {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\6cc81808825e871d25cdc1361cf15e69bc9d7b13.json",
+      "start_id": "c22-interrupt",
+      "unresolved_launch": true,
+      "children": [],
+      "record": {
+        "start_id": "c22-interrupt",
+        "children": [],
+        "unresolved_launch": true,
+        "unresolved_instance": "c22-instrument",
+        "unresolved_ms": 1788971454739
+      }
+    }
+  ],
+  "surviving_unregistered": [
+    {
+      "pid": 73072,
+      "liveness": "alive",
+      "unregistered": true
+    }
+  ]
+}

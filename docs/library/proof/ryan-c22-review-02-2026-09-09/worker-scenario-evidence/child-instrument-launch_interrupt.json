@@ -1,0 +1,15 @@
+{
+  "inject": "launch_interrupt",
+  "start_id": "c22-interrupt",
+  "instance": "c22-instrument",
+  "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+  "product_module": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed\\source_subscriptions.py",
+  "methods": [
+    "record_child_launch_intent",
+    "record_child_start",
+    "resolve_child_launch_intent"
+  ],
+  "intent_recorded": true,
+  "unresolved_left": true,
+  "spawned": false
+}

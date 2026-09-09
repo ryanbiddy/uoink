@@ -1,0 +1,113 @@
+{
+  "id": "launch_interruption",
+  "status": "pass",
+  "injection": "launch_interrupt",
+  "instrument": {
+    "command": {
+      "name": "child-instrument-launch_interrupt",
+      "argv": [
+        "C:\\Python314\\python.exe",
+        "-B",
+        "-s",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\scripts\\install_receipt\\child_instrument.py",
+        "--profile",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+        "--inject",
+        "launch_interrupt",
+        "--start-id",
+        "c22-interrupt",
+        "--out",
+        "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\evidence\\child-instrument-launch_interrupt.json"
+      ],
+      "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed",
+      "started_utc": "2026-09-09T16:30:54.561350+00:00",
+      "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\commands\\2026-09-09T163054.stdout.log",
+      "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\commands\\2026-09-09T163054.stderr.log",
+      "synthetic": true,
+      "child": {
+        "pid": 27256,
+        "created_ms": 1788971454565,
+        "observed_ms": 1788971454570
+      },
+      "exit": 0,
+      "finished_utc": "2026-09-09T16:30:54.754119+00:00",
+      "wall_seconds": 0.193,
+      "stdout_sha256": "a35bec2d101a06d51dc4b12f3a7c5cfae719df1c13aae32a4b54b5b10234c269",
+      "stdout_bytes": 614,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    },
+    "instrument": {
+      "inject": "launch_interrupt",
+      "start_id": "c22-interrupt",
+      "instance": "c22-instrument",
+      "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+      "product_module": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed\\source_subscriptions.py",
+      "methods": [
+        "record_child_launch_intent",
+        "record_child_start",
+        "resolve_child_launch_intent"
+      ],
+      "intent_recorded": true,
+      "unresolved_left": true,
+      "spawned": false
+    },
+    "ownership": [
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\6cc81808825e871d25cdc1361cf15e69bc9d7b13.json",
+        "start_id": "c22-interrupt",
+        "unresolved_launch": true,
+        "children": [],
+        "record": {
+          "start_id": "c22-interrupt",
+          "children": [],
+          "unresolved_launch": true,
+          "unresolved_instance": "c22-instrument",
+          "unresolved_ms": 1788971454739
+        }
+      },
+      {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\cf03714ef98c20b82d77c36f34c1f12bb439c6dc.json",
+        "start_id": "c22-child-life",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 71908,
+            "created_ms": 1788971451888,
+            "instance": "c22-instrument",
+            "started_ms": 1788971451905,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "c22-child-life",
+          "children": [
+            {
+              "pid": 71908,
+              "created_ms": 1788971451888,
+              "instance": "c22-instrument",
+              "started_ms": 1788971451905,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ]
+  },
+  "unresolved": [
+    {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty\\source_children\\6cc81808825e871d25cdc1361cf15e69bc9d7b13.json",
+      "start_id": "c22-interrupt",
+      "unresolved_launch": true,
+      "children": [],
+      "record": {
+        "start_id": "c22-interrupt",
+        "children": [],
+        "unresolved_launch": true,
+        "unresolved_instance": "c22-instrument",
+        "unresolved_ms": 1788971454739
+      }
+    }
+  ]
+}

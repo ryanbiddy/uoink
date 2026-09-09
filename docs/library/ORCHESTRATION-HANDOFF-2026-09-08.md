@@ -162,6 +162,10 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    found active Restart Manager closing, non-gating uninstall errors and path /
    marker parsing gaps. Follow `RYAN-INNO-FINAL-BOUNDARY-REPAIR-BRIEF-2026-09-09.md`
    before integration. The second raw patch and all three observations are sealed.
+   C22 replacement independently has 26 passes / two failures, 69.61 s. Its
+   receipt still substitutes direct child-record calls for helper recovery,
+   miscounts charges and compares protected state only after all scenarios.
+   Follow `RYAN-C22-SCENARIO-TRUTH-REPAIR-BRIEF-2026-09-09.md`; no installed credit.
 3. After source repairs, run applicable suites in worker/checkout and the full
    tree at a committed SHA; rebuild/reseal only when production source changed.
    Replace the runbook's stop preflight with exact reviewed install/restart and
@@ -1596,3 +1600,21 @@ resources does not disable Restart Manager, and InitializeUninstall accepts
 damaged metadata without a checked stop before deletion. Path aliases and
 ambiguous marker parsing also need the bounded repair brief. Compilation and
 Python tests cannot establish these installed runtime guarantees.
+
+### 2026-09-09 — C22 second-kit evidence and archive correction
+
+Independent guarded C22 instrument union: 26 passed / two failed, 69.61 s.
+The old Inno-argument assertion and stub-helper acceptance assertion remain
+failed. Source review additionally found ordinary-index hashing (forbidden),
+post-only protected-state snapshots, nonexistent charge columns, direct child
+record calls outside helper recovery, and an operator preparation flow that
+cannot continue its own receipt. The next bounded brief fixes the instrument;
+production URL validation must keep refusing loopback standing sources.
+The original patch, named-run output and worker scenario JSON are retained in
+proof/ryan-c22-review-02-2026-09-09 with a hash seal.
+
+Astra's explicit isolation archive path list accidentally omitted the modified
+suite_service.py. The original patch is unchanged; omitted-suite-service.patch
+now retains those exact bytes and is added to that seal. Astra applied this
+companion patch cleanly in the d0577a56 worker before its verification, without
+touching the worker-owned Inno file. Integrate both patches together.

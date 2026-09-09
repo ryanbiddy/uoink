@@ -1,0 +1,20 @@
+{
+  "id": "install",
+  "status": "unexecuted",
+  "reason": "Inno is Ryan's throwaway-operator step",
+  "plan": {
+    "argv": [
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink-Setup-synthetic.exe",
+      "/VERYSILENT",
+      "/NORESTART",
+      "/SUPPRESSMSGBOXES",
+      "/DIR=\"C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\Uoink Installed\"",
+      "/ISOLATED=1",
+      "/PROFILE=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6accc421-5b2\\grok\\_scratch\\c22-kit\\r-una8_nq9\\receipt\\profiles\\empty",
+      "/PORT=61725"
+    ],
+    "execute": false,
+    "reason": "Inno is an operator step; this kit does not auto-run it"
+  },
+  "agreed_inno_shape": true
+}

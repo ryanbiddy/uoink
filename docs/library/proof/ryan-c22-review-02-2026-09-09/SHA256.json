@@ -1,0 +1,96 @@
+{
+  "files": {
+    "original.patch": {
+      "bytes": 250491,
+      "sha256": "c68c73f349bcac01a2848d17f178daa00a6cef3fa9ef1722de41f5ef92a36ba1"
+    },
+    "results.json": {
+      "bytes": 870,
+      "sha256": "c9c442313d7a941180c5f3a162ae5e8f249467f2566f8f0ce886347be1d851aa"
+    },
+    "tests.log": {
+      "bytes": 1515,
+      "sha256": "de9df31dc03e2d909024d6227e12248c6c4e0d7ac460f9feb125917447817ff5"
+    },
+    "tests.xml": {
+      "bytes": 5334,
+      "sha256": "85c97b2459e56554710983b00a1a689682cfab2d973c992b8203fda6aee95c38"
+    },
+    "worker-scenario-evidence/browser-checkpoint.snapshot.json": {
+      "bytes": 18903,
+      "sha256": "77ca5bff8f2389532a2139698e21657619e476a4359d313172fe7f1d99c77eb1"
+    },
+    "worker-scenario-evidence/browser_observation_protocol.json": {
+      "bytes": 646,
+      "sha256": "c9e6c500af7e1f714c499716c4bd46988b633fc878b801a02b179c0d416e4a4b"
+    },
+    "worker-scenario-evidence/browser_state_checkpoint.json": {
+      "bytes": 20715,
+      "sha256": "ff90aa4066c51ad222eec5a28ef3eeb9691ec612ef41c2304b0ad799b6ff4ab6"
+    },
+    "worker-scenario-evidence/child-instrument-launch_interrupt.json": {
+      "bytes": 664,
+      "sha256": "95132ae5679b07e5bcc3e244f42dccfb74e1e1a650179ab55afd004807d2b88c"
+    },
+    "worker-scenario-evidence/child-instrument-registration_failure.json": {
+      "bytes": 734,
+      "sha256": "a0289fa0c8793c25eafb038282c899d7df38e33d2924d472e96170e2db4c086d"
+    },
+    "worker-scenario-evidence/child-instrument-spawn_child.json": {
+      "bytes": 685,
+      "sha256": "716641a498de8cbb66f5417d015f48417f6df6b56feefddc46b6d841b3ef481e"
+    },
+    "worker-scenario-evidence/empty_migration_replay.json": {
+      "bytes": 24958,
+      "sha256": "b2058059d1dcb71de7d88f16196dc2f59ad8f0e7125daf9da762663fcad6fe09"
+    },
+    "worker-scenario-evidence/install.json": {
+      "bytes": 891,
+      "sha256": "a57dd7c3b6ec962fdb43661011e673122bfb2377a7b87b2ac2172c53eed310f0"
+    },
+    "worker-scenario-evidence/installed_provenance.json": {
+      "bytes": 5913,
+      "sha256": "6bb163405d450cb5bfe7dd1041dd3c957fde83a26bc690e5f8334c22edc3b774"
+    },
+    "worker-scenario-evidence/launch_interruption.json": {
+      "bytes": 4961,
+      "sha256": "f4027a6649900feeca4554631eff9a05854fa6f8950d1db27963a86c9459e5c7"
+    },
+    "worker-scenario-evidence/manual_first.json": {
+      "bytes": 38605,
+      "sha256": "a9273f3d1fc8866e60dcf61f5861cb915498a5469c078759634f91c758293c9a"
+    },
+    "worker-scenario-evidence/one_off_capture.json": {
+      "bytes": 12639,
+      "sha256": "a73b9defd005fe6dec6e3bebdb78ab65f5e16f65ac9eae6b45d0264ece752a3a"
+    },
+    "worker-scenario-evidence/populated_legacy_replay.json": {
+      "bytes": 31291,
+      "sha256": "3cf047c4f93c571293a2d085c44130b3bcbe5b2c4323d08f2943099149fc5ca1"
+    },
+    "worker-scenario-evidence/protected_phase2_state.json": {
+      "bytes": 1993,
+      "sha256": "4e3fcae03dbdb6bcdb47aae78aa0abc4b63e4cfaa6d6b0eaeeb2b1686ab8fa6d"
+    },
+    "worker-scenario-evidence/registered_child_lifetime.json": {
+      "bytes": 4026,
+      "sha256": "65ed86dfdd6ceeb8f974ef656604a6534f7d506bd13be06afd3c87e932de859b"
+    },
+    "worker-scenario-evidence/registration_failure.json": {
+      "bytes": 6362,
+      "sha256": "6fde0201b17ad570cc8b23ded03d0082943610657f8339108dbee703fa906d1c"
+    },
+    "worker-scenario-evidence/standing_first.json": {
+      "bytes": 23094,
+      "sha256": "186cd0bb78f6534281bd5e5ad137e3bec30d40d7d19e00752992075c7de15f2f"
+    },
+    "worker-scenario-evidence/upgrade_operator_step.json": {
+      "bytes": 981,
+      "sha256": "58728326752d782d8228bcbad4bb43f25704f60b16717859991ee1620119a7c4"
+    },
+    "worker-scenario-evidence/whole_helper_relaunch.json": {
+      "bytes": 39643,
+      "sha256": "bb81a351874d23aac2e5f500125383c4d0a7b99228d9c3881e0b84cd88d045e3"
+    }
+  }
+}
