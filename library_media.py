@@ -14,17 +14,25 @@ the literal BD-0 wording, read before relying on the behaviour:
    (``.media-inputs/publication.json``: generation, current media revision,
    the revisions it superseded and the artifacts the current target
    references). ``begin_publication`` mints a ``PublicationTicket`` naming
-   the base (generation, media revision) a publisher built against;
-   ``publish_transcript`` rechecks deletion, corpus bytes, the sidecar's
-   snapshot and that base under ``BEGIN IMMEDIATE`` before touching a file,
-   writes the ledger claim first and the complete sidecar last, and a retry
-   whose target the ledger already names completes from any file/DB
-   boundary. A raw call without a ticket mints its base at call entry (so
-   it still refuses anything published after entry and every revision in
-   the ledger's history); it cannot recognise a never-published stale
-   build, so production callers (``Index.publish_media_snapshot``,
-   ``podcasts.episode_to_corpus``, ``server._index_yoink``) carry a ticket.
-   The ledger keeps the 256 most recent superseded revisions. A ledger that
+   the base (generation, media revision) a publisher built against and the
+   non-owned sidecar keys present at mint time; ``publish_transcript``
+   rechecks deletion, corpus bytes, the sidecar's snapshot and that base
+   under ``BEGIN IMMEDIATE`` before touching a file, writes the ledger
+   claim first and the complete sidecar last, and a retry whose target the
+   ledger already names completes from any file/DB boundary. Both entry
+   points require that original build-time ticket: an omitted ticket is
+   refused at ``Index.publish_media_snapshot`` and at raw
+   ``publish_transcript``. The publisher never mints a ticket. An
+   idempotent retry carries the original ticket. There is no empty,
+   first-publication, or evaluation-helper exception. Production callers
+   (``podcasts.episode_to_corpus``, ``server._index_yoink``) acquire the
+   ticket before building. Reconstruction consults the same ledger and
+   will not restore a superseded sidecar while disk still names the
+   current publication. Non-owned sidecar keys, including a key another
+   owner removed, are merged onto the carrier and revalidated at the
+   final sidecar write after ledger/artifact work. User-edited corpus
+   bytes are protected even before the first media block exists. The
+   ledger keeps the 256 most recent superseded revisions. A ledger that
    is not parseable refuses ``invalid_source_data`` rather than guessing.
 2. **Phase 2 invalidation** is invoked by ``Index.publish_media_snapshot``
    and ``Index.rebuild_media_item`` (the raw helpers here take a connection
@@ -76,6 +84,7 @@ the literal BD-0 wording, read before relying on the behaviour:
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import math
@@ -111,6 +120,10 @@ MEDIA_INPUTS_DIR = ".media-inputs"
 PUBLICATION_LEDGER = "publication.json"
 LEDGER_HISTORY_LIMIT = 256
 PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth")
+# Keys this publisher replaces on the sidecar. Every other top-level member
+# belongs to another owner or to the carrier identity and is snapshotted on
+# the ticket so an intervening edit can be merged instead of clobbered.
+SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript"})
 
 CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
 SPEAKER_STATES = ("present", "partial", "absent", "invalid", "unsupported")
@@ -1540,7 +1553,10 @@ def store_snapshot(conn: sqlite3.Connection, item: dict, cues: list[dict], block
 
 def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
     """Clip-only rebuild (``sidecar=None``) or reconstruction from the durable
-    sidecar/artifacts. Never writes Markdown, runs a model or fetches."""
+    sidecar/artifacts. Never writes Markdown, runs a model or fetches.
+    Reconstruction is fenced through the publication ledger: a sidecar that
+    is not the ledger's current snapshot is refused before any DB write so
+    disk and rows cannot diverge onto a superseded media revision."""
     try:
         item = _load_item(conn, video_id)
         if sidecar is None:
@@ -1564,6 +1580,30 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
                 raise _invalid("cross_item_annotations")
         cues = _cues_from_sidecar(sidecar, block, item)
         folder = _item_folder(item)
+        if not conn.in_transaction:
+            conn.execute("BEGIN IMMEDIATE")
+        item = _load_item(conn, video_id)
+        generation, current, ledger = _publication_state(conn, video_id, folder)
+        sidecar_revision = block["media_revision"] if block is not None else None
+        if ledger is not None:
+            # Only the ledger's current snapshot may be restored. A stale
+            # sidecar (BD-03) would otherwise rewrite DB annotations while
+            # disk still names the newer publication.
+            if sidecar_revision != current:
+                raise _stale("publication_superseded", base_generation=generation,
+                             current_generation=generation)
+            disk_raw = _read_bytes(Path(item["sidecar_path"]), required=False)
+            disk_revision = None
+            if disk_raw is not None:
+                try:
+                    disk_block = _parse_json_object(disk_raw, "sidecar").get("media_depth")
+                except MediaError:
+                    disk_block = None
+                if isinstance(disk_block, dict) and _is_hash(disk_block.get("media_revision")):
+                    disk_revision = disk_block["media_revision"]
+            if disk_revision is not None and disk_revision != current:
+                raise _stale("publication_superseded", base_generation=generation,
+                             current_generation=generation)
         if block is not None:
             _verify_artifacts(folder, block, cues)
             corpus_bytes = _read_bytes(Path(item["corpus_path"]), required=True)
@@ -1604,15 +1644,18 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
 # --------------------------------------------------------------------------
 class PublicationTicket:
     """The base a publisher built against: the item's publication generation
-    and current media revision when ``begin_publication`` ran. Carried by the
-    owning service, never by a media hash or an export input."""
+    and current media revision when ``begin_publication`` ran, plus the
+    non-owned sidecar keys present at that moment. Carried by the owning
+    service, never by a media hash or an export input."""
 
-    __slots__ = ("video_id", "base_generation", "base_media_revision")
+    __slots__ = ("video_id", "base_generation", "base_media_revision", "sidecar_dependencies")
 
-    def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None):
+    def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None,
+                 sidecar_dependencies: dict | None = None):
         self.video_id = video_id
         self.base_generation = base_generation
         self.base_media_revision = base_media_revision
+        self.sidecar_dependencies = copy.deepcopy(sidecar_dependencies or {})
 
     @property
     def base(self) -> tuple:
@@ -1657,6 +1700,86 @@ def _publication_state(conn: sqlite3.Connection, video_id: str, folder: Path | N
     return 0, (row["media_revision"] if row is not None else None), None
 
 
+def _sidecar_dependencies_from(parsed: dict | None) -> dict:
+    """Top-level sidecar members this publication does not replace."""
+    if not isinstance(parsed, dict):
+        return {}
+    return {key: value for key, value in parsed.items() if key not in SIDECAR_PUBLICATION_KEYS}
+
+
+def _read_sidecar_dependencies(path: Path | None) -> dict:
+    if path is None:
+        return {}
+    raw = _read_bytes(Path(path), required=False)
+    if raw is None:
+        return {}
+    try:
+        return _sidecar_dependencies_from(_parse_json_object(raw, "sidecar"))
+    except MediaError:
+        return {}
+
+
+def _sidecar_from_disk(path: Path) -> tuple[bytes | None, dict | None]:
+    """Current sidecar bytes and object, or ``(None, None)`` when absent.
+
+    An unparseable on-disk sidecar is a dependency conflict, not an empty
+    carrier: refusing avoids treating a missing parse as a bulk key removal.
+    """
+    raw = _read_bytes(Path(path), required=False)
+    if raw is None:
+        return None, None
+    try:
+        return raw, _parse_json_object(raw, "sidecar")
+    except MediaError:
+        raise _stale("sidecar_dependency_changed") from None
+
+
+def _apply_sidecar_dependencies(sidecar: dict, disk_side: dict | None, ticket: PublicationTicket) -> bool:
+    """Overlay non-owned sidecar state from disk onto the published carrier.
+
+    Ticket snapshot is the base. Disk values that still match the snapshot
+    leave a publisher-supplied replacement in place (podcast title/speakers)
+    and restore a key the publisher omitted. Disk values that changed after
+    mint, keys that exist only on disk, and keys removed on disk after mint
+    are taken from disk so this write neither overwrites another owner's
+    edit nor resurrects a removed key. Returns True when ``sidecar`` changed.
+    """
+    base = ticket.sidecar_dependencies if isinstance(ticket.sidecar_dependencies, dict) else {}
+    disk = disk_side if isinstance(disk_side, dict) else {}
+    changed = False
+    for key in list(sidecar.keys()):
+        if key in SIDECAR_PUBLICATION_KEYS:
+            continue
+        if key in base and key not in disk:
+            del sidecar[key]
+            changed = True
+    for key, value in disk.items():
+        if key in SIDECAR_PUBLICATION_KEYS:
+            continue
+        unchanged = key in base and base[key] == value
+        if unchanged:
+            if key not in sidecar:
+                sidecar[key] = copy.deepcopy(value)
+                changed = True
+            continue
+        if key not in sidecar or sidecar[key] != value:
+            sidecar[key] = copy.deepcopy(value)
+            changed = True
+    return changed
+
+
+def _bind_sidecar_carrier(sidecar: dict, sidecar_path: Path, ticket: PublicationTicket,
+                          owned: dict, video_id: str) -> bytes | None:
+    """Merge the on-disk non-owned keys into ``sidecar`` and refresh owned bytes."""
+    raw, disk_side = _sidecar_from_disk(sidecar_path)
+    changed = _apply_sidecar_dependencies(sidecar, disk_side, ticket)
+    if sidecar.get("video_id") != video_id:
+        raise _invalid("sidecar_identity")
+    if changed:
+        owned[sidecar_path] = _json(sidecar).encode("utf-8")
+    return raw
+
+
 def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
     """Mint the fence for one publication of ``video_id``: the base it must
     still find under the storage lock when it publishes. ``folder`` names
@@ -1670,7 +1793,8 @@ def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
         if folder is None and item is not None:
             folder = _item_folder(item)
         generation, current, _ledger = _publication_state(conn, video_id, Path(folder) if folder else None)
-        return PublicationTicket(video_id, generation, current)
+        sidecar_path = Path(item["sidecar_path"]) if item is not None and item.get("sidecar_path") else None
+        return PublicationTicket(video_id, generation, current, _read_sidecar_dependencies(sidecar_path))
     except sqlite3.Error:
         raise MediaError("library_unavailable") from None
 
@@ -1781,14 +1905,17 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
     ledger claim written first, owned files replaced atomically with the
     complete sidecar last, then the DB rows committed together and obsolete
     owned artifacts pruned. A crash between steps leaves an explicit state
-    that a retry with the same durable inputs completes."""
+    that a retry with the same durable inputs completes. ``ticket`` is the
+    original build-time fence; it is never minted here."""
     try:
+        if ticket is None:
+            raise _request("publication_ticket_required")
+        if not isinstance(ticket, PublicationTicket) or ticket.video_id != video_id:
+            raise _request("ticket_identity")
         item = _load_item(conn, video_id)
         block = validate_media_block(media_block)
         if block["video_id"] != video_id:
             raise _invalid("cross_item_annotations")
-        if ticket is not None and (not isinstance(ticket, PublicationTicket) or ticket.video_id != video_id):
-            raise _request("ticket_identity")
         cues = [dict(cue) for cue in (cues or [])]
         _bind_cues(block, cues, stale_code="invalid_source_data")
         if not isinstance(artifacts, dict):
@@ -1831,9 +1958,6 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         source_now = _cards.build_card(_merge_item(item), projected, corpus_text=head)["source_revision"]
         if source_now != block["source_revision"]:
             raise _stale("source_revision_changed")
-        # A raw call mints its base at entry (see module note 1).
-        if ticket is None:
-            ticket = begin_publication(conn, video_id)
 
         # Current state under the item's storage lock: deletion, corpus
         # bytes, sidecar dependencies and the ownership fence are rechecked
@@ -1843,18 +1967,18 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         item = _load_item(conn, video_id)
         target = block["media_revision"]
         current_block = None
-        current_sidecar = _read_bytes(sidecar_path, required=False)
-        if current_sidecar is not None:
-            try:
-                candidate = _parse_json_object(current_sidecar, "sidecar").get("media_depth")
-            except MediaError:
-                candidate = None
+        current_sidecar, disk_side = _sidecar_from_disk(sidecar_path)
+        if isinstance(disk_side, dict):
+            candidate = disk_side.get("media_depth")
             if isinstance(candidate, dict) and _is_hash(candidate.get("media_revision")):
                 current_block = candidate
         disk_corpus = _read_bytes(corpus_path, required=False)
-        if disk_corpus is not None and disk_corpus != corpus_bytes and current_block is not None:
+        # Protect user-edited corpus bytes even before the first media block
+        # exists (BD-06). A disk file that still matches the recorded current
+        # snapshot is a legitimate replacement, not an edit.
+        if disk_corpus is not None and disk_corpus != corpus_bytes:
             recorded = (current_block.get("provenance") or {}).get("corpus_revision") \
-                if isinstance(current_block.get("provenance"), dict) else None
+                if current_block is not None and isinstance(current_block.get("provenance"), dict) else None
             if recorded != _sha256(disk_corpus):
                 raise _stale("corpus_edited")
         generation, current, ledger = _publication_state(conn, video_id, folder)
@@ -1865,6 +1989,12 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         if ledger is not None and current_block is not None and current_block["media_revision"] not in (
                 current, target, ticket.base_media_revision, ledger.get("base_media_revision")):
             raise _stale("sidecar_foreign_snapshot")
+        # Recheck/merge preserved sidecar dependencies before replacing the
+        # full carrier (BD-05), including a key another owner removed.
+        _bind_sidecar_carrier(sidecar, sidecar_path, ticket, owned, video_id)
+        reread, _disk_again = _sidecar_from_disk(sidecar_path)
+        if reread != current_sidecar:
+            _bind_sidecar_carrier(sidecar, sidecar_path, ticket, owned, video_id)
         if current == target:
             # This publication already holds the claim (retry or idempotent
             # republication): settle it without a new generation.
@@ -1893,14 +2023,20 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
             }).encode("utf-8"))
         ordered = ([p for p in owned if p.parent.name == MEDIA_INPUTS_DIR]
                    + ([corpus_path] if corpus_path in owned else [])
-                   + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)]
-                   + [sidecar_path])
+                   + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)])
         for path in ordered:
             data = owned[path]
             existing = _read_bytes(path, required=False)
             if existing == data:
                 continue
             _atomic_replace(path, data)
+        # Final carrier write: revalidate non-owned keys after ledger/artifact
+        # work so an intervening edit or removal is not overwritten.
+        _bind_sidecar_carrier(sidecar, sidecar_path, ticket, owned, video_id)
+        sidecar_data = owned[sidecar_path]
+        existing_sidecar = _read_bytes(sidecar_path, required=False)
+        if existing_sidecar != sidecar_data:
+            _atomic_replace(sidecar_path, sidecar_data)
 
         _insert_citations(conn, video_id, cues, block)
         _write_media_rows(conn, block)

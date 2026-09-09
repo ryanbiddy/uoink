@@ -1891,8 +1891,12 @@ class Index:
         media/clip snapshot committed under the index lock through
         ``library_media.publish_transcript`` (ownership fence, owned files,
         DB rows, artifact retention), then Phase 2 invalidation. Raises
-        ``library_media.MediaError`` with a recoverable state on refusal."""
+        ``library_media.MediaError`` with a recoverable state on refusal.
+        ``ticket`` is the build-time fence from ``begin_media_publication``;
+        an omitted ticket is refused rather than minted here."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        if ticket is None:
+            raise _media.MediaError("invalid_request", details={"reason": "publication_ticket_required"})
         with self._lock:
             if self._conn.in_transaction:
                 raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
