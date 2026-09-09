@@ -1,0 +1,16 @@
+{
+  "started_at": "2026-09-09T06:44:52.629Z",
+  "requested_url": "https://x.com/NASAAdmin/status/2020984085754282078",
+  "scope": "Fresh anonymous isolated Chrome context; returned text-only Source link only",
+  "network_failures": [
+    {
+      "url": "https://x.com/NASAAdmin/status/2020984085754282078",
+      "failure": {
+        "errorText": "net::ERR_HTTP_RESPONSE_CODE_FAILURE"
+      }
+    }
+  ],
+  "browser_version": "152.0.7977.83",
+  "error": "Error: page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://x.com/NASAAdmin/status/2020984085754282078\nCall log:\n\u001b[2m  - navigating to \"https://x.com/NASAAdmin/status/2020984085754282078\", waiting until \"domcontentloaded\"\u001b[22m\n",
+  "ended_at": "2026-09-09T06:44:53.188Z"
+}

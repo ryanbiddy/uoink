@@ -1,0 +1,111 @@
+[
+  {
+    "at": "2026-09-09T06:53:56.192Z",
+    "action": "launch",
+    "chunk_id": "24ad5b",
+    "wall_time_seconds": 10.0097416,
+    "session_id": 4226,
+    "original_token_count": 156,
+    "output": "\u001b[?9001h\u001b[?1004h\u001b[?25l\u001b[2J\u001b[m\u001b[H\u001b]0;claude\u0007\u001b[?25h[Screen Reader Mode: on via flag]\r\n\u001b[?2004h\u001b[?2031h\u001b[?1004h\u001b[>0q\u001b[>4m\u001b[<u\u001b[?2031l\u001b[?2004l\r\n\u001b[?2004h\u001b[?2031h\u001b[?1004h\u001b[?25l\u001b[2;1H\u001b]0;✳ Claude Code\u0007\u001b[?25h\u001b[>0qClaude Code v2.1.261\r\nHaiku 4.5 · Claude Max\r\nE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\r\nKeep working from anywhere\r\nCheck progress or reply to any session from the mobile app, desktop app, or\r\nhttps://claude.ai/code/session_0186N37zro3p9Q4zLgPqhcak. To keep a session in\r\nthis terminal only, run /remote-control\r\n+3 more · /status\r\ndon't ask on (shift+tab to cycle)\r\n/rc active\r\n$"
+  },
+  {
+    "at": "2026-09-09T06:54:07.195Z",
+    "input": "What does the orbit fixture say about its stored value?\r",
+    "chunk_id": "e03b94",
+    "wall_time_seconds": 1.0098317,
+    "session_id": 4226,
+    "original_token_count": 88,
+    "output": "\u001b]0;◐ Claude Code\u0007\r\u001b[?25l\u001b[10;1Hyou: What does the orbit fixture say about its stored value?\u001b[K\r\nHyperspacing…\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\r\n$\u001b[?25h\u001b]133;A;redraw=0\u0007\u001b]0;◑ Claude Code\u0007\r\u001b[?25l\u001b[11;1HSwirling…\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\u001b[K\r\n$\u001b[K\u001b[?25h"
+  },
+  {
+    "at": "2026-09-09T06:54:20.218Z",
+    "poll": true,
+    "chunk_id": "5375ba",
+    "wall_time_seconds": 5.0057515,
+    "session_id": 4226,
+    "original_token_count": 117,
+    "output": "\u001b]0;◑ Orbit fixture stored value\u0007\u001b]0;◐ Orbit fixture stored value\u0007\u001b]0;◑ Orbit fixture stored value\u0007\u001b]0;◐ Orbit fixture stored value\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b]0;✳ Orbit fixture stored value\u0007\r\u001b[?25l\u001b[11;1Hclaude: Based on the orbit fixture saved in your uoink library, it says: \"Orbit \r\nfixture value BLUE.\"\u001b[K\r\n\u001b[K\r\nThis is from a clip at the 0:10 mark in your saved item.\u001b[K\r\nSautéed for 4s · done 11:54 PM\r\ndon't ask on (shift+tab to cycle)\r\n/rc active\r\n$\u001b[?25h"
+  },
+  {
+    "at": "2026-09-09T06:54:28.923Z",
+    "input": "Make one fresh search_library request for orbit and one fresh get_library_item request for item WgPbbWmnXJ8. Report each actual result separately, without retries.\r",
+    "chunk_id": "750503",
+    "wall_time_seconds": 1.0095562,
+    "session_id": 4226,
+    "original_token_count": 44,
+    "output": "\r$  Make one fresh search_library request for orbit and one fresh\u001b[K\r\nget_library_item request for item WgPbbWmnXJ8. Report each actual result\r\nseparately, without retries.\r\n"
+  },
+  {
+    "at": "2026-09-09T06:54:36.635Z",
+    "input": "\r",
+    "chunk_id": "7a9f04",
+    "wall_time_seconds": 1.0084273,
+    "session_id": 4226,
+    "original_token_count": 108,
+    "output": "\u001b]0;◐ Orbit fixture stored value\u0007\u001b[?25l\u001b[16;1Hyou: Make one fresh search_library request for orbit and one fresh\u001b[K\r\nget_library_item request for item WgPbbWmnXJ8. Report each actual result        \r\nseparately, without retries.\u001b[K\r\nRazzmatazzing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\r\n$\u001b[?25h\u001b]133;A;redraw=0\u0007\u001b]0;◑ Orbit fixture stored value\u0007"
+  },
+  {
+    "at": "2026-09-09T06:54:53.906Z",
+    "poll": true,
+    "chunk_id": "8c7d0c",
+    "wall_time_seconds": 5.0110588,
+    "session_id": 4226,
+    "original_token_count": 326,
+    "output": "\r\u001b[?25l\u001b[19;1Htool: Calling uoink… (ctrl+o to expand)\u001b[K\r\nRazzmatazzing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\u001b[K\r\n$\u001b[?25h\r\u001b[?25l\u001b[19;1Htool: Calling uoink 2 times… (ctrl+o to expand)\u001b[K\r\n\"orbit\"\u001b[K\r\nRazzmatazzing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\u001b[K\u001b[?25h\r\n$\u001b]0;◐ Orbit fixture stored value\u0007\r\u001b[?25l\u001b[18;1Htool error: Calling uoink 2 times… (ctrl+o to expand)\u001b[K\r\n\"orbit\"\u001b[K\r\nRazzmatazzing…\u001b[K\r\nTip: Use /theme to change the color theme\u001b[K\r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\r\n/rc active\u001b[K\r\n$\u001b[K\u001b[?25h\u001b]0;◑ Orbit fixture stored value\u0007\u001b]0;◐ Orbit fixture stored value\u0007\u001b]0;◑ Orbit fixture stored value\u0007\r\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b]0;✳ Orbit fixture stored value\u0007\u001b[?25l\u001b[18;1HCalled uoink 2 times (ctrl+o to expand)\u001b[K\r\nclaude: search_library result for \"orbit\":\u001b[K\r\n- Error: library_unavailable (FileNotFoundError in storage)\u001b[K\r\n\u001b[K\r\nget_library_item result for WgPbbWmnXJ8:\u001b[K\r\n- Error: library_unavailable (FileNotFoundError in storage)\u001b[K\r\n\u001b[K\u001b[?25h\nThe library storage is currently unavailable on this system.\r\nCooked for 5s · done 11:54 PM\r\ndon't ask on (shift+tab to cycle)\r\n/rc active\r\n$"
+  },
+  {
+    "at": "2026-09-09T06:55:18.455Z",
+    "input": "For this new turn, does newly supplied Recall context provide another stored orbit fixture value? Distinguish any fresh context from what appeared in earlier turns.\r",
+    "chunk_id": "e7081e",
+    "wall_time_seconds": 1.0086533,
+    "session_id": 4226,
+    "original_token_count": 53,
+    "output": "\r\u001b[?25l$  For this new turn, does newly supplied Recall context provide another stored \u001b[24;80H\r\norbit fixture value? Distinguish any fresh context from what appeared in        \u001b[24;73H\u001b[?25h\r\nearlier turns.\r\n"
+  },
+  {
+    "at": "2026-09-09T06:55:29.333Z",
+    "input": "\r",
+    "chunk_id": "108a80",
+    "wall_time_seconds": 1.0088128,
+    "session_id": 4226,
+    "original_token_count": 116,
+    "output": "\u001b]0;◑ Orbit fixture stored value\u0007\u001b[?25l\u001b[19;1Hyou: For this new turn, does newly supplied Recall context provide another      \r\nstored orbit fixture value? Distinguish any fresh context from what appeared in \r\nearlier turns.\u001b[K\r\nSkedaddling…\u001b[K\r\nTip: Try setting environment variable COLORTERM=truecolor for richer colors     \r\ndon't ask on (shift+tab to cycle)  ·  esc to interrupt\u001b[K\u001b[?25h\r\n/rc active\r\n$\u001b]133;A;redraw=0\u0007\u001b]0;◐ Orbit fixture stored value\u0007"
+  },
+  {
+    "at": "2026-09-09T06:55:46.901Z",
+    "poll": true,
+    "chunk_id": "683514",
+    "wall_time_seconds": 5.013871,
+    "session_id": 4226,
+    "original_token_count": 151,
+    "output": "\u001b]0;◑ Orbit fixture stored value\u0007\u001b]0;◐ Orbit fixture stored value\u0007\u001b]0;◑ Orbit fixture stored value\u0007\u001b]0;◐ Orbit fixture stored value\u0007\u001b]0;◑ Orbit fixture stored value\u0007\r\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b]0;✳ Orbit fixture stored value\u0007\u001b[?25l\u001b[20;1Hclaude: No. This turn contains no newly supplied Recall context. The only orbit \r\nfixture context appeared in the first turn's system reminder, which stated:     \r\n\"Orbit fixture value BLUE.\"\u001b[K\r\n\u001b[K\r\nThis current turn's system reminders contain only a token count update.\u001b[K\u001b[?25h\r\nBrewed for 5s · done 11:55 PM\r\ndon't ask on (shift+tab to cycle)\r\n/rc active\r\n$"
+  },
+  {
+    "at": "2026-09-09T06:55:58.511Z",
+    "input": "/usage\r",
+    "chunk_id": "267bde",
+    "wall_time_seconds": 1.0080843,
+    "session_id": 4226,
+    "original_token_count": 675,
+    "output": "\r\u001b[?25l\u001b[?25l\u001b[?25l\u001b[22;1Hyou: /usage\u001b[K\r\nSettings  Status   Config   Usage   Stats\u001b[K\r\nSession\u001b[K\u001b[?25h\r\nTotal cost:            $0.0289\r\nTotal duration (API):  32s\r\nTotal duration (wall): 2m 11s\r\nTotal code changes:    0 lines added, 0 lines removed\r\nUsage by model:\r\n    claude-haiku-4-5:  2.9k input, 2.8k output, 47.0k cache read, 3.7k cache    \u001b[24;77H\u001b[?25h\r\nwrite ($0.0289)\r\nPrompt cache (main):   4 requests · 91% of input tokens from cache · no misses ·\u001b[24;80H\r\n warm (1h TTL, last activity 23s ago)\r\nCurrent session\r\n0% 0% used\r\nResets 3:20am (America/Los_Angeles)\r\nCurrent week (all models)\r\n69% 69% used\r\nResets Sep 12, 3am (America/Los_Angeles)\r\n+50% weekly limits promo through Sep 13 · clau.de/cc-50-promo\r\nWhat's contributing to your limits usage?\r\nApproximate, based on local sessions on this machine — does not include other   \u001b[24;78H\u001b[?25h\r\ndevices or claude.ai\r\nScanning local sessions…\r\nRefreshing…\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h\u001b[?25l\u001b[H\u001b[?25h\u001b[?25l\u001b[22;1HLast 24h · these are independent characteristics of your usage, not a breakdown \r\n15% of your usage came from /mcp__uoink__consult-library\u001b[K\r\nHeavy skills can be scoped down or run with a cheaper model via skill\u001b[K\u001b[?25h\r\nfrontmatter.\r\n61% of your usage came from the MCP server \"uoink\"\r\nMCP tool results stay in context for the rest of the session. /compact to flush \u001b[24;80H\r\nthem, or disable servers you don't need.\r\nSkills % of usage\r\n/mcp__uoink__consult-library 15%\r\nMCP servers % of usage\r\nuoink 61%\r\nd to day · w to week\r\nRefreshing…\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h\u001b[?25l\u001b[H\u001b[?25h\u001b[?25l\u001b[3;1HResets 3:19am (America/Los_Angeles)\u001b[K\r\nCurrent week (all models)\u001b[K\r\n70% 70% used\u001b[K\r\nResets Sep 12, 2:59am (America/Los_Angeles)\u001b[K\r\n+50% weekly limits promo through Sep 13 · clau.de/cc-50-promo\u001b[K\r\nCurrent week (Fable)\u001b[K\r\n88% 88% used\u001b[K\r\nResets Sep 12, 2:59am (America/Los_Angeles)\u001b[K\r\nWhat's contributing to your limits usage?\u001b[K\r\nApproximate, based on local sessions on this machine — does not include other   \r\ndevices or claude.ai\u001b[K\r\nLast 24h · these are independent characteristics of your usage, not a breakdown \r\n15% of your usage came from /mcp__uoink__consult-library\u001b[K\r\nHeavy skills can be scoped down or run with a cheaper model via skill\u001b[K\r\nfrontmatter.\u001b[K\r\n61% of your usage came from the MCP server \"uoink\"\u001b[K\r\nMCP tool results stay in context for the rest of the session. /compact to flush \r\nthem, or disable servers you don't need.\u001b[K\r\nSkills % of usage\u001b[K\r\n/mcp__uoink__consult-library 15%\u001b[K\r\nMCP servers % of usage\u001b[K\r\nuoink 61%\u001b[K\u001b[?25h\r\nd to day · w to week\r\nUsage credits\r\nUsage credits are off · /usage-credits to turn them on\u001b[?25l\r\nEsc to cancel\u001b[1;29H\u001b[?25h"
+  },
+  {
+    "at": "2026-09-09T06:56:12.618Z",
+    "input": "\u001b",
+    "chunk_id": "ed3a15",
+    "wall_time_seconds": 1.0083108,
+    "session_id": 4226,
+    "original_token_count": 64,
+    "output": "\u001b]133;A;redraw=0\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b[?25l\u001b[H\u001b[?25h\u001b[?25lSettings dialog dismissed\u001b[K\r\ndon't ask on (shift+tab to cycle)\u001b[K\r\n/rc active\u001b[K\r\n$\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\u001b[4;2H\u001b[?25h"
+  },
+  {
+    "at": "2026-09-09T06:56:13.224Z",
+    "input": "/exit\r",
+    "chunk_id": "6e060f",
+    "wall_time_seconds": 0.4962929,
+    "exit_code": 0,
+    "original_token_count": 89,
+    "output": "\u001b]0;◑ Orbit fixture stored value\u0007\r\u001b]133;A;redraw=0\u0007\u001b]133;C\u0007\u001b]133;D\u0007\u0007\u001b[?1006l\u001b[?1003l\u001b[?1002l\u001b[?1000l\u001b[>4m\u001b[<u\u001b[?2031l\u001b[?2004l\r\nResume this session with:\r\nclaude --resume f54d8fe3-bc79-4c30-bbb2-6a3e024e5125\r\n\u001b]0;\u0007\u001b]0;✳ Orbit fixture stored value\u0007\u001b]0;C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\u0007"
+  }
+]
+

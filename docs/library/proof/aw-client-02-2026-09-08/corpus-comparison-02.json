@@ -1,0 +1,45 @@
+{
+  "routes_equal": true,
+  "complete_stored_text_equal": true,
+  "payload": {
+    "boundary_adjusted": false,
+    "bytes": {
+      "end": 897,
+      "offset": 0,
+      "requested_length": 4096,
+      "returned": 897,
+      "start": 0,
+      "total": 897
+    },
+    "complete": true,
+    "continuation": {
+      "next_uri": null
+    },
+    "contract_version": "phase4-v1-2026-09-08",
+    "document": "corpus_chunk",
+    "encoding": "utf-8",
+    "evidence_basis": "reading_aid",
+    "evidence_kind": "corpus_chunk",
+    "has_more": false,
+    "identity": {
+      "item_id": "x_27061a15409",
+      "slug": "27061a15409"
+    },
+    "labels": {
+      "channel": "NASA Administrator Jared Isaacman (@NASAAdmin)",
+      "title": "@NASAAdmin: It will never get old seeing Kennedy Space Center from the…"
+    },
+    "redactions": [],
+    "render_version": "reach-markdown-v1",
+    "requested_revision": {
+      "corpus_revision": "07603cc32bd8840cf211b4ad9fb6effd13e769e9f82d9a4da139acde3e3b4cb5"
+    },
+    "schema_version": 1,
+    "text": "# @NASAAdmin: It will never get old seeing Kennedy Space Center from the…\r\n\r\n**Source:** https://x.com/NASAAdmin/status/2020984085754282078\r\n\r\n# NASA Administrator Jared Isaacman (@NASAAdmin) on X\r\n\r\n**Source:** https://x.com/NASAAdmin/status/2020984085754282078\r\n\r\n*2 posts captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.*\r\n\r\n## 1/2\r\nIt will never get old seeing Kennedy Space Center from the air--especially with two human-rated rockets standing vertical on Pads 39B and 40 for Artemis II and Crew-12.\r\n\r\nIt was an honor to share the skies with @AFThunderbirds Thunderbird 7, Lt. Col. Tyler Keener, Thunderbird 8, https://t.co/PYgaWULbPH\r\n\r\n*2026-02-09T22:11:30.000Z · video (capture it with the regular Uoink button)*\r\n\r\n## 2/2\r\nhttps://t.co/DLb2immna5\r\n\r\n*2026-02-09T22:12:08.000Z · 4 photos*\r\n",
+    "truncated": false
+  },
+  "stored_corpus_sha256": "07603cc32bd8840cf211b4ad9fb6effd13e769e9f82d9a4da139acde3e3b4cb5",
+  "stored_text_bytes": 897,
+  "source_header_present": true,
+  "source_url": "https://x.com/NASAAdmin/status/2020984085754282078"
+}

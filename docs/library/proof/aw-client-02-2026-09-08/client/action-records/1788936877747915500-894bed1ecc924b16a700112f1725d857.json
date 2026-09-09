@@ -1,0 +1,34 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-09T06:54:37.747905+00:00",
+  "monotonic_ns": 399504905301600,
+  "pid": 71868,
+  "input": {
+    "session_id": "f54d8fe3-bc79-4c30-bbb2-6a3e024e5125",
+    "transcript_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\aw-client-receipt-20260909T064142Z\\projects\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-02-client\\f54d8fe3-bc79-4c30-bbb2-6a3e024e5125.jsonl",
+    "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client",
+    "scratchpad_dir": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile\\claude\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-02-client\\f54d8fe3-bc79-4c30-bbb2-6a3e024e5125\\scratchpad",
+    "prompt_id": "7fd48142-153e-47f2-aae0-aa4baccb9739",
+    "permission_mode": "dontAsk",
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__uoink__get_library_item",
+    "tool_input": {
+      "video_id": "WgPbbWmnXJ8"
+    },
+    "tool_use_id": "toolu_01UKVJRBWT1Nesibj2wewCgg",
+    "error": "{\"contract_version\": \"phase4-v1-2026-09-08\", \"error\": {\"code\": \"library_unavailable\", \"details\": {\"storage\": \"FileNotFoundError\"}, \"message\": \"The library storage is unavailable.\", \"retryable\": true}, \"ok\": false, \"schema_version\": 1}",
+    "is_interrupt": false,
+    "duration_ms": 3
+  },
+  "response": {},
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__aw_sentinel__record_action"
+  }
+}

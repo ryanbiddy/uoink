@@ -1,0 +1,52 @@
+{
+  "utc": "2026-09-09T06:57:15.8776184+00:00",
+  "children": [
+    {
+      "pid": 63008,
+      "alive": false
+    },
+    {
+      "pid": 72528,
+      "alive": false
+    },
+    {
+      "pid": 67204,
+      "alive": false
+    },
+    {
+      "pid": 70860,
+      "alive": false
+    },
+    {
+      "pid": 72312,
+      "alive": false
+    },
+    {
+      "pid": 67536,
+      "alive": false
+    },
+    {
+      "pid": 69780,
+      "alive": false
+    },
+    {
+      "pid": 65060,
+      "alive": false
+    }
+  ],
+  "restored": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile\\Uoink\\index.db",
+      "sha256": "57b785c6eb95b8c5ed39aacd328bfbc145da1e2a0e6c90723088c44540a5f3ea",
+      "replacement_absent_before_restore": true,
+      "restored_identical": true
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\recall\\index.db",
+      "sha256": "954973918e9783ec33f6ac2fd065c350069e005c5c16e0425a201974bd19739a",
+      "replacement_absent_before_restore": true,
+      "restored_identical": true
+    }
+  ],
+  "credential_cleanup": "Combined cleanup command blocked by automatic approval review; separate disposition required"
+}

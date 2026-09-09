@@ -1,0 +1,160 @@
+{
+  "prepared_at": "2026-09-09T06:40:39.621849+00:00",
+  "candidate": "49026e420dfd7072a504876b6bac30ddd774b7a0",
+  "status": "prompt fixture prepared; client not run",
+  "preview_id": "mFBHhR3VUxnzqkWfs5fsVtSeGnAk2iVJ",
+  "expires_ms": 1788936939530,
+  "before_setup": {
+    "clips": {
+      "rows": 3705,
+      "sha256": "df044eb616dc7d953500257c22a3cf8d169717ef5b7c9ece32d0d87797616fad"
+    },
+    "item_shelves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_applies": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_attempts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_item_policy": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_manifest": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_meta": {
+      "rows": 1,
+      "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+    },
+    "library_operation_receipts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_previews": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_proposals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_runs": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_submissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_user_intents": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_work": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shelf_nodes": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shelf_versions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "yoinks": {
+      "rows": 549,
+      "sha256": "a265f27ad23bbb9bdbce4cdb494afbb678187216d13d3871e4835b39865589ef"
+    },
+    "settings": {
+      "sha256": "195586f5c9dd9b0990935e3067fa6711ffe98b13472c731ca46bc09db582865b"
+    }
+  },
+  "before_client": {
+    "clips": {
+      "rows": 3705,
+      "sha256": "df044eb616dc7d953500257c22a3cf8d169717ef5b7c9ece32d0d87797616fad"
+    },
+    "item_shelves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_applies": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_attempts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_item_policy": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_manifest": {
+      "rows": 2,
+      "sha256": "87fed7f5f3639db5c0dbc836db41e6ce201ee1a554b7898a394f13abc902cc07"
+    },
+    "library_meta": {
+      "rows": 1,
+      "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+    },
+    "library_operation_receipts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_previews": {
+      "rows": 1,
+      "sha256": "45c251b1e84c7cbd0ae3c2dc6c5e789fbba60f13cfa5193539845d392e5a4528"
+    },
+    "library_proposals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_runs": {
+      "rows": 1,
+      "sha256": "b8ed67b4fc43b679bb3d080d00be34a904a56989fcef3671382126bbe141c492"
+    },
+    "library_submissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_user_intents": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_work": {
+      "rows": 2,
+      "sha256": "dce58ab59d87b6a2989b812ff0bbb993bac34e46577d9174122e492e46728f2e"
+    },
+    "shelf_nodes": {
+      "rows": 1,
+      "sha256": "c197e7cf37f87360d26399e3dde510b0890989afcbc162c4427ebbf417d7d057"
+    },
+    "shelf_versions": {
+      "rows": 1,
+      "sha256": "c653002be9939e37faf8e7fa8a1bc7039e1a9ed79352f9e2bc52515757898834"
+    },
+    "yoinks": {
+      "rows": 549,
+      "sha256": "a265f27ad23bbb9bdbce4cdb494afbb678187216d13d3871e4835b39865589ef"
+    },
+    "settings": {
+      "sha256": "195586f5c9dd9b0990935e3067fa6711ffe98b13472c731ca46bc09db582865b"
+    }
+  },
+  "reattachment_semantically_unchanged": true,
+  "apply_enabled": false,
+  "entry_sha256": "07533ccf15d90d51a91ef38fff3f052097ef6006bab3e33b718847865c88c620",
+  "config_sha256": "d353d6b058d3ea7bc0d69f02c7702292f897c277c5ae91ddd1d438a009ab52dc",
+  "preconditioning_sha256": "8eeeb9cd1f27510a465d37ee54b1b29c2092aba44c6aff3d37c3b555414c89b7",
+  "scope": "Real service with synthetic excluded run; no model classifications, taxonomy activation or apply",
+  "default_entry": "mcp.json retains unattached production startup; valid preview uses explicit application fixture"
+}

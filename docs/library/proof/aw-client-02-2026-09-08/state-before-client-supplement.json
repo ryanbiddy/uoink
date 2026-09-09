@@ -1,0 +1,93 @@
+{
+  "semantic": {
+    "clips": {
+      "rows": 3705,
+      "sha256": "df044eb616dc7d953500257c22a3cf8d169717ef5b7c9ece32d0d87797616fad"
+    },
+    "item_shelves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_applies": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_attempts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_item_policy": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_manifest": {
+      "rows": 2,
+      "sha256": "87fed7f5f3639db5c0dbc836db41e6ce201ee1a554b7898a394f13abc902cc07"
+    },
+    "library_meta": {
+      "rows": 1,
+      "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+    },
+    "library_operation_receipts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_previews": {
+      "rows": 1,
+      "sha256": "45c251b1e84c7cbd0ae3c2dc6c5e789fbba60f13cfa5193539845d392e5a4528"
+    },
+    "library_proposals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_runs": {
+      "rows": 1,
+      "sha256": "b8ed67b4fc43b679bb3d080d00be34a904a56989fcef3671382126bbe141c492"
+    },
+    "library_submissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_user_intents": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_work": {
+      "rows": 2,
+      "sha256": "dce58ab59d87b6a2989b812ff0bbb993bac34e46577d9174122e492e46728f2e"
+    },
+    "shelf_nodes": {
+      "rows": 1,
+      "sha256": "c197e7cf37f87360d26399e3dde510b0890989afcbc162c4427ebbf417d7d057"
+    },
+    "shelf_versions": {
+      "rows": 1,
+      "sha256": "c653002be9939e37faf8e7fa8a1bc7039e1a9ed79352f9e2bc52515757898834"
+    },
+    "yoinks": {
+      "rows": 549,
+      "sha256": "a265f27ad23bbb9bdbce4cdb494afbb678187216d13d3871e4835b39865589ef"
+    },
+    "settings": {
+      "sha256": "195586f5c9dd9b0990935e3067fa6711ffe98b13472c731ca46bc09db582865b"
+    }
+  },
+  "files": {
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\citations.json": "abce1d3911e70f13b44c84dcd75e0d103b3a8a8de523d8c769a0ca6ea1cc7e24",
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\document.md": "f90f926ea6c16623af8fbfdb0b9b2e5df6f9e24d6c51e0c3a6db073cb0db9ed9",
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\manifest.json": "25218161e46cdbde103b938b13df2a60be4b1bd429b9f1818cf3dfab0765c309",
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\packet.json": "800f2beeab9584556f437f833928f81b29abae7907b79c8bfaac3c7887512f2c",
+    "profile\\Uoink\\reach\\briefs\\jobs\\ee8f2adbb5587ce2de969e4fb65be82401df508b49bbb15505d65fddbb18f03b.json": "ab14e1f9fa287c8bf6e1ac255d90f91d21bbbf46b4f8fdcb703b705fb8f3627b",
+    "profile\\Uoink\\reach\\briefs\\receipts\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da.json": "cfd7dff99a88c64fa0048d137929cb1df8c90971f5d737be08ba2b9338820c1e",
+    "profile\\Uoink\\reach\\briefs\\submissions\\fffa52894af27c0b9f8be954dc0b655adee400383103f0d187c7bfe9d4e03bd2.json": "50ac141fe09dcd9646f7bd986e4aa2344595f8a3a4bc403eec7dc12683267a1d",
+    "synthetic-items\\aw02-hostile-orbit\\corpus.json": "f4ae798a08307ffbdcb750a5f1f8110970fa0dd11f45890260469dc6badf616a",
+    "synthetic-items\\aw02-hostile-orbit\\corpus.md": "9690e9c71b92249ea508f050272b03a8aabf77fe74b868dfbda6e898200fadf5",
+    "recall\\corpus.md": "73f484a64fdfe727c30061e8b6fe5f0ad3e1e63c97a25793e608923c1c87614a",
+    "recall\\index.db": "954973918e9783ec33f6ac2fd065c350069e005c5c16e0425a201974bd19739a",
+    "prompt-store\\.library.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prompt-store\\pins.json": "4941920b1c957a0177a5e8d195a55696214e8e8297bcc36b350b283680e8b733",
+    "prompt-store\\taxonomies\\61f91f6bb9db2e2bd565ba193946feb65dee8855b49bcd4410c60fa1d01f4db8.json": "8921c61938ac2ad425b0175216399b6e02e3dc3cabed5ccda38475e15c214604",
+    "client/protected-sentinel.txt": "d073fdf293f263f22bbb97e0d431ddd9ac8185821d32f42d6830848fb7641a94"
+  },
+  "created_at": "2026-09-09T06:42:48.103673+00:00"
+}

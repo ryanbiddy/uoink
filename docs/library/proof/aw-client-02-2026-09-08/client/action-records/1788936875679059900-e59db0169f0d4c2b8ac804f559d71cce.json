@@ -1,0 +1,14 @@
+{
+  "kind": "recall_hook",
+  "utc": "2026-09-09T06:54:35.679049+00:00",
+  "monotonic_ns": 399502836445700,
+  "pid": 70460,
+  "input_utf8": "{\"session_id\":\"f54d8fe3-bc79-4c30-bbb2-6a3e024e5125\",\"transcript_path\":\"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\aw-client-receipt-20260909T064142Z\\\\projects\\\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-02-client\\\\f54d8fe3-bc79-4c30-bbb2-6a3e024e5125.jsonl\",\"cwd\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\aw-client-02\\\\client\",\"scratchpad_dir\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\aw-client-02\\\\profile\\\\claude\\\\E--AI-projects-uoink-checkouts-Yoink-library--scratch-aw-client-02-client\\\\f54d8fe3-bc79-4c30-bbb2-6a3e024e5125\\\\scratchpad\",\"prompt_id\":\"7fd48142-153e-47f2-aae0-aa4baccb9739\",\"permission_mode\":\"dontAsk\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"Make one fresh search_library request for orbit and one fresh get_library_item request for item WgPbbWmnXJ8. Report each actual result separately, without retries.\"}\n",
+  "output_utf8": "",
+  "stderr_utf8": "",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_ms": 60.5383,
+  "script_sha256": "d8b302bc94df6405dbca2f3294829f1245d0c0772ca682970612f9453921a6bf",
+  "database": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\recall\\index.db"
+}

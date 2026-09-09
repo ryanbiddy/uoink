@@ -1,0 +1,37 @@
+{
+  "scope": "Real production Mirror on synthetic isolated files; no client or live vault",
+  "observations_completed": true,
+  "user_edit_preserved": true,
+  "owned_delete_removed": true,
+  "new_item_written_after_reconnect": true,
+  "unowned_files_unchanged": true,
+  "temporary_files": [],
+  "final_status": {
+    "ok": true,
+    "schema_version": 1,
+    "contract_version": "phase4-v1-2026-09-08",
+    "enabled": true,
+    "state": "paused",
+    "pending": 2,
+    "synced": 1,
+    "stale": 0,
+    "conflicts": {
+      "user_edit": [
+        {
+          "key": "item:edited-keep",
+          "path": "Library/08e48e138fad62f138124cd41d586986fd3b5318d839948ac9268ae7de510f31.md"
+        }
+      ],
+      "unmanaged": [],
+      "path_collision": []
+    },
+    "unmanaged": [],
+    "deletion_pending": 1,
+    "destination_state": "available",
+    "destination_available": true,
+    "exports_paused": true
+  },
+  "pending_user_edit_conflict_is_expected": true,
+  "mirror_session_retained": false,
+  "apply_enabled": false
+}

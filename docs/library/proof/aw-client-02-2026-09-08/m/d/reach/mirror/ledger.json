@@ -1,0 +1,68 @@
+{
+  "contract_version": "phase4-v1-2026-09-08",
+  "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\m\\v",
+  "entries": {
+    "index:Library.md": {
+      "dependency_hash": "",
+      "desired_generation": 9,
+      "identity": "Library.md",
+      "kind": "index",
+      "last_file_hash": "f1e7efb6dd68a4606a4f67a5bf7d4c6646dff218cd992d7c76e6f72779437290",
+      "pending_action": "write",
+      "relpath": "Library.md",
+      "status": "pending",
+      "written_generation": 8
+    },
+    "item:edited-keep": {
+      "dependency_hash": "6656cffbde94a2cb2ae28effcc5ea0f277733cf2e113f4a796492bacc6b26437",
+      "desired_generation": 4,
+      "identity": "edited-keep",
+      "kind": "item",
+      "last_file_hash": "f169eba5c7a11cc8f8cebdd2e226fb21789aacbef14baf5b48b9d19bcfc39d8a",
+      "pending_action": "purge",
+      "relpath": "Library/08e48e138fad62f138124cd41d586986fd3b5318d839948ac9268ae7de510f31.md",
+      "status": "user_edit_conflict",
+      "written_generation": 2
+    },
+    "item:new-after-disconnect": {
+      "dependency_hash": "f4cf2e3ca3e189790d64f610f99b24fe61dd4b18b1df434ffa60af82e4979b1d",
+      "desired_generation": 2,
+      "identity": "new-after-disconnect",
+      "kind": "item",
+      "last_file_hash": "69bc240efe4fcaf8b66f25cbe5df7aa27658982a2bdb997e956564d73f47ad65",
+      "pending_action": "none",
+      "relpath": "Library/af360ee359c2f7941547f8385a6114d546a8942879e7062bb81102e3d5003820.md",
+      "status": "synced",
+      "written_generation": 2
+    },
+    "item:owned-purge": {
+      "dependency_hash": "5c02ba8d7d12242940a2094bcdf588912ba9b2c793dcea272b1c9b4a3272d74a",
+      "desired_generation": 3,
+      "identity": "owned-purge",
+      "kind": "item",
+      "last_file_hash": "",
+      "pending_action": "none",
+      "relpath": "Library/f8c787badbb68986d64fbe3c2b153a7d03392d6ddbaa52d23b2cc373d8812355.md",
+      "status": "purged",
+      "written_generation": 3
+    }
+  },
+  "exports_paused": true,
+  "marker": "aw02-disposable-volume",
+  "pause_reason": "purge_blocked_user_edit",
+  "purged": {
+    "item:edited-keep": {
+      "generation": 4,
+      "identity": "edited-keep",
+      "purged_at": "2026-09-09T06:46:11Z",
+      "relpath": "Library/08e48e138fad62f138124cd41d586986fd3b5318d839948ac9268ae7de510f31.md"
+    },
+    "item:owned-purge": {
+      "generation": 3,
+      "identity": "owned-purge",
+      "purged_at": "2026-09-09T06:46:10Z",
+      "relpath": "Library/f8c787badbb68986d64fbe3c2b153a7d03392d6ddbaa52d23b2cc373d8812355.md"
+    }
+  },
+  "schema_version": 1
+}

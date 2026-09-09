@@ -1,0 +1,79 @@
+{
+  "mcpServers": {
+    "uoink": {
+      "type": "stdio",
+      "command": "C:\\Python314\\python.exe",
+      "args": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stdio_tap.py",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\records\\stdio",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stage",
+        "--",
+        "C:\\Python314\\python.exe",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stage\\uoink_mcp.py"
+      ],
+      "env": {
+        "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\output",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\guard;E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stage;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin",
+        "AW_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02",
+        "AW_FORBIDDEN_INDEX": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+        "MCP_TIMEOUT": "10000",
+        "ENABLE_TOOL_SEARCH": "false",
+        "DISABLE_AUTOUPDATER": "1",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+      },
+      "timeout": 10000,
+      "alwaysLoad": true
+    },
+    "aw_sentinel": {
+      "type": "stdio",
+      "command": "C:\\Python314\\python.exe",
+      "timeout": 10000,
+      "alwaysLoad": true,
+      "args": [
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stdio_tap.py",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\records\\sentinel",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client",
+        "--",
+        "C:\\Python314\\python.exe",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\observe_client_actions.py",
+        "sentinel",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02"
+      ],
+      "env": {
+        "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+        "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\output",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\guard;E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stage;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin",
+        "AW_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02",
+        "AW_FORBIDDEN_INDEX": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+        "MCP_TIMEOUT": "10000",
+        "ENABLE_TOOL_SEARCH": "false",
+        "DISABLE_AUTOUPDATER": "1",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+      }
+    }
+  }
+}

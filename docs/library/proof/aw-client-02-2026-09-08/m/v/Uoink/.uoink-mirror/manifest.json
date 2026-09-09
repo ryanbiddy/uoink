@@ -1,0 +1,31 @@
+{
+  "contract_version": "phase4-v1-2026-09-08",
+  "ownership": {
+    "Library.md": {
+      "file_hash": "f1e7efb6dd68a4606a4f67a5bf7d4c6646dff218cd992d7c76e6f72779437290",
+      "generation": 8,
+      "identity": "Library.md",
+      "key": "index:Library.md",
+      "kind": "index",
+      "tombstone": false
+    },
+    "Library/08e48e138fad62f138124cd41d586986fd3b5318d839948ac9268ae7de510f31.md": {
+      "file_hash": "f169eba5c7a11cc8f8cebdd2e226fb21789aacbef14baf5b48b9d19bcfc39d8a",
+      "generation": 2,
+      "identity": "edited-keep",
+      "key": "item:edited-keep",
+      "kind": "item",
+      "tombstone": false
+    },
+    "Library/af360ee359c2f7941547f8385a6114d546a8942879e7062bb81102e3d5003820.md": {
+      "file_hash": "69bc240efe4fcaf8b66f25cbe5df7aa27658982a2bdb997e956564d73f47ad65",
+      "generation": 2,
+      "identity": "new-after-disconnect",
+      "key": "item:new-after-disconnect",
+      "kind": "item",
+      "tombstone": false
+    }
+  },
+  "render_version": "reach-markdown-v1",
+  "schema_version": 1
+}

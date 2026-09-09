@@ -1,0 +1,54 @@
+{
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client",
+  "session_id": "f1345256-7555-46b5-90dc-8a9cc25938c0",
+  "args": [
+    "--restricted",
+    "--strict-mcp-config",
+    "--no-chrome",
+    "--permission-mode",
+    "dontAsk",
+    "--tools",
+    "ListMcpResourcesTool,ReadMcpResourceTool",
+    "--allowedTools",
+    "ListMcpResourcesTool,ReadMcpResourceTool,mcp__uoink__get_library_item,mcp__uoink__read_library_resource,mcp__uoink__search_library,mcp__aw_sentinel__record_action",
+    "--disallowedTools",
+    "mcp__uoink__add_allowed_site,mcp__uoink__add_monitored_playlist,mcp__uoink__add_podcast_feed,mcp__uoink__add_style_anchor,mcp__uoink__analyze_comments,mcp__uoink__analyze_self_channel,mcp__uoink__apply_reshelving,mcp__uoink__assemble_workspace,mcp__uoink__cancel_job,mcp__uoink__check_live_status,mcp__uoink__claim_library_work,mcp__uoink__classify_facets,mcp__uoink__classify_hook,mcp__uoink__critique_against_corpus,mcp__uoink__download_podcast_episode,mcp__uoink__episode_to_corpus,mcp__uoink__export_cited_range,mcp__uoink__extract_claims,mcp__uoink__find_mentions,mcp__uoink__generate_script,mcp__uoink__get_citation_map,mcp__uoink__get_claim,mcp__uoink__get_engagement_signal,mcp__uoink__get_evidence_card,mcp__uoink__get_facet_taxonomy,mcp__uoink__get_job_status,mcp__uoink__get_library_activity,mcp__uoink__get_library_brief_input,mcp__uoink__get_schema_version,mcp__uoink__get_script,mcp__uoink__get_shot_list,mcp__uoink__get_taxonomy,mcp__uoink__get_transcript_reliability,mcp__uoink__get_uoink_corpus,mcp__uoink__get_uoink_health,mcp__uoink__get_user_memory,mcp__uoink__get_user_role,mcp__uoink__get_user_taste,mcp__uoink__get_whisperx_status,mcp__uoink__get_workspace,mcp__uoink__get_writing_piece,mcp__uoink__list_allowed_sites,mcp__uoink__list_claims,mcp__uoink__list_library_work,mcp__uoink__list_monitored_playlist_events,mcp__uoink__list_monitored_playlists,mcp__uoink__list_podcast_episodes,mcp__uoink__list_podcast_feeds,mcp__uoink__list_recent_uoinks,mcp__uoink__list_scripts,mcp__uoink__list_sources,mcp__uoink__list_style_anchors,mcp__uoink__list_workspaces,mcp__uoink__list_writing_pieces,mcp__uoink__pin_shelf,mcp__uoink__poll_monitored_playlist,mcp__uoink__poll_podcast_feed,mcp__uoink__publish_library_brief,mcp__uoink__query_by_facets,mcp__uoink__register_source,mcp__uoink__remove_allowed_site,mcp__uoink__remove_monitored_playlist,mcp__uoink__remove_podcast_feed,mcp__uoink__remove_style_anchor,mcp__uoink__revise_script,mcp__uoink__search_clips,mcp__uoink__search_uoinks,mcp__uoink__set_source_consent,mcp__uoink__set_user_role,mcp__uoink__source_status,mcp__uoink__submit_library_result,mcp__uoink__transcribe_podcast_episode,mcp__uoink__undo_library_apply,mcp__uoink__uoink_image,mcp__uoink__uoink_note,mcp__uoink__uoink_page,mcp__uoink__uoink_playlist,mcp__uoink__uoink_reddit_thread,mcp__uoink__uoink_url,mcp__uoink__uoink_video,mcp__uoink__uoink_x,mcp__uoink__update_user_taste,mcp__uoink__verify_claim,mcp__uoink__write_blog,mcp__uoink__write_tweet",
+    "--mcp-config",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\mcp-client.json",
+    "--settings",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\settings.json",
+    "--session-id",
+    "f1345256-7555-46b5-90dc-8a9cc25938c0",
+    "--debug-file",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\claude-debug.log"
+  ],
+  "interactive_extra_args": [
+    "--ax-screen-reader"
+  ],
+  "print_extra_args": [
+    "--print",
+    "--verbose",
+    "--output-format",
+    "stream-json",
+    "--include-hook-events"
+  ],
+  "environment": {
+    "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+    "APPDATA": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+    "TEMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+    "TMP": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+    "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\profile",
+    "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\output",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\guard;E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\stage;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\win32\\lib;C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages\\pythonwin",
+    "AW_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02",
+    "AW_FORBIDDEN_INDEX": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "MCP_TIMEOUT": "10000",
+    "ENABLE_TOOL_SEARCH": "false",
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+  },
+  "required_authentication": "claude.ai subscription; verify immediately before launch",
+  "no_client_started": true
+}

@@ -59,10 +59,10 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | Implementation closed at `6858b81`; both roots 286 passed / nine frozen failures; broader AW-4 113 passed. Client observation 01 is partial on `7eec17b` | Native prompts, eight complete packet comparisons, explicit reconnect, corpus refusal and a 10.003-second transport timeout observed | Finish the client supplement: bounded text source link, hostile content, Recall and vault scenarios. Frozen fixture and installed Inno rulings are Ryan's |
+| 4 | Implementation and required Claude Code/stdio behavior accepted with conditions; 286 passed / nine frozen failures in both roots, broader AW-4 113 passed | `PHASE4-CLIENT-02-2026-09-09.md` closes the planned supplement: complete packets, action evidence, missing-index refusals, Recall and vault accounting | Ryan: installed Inno, frozen fixture rulings and retained X-source HTTP 403 condition. No implementation repair remains identified |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
-| Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
+| Integration | Ready to start; phases 3–6 accepted or blocked only on Ryan's listed conditions | Client supplement complete; no worker active | Cut candidate from HEAD, release notes, full suite and local installer; installed-tree receipts stay with Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -119,11 +119,12 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    `6858b81`, with 286 passed / nine frozen failures in both roots. Original
    B7 and all failed observations remain retained. Final AW-4's four broader
    companion files passed 113 tests; see `PHASE4-AW4-FINAL-2026-09-08.md`.
-   Real-client observation 01 is partial on `7eec17b`; see
-   `PHASE4-CLIENT-01-2026-09-08.md`. Continue with
-   `PHASE4-CLIENT-SUPPLEMENT-BRIEF-2026-09-08.md` and the original client-rerun
-   brief. AW-3's five requirements remain in force; Fable's earlier receipt
-   and all partial observations stay retained.
+   Real-client observation 01 stays partial on `7eec17b`. Its planned supplement
+   is complete on documentation-only successor `49026e4`; see
+   `PHASE4-CLIENT-02-2026-09-09.md`. Required client behavior is accepted with
+   the installed/fixture conditions and explicit blocked X-source link. The
+   original receipt and every failed/partial observation stay retained. No
+   new worker or client rerun is warranted without a documented repair/brief.
 4. Phase 6: BC-3a3 is integrated at `00fe216`; BC-3a2 remains rejected.
    BC-3d integrated at `897f0d2`; BC-3e integrated at `d792875`.
    BC-3f integrated at `986b555`. Final BD-2 on `d1d5fb8` closes implementation
@@ -152,6 +153,10 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 - Phase 2: keep 0.90 strict, change the rule, or ship with owner review.
 - Installed Inno package receipts (Phase 3 C22, Phase 4).
+- Phase 4 external source: the text-only item's exact retained X URL returned
+  HTTP 403 in the isolated browser. Keep this explicitly blocked link condition,
+  or authorize an access repair and a documented follow-up. The successful
+  timed YouTube observation is separate; no replacement source was fetched.
 - Acceptance-fixture rulings: D13's user-edit fixture creates its edit only after
   the publication forbidden by its visibility case, and eight old Phase 4
   parent-process interceptors cannot observe the new isolated writer's syscall;
@@ -169,6 +174,42 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
 
 ## Integrator log
+
+### 2026-09-09 00:03 PDT - Client supplement closed; candidate prerequisites met
+
+The supplement on `49026e4` has 112 hash-sealed proof files. Both text-source
+corpus routes matched all 897 original bytes; four hostile card/excerpt and
+two brief comparisons matched in full. All 12 actual client tool requests were
+permitted reads. Sentinel attempts were zero, library/settings and 15 auxiliary
+file hashes stayed unchanged, and SQLite integrity/foreign-key checks passed.
+The held X link failed with HTTP 403; it is not a passed click. See the new
+Blockers for Ryan entry and `PHASE4-CLIENT-02-2026-09-09.md`.
+
+Live unattached stdio refused the missing fixture index in 1.6269/1.5294 ms
+without creating a replacement. Recall delivered the hostile quoted fact in
+56.0376 ms, then failed silently on unavailable storage in 54.1236 ms. Both
+closed database files were restored byte-identically. Actual Mirror fixture
+disconnection drained three pending actions after reconnect; the later edited
+source purge preserved user bytes and correctly paused with two pending actions,
+one deletion and one user-edit conflict. No temporary artifact remained.
+
+All client children exited and the temporary access-only credential was removed.
+Automatic approval review rejected the first combined computed-path cleanup;
+separate contained fixture restoration and literal-path credential deletion
+succeeded. Neither normal client configuration nor its credential was removed.
+The read-only collector's initial nested-error-field/newline assumptions were
+corrected against retained captures, as documented; no model session was rerun.
+
+The setup-only hostile brief's initial cold-import deadline failure stays
+retained. Its documented repair reused the exact saved packet/key/document
+and existing receipt. It is not a client-authored brief workflow. Native
+template discovery and Claude Desktop remain unobserved, with scope stated
+separately from the successful required Code routes. Corrected the installed
+CLI guide's obsolete claim that native resource tools are absent.
+
+Proceed to Queue 6: candidate, full tree with only S21 omitted, release notes
+and local installer. Preserve all nine Phase 4, eleven Phase 6 and other
+retained fixture failures. No production changes occurred in this supplement.
 
 ### 2026-09-08 16:24 PDT â€” Astra takeover and AS-9
 

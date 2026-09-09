@@ -1,0 +1,100 @@
+{
+  "semantic": {
+    "clips": {
+      "rows": 3705,
+      "sha256": "df044eb616dc7d953500257c22a3cf8d169717ef5b7c9ece32d0d87797616fad"
+    },
+    "item_shelves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_applies": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_attempts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_item_policy": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_manifest": {
+      "rows": 2,
+      "sha256": "87fed7f5f3639db5c0dbc836db41e6ce201ee1a554b7898a394f13abc902cc07"
+    },
+    "library_meta": {
+      "rows": 1,
+      "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+    },
+    "library_operation_receipts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_previews": {
+      "rows": 1,
+      "sha256": "45c251b1e84c7cbd0ae3c2dc6c5e789fbba60f13cfa5193539845d392e5a4528"
+    },
+    "library_proposals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_runs": {
+      "rows": 1,
+      "sha256": "b8ed67b4fc43b679bb3d080d00be34a904a56989fcef3671382126bbe141c492"
+    },
+    "library_submissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_user_intents": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "library_work": {
+      "rows": 2,
+      "sha256": "dce58ab59d87b6a2989b812ff0bbb993bac34e46577d9174122e492e46728f2e"
+    },
+    "shelf_nodes": {
+      "rows": 1,
+      "sha256": "c197e7cf37f87360d26399e3dde510b0890989afcbc162c4427ebbf417d7d057"
+    },
+    "shelf_versions": {
+      "rows": 1,
+      "sha256": "c653002be9939e37faf8e7fa8a1bc7039e1a9ed79352f9e2bc52515757898834"
+    },
+    "yoinks": {
+      "rows": 549,
+      "sha256": "a265f27ad23bbb9bdbce4cdb494afbb678187216d13d3871e4835b39865589ef"
+    },
+    "settings": {
+      "sha256": "195586f5c9dd9b0990935e3067fa6711ffe98b13472c731ca46bc09db582865b"
+    }
+  },
+  "changed": [],
+  "file_checks": {
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\citations.json": true,
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\document.md": true,
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\manifest.json": true,
+    "profile\\Uoink\\reach\\briefs\\2026-09-09\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da\\packet.json": true,
+    "profile\\Uoink\\reach\\briefs\\jobs\\ee8f2adbb5587ce2de969e4fb65be82401df508b49bbb15505d65fddbb18f03b.json": true,
+    "profile\\Uoink\\reach\\briefs\\receipts\\bf821d08444e359ece8d8d21a8c30f40f1d70129c71cf0d9ff7d428dbaa555da.json": true,
+    "profile\\Uoink\\reach\\briefs\\submissions\\fffa52894af27c0b9f8be954dc0b655adee400383103f0d187c7bfe9d4e03bd2.json": true,
+    "synthetic-items\\aw02-hostile-orbit\\corpus.json": true,
+    "synthetic-items\\aw02-hostile-orbit\\corpus.md": true,
+    "recall\\corpus.md": true,
+    "recall\\index.db": true,
+    "prompt-store\\.library.lock": true,
+    "prompt-store\\pins.json": true,
+    "prompt-store\\taxonomies\\61f91f6bb9db2e2bd565ba193946feb65dee8855b49bcd4410c60fa1d01f4db8.json": true,
+    "client/protected-sentinel.txt": true
+  },
+  "integrity": [
+    [
+      "ok"
+    ]
+  ],
+  "foreign_keys": [],
+  "db_sha256": "57b785c6eb95b8c5ed39aacd328bfbc145da1e2a0e6c90723088c44540a5f3ea"
+}

@@ -8,9 +8,12 @@ This file is the Phase 4 configuration artifact for the supported pair:
 **Claude Code CLI 2.1.261 over stdio through `uoink_mcp.py`**. It is not an
 acceptance receipt.
 
-Every Claude Code behavior below is cited to that protocol-limits note.
-Product limits (bounded tools, helper independence, refusal shapes) come from
-the contract.
+The protocol-limits note records the initial investigation. Later actual
+client observations supersede its claim that native resource reads are absent:
+[observation 01](library/PHASE4-CLIENT-01-2026-09-08.md) and
+[supplement/final disposition](library/PHASE4-CLIENT-02-2026-09-09.md).
+Product limits come from the contract. Installed-package acceptance remains
+separate from these source-staged observations.
 
 ## Supported client and scope
 
@@ -131,27 +134,32 @@ Empty hits are a successful empty result. Missing or unreadable storage is
 `library_unavailable`, not an empty library
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md)).
 
-## 3. Resource reads: `read_library_resource` fallback
+## 3. Native resource reads and the fallback tool
 
-Claude Code CLI 2.1.261 implements `readResource()` and
-`listResourceTemplates()` in its client SDK, but the CLI exposes **no model
-tool and no slash command** for reading or attaching arbitrary MCP resources.
-Unlike Claude Desktop's `@` picker, this CLI does not put `resources/list`
-entries into the model loop
-([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §3.5).
+Claude Code CLI 2.1.261 performed actual `resources/read` requests through its
+`ReadMcpResourceTool` in the recorded sessions. Keep that built-in tool and
+`ListMcpResourcesTool` available when restricting a client session. Ask it to
+read the canonical URI returned by uoink; the observed native and fallback
+responses matched in full. The session did not request template discovery,
+so no template-picker support is claimed by this receipt.
 
-That is why Phase 4 freezes **`read_library_resource(uri)`**. Without it,
-Claude Code cannot consume `uoink://library/v1/...` documents
-([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §3.5 and
-§7.1). The tool uses the same URI validation, contents, and refusals as
-`resources/read` — one renderer, identical `contents` text
-([contract](library/PHASE4-CONTRACT-2026-09-08.md)).
+**`read_library_resource(uri)`** remains the supported fallback. It uses the
+same URI validation, contents and refusals as native `resources/read`, with
+one renderer and identical `contents` text. Both routes were observed for
+cards, excerpts, a bounded corpus and a synthetic brief.
 
-After `get_library_item`, pass a returned canonical URI (card, excerpt, or
-corpus chunk) to `read_library_resource`. Do not hand-build hashes or attach
-a filesystem path.
+After `get_library_item`, use a returned canonical URI (card, excerpt, or
+corpus chunk). Do not hand-build hashes or attach a filesystem path. If card
+metadata has no source link, a retained bounded corpus may contain the
+original Source header; missing card links and text-only timing stay null.
 
-## 4. Prompts as `/uoink:<prompt>` slash commands
+## 4. Native prompt commands
+
+The observed route was `/mcp__uoink__consult-library orbit` and
+`/mcp__uoink__reshelve-review <preview_id>`, with actual `prompts/get` traffic.
+Use these recorded internal command names when reproducing the receipt.
+The alias forms below come from the earlier protocol investigation; they were
+not separately exercised in the final session.
 
 Claude Code discovers prompts via `prompts/list` and exposes them as slash
 commands ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
@@ -167,7 +175,7 @@ commands ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
 The generated command name is `/mcp__<server>__<promptName>`. User aliases
 are `/<server>:<promptName>` and `/<server>:<promptName> (MCP)`
 ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §3.4).
-Use the `/uoink:<prompt>` alias.
+The final observation used the `/mcp__uoink__<prompt>` form.
 
 Arguments:
 
@@ -232,6 +240,14 @@ Phase 4 advertises `listChanged: false` on tools, resources, and prompts, so
 this CLI does not register list-change listeners or poll
 ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §3.6).
 Refresh is an explicit tool/resource call or a new session.
+
+The actual 2.1.261 client also supports `/mcp`, selecting `uoink`, then
+Reconnect. Observation 01 replaced the recorded child and returned identical
+complete item envelopes. That fixture configured a 10,000 ms server timeout
+and `MCP_TIMEOUT=10000`; a suspended child produced a client failure after
+10.003 seconds without a retry. This measured configuration supersedes the
+older approximate hang timing for that receipt only; it is not a new default
+timeout claim.
 
 Do not target the resident helper to "fix" a stdio session. Do not add a
 helper URL after a failure. If the child died, relaunch Claude Code so it

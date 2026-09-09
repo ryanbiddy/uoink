@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-09-09T07:00:31.793106+00:00",
+  "frozen_input_seals_verified": true,
+  "debug": [
+    {
+      "raw_private_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\claude-debug.log",
+      "raw_sha256": "8a1d2079ab830e6c0640245d7eb8b93abd38e5403005dc6d5dd9703f22519b7c",
+      "selection": "claude-debug-selected.log",
+      "kind": "Selected noncredential lines; raw file retained privately"
+    },
+    {
+      "raw_private_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\aw-client-02\\client\\claude-recall-debug.log",
+      "raw_sha256": "a9e3327fa1812bee89fe0e549588d99116fb518dd7af1d7ed0b0bae7494268d9",
+      "selection": "claude-recall-debug-selected.log",
+      "kind": "Selected noncredential lines; raw file retained privately"
+    }
+  ],
+  "database_archived": false,
+  "credentials_archived": false,
+  "x_error_screenshot_observation": "Visually inspected: Access to x.com was denied, HTTP ERROR 403; no successful destination page",
+  "brief_setup_limit": "Synthetic publisher input, not client-authored publication; initial cold standalone setup deadline_exceeded retained with repair note"
+}
