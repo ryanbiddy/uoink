@@ -1153,10 +1153,13 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     # a row that carries another feed/GUID, and persist the full identity
     # (normalized feed URL, GUID, capture key) with this publication.
     _check_corpus_identity(idx, existing, row, video_id)
-    # BC-2/BC-3d: mint after consuming the transcript file, then recheck
-    # those exact bytes under the fence before building or replacing files.
+    # BC-2/BC-3d/BC-3f: mint after consuming the transcript file, carry
+    # those exact bytes on the ticket, and recheck them under the fence
+    # before building or replacing files and again inside publication.
     import library_media as _media_fence  # noqa: WPS433 -- lazy: keeps module import graph unchanged
-    ticket = (idx.begin_media_publication(video_id, folder=folder)
+    ticket = (idx.begin_media_publication(
+                  video_id, folder=folder,
+                  input_files={transcript_path: transcript_bytes})
               if _media_fence.schema_ready(idx._conn) else None)
     if ticket is not None:
         _media_fence.require_unchanged_input_bytes(transcript_path, transcript_bytes)

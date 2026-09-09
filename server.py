@@ -2713,24 +2713,27 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
                            sidecar_path: Path, plan: dict | None = None) -> bool:
-    """Phase 6 (BC-2/BC-3e): publish the helper capture through the shared
+    """Phase 6 (BC-2/BC-3e/BC-3f): publish the helper capture through the shared
     media publisher. The consumed sidecar binding is frozen, then the
-    ownership ticket is minted. Every input the plan consumes (cue links,
-    speaker/provenance, transcript kind/provider, source/playback identity,
-    chapters and artifact metadata) is checked against disk after mint and
-    again at the publication boundary; a newer owner's file refuses
-    ``revision_unavailable`` instead of rebuilding already-read inputs
-    under that newer base. A caller-supplied plan is kept only when those
-    consumed inputs still match (sealed study artifact bytes may differ).
-    The indexed row and corpus bytes on disk are the source revision's
-    inputs; the sealed block, artifact and complete sidecar are replaced
-    by the fenced operation."""
+    ownership ticket is minted carrying that original binding. Every input
+    the plan consumes (cue links, speaker/provenance, transcript kind/provider,
+    source/playback identity, chapters and artifact metadata) is checked
+    against disk after mint and again at the publication boundary; a newer
+    owner's file refuses ``revision_unavailable`` instead of rebuilding
+    already-read inputs under that newer base. The same binding is carried
+    into ``publish_media_snapshot`` so a late edit at publisher entry or
+    the final sidecar replacement is also refused. A caller-supplied plan
+    is kept only when those consumed inputs still match (sealed study
+    artifact bytes may differ). The indexed row and corpus bytes on disk
+    are the source revision's inputs; the sealed block, artifact and
+    complete sidecar are replaced by the fenced operation."""
     import library_cards  # noqa: WPS433
     import library_media  # noqa: WPS433
     import clips as _clips  # noqa: WPS433
     video_id = (sidecar.get("video_id") or "").strip()
     consumed_binding = library_media.capture_sidecar_inputs(sidecar)
-    ticket = idx.begin_media_publication(video_id, folder=folder)
+    ticket = idx.begin_media_publication(
+        video_id, folder=folder, capture_binding=consumed_binding)
     library_media.require_capture_binding(sidecar_path, consumed_binding)
     row = idx.get_yoink(video_id)
     if row is None:

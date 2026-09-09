@@ -33,8 +33,12 @@ the literal BD-0 wording, read before relying on the behaviour:
    binds every input the plan consumes (cue links, speaker provenance,
    transcript kind/provider, source/playback identity, chapters and
    artifact metadata), not only start/end/text, and rechecks that binding
-   at the publication boundary as well as after mint. Reconstruction
-   consults the same ledger and
+   at the publication boundary as well as after mint. The original
+   consumed-input binding, ticket and exact owned paths are carried into
+   ``publish_transcript`` / ``Index.publish_media_snapshot`` and rechecked
+   there before any publication write and again immediately before the
+   final sidecar replacement; a caller check before invoking the publisher
+   is not the publication lock. Reconstruction consults the same ledger and
    will not restore a superseded sidecar while disk still names the
    current publication. Non-owned sidecar keys, including a key another
    owner removed, are merged onto the carrier and revalidated at the
@@ -1653,17 +1657,25 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
 class PublicationTicket:
     """The base a publisher built against: the item's publication generation
     and current media revision when ``begin_publication`` ran, plus the
-    non-owned sidecar keys present at that moment. Carried by the owning
-    service, never by a media hash or an export input."""
+    non-owned sidecar keys present at that moment, the frozen consumed
+    capture binding, the exact sidecar path and any extra owned input
+    files. Carried by the owning service, never by a media hash or an
+    export input. The publisher revalidates those bindings; it does not
+    mint a replacement ticket or adopt a changed dependency."""
 
-    __slots__ = ("video_id", "base_generation", "base_media_revision", "sidecar_dependencies")
+    __slots__ = ("video_id", "base_generation", "base_media_revision", "sidecar_dependencies",
+                 "capture_binding", "sidecar_path", "input_bindings")
 
     def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None,
-                 sidecar_dependencies: dict | None = None):
+                 sidecar_dependencies: dict | None = None, *, capture_binding=None,
+                 sidecar_path=None, input_bindings=None):
         self.video_id = video_id
         self.base_generation = base_generation
         self.base_media_revision = base_media_revision
         self.sidecar_dependencies = copy.deepcopy(sidecar_dependencies or {})
+        self.capture_binding = capture_binding
+        self.sidecar_path = str(sidecar_path) if sidecar_path is not None else None
+        self.input_bindings = tuple(input_bindings or ())
 
     @property
     def base(self) -> tuple:
@@ -1889,6 +1901,83 @@ def require_unchanged_capture_inputs(sidecar_path, consumed: dict) -> None:
     require_capture_binding(sidecar_path, capture_sidecar_inputs(consumed))
 
 
+_REREAD_SIDECAR = object()
+
+
+def _freeze_capture_state(sidecar_path):
+    """Sidecar path and consumed-input binding observed at mint.
+
+    A missing file records the path with no binding. Unreadable bytes are
+    a distinct binding so a later valid sidecar is not adopted.
+    """
+    if sidecar_path is None:
+        return None, None
+    path = Path(sidecar_path)
+    bound = str(path.resolve())
+    raw = _read_bytes(path, required=False)
+    if raw is None:
+        return None, bound
+    try:
+        parsed = _parse_json_object(raw, "sidecar")
+    except MediaError:
+        return ("unreadable",), bound
+    if not isinstance(parsed, dict):
+        return ("unreadable",), bound
+    return capture_sidecar_inputs(parsed), bound
+
+
+def _freeze_input_files(files) -> tuple:
+    """Exact owned input paths and bytes carried on the ticket."""
+    if files is None:
+        return ()
+    if not isinstance(files, dict):
+        raise _request("input_files_type")
+    frozen = []
+    for raw_path, data in files.items():
+        if not isinstance(raw_path, (str, Path)) or not isinstance(data, (bytes, bytearray)):
+            raise _request("input_file_bytes")
+        frozen.append((str(Path(raw_path).resolve()), bytes(data)))
+    return tuple(frozen)
+
+
+def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
+                                     disk_raw=_REREAD_SIDECAR) -> None:
+    """Refuse changed, removed, or conflicting consumed inputs inside publication.
+
+    Disk may still match the frozen mint binding (intentional replacement of
+    unchanged files) or this publication's original consumed binding (retry
+    after that carrier was already replaced). ``published_binding`` is the
+    pre-merge artifact binding; non-owned disk keys must not be adopted into
+    it. Any other consumed-input state is a conflict: do not replace the
+    current sidecar or adopt the new dependency. Extra bound input files
+    must still be the exact bytes consumed at mint.
+    """
+    if disk_raw is _REREAD_SIDECAR:
+        disk_raw, owned = _sidecar_from_disk(Path(sidecar_path))
+    elif disk_raw is None:
+        owned = None
+    else:
+        try:
+            owned = _parse_json_object(disk_raw, "sidecar")
+        except MediaError:
+            raise _stale("sidecar_dependency_changed") from None
+    frozen = ticket.capture_binding
+    if owned is None:
+        if frozen is not None:
+            raise _stale("publication_input_changed")
+    else:
+        if not isinstance(owned, dict):
+            raise _stale("publication_input_changed")
+        disk_binding = capture_sidecar_inputs(owned)
+        if disk_binding != frozen and disk_binding != published_binding:
+            raise _stale("publication_input_changed")
+    if ticket.sidecar_path is not None:
+        if Path(sidecar_path).resolve() != Path(ticket.sidecar_path).resolve():
+            raise _stale("publication_input_changed")
+    for path, expected in ticket.input_bindings:
+        require_unchanged_input_bytes(path, expected)
+
+
 def _plan_cue_binding(cue: dict) -> tuple:
     provenance = cue.get("speaker_provenance")
     speaker = cue.get("speaker")
@@ -1948,10 +2037,16 @@ def require_unchanged_input_bytes(path, expected: bytes) -> None:
         raise _stale("publication_input_changed")
 
 
-def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
+def begin_publication(conn, video_id: str, *, folder=None, capture_binding=None,
+                      input_files=None) -> PublicationTicket:
     """Mint the fence for one publication of ``video_id``: the base it must
     still find under the storage lock when it publishes. ``folder`` names
-    the item folder for a first publication whose row does not exist yet."""
+    the item folder for a first publication whose row does not exist yet.
+    ``capture_binding`` is the original consumed sidecar binding the owner
+    already holds; when omitted, the on-disk sidecar at mint is frozen.
+    ``input_files`` are extra owned paths (podcast transcript bytes) the
+    publisher must still observe. The ticket carries those bindings into
+    the publication operation; mint does not adopt a later disk change."""
     try:
         _validate_identity(video_id)
         raw = conn.execute("SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
@@ -1962,7 +2057,12 @@ def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
             folder = _item_folder(item)
         generation, current, _ledger = _publication_state(conn, video_id, Path(folder) if folder else None)
         sidecar_path = Path(item["sidecar_path"]) if item is not None and item.get("sidecar_path") else None
-        return PublicationTicket(video_id, generation, current, _read_sidecar_dependencies(sidecar_path))
+        disk_binding, bound_sidecar = _freeze_capture_state(sidecar_path)
+        frozen = capture_binding if capture_binding is not None else disk_binding
+        return PublicationTicket(
+            video_id, generation, current, _read_sidecar_dependencies(sidecar_path),
+            capture_binding=frozen, sidecar_path=bound_sidecar,
+            input_bindings=_freeze_input_files(input_files))
     except sqlite3.Error:
         raise MediaError("library_unavailable") from None
 
@@ -2105,6 +2205,7 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         if sidecar_bytes is None:
             raise _request("sidecar_artifact_required")
         sidecar = _parse_json_object(sidecar_bytes, "sidecar")
+        published_binding = capture_sidecar_inputs(sidecar)
         if sidecar.get("video_id") != video_id:
             raise _invalid("sidecar_identity")
         if json.loads(_json(block)) != json.loads(_json(sidecar.get("media_depth"))):
@@ -2179,6 +2280,10 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
             history = history[-LEDGER_HISTORY_LIMIT:]
         if not _has_column(conn, "clips", "speaker_spans_json"):
             raise MediaError("library_unavailable", details={"reason": "schema_not_migrated"})
+        # Ticketed consumed inputs, original sidecar path and extra owned
+        # files are rechecked here under the lock before any publication
+        # write. A caller check before this operation is not this lock.
+        require_bound_publication_inputs(ticket, sidecar_path, published_binding)
 
         # Files: the ledger claim first, then inputs, corpus, other owned
         # artifacts and the complete sidecar last.
@@ -2199,10 +2304,15 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 continue
             _atomic_replace(path, data)
         # Final carrier write: revalidate non-owned keys after ledger/artifact
-        # work so an intervening edit or removal is not overwritten.
+        # work so an intervening edit or removal is not overwritten, then
+        # recheck consumed capture inputs against the exact bytes about to
+        # be replaced. A changed caption, removed sidecar or other consumed
+        # input is refused without this replacement.
         _bind_sidecar_carrier(sidecar, sidecar_path, ticket, owned, video_id)
         sidecar_data = owned[sidecar_path]
         existing_sidecar = _read_bytes(sidecar_path, required=False)
+        require_bound_publication_inputs(
+            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar)
         if existing_sidecar != sidecar_data:
             _atomic_replace(sidecar_path, sidecar_data)
 

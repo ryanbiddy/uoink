@@ -1878,12 +1878,15 @@ class Index:
                 "reason": "invalidation_failed", "service_error": result["error"]["code"],
                 "next_step": "retry_publication"})
 
-    def begin_media_publication(self, video_id: str, *, folder=None):
+    def begin_media_publication(self, video_id: str, *, folder=None, capture_binding=None,
+                                input_files=None):
         """Mint the publication ticket (ownership fence) a caller must carry
         into ``publish_media_snapshot``. See library_media.begin_publication."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
-            return _media.begin_publication(self._conn, video_id, folder=folder)
+            return _media.begin_publication(
+                self._conn, video_id, folder=folder, capture_binding=capture_binding,
+                input_files=input_files)
 
     def publish_media_snapshot(self, video_id: str, *, cues: list[dict], media_block: dict,
                                artifacts: dict, ticket=None) -> dict:
