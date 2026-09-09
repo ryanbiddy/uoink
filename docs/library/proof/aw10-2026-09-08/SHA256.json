@@ -1,0 +1,80 @@
+{
+  "files": {
+    "docs/library/proof/aw10-2026-09-08/av5m4b5-wi/results.json": {
+      "sha256": "157194004cf2d0011d28468b6d08c58a690c971fba90c356b8907eaccbfe8e17",
+      "bytes": 2034
+    },
+    "docs/library/proof/aw10-2026-09-08/av5m4b5-wi/tests.log": {
+      "sha256": "4f00e60f6830348d5de6071a702d980ef52b6e666497d793cdff5ffe8dfde4a5",
+      "bytes": 6345
+    },
+    "docs/library/proof/aw10-2026-09-08/av5m4b5-wi/tests.xml": {
+      "sha256": "a1494a2f9fda32199015349de1779e613e493bd1d66b9fc2072df3cace16468e",
+      "bytes": 48824
+    },
+    "docs/library/proof/aw10-2026-09-08/aw10-alias/results.json": {
+      "sha256": "e7ce10a3585bb192c0c32b8006455313acdb433a55e28b73e36608cb0621d2da",
+      "bytes": 818
+    },
+    "docs/library/proof/aw10-2026-09-08/aw10-alias/tests.log": {
+      "sha256": "daf6d148bf11f21c4488f3fb6ab5cfb982108f97ec84b998c96462f11a7ffd77",
+      "bytes": 1361
+    },
+    "docs/library/proof/aw10-2026-09-08/aw10-alias/tests.xml": {
+      "sha256": "dd582ddb9cef3831da2b2182b854dadcfbe30ceea1f29d1cb4e03c0d3bb8d3ce",
+      "bytes": 822
+    },
+    "docs/library/proof/aw10-2026-09-08/AW10-ALIAS-RECHECK-BRIEF.md": {
+      "sha256": "424d4c071555215f3425ede0d8016aef44bb04fd6f7369d8e7373ffa7c9bab50",
+      "bytes": 868
+    },
+    "docs/library/proof/aw10-2026-09-08/final-source/index.py": {
+      "sha256": "02aaf994cc98eac0e1dc1cd552bbdae22eeae1ab23422339277c2b68c790c781",
+      "bytes": 110388
+    },
+    "docs/library/proof/aw10-2026-09-08/final-source/library_briefs.py": {
+      "sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556",
+      "bytes": 74080
+    },
+    "docs/library/proof/aw10-2026-09-08/final-source/library_mirror.py": {
+      "sha256": "99fc994219256aad23416e173da16d90fc57e8143be8d7e74e837f6b28355485",
+      "bytes": 191118
+    },
+    "docs/library/proof/aw10-2026-09-08/final-source/library_mirror_vault_io.py": {
+      "sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7",
+      "bytes": 19933
+    },
+    "docs/library/proof/aw10-2026-09-08/test_aw10_alias.py": {
+      "sha256": "51a6a32784f7c7dbf565705f082db7993fce5e2770bc8aae32909351716a8490",
+      "bytes": 2203
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/junit/focus.xml": {
+      "sha256": "016d5816d6b1725950708d4fe8fe220d7270329a0ae7e32eb6b826536cd64919",
+      "bytes": 2793
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/junit/focus2.xml": {
+      "sha256": "2db23448beef26da10af2dc72533400815774eb8b4d5762f63ae0072cee90d34",
+      "bytes": 4538
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/junit/focus3.xml": {
+      "sha256": "cba12b8bb68c02c3b039193607eb793b8da9b802bf7355bddb22e32461c7825e",
+      "bytes": 6107
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/junit/union.xml": {
+      "sha256": "4c51affee2539686a1b56cfe03a31033ce2056d69892be58b8abab30645b0e39",
+      "bytes": 46507
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/union-short.log": {
+      "sha256": "d37892056043c9d7dd9f0f33504242c11b96e017beed04fddd11f4064c849763",
+      "bytes": 6451
+    },
+    "docs/library/proof/aw10-2026-09-08/worker/union.log": {
+      "sha256": "36effadc36cbb5ddd5e31bf0e557d9d8eb355fa9d26b43fbed983c668741478d",
+      "bytes": 27966
+    },
+    "docs/library/patches/av5m4b5-grok-rejected-2026-09-08.patch": {
+      "sha256": "578f649bce7c70326791c175a21dd8d44b9ea46219b3f56c575a4a5c228931eb",
+      "bytes": 233882
+    }
+  }
+}

@@ -1,0 +1,245 @@
+.......................F...............................F.............FFF [ 26%]
+FF.FF................................................................... [ 52%]
+........................................................................ [ 78%]
+.............F.FFF..FFFF.FFFFF..F..F........................             [100%]
+================================== FAILURES ===================================
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name
+    assert len(orphans) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1ebeb6bdeb0: unset>.is_set
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1ebeb6bdd90: unset>.is_set
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1ebeb5f7cb0: unset>.is_set
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:329: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1ebeb71db50: unset>.is_set
+__ test_d15_failed_destination_binding_persistence_does_not_allow_readoption __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:360: in test_d15_failed_destination_binding_persistence_does_not_allow_readoption
+    assert item_file(env).exists() and not binding.exists()
+E   AssertionError: assert (True and not True)
+E    +  where True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_s...ibrary/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001EBEB62AC60>))
+E    +  and   True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/d/reach/mirror/destination_binding.json').exists
+__________ TestP409PathsAndConsent.test_consent_allowlist_filtering ___________
+tests\test_library_mirror.py:264: in test_consent_allowlist_filtering
+    assert allowed_file.exists(), f"Expected {allowed_file} to exist"
+E   AssertionError: Expected C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\a4af542b-c8b\grok\_scratch\av5m4b5\union-t\test_consent_allowlist_filteri0\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+E   assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_consent_allowlist_filteri0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+___________ TestP409PathsAndConsent.test_path_traversal_confinement ___________
+tests\test_library_mirror.py:298: in test_path_traversal_confinement
+    assert target.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_path_traversal_confinemen0/vault/Uoink/Library/3754d6cb3a38e1185e5b382d5f3ef3f118af75bf4bf0254d1fdb8437f51423e0.md').exists
+_______ TestP409PathsAndConsent.test_windows_reserved_names_confinement _______
+tests\test_library_mirror.py:313: in test_windows_reserved_names_confinement
+    assert target.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_windows_reserved_names_co0/vault/Uoink/Library/321f68140efca2b301c8c9e9cd67f0e0e3f89a6b24ca923c13bade1ee6552073.md').exists
+__________ TestP409PathsAndConsent.test_case_and_unicode_collisions ___________
+tests\test_library_mirror.py:331: in test_case_and_unicode_collisions
+    assert f1.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_case_and_unicode_collisio0/vault/Uoink/Library/29592a94f045306c6b3143a91630fba13a3f3d9e0bb1dd5fb567bd62b2554a47.md').exists
+______ TestP410EditsAndAtomicity.test_user_edit_conflict_preserves_bytes ______
+tests\test_library_mirror.py:373: in test_user_edit_conflict_preserves_bytes
+    assert file_path.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_user_edit_conflict_preser0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+_ TestP410EditsAndAtomicity.test_crash_before_replacement_preserves_old_file __
+tests\test_library_mirror.py:405: in test_crash_before_replacement_preserves_old_file
+    orig_hash = _compute_file_sha256(file_path)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_library_mirror.py:78: in _compute_file_sha256
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_crash_before_replacement_0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+____________ TestP410EditsAndAtomicity.test_two_writers_serialized ____________
+tests\test_library_mirror.py:442: in test_two_writers_serialized
+    assert h1.item_file_path("vid-standard-01").exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/.../test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/.../test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+E    +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB5AA030>.item_file_path
+_________ TestP410EditsAndAtomicity.test_stale_delayed_work_rejected __________
+tests\test_library_mirror.py:453: in test_stale_delayed_work_rejected
+    gen1_hash = _compute_file_sha256(f)
+                ^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_library_mirror.py:78: in _compute_file_sha256
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_stale_delayed_work_reject0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+____ TestP410EditsAndAtomicity.test_file_size_cap_and_frontmatter_escaping ____
+tests\test_library_mirror.py:500: in test_file_size_cap_and_frontmatter_escaping
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_file_size_cap_and_frontma0/vault/Uoink/Library/31eb248514f78c8a800ea067ea91a2626e50ac2b50ca2b2fe5081fbfea57da17.md').exists
+___________ TestP410EditsAndAtomicity.test_library_md_written_last ____________
+tests\test_library_mirror.py:517: in test_library_md_written_last
+    assert "Standard Analysis Video" in content or "vid-standard-01" in content or h.item_file_path("vid-standard-01").stem in content
+E   assert ('Standard Analysis Video' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n' or 'vid-standard-01' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n' or '8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n')
+E    +  where '8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88' = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...test_library_md_written_last0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').stem
+E    +    where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...test_library_md_written_last0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+E    +      where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB7E9A90>.item_file_path
+_________________ TestP411Deletion.test_soft_delete_tombstone _________________
+tests\test_library_mirror.py:542: in test_soft_delete_tombstone
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...t/test_soft_delete_tombstone0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+_______ TestP411Deletion.test_hard_purge_removes_owned_files_idempotent _______
+tests\test_library_mirror.py:568: in test_hard_purge_removes_owned_files_idempotent
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_hard_purge_removes_owned_0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+______________ TestP411Deletion.test_restore_replaces_tombstone _______________
+tests\test_library_mirror.py:593: in test_restore_replaces_tombstone
+    assert "deleted: true" in f.read_text(encoding="utf-8").lower()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\pathlib\__init__.py:771: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_restore_replaces_tombston0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+_ TestP411Deletion.test_reconnected_destination_validates_marker_and_drains_deletions_first _
+tests\test_library_mirror.py:654: in test_reconnected_destination_validates_marker_and_drains_deletions_first
+    assert h.item_file_path(vid_to_delete).exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+E    +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB62BB60>.item_file_path
+______ TestP412CorrectionStoreSeparation.test_no_read_back_into_taxonomy ______
+tests\test_library_mirror.py:729: in test_no_read_back_into_taxonomy
+    assert f.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_no_read_back_into_taxonom0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name - assert 0 == 1
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1ebeb6bdeb0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement - assert (0 == 1)
+ +  where 0 = len([])
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1ebeb6bdd90: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1ebeb5f7cb0: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync - assert (False)
+ +  where False = is_set()
+ +    where is_set = <threading.Event at 0x1ebeb71db50: unset>.is_set
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption - AssertionError: assert (True and not True)
+ +  where True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_s...ibrary/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/v'), mirror=<library_mirror.Mirror object at 0x000001EBEB62AC60>))
+ +  and   True = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/union-t/a76/d/reach/mirror/destination_binding.json').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_consent_allowlist_filtering - AssertionError: Expected C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\a4af542b-c8b\grok\_scratch\av5m4b5\union-t\test_consent_allowlist_filteri0\vault\Uoink\Library\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md to exist
+assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_consent_allowlist_filteri0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_path_traversal_confinement - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_path_traversal_confinemen0/vault/Uoink/Library/3754d6cb3a38e1185e5b382d5f3ef3f118af75bf4bf0254d1fdb8437f51423e0.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_windows_reserved_names_confinement - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_windows_reserved_names_co0/vault/Uoink/Library/321f68140efca2b301c8c9e9cd67f0e0e3f89a6b24ca923c13bade1ee6552073.md').exists
+FAILED tests/test_library_mirror.py::TestP409PathsAndConsent::test_case_and_unicode_collisions - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_case_and_unicode_collisio0/vault/Uoink/Library/29592a94f045306c6b3143a91630fba13a3f3d9e0bb1dd5fb567bd62b2554a47.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_user_edit_conflict_preserves_bytes - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_user_edit_conflict_preser0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_crash_before_replacement_preserves_old_file - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_crash_before_replacement_0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_two_writers_serialized - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/.../test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/.../test_two_writers_serialized0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+ +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB5AA030>.item_file_path
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_stale_delayed_work_rejected - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_stale_delayed_work_reject0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_file_size_cap_and_frontmatter_escaping - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_file_size_cap_and_frontma0/vault/Uoink/Library/31eb248514f78c8a800ea067ea91a2626e50ac2b50ca2b2fe5081fbfea57da17.md').exists
+FAILED tests/test_library_mirror.py::TestP410EditsAndAtomicity::test_library_md_written_last - assert ('Standard Analysis Video' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n' or 'vid-standard-01' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n' or '8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88' in '---\nschema_version: 1\ncontract_version: "phase4-v1-2026-09-08"\nrender_version: "reach-markdown-v1"\nkind: "index"\...es: 0\nBriefs: 0\n\n## Recent\n\n\nOmissions: 5 additional items not listed.\n\nEdits to this file are not imported.\n')
+ +  where '8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88' = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...test_library_md_written_last0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').stem
+ +    where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...test_library_md_written_last0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+ +      where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB7E9A90>.item_file_path
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_soft_delete_tombstone - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...t/test_soft_delete_tombstone0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_hard_purge_removes_owned_files_idempotent - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_hard_purge_removes_owned_0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_restore_replaces_tombstone - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\av5m4b5\\union-t\\test_restore_replaces_tombston0\\vault\\Uoink\\Library\\8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md'
+FAILED tests/test_library_mirror.py::TestP411Deletion::test_reconnected_destination_validates_marker_and_drains_deletions_first - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+ +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_reconnected_destination_v0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md') = item_file_path('vid-standard-01')
+ +        where item_file_path = <test_library_mirror.MirrorTestHarness object at 0x000001EBEB62BB60>.item_file_path
+FAILED tests/test_library_mirror.py::TestP412CorrectionStoreSeparation::test_no_read_back_into_taxonomy - AssertionError: assert False
+ +  where False = exists()
+ +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/a4af542b-c8b/grok/_scratch/av5m4b5/...st_no_read_back_into_taxonom0/vault/Uoink/Library/8824c671fb5d5b40d78f142f980a15025276ec2d6eea841d86285f37d5d41c88.md').exists
+24 failed, 252 passed in 137.25s (0:02:17)

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="22" time="10.824" timestamp="2026-09-08T21:11:02.100505-07:00" hostname="Ryan-PC"><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_unknown_writer_after_launcher_exit_is_retained" time="0.094" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_destination_exclusion_survives_owning_thread_exit_before_lease" time="0.615" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_destination_exclusion_survives_owning_thread_exit_after_lease" time="0.606" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_startup_failure_keeps_exclusion_until_child_death" time="0.538" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_helper_startup_failure_keeps_exclusion" time="0.546" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_competitor_blocked_before_and_after_lease_then_released_on_death" time="1.262" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_recycled_pid_is_not_terminated" time="0.000" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_abandoned_flag_is_not_writer_death" time="0.612" /><testcase classname="tests.test_phase4_av5m4b5_lifetime" name="test_dest_aliases_share_exclusion_not_temp" time="0.693" /><testcase classname="tests.library_work_astra.test_phase4_aw9_acceptance" name="test_unknown_writer_after_launcher_exit_is_retained" time="0.076" /><testcase classname="tests.library_work_astra.test_phase4_aw9_acceptance" name="test_destination_exclusion_survives_owning_thread_exit_before_lease" time="0.592" /><testcase classname="tests.library_work_astra.test_phase4_aw9_startup_acceptance" name="test_startup_failure_keeps_exclusion_until_child_death" time="0.526" /><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_unconfirmed_child_death_is_not_forgotten" time="0.072" /><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_late_parent_refuses_dead_session_and_does_not_adopt_later" time="2.168"><failure message="OSError: destination exclusion unavailable">library_mirror.py:1143: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1123: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1003: in start_wait
+    raise self._error
+library_mirror.py:1045: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:935: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b4_lifetime.py:39: in test_late_parent_refuses_dead_session_and_does_not_adopt_later
+    later = mirror._VaultIoSession.start(str(env.vault))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1396: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1389: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1145: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable</failure></testcase><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_inflight_isolated_intent_put_cannot_finish_after_writer_death" time="0.465" /><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_ready_identifies_actual_writer_process" time="0.092" /><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_dest_mutex_does_not_block_on_parent_realpath" time="0.001" /><testcase classname="tests.test_phase4_av5m4b4_lifetime" name="test_live_worker_without_lease_is_not_forgotten" time="0.160" /><testcase classname="tests.test_phase4_av5m4a3_identity" name="test_write_error_does_not_unlink_replacement_after_handle_close" time="0.006" /><testcase classname="tests.test_phase4_av5m4a3_identity" name="test_worker_replace_does_not_adopt_replaced_temp" time="0.103" /><testcase classname="tests.test_phase4_av5m4a3_identity" name="test_finally_cleanup_retains_intent_when_temp_name_changed_owners" time="0.792" /><testcase classname="tests.test_phase4_av5m4a3_identity" name="test_recorded_cleanup_still_preserves_same_byte_replacement" time="0.108" /></testsuite></testsuites>

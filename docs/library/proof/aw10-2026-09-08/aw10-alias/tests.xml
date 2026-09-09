@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.917" timestamp="2026-09-08T21:26:30.121850-07:00" hostname="Ryan-PC"><testcase classname="_scratch.test_aw10_alias" name="test_junction_alias_refuses_competing_session_before_first_lease" time="0.744"><failure message="AssertionError: {'competitor_pid': 70488, 'started': True, 'writer_pid': 62020, 'launcher_pid': 47392, ...}&#10;assert not True">_scratch\test_aw10_alias.py:53: in test_junction_alias_refuses_competing_session_before_first_lease
+    assert not observed["started"], observed
+E   AssertionError: {'competitor_pid': 70488, 'started': True, 'writer_pid': 62020, 'launcher_pid': 47392, ...}
+E   assert not True</failure></testcase></testsuite></testsuites>

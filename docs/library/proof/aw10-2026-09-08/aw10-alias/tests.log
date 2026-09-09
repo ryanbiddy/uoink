@@ -1,0 +1,12 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______ test_junction_alias_refuses_competing_session_before_first_lease _______
+_scratch\test_aw10_alias.py:53: in test_junction_alias_refuses_competing_session_before_first_lease
+    assert not observed["started"], observed
+E   AssertionError: {'competitor_pid': 70488, 'started': True, 'writer_pid': 62020, 'launcher_pid': 47392, ...}
+E   assert not True
+---------------------------- Captured stdout call -----------------------------
+{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\aw10-alias-0\\a0\\aw10-alias", "alive": true, "competitor_pid": 70488, "first_lease_written": false, "first_writer_alive": true, "first_writer_pid": 67860, "launcher_pid": 47392, "lease_written": false, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a4af542b-c8b\\grok\\_scratch\\aw10-alias-0\\a0\\v", "same_file": true, "started": true, "termination_confirmed": true, "writer_pid": 62020}
+=========================== short test summary info ===========================
+FAILED _scratch/test_aw10_alias.py::test_junction_alias_refuses_competing_session_before_first_lease
+1 failed in 2.90s
