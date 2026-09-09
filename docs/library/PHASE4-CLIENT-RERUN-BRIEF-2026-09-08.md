@@ -1,6 +1,6 @@
 # Phase 4 client rerun after AW-4
 
-Run only after AV-5m2 and any AW-4 repairs are integrated and the candidate SHA
+Run only after AV-5m3 and any AW-4 repairs are integrated and the candidate SHA
 is frozen. The earlier [AW receipt](PHASE4-AW-RECEIPT-2026-09-08.md) is partial
 and belongs to `d4d99bb`; preserve it. The repaired observation must satisfy
 all five requirements in [AW-3](PHASE4-ACCEPTANCE-3-2026-09-08.md), including
@@ -65,3 +65,27 @@ Keep raw private evidence internal, seal every retained artifact with SHA-256,
 and distinguish any redacted copy by its own hash. No live labels, settings,
 client configuration, helper, install or release changes. No push. Installed
 Inno receipts remain Ryan's separate P4-13/C22 gate.
+
+## Recorder preparation, 2026-09-08
+
+`proof/aw-rerun-2026-09-08/stdio_tap.py` records complete byte frames in both
+directions, separate stderr, child identities, per-request timing and unanswered
+requests at child exit. Configure it as the real client's MCP command, wrapping
+the exact staged child. It never issues its own MCP request. Each launch creates
+a fresh private recording directory; unsafe profile roots refuse before launch.
+Timing includes recorder overhead and is not pure server CPU time.
+
+The stdlib-only `verify_stdio_tap.py` check passed on 2026-09-08: three lossless
+requests (85,275 input / 85,221 output bytes), diagnostics, request correlation,
+child exit, unanswered request on exit 7, and unsafe-profile refusal. Receipt
+and transcripts are retained locally in `_scratch/aw-tap-verify-01`. This ran
+neither uoink nor a model and credits no real-client or phase gate.
+
+Anthropic's [MCP documentation](https://code.claude.com/docs/en/mcp#use-mcp-prompts-as-commands)
+documents native `/mcp__servername__promptname` commands with positional
+arguments. Its [programmatic guide](https://code.claude.com/docs/en/headless)
+describes print mode but does not by itself prove this installed client's prompt
+route. Observe the actual `prompts/get` exchange for both required prompts; a
+documentation lookup, slash-command-looking model text or fixture probe is not
+an invocation receipt. Keep bare/API-key mode disabled and stop on a quota
+refusal; no upgrade or additional paid usage is authorized.

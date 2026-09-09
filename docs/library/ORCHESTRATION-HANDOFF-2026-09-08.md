@@ -77,19 +77,21 @@ with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no 
 AZ-5a3g grok `54108a1f` integrated at `d437b59`. AV-5m2 grok `6b5e5f1e`
 and BC-3a2 grok `5aca8450` finished and are rejected; both complete original diffs
 are retained in the patches directory. New repair briefs below govern retries.
+AZ-5d grok `e739a5ec`, AV-5m3 grok `c5f611c8` and BC-3a3 grok `855b1d16`
+are running from `79f6961` (started 17:12 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a3g (Phase 5) integrated at `d437b59`; earlier failed diffs remain retained.
-   Dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
+   Verify running AZ-5d (grok `e739a5ec`) and, after it, dispatch AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
-3. AV-5m1 (Phase 4) complete at `9489141`. AV-5m2 is rejected. Dispatch AV-5m3
-   (grok) from `PHASE4-AV5M3-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
+3. AV-5m1 (Phase 4) complete at `9489141`. AV-5m2 is rejected. Verify AV-5m3
+   (grok `c5f611c8`) from `PHASE4-AV5M3-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: BC-3c is integrated; BC-3a2 is rejected. Dispatch BC-3a3 on Grok
+4. Phase 6: BC-3c is integrated; BC-3a2 is rejected. Verify BC-3a3 (grok `855b1d16`)
    from `PHASE6-BC3A3-BRIEF-2026-09-08.md`; preserve both rejected diffs and the quota failure.
    Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
@@ -260,3 +262,19 @@ observed 156 passes and five omitted-ticket failures. It is also rejected, not
 integrated. New AV-5m3 and BC-3a3 briefs require general safety repairs and retain
 the conflicting unchanged acceptance setup for Ryan. Neither green worker
 claims nor the fixture conflicts excuse unfinished implementation.
+
+### 2026-09-08 17:20 PDT — Three repair runs and client recorder preparation
+
+AZ-5d `e739a5ec-e3b0-4ddf-bc6c-b5ec9faf75dc`, AV-5m3
+`c5f611c8-2aa8-470d-ab2a-77aa3fa5ee40`, and BC-3a3
+`855b1d16-104b-4f8e-a4d7-73453e22bbb8` are active Grok runs on `79f6961`.
+Their bounded goals reiterate no existing-test edits, paid API, live index,
+port 5179, commits or pushes. Their briefs retain rejected evidence explicitly.
+
+The new AW stdio recorder passed its fake-child instrument checks, including
+85,275 input and 85,221 output bytes, independent diagnostic capture, request
+timings and unanswered-request retention after child exit. It launches no
+request or model itself. The client rerun brief records its use and the official
+native MCP prompt syntax; neither preparation nor documentation lookup is a
+client receipt. The real observation still waits for the repaired/frozen AW-4
+candidate. No client model has run during this takeover.
