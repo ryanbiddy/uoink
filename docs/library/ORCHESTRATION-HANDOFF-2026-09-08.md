@@ -166,6 +166,9 @@ executable installed scenario kit yet. Backup result is recorded in the log.
    118 passed / one skip in the corrected worker, 130 passed / one skip in checkout
    with twelve read/startup companions. Exact-script dummy compile exits zero;
    `RYAN-INNO-FINAL-INTEGRATION-REVIEW-2026-09-09.md` preserves installed limits.
+   Source through `022ff43` can be measured while both kits finish under
+   `RYAN-ISOLATION-CHECKPOINT-TREE-BRIEF-2026-09-09.md`; retain its checkpoint
+   label and run the final kit-inclusive tree after those integrations.
    C22 replacement independently has 26 passes / two failures, 69.61 s. Its
    receipt still substitutes direct child-record calls for helper recovery,
    miscounts charges and compares protected state only after all scenarios.
@@ -1673,3 +1676,17 @@ No frozen test changed. The saved identity, marker app path, strict switches,
 UTF-8 JSON, reparse leaf checks and failed persistence are now checked before
 isolated operations. Real Inno persistence and installed C22/Phase 4 remain
 unexecuted. Two receipt workers remain; final committed tree/package still owed.
+
+### 2026-09-09 — Backup authentication repair and next source checkpoint
+
+The backup attempt for 5162fcb stalled in Git Credential Manager and failed
+without a confirmed push after its exact owned credential child was stopped.
+GitHub CLI's existing account authentication was valid. A process-local
+credential-helper override (no saved config or credentials changed) completed
+the authorized git push origin cc/living-library. Independent ls-remote shows
+022ff43270626f0d469ccc1dc9a027af3ea0227d. No candidate branch/main was pushed.
+The complete original helper in iso-c5 also reached /health after committing
+all five default style anchors, without the earlier reconciliation error.
+Use RYAN-ISOLATION-CHECKPOINT-TREE-BRIEF-2026-09-09.md for this product source
+while C22 and Phase 4 instruments finish. Their final integration still needs
+its own complete committed tree and rebuilt artifact.
