@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-life-2",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-life",
+    "--isolated-port",
+    "18331"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "started_utc": "2026-09-09T20:04:22Z",
+  "child": {
+    "pid": 38116,
+    "created_ms": 1788984262407,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "observed_ms": 1788984262409,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 38116,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200422Z-helper-child-life-2.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200422Z-helper-child-life-2.stderr.log",
+  "synthetic": true
+}

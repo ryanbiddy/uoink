@@ -1,0 +1,1768 @@
+{
+  "id": "protected_phase2_state",
+  "status": "fail",
+  "empty_compare": {
+    "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [
+      {
+        "table": "library_meta",
+        "before_count": 0,
+        "after_count": 1,
+        "new_row_identities": [
+          "singleton:1"
+        ],
+        "mutated_prior": [],
+        "allowed": [
+          {
+            "scenario": "empty",
+            "table": "library_meta",
+            "new_rows": [
+              {
+                "singleton": 1,
+                "projection_revision": 0,
+                "active_version_id": null,
+                "last_operation_sequence": 0,
+                "recovery_state": "ready"
+              }
+            ],
+            "reason": "one complete schema 0027 default singleton"
+          }
+        ]
+      }
+    ],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "populated_compare": {
+    "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "extra_compares": {
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "one-off",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "manual-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "713a46249f49f2e53d88d796e99bf824ba6cc49c60ad601ffd85746a5b23dda6",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        },
+        {
+          "table": "source_classification_outbox",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "capture_key:podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "source_classification_outbox",
+              "new_rows": [
+                {
+                  "capture_key": "podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2",
+                  "video_id": "episode_e112bb7e637",
+                  "committed_at_ms": 1788984225416,
+                  "state": "pending",
+                  "run_id": null,
+                  "version_id": null,
+                  "prompt_hash": null,
+                  "source_revision": null,
+                  "work_id": null,
+                  "last_error_code": null,
+                  "updated_at_ms": 1788984225416
+                }
+              ],
+              "reason": "declared standing fixture and successful persisted start"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-life",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-interrupt",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-regfail",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "relaunch",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "all_profile_compares": {
+    "empty": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "empty",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "populated": {
+      "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "one-off",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "manual-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "713a46249f49f2e53d88d796e99bf824ba6cc49c60ad601ffd85746a5b23dda6",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        },
+        {
+          "table": "source_classification_outbox",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "capture_key:podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "source_classification_outbox",
+              "new_rows": [
+                {
+                  "capture_key": "podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2",
+                  "video_id": "episode_e112bb7e637",
+                  "committed_at_ms": 1788984225416,
+                  "state": "pending",
+                  "run_id": null,
+                  "version_id": null,
+                  "prompt_hash": null,
+                  "source_revision": null,
+                  "work_id": null,
+                  "last_error_code": null,
+                  "updated_at_ms": 1788984225416
+                }
+              ],
+              "reason": "declared standing fixture and successful persisted start"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-life",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-interrupt",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-regfail",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "relaunch",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "runtime_guard_events": {
+    "profiles": {
+      "empty": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\empty\\c22-guard-events.jsonl",
+        "sha256": "47519b7c5ede71b5548205ab230a329dbdffbe5d3427fe84bc5289066b654bc5",
+        "event_count": 54,
+        "guard_loads": 10,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 26368,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 26368,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\empty --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 26368,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 44240,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 26368,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 26368,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71592,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71592,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\empty --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 52704,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71592,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71592,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71792,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71792,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\empty --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 72232,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71792,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71792,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71792,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 50516,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 61160,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 26024,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "populated": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\populated\\c22-guard-events.jsonl",
+        "sha256": "a322206a1d0e61a4953086061c38cf1112dbe532b1a40712f7aae86c13e79a43",
+        "event_count": 34,
+        "guard_loads": 6,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 65560,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 65560,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\populated --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 65560,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 65560,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 65560,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 69104,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 69104,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\populated --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 69104,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 69104,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 69104,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 69852,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 50060,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "one-off": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\one-off\\c22-guard-events.jsonl",
+        "sha256": "da07a051b59ba112f641650cda5cf3f1d302fe55a93fe081dd549c3f3fe4f16c",
+        "event_count": 21,
+        "guard_loads": 3,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 76584,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76584,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\one-off --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76584,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76584,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76584,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 36452,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "manual-first": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\manual-first\\c22-guard-events.jsonl",
+        "sha256": "27a2c54ad38463a9b1416ca52318f9deaad44af1e0df4f21d33534948106943a",
+        "event_count": 53,
+        "guard_loads": 6,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\manual-first --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8372,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 48732,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 54136,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 70392,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 43284,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "standing-first": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\standing-first\\c22-guard-events.jsonl",
+        "sha256": "eefa7ae93e9a01c965ba4ce2b163e1c480913e476bf7611c913e84bf4033facc",
+        "event_count": 74,
+        "guard_loads": 8,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\standing-first --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 57596,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 23640,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 74116,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 67720,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 75948,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 24100,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 66780,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "child-life": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-life\\c22-guard-events.jsonl",
+        "sha256": "c5cd71f7961c8f1de4651a6b2bab77b3e3421f5d64eb03c63b37cf3dc7730422",
+        "event_count": 121,
+        "guard_loads": 16,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-life --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 61808,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -B -c \"import time; time.sleep(8)\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-life --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 38116,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73464,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73464,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-life --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73464,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73464,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73464,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 53092,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 48248,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 62684,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 74756,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 26800,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 68016,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 43132,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 59924,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 44408,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "child-interrupt": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-interrupt\\c22-guard-events.jsonl",
+        "sha256": "373ff6cc6189291fe0f56693ca5ca239337c885c238b1f461e5723ef966878fe",
+        "event_count": 90,
+        "guard_loads": 11,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-interrupt --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 71708,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 67100,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 67100,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-interrupt --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 67100,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 67100,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 67100,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 77052,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 22588,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 74232,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 428,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 77144,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 60516,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 54328,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "child-regfail": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail\\c22-guard-events.jsonl",
+        "sha256": "a6f8c9ac3e6a99062d2c47a741ea5f52d22f76fe95bba82d75ddf3643bea8ee4",
+        "event_count": 92,
+        "guard_loads": 12,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 76868,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -B -c \"import time; time.sleep(8)\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 53680,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 53680,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 53680,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 53680,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 53680,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 77656,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 77248,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 47228,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 37292,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 65768,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 39880,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 56172,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      },
+      "relaunch": {
+        "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\relaunch\\c22-guard-events.jsonl",
+        "sha256": "1c87d9746c1e2e2b296f87cb43b2128759ad234aee4f321bcb26ed8c13b61356",
+        "event_count": 31,
+        "guard_loads": 6,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 73548,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73548,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\relaunch --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73548,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 73548,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 7016,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 7016,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\relaunch --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 7016,
+            "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 7016,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 7016,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "forbidden_attempts": [
+          {
+            "event": "forbidden_attempt",
+            "pid": 46004,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          },
+          {
+            "event": "forbidden_attempt",
+            "pid": 47932,
+            "reason": "C22 guard: bind of undeclared port 0 forbidden"
+          }
+        ],
+        "error": null,
+        "ok": false
+      }
+    },
+    "ok": false,
+    "scope": "guard load and recorded attempts; blocked attempts cannot count as zero attempts"
+  },
+  "settings_and_pins": {
+    "empty": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "populated": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "one-off": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "manual-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "standing-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-life": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-interrupt": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-regfail": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "relaunch": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    }
+  },
+  "compared_profiles": [
+    "empty",
+    "populated",
+    "one-off",
+    "manual-first",
+    "standing-first",
+    "child-life",
+    "child-interrupt",
+    "child-regfail",
+    "relaunch"
+  ],
+  "empty": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "populated": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "baseline_recorded_before_scenarios": true,
+  "librarian_apply_enabled": false,
+  "self_authorized_after_state": false
+}

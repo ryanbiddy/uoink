@@ -1,0 +1,60 @@
+2026-09-09 13:03:51,759 INFO install migration: skipped_isolated_install
+2026-09-09 13:03:51,770 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-09 13:03:51,775 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-09 13:03:51,777 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-09 13:03:51,778 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-09 13:03:51,780 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-09 13:03:51,782 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-09 13:03:51,785 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-09 13:03:51,786 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-09 13:03:51,788 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-09 13:03:51,790 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-09 13:03:51,791 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-09 13:03:51,793 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-09 13:03:51,796 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-09 13:03:51,798 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-09 13:03:51,800 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-09 13:03:51,802 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-09 13:03:51,803 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-09 13:03:51,806 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-09 13:03:51,807 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-09 13:03:51,809 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-09 13:03:51,811 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-09 13:03:51,814 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-09 13:03:51,816 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-09 13:03:51,818 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-09 13:03:51,820 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-09 13:03:51,822 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-09 13:03:51,824 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-09 13:03:51,826 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-09 13:03:51,829 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-09 13:03:51,839 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-09 13:03:51,841 INFO seeded 5 default style anchors
+2026-09-09 13:03:51,841 INFO default style anchors: seeded 5 on first run
+2026-09-09 13:03:51,841 INFO Restored 0 job record(s) from the library index
+2026-09-09 13:03:51,843 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-09 13:03:51,843 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-09 13:03:51,850 ERROR source watch tick could not select due polls
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\server.py", line 8954, in _podcast_feed_scheduler_tick
+    due = _standing_due_polls()
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\server.py", line 8772, in _standing_due_polls
+    service.expire_poll_leases()
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\source_subscriptions.py", line 3030, in expire_poll_leases
+    with self.store.write() as conn:
+  File "contextlib.py", line 137, in __enter__
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\source_subscriptions.py", line 1990, in write
+    with self.index.write_transaction() as conn:
+  File "contextlib.py", line 137, in __enter__
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\installer\staging\index.py", line 570, in write_transaction
+    raise RuntimeError(
+RuntimeError: cannot start a write transaction while another transaction is active
+2026-09-09 13:03:51,946 INFO tray: started (daemon thread)
+2026-09-09 13:03:51,956 INFO splash: spawned (version 3.8.0)
+2026-09-09 13:03:51,957 INFO Uoink server v3.8.0 running on http://127.0.0.1:18331
+2026-09-09 13:03:51,957 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-09 13:03:51,957 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-01\receipt\profiles\child-life\output
+2026-09-09 13:03:51,957 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\c22-bundled-01\receipt\profiles\child-life\server.log
+2026-09-09 13:03:51,957 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-09 13:03:52,302 INFO GET /health from 127.0.0.1 -> ok

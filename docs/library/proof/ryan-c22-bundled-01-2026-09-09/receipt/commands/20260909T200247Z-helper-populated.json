@@ -1,0 +1,27 @@
+{
+  "name": "helper-populated",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\populated",
+    "--isolated-port",
+    "18331"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "started_utc": "2026-09-09T20:02:47Z",
+  "child": {
+    "pid": 69104,
+    "created_ms": 1788984167116,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "observed_ms": 1788984167117,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 69104,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200247Z-helper-populated.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200247Z-helper-populated.stderr.log",
+  "synthetic": true
+}

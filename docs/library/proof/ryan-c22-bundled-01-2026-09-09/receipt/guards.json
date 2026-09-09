@@ -1,0 +1,81 @@
+{
+  "sitecustomize": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\injection\\sitecustomize.py",
+    "sha256": "adb0d0f894787b5442305c049c87f8108a3708a7966f05d44dabc710651524b4",
+    "bytes": 14043
+  },
+  "bundled": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py",
+    "sha256": "adb0d0f894787b5442305c049c87f8108a3708a7966f05d44dabc710651524b4",
+    "already_present": false,
+    "bytes": 14043,
+    "previous_sha256": null,
+    "previous_absent": true
+  },
+  "canary_proof": {
+    "canary": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\guard-canary\\index.canary",
+    "rejected": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "automatic_sitecustomize": true,
+    "explicit_exec": false,
+    "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "pth": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311._pth",
+      "present": true,
+      "import_site_active": true,
+      "bytes": 79,
+      "sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf",
+      "commented_import_site": false,
+      "preserved_exact_bytes": true
+    },
+    "stdout": "CANARY_REJECTED\nC22 guard: live index forbidden\n"
+  },
+  "forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "guard_original": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\sitecustomize.py",
+    "previous_absent": true,
+    "previous_sha256": null,
+    "previous_bytes": null,
+    "owned_sha256": "adb0d0f894787b5442305c049c87f8108a3708a7966f05d44dabc710651524b4",
+    "pth_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311._pth",
+    "pth_sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf"
+  },
+  "pth": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311._pth",
+    "present": true,
+    "import_site_active": true,
+    "bytes": 79,
+    "sha256": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf",
+    "commented_import_site": false,
+    "preserved_exact_bytes": true
+  },
+  "target_interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+  "env_keys": [
+    "C22_ALLOWED_PORTS",
+    "C22_EVENTS_PATH",
+    "C22_FIXTURE_LOOPBACK",
+    "C22_FORBIDDEN_LIVE",
+    "C22_INJECT",
+    "C22_ISOLATED_PROFILE",
+    "C22_SLEEPER_SECONDS",
+    "C22_SYNTHETIC",
+    "C22_SYNTHETIC_AUDIO_PATH",
+    "C22_SYNTHETIC_HOST",
+    "C22_SYNTHETIC_TRANSCRIPT_PATH",
+    "IG_FORBIDDEN_LIVE",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONNOUSERSITE",
+    "PYTHONPATH",
+    "PYTHONUTF8",
+    "librarian_apply_enabled"
+  ],
+  "allowed_ports": [
+    18331,
+    18332
+  ],
+  "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "c22_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+}

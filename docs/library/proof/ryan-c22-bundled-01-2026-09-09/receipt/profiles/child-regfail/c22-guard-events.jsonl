@@ -1,0 +1,92 @@
+{"event": "guard_loaded", "pid": 76868, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.bind", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"}
+{"event": "guard_loaded", "pid": 54540, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 77656, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 77656, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 77656, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18332)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18332)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 77248, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 77248, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 77248, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 47228, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 47228, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 47228, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 37292, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 37292, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 37292, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 65768, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 65768, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 65768, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 39880, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 39880, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 39880, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 76868, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 76868, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -B -c \"import time; time.sleep(8)\""}
+{"event": "guard_loaded", "pid": 71748, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "guard_loaded", "pid": 53680, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "subprocess_attempt", "pid": 53680, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.bind", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 53680, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\pythonw.exe E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\uoink_splash.py --isolated-profile E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail --isolated-port 18331 --isolated-from-install-dir E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging"}
+{"event": "guard_loaded", "pid": 17592, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "subprocess_attempt", "pid": 53680, "command": "C:\\WINDOWS\\system32\\cmd.exe /c \"ver\""}
+{"event": "subprocess_attempt", "pid": 53680, "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 56172, "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 56172, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "forbidden_attempt", "pid": 56172, "reason": "C22 guard: bind of undeclared port 0 forbidden"}
+{"event": "subprocess_attempt", "pid": 53680, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.connect", "address": "('127.0.0.1', 18331)"}
+{"event": "network_attempt", "pid": 53680, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18331)"}

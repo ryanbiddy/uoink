@@ -1,0 +1,27 @@
+{
+  "name": "helper-manual-first",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\profiles\\manual-first",
+    "--isolated-port",
+    "18331"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+  "started_utc": "2026-09-09T20:02:51Z",
+  "child": {
+    "pid": 8372,
+    "created_ms": 1788984171530,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+    "observed_ms": 1788984171534,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 8372,
+  "stdout_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200251Z-helper-manual-first.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt\\commands\\20260909T200251Z-helper-manual-first.stderr.log",
+  "synthetic": true
+}

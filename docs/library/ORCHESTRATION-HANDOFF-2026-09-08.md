@@ -121,6 +121,15 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
+New priority before the numbered completion queue: original bundled C22 at
+6632f33 has nine passed / two failed / three unexecuted. Follow
+RYAN-C22-BUNDLED-PROVENANCE-REPAIR-BRIEF-2026-09-09.md for the receipt probe and
+guard compatibility/accounting. Independently follow
+RYAN-STARTUP-BACKFILL-TRANSACTION-REPAIR-BRIEF-2026-09-09.md for the newly observed
+production backfill/source-watch connection race. Review and integrate both;
+changed packaged product requires a new build/seal before final bundled/whole-tree
+verification. Keep the old package and failed 105-file observation intact.
+
 1. Both completed workers and supplements are integrated. C22: 92 passed / two
    frozen failures in worker and checkout; review and raw diff are in
    `RYAN-C22-FINAL-INTEGRATION-REVIEW-2026-09-09.md`. P4: 68 passed / one frozen
@@ -1988,3 +1997,25 @@ C22/P4 commands, isolated subscription sign-in, actual client streams, everyday
 flows and scoped evidence collection. Its eight PowerShell blocks parse without
 execution. The receipt ZIP remains to be assembled after final validation.
 Neither pending fixture proposal was applied. No Setup, client or model ran.
+
+### 2026-09-09 — first bundled C22 reveals compatibility and startup defects
+
+Source 6632f33, original d024baf5 bundled app: nine scenarios pass, two fail,
+three remain unexecuted. Provenance lacks the explicit app path under embedded
+Python's -c invocation, and the guard's function replacement of Popen breaks
+Windows asyncio/MCP imports. Protected table/settings comparisons all pass,
+but the combined outcome fails on refused urllib3 IPv6 capability queries.
+These bind-zero attempts were blocked before binding; they must stay counted
+and may not be described as zero attempts. The bounded tool brief separates
+that exact refused query without authorizing a new socket connection.
+
+Original startup logs expose real unowned backfill access to the connection
+shared with the source watcher, including a commit of another transaction.
+This is new product work, independent of the expected capture injections.
+The named production repair brief requires a deterministic ownership regression.
+
+All command identities are dead, the guard is absent and _pth unchanged.
+Only this observation-created marker was removed after owned cleanup; all 142
+source bindings and installer bytes remain unchanged. Complete failed evidence:
+proof/ryan-c22-bundled-01-2026-09-09/SHA256.json (105 files). Browser hold was
+not attempted after the failed verdict. No Setup, client/model or new fetch ran.

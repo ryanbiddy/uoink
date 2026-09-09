@@ -1,0 +1,329 @@
+{
+  "source": "6632f33d1ee1af791a5e7220665520126e5f533b",
+  "build_source": "8a607c37095cb4f3b66d2aee285cfb710ab5e586",
+  "scope": "Original staged runtime; pre-Inno synthetic acquisition and transcript; no installed/client/visual acceptance",
+  "utc_start": "2026-09-09T20:02:33.919624+00:00",
+  "package_sha256": "d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1",
+  "before_bindings": 142,
+  "guard_before": "absent",
+  "marker_before": "absent",
+  "pth_before": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311._pth": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf"
+  },
+  "setup_executed": false,
+  "installed_credit": false,
+  "verdict": {
+    "schema": "c22-verdict-input-v1",
+    "utc": "2026-09-09T20:05:46.738475+00:00",
+    "receipt_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\c22-bundled-01\\receipt",
+    "synthetic_instrument": true,
+    "installed_pass_claimed": false,
+    "installed_pass_note": "No claimed installed pass until Ryan actually runs the sealed kit on the throwaway profile against the isolated installed helper.",
+    "scenarios": [
+      {
+        "id": "install",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "Inno is Ryan's throwaway-operator step"
+      },
+      {
+        "id": "installed_provenance",
+        "status": "fail",
+        "error": null,
+        "reason": "required import failed; ERROR lines are not installed credit"
+      },
+      {
+        "id": "empty_migration_replay",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "populated_legacy_replay",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "one_off_capture",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "manual_first",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "standing_first",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "whole_helper_relaunch",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "registered_child_lifetime",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "launch_interruption",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "registration_failure",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "browser_state_checkpoint",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "browser protocol without an image is unexecuted in all modes"
+      },
+      {
+        "id": "protected_phase2_state",
+        "status": "fail",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "upgrade_operator_step",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "real installed upgrade/reinstall is Ryan's operator step"
+      }
+    ],
+    "counts": {
+      "pass": 9,
+      "fail": 2,
+      "unexecuted": 3,
+      "executed": 11
+    },
+    "astra_owns": [
+      "independent verification",
+      "final runbook/package seal",
+      "isolation mechanism integration",
+      "Phase 4 client/everyday receipt tooling"
+    ]
+  },
+  "after_bindings": 142,
+  "package_after": "d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1",
+  "pth_after": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python311._pth": "eaf714069da6bf371d13eda976ddf679e50aab42d7facbbb06e2bb3ab7388cbf"
+  },
+  "guard_after": "absent",
+  "command_identity_liveness": [
+    {
+      "identity": {
+        "pid": 72456,
+        "created_ms": 1788984155309,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984155318,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 26368,
+        "created_ms": 1788984156322,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984156326,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 71592,
+        "created_ms": 1788984158619,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984158620,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 71792,
+        "created_ms": 1788984160651,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984160652,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 65560,
+        "created_ms": 1788984164891,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984164895,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 69104,
+        "created_ms": 1788984167116,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984167117,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 76584,
+        "created_ms": 1788984169141,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984169145,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 8372,
+        "created_ms": 1788984171530,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984171534,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 57596,
+        "created_ms": 1788984194446,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984194450,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 73548,
+        "created_ms": 1788984226765,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984226769,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 7016,
+        "created_ms": 1788984228480,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984228481,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 61808,
+        "created_ms": 1788984230966,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984230970,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 38116,
+        "created_ms": 1788984262407,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984262409,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 73464,
+        "created_ms": 1788984271145,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984271146,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 71708,
+        "created_ms": 1788984273331,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984273335,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 67100,
+        "created_ms": 1788984304761,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984304762,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 76868,
+        "created_ms": 1788984307011,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984307014,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 53680,
+        "created_ms": 1788984338444,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+        "observed_ms": 1788984338445,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    }
+  ],
+  "marker_after": "removed only this observation-created marker after owned processes dead",
+  "utc_end": "2026-09-09T20:05:47.075496+00:00"
+}
