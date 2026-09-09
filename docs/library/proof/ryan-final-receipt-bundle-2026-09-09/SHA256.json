@@ -1,0 +1,25 @@
+{
+  "scope": "Final local release-candidate receipt bundle; all ZIP and extracted payloads verified, no publication or installed credit",
+  "files": {
+    "build_receipt_bundle.py": {
+      "bytes": 8766,
+      "sha256": "aeaa16757fd237f71e3d2f51cede5b9b65e9a030e76635f3d1e63604c3b76e53"
+    },
+    "bundle-receipt.json": {
+      "bytes": 621,
+      "sha256": "ff5b2a949f4457fadab862847ba6088777518b0955a36869f225f1800277bada"
+    },
+    "BUNDLE-SHA256.json": {
+      "bytes": 142488,
+      "sha256": "034fde70e8205c287c55cc9fb4f776d16066adfc02f3585ed403c31088c14007"
+    },
+    "extracted-observation.json": {
+      "bytes": 4443,
+      "sha256": "a5b48d129616b1a0da14c37d3b15de970b6f5bc44d13bbb7f7aa3488ea4a9729"
+    },
+    "verify_final_archive.py": {
+      "bytes": 2984,
+      "sha256": "1531325f35e08530738a11033436245ea6a5f49f1735e90a0c8d4d72f39d3d50"
+    }
+  }
+}

@@ -84,7 +84,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `67a274d`; final `12ce8a5` tree: 2,429 passed / 13 failed / three skipped / one xfailed, 1,542.35 s | Both receipt kits/startup repair integrated; package-03, bundled and complete-tree results sealed; portable operator preflight passes | Assemble/verify final ZIP and authorized backup; remaining fixture/installed decisions belong to Ryan |
+| Integration | Installer built/sealed at `67a274d`; final `12ce8a5` tree: 2,429 passed / 13 failed / three skipped / one xfailed, 1,542.35 s | Both receipt kits/startup repair integrated; package-03, bundled and complete-tree results sealed; final 771-file ZIP verified | Ryan: installed receipts, fixture/contract dispositions and release approval; final backup receipt supplies transport status |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -133,15 +133,17 @@ both original bundled observations plus the final committed complete tree are
 recorded. Product source is unchanged after validation. Do not restart completed
 runs or edit frozen tests merely to obtain a green tree.
 
-1. Finish the portable ZIP under RYAN-FINAL-KIT-TREE-VERIFICATION-BRIEF-2026-09-09.md.
-   Include installer a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe,
-   the reviewed tools, migrations, full notes/runbook, final test proof and
-   complete active package/runtime seals. Validate every ZIP/extracted member.
-   Bind the final tools/package to the passed 73-file exported operator preflight;
-   metadata changes must not stand in for changed executable inputs.
-2. Fast-forward and push only origin/cc/living-library; verify the remote SHA.
-   No force, candidate-branch push, main merge or publication. Store the final
-   transport receipt outside Git to avoid a self-referencing commit loop.
+1. Artifact work is complete. Local ZIP: build/Uoink-Living-Library-3-8-0-Receipt-Kit-2026-09-09.zip,
+   358,530,295 bytes, SHA-256 7fb55a3a121aa99d56c2b652bdf1c979167baeba5085f92b13af233c1a5fc655.
+   All 771 payload files pass ZIP/extracted checks. Source 25d043cbd9e3035a38e0e466d33d6ff18f927e84
+   binds full validation 12ce8a5 and installer source 67a274d. See
+   RELEASE-DELIVERY-2026-09-09.md and its archive seal. No rebuild is owed.
+2. Final branch transport receipt: build/Uoink-Living-Library-3-8-0-Receipt-Kit-2026-09-09.backup.json.
+   The closing backup step must fast-forward and push only origin/cc/living-library
+   and verify its SHA, with no force/main/candidate-branch push. verified=true
+   and matching source/remote values in that receipt establish completion;
+   do not infer success from this instruction. The receipt remains outside Git
+   to avoid creating an endless self-referencing commit sequence.
 3. Ryan runs the one throwaway-account receipt session in
    INSTALL-RECEIPT-RUNBOOK-2026-09-09.md. Collect actual Inno install/reinstall,
    C22 browser/state and Phase 4 client/everyday evidence. Agent observations
@@ -2112,3 +2114,21 @@ proof/ryan-portable-operator-2026-09-09. The final ZIP must bind those same
 executable inputs and be independently extracted/hash-checked. Full notes,
 runbook and per-failure disposition are now written. Finish the artifact/backup;
 then only the listed Ryan decisions and actual installed receipts remain.
+
+### 2026-09-09 — final local bundle verified, Ryan receipt session next
+
+The 25d043c bundle contains the full notes, exact runbook, both tools, migrations,
+final test proof and current runtime/package evidence. ZIP 358,530,295 bytes,
+SHA-256 7fb55a3a121aa99d56c2b652bdf1c979167baeba5085f92b13af233c1a5fc655.
+Every one of 771 payloads passed ZIP and extracted-file hashes. Of the first
+operator preflight's 73 inputs, 71 are byte-identical and two change only the
+bundle-source metadata; all executable/migration/package bytes match. The
+source remains 12ce8a5-tested; all 142 packaged bindings still match 67a274d.
+No further build, source edit or measurement is needed without a new finding.
+
+RELEASE-DELIVERY-2026-09-09.md names the artifact, hashes, counts and next actions.
+Its companion backup receipt records the final authorized branch transport.
+The 13 failures and three/eight unexecuted or unobserved C22/P4 fields remain;
+there is no release/main/installed approval. Ryan supplies the installed session
+and the explicit frozen-test dispositions. Speaker/no-fetch/Part B/apply rules
+remain unchanged. No active worker remains.

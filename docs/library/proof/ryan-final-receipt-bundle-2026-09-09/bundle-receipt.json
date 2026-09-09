@@ -1,0 +1,13 @@
+{
+  "bundle_source": "25d043cbd9e3035a38e0e466d33d6ff18f927e84",
+  "validation_source": "12ce8a5fbd34c3472d55ae76afa17535b43c5282",
+  "build_source": "67a274d5d0c67f48405c4fa242a1011c2cf671c1",
+  "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Living-Library-3-8-0-Receipt-Kit-2026-09-09.zip",
+  "bytes": 358530295,
+  "sha256": "7fb55a3a121aa99d56c2b652bdf1c979167baeba5085f92b13af233c1a5fc655",
+  "manifest_sha256": "034fde70e8205c287c55cc9fb4f776d16066adfc02f3585ed403c31088c14007",
+  "payload_files": 771,
+  "all_zip_member_hashes_verified": true,
+  "installed": false,
+  "published": false
+}
