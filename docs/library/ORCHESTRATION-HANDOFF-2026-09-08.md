@@ -93,6 +93,8 @@ with an independent supplement. AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0
 finished from `564836c` and is rejected after AW-9. AV-5m4b5 Grok
 `a4af542b-c8bb-4958-97f4-185951daaad0` finished from `39d7e19` and is
 rejected after AW-10. Its complete diff and independent proof are retained.
+AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` is active from
+`17f3714` (21:30 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -109,7 +111,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. B5 is rejected after AW-10. Dispatch and verify AV-5m4b6 (grok) under
+   AW-9. B5 is rejected after AW-10. Verify active AV-5m4b6 (grok) under
    `PHASE4-AV5M4B6-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
@@ -823,7 +825,7 @@ Canonical exclusion or explicit refusal before admission is acceptable. The
 scratch `AW10-ALIAS-RECHECK-BRIEF.md` specifies that check; preserve the B4
 low-level observations separately. B5 remains in progress.
 
-### 2026-09-08 21:33 PDT - B5 independently verified; alias repair required
+### 2026-09-08 21:30 PDT - B5 independently verified; alias repair required
 
 B5 independently produced **267 passed, nine failed**, 132.05 seconds, and
 closes all three AW-9 lifetime cases. The final mirror source hash remained
@@ -842,3 +844,11 @@ shared Windows writer-admission gate, conservatively serializing unrelated
 destinations without parent filesystem resolution. Preserve exact operation
 bindings and lifetime ownership; a process-global owner lookup alone cannot
 authorize a foreign operation. This is implementation work, not a Ryan gate.
+
+### 2026-09-08 21:32 PDT - B6 dispatched and AW-10 seal verified
+
+AV-5m4b6 Grok `9577904a-b4f7-4a0f-ac3c-93467f2e1b50` started at
+21:30 PDT from `17f3714`. The brief requires the unchanged AW-10 case,
+the complete B5 union and new alias/operation-ownership evidence. All 19
+AW-10 sealed files match committed bytes. No B5 production change has been
+integrated; the checkout remains on the accepted A3 production baseline.
