@@ -1,0 +1,156 @@
+{
+  "files": {
+    "docs/library/proof/aw12-2026-09-08/a12c/results.json": {
+      "bytes": 2442,
+      "sha256": "c431f1b04bf0021888cb0d0672caf20ce2570cc79b7ce50f6d58fcf27f37f366"
+    },
+    "docs/library/proof/aw12-2026-09-08/a12c/tests.log": {
+      "bytes": 11846,
+      "sha256": "39ecd9c84e2106d374160dc55791bcca4068898c20da8abdd13daad26020d65d"
+    },
+    "docs/library/proof/aw12-2026-09-08/a12c/tests.xml": {
+      "bytes": 51388,
+      "sha256": "0446023fddc890bd4371e35da197cb85f49d1c9854fe6f6998136c46b3aac91b"
+    },
+    "docs/library/proof/aw12-2026-09-08/a12w/results.json": {
+      "bytes": 2583,
+      "sha256": "8b416ed56a454371c425807841bcef0180996543e62480ddaa6fa51146dc2eba"
+    },
+    "docs/library/proof/aw12-2026-09-08/a12w/tests.log": {
+      "bytes": 12301,
+      "sha256": "d06b8e6f6765cabae2bc2aebe7475b4001fac819f7dfe9acf722c56613f9fe5c"
+    },
+    "docs/library/proof/aw12-2026-09-08/a12w/tests.xml": {
+      "bytes": 51640,
+      "sha256": "0190da8d1e41989fb7efbd6f341932aaf944d08ca4bbfd91299981a9c1153dca"
+    },
+    "docs/library/proof/aw12-2026-09-08/applied-integration.patch": {
+      "bytes": 315087,
+      "sha256": "2db630d2ad29103bff7f4b66261a70565345fb4fd85c97751704f39ff2000e51"
+    },
+    "docs/library/proof/aw12-2026-09-08/AW12-THREAD-IDENTITY-REVIEW-BRIEF.md": {
+      "bytes": 2622,
+      "sha256": "4fd5b9bb62c5764b64539d7cb11db0a7098c3972fee807b34c4496e96dffcef9"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12f/results.json": {
+      "bytes": 1218,
+      "sha256": "4edfe77f6b61e4a62f8288b25c2ba1c5d56a52b1ffa75139109ff1e6d2c2d2fc"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12f/tests.log": {
+      "bytes": 4110,
+      "sha256": "81951fa449006b3daa03d910126497ea51aaf0ceb7ea945c6f13fc1f77a635ad"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12f/tests.xml": {
+      "bytes": 2000,
+      "sha256": "40b2861685b294e80f35ce740604235091d5dd3decd64847586b200a86206546"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/results.json": {
+      "bytes": 888,
+      "sha256": "2488719ccb0fc2d17ab615c394e9442d2f6f2e4cda8142bf908553948bace777"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/tests.log": {
+      "bytes": 4039,
+      "sha256": "db5e42cdc18aad1b577d32c134e8531a5c9d794a7b03d5ee46365e3c1c6715ef"
+    },
+    "docs/library/proof/aw12-2026-09-08/aw12o/tests.xml": {
+      "bytes": 2631,
+      "sha256": "96b1c26d32d1448b478908ed929e7ba27a62f37d9cae9c0edd42fe371baf0831"
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/results.json": {
+      "bytes": 2363,
+      "sha256": "17038a7c5bc5e72475c15cd1a41dbcc907ef17855188d1981a1d7adb5a9450c9"
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/tests.log": {
+      "bytes": 11126,
+      "sha256": "b0aa4c1672acafb8de28c392da3aaf0fbda243671ce89dfdc87b8949244aaa79"
+    },
+    "docs/library/proof/aw12-2026-09-08/b7w/tests.xml": {
+      "bytes": 50963,
+      "sha256": "47ec89f990eb391adb0dee1a399ebef885970d8dd3523acb726e4bdd2abf9391"
+    },
+    "docs/library/proof/aw12-2026-09-08/checkout-source/library_mirror.py": {
+      "bytes": 202837,
+      "sha256": "e04509fb9fa1752351af0e32e43a535a30536aeee3e7934efdbf709fffca5d45"
+    },
+    "docs/library/proof/aw12-2026-09-08/corrected-source/index.py": {
+      "bytes": 110388,
+      "sha256": "02aaf994cc98eac0e1dc1cd552bbdae22eeae1ab23422339277c2b68c790c781"
+    },
+    "docs/library/proof/aw12-2026-09-08/corrected-source/library_briefs.py": {
+      "bytes": 74080,
+      "sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556"
+    },
+    "docs/library/proof/aw12-2026-09-08/corrected-source/library_mirror.py": {
+      "bytes": 202777,
+      "sha256": "33bd644ca3ac13070716fa8493221260c4b713ba71e4a402683d608de06761b3"
+    },
+    "docs/library/proof/aw12-2026-09-08/corrected-source/library_mirror_vault_io.py": {
+      "bytes": 19933,
+      "sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7"
+    },
+    "docs/library/proof/aw12-2026-09-08/corrected-source-before.json": {
+      "bytes": 513,
+      "sha256": "a07a38a67f2f78a823e4d3179f24f50fae51ae7edf5d83dfb51689c06ac49a0f"
+    },
+    "docs/library/proof/aw12-2026-09-08/correction-receipt.json": {
+      "bytes": 3303,
+      "sha256": "d08330550079f325aa644b464c7d274f7da3f0393c6892974a2e1348d8eb848f"
+    },
+    "docs/library/proof/aw12-2026-09-08/ORIGINAL-SHA256.json": {
+      "bytes": 3940,
+      "sha256": "655797ea391321437ecb8165349469b43df6f79ab49bb695e3aaf7111b4fe67d"
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/index.py": {
+      "bytes": 110388,
+      "sha256": "02aaf994cc98eac0e1dc1cd552bbdae22eeae1ab23422339277c2b68c790c781"
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_briefs.py": {
+      "bytes": 74080,
+      "sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556"
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_mirror.py": {
+      "bytes": 201992,
+      "sha256": "8b670a0cdde7660abdfa3c96b16a968d52c59d7acb86caba4616f8de1001e953"
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source/library_mirror_vault_io.py": {
+      "bytes": 19933,
+      "sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7"
+    },
+    "docs/library/proof/aw12-2026-09-08/original-source-before.json": {
+      "bytes": 513,
+      "sha256": "cf29ec491e3d3be79657714ac1d737e9501712d1f0ecf08e1c081fa8189b521c"
+    },
+    "docs/library/proof/aw12-2026-09-08/test_aw12_launch_handoff.py": {
+      "bytes": 3889,
+      "sha256": "865019e2ff70b91d708d4d3158e586788035b5f81cee45354dc89e91bac778ae"
+    },
+    "docs/library/proof/aw12-2026-09-08/test_aw12_thread_identity.py": {
+      "bytes": 2404,
+      "sha256": "86b283bf8bd6d221260293c3274af01761249a75b6f9d38af9542a8e8303fe9c"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union-short.log": {
+      "bytes": 11225,
+      "sha256": "58aa82fdd497a7baf299c9681a8ae51b4dd3da066f83ec22dab04bade13947f7"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union-terminal.log": {
+      "bytes": 11274,
+      "sha256": "00b02918c59779abcf591b299171143d324c0b6c8d1f7537c94e5c16f214804e"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/failed-union-1/union.xml": {
+      "bytes": 48804,
+      "sha256": "edabee214df4adf610ef35156fca1bf17203c67c65fc32c55984420932db837b"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/focus.xml": {
+      "bytes": 1327,
+      "sha256": "73961a35af47eca16c6a38ec1e8b512266cd2c4153f3263ab8af7c177cc8c2ec"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/union-short.log": {
+      "bytes": 7073,
+      "sha256": "affe9fb879e966b37825793bfa4079c76ef2bb5d83b241ff04f6544669322aef"
+    },
+    "docs/library/proof/aw12-2026-09-08/worker/junit/union.xml": {
+      "bytes": 48688,
+      "sha256": "063e4d3876bec046db4e243309bd54b850b807fa988cbbc38203303ea87db241"
+    }
+  }
+}

@@ -9,11 +9,20 @@ reads ``TASTE.md`` / ``USER.md`` back, and never routes through
 Contract rules this module does not implement exactly, and why
 --------------------------------------------------------------
 1. Isolated worker cancellation. Vault mutation runs in one child process
-   per resync (not per file), assigned to a Windows kill-on-close job or a
-   POSIX process group. The caller's deadline kills that worker and waits
-   until it can no longer mutate the destination. A hung ``os.replace`` in
-   the parent interpreter is not used. Source/dependency checks stay in the
-   parent against authoritative storage immediately before publication.
+   per resync (not per file). Windows requires a successful kill-on-close job
+   assignment before any vault mutation; POSIX terminates the process group.
+   The caller's deadline kills that worker and keeps the destination lease
+   until death is confirmed. Destination lock/lease I/O that can block runs
+   inside the cancellable boundary; live exclusion is a shared Windows
+   kernel admission gate so a hung dest filesystem cannot trap the caller
+   and lexical destination aliases cannot admit a second writer. Destination lease
+   write, replace and cleanup run in that isolated child with the original
+   session, token and operation bound before the call; a timed-out parent
+   refuses through its dead bound session before touching a destination. A
+   hung ``os.replace`` in the parent interpreter is not used. Each operation
+   binds its own I/O session, cancellation token and plan. Source/dependency
+   checks stay in the parent against authoritative storage immediately before
+   publication.
 2. Mirror-specific codes (``destination_unavailable``, ``user_edit_conflict``,
    ``unmanaged_conflict``, ``path_collision``, ``purge_blocked_user_edit``)
    are returned through ``library_resources.refusal``, not
@@ -28,6 +37,7 @@ Contract rules this module does not implement exactly, and why
 """
 from __future__ import annotations
 
+import atexit
 import base64
 import contextlib
 import ctypes
@@ -37,6 +47,7 @@ import logging
 import os
 import re
 import secrets
+import signal
 import stat
 import subprocess
 import sys
@@ -45,7 +56,6 @@ import time
 import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
-import tempfile
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
@@ -67,9 +77,18 @@ except ImportError:
     _library_briefs = None  # type: ignore[assignment]
 
 log = logging.getLogger("uoink.library_mirror")
-# Per-operation I/O context. AV-5m4b2 binds session/plan/key here; this run
-# binds creating-file authority so a later resync cannot replace it.
+# Per-operation I/O context. B3 binds session/plan/key here; A3 binds
+# creating-file authority so a later resync cannot replace it.
 _IO_CTX = threading.local()
+# Exclusive-section owner for this thread. prepare() attaches to it so a
+# helper start inside _exclusive does not WaitForSingleObject again.
+# Reuse is this admitted operation only; a foreign thread must acquire.
+_EXCL_CTX = threading.local()
+_k32 = None
+_dest_hold_guard = threading.Lock()
+_dest_holds: dict[str, int] = {}
+_live_owners: set["_DestExclusionOwner"] = set()
+_retained_sessions: set["_VaultIoSession"] = set()
 
 CONTRACT_VERSION = "phase4-v1-2026-09-08"
 MIRROR_LEDGER_DIR = "reach/mirror"
@@ -79,6 +98,17 @@ SCOPE_ALL = "all_current_and_future_items"
 MAX_FILE_BYTES = 65536
 DEFAULT_MAX_FILES = 20
 DEFAULT_BUDGET_S = 2.0
+_WORKER_STARTUP_S = 2.0
+_WORKER_TERMINATE_S = 2.0
+_STILL_ACTIVE = 259
+_WAIT_OBJECT_0 = 0
+_WAIT_ABANDONED = 0x00000080
+_WAIT_TIMEOUT = 0x00000102
+_FILETIME_EPOCH_OFFSET_100NS = 116_444_736_000_000_000
+_PROCESS_START_TOLERANCE_MS = 2_000
+_WRITER_LOCK_NAME = ".uoink-mirror-writer.lock"
+_WRITER_LEASE_NAME = ".uoink-mirror-writer.lease"
+_WRITER_ADMISSION_MUTEX = "Local\\uoink-mirror-writer-admission"
 VOLUME_MARKER_NAME = ".uoink-volume-marker"
 MANIFEST_REL = ".uoink-mirror/manifest.json"
 LIBRARY_INDEX_REL = "Library.md"
@@ -426,80 +456,826 @@ def _safe_temp_path(uoink: Path, rel: str) -> Path | None:
     return path
 
 
-def _pid_is_alive(pid: int | None) -> bool:
-    if not isinstance(pid, int) or pid <= 0:
+def _kernel32():
+    """kernel32 with pointer-sized HANDLE signatures. Cached after first use."""
+    global _k32
+    if _k32 is not None:
+        return _k32
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    handle = wintypes.HANDLE
+    k32.CreateJobObjectW.restype = handle
+    k32.CreateJobObjectW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR]
+    k32.SetInformationJobObject.restype = wintypes.BOOL
+    k32.SetInformationJobObject.argtypes = [
+        handle, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
+    ]
+    k32.AssignProcessToJobObject.restype = wintypes.BOOL
+    k32.AssignProcessToJobObject.argtypes = [handle, handle]
+    k32.TerminateJobObject.restype = wintypes.BOOL
+    k32.TerminateJobObject.argtypes = [handle, wintypes.UINT]
+    k32.CloseHandle.restype = wintypes.BOOL
+    k32.CloseHandle.argtypes = [handle]
+    k32.OpenProcess.restype = handle
+    k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    k32.GetExitCodeProcess.restype = wintypes.BOOL
+    k32.GetExitCodeProcess.argtypes = [handle, ctypes.POINTER(wintypes.DWORD)]
+    k32.GetProcessTimes.restype = wintypes.BOOL
+    k32.GetProcessTimes.argtypes = [
+        handle,
+        ctypes.POINTER(wintypes.FILETIME),
+        ctypes.POINTER(wintypes.FILETIME),
+        ctypes.POINTER(wintypes.FILETIME),
+        ctypes.POINTER(wintypes.FILETIME),
+    ]
+    k32.GetCurrentProcess.restype = handle
+    k32.GetCurrentProcess.argtypes = []
+    k32.CreateMutexW.restype = handle
+    k32.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+    k32.WaitForSingleObject.restype = wintypes.DWORD
+    k32.WaitForSingleObject.argtypes = [handle, wintypes.DWORD]
+    k32.ReleaseMutex.restype = wintypes.BOOL
+    k32.ReleaseMutex.argtypes = [handle]
+    k32.TerminateProcess.restype = wintypes.BOOL
+    k32.TerminateProcess.argtypes = [handle, wintypes.UINT]
+    k32.CreateToolhelp32Snapshot.restype = handle
+    k32.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    _k32 = k32
+    return k32
+
+
+class _PROCESSENTRY32W(ctypes.Structure):
+    _fields_ = [
+        ("dwSize", ctypes.c_ulong),
+        ("cntUsage", ctypes.c_ulong),
+        ("th32ProcessID", ctypes.c_ulong),
+        ("th32DefaultHeapID", ctypes.c_size_t),
+        ("th32ModuleID", ctypes.c_ulong),
+        ("cntThreads", ctypes.c_ulong),
+        ("th32ParentProcessID", ctypes.c_ulong),
+        ("pcPriClassBase", ctypes.c_long),
+        ("dwFlags", ctypes.c_ulong),
+        ("szExeFile", ctypes.c_wchar * 260),
+    ]
+
+
+_TH32CS_SNAPPROCESS = 0x00000002
+_PROCESS_TERMINATE = 0x0001
+_PROCESS_SET_QUOTA = 0x0100
+_PROCESS_SUSPEND_RESUME = 0x0800
+_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+
+
+def _windows_process_children(parent_pid: int | None) -> list[dict[str, Any]]:
+    if os.name != "nt" or not isinstance(parent_pid, int) or parent_pid <= 0:
+        return []
+    from ctypes import wintypes
+    k32 = _kernel32()
+    Process32FirstW = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HANDLE, ctypes.POINTER(_PROCESSENTRY32W))((
+        "Process32FirstW", k32,
+    ))
+    Process32NextW = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HANDLE, ctypes.POINTER(_PROCESSENTRY32W))((
+        "Process32NextW", k32,
+    ))
+    snapshot = k32.CreateToolhelp32Snapshot(_TH32CS_SNAPPROCESS, 0)
+    if not snapshot or int(snapshot) == -1:
+        return []
+    try:
+        entry = _PROCESSENTRY32W()
+        entry.dwSize = ctypes.sizeof(_PROCESSENTRY32W)
+        if not Process32FirstW(snapshot, ctypes.byref(entry)):
+            return []
+        out: list[dict[str, Any]] = []
+        while True:
+            if int(entry.th32ParentProcessID) == int(parent_pid):
+                out.append({
+                    "pid": int(entry.th32ProcessID),
+                    "exe": str(entry.szExeFile or ""),
+                    "ppid": int(entry.th32ParentProcessID),
+                })
+            if not Process32NextW(snapshot, ctypes.byref(entry)):
+                break
+        return out
+    finally:
+        k32.CloseHandle(snapshot)
+
+
+def _is_console_host(exe: str) -> bool:
+    name = os.path.basename(str(exe or "")).lower()
+    return name in ("conhost.exe", "openconsole.exe")
+
+
+def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
+    """Terminate only the recorded process identity. Recycled PIDs are skipped."""
+    if os.name != "nt" or not isinstance(pid, int) or pid <= 0:
         return False
-    if os.name == "nt":
-        k32 = ctypes.windll.kernel32
-        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-        handle = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
-        if not handle:
-            return False
-        try:
-            code = ctypes.c_ulong()
-            if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
+    k32 = _kernel32()
+    handle = k32.OpenProcess(_PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+    if not handle:
+        return ctypes.get_last_error() in (87, 0)
+    try:
+        if created_ms is not None:
+            actual = _windows_process_created_ms(handle)
+            if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
                 return False
-            return int(code.value) == 259  # STILL_ACTIVE
+        from ctypes import wintypes
+        code = wintypes.DWORD()
+        if k32.GetExitCodeProcess(handle, ctypes.byref(code)) and int(code.value) != _STILL_ACTIVE:
+            return True
+        return bool(k32.TerminateProcess(handle, 1))
+    finally:
+        k32.CloseHandle(handle)
+
+
+def _win_assign_pid(job, pid: int | None) -> bool:
+    if job is None or os.name != "nt" or not isinstance(pid, int) or pid <= 0:
+        return False
+    k32 = _kernel32()
+    handle = k32.OpenProcess(
+        _PROCESS_SET_QUOTA | _PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION,
+        False, int(pid),
+    )
+    if not handle:
+        return False
+    try:
+        return bool(k32.AssignProcessToJobObject(job, handle))
+    finally:
+        k32.CloseHandle(handle)
+
+
+def _windows_process_created_ms(handle) -> int | None:
+    from ctypes import wintypes
+    creation, exit_, kernel, user = (wintypes.FILETIME() for _ in range(4))
+    if not _kernel32().GetProcessTimes(
+        handle, ctypes.byref(creation), ctypes.byref(exit_),
+        ctypes.byref(kernel), ctypes.byref(user),
+    ):
+        return None
+    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
+    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+
+
+def _posix_process_created_ms(pid: int) -> int | None:
+    try:
+        with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
+            stat_text = handle.read()
+        with open("/proc/stat", "r", encoding="ascii", errors="replace") as handle:
+            boot = next(int(line.split()[1]) for line in handle if line.startswith("btime "))
+        ticks = int(stat_text.rsplit(")", 1)[1].split()[19])
+        hertz = os.sysconf("SC_CLK_TCK")
+        return boot * 1000 + (ticks * 1000) // hertz
+    except (OSError, ValueError, IndexError, StopIteration, AttributeError):
+        return None
+
+
+def _process_created_ms(pid: int | None) -> int | None:
+    if not isinstance(pid, int) or pid <= 0:
+        return None
+    if os.name == "nt":
+        k32 = _kernel32()
+        handle = k32.OpenProcess(0x1000, False, int(pid))
+        if not handle:
+            return None
+        try:
+            return _windows_process_created_ms(handle)
+        finally:
+            k32.CloseHandle(handle)
+    return _posix_process_created_ms(int(pid))
+
+
+def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
+    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead."""
+    if not isinstance(pid, int) or pid <= 0:
+        return "dead"
+    if os.name == "nt":
+        from ctypes import wintypes
+        k32 = _kernel32()
+        handle = k32.OpenProcess(0x1000, False, int(pid))
+        if not handle:
+            error = ctypes.get_last_error()
+            return "dead" if error == 87 else "unknown"
+        try:
+            code = wintypes.DWORD()
+            if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return "unknown"
+            if int(code.value) != _STILL_ACTIVE:
+                return "dead"
+            if created_ms is not None:
+                actual = _windows_process_created_ms(handle)
+                if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+                    return "dead"
+            return "alive"
         finally:
             k32.CloseHandle(handle)
     try:
-        os.kill(pid, 0)
-    except (OSError, ProcessLookupError, PermissionError, ValueError):
-        return False
-    return True
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return "dead"
+    except (OSError, PermissionError, ValueError):
+        return "unknown"
+    if created_ms is not None:
+        actual = _posix_process_created_ms(int(pid))
+        if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+            return "dead"
+    return "alive"
+
+
+def _pid_is_alive(pid: int | None, created_ms: int | None = None) -> bool:
+    """Proven alive. Unknown is not alive and is not dead."""
+    return _process_liveness(pid, created_ms) == "alive"
+
+
+def _pid_unresolved(pid: int | None, created_ms: int | None = None) -> bool:
+    """True unless this pid identity is proven dead."""
+    return _process_liveness(pid, created_ms) != "dead"
+
+
+def _canonical_dest(dest: str) -> str:
+    """Dest identity for exclusion. Parent must not realpath: that is dest I/O."""
+    return os.path.normcase(os.path.abspath(os.path.normpath(str(dest).strip())))
+
+
+def _path_key(path: Path | str) -> str:
+    return os.path.normcase(os.path.abspath(os.path.normpath(str(path))))
+
+
+def _dest_namespace_dir(dest: str) -> Path:
+    return Path(_canonical_dest(dest))
 
 
 def _dest_lease_path(dest: str) -> Path:
-    canonical = os.path.normcase(os.path.realpath(str(dest)))
-    dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-    lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
-    lock_dir.mkdir(parents=True, exist_ok=True)
-    return lock_dir / f"{dest_key}.lease"
+    return _dest_namespace_dir(dest) / _WRITER_LEASE_NAME
 
 
-def _read_dest_lease(dest: str) -> dict:
+def _dest_lock_path(dest: str) -> Path:
+    return _dest_namespace_dir(dest) / _WRITER_LOCK_NAME
+
+
+def _io_ctx_session():
+    return getattr(_IO_CTX, "session", None)
+
+
+def _bound_session_must_refuse_dest() -> bool:
+    """True when a bound operation exists and must not touch the destination."""
+    session = _io_ctx_session()
+    if session is None:
+        return False
+    if getattr(session, "_dead", False) or not session.alive:
+        return True
+    token = getattr(_IO_CTX, "token", None)
+    if token is not None and getattr(session, "token", None) != token:
+        return True
+    plan = getattr(_IO_CTX, "plan", None)
+    if isinstance(plan, dict):
+        cancelled = plan.get("cancelled")
+        if isinstance(cancelled, threading.Event) and cancelled.is_set():
+            return True
+        bound = plan.get("io")
+        if bound is not None and bound is not session:
+            return True
+        if bound is not None and (getattr(bound, "_dead", False) or not bound.alive):
+            return True
+    return False
+
+
+def _require_live_lease_session():
+    """Live bound session, or None when no resync owns this call.
+
+    A dead/cancelled bound session refuses before any destination syscall.
+    """
+    if _bound_session_must_refuse_dest():
+        raise OSError("vault io worker is not running")
+    session = _io_ctx_session()
+    if session is not None and session.alive:
+        return session
+    return None
+
+
+def _session_dest_matches(session, dest: str) -> bool:
+    """Lexical dest identity only. Parent must not realpath; the gate name is not dest."""
+    session_dest = getattr(session, "dest", None)
+    if not session_dest or not dest:
+        return False
+    return _canonical_dest(str(session_dest)) == _canonical_dest(str(dest))
+
+
+def _session_launch_open(session) -> bool:
+    """True while launch may still create or register a child."""
+    if session is None:
+        return False
+    if getattr(session, "_popen_in_progress", False):
+        return True
+    return bool(getattr(session, "_launching", False) and session.proc is None)
+
+
+def _live_owner_session(dest: str):
+    """Live mutator of this admitted operation, if any. Does not adopt a foreign owner.
+
+    The shared Windows gate is not destination identity. Reuse only a session
+    whose lexical dest matches the requested dest.
+    """
+    session = _require_live_lease_session()
+    if session is not None:
+        if _session_dest_matches(session, dest):
+            return session
+        return None
+    ctx_owner = _ctx_owner_for_gate(dest)
+    if ctx_owner is None:
+        return None
+    with _dest_hold_guard:
+        attached = list(ctx_owner.sessions)
+    for existing in attached:
+        if existing.alive and _session_dest_matches(existing, dest):
+            return existing
+    return None
+
+
+def _with_isolated_lease_session(dest: str, fn):
+    """Fixture/helper path: one bounded isolated worker when no resync owns the call.
+
+    A live admitted mutator is reused only when its dest matches. A replacement
+    writer is not started. The shared gate name is not dest identity.
+    """
+    existing = _live_owner_session(dest)
+    if existing is not None:
+        return fn(existing)
+    bound = _io_ctx_session()
+    if bound is not None:
+        raise OSError("vault io worker is not running")
+    session = _VaultIoSession.start(dest)
+    prev_session = getattr(_IO_CTX, "session", None)
+    prev_token = getattr(_IO_CTX, "token", None)
+    try:
+        _IO_CTX.session = session
+        _IO_CTX.token = session.token
+        return fn(session)
+    finally:
+        _IO_CTX.session = prev_session
+        _IO_CTX.token = prev_token
+        session.terminate()
+
+
+def _decode_lease_bytes(raw: bytes):
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeError, TypeError):
+        return "corrupt"
+    if not isinstance(data, dict):
+        return "corrupt"
+    return data
+
+
+def _lease_read_parent(dest: str):
     path = _dest_lease_path(dest)
     try:
         if not path.is_file():
-            return {}
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError, UnicodeError, TypeError):
-        return {}
-    return data if isinstance(data, dict) else {}
+            return None
+    except OSError:
+        return "unavailable"
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return "unavailable"
+    return _decode_lease_bytes(raw)
+
+
+def _lease_read_via(session: "_VaultIoSession", dest: str):
+    result = session.call({"cmd": "read", "path": str(_dest_lease_path(dest))})
+    if result.get("gone"):
+        return None
+    if not result.get("ok"):
+        return "unavailable"
+    raw = result.get("b64")
+    if not isinstance(raw, str):
+        return "corrupt"
+    try:
+        return _decode_lease_bytes(base64.b64decode(raw))
+    except (OSError, ValueError, TypeError):
+        return "corrupt"
+
+
+def _lease_put_via(session: "_VaultIoSession", dest: str, payload: dict) -> None:
+    if _bound_session_must_refuse_dest() or not session.alive:
+        raise OSError("vault io worker is not running")
+    data = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    result = session.call({
+        "cmd": "lease_put",
+        "path": str(_dest_lease_path(dest)),
+        "b64": base64.b64encode(data).decode("ascii"),
+    })
+    if not result.get("ok"):
+        raise OSError(result.get("error") or "lease write failed")
+
+
+def _lease_clear_via(
+    session: "_VaultIoSession", dest: str, pid: int | None, token: str | None,
+) -> None:
+    if _bound_session_must_refuse_dest() or not session.alive:
+        raise OSError("vault io worker is not running")
+    result = session.call({
+        "cmd": "lease_clear",
+        "path": str(_dest_lease_path(dest)),
+        "pid": pid,
+        "token": token,
+    })
+    if result.get("not_ours") or result.get("gone"):
+        return
+    if not result.get("ok"):
+        raise OSError(result.get("error") or "lease clear failed")
+
+
+def _read_dest_lease(dest: str):
+    session = _io_ctx_session()
+    if session is not None:
+        if _bound_session_must_refuse_dest() or not session.alive:
+            return "unavailable"
+        try:
+            return _lease_read_via(session, dest)
+        except OSError:
+            return "unavailable"
+    return _lease_read_parent(dest)
 
 
 def _write_dest_lease(dest: str, payload: dict) -> None:
-    path = _dest_lease_path(dest)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + "." + secrets.token_hex(8) + ".tmp")
-    data = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
-    with open(tmp, "xb") as stream:
-        stream.write(data)
-        stream.flush()
-        os.fsync(stream.fileno())
-    os.replace(tmp, path)
+    session = _require_live_lease_session()
+    if session is None:
+        _with_isolated_lease_session(dest, lambda sess: _lease_put_via(sess, dest, payload))
+        return
+    _lease_put_via(session, dest, payload)
 
 
-def _clear_dest_lease(dest: str, pid: int | None = None) -> None:
-    path = _dest_lease_path(dest)
+def _lease_holder_status(lease: dict) -> str:
+    created = lease.get("created_ms")
+    return _process_liveness(
+        lease.get("pid"), created if isinstance(created, int) else None,
+    )
+
+
+def _lease_holder_alive(lease: dict) -> bool:
+    return _lease_holder_status(lease) == "alive"
+
+
+def _lease_blocks_us(lease: dict) -> bool:
+    """Alive or unknown ownership blocks us. Only proven death yields the dest."""
+    return _lease_holder_status(lease) != "dead"
+
+
+def _clear_dest_lease(dest: str, pid: int | None = None, token: str | None = None) -> None:
+    session = _io_ctx_session()
+    if session is not None:
+        if _bound_session_must_refuse_dest() or not session.alive:
+            return
+        try:
+            _lease_clear_via(session, dest, pid, token)
+        except OSError:
+            return
+        return
     try:
-        if pid is not None:
-            current = _read_dest_lease(dest)
-            if current.get("pid") not in (None, pid) and _pid_is_alive(current.get("pid")):
-                return
-        path.unlink()
+        _with_isolated_lease_session(
+            dest, lambda sess: _lease_clear_via(sess, dest, pid, token),
+        )
     except OSError:
-        pass
+        return
 
 
-def _foreign_vault_worker_alive(dest: str, our_pid: int | None = None) -> bool:
+def _foreign_vault_worker_alive(
+    dest: str, our_pid: int | None = None, our_token: str | None = None,
+) -> bool:
     lease = _read_dest_lease(dest)
-    pid = lease.get("pid")
-    if not isinstance(pid, int) or pid <= 0:
+    if lease in ("corrupt", "unavailable"):
+        return True
+    if not isinstance(lease, dict):
         return False
-    if our_pid is not None and pid == our_pid:
+    if our_token is not None and lease.get("token") == our_token:
         return False
-    return _pid_is_alive(pid)
+    if our_pid is not None and lease.get("pid") == our_pid:
+        return False
+    return _lease_blocks_us(lease)
+
+
+def _admission_gate_key(dest: str | None = None) -> str:
+    """Kernel admission identity. Windows shares one gate across destinations.
+
+    Unrelated destinations serialize. That concurrency tradeoff is the
+    bounded alternative to parent realpath / lexical dest hashing.
+    POSIX keeps dest-local flock identity.
+    """
+    if os.name == "nt":
+        return _WRITER_ADMISSION_MUTEX
+    if dest:
+        return _canonical_dest(dest)
+    return "posix-dest-exclusion"
+
+
+def _dest_mutex_name(dest: str) -> str:
+    """Windows kernel mutex name. ``dest`` is not hashed into the name."""
+    return _admission_gate_key(dest)
+
+
+def _win_acquire_dest_mutex(dest: str, timeout: float):
+    """Named mutex plus same-thread non-recursion (Win32 mutexes are recursive).
+
+    Must be called from the thread that will ReleaseMutex. Abandoned is not
+    proof the previous writer is dead; the caller owns the mutex either way.
+    Same-thread non-recursion uses the shared gate identity, even when the
+    request carries a different lexical destination.
+    """
+    handle, key, _abandoned = _win_acquire_dest_mutex_result(dest, timeout)
+    return handle, key
+
+
+def _win_acquire_dest_mutex_result(dest: str, timeout: float):
+    k32 = _kernel32()
+    key = _admission_gate_key(dest)
+    me = threading.get_ident()
+    with _dest_hold_guard:
+        if _dest_holds.get(key) == me:
+            raise _LockTimeout()
+    name = _dest_mutex_name(dest)
+    handle = k32.CreateMutexW(None, False, name)
+    if not handle:
+        raise _LockTimeout()
+    wait_ms = max(50, int(max(0.05, float(timeout)) * 1000))
+    result = int(k32.WaitForSingleObject(handle, wait_ms))
+    if result not in (_WAIT_OBJECT_0, _WAIT_ABANDONED):
+        k32.CloseHandle(handle)
+        raise _LockTimeout()
+    with _dest_hold_guard:
+        if _dest_holds.get(key) == me:
+            try:
+                k32.ReleaseMutex(handle)
+            except Exception:
+                pass
+            k32.CloseHandle(handle)
+            raise _LockTimeout()
+        _dest_holds[key] = me
+    return handle, key, result == _WAIT_ABANDONED
+
+
+def _win_release_dest_mutex(handle, key: str | None = None) -> None:
+    if handle is None or os.name != "nt":
+        return
+    if key is not None:
+        with _dest_hold_guard:
+            _dest_holds.pop(key, None)
+    k32 = _kernel32()
+    try:
+        k32.ReleaseMutex(handle)
+    except Exception:
+        pass
+    _win_close_handle(handle)
+
+
+def _retain_session(session: "_VaultIoSession") -> None:
+    with _dest_hold_guard:
+        _retained_sessions.add(session)
+
+
+def _drop_retained_session(session: "_VaultIoSession") -> None:
+    with _dest_hold_guard:
+        _retained_sessions.discard(session)
+
+
+class _DestExclusionOwner:
+    """Dedicated thread that acquires and releases dest exclusion.
+
+    Windows mutex ownership dies with the acquiring thread. This owner
+    acquires, then waits until every attached mutator is proven dead.
+    Abandoned mutexes are recorded and are not writer-death evidence.
+    """
+
+    def __init__(self, dest: str, timeout: float) -> None:
+        self.dest = dest
+        self.key = _admission_gate_key(dest)
+        self.timeout = max(0.05, float(timeout))
+        self.abandoned = False
+        self.held = False
+        self._exclusive_holds = 0
+        self.sessions: set[Any] = set()
+        self._acquired = threading.Event()
+        self._error: BaseException | None = None
+        self._stop = threading.Event()
+        self._done = threading.Event()
+        self._posix_fd: int | None = None
+        self._thread = threading.Thread(
+            target=self._run, name="uoink-dest-excl", daemon=True,
+        )
+
+    def start_wait(self) -> None:
+        self._thread.start()
+        if not self._acquired.wait(self.timeout + 0.25):
+            self._stop.set()
+            raise _LockTimeout()
+        if self._error is not None:
+            raise self._error
+        with _dest_hold_guard:
+            _live_owners.add(self)
+        self.held = True
+
+    def add_exclusive(self) -> None:
+        with _dest_hold_guard:
+            self._exclusive_holds += 1
+
+    def drop_exclusive(self) -> None:
+        with _dest_hold_guard:
+            if self._exclusive_holds > 0:
+                self._exclusive_holds -= 1
+
+    def attach(self, session: "_VaultIoSession") -> None:
+        with _dest_hold_guard:
+            self.sessions.add(session)
+        session._exclusion_owner = self
+
+    def detach(self, session: "_VaultIoSession") -> None:
+        with _dest_hold_guard:
+            self.sessions.discard(session)
+        if getattr(session, "_exclusion_owner", None) is self:
+            session._exclusion_owner = None
+
+    def needed(self) -> bool:
+        with _dest_hold_guard:
+            if self._exclusive_holds > 0:
+                return True
+            sessions = list(self.sessions)
+        for session in sessions:
+            if session.physically_alive():
+                return True
+            if _session_launch_open(session):
+                return True
+        return False
+
+    def release_if_unneeded(self) -> None:
+        with _dest_hold_guard:
+            attached = list(self.sessions)
+        stale = [
+            session for session in attached
+            if not session.physically_alive() and not _session_launch_open(session)
+        ]
+        for session in stale:
+            self.detach(session)
+        if not self.needed():
+            self.release()
+
+    def release(self) -> None:
+        self._stop.set()
+        self._done.wait(max(0.2, _WORKER_TERMINATE_S))
+
+    def _run(self) -> None:
+        handle = None
+        key = self.key
+        try:
+            if os.name == "nt":
+                handle, key, abandoned = _win_acquire_dest_mutex_result(
+                    self.dest, self.timeout,
+                )
+                self.abandoned = bool(abandoned)
+            else:
+                self._posix_hold()
+            self.held = True
+            self._acquired.set()
+        except BaseException as exc:
+            self._error = exc
+            self.held = False
+            self._acquired.set()
+            self._done.set()
+            return
+        try:
+            self._stop.wait()
+        finally:
+            if os.name == "nt":
+                _win_release_dest_mutex(handle, key)
+            else:
+                self._posix_release()
+            self.held = False
+            with _dest_hold_guard:
+                _live_owners.discard(self)
+            self._done.set()
+
+    def _posix_hold(self) -> None:
+        import fcntl
+        path = _dest_lock_path(self.dest)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise _LockTimeout() from exc
+        fd = os.open(str(path), os.O_CREAT | os.O_RDWR, 0o600)
+        try:
+            if os.fstat(fd).st_size == 0:
+                os.write(fd, b"\0")
+        except OSError:
+            pass
+        until = time.monotonic() + self.timeout
+        while True:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                self._posix_fd = fd
+                return
+            except OSError:
+                if time.monotonic() >= until:
+                    try:
+                        os.close(fd)
+                    except OSError:
+                        pass
+                    raise _LockTimeout()
+                time.sleep(0.01)
+
+    def _posix_release(self) -> None:
+        fd = self._posix_fd
+        self._posix_fd = None
+        if fd is None:
+            return
+        try:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+
+
+def _release_proven_dead_owners() -> None:
+    """Drop owners whose mutators are proven dead. Not foreign-owner adoption."""
+    for owner in list(_live_owners):
+        try:
+            owner.release_if_unneeded()
+        except Exception:
+            pass
+
+
+def _acquire_dest_exclusion(
+    dest: str, timeout: float, *, exclusive: bool = False,
+) -> _DestExclusionOwner:
+    _release_proven_dead_owners()
+    owner = _DestExclusionOwner(dest, timeout)
+    if exclusive:
+        owner.add_exclusive()
+    try:
+        owner.start_wait()
+    except BaseException:
+        if exclusive:
+            owner.drop_exclusive()
+        owner.release()
+        raise
+    return owner
+
+
+def _ctx_owner_for_gate(dest: str) -> "_DestExclusionOwner | None":
+    """Owner of this admitted operation, or None. Not a process-global lookup."""
+    ctx_owner = getattr(_EXCL_CTX, "owner", None)
+    if ctx_owner is None or not getattr(ctx_owner, "held", False):
+        return None
+    if getattr(ctx_owner, "key", None) != _admission_gate_key(dest):
+        return None
+    return ctx_owner
+
+
+def _owner_blocks_replacement(
+    owner: "_DestExclusionOwner", incoming: "_VaultIoSession",
+) -> bool:
+    """True when a live, unknown, or launching mutator already owns this gate."""
+    with _dest_hold_guard:
+        others = [session for session in owner.sessions if session is not incoming]
+    for session in others:
+        if getattr(session, "_launching", False) or _session_launch_open(session):
+            return True
+        if session.physically_alive():
+            return True
+    return False
+
+
+def _exclusion_for_dest(dest: str, timeout: float) -> _DestExclusionOwner:
+    """Acquire admission, or reuse the owner of this admitted operation.
+
+    Foreign threads and helper callers without ``_EXCL_CTX`` wait on the
+    kernel gate. They must not adopt a process-global owner. Same-thread
+    context inside the admitted operation may reuse the owner; a second
+    mutator is still refused at prepare().
+    """
+    ctx_owner = _ctx_owner_for_gate(dest)
+    if ctx_owner is not None:
+        return ctx_owner
+    try:
+        return _acquire_dest_exclusion(dest, timeout)
+    except _LockTimeout as exc:
+        raise OSError("destination exclusion unavailable") from exc
+
+
+def _atexit_release_dest_exclusion() -> None:
+    for session in list(_retained_sessions):
+        try:
+            session.terminate()
+        except Exception:
+            pass
+    for owner in list(_live_owners):
+        try:
+            owner.release_if_unneeded()
+        except Exception:
+            pass
+
+
+atexit.register(_atexit_release_dest_exclusion)
 
 
 class _JOBOBJECT_BASIC_LIMIT_INFORMATION(ctypes.Structure):
@@ -545,7 +1321,7 @@ _JOB_OBJECT_EXTENDED_LIMIT_INFORMATION = 9
 def _win_create_kill_job():
     if os.name != "nt":
         return None
-    k32 = ctypes.windll.kernel32
+    k32 = _kernel32()
     job = k32.CreateJobObjectW(None, None)
     if not job:
         return None
@@ -558,7 +1334,7 @@ def _win_create_kill_job():
     if not ok:
         k32.CloseHandle(job)
         return None
-    return job
+    return int(job)
 
 
 def _win_assign_job(job, proc: subprocess.Popen) -> bool:
@@ -567,8 +1343,25 @@ def _win_assign_job(job, proc: subprocess.Popen) -> bool:
     handle = getattr(proc, "_handle", None)
     if not handle:
         return False
-    k32 = ctypes.windll.kernel32
-    return bool(k32.AssignProcessToJobObject(job, int(handle)))
+    return bool(_kernel32().AssignProcessToJobObject(job, handle))
+
+
+def _win_close_handle(handle) -> None:
+    if handle is None or os.name != "nt":
+        return
+    try:
+        _kernel32().CloseHandle(handle)
+    except Exception:
+        pass
+
+
+def _win_terminate_job(job) -> None:
+    if job is None or os.name != "nt":
+        return
+    try:
+        _kernel32().TerminateJobObject(job, 1)
+    except Exception:
+        pass
 
 
 class _VaultIoSession:
@@ -579,18 +1372,104 @@ class _VaultIoSession:
         self.job = None
         self.dest = ""
         self.startup_s = 0.0
+        self.termination_s = 0.0
+        self.token = ""
+        self.created_ms: int | None = None
+        self.writer_pid: int | None = None
+        self.writer_created_ms: int | None = None
+        self._lease_written = False
         self._rpc_lock = threading.Lock()
+        self._state_lock = threading.Lock()
+        self._termination_lock = threading.Lock()
         self._dead = False
+        self._held_mutex = None
+        self._held_mutex_key = None
+        self._exclusion_owner: _DestExclusionOwner | None = None
+        self._owned_exe: dict[int, str] = {}
+        self._owned_created: dict[int, int | None] = {}
+        self._launch_t0 = 0.0
+        self._launching = False
+        self._popen_in_progress = False
+        self._origin_thread_id: int | None = None
+        self._origin_thread: threading.Thread | None = None
+        self.cancel_return_s = 0.0
 
     @property
     def pid(self) -> int | None:
         proc = self.proc
         return int(proc.pid) if proc is not None and proc.pid else None
 
+    def owned_pids(self) -> list[int]:
+        pids: list[int] = []
+        seen: set[int] = set()
+
+        def add(pid: int | None, exe: str = "", created: int | None = None) -> None:
+            if not isinstance(pid, int) or pid <= 0 or pid in seen:
+                return
+            seen.add(pid)
+            pids.append(pid)
+            if exe:
+                self._owned_exe[pid] = exe
+            if pid not in self._owned_created:
+                self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
+
+        add(self.pid, created=self.created_ms)
+        add(self.writer_pid, created=self.writer_created_ms)
+        if os.name == "nt" and self.pid:
+            for child in _windows_process_children(self.pid):
+                exe = str(child.get("exe") or "")
+                if _is_console_host(exe):
+                    continue
+                add(int(child["pid"]), exe)
+            writer = self.writer_pid
+            if writer and writer != self.pid:
+                for child in _windows_process_children(writer):
+                    exe = str(child.get("exe") or "")
+                    if _is_console_host(exe):
+                        continue
+                    add(int(child["pid"]), exe)
+        return pids
+
+    def physical_liveness(self) -> str:
+        """``alive``, ``unknown`` or ``dead``. Unknown is unresolved ownership."""
+        states: list[str] = []
+        proc = self.proc
+        if proc is not None:
+            try:
+                poll = proc.poll()
+            except Exception:
+                states.append("unknown")
+            else:
+                if poll is None:
+                    return "alive"
+        writer = self.writer_pid
+        if writer:
+            states.append(_process_liveness(writer, self.writer_created_ms))
+        if self.pid:
+            states.append(_process_liveness(self.pid, self.created_ms))
+        for pid, created in list(self._owned_created.items()):
+            if pid in (self.pid, self.writer_pid):
+                continue
+            states.append(_process_liveness(pid, created))
+        if "alive" in states:
+            return "alive"
+        if "unknown" in states:
+            return "unknown"
+        return "dead"
+
+    def physically_alive(self) -> bool:
+        """True unless every tracked pid identity is proven dead."""
+        return self.physical_liveness() != "dead"
+
+    def owns_pid(self, pid: int | None) -> bool:
+        if not isinstance(pid, int) or pid <= 0:
+            return False
+        return pid in self.owned_pids()
+
     @property
     def alive(self) -> bool:
-        proc = self.proc
-        return (not self._dead) and proc is not None and proc.poll() is None
+        """Admitted and proven running. Unknown is unresolved, not admission."""
+        return (not self._dead) and self.physical_liveness() == "alive"
 
     def _readline(self, timeout: float | None = None) -> bytes | None:
         proc = self.proc
@@ -614,11 +1493,74 @@ class _VaultIoSession:
         line = box.get("line")
         return line if isinstance(line, (bytes, bytearray)) else None
 
+    def _close_streams(self) -> None:
+        proc = self.proc
+        if proc is None:
+            return
+        for stream in (proc.stdin, proc.stdout, proc.stderr):
+            if stream is not None:
+                try:
+                    stream.close()
+                except OSError:
+                    pass
+
     @classmethod
-    def start(cls, dest: str) -> "_VaultIoSession":
+    def prepare(cls, dest: str) -> "_VaultIoSession":
+        """Token, dest, dest exclusion and retain — before any child exists."""
         session = cls()
         session.dest = dest
+        session.token = secrets.token_hex(16)
+        owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+        if _owner_blocks_replacement(owner, session):
+            raise OSError("vault io worker still live")
+        session._launching = True
+        session._origin_thread_id = threading.get_ident()
+        session._origin_thread = threading.current_thread()
+        owner.attach(session)
+        _retain_session(session)
+        return session
+
+    @classmethod
+    def start(cls, dest: str) -> "_VaultIoSession":
+        session = cls.prepare(dest)
+        session.launch()
+        return session
+
+    def launch(self) -> None:
+        """Job, Popen, ready. Caller must have prepare()'d and retained us."""
+        with self._state_lock:
+            if self.proc is not None:
+                return
+            if self._dead:
+                self._launching = False
+                refuse_before_popen = True
+            else:
+                refuse_before_popen = False
+        if refuse_before_popen:
+            self._abandon_unstarted()
+            raise OSError("vault io worker cancelled")
         t0 = time.monotonic()
+        self._launch_t0 = t0
+        job = None
+        if os.name == "nt":
+            job = _win_create_kill_job()
+            if job is None:
+                with self._state_lock:
+                    self._popen_in_progress = False
+                    self._launching = False
+                self._abandon_unstarted()
+                raise OSError("vault io worker job assignment failed")
+            with self._state_lock:
+                if self._dead:
+                    self._launching = False
+                    refuse_before_popen = True
+                else:
+                    self.job = job
+                    refuse_before_popen = False
+            if refuse_before_popen:
+                _win_close_handle(job)
+                self._abandon_unstarted()
+                raise OSError("vault io worker cancelled")
         env = os.environ.copy()
         env["PYTHONDONTWRITEBYTECODE"] = "1"
         env.pop("ANTHROPIC_API_KEY", None)
@@ -636,35 +1578,200 @@ class _VaultIoSession:
             kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
         else:
             kwargs["start_new_session"] = True
-        session.proc = subprocess.Popen(
-            [sys.executable, "-B", worker],
-            **kwargs,
-        )
-        if os.name == "nt":
-            session.job = _win_create_kill_job()
-            if session.job is not None:
-                _win_assign_job(session.job, session.proc)
-        ready_line = session._readline(timeout=15.0)
-        session.startup_s = time.monotonic() - t0
+        with self._state_lock:
+            if self._dead:
+                self._launching = False
+                refuse_before_popen = True
+            else:
+                self._popen_in_progress = True
+                refuse_before_popen = False
+        if refuse_before_popen:
+            held = self.job
+            self.job = None
+            _win_close_handle(held)
+            self._abandon_unstarted()
+            raise OSError("vault io worker cancelled")
+        try:
+            proc = subprocess.Popen(
+                [sys.executable, "-B", worker],
+                **kwargs,
+            )
+        except Exception as exc:
+            with self._state_lock:
+                held = self.job
+                self.job = None
+                self._popen_in_progress = False
+                self._launching = False
+            _win_close_handle(held)
+            self._abandon_unstarted()
+            raise OSError("vault io worker failed to start") from exc
+        with self._state_lock:
+            self.proc = proc
+        self.created_ms = _process_created_ms(self.pid)
+        if self.pid:
+            self._owned_created[self.pid] = self.created_ms
+        # Launch owns the job through process registration and assignment.
+        # Cancellation records intent but cannot close a handle still in use.
+        try:
+            assigned = os.name != "nt" or _win_assign_job(job, proc)
+        finally:
+            with self._state_lock:
+                self._popen_in_progress = False
+        if not assigned:
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
+            raise OSError("vault io worker job assignment failed")
+        if self._dead:
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
+            raise OSError("vault io worker cancelled")
+        ready_line = self._readline(timeout=_WORKER_STARTUP_S)
+        self.startup_s = time.monotonic() - t0
         ready = None
         if ready_line:
             try:
                 ready = json.loads(ready_line.decode("utf-8"))
             except (json.JSONDecodeError, UnicodeError, TypeError):
                 ready = None
-        if not isinstance(ready, dict) or not ready.get("ready") or not session.alive:
-            session.terminate()
+        if self._dead:
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
+            raise OSError("vault io worker cancelled")
+        if not isinstance(ready, dict) or not ready.get("ready") or not self.physically_alive():
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
             raise OSError("vault io worker failed to start")
-        _write_dest_lease(dest, {
-            "pid": session.pid,
-            "destination": dest,
-            "ppid": os.getpid(),
-        })
-        return session
+        writer = _optional_int(ready.get("pid"))
+        self.writer_pid = writer if writer else self.pid
+        self.writer_created_ms = _process_created_ms(self.writer_pid)
+        self._adopt_owned_tree()
+        if os.name == "nt":
+            for pid in self.owned_pids():
+                if pid != self.pid:
+                    # This local handle operation is short. Popen and pipe
+                    # reads remain outside the state lock.
+                    with self._state_lock:
+                        if not self._dead and self.job is not None:
+                            _win_assign_pid(self.job, pid)
+        self._launching = False
+        if self._dead:
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
+            raise OSError("vault io worker cancelled")
+
+    def _abandon_unstarted(self) -> None:
+        """No living child: drop retain and exclusion. Unconfirmed children keep both."""
+        if self.physically_alive() or self._popen_in_progress:
+            return
+        self._launching = False
+        self._popen_in_progress = False
+        _drop_retained_session(self)
+        self._release_held_exclusion()
+
+    def _adopt_owned_tree(self) -> None:
+        self.owned_pids()
+        if self.writer_pid is None and os.name == "nt" and self.pid:
+            for child in _windows_process_children(self.pid):
+                exe = str(child.get("exe") or "").lower()
+                if "python" in exe and not _is_console_host(exe):
+                    self.writer_pid = int(child["pid"])
+                    self.writer_created_ms = _process_created_ms(self.writer_pid)
+                    break
+
+    def claim_lease(self, op_id: int | None = None) -> None:
+        """Dest lease I/O. Bind session/token/operation before the isolated put."""
+        prev_session = getattr(_IO_CTX, "session", None)
+        prev_token = getattr(_IO_CTX, "token", None)
+        _IO_CTX.session = self
+        _IO_CTX.token = self.token
+        try:
+            if _bound_session_must_refuse_dest() or not self.alive:
+                raise OSError("vault io worker is not running")
+            _write_dest_lease(self.dest, {
+                "pid": self.writer_pid or self.pid,
+                "session_pid": self.pid,
+                "ppid": os.getpid(),
+                "created_ms": self.writer_created_ms or self.created_ms,
+                "token": self.token,
+                "destination": self.dest,
+                "op_id": op_id,
+            })
+            self._lease_written = True
+        finally:
+            if getattr(_IO_CTX, "plan", None) is None:
+                _IO_CTX.session = prev_session
+                _IO_CTX.token = prev_token
+
+    def bind_operation(self, plan: dict | None = None) -> None:
+        if not self.alive:
+            raise OSError("vault io worker is not running")
+        payload: dict[str, Any] = {"cmd": "bind", "token": self.token}
+        if isinstance(plan, dict):
+            if plan.get("op_id") is not None:
+                payload["op_id"] = plan.get("op_id")
+            if plan.get("lock_generation") is not None:
+                payload["lock_generation"] = plan.get("lock_generation")
+        result = self.call(payload)
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "bind failed")
+        writer = _optional_int(result.get("pid"))
+        if writer:
+            self.writer_pid = writer
+            if self.writer_created_ms is None:
+                self.writer_created_ms = _process_created_ms(writer)
+
+    def local_put(
+        self, path: str, data: bytes, *, op_id: int | None = None,
+        lock_generation: int | None = None,
+    ) -> None:
+        if self._dead:
+            raise OSError("operation is no longer live")
+        req: dict[str, Any] = {
+            "cmd": "local_put",
+            "path": path,
+            "b64": base64.b64encode(data).decode("ascii"),
+            "token": self.token,
+        }
+        if op_id is not None:
+            req["op_id"] = int(op_id)
+        if lock_generation is not None:
+            req["lock_generation"] = int(lock_generation)
+        result = self.call(req)
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "local put failed")
+
+    def local_unlink(
+        self, path: str, *, op_id: int | None = None,
+        lock_generation: int | None = None,
+    ) -> dict:
+        if self._dead:
+            raise OSError("operation is no longer live")
+        req: dict[str, Any] = {
+            "cmd": "local_unlink",
+            "path": path,
+            "token": self.token,
+        }
+        if op_id is not None:
+            req["op_id"] = int(op_id)
+        if lock_generation is not None:
+            req["lock_generation"] = int(lock_generation)
+        result = self.call(req)
+        if result.get("gone"):
+            return result
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "local unlink failed")
+        return result
 
     def call(self, req: dict) -> dict:
         with self._rpc_lock:
-            if not self.alive or self.proc is None or self.proc.stdin is None or self.proc.stdout is None:
+            if self._dead or self.proc is None or self.proc.stdin is None or self.proc.stdout is None:
+                raise OSError("vault io worker is not running")
+            if self.physical_liveness() != "alive":
                 raise OSError("vault io worker is not running")
             payload = json.dumps(req, ensure_ascii=False).encode("utf-8") + b"\n"
             try:
@@ -769,68 +1876,141 @@ class _VaultIoSession:
         digest = result.get("hash")
         return digest if isinstance(digest, str) else None
 
-    def terminate(self) -> None:
-        self._dead = True
-        proc = self.proc
-        job = self.job
-        dest = self.dest
-        pid = self.pid
-        if job is not None and os.name == "nt":
+    def _created_for_pid(self, pid: int | None) -> int | None:
+        if not isinstance(pid, int) or pid <= 0:
+            return None
+        if pid == self.writer_pid:
+            return self.writer_created_ms
+        if pid == self.pid:
+            return self.created_ms
+        return self._owned_created.get(pid)
+
+    def _release_held_exclusion(self) -> None:
+        owner = self._exclusion_owner
+        if owner is not None:
+            owner.detach(self)
+            owner.release_if_unneeded()
+        mutex = self._held_mutex
+        key = self._held_mutex_key
+        self._held_mutex = None
+        self._held_mutex_key = None
+        if mutex is not None:
+            # Legacy handle stored on the session is not ownership. Closing it
+            # from this thread must not ReleaseMutex (wrong thread).
+            _win_close_handle(mutex)
+
+    def terminate(self) -> bool:
+        started = time.monotonic()
+        with self._state_lock:
+            self._dead = True
+        # One terminator owns job closure. Another cancellation must not
+        # wait for it or close the same native handle a second time.
+        if not self._termination_lock.acquire(blocking=False):
+            self.cancel_return_s = time.monotonic() - started
+            return False
+        try:
+            return self._terminate_owned()
+        finally:
+            self._termination_lock.release()
+
+    def _terminate_owned(self) -> bool:
+        t0 = time.monotonic()
+        with self._state_lock:
+            self._dead = True
+            proc = self.proc
+            job = self.job
+            if self._popen_in_progress:
+                # Admission cancelled. Do not claim physical death, close a job
+                # launch still uses, or drop retain/owner while Popen can follow.
+                self.cancel_return_s = time.monotonic() - t0
+                return False
+            if proc is None:
+                # A prepared-only session can no longer enter Popen: launch
+                # rechecks _dead under this same lock before that transition.
+                self._launching = False
+        owned = self.owned_pids()
+        if job is not None:
+            _win_terminate_job(job)
+        if os.name == "nt":
+            for pid in owned:
+                if self.owns_pid(pid):
+                    _win_terminate_pid(pid, self._created_for_pid(pid))
+        if os.name != "nt" and proc is not None and proc.pid:
             try:
-                ctypes.windll.kernel32.TerminateJobObject(job, 1)
-            except Exception:
-                pass
-        if proc is not None and proc.poll() is None:
+                os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
+            except (OSError, ProcessLookupError, PermissionError, AttributeError):
+                try:
+                    proc.kill()
+                except OSError:
+                    pass
+        elif proc is not None and proc.poll() is None:
             try:
                 proc.kill()
             except OSError:
                 pass
+        confirmed = not self.physically_alive()
+        if proc is not None and not confirmed:
             try:
-                proc.wait(timeout=2.0)
-            except Exception:
+                proc.wait(timeout=_WORKER_TERMINATE_S)
+            except subprocess.TimeoutExpired:
                 pass
-        if proc is not None:
-            for stream in (proc.stdin, proc.stdout, proc.stderr):
-                if stream is not None:
-                    try:
-                        stream.close()
-                    except OSError:
-                        pass
-        if job is not None and os.name == "nt":
-            try:
-                ctypes.windll.kernel32.CloseHandle(job)
-            except Exception:
-                pass
-        self.proc = None
-        self.job = None
-        if dest:
-            _clear_dest_lease(dest, pid)
+            if os.name == "nt":
+                for pid in self.owned_pids():
+                    if self.owns_pid(pid):
+                        _win_terminate_pid(pid, self._created_for_pid(pid))
+            confirmed = not self.physically_alive()
+        if not confirmed and job is not None:
+            _win_close_handle(job)
+            self.job = None
+            job = None
+            if proc is not None and proc.poll() is None:
+                try:
+                    proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
+                except subprocess.TimeoutExpired:
+                    pass
+                confirmed = not self.physically_alive()
+        if confirmed:
+            self._launching = False
+            self._close_streams()
+            _win_close_handle(job)
+            self.proc = None
+            self.job = None
+            _drop_retained_session(self)
+            self._release_held_exclusion()
+        self.termination_s = time.monotonic() - t0
+        return confirmed
 
-    def shutdown(self) -> None:
+    def shutdown(self) -> bool:
+        t0 = time.monotonic()
+        prev_session = getattr(_IO_CTX, "session", None)
+        prev_token = getattr(_IO_CTX, "token", None)
         try:
+            if self.alive and self._lease_written:
+                _IO_CTX.session = self
+                _IO_CTX.token = self.token
+                try:
+                    _clear_dest_lease(self.dest, self.writer_pid or self.pid, token=self.token)
+                    self._lease_written = False
+                except OSError:
+                    pass
             if self.alive:
                 self.call({"cmd": "shutdown"})
         except OSError:
-            pass
+            return self.terminate()
+        finally:
+            _IO_CTX.session = prev_session
+            _IO_CTX.token = prev_token
         proc = self.proc
         if proc is not None and proc.poll() is None:
             try:
-                proc.wait(timeout=1.0)
-            except Exception:
-                self.terminate()
-                return
-        dest = self.dest
-        pid = self.pid
-        self._dead = True
-        self.proc = None
-        if self.job is not None and os.name == "nt":
-            try:
-                ctypes.windll.kernel32.CloseHandle(self.job)
-            except Exception:
-                pass
-            self.job = None
-        if dest:
-            _clear_dest_lease(dest, pid)
+                proc.wait(timeout=min(1.0, _WORKER_TERMINATE_S))
+            except subprocess.TimeoutExpired:
+                return self.terminate()
+        if self.physically_alive():
+            return self.terminate()
+        confirmed = self.terminate()
+        self.termination_s = time.monotonic() - t0
+        return confirmed
 
 
 # --------------------------------------------------------------------------
@@ -854,6 +2034,10 @@ class Mirror:
         self._thread_lock = threading.RLock()
         self._vault_io: _VaultIoSession | None = None
         self._vault_io_startup_s = 0.0
+        self._vault_io_termination_s = 0.0
+        self._lock_generation = 0
+        self._lock_acquired = False
+        self._op_seq = 0
         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
 
     # ---- public API ----------------------------------------------------
@@ -988,16 +2172,24 @@ class Mirror:
             if not has_deletions:
                 return _ok(synced=0, enabled=False, state="disabled")
         start = float(self._clock())
+        dest = Path(self.consent.destination)
+        if not self._destination_exists(dest):
+            ledger = self._load_ledger()
+            pending = sum(
+                1 for e in ledger.get("entries", {}).values()
+                if (e.get("pending_action") or "none") != "none"
+            )
+            return _mirror_refusal(
+                "destination_unavailable",
+                "The mirror destination is unavailable.",
+                retryable=True,
+                destination_unavailable=True,
+                destination_state="unavailable",
+                pending=pending,
+                synced=0,
+            )
         try:
             with self._exclusive(timeout=max(0.05, float(budget_s))):
-                if _foreign_vault_worker_alive(self.consent.destination):
-                    return _mirror_refusal(
-                        "destination_unavailable",
-                        "The mirror destination is unavailable.",
-                        retryable=True,
-                        destination_unavailable=True,
-                        synced=0,
-                    )
                 remaining = float(budget_s) - (float(self._clock()) - start)
                 return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
         except _LockTimeout:
@@ -1469,7 +2661,7 @@ class Mirror:
         if not dest_str or not prior_dest or not self.consent:
             return False
         try:
-            dest_changed = os.path.normcase(os.path.realpath(dest_str)) != os.path.normcase(os.path.realpath(prior_dest))
+            dest_changed = _canonical_dest(dest_str) != _canonical_dest(prior_dest)
         except OSError:
             return False
         return bool(dest_changed and self._consent_time_ms() > int(prior_consented_at or 0))
@@ -1596,7 +2788,40 @@ class Mirror:
         payload = json.dumps(ledger, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8")
         self._atomic_local(path, payload)
 
-    def _atomic_local(self, path: Path, data: bytes) -> None:
+    def _is_intent_path(self, path: Path) -> bool:
+        try:
+            return _path_key(Path(path).parent) == _path_key(self._intent_dir())
+        except OSError:
+            return False
+
+    def _bound_local_session(self) -> _VaultIoSession | None:
+        session = getattr(_IO_CTX, "session", None)
+        plan = getattr(_IO_CTX, "plan", None)
+        if session is None and isinstance(plan, dict):
+            session = plan.get("io")
+        if session is not None and session is not getattr(_IO_CTX, "session", None):
+            ctx = getattr(_IO_CTX, "session", None)
+            if ctx is not None and ctx is not session:
+                return None
+        return session if isinstance(session, _VaultIoSession) else None
+
+    def _plan_op_fields(self) -> tuple[int | None, int | None]:
+        plan = getattr(_IO_CTX, "plan", None)
+        if not isinstance(plan, dict):
+            return None, None
+        op_id = plan.get("op_id")
+        lock_generation = plan.get("lock_generation")
+        try:
+            op_id = int(op_id) if op_id is not None else None
+        except (TypeError, ValueError):
+            op_id = None
+        try:
+            lock_generation = int(lock_generation) if lock_generation is not None else None
+        except (TypeError, ValueError):
+            lock_generation = None
+        return op_id, lock_generation
+
+    def _parent_atomic_local(self, path: Path, data: bytes) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_name(path.name + "." + secrets.token_hex(12) + ".tmp")
         try:
@@ -1613,6 +2838,45 @@ class Mirror:
                 except OSError:
                     pass
 
+    def _atomic_local(self, path: Path, data: bytes) -> None:
+        plan = getattr(_IO_CTX, "plan", None)
+        session = self._bound_local_session()
+        bound = session is not None or (
+            isinstance(plan, dict) and (plan.get("io") is not None or plan.get("op_id") is not None)
+        )
+        if not bound:
+            later = getattr(self, "_vault_io", None)
+            origin = getattr(later, "_origin_thread", None) if later is not None else None
+            if (
+                later is not None
+                and later.alive
+                and origin is not None
+                and origin is threading.current_thread()
+            ):
+                session = later
+                bound = True
+        if bound:
+            original = session
+            if original is None or getattr(original, "_dead", False) or not original.alive:
+                raise OSError("operation is no longer live")
+            later = getattr(self, "_vault_io", None)
+            if later is not None and later is not original:
+                raise OSError("operation is no longer live")
+            if self._is_intent_path(path) and not self._intent_mutation_allowed():
+                raise OSError("operation is no longer live")
+            op_id, lock_generation = self._plan_op_fields()
+            original.local_put(str(path), data, op_id=op_id, lock_generation=lock_generation)
+            return
+        dest = ""
+        if self.consent and self.consent.destination:
+            dest = str(self.consent.destination)
+        if dest:
+            _with_isolated_lease_session(
+                dest, lambda sess: sess.local_put(str(path), data),
+            )
+            return
+        self._parent_atomic_local(path, data)
+
     def _intent_dir(self) -> Path:
         return self.ledger_dir / "intents"
 
@@ -1620,14 +2884,76 @@ class Mirror:
         name = hashlib.sha256(key.encode("utf-8")).hexdigest()
         return self._intent_dir() / f"{name}.json"
 
+    def _intent_mutation_allowed(self, plan: dict | None = None) -> bool:
+        ctx_plan = plan if isinstance(plan, dict) else getattr(_IO_CTX, "plan", None)
+        if not isinstance(ctx_plan, dict):
+            return True
+        cancelled = ctx_plan.get("cancelled")
+        if isinstance(cancelled, threading.Event) and cancelled.is_set():
+            return False
+        session = ctx_plan.get("io")
+        if session is not None and (getattr(session, "_dead", False) or not session.alive):
+            return False
+        lock_gen = ctx_plan.get("lock_generation")
+        if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
+            return False
+        op_id = ctx_plan.get("op_id")
+        if op_id is not None and op_id != getattr(self, "_op_seq", None):
+            return False
+        return True
+
     def _write_intent(self, key: str, payload: dict) -> None:
+        if not self._intent_mutation_allowed():
+            return
         path = self._intent_path(key)
         path.parent.mkdir(parents=True, exist_ok=True)
         self._atomic_local(path, json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8"))
 
+    def _unlink_intent_file(self, path: Path) -> None:
+        if not self._intent_mutation_allowed():
+            raise OSError("operation is no longer live")
+        plan = getattr(_IO_CTX, "plan", None)
+        session = self._bound_local_session()
+        bound = session is not None or (
+            isinstance(plan, dict) and (plan.get("io") is not None or plan.get("op_id") is not None)
+        )
+        if not bound:
+            later = getattr(self, "_vault_io", None)
+            origin = getattr(later, "_origin_thread", None) if later is not None else None
+            if (
+                later is not None
+                and later.alive
+                and origin is not None
+                and origin is threading.current_thread()
+            ):
+                session = later
+                bound = True
+        if bound:
+            original = session
+            if original is None or getattr(original, "_dead", False) or not original.alive:
+                raise OSError("operation is no longer live")
+            later = getattr(self, "_vault_io", None)
+            if later is not None and later is not original:
+                raise OSError("operation is no longer live")
+            op_id, lock_generation = self._plan_op_fields()
+            original.local_unlink(str(path), op_id=op_id, lock_generation=lock_generation)
+            return
+        dest = ""
+        if self.consent and self.consent.destination:
+            dest = str(self.consent.destination)
+        if dest:
+            _with_isolated_lease_session(
+                dest, lambda sess: sess.local_unlink(str(path)),
+            )
+            return
+        path.unlink()
+
     def _clear_intent(self, key: str) -> None:
+        if not self._intent_mutation_allowed():
+            return
+        path = self._intent_path(key)
         try:
-            self._intent_path(key).unlink()
+            self._unlink_intent_file(path)
         except OSError:
             pass
 
@@ -1987,8 +3313,7 @@ class Mirror:
         bound_dest = dest_binding.get("destination") if isinstance(dest_binding, dict) else None
         dest_matches = bool(
             bound_dest
-            and os.path.normcase(os.path.realpath(bound_dest))
-            == os.path.normcase(os.path.realpath(dest_str))
+            and _canonical_dest(bound_dest) == _canonical_dest(dest_str)
         )
         have_synced = bool(isinstance(dest_binding, dict) and dest_matches and dest_binding.get("have_synced"))
         if isinstance(dest_binding, dict) and dest_binding.get("destination") and not dest_matches:
@@ -2043,26 +3368,10 @@ class Mirror:
             )
         self._reconcile_desired_state(ledger)
         paused = bool(ledger.get("exports_paused")) or not self.enabled
-        plan = self._build_plan(ledger, manifest_state if isinstance(manifest_state, dict) else None, paused)
-        # Persist intents before vault replacement. Keep outstanding temp records
-        # across generations; do not hash Library.md until its exact bytes exist.
-        existing_intents = self._load_intents()
-        for op in plan["ops"]:
-            if op["action"] in ("write", "tombstone") and op.get("content") is not None:
-                payload = {
-                    "key": op["key"],
-                    "relpath": op["relpath"],
-                    "content_hash": _sha256_bytes(op["content"]),
-                    "generation": op["generation"],
-                    "action": op["action"],
-                    "identity": op.get("identity"),
-                    "kind": op.get("kind"),
-                    "pending_temps": _pending_temps_from_intent(existing_intents.get(op["key"])),
-                }
-                self._write_intent(op["key"], payload)
-                existing_intents[op["key"]] = payload
-        recovered = self._load_intents()
-        plan["intents"] = recovered
+        plan = self._build_plan(
+            ledger, manifest_state if isinstance(manifest_state, dict) else None, paused,
+            persist=False,
+        )
         plan["expected_marker"] = self.consent.marker if self.consent else ""
         plan["write_marker"] = marker_state == "missing" and not have_synced
         plan["have_synced"] = have_synced
@@ -2070,12 +3379,44 @@ class Mirror:
         plan["dest"] = str(dest)
         cancel_event = threading.Event()
         plan["cancelled"] = cancel_event
+        plan["lock_generation"] = self._lock_generation
+        self._op_seq += 1
+        plan["op_id"] = self._op_seq
+        session = None
+
+        def persist_intents() -> None:
+            existing_intents = self._load_intents()
+            for op in plan["ops"]:
+                if op["action"] in ("write", "tombstone") and op.get("content") is not None:
+                    payload = {
+                        "key": op["key"],
+                        "relpath": op["relpath"],
+                        "content_hash": _sha256_bytes(op["content"]),
+                        "generation": op["generation"],
+                        "action": op["action"],
+                        "identity": op.get("identity"),
+                        "kind": op.get("kind"),
+                        "pending_temps": _pending_temps_from_intent(existing_intents.get(op["key"])),
+                    }
+                    self._write_intent(op["key"], payload)
+                    existing_intents[op["key"]] = payload
+            plan["intents"] = self._load_intents()
 
         def work():
+            bound = plan.get("io")
+            if bound is None or getattr(bound, "_dead", False) or not bound.physically_alive():
+                raise OSError("vault io worker is not running")
+            bound.bind_operation(plan)
+            self._save_ledger(ledger)
+            persist_intents()
+            if _foreign_vault_worker_alive(dest_str, our_token=getattr(bound, "token", None)):
+                raise OSError("destination lease held")
+            bound.claim_lease(op_id=plan.get("op_id"))
             return self._vault_work(plan)
 
         try:
             self._start_vault_io(dest_str)
+            session = self._vault_io
         except OSError as exc:
             return _mirror_refusal(
                 "destination_unavailable",
@@ -2085,23 +3426,31 @@ class Mirror:
                 synced=0,
                 details={"reason": type(exc).__name__, "what": "vault_io_worker"},
             )
+        plan["io"] = session
         deadline = float(self._clock()) + max(0.0, float(budget_s))
         plan["deadline_mono"] = deadline
         remaining = max(0.01, deadline - float(self._clock()))
         try:
-            result, err = self._run_cancellable(work, remaining)
+            result, err = self._run_cancellable(work, remaining, session=session, plan=plan)
             if err == "timeout" or result is None:
                 cancel_event.set()
-                self._kill_vault_io()
+                self._kill_vault_io(session)
+                self._op_seq += 1
                 return _mirror_refusal(
                     "destination_unavailable",
                     "The mirror destination is unavailable.",
                     retryable=True,
                     destination_unavailable=True,
                     synced=0,
+                    details={
+                        "reason": "timeout",
+                        "startup_s": float(getattr(session, "startup_s", 0.0) or 0.0),
+                        "termination_s": float(getattr(session, "termination_s", 0.0) or 0.0),
+                    },
                 )
             if isinstance(err, Exception):
                 cancel_event.set()
+                self._op_seq += 1
                 log.exception("mirror vault worker failed")
                 return _mirror_refusal(
                     "destination_unavailable",
@@ -2111,9 +3460,17 @@ class Mirror:
                     synced=0,
                     details={"reason": type(err).__name__},
                 )
-            return self._apply_receipts(ledger, result)
+            prev_session = getattr(_IO_CTX, "session", None)
+            prev_plan = getattr(_IO_CTX, "plan", None)
+            _IO_CTX.session = session
+            _IO_CTX.plan = plan
+            try:
+                return self._apply_receipts(ledger, result)
+            finally:
+                _IO_CTX.session = prev_session
+                _IO_CTX.plan = prev_plan
         finally:
-            self._stop_vault_io()
+            self._stop_vault_io(session)
 
     def _marker_state(self, dest: Path) -> str:
         expected = (self.consent.marker if self.consent else "") or ""
@@ -2171,7 +3528,7 @@ class Mirror:
             return "corrupt"
         return value
 
-    def _build_plan(self, ledger: dict, manifest: dict | None, paused: bool) -> dict:
+    def _build_plan(self, ledger: dict, manifest: dict | None, paused: bool, persist: bool = True) -> dict:
         ownership = (manifest or {}).get("ownership") or {}
         ops: list[dict] = []
         allowed_ids = None
@@ -2328,10 +3685,16 @@ class Mirror:
             "index_generation": int((index_entry or {}).get("desired_generation") or 0),
             "rewrite_index": bool(index_entry and (index_entry.get("pending_action") == "write") and not paused),
         }
-        self._save_ledger(ledger)
+        if persist:
+            self._save_ledger(ledger)
         return plan
 
     def _vault_work(self, plan: dict) -> dict:
+        _IO_CTX.plan = plan
+        bound = plan.get("io")
+        if bound is None or getattr(bound, "_dead", False):
+            raise OSError("vault io worker is not running")
+        _IO_CTX.session = bound
         self._active_plan = plan
         self._active_key = None
         dest = Path(plan["dest"])
@@ -2454,7 +3817,7 @@ class Mirror:
             if receipt.get("counted"):
                 used += 1
         try:
-            self._write_manifest(manifest_path, uoink, ownership)
+            self._write_manifest(manifest_path, uoink, ownership, plan=plan)
         except OSError as exc:
             return {
                 "ok": False,
@@ -2481,7 +3844,7 @@ class Mirror:
             return {}, "corrupt"
         return ownership, None
 
-    def _write_manifest(self, manifest_path: Path, uoink: Path, ownership: dict) -> None:
+    def _write_manifest(self, manifest_path: Path, uoink: Path, ownership: dict, plan: dict | None = None) -> None:
         payload = {
             "schema_version": SCHEMA_VERSION,
             "contract_version": CONTRACT_VERSION,
@@ -2489,7 +3852,13 @@ class Mirror:
             "ownership": ownership,
         }
         data = json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8")
-        self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
+        previous_key = getattr(_IO_CTX, "key", None)
+        _IO_CTX.plan = plan if plan is not None else getattr(_IO_CTX, "plan", None)
+        _IO_CTX.key = None
+        try:
+            self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
+        finally:
+            _IO_CTX.key = previous_key
 
     def _recover_intents(self, uoink: Path, intents: dict, ownership: dict, receipts: list) -> None:
         for key, intent in intents.items():
@@ -2663,7 +4032,9 @@ class Mirror:
         self._write_intent(key, intent)
 
     def _cleanup_owned_temps(self, uoink: Path, ownership: dict, plan: dict) -> None:
-        intents = self._load_intents()
+        if not self._intent_mutation_allowed(plan):
+            return
+        intents = plan.get("intents") if isinstance(plan.get("intents"), dict) else self._load_intents()
         for key, intent in list(intents.items()):
             kept = self._cleanup_intent_temps(uoink, key, intent)
             if kept:
@@ -2768,6 +4139,9 @@ class Mirror:
                 deadline = float(plan.get("deadline_mono") or 0)
                 if deadline and float(self._clock()) > deadline:
                     return False
+                lock_gen = plan.get("lock_generation")
+                if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
+                    return False
             if not getattr(self, "_lock_acquired", False):
                 return False
 
@@ -2863,28 +4237,36 @@ class Mirror:
 
             return True
 
+        _IO_CTX.plan = plan
+        _IO_CTX.key = key
         self._active_plan = plan
         self._active_key = key
         try:
             digest = self._atomic_vault(dest, bytes(content), uoink, recheck=recheck)
         except _AbortedWrite:
-            if dest.exists():
-                now_h = _sha256_file(dest)
-                desired = _sha256_bytes(bytes(content)) if isinstance(content, (bytes, bytearray)) else None
-                if desired and now_h == desired:
-                    # We replaced but will not acknowledge; intent recovers these bytes.
-                    return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
-                if initial_dest_hash and now_h != initial_dest_hash:
-                    return {
-                        "key": key, "ok": False, "code": "user_edit_conflict",
-                        "user_edit_conflict": True, "counted": False, "relpath": rel,
-                    }
+            session = getattr(_IO_CTX, "session", None) or (plan or {}).get("io") or self._vault_io
+            if session is None or not session.alive:
+                return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
+            try:
+                if self._io_exists(dest):
+                    now_h = self._io_sha256(dest)
+                    desired = _sha256_bytes(bytes(content)) if isinstance(content, (bytes, bytearray)) else None
+                    if desired and now_h == desired:
+                        return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
+                    if initial_dest_hash and now_h != initial_dest_hash:
+                        return {
+                            "key": key, "ok": False, "code": "user_edit_conflict",
+                            "user_edit_conflict": True, "counted": False, "relpath": rel,
+                        }
+            except OSError:
+                return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
             return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
         except OSError as exc:
             return {"key": key, "ok": False, "code": "destination_unavailable",
                     "counted": False, "reason": type(exc).__name__, "relpath": rel}
         finally:
             self._active_key = None
+            _IO_CTX.key = None
         if digest is None:
             return {"key": key, "ok": False, "code": "destination_unavailable", "counted": False}
         on_disk = _sha256_file(dest)
@@ -2933,9 +4315,16 @@ class Mirror:
             deadline = float(plan.get("deadline_mono") or 0)
             if deadline and float(self._clock()) > deadline:
                 return True
-        session = getattr(self, "_vault_io", None)
-        if session is not None and not session.alive:
-            return True
+            lock_gen = plan.get("lock_generation")
+            if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
+                return True
+            session = plan.get("io") or getattr(_IO_CTX, "session", None)
+            if session is not None and not session.alive:
+                return True
+        else:
+            session = getattr(_IO_CTX, "session", None) or getattr(self, "_vault_io", None)
+            if session is not None and not session.alive:
+                return True
         return not getattr(self, "_lock_acquired", False)
 
     def _atomic_vault(self, dest: Path, data: bytes, uoink: Path, *, recheck: Callable[[], bool]) -> str:
@@ -3165,36 +4554,108 @@ class Mirror:
         return unmanaged, collisions, user_edits
 
     # ---- locking / worker ---------------------------------------------
-    def _start_vault_io(self, dest: str) -> None:
-        self._stop_vault_io()
-        session = _VaultIoSession.start(dest)
-        self._vault_io = session
-        self._vault_io_startup_s = float(session.startup_s)
-
-    def _kill_vault_io(self) -> None:
-        session = self._vault_io
-        self._vault_io = None
-        if session is not None:
-            session.terminate()
-
-    def _stop_vault_io(self) -> None:
-        session = self._vault_io
-        self._vault_io = None
+    def _forget_session(self, session: _VaultIoSession | None) -> None:
         if session is None:
             return
-        if session.alive:
-            session.shutdown()
+        if self._session_blocks_start(session):
+            return
+        if getattr(_IO_CTX, "session", None) is session:
+            _IO_CTX.session = None
+            if getattr(_IO_CTX, "token", None) == getattr(session, "token", None):
+                _IO_CTX.token = None
+        _drop_retained_session(session)
+        session._release_held_exclusion()
+        if self._vault_io is session:
+            self._vault_io = None
+
+    def _session_blocks_start(self, session: _VaultIoSession | None) -> bool:
+        if session is None:
+            return False
+        if session.physically_alive():
+            return True
+        return _session_launch_open(session)
+
+    def _bind_originating_helper(self, session: _VaultIoSession) -> None:
+        """Bind this thread to the helper session it started.
+
+        A live bound operation is left in place. A dead or cancelled leftover
+        from an earlier helper is replaced so a new start is not trapped by
+        stale context. That is originating-helper binding, not later-session
+        adoption during a still-bound dead operation.
+        """
+        current = getattr(_IO_CTX, "session", None)
+        if current is session:
+            _IO_CTX.token = session.token
+            return
+        if current is not None and not getattr(current, "_dead", False) and current.alive:
+            return
+        _IO_CTX.session = session
+        _IO_CTX.token = session.token
+
+    def _start_vault_io(self, dest: str) -> None:
+        existing = self._vault_io
+        if existing is not None:
+            if self._session_blocks_start(existing):
+                raise OSError("vault io worker still live")
+            existing.terminate()
+            if self._session_blocks_start(existing):
+                raise OSError("vault io worker still live")
+            self._forget_session(existing)
+        if dest and _ctx_owner_for_gate(dest) is None:
+            with self._exclusive():
+                self._start_vault_io(dest)
+            return
+        session = _VaultIoSession.prepare(dest)
+        self._vault_io = session
+        self._bind_originating_helper(session)
+        try:
+            session.launch()
+        except OSError:
+            if not self._session_blocks_start(session):
+                self._forget_session(session)
+            raise
+        self._vault_io_startup_s = float(session.startup_s)
+        self._vault_io_termination_s = 0.0
+        self._bind_originating_helper(session)
+
+    def _kill_vault_io(self, session: _VaultIoSession | None = None) -> None:
+        target = session if session is not None else self._vault_io
+        if target is None:
+            return
+        target.terminate()
+        term_s = float(getattr(target, "termination_s", 0.0) or 0.0)
+        cancel_s = float(getattr(target, "cancel_return_s", 0.0) or 0.0)
+        self._vault_io_termination_s = term_s if term_s else cancel_s
+        if not self._session_blocks_start(target):
+            self._forget_session(target)
+
+    def _stop_vault_io(self, session: _VaultIoSession | None = None) -> None:
+        target = session if session is not None else self._vault_io
+        if target is None:
+            return
+        if target.alive:
+            target.shutdown()
         else:
-            session.terminate()
+            target.terminate()
+        term_s = float(getattr(target, "termination_s", 0.0) or 0.0)
+        cancel_s = float(getattr(target, "cancel_return_s", 0.0) or 0.0)
+        self._vault_io_termination_s = term_s if term_s else cancel_s
+        if not self._session_blocks_start(target):
+            self._forget_session(target)
 
     def _require_vault_io(self) -> _VaultIoSession:
         session = getattr(_IO_CTX, "session", None)
         if session is not None:
-            if not session.alive:
+            if getattr(session, "_dead", False) or session.physical_liveness() != "alive":
                 raise OSError("vault io worker is not running")
             return session
-        session = self._vault_io
-        if session is None or not session.alive:
+        later = self._vault_io
+        plan = getattr(_IO_CTX, "plan", None)
+        bound = plan.get("io") if isinstance(plan, dict) else None
+        if bound is not None and later is not None and later is not bound:
+            raise OSError("vault io worker is not running")
+        session = later
+        if session is None or getattr(session, "_dead", False) or session.physical_liveness() != "alive":
             raise OSError("vault io worker is not running")
         return session
 
@@ -3245,17 +4706,33 @@ class Mirror:
         fid, _vol = self._io_file_identity(path)
         return fid
 
-    def _io_sha256(self, path: Path) -> str | None:
-        session = self._vault_io
-        if session is None or not session.alive:
-            return _sha256_file(path)
-        return session.sha256(str(path))
+    def _io_exists(self, path: Path) -> bool:
+        result = self._require_vault_io().call({"cmd": "exists", "path": str(path)})
+        if not result.get("ok"):
+            raise OSError(result.get("error") or "exists failed")
+        return bool(result.get("exists"))
 
-    def _run_cancellable(self, fn: Callable[[], Any], budget_s: float) -> tuple[Any, Any]:
+    def _io_sha256(self, path: Path) -> str | None:
+        return self._require_vault_io().sha256(str(path))
+
+    def _run_cancellable(
+        self, fn: Callable[[], Any], budget_s: float,
+        *, session: _VaultIoSession | None = None, plan: dict | None = None,
+    ) -> tuple[Any, Any]:
         box: dict[str, Any] = {}
         done = threading.Event()
 
         def runner() -> None:
+            _IO_CTX.session = session
+            _IO_CTX.plan = plan
+            _IO_CTX.token = getattr(session, "token", None) if session is not None else None
+            _IO_CTX.op_id = (plan or {}).get("op_id") if isinstance(plan, dict) else None
+            prev_owner = getattr(_EXCL_CTX, "owner", None)
+            prev_key = getattr(_EXCL_CTX, "key", None)
+            owner = getattr(session, "_exclusion_owner", None) if session is not None else None
+            if owner is not None and getattr(owner, "held", False):
+                _EXCL_CTX.owner = owner
+                _EXCL_CTX.key = owner.key
             try:
                 box["value"] = fn()
             except _AbortedWrite as exc:
@@ -3263,13 +4740,20 @@ class Mirror:
             except Exception as exc:
                 box["error"] = exc
             finally:
+                _EXCL_CTX.owner = prev_owner
+                _EXCL_CTX.key = prev_key
                 done.set()
 
         thread = threading.Thread(target=runner, name="uoink-mirror-io", daemon=True)
         thread.start()
         if not done.wait(timeout=max(0.001, float(budget_s))):
-            self._kill_vault_io()
-            done.wait(2.0)
+            if session is not None:
+                session._dead = True
+            cancelled = (plan or {}).get("cancelled") if isinstance(plan, dict) else None
+            if isinstance(cancelled, threading.Event):
+                cancelled.set()
+            self._kill_vault_io(session)
+            done.wait(min(_WORKER_TERMINATE_S, 0.5))
             return None, "timeout"
         if "error" in box:
             return None, box["error"]
@@ -3277,29 +4761,29 @@ class Mirror:
 
     def _lock_path(self) -> Path:
         if self.consent and self.consent.destination:
-            canonical = os.path.normcase(os.path.realpath(str(self.consent.destination)))
-            dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-            lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
-            lock_dir.mkdir(parents=True, exist_ok=True)
-            return lock_dir / f"{dest_key}.lock"
+            dest = Path(self.consent.destination)
+            try:
+                if dest.exists() and dest.is_dir():
+                    return _dest_lock_path(str(dest))
+            except OSError:
+                pass
         self.ledger_dir.mkdir(parents=True, exist_ok=True)
         return self.ledger_dir / ".writer.lock"
 
-    @contextlib.contextmanager
-    def _exclusive(self, timeout: float = 10.0) -> Iterator[None]:
+    def _ledger_lock_acquire(self, timeout: float):
         path = self._lock_path()
         try:
             fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
         except FileExistsError:
             fd = os.open(path, os.O_RDWR)
+        try:
+            if os.fstat(fd).st_size == 0:
+                os.write(fd, b"\0")
+        except OSError:
+            pass
+        until = time.monotonic() + timeout
         acquired = False
         try:
-            try:
-                if os.fstat(fd).st_size == 0:
-                    os.write(fd, b"\0")
-            except OSError:
-                pass
-            until = time.monotonic() + max(0.05, float(timeout))
             if os.name == "nt":
                 import msvcrt
                 while not acquired:
@@ -3321,27 +4805,74 @@ class Mirror:
                         if time.monotonic() >= until:
                             raise _LockTimeout()
                         time.sleep(0.01)
-            self._lock_acquired = True
-            try:
-                yield
-            finally:
-                self._lock_acquired = False
-        finally:
-            if acquired:
-                try:
-                    if os.name == "nt":
-                        import msvcrt
-                        os.lseek(fd, 0, os.SEEK_SET)
-                        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
-                    else:
-                        import fcntl
-                        fcntl.flock(fd, fcntl.LOCK_UN)
-                except OSError:
-                    pass
+        except BaseException:
             try:
                 os.close(fd)
             except OSError:
                 pass
+            raise
+        return fd, acquired
+
+    def _ledger_lock_release(self, fd, acquired: bool) -> None:
+        if fd is None:
+            return
+        if acquired:
+            try:
+                if os.name == "nt":
+                    import msvcrt
+                    os.lseek(fd, 0, os.SEEK_SET)
+                    msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+
+    @contextlib.contextmanager
+    def _exclusive(self, timeout: float = 10.0) -> Iterator[None]:
+        timeout = max(0.05, float(timeout))
+        dest = ""
+        if self.consent and self.consent.destination:
+            dest = str(self.consent.destination)
+        owner = None
+        fd = None
+        acquired = False
+        prev_owner = getattr(_EXCL_CTX, "owner", None)
+        prev_key = getattr(_EXCL_CTX, "key", None)
+        try:
+            use_owner = bool(dest)
+            if dest and os.name != "nt":
+                try:
+                    use_owner = Path(dest).exists() and Path(dest).is_dir()
+                except OSError:
+                    use_owner = False
+            if use_owner:
+                owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+                _EXCL_CTX.owner = owner
+                _EXCL_CTX.key = owner.key
+                acquired = True
+            else:
+                fd, acquired = self._ledger_lock_acquire(timeout)
+            self._lock_generation += 1
+            my_generation = self._lock_generation
+            self._lock_acquired = True
+            try:
+                yield
+            finally:
+                if self._lock_generation == my_generation:
+                    self._lock_acquired = False
+        finally:
+            if owner is not None:
+                owner.drop_exclusive()
+                owner.release_if_unneeded()
+            else:
+                self._ledger_lock_release(fd, acquired)
+            _EXCL_CTX.owner = prev_owner
+            _EXCL_CTX.key = prev_key
 
 
 class _LockTimeout(Exception):

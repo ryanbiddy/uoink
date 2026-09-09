@@ -1,0 +1,101 @@
+.......................F...............................F.............FFF [ 24%]
+FF.FF................................................................... [ 48%]
+..................................................................ok  initialize answers under -P (embeddable path rules)
+ok  tools/list returns exactly 25 canonical tools
+ok  tools/call round-trips against the isolated index
+.ok  doctor payload carries mcp_stdio
+.ok  entry point pins the app dir before importing server
+.ok  removed aliases reject and MCPB lists the same 25 tools
+... [ 73%]
+............................................................{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a129\\aw10-alias", "competitor_pid": 39440, "first_lease_written": false, "first_writer_alive": true, "first_writer_pid": 824, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a129\\v", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "same_file": true, "started": false}
+.{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a130\\j", "competitor_pid": 71940, "first_lease_written": false, "first_writer_alive": true, "first_writer_pid": 63892, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a130\\v", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "same_file": true, "started": false, "startup_s": 0.07174290000693873}
+.{"alias": {"path": "junction", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false, "thread_alive": false}, "target": {"path": "target", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false, "thread_alive": false}}
+.{"mutex": {"acquired": false, "dest": "b", "phase": "held", "pid": 25432}, "session": {"competitor_pid": 68836, "dest": "b", "phase": "held", "refusal": "destination exclusion unavailable", "refusal_type": "OSError", "started": false}}
+.....{"admitted_alive": false, "caller_errors": [{"message": "vault io worker cancelled", "type": "OSError"}], "cancelled_admission": true, "content_mutation_commands": 0, "global_retained": false, "launcher_pid": null, "lease_written": false, "mirror_retained": false, "owner_held": false, "physical_liveness": "dead", "writer_pid": null}
+.{"after": "{\"owner\":\"original\"}", "context_owner": false, "context_session": false, "error": "destination exclusion unavailable", "foreign_thread": 66072, "operation": "put", "origin_thread": 71436, "original_writer_alive": true, "returned": "OSError", "writer_pid": 53924}
+.{"after": "{\"owner\":\"original\"}", "context_owner": false, "context_session": false, "error": "destination exclusion unavailable", "foreign_thread": 18464, "operation": "unlink", "origin_thread": 71436, "original_writer_alive": true, "returned": "OSError", "writer_pid": 71488}
+.{"mid": {"admitted_alive_mid": false, "cancel_return_s": 7.00005330145359e-07, "cancelled_admission": true, "content_mutation_commands": 0, "global_retained": true, "idle_child_is_not_post_timeout_publication": true, "launcher_pid_mid": null, "lease_written": false, "mirror_retained": true, "owner_held": true, "physical_liveness_mid": "dead", "popen_in_progress": true, "startup_s_mid": 0.0, "termination_s_mid": 0.0, "writer_pid_mid": null}}
+{"after": {"caller_errors": [{"message": "vault io worker cancelled", "type": "OSError"}], "cancel_return_s": 7.00005330145359e-07, "child_alive_after": false, "child_pid": 63608, "child_registered": true, "lease_written": false, "physical_liveness": "dead", "startup_s": 0.0, "termination_confirmed": true, "termination_s": 1.8200022168457508e-05}}
+. [ 97%]
+{"caller_errors": [{"message": "vault io worker failed to start", "type": "OSError"}], "cancel_return_s": 1.00000761449337e-06, "children_created": 0, "global_retained": false, "launcher_pid": null, "lease_written": false, "mirror_retained": false, "owner_held": false, "physical_liveness": "dead", "termination_s": 0.0, "writer_pid": null}
+.{"after": "{\"owner\":\"origin-again\"}", "foreign": {"context_owner": false, "context_session": false, "error": "destination exclusion unavailable", "returned": "OSError", "thread": 70992}, "origin_thread": 71436, "original_writer_alive": true, "writer_pid": 68208}
+.{"alias": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a143\\j", "canonical_alias_differs": true, "gate_key_shared": true, "original": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\a143\\v", "other": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\b00703c8-7ca\\grok\\_scratch\\a12w-0\\o0", "reused_count": 1, "samefile_alias": true, "session_alive": true}
+.{"actual_current_integer_id": 71436, "after": "{\"owner\":\"original\"}", "allocator_reuse": "simulated at mirror.get_ident only", "error": "operation is no longer live", "origin_exited": true, "origin_integer_id": 18656, "returned": "OSError", "same_thread_object": false, "simulated_current_integer_id": 18656, "writer_pid": 69688}
+.{"cancel_return_s": 5.659996531903744e-05, "competitor": {"acquired": true, "pid": 17636}, "global_retained": false, "launch_open": false, "owner_held": false, "physical_liveness": "dead", "termination_confirmed": true}
+.{"actual_stale_handle_kernel_call": false, "caller_errors": ["vault io worker cancelled"], "caller_returned": true, "cancel_return_s": 4.599976819008589e-06, "final_physical_liveness": "dead", "job_closed_before_launcher_resumed": false, "launcher_pid": 71020, "owner_held_before_handoff": true, "retained_before_handoff": true, "termination_confirmed_before_handoff": false}
+.{"final_liveness": "dead", "first_results": [true], "job_close_count": 1, "owner_held_during_first_termination": true, "retained_during_first_termination": true, "second_confirmed": false, "second_return_s": 3.5999692045152187e-06}
+.                                                                  [100%]
+================================== FAILURES ===================================
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name
+    assert len(orphans) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1d76e744890: unset>.is_set
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1d76e7c36b0: unset>.is_set
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1d7691be930: unset>.is_set
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:329: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1d76e7440b0: unset>.is_set
+__ test_d15_failed_destination_binding_persistence_does_not_allow_readoption __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:360: in test_d15_failed_destination_binding_persistence_does_not_allow_readoption
+    assert item_file(env).exists() and not binding.exists()
+E   AssertionError: assert (True and not True)
+E    +  where True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/_scratch/a12w-0/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/_scratch/a12w-0/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/_s...s/uoink-library/b00703c8-7ca/grok/_scratch/a12w-0/a76/v'), mirror=<library_mirror.Mirror object at 0x000001D76E5B4140>))
+E    +  and   True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/b00703c8-7ca/grok/_scratch/a12w-0/a76/d/reach/mirror/destination_binding.json').exists
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption
+9 failed, 286 passed in 168.87s (0:02:48)
