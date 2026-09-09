@@ -1,0 +1,62 @@
+{
+  "source": "12ce8a5fbd34c3472d55ae76afa17535b43c5282",
+  "scope": "First exported operator preparation, not final release ZIP; nine profiles; both commands exit0; all 73 inputs unchanged; no Setup/client/model; no database or credentials copied",
+  "files": {
+    "brief.txt": {
+      "bytes": 549,
+      "sha256": "b3d40d763f3e38cc1f92db4a13c7979fb12d14f4e7c55609a69c09b2acb28b33"
+    },
+    "commands.json": {
+      "bytes": 1838,
+      "sha256": "a5ea8f85f203c7db4d21a47a7369f9f5e91b35bf83f717b67e5ec936b816b3a9"
+    },
+    "observation.json": {
+      "bytes": 2600,
+      "sha256": "32764f2685ca9e978ff446456f62fbbc93e6ca1efea909b8f755d22e5227aa77"
+    },
+    "p4-help.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "p4-help.stdout": {
+      "bytes": 2287,
+      "sha256": "9d4f0ac28f02e7d2429d51ca288d3da320c3f063f7077fb41fa58e3da1635cf8"
+    },
+    "preflight-inputs.json": {
+      "bytes": 12095,
+      "sha256": "ea2f8c032621b899423bf31a82e0f1fdb2a11f54cc776e548c1c6063091e304f"
+    },
+    "prepare.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "prepare.stdout": {
+      "bytes": 7459,
+      "sha256": "e21f586c12b92bd78002fb48767d2a320e48f496a5bb68ecaa37f0ba3383ab5e"
+    },
+    "verify_portable_bundle.py": {
+      "bytes": 3663,
+      "sha256": "97d7a1c40e05a4b3bb64615f5813c6ee3ca6b12953bbc679b682e3f53c7227ae"
+    },
+    "receipt/fixture_prepare.json": {
+      "bytes": 3506,
+      "sha256": "3625f72ea2b8111d6317b00f60d8786bedc9afd5892d5fa2e76617fa3a15a612"
+    },
+    "receipt/inputs.json": {
+      "bytes": 1855,
+      "sha256": "34cb4745ca7e1590be46c113f7ac13faeb237b018da9b91fd35bc699a8c5d8cb"
+    },
+    "receipt/manifest.used.json": {
+      "bytes": 43536,
+      "sha256": "f320a5da9931a88cf0627c59fe0bedb4c4d07083afc738dbd97185ad826542ce"
+    },
+    "receipt/operator_commands.json": {
+      "bytes": 3060,
+      "sha256": "f85b6dcb11dd89fbf3f196cc4721f719d858ef6cff4246d2a0ebcf3a4057f409"
+    },
+    "receipt/runner.json": {
+      "bytes": 2152,
+      "sha256": "25fa5e394ac1e2ed66aa0abc8adbce90916e107c24aba0409193c9e4bcd798e8"
+    }
+  }
+}

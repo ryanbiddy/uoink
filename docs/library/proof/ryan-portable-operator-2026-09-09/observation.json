@@ -1,0 +1,71 @@
+{
+  "zip": "_scratch\\operator-preflight-snapshot-01.zip",
+  "zip_sha256": "ab72ef380d64445f0ade200be2a60cf9d42b5a2f1efd93b81b76020a2114831f",
+  "bundle_source": "12ce8a5fbd34c3472d55ae76afa17535b43c5282",
+  "validation_source": "12ce8a5fbd34c3472d55ae76afa17535b43c5282",
+  "payload_files_before": 73,
+  "payload_files_after": 73,
+  "app_created": false,
+  "results": [
+    {
+      "name": "prepare",
+      "argv": [
+        "C:\\Python314\\python.exe",
+        "-I",
+        "-S",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\scripts\\install_receipt\\cli.py",
+        "prepare-before-install",
+        "--intended-app",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Future Installed App",
+        "--package",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\Uoink-Setup-3.8.0.exe",
+        "--package-sha256",
+        "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt\\profiles\\empty",
+        "--isolated-port",
+        "18481",
+        "--fixture-port",
+        "18480",
+        "--receipt-root",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt",
+        "--manifest",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\c22-operator-manifest.json",
+        "--synthetic",
+        "--allow-ordinary-user"
+      ],
+      "exit": 0,
+      "started_utc": "2026-09-09T21:01:20.528866+00:00",
+      "finished_utc": "2026-09-09T21:01:22.206597+00:00"
+    },
+    {
+      "name": "p4-help",
+      "argv": [
+        "C:\\Python314\\python.exe",
+        "-I",
+        "-S",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\scripts\\install_receipt\\p4_operator.py",
+        "--help"
+      ],
+      "exit": 0,
+      "started_utc": "2026-09-09T21:01:22.207407+00:00",
+      "finished_utc": "2026-09-09T21:01:22.285639+00:00"
+    }
+  ],
+  "setup_executed": false,
+  "client_executed": false,
+  "installed_credit": false,
+  "profile_names": [
+    "child-interrupt",
+    "child-life",
+    "child-regfail",
+    "empty",
+    "manual-first",
+    "one-off",
+    "populated",
+    "relaunch",
+    "standing-first"
+  ]
+}

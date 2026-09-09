@@ -1,0 +1,48 @@
+[
+  {
+    "name": "prepare",
+    "argv": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\scripts\\install_receipt\\cli.py",
+      "prepare-before-install",
+      "--intended-app",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Future Installed App",
+      "--package",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\Uoink-Setup-3.8.0.exe",
+      "--package-sha256",
+      "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+      "--isolated-profile",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt\\profiles\\empty",
+      "--isolated-port",
+      "18481",
+      "--fixture-port",
+      "18480",
+      "--receipt-root",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt",
+      "--manifest",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\c22-operator-manifest.json",
+      "--synthetic",
+      "--allow-ordinary-user"
+    ],
+    "exit": 0,
+    "started_utc": "2026-09-09T21:01:20.528866+00:00",
+    "finished_utc": "2026-09-09T21:01:22.206597+00:00"
+  },
+  {
+    "name": "p4-help",
+    "argv": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\scripts\\install_receipt\\p4_operator.py",
+      "--help"
+    ],
+    "exit": 0,
+    "started_utc": "2026-09-09T21:01:22.207407+00:00",
+    "finished_utc": "2026-09-09T21:01:22.285639+00:00"
+  }
+]

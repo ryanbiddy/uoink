@@ -1,0 +1,49 @@
+usage: p4_operator.py [-h] --isolated-profile ISOLATED_PROFILE
+                      --isolated-port ISOLATED_PORT
+                      --installed-app INSTALLED_APP
+                      --installed-interpreter INSTALLED_INTERPRETER
+                      --package-manifest PACKAGE_MANIFEST
+                      --receipt-root RECEIPT_ROOT
+                      [--forbid-checkout FORBID_CHECKOUT]
+                      [--package-path PACKAGE_PATH]
+                      [--source-bindings SOURCE_BINDINGS]
+                      [--runtime-mode {installed,source-runtime,instrument-only}]
+                      [--instrument-only] [--operator-json OPERATOR_JSON]
+                      [--client-exe CLIENT_EXE] [--prompt-file PROMPT_FILE]
+                      [--client-route {ordinary,recall}]
+                      [--subscription-confirmed] [--usage-credits-off]
+                      [--timeout-seconds TIMEOUT_SECONDS]
+                      {prepare,check,prepare-client,collect,client}
+
+Ryan's guarded P4 command driver; system Python -I -S, never a model by
+default.
+
+positional arguments:
+  {prepare,check,prepare-client,collect,client}
+
+options:
+  -h, --help            show this help message and exit
+  --isolated-profile ISOLATED_PROFILE
+  --isolated-port ISOLATED_PORT
+  --installed-app INSTALLED_APP
+  --installed-interpreter INSTALLED_INTERPRETER
+  --package-manifest PACKAGE_MANIFEST
+  --receipt-root RECEIPT_ROOT
+  --forbid-checkout FORBID_CHECKOUT
+  --package-path PACKAGE_PATH
+                        Actual package bytes; required for installed
+                        eligibility
+  --source-bindings SOURCE_BINDINGS
+                        Candidate-package same-purpose sealed file digests
+                        (SHA-256 per file, 40-hex git blobs)
+  --runtime-mode {installed,source-runtime,instrument-only}
+                        installed requires sealed provenance; source-runtime
+                        is the pre-Inno path
+  --instrument-only     Synthetic instrument check; not installed credit
+  --operator-json OPERATOR_JSON
+  --client-exe CLIENT_EXE
+  --prompt-file PROMPT_FILE
+  --client-route {ordinary,recall}
+  --subscription-confirmed
+  --usage-credits-off
+  --timeout-seconds TIMEOUT_SECONDS

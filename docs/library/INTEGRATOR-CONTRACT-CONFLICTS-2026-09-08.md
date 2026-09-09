@@ -141,3 +141,14 @@ Capture the original production getter during collection and bind it for the
 new test with monkeypatch; keep every assertion and the older fixture unchanged.
 All 13 assertion trees match. Review: RYAN-READ-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md.
 No correction has been applied. Ryan's further-fixture freeze remains in force.
+
+## Final receipt-test conflicts, 2026-09-09: unchanged and unresolved
+
+The final 12ce8a5 tree adds 178 cases and preserves all earlier membership.
+Its 13 failures comprise the prior ten and three frozen receipt-test conflicts.
+The [bounded disposition brief](RYAN-FINAL-RECEIPT-CONTRACT-DISPOSITION-BRIEF-2026-09-09.md)
+records the exact test locations, original assertions, current contract and
+permitted next action. No test, fixture, threshold, marker or parameter changed.
+The actual original bundled routes are separate evidence, not a waiver of these
+failed tests. Ryan's narrow five-correction authorization does not authorize
+changing the obsolete flags, extending the old stub, or changing the nested path.

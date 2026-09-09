@@ -1,11 +1,12 @@
 # Living Library integration candidate
 
-Version 3.8.0, 2026-09-09. **Not yet approved for release.** The replacement
-installer is built and the original bundled application passes its focused
-evidence-reading and isolated-helper observation. The latest complete test tree
-has **2,254 passed, ten failed, three skipped and one xfailed**. Receipt tools
-are undergoing final review; the final kit-inclusive tree and Ryan's installed
-receipts remain open. No merge to main or artifact publication has occurred.
+Version 3.8.0, 2026-09-09. **Candidate ready for Ryan's receipt session; release approval remains blocked.**
+The rebuilt installer, both receipt tools, complete notes and executable runbook
+are prepared for one throwaway Windows account. The final kit-inclusive tree
+at `12ce8a5fbd34c3472d55ae76afa17535b43c5282` has **2,429 passed, 13 failed, 3 skipped and 1 xfailed**.
+Every failure remains in the sealed result. Original bundled C22 and Phase 4
+checks are recorded below; neither substitutes for an actual installation.
+No merge to main or artifact publication has occurred.
 
 ## What this candidate adds
 
@@ -26,18 +27,30 @@ no access repair or replacement fetch is included.
 | Item | Value |
 |---|---|
 | Branch | `cc/living-library-candidate` |
-| Installer build source | `8a607c37095cb4f3b66d2aee285cfb710ab5e586` |
-| Last complete product tree | `8fc6a40a049f704a654d72998a9fb89455fe9293` |
+| Installer build source | `67a274d5d0c67f48405c4fa242a1011c2cf671c1` |
+| Final kit-inclusive validation | `12ce8a5fbd34c3472d55ae76afa17535b43c5282` |
 | Local executable | `build/Uoink-Setup-3.8.0.exe` |
-| Size | 339,059,131 bytes |
-| SHA-256 | `d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1` |
+| Size | 339,059,334 bytes |
+| SHA-256 | `a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe` |
 | Bundled runtime | Python 3.11.9, MCP 1.27.1, schema 30 |
-| Build | 2026-09-09 10:33–10:39 PDT, 327.57 seconds |
+| Build UTC | 2026-09-09T20:39:51.7943956+00:00 to 2026-09-09T20:45:43.7573129+00:00 |
+| Build seconds | 351.964 |
 
-The build verifies the exact 142-package lock and packaged helper, extension,
-tray, dashboard, splash and WhisperX imports. The sealed compiler-input inventory
-contains 32,203 files and 142 exact source/Git bindings. It is not an extraction
-of installer bytes. See [the package seal](proof/candidate-package-02-2026-09-09/SHA256.json).
+The build verifies the 142-package lock and staged application imports. The
+sealed compiler-input inventory contains 32,203 files and
+142 exact source/Git bindings. These are compiler inputs;
+they are not an extraction of installer bytes. See
+[package-03](proof/candidate-package-03-2026-09-09/SHA256.json).
+The prior package-02 executable remains retained, SHA-256
+`d024baf5e27fc15b292c17c3c7a551b41c9564378ce352e81ed25a9908bfd5b1`.
+Its failed bundled C22 observation is preserved. Startup repair `67a274d`
+changes the shared backfill connection access and requires the new package.
+
+The active C22 loader consumes package-03; its historical API name and receipt
+format remain compatible. The portable kit includes that complete package seal,
+both operator tools, fixture migrations, these notes, the runbook, final test
+proof and a per-file manifest. The ZIP receipt separately records the archive
+hash and verifies every member. The installer has not been run by Astra.
 
 The isolated path now takes an explicit app directory, profile and non-5179 port.
 Inno requires close/restart suppression; uninstall validates its persisted
@@ -157,8 +170,8 @@ access repair or new fetch. The five lifetime failures pass after `1063843`,
 including in the complete `263b7e4` tree. Eight parent-interception checks
 still fail; the exact three-file fixture proposal preserves all 150 assertion
 syntax trees and awaits Ryan's explicit approval. The proposal is unapplied.
-The isolated installation repair is built. The complete installed receipt kit
-and Ryan's installation observation remain outstanding.
+The isolated installation repair is built. The installed receipt kit is integrated and bundled. Ryan's actual installation
+and client observations remain outstanding.
 
 ## Phase 5: descriptive library activity
 
@@ -211,7 +224,7 @@ Ryan authorized the setup correction. The subsequent refusal repair passes
 all 71 named checks in both roots. Validated snapshots already in committed
 history receive the expected stale-revision refusal; other omitted tickets
 remain invalid and cannot publish. These repaired refusal checks also pass in the complete `8fc6a40` tree.
-That whole-tree observation still has ten failures elsewhere. Speaker material stays blocked under the explicit
+The final kit-inclusive observation has 13 retained failures elsewhere. Speaker material stays blocked under the explicit
 release scope above.
 
 The frozen navigation study reduced mean absolute error from 72.06 seconds
@@ -234,23 +247,52 @@ subsecond player timing. See `PHASE6-BD2-2026-09-08.md` and
 | Existing reads and preview recovery isolation | `e86bc16` | Nine focused passes; broader 212 passed / eight known failures. Reads do not migrate, backfill or replay recovery. |
 | Isolated helper and Inno ownership | `022ff43` | 130 passed / one skip in checkout; compiled and included in the replacement package. Installed receipt remains open. |
 
+The startup backfill repair `67a274d` passes all six new SQLite regressions;
+its named groups have 22 passes / one known getter failure and strict Phase 3
+181 passes / one original AT6 failure in both roots. Receipt compatibility has
+59 focused passes in each root. Existing acceptance files are unchanged.
+
+The original new bundled C22 observation at `b28431b4baf8395329995a75b0d0b859bdb219ea` records
+11 passed / zero failed /
+3 unexecuted. Empty/legacy data,
+capture orderings and original helper/child recovery use synthetic acquisition
+and transcripts. All protected-state comparisons pass, no unexpected startup
+ERROR/CRITICAL line remains, every owned command identity is dead and guard/_pth
+restoration is confirmed. Refused dependency capability queries remain counted;
+they are not zero-attempt claims. Browser imagery remains unobserved. See
+[C22 bundled proof](proof/ryan-c22-bundled-02-2026-09-09/SHA256.json).
+
+Original bundled Phase 4 at `b28431b4baf8395329995a75b0d0b859bdb219ea` completes all four operator stages
+with exit zero: 15 passed / zero failed / eight unobserved. Both original native
+prompts and full packet pairs succeed. Synthetic mirror deletion/purge preserves
+independent bytes and accounts for owned files. Actual client/visual credit
+remains absent. See [Phase 4 bundled proof](proof/ryan-p4-bundled-03-2026-09-09/SHA256.json).
+Both observations retain all 142 source bindings and the new package hash.
+
 Complete observations are separate results; none replaces the recorded status of
 an earlier run. Only S21 is excluded in the complete trees below.
 
 | Committed tree | Passed | Failed | Skipped | Xfailed | Seconds |
 |---|---:|---:|---:|---:|---:|
+| `12ce8a5`, final kit-inclusive | 2,429 | 13 | 3 | 1 | 1542.35 |
 | `8fc6a40` | 2,254 | 10 | 3 | 1 | 573.49 |
 | `263b7e4` | 2,193 | 9 | 3 | 1 | 728.37 |
 | `4a35316`, five authorized corrections | 2,174 | 20 | 3 | 1 | 607.27 |
 | `6c313ea`, earlier candidate | 2,102 | 92 | 3 | 1 | 550.41 |
 
-The latest tree adds 62 cases and loses none; it closes none of the prior nine
-failures and adds one ordered read-opening failure. That new test encounters a
-backend getter left replaced by an older fixture. The exact two-line proposed
-setup correction preserves all 13 assertions. The other proposal moves eight
-mirror failure injections to the production child-writer boundary, preserving
-all 150 assertions. Both are unapplied pending Ryan's explicit ruling, because
-the September 9 instruction froze further fixture edits.
+The final tree adds 178 cases relative to 8fc6a40,
+loses none and closes none of that observation's failures.
+Exact case additions and changed outcomes are listed in
+[the complete comparison](proof/ryan-final-kit-tree-01-2026-09-09/comparison.json).
+The failed result includes the historical AT6 exit, eight mirror interceptors,
+the ordered read-opening fixture and the frozen receipt-kit expectations.
+See [the final disposition](FINAL-RELEASE-VALIDATION-2026-09-09.md) for every
+case and its limitation. No expected value, assertion, parameter or skip changed.
+
+The proposed mirror setup moves failure injections to the real child-writer
+boundary and preserves 150 assertion trees. The proposed read setup captures
+the production getter before an older fixture replaces it and preserves all
+13 assertions. Both exact patches remain unapplied pending Ryan's explicit ruling.
 
 The remaining historical AT6 failure concerns an exit status discarded by the
 original shell wrapper. Its original artifacts were recovered; that missing
@@ -261,27 +303,33 @@ The complete run used the private native Python 3.14.6 verification runtime,
 pytest 9.1.1 and MCP 1.28.1 with inherited guards. It is not the bundled-runtime
 receipt. Its three skips and one existing xfail remain disclosed in the raw
 JUnit/log; the xfail concerns the existing non-ASCII FTS case. See the
-[latest complete-tree seal](proof/ryan-integrated-tree-02-2026-09-09/SHA256.json),
-[previous tree](proof/ryan-integrated-tree-01-2026-09-09/SHA256.json) and
+[final complete-tree seal](proof/ryan-final-kit-tree-01-2026-09-09/SHA256.json),
+[previous tree](proof/ryan-integrated-tree-02-2026-09-09/SHA256.json) and
 [authorized-correction tree](proof/ryan-corrected-01-2026-09-09/SHA256.json).
 
-Receipt instrument results remain separate from product acceptance. C22 and
-Phase 4 worker checks have exposed missing provenance, cleanup and completeness
-conditions; rejected patches and original failed or partial measurements remain
-archived. They will not earn installed credit through a passing status flag.
+Receipt instrument results remain separate from product acceptance. Both kits
+are integrated and their original bundled observations are sealed. Rejected
+patches, failed measurements and partial observations remain in history. The
+installed verdict still requires Ryan's actual package/session evidence.
+
+The exported operator preflight also succeeds at 12ce8a5: C22 preparation
+creates all nine profiles and the P4 command loads independently of the checkout.
+Both commands exit zero and all 73 exported inputs remain unchanged. No Setup,
+helper, client or model runs in this preflight. The final ZIP is separately
+verified against these exact tools, migrations and package bytes; only its
+bundle-source metadata may differ. See
+[portable operator proof](proof/ryan-portable-operator-2026-09-09/SHA256.json).
 
 ## Remaining release gates
 
-- Finish review and integration of both executable receipt kits, then record
-  a final complete tree on its exact commit. Rebuild only if packaged source
-  changes; otherwise retain the build SHA and recheck every source binding.
 - Ryan's explicit ruling on the two exact fixture proposals. No assertion,
   threshold, skipped case or failed measurement is changed by inference.
 - Ryan's actual installed Inno/C22 and Phase 4 receipts from one throwaway
   Windows profile using the final [operator runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md).
   The session covers evidence retrieval, following a citation, opening a brief,
   jumping to a chapter, and the required recovery/failure observations.
-- The historical AT6 exit gap remains recorded; main merge and publication
+- The three frozen receipt-kit expectation conflicts require an explicit
+  disposition; they remain failed. The historical AT6 exit gap remains recorded; main merge and publication
   remain Ryan's decisions. No new fetch scope is authorized.
 - Speaker material stays blocked under the narrowed Phase 6 release scope.
   Part B stays deferred. The failed shelf-quality and dashboard-byte measurements

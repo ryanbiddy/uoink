@@ -1,0 +1,106 @@
+{
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_at6_receipt_records_process_exit_status": {
+    "status": "failed",
+    "seconds": 0.0,
+    "detail": {
+      "message": "AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nassert ({})",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status\n    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (\nE   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nE   assert ({})"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw2_acceptance::test_d13_replace_syscall_cannot_complete_after_timeout": {
+    "status": "failed",
+    "seconds": 0.455,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x22abc6975f0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout\n    assert entered.is_set() and result[\"ok\"] is False\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x22abc6975f0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_retry_keeps_ownership_of_interrupted_temp": {
+    "status": "failed",
+    "seconds": 0.728,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_control_hard_purge_removes_unedited_recorded_temp": {
+    "status": "failed",
+    "seconds": 0.682,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement": {
+    "status": "failed",
+    "seconds": 0.694,
+    "detail": {
+      "message": "assert (0 == 1)\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement\n    temporary = interrupted_item_temp(env, monkeypatch)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\library_work_astra\\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp\n    assert len(allocated) == 1 and allocated[0].is_file()\nE   assert (0 == 1)\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]": {
+    "status": "failed",
+    "seconds": 0.45,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x22abc6d1f10: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes\n    assert entered.is_set() and not result[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x22abc6d1f10: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]": {
+    "status": "failed",
+    "seconds": 0.448,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x22abc6d1bb0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:272: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes\n    assert entered.is_set() and not result[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x22abc6d1bb0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw3_acceptance::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync": {
+    "status": "failed",
+    "seconds": 0.471,
+    "detail": {
+      "message": "assert (False)\n +  where False = is_set()\n +    where is_set = <threading.Event at 0x22abc6d1df0: unset>.is_set",
+      "text": "tests\\library_work_astra\\test_phase4_aw3_acceptance.py:330: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync\n    assert entered.is_set() and not first[\"ok\"]\nE   assert (False)\nE    +  where False = is_set()\nE    +    where is_set = <threading.Event at 0x22abc6d1df0: unset>.is_set"
+    }
+  },
+  "tests.library_work_astra.test_phase4_aw_acceptance::test_purge_removes_intent_owned_actual_temp_name": {
+    "status": "failed",
+    "seconds": 0.796,
+    "detail": {
+      "message": "assert 0 == 1\n +  where 0 = len([])",
+      "text": "tests\\library_work_astra\\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name\n    assert len(orphans) == 1\nE   assert 0 == 1\nE    +  where 0 = len([])"
+    }
+  },
+  "tests.test_existing_index_read_open::test_read_open_does_not_migrate_then_explicit_backend_promotes": {
+    "status": "failed",
+    "seconds": 0.076,
+    "detail": {
+      "message": "assert <index.Index object at 0x0000022ABB317E50> is <index.Index object at 0x0000022ABB620550>",
+      "text": "tests\\test_existing_index_read_open.py:38: in test_read_open_does_not_migrate_then_explicit_backend_promotes\n    assert writer is reader\nE   assert <index.Index object at 0x0000022ABB317E50> is <index.Index object at 0x0000022ABB620550>"
+    }
+  },
+  "tests.test_install_receipt_c22_kit::test_plan_inno_does_not_execute": {
+    "status": "failed",
+    "seconds": 0.01,
+    "detail": {
+      "message": "AssertionError: assert '/ISOLATEDPROFILE=' in 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\c22-kit\\\\t-adkqasb_\\\\Uoink-Setup-synthetic.exe /VERYSILE...brary\\\\_scratch\\\\c22-kit\\\\t-adkqasb_\\\\receipt\\\\profiles\\\\empty /PORT=54207 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'",
+      "text": "tests\\test_install_receipt_c22_kit.py:223: in test_plan_inno_does_not_execute\n    assert \"/ISOLATEDPROFILE=\" in joined\nE   AssertionError: assert '/ISOLATEDPROFILE=' in 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\c22-kit\\\\t-adkqasb_\\\\Uoink-Setup-synthetic.exe /VERYSILE...brary\\\\_scratch\\\\c22-kit\\\\t-adkqasb_\\\\receipt\\\\profiles\\\\empty /PORT=54207 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'"
+    }
+  },
+  "tests.test_install_receipt_c22_kit::test_synthetic_helper_scenarios_and_verdict": {
+    "status": "failed",
+    "seconds": 339.458,
+    "detail": {
+      "message": "AssertionError: ('manual_first', {'id': 'manual_first', 'status': 'fail', 'registered': {'register_source': {'ok': True, 'source': {'s...r': 'not found', '_http_status': 404}, 'episode_id': None, 'reason': 'declared episode identity not found', ...}, ...})\nassert 'fail' == 'pass'\n  \n  - pass\n  + fail",
+      "text": "tests\\test_install_receipt_c22_kit.py:328: in test_synthetic_helper_scenarios_and_verdict\n    assert outcomes[key][\"status\"] == \"pass\", (key, outcomes[key])\nE   AssertionError: ('manual_first', {'id': 'manual_first', 'status': 'fail', 'registered': {'register_source': {'ok': True, 'source': {'s...r': 'not found', '_http_status': 404}, 'episode_id': None, 'reason': 'declared episode identity not found', ...}, ...})\nE   assert 'fail' == 'pass'\nE     \nE     - pass\nE     + fail"
+    }
+  },
+  "tests.test_install_receipt_p4_kit::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false": {
+    "status": "failed",
+    "seconds": 0.294,
+    "detail": {
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\final-kit-tree-01-0\\\\t291\\\\r\\\\p\\\\Uoink\\\\settings.json'",
+      "text": "tests\\test_install_receipt_p4_kit.py:453: in test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false\n    settings = json.loads((profile / \"Uoink\" / \"settings.json\").read_text(encoding=\"utf-8\"))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nC:\\Python314\\Lib\\pathlib\\__init__.py:787: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nC:\\Python314\\Lib\\pathlib\\__init__.py:771: in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   FileNotFoundError: [Errno 2] No such file or directory: 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\final-kit-tree-01-0\\\\t291\\\\r\\\\p\\\\Uoink\\\\settings.json'"
+    }
+  }
+}

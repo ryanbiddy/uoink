@@ -75,24 +75,31 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; integrated tree `8fc6a40`, installer source `8a607c3`)
+## State at handoff (updated 2026-09-09; final tree `12ce8a5`, installer source `67a274d`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 59 passes in both roots; new bundled C22 11 passed / zero failed / three unexecuted | Package-03 and original bundled checks complete; final tree and Ryan's installed receipt |
-| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled kit observed (15 passed / zero failed / eight unobserved); final tree and Ryan's installed/client receipt |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 59 passes in both roots; new bundled C22 11 passed / zero failed / three unexecuted | Package-03, bundled and final-tree checks recorded; Ryan's installed receipt remains |
+| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `67a274d`; complete `8fc6a40` tree: 2,254 passed / ten failed / three skipped / one xfailed, 573.49 s | Both receipt kits/startup repair integrated; package-03 and bundled checks sealed; final tree owed | Both setup proposals pending; final full-tree observation and portable bundle |
+| Integration | Installer built/sealed at `67a274d`; final `12ce8a5` tree: 2,429 passed / 13 failed / three skipped / one xfailed, 1,542.35 s | Both receipt kits/startup repair integrated; package-03, bundled and complete-tree results sealed; portable operator preflight passes | Assemble/verify final ZIP and authorized backup; remaining fixture/installed decisions belong to Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
 open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
-Latest integrated full tree, `8fc6a40`: **2,254 passed, ten failed, three skipped,
-one xfailed**, 183 warnings, 573.49 seconds. Sixty-two new cases, no missing
-cases or previous-failure closures. The new read-promotion case fails only in
-this complete observation so far; follow `RYAN-READ-PROMOTION-ORDER-INVESTIGATION-BRIEF-2026-09-09.md`.
+Final kit-inclusive tree, `12ce8a5fbd34c3472d55ae76afa17535b43c5282`:
+**2,429 passed, 13 failed, three skipped, one xfailed**, 183 warnings,
+1,542.35 seconds. Exactly 178 new cases, none missing. All prior ten failures
+remain; the three additional receipt-test conflicts were already observed in
+both-root integration. No unexpected new product failure appears. The result
+remains FAIL. Proof: `proof/ryan-final-kit-tree-01-2026-09-09/SHA256.json`.
+See FINAL-RELEASE-VALIDATION-2026-09-09.md and the receipt disposition brief.
+
+Earlier integrated full tree, `8fc6a40`: 2,254 passed / ten failed / three
+skipped / one xfailed, 573.49 seconds. Sixty-two new cases and none missing.
+The ordered getter failure is assigned to its exact unapplied setup proposal.
 Proof: `proof/ryan-integrated-tree-02-2026-09-09/SHA256.json`.
 
 Earlier integrated full tree, `263b7e4`: **2,193 passed, nine failed, three
@@ -121,40 +128,32 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; each item names its brief)
 
-Completed priority repair: startup f9e2c921 and receipt compatibility integrated
-at 67a274d; package-03 built from that source and sealed at b28431b. Original
-bundled C22 now 11 passed / zero failed / three unexecuted, with no unexpected
-startup error. P4 four stages exit zero. Both observations bind the new package.
-The prior failed data and package-02 remain intact. No active worker remains.
+All workers are integrated; no run remains active. Package-03 is sealed and
+both original bundled observations plus the final committed complete tree are
+recorded. Product source is unchanged after validation. Do not restart completed
+runs or edit frozen tests merely to obtain a green tree.
 
-1. Startup f9e2c921 and both receipt-tool corrections are independently verified and integrated. No worker remains active. Both completed receipt workers and supplements are integrated. C22: 92 passed / two
-   frozen failures in worker and checkout; review and raw diff are in
-   `RYAN-C22-FINAL-INTEGRATION-REVIEW-2026-09-09.md`. P4: 68 passed / one frozen
-   path failure in both roots; bundled operator has 15 passed / zero failed /
-   eight unobserved. No worker remains active and no installed credit is inferred.
-2. Original package-03 C22 and P4 checks are complete at b28431b. C22: 11
-   passed / zero failed / three unexecuted. P4: four stages exit zero; client
-   and visual observations remain absent. Seals: ryan-c22-bundled-02 and
-   ryan-p4-bundled-03. No Setup, client or model ran. Proceed to the final tree.
-3. Run the final kit-inclusive complete tree at a committed SHA under that same
-   brief: guarded native runtime, only S21 excluded, every frozen failure retained.
-   Seal exact case membership/counts/log/XML and compare with 8fc6a40. Investigate
-   any new product defect with a repair brief before another observation.
-4. Both exact setup proposals under Blockers for Ryan remain unapplied. If Ryan
-   explicitly approves them, apply only their sealed diffs, record the ruling,
-   assertion audit and review, verify the ordered read pair and affected mirror
-   union, then include them in the committed complete tree. Waiting is not approval.
-   The separate original AT6 exit remains unavailable; do not invent it.
-5. Package build source is 67a274d5d0c67f48405c4fa242a1011c2cf671c1;
-   executable SHA-256 a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe.
-   Verify its 142 source bindings against final validation; rebuild only if
-   packaged source changes. Assemble the portable bundle with both tools,
-   migrations, notes, final proof and per-file/ZIP hashes. The runbook is complete.
-6. Update release notes, State table and remaining Ryan items. Fast-forward the
-   authorized backup branch and push only origin/cc/living-library, without force;
-   verify the remote SHA. Report actual counts, build/validation/backup commits,
-   artifact and gates. No main merge or publication. Ryan then supplies the one
-   throwaway-account install/client/browser session using the shipped runbook.
+1. Finish the portable ZIP under RYAN-FINAL-KIT-TREE-VERIFICATION-BRIEF-2026-09-09.md.
+   Include installer a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe,
+   the reviewed tools, migrations, full notes/runbook, final test proof and
+   complete active package/runtime seals. Validate every ZIP/extracted member.
+   Bind the final tools/package to the passed 73-file exported operator preflight;
+   metadata changes must not stand in for changed executable inputs.
+2. Fast-forward and push only origin/cc/living-library; verify the remote SHA.
+   No force, candidate-branch push, main merge or publication. Store the final
+   transport receipt outside Git to avoid a self-referencing commit loop.
+3. Ryan runs the one throwaway-account receipt session in
+   INSTALL-RECEIPT-RUNBOOK-2026-09-09.md. Collect actual Inno install/reinstall,
+   C22 browser/state and Phase 4 client/everyday evidence. Agent observations
+   are pre-Inno with synthetic acquisition; they do not supply installed credit.
+4. Ryan's two exact setup proposals remain unapplied. The three receipt-test
+   conflicts have the bounded RYAN-FINAL-RECEIPT-CONTRACT-DISPOSITION-BRIEF-
+   2026-09-09.md. Preserve all 13 failures and the missing original AT6 exit.
+   Any explicit correction/disposition needs its exact record/review and a
+   justified new observation; waiting or broad continuation is not authorization.
+5. Phase 2 remains suggestions at 0.90 with apply false; X 403 stays blocked;
+   Phase 6 has no speaker claim or diarization; Phase 5 Part B is deferred.
+   Main merge/release approval remains Ryan's decision after the receipts.
 
 ### Earlier continuation record (historical; active queue above supersedes it)
 
@@ -358,10 +357,17 @@ Exact unapplied patch: 649 bytes, SHA-256
 Together both proposals touch four files and preserve 163 assertion trees.
 No fixture edit or pass is inferred from this diagnosis.
 
-- Installed Inno package receipts (Phase 3 C22, Phase 4), once product work
-  supplies the final reviewed operator kit. The isolated package is built;
-  both instruments are now integrated; finish the final tree and portable bundle
-  before Ryan uses the executable runbook.
+- Three additional receipt-test contract/setup conflicts are documented in
+  RYAN-FINAL-RECEIPT-CONTRACT-DISPOSITION-BRIEF-2026-09-09.md: obsolete Inno
+  switches, old synthetic helper routes and the old nested settings path.
+  They remain failed and unchanged. Any fixture/assertion disposition requires
+  Ryan's explicit ruling under the further-fixture freeze.
+- The historical AT6 child exit cannot be reconstructed. Retain its failed
+  audit outcome; any release disposition of that missing evidence is Ryan's.
+- Actual installed Inno package receipts (Phase 3 C22, Phase 4), plus the
+  browser/client/everyday evidence from the completed executable runbook.
+  Product, both instruments, package and complete-tree agent work are recorded;
+  final ZIP/backup precede Ryan's session. No missing command is shifted to him.
 - Phase 6 speaker gate remains blocked by Ryan's explicit ruling. No diarization
   runs or attribution claims; chapters and cited ranges are the release scope.
 - Main merge remains unauthorized. No new fetch scope is authorized.
@@ -2088,3 +2094,21 @@ are original staged runtime, pre-Inno, with no real client/model/visual credit.
 Final complete tree and portable bundle remain. Frozen test proposals are unapplied.
 
 The first P4 archive staging check stopped because the global mirror ignore omitted a sealed manifest.json. Force-added only this vetted proof directory; all 66 working/staged hashes then verify. No observation was rerun and the complete tree had not yet started. Future archive staging must verify every manifest member, including ignored mirror metadata.
+
+### 2026-09-09 — final committed tree and portable operator preparation
+
+12ce8a5: 2,429 passed / 13 failed / three skipped / one xfailed; 183 warnings,
+1,542.35 seconds. The 178 new cases lose no previous case and close no prior
+failure. Three additional cases are the already reviewed C22/P4 frozen conflicts.
+All six startup ownership regressions and the receipt compatibility checks pass.
+The final result remains FAIL; original bundled C22 is separately 11/0/3 and
+P4 15/0/8. No packaged source changed after this tree. No rebuild is owed.
+
+The first exported operator preparation uses the exact 12ce8a5 tools, SQL
+migrations and package-03. Both commands exit zero, all nine profiles exist,
+all 73 inputs remain byte-identical, and the intended app directory is absent.
+No Setup/helper/client/model runs. Fourteen evidence files are sealed at
+proof/ryan-portable-operator-2026-09-09. The final ZIP must bind those same
+executable inputs and be independently extracted/hash-checked. Full notes,
+runbook and per-failure disposition are now written. Finish the artifact/backup;
+then only the listed Ryan decisions and actual installed receipts remain.

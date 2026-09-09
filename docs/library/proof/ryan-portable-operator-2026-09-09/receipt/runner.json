@@ -1,0 +1,42 @@
+{
+  "status": "prepared_before_install",
+  "inputs": {
+    "schema": "c22-runner-inputs-v1",
+    "created_utc": "2026-09-09T21:01:20.906626+00:00",
+    "synthetic": true,
+    "prepare_before_install": true,
+    "userprofile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\environment\\USERPROFILE",
+    "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "installed_app": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Future Installed App",
+      "server_py": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Future Installed App\\server.py",
+      "interpreter": null,
+      "has_space": true,
+      "bundled_python": false,
+      "present": false,
+      "intended_before_install": true
+    },
+    "package": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\Uoink-Setup-3.8.0.exe",
+      "bytes": 339059334,
+      "sha256": "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+      "matched_supplied_digest": true
+    },
+    "isolated_profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt\\profiles\\empty",
+    "isolated_port": 18481,
+    "mode": "source_runtime_synthetic",
+    "profile_dirs_prepared": true,
+    "candidate_package_02": null,
+    "manifest": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\Uoink Receipt Kit\\c22-operator-manifest.json",
+      "sealed_by": "Astra",
+      "expected_package_sha256": "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+      "candidate_sha": "12ce8a5fbd34c3472d55ae76afa17535b43c5282",
+      "installer_source_sha": "67a274d5d0c67f48405c4fa242a1011c2cf671c1"
+    }
+  },
+  "updated_utc": "2026-09-09T21:01:20.907342+00:00",
+  "receipt_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\portable-operator-01\\receipt"
+}
