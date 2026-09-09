@@ -62,7 +62,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 4 | Implementation and required Claude Code/stdio behavior accepted with conditions; 286 passed / nine frozen failures in both roots, broader AW-4 113 passed | `PHASE4-CLIENT-02-2026-09-09.md` closes the planned supplement: complete packets, action evidence, missing-index refusals, Recall and vault accounting | Ryan: installed Inno, frozen fixture rulings and retained X-source HTTP 403 condition. No implementation repair remains identified |
 | 5 | Part A accepted with conditions at `a39c7e6`: G2 and supplement sealed; both roots 574 passed / two retained failures | Final BA-4 accepts the supported replacement entry; the old SDK-route test stays failed. Unary/clock ruling remains Ryan's | Closure full tree 2,106 passed / 26 retained failures; combined candidate/build after Phase 4 |
 | 6 | Accepted subject to Ryan's legacy fixture ruling and speaker material. BC-3f (`986b555`): both roots 174 passed / 11 omitted-ticket failures; final broader check 382 passed / four superseded-evidence failures | Final BD-2 closes implementation and combined transport review; BD-27 observed; closure full tree recorded at `669725f` | Combined candidate; retain the failed fixtures and blocked speaker gate |
-| Integration | Ready to start; phases 3–6 accepted or blocked only on Ryan's listed conditions | Client supplement complete; no worker active | Cut candidate from HEAD, release notes, full suite and local installer; installed-tree receipts stay with Ryan |
+| Integration | Candidate branch cut from `9217846`; release notes prepared | `cc/living-library-candidate`; no worker active or unresolved merge entry | Run full suite with only S21 excluded, then local installer; installed-tree receipts stay with Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -141,6 +141,9 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    (per-phase contract, acceptance verdict, receipts, open Ryan gates), run the full tree,
    build the installer locally (`build.ps1`; Inno Setup 6 is installed) as the staged
    package for Ryan's C22/Phase 4 receipts. No merge, no push, no release publish.
+   Candidate branch was cut from `9217846`; release notes are now tracked.
+   Next: freeze the notes commit, run the full tree without the old AW-5/AW-7
+   exclusions, then build and record the actual installer/runtime result.
 
 Worker notes: claude worker = no shell, one session at a time, shares the subscription (tell it
 "no subagents; targeted searches; write early"); gemini has shell, times out on big sets (3-5
@@ -174,6 +177,22 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
 
 ## Integrator log
+
+### 2026-09-09 00:07 PDT - Candidate branch and final verification plan
+
+Cut `cc/living-library-candidate` from clean `9217846`, as explicitly authorized
+by Queue 6. No Git merge/conflict entries exist. All implementation overlays
+were previously reviewed and tested in worker and checkout roots. Release
+notes now cover all phases and retain every owner gate and absent feature.
+The next full tree includes every closed Phase 4 reproduction; only S21 is
+excluded under the standing command. Preserve failures and classify against
+the prior 26-case baseline before building. No test expectation will change.
+
+The supplemental archive's 112 staged hashes verified before commit. Ordinary
+Git whitespace checking flagged its original CRLF bytes; the CR-at-EOL-aware
+check found only a final blank line in the raw terminal JSON capture. That
+exact file is preserved, not reformatted. All other new files passed that
+check; authored documentation passed the normal check.
 
 ### 2026-09-09 00:03 PDT - Client supplement closed; candidate prerequisites met
 
