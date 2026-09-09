@@ -1505,3 +1505,13 @@ Installer repair `3a3bd6cb` is active from `b6aa527`. Astra independently
 located an uncommitted write in `writing_studio.seed_default_anchors` along
 the observed empty-helper startup path; a new regression and narrow durable
 transaction repair are next. Do not weaken Index's transaction refusal.
+
+### 2026-09-09 - Default startup styles now settle their transaction
+
+Astra's three new default-seed regressions all failed before repair. The
+Index-owned transaction repair with legacy connection/lock savepoint support
+passes **21 checks, zero failures** (2.21 seconds), including the existing
+style/writing and source-migration files. The intermediate 18-pass/three-fail
+adapter observation is retained. No existing tests changed. See the startup
+anchor review and proof seal. Full-helper startup verification remains next
+after the installer source is ready; no installed receipt is claimed.

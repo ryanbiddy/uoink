@@ -1,0 +1,8 @@
+{
+  "checkout_parent": "24a5fe0c47ea0a3fd6390898f4732b7bddf6e9a8",
+  "source": "writing_studio.py",
+  "sha256": "6251247a6b93d169ac92c563f7f2e9052a50e591d5daead1c5244081fb524348",
+  "lf_sha256": "a2667e4dbbc21ce5c7784ca475355af69e0577bb6c48b1ac5e8e9a17d499e23f",
+  "bytes": 28670,
+  "outcome": "21 passed, 0 failed, 5 warnings, 2.21 seconds"
+}

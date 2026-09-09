@@ -1,0 +1,24 @@
+FFF                                                                      [100%]
+================================== FAILURES ===================================
+____________ test_default_seed_is_durable_and_releases_transaction ____________
+tests\test_startup_anchor_transaction.py:14: in test_default_seed_is_durable_and_releases_transaction
+    assert not idx._conn.in_transaction
+E   assert not True
+E    +  where True = <sqlite3.Connection object at 0x00000243946DDE40>.in_transaction
+E    +    where <sqlite3.Connection object at 0x00000243946DDE40> = <index.Index object at 0x000002439443FA10>._conn
+_____ test_default_seed_refuses_foreign_transaction_without_absorbing_it ______
+tests\test_startup_anchor_transaction.py:28: in test_default_seed_refuses_foreign_transaction_without_absorbing_it
+    with pytest.raises(RuntimeError, match="transaction"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE RuntimeError
+________________ test_default_seed_rolls_back_partial_failure _________________
+tests\test_startup_anchor_transaction.py:41: in test_default_seed_rolls_back_partial_failure
+    assert not idx._conn.in_transaction
+E   assert not True
+E    +  where True = <sqlite3.Connection object at 0x000002439468E200>.in_transaction
+E    +    where <sqlite3.Connection object at 0x000002439468E200> = <index.Index object at 0x000002439469B250>._conn
+=========================== short test summary info ===========================
+FAILED tests/test_startup_anchor_transaction.py::test_default_seed_is_durable_and_releases_transaction
+FAILED tests/test_startup_anchor_transaction.py::test_default_seed_refuses_foreign_transaction_without_absorbing_it
+FAILED tests/test_startup_anchor_transaction.py::test_default_seed_rolls_back_partial_failure
+3 failed in 0.48s

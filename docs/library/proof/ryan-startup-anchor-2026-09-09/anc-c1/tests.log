@@ -1,0 +1,44 @@
+...FFF...............                                                    [100%]
+================================== FAILURES ===================================
+___________________________ test_seed_and_defaults ____________________________
+tests\test_v3_2_3_anchors_lens.py:55: in test_seed_and_defaults
+    seeded = ws.seed_default_anchors(idx, DEFAULTS)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+writing_studio.py:164: in seed_default_anchors
+    with idx.write_transaction() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'FakeIndex' object has no attribute 'write_transaction'
+___________________________ test_seed_upgrade_path ____________________________
+tests\test_v3_2_3_anchors_lens.py:74: in test_seed_upgrade_path
+    seeded = ws.seed_default_anchors(idx, DEFAULTS)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+writing_studio.py:164: in seed_default_anchors
+    with idx.write_transaction() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'FakeIndex' object has no attribute 'write_transaction'
+______________________ test_cap_counts_active_not_total _______________________
+tests\test_v3_2_3_anchors_lens.py:91: in test_cap_counts_active_not_total
+    ws.seed_default_anchors(idx, DEFAULTS)  # 5 inactive defaults
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+writing_studio.py:164: in seed_default_anchors
+    with idx.write_transaction() as conn:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'FakeIndex' object has no attribute 'write_transaction'
+============================== warnings summary ===============================
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+tests/test_source_subscriptions_migration.py::test_s02_old_delete_routes_archive_and_preserve_rows
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_v3_2_3_anchors_lens.py::test_seed_and_defaults - AttributeE...
+FAILED tests/test_v3_2_3_anchors_lens.py::test_seed_upgrade_path - AttributeE...
+FAILED tests/test_v3_2_3_anchors_lens.py::test_cap_counts_active_not_total - ...
+3 failed, 18 passed, 5 warnings in 2.41s

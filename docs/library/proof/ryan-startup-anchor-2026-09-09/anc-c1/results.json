@@ -1,0 +1,29 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_startup_anchor_transaction.py",
+      "tests/test_v3_2_3_anchors_lens.py",
+      "tests/test_g27_style_anchor_keep.py",
+      "tests/test_writing_surface_ownership.py",
+      "tests/test_writing_save_real.py",
+      "tests/test_writing_draft_endpoints.py",
+      "tests/test_source_subscriptions_migration.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\anc-c1-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\anc-c1\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\anc-c1\\tests.log"
+  }
+]

@@ -29,6 +29,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from contextlib import contextmanager
 from datetime import datetime, timezone
 
 import voice_dna
@@ -145,6 +146,27 @@ def active_style_anchor_count(idx) -> int:
     return int(row["c"]) if row else 0
 
 
+@contextmanager
+def _anchor_seed_transaction(idx):
+    transaction = getattr(idx, "write_transaction", None)
+    if callable(transaction):
+        with transaction() as conn:
+            yield conn
+        return
+    # Older connection/lock adapters lack Index's transaction API. A savepoint
+    # makes this unit atomic without committing an adapter caller's outer work.
+    with idx._lock:
+        conn = idx._conn
+        conn.execute("SAVEPOINT default_anchor_seed")
+        try:
+            yield conn
+            conn.execute("RELEASE SAVEPOINT default_anchor_seed")
+        except BaseException:
+            conn.execute("ROLLBACK TO SAVEPOINT default_anchor_seed")
+            conn.execute("RELEASE SAVEPOINT default_anchor_seed")
+            raise
+
+
 def seed_default_anchors(idx, anchors: list[dict]) -> int:
     """Seed the curated defaults idempotently, per anchor. Inserts any default
     that is missing (matched by is_default=1 + name) and leaves existing rows
@@ -161,9 +183,9 @@ def seed_default_anchors(idx, anchors: list[dict]) -> int:
     if not anchors:
         return 0
     seeded = 0
-    with idx._lock:
+    with _anchor_seed_transaction(idx) as conn:
         existing = {
-            (r["name"] or "") for r in idx._conn.execute(
+            (r["name"] or "") for r in conn.execute(
                 "SELECT name FROM style_anchors WHERE is_default = 1").fetchall()
         }
         for a in anchors:
@@ -175,7 +197,7 @@ def seed_default_anchors(idx, anchors: list[dict]) -> int:
             source_type = a.get("source_type") or ANCHOR_SOURCE_TEXT
             if source_type not in _ANCHOR_SOURCES:
                 source_type = ANCHOR_SOURCE_TEXT
-            idx._conn.execute(
+            conn.execute(
                 "INSERT INTO style_anchors "
                 "(name, source_type, source_url, raw_text, active, "
                 " is_default, added_at) VALUES (?, ?, ?, ?, 0, 1, ?)",

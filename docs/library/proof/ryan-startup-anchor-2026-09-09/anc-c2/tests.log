@@ -1,0 +1,15 @@
+.....................                                                    [100%]
+============================== warnings summary ===============================
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+tests/test_source_subscriptions_migration.py::test_s02_old_delete_routes_archive_and_preserve_rows
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+21 passed, 5 warnings in 2.21s
