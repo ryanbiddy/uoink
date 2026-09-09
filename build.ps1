@@ -25,7 +25,8 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Clean
+    [switch]$Clean,
+    [switch]$Release
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,6 +44,7 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
+$setReleaseInstallerLink = Join-Path $RepoRoot 'scripts\set_release_installer_link.ps1'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
@@ -74,6 +76,9 @@ $ManifestJson = Get-Content -Raw $ManifestPath | ConvertFrom-Json
 $ManifestVersion = [string]$ManifestJson.version
 if ($ManifestVersion -ne $VERSION) {
     throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
+}
+if ($Release -and -not (Test-Path -LiteralPath $setReleaseInstallerLink -PathType Leaf)) {
+    throw "Missing release installer-link guard: $setReleaseInstallerLink"
 }
 
 # Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
@@ -554,6 +559,10 @@ Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\b
 # v3.1.3: ship the unpacked Chrome extension beside the helper so the
 # first-run hint can point Chrome's "Load unpacked" flow at a real folder.
 Copy-Item (Join-Path $RepoRoot 'extension') (Join-Path $StagingDir 'extension') -Recurse -Force
+if ($Release) {
+    $stagedSetupScript = Join-Path $StagingDir 'extension\setup.js'
+    & $setReleaseInstallerLink -SetupScript $stagedSetupScript -ExpectedVersion $VERSION
+}
 # v2.2.0: canonical rust-U mark used by the tray glyph loader AND by
 # installer\generate_icon.py. Shipping it makes the tray's PNG source-of-truth
 # pattern work post-install (uoink_tray loads {app}\assets\logo-mark-color.png).
