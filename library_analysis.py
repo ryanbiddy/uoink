@@ -739,6 +739,7 @@ def _ratio_metric(
     scope_ref: str,
     *,
     reason: Optional[str] = None,
+    denominator_metric_id: Optional[str] = None,
 ) -> dict:
     percent: Optional[float] = None
     res_reason = reason
@@ -752,7 +753,7 @@ def _ratio_metric(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
         percent = float(pct)
-    return {
+    m = {
         "metric_id": metric_id,
         "value": numerator if denominator > 0 else 0,
         "unit": "ratio",
@@ -761,8 +762,149 @@ def _ratio_metric(
         "denominator": denominator,
         "percent": percent,
         "reason": res_reason,
-        "evidence": {"metric_id": metric_id, "role": "numerator"},
+        "evidence": _evidence_descriptor(metric_id, "numerator"),
     }
+    if denominator_metric_id:
+        _attach_denominator_evidence(m, denominator_metric_id)
+    return m
+
+
+# ---------------------------------------------------------------------------
+# BA-01: compact metric-to-support relation references
+# ---------------------------------------------------------------------------
+# Compact evidence on each metric: role plus exact support/sample counts.
+# ``provenance.relations`` is the metric-to-support registry (scope, clock,
+# source tables), keyed by relation id from ``_relation_id_for``. Supporting
+# observation rows live only on the paged evidence endpoint. Observation
+# hashes are on those page rows, not on the summary descriptor; a first-page
+# digest is not a population hash. Numerator descriptors omit metric_id: the
+# enclosing metric already carries it (dashboard and Astra merge
+# ``{**metric, **evidence}``). Denominator references keep ``{metric_id,role}``
+# so they resolve without the enclosing metric.
+
+EVIDENCE_PAGE_LIMIT = 20
+
+# Relation ids are short on purpose: they appear once per metric on the wire.
+_RELATION_ITEMS = "items"
+_RELATION_LIVE = "live"
+_RELATION_PUBLICATION = "publication"
+_RELATION_TOMBSTONES = "tombstones"
+_RELATION_JOURNAL = "journal"
+_RELATION_SHELF_CURRENT = "shelf_current"
+_RELATION_BASELINE = "baseline"
+_RELATION_CAPTURES = "captures"
+_RELATION_OBSERVATIONS = "observations"
+_RELATION_REVISIONS = "revisions"
+_RELATION_EVENTS = "events"
+
+
+def _relation_id_for(metric_id: str) -> str:
+    """Map a metric id to its metric-to-support relation id (BA-01 registry)."""
+    if metric_id.startswith("items."):
+        if metric_id in ("items.live_population", "items.capture_time_available", "items.capture_time_unavailable"):
+            return _RELATION_LIVE
+        if metric_id.startswith("items.publication_"):
+            return _RELATION_PUBLICATION
+        if metric_id.startswith("items.deleted_items_"):
+            return _RELATION_TOMBSTONES
+        return _RELATION_ITEMS
+    if metric_id.startswith("shelf_activity."):
+        if metric_id in ("shelf_activity.current_assigned_items", "shelf_activity.current_memberships"):
+            return _RELATION_SHELF_CURRENT
+        if metric_id.startswith("shelf_activity.churn") or metric_id == "shelf_activity.initial_filing_items":
+            return _RELATION_BASELINE
+        parts = metric_id.split(".")
+        if len(parts) >= 4 and parts[1] == "shelves":
+            kind = parts[3]
+            if kind == "current_size":
+                return _RELATION_SHELF_CURRENT
+            if kind in ("start_size", "end_size", "churn"):
+                return _RELATION_BASELINE
+        return _RELATION_JOURNAL
+    if metric_id.startswith("sources."):
+        if metric_id in ("sources.linked_capture_union_count", "sources.multiply_linked_capture_count"):
+            return _RELATION_CAPTURES
+        if metric_id in ("sources.active_sources_count", "sources.unlinked_hint_groups_count"):
+            return _RELATION_OBSERVATIONS
+        if metric_id.endswith(".captures"):
+            return _RELATION_CAPTURES
+        return _RELATION_OBSERVATIONS
+    if metric_id.startswith("revisions."):
+        return _RELATION_REVISIONS
+    if metric_id.startswith("events."):
+        return _RELATION_EVENTS
+    return _RELATION_ITEMS
+
+
+def _build_relation_registry(date_basis: str, scope_items_ref: str) -> Dict[str, dict]:
+    """``provenance.relations``: one entry per relation, resolving scope, clock and source tables once."""
+    item_tables = ["yoinks"] if date_basis == "capture_time" else ["source_items", "podcast_episodes", "yoinks"]
+    return {
+        _RELATION_ITEMS: {"support": "selected_item_observations", "scope_ref": scope_items_ref, "clock": date_basis, "source_tables": item_tables},
+        _RELATION_LIVE: {"support": "live_saved_items", "scope_ref": "scope_items_capture", "clock": "capture_time", "source_tables": ["yoinks"]},
+        _RELATION_PUBLICATION: {"support": "publication_candidates", "scope_ref": "scope_items_publication", "clock": "publication_time", "source_tables": ["source_items", "podcast_episodes", "yoinks"]},
+        _RELATION_TOMBSTONES: {"support": "deleted_saved_items", "scope_ref": "scope_items_tombstones", "clock": "capture_time", "source_tables": ["yoinks"]},
+        _RELATION_JOURNAL: {"support": "applied_operations", "scope_ref": "scope_shelf_activity", "clock": "applied_journal_time", "source_tables": ["library_applies"]},
+        _RELATION_SHELF_CURRENT: {"support": "current_memberships", "scope_ref": "scope_shelf_current", "clock": "as_of", "source_tables": ["item_shelves"]},
+        _RELATION_BASELINE: {"support": "replayed_memberships", "scope_ref": "scope_shelf_baseline", "clock": "applied_journal_time", "source_tables": ["library_applies", "item_shelves"]},
+        _RELATION_CAPTURES: {"support": "captured_items_by_source", "scope_ref": "scope_source_captures", "clock": "capture_time", "source_tables": ["yoinks", "source_items"]},
+        _RELATION_OBSERVATIONS: {"support": "source_observations", "scope_ref": "scope_sources", "clock": "observation_time", "source_tables": ["source_items", "source_subscriptions"]},
+        _RELATION_REVISIONS: {"support": "recorded_revisions", "scope_ref": "scope_revisions", "clock": "creation_time", "source_tables": ["shelf_versions", "library_runs"]},
+        _RELATION_EVENTS: {"support": "combined_events", "scope_ref": "scope_events", "clock": "event_time", "source_tables": ["yoinks", "library_applies", "shelf_versions", "library_runs"]},
+    }
+
+
+def _evidence_descriptor(metric_id: str, role: str) -> dict:
+    """Unbound compact selector; counts are bound by ``_bind_support``.
+
+    Numerators omit metric_id (the enclosing metric already has it).
+    Denominators keep metric_id because they name a different metric.
+    Relation ids stay in ``provenance.relations``, not on every descriptor.
+    """
+    if role != "numerator":
+        return {"metric_id": metric_id, "role": role}
+    return {"role": role}
+
+
+class _EvidenceRows(list):
+    """Evidence rows for one metric: every supporting observation is counted,
+    but at most ``limit`` rows are constructed (bounded work, BA-11). ``add``
+    takes a zero-argument builder so unconstructed rows cost nothing."""
+
+    def __init__(self, limit: Optional[int] = None):
+        super().__init__()
+        self.limit = limit
+        self.total_rows = 0
+
+    def add(self, build: Any) -> None:
+        self.total_rows += 1
+        if self.limit is None or len(self) < self.limit:
+            self.append(build())
+
+
+def _bind_support(descriptor: dict, rows: Optional[List[dict]]) -> None:
+    """Bind exact support/sample counts. Do not attach a summary observation
+    hash: page rows carry per-observation hashes, and a first-page digest
+    would not be a population hash."""
+    total = getattr(rows, "total_rows", None)
+    if total is None:
+        total = len(rows or [])
+    descriptor["row_count"] = total
+    descriptor["sample_count"] = min(EVIDENCE_PAGE_LIMIT, total)
+    descriptor["has_more"] = total > EVIDENCE_PAGE_LIMIT
+
+
+def _iter_metric_dicts(node: Any):
+    """Yield every metric dict (has ``metric_id`` and a dict ``evidence``) in a response subtree."""
+    if isinstance(node, dict):
+        if isinstance(node.get("metric_id"), str) and isinstance(node.get("evidence"), dict):
+            yield node
+        for child in node.values():
+            if isinstance(child, (dict, list)):
+                yield from _iter_metric_dicts(child)
+    elif isinstance(node, list):
+        for child in node:
+            yield from _iter_metric_dicts(child)
 
 
 class CountMetric(dict):
@@ -829,7 +971,7 @@ def _count_metric(
         "value": value,
         "unit": unit,
         "scope_ref": scope_ref,
-        "evidence": {"metric_id": metric_id, "role": "numerator"},
+        "evidence": _evidence_descriptor(metric_id, "numerator"),
     }
     if value is None or recorded_count is not None:
         m["recorded_count"] = recorded_count if recorded_count is not None else 0
@@ -845,21 +987,8 @@ def _metric_value_or_zero(metric: Any) -> int:
     return val if isinstance(val, int) else 0
 
 
-def _attach_sample_counts(metric: dict, row_n: int) -> None:
-    """BA-01: exact supporting population/sample counts on the evidence descriptor."""
-    n = max(0, int(row_n or 0))
-    metric["row_count"] = n
-    metric["sample_count"] = min(20, n)
-    metric["has_more"] = n > 20
-    ev = metric.setdefault("evidence", {})
-    if isinstance(ev, dict):
-        ev["row_count"] = n
-        ev["sample_count"] = min(20, n)
-        ev["has_more"] = n > 20
-
-
 def _attach_denominator_evidence(metric: dict, denom_metric_id: str) -> None:
-    """BA-01: distinct addressable denominator relation."""
+    """BA-01: distinct addressable denominator relation (a reference to another metric id)."""
     ev = metric.setdefault("evidence", {})
     if isinstance(ev, dict):
         ev["denominator"] = {"metric_id": denom_metric_id, "role": "denominator"}
@@ -870,8 +999,6 @@ def _mark_no_history(metric: Optional[dict]) -> None:
         return
     metric["value"] = None
     metric["recorded_count"] = 0
-    if "row_count" in metric:
-        _attach_sample_counts(metric, 0)
 
 
 def _truncate_label(label: str) -> str:
@@ -1142,6 +1269,7 @@ def _execute_activity(
             else:
                 tombstone_yoinks.append(row_dict)
         live_survivor_ids = {item["video_id"] for item in live_yoinks}
+        tombstone_ids = {item["video_id"] for item in tombstone_yoinks}
 
         # Q2a podcast episodes
         c_episodes = conn.execute(
@@ -1429,7 +1557,19 @@ def _execute_activity(
                 if baseline_proved:
                     for vid, rows in f_items.items():
                         if vid in live_survivor_ids:
-                            projected_state[vid] = {r["shelf_id"]: r for r in rows}
+                            # BA-01: a replayed membership is bound to the retained
+                            # apply that produced it, so historical (start/end/
+                            # baseline) evidence can name library_applies rows
+                            # instead of a fabricated current item_shelves key.
+                            shelf_dict: Dict[str, dict] = {}
+                            for r in rows:
+                                r_entry = dict(r)
+                                r_entry["_apply_id"] = app_id
+                                r_entry["_operation_sequence"] = op_seq
+                                r_entry["_created_at"] = c_at
+                                r_entry["_record_hash"] = auth_hash
+                                shelf_dict[r["shelf_id"]] = r_entry
+                            projected_state[vid] = shelf_dict
 
             # Interval applies accounting
             if dt_apply is not None and dt_start <= dt_apply < dt_end:
@@ -1444,8 +1584,17 @@ def _execute_activity(
                 apply_additions = 0
                 apply_removals = 0
                 apply_affected: Set[str] = set()
+                # BA-01: per-shelf mutation counts and thin per-item changes are
+                # retained per apply (identities and shelf ids only, never the
+                # decoded forward/inverse maps) so shelf-level journal evidence
+                # binds only operations that touched that shelf and journal
+                # evidence rows are reconcilable with the membership counts.
+                apply_shelf_additions: Dict[str, int] = {}
+                apply_shelf_removals: Dict[str, int] = {}
+                apply_item_changes: List[dict] = []
+                apply_has_deleted_item = False
 
-                for vid in all_vids:
+                for vid in sorted(all_vids):
                     f_rows = f_items.get(vid, [])
                     i_rows = i_items.get(vid, [])
                     f_shelves = {r["shelf_id"] for r in f_rows}
@@ -1460,9 +1609,26 @@ def _execute_activity(
                     for s in added:
                         shelf_additions[s] = shelf_additions.get(s, 0) + 1
                         apply_additions += 1
+                        apply_shelf_additions[s] = apply_shelf_additions.get(s, 0) + 1
                     for s in removed:
                         shelf_removals[s] = shelf_removals.get(s, 0) + 1
                         apply_removals += 1
+                        apply_shelf_removals[s] = apply_shelf_removals.get(s, 0) + 1
+
+                    if vid in tombstone_ids:
+                        # Deleted evidence exposes identity only (contract).
+                        apply_has_deleted_item = True
+                        apply_item_changes.append({"video_id": vid, "item_deleted": True})
+                    else:
+                        apply_item_changes.append({
+                            "video_id": vid,
+                            "before_shelves": sorted(i_shelves),
+                            "after_shelves": sorted(f_shelves),
+                            "added_shelves": sorted(added),
+                            "removed_shelves": sorted(removed),
+                            "before_primary": i_prim,
+                            "after_primary": f_prim,
+                        })
 
                     if f_shelves != i_shelves or f_prim != i_prim:
                         interval_affected_items.add(vid)
@@ -1510,6 +1676,10 @@ def _execute_activity(
                     "additions": apply_additions,
                     "removals": apply_removals,
                     "affected_vids": apply_affected,
+                    "shelf_additions": apply_shelf_additions,
+                    "shelf_removals": apply_shelf_removals,
+                    "item_changes": apply_item_changes,
+                    "has_deleted_item": apply_has_deleted_item,
                 })
 
             del f_delta
@@ -1896,14 +2066,14 @@ def _execute_activity(
         scope_items_ref = "scope_items_capture" if date_basis == "capture_time" else "scope_items_publication"
 
         items_total_metric = _count_metric("items.total", selected_total, "saved_items", scope_items_ref)
-        # BA-01: population/sample counts for the primary item total (compact evidence descriptor).
-        _attach_sample_counts(items_total_metric, selected_total)
+        # BA-01: support/sample counts and observation hashes for every metric are
+        # bound from the actual evidence rows by ``_bind_returned_metrics`` below.
 
         by_source_type_rows: List[dict] = []
         for t_name, count in sorted(type_counts.items(), key=lambda x: (-x[1], x[0])):
             m_id = f"items.by_source_type.{t_name}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
+            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
             by_source_type_rows.append({
                 "source_type": t_name,
                 "count": c_metric,
@@ -1916,7 +2086,7 @@ def _execute_activity(
             key_hash = hashlib.sha256(json.dumps(list(c_tuple), ensure_ascii=False).encode("utf-8")).hexdigest()
             m_id = f"items.by_creator_hint.{key_hash}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
+            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
             display_hint, hint_truncated = _display_hint(p_val)
             by_creator_rows.append({
                 "platform": p_plat,
@@ -1934,7 +2104,7 @@ def _execute_activity(
             j_hash = hashlib.sha256(json.dumps(list(j_tuple), ensure_ascii=False).encode("utf-8")).hexdigest()
             m_id = f"items.by_type_creator_hint.{j_hash}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
+            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
             display_hint, hint_truncated = _display_hint(p_val)
             by_joint_rows.append({
                 "source_type": j_stype,
@@ -1952,7 +2122,7 @@ def _execute_activity(
             b_hash = hashlib.sha256(f"{b_s}_{b_e}".encode("utf-8")).hexdigest()[:16]
             m_id = f"items.daily_buckets.{b_hash}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
-            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
+            s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref, denominator_metric_id="items.total")
             daily_rows.append({
                 "bucket_start": b_s,
                 "bucket_end": b_e,
@@ -1980,8 +2150,9 @@ def _execute_activity(
                 )
                 for reason, count in pub_unavailable_by_reason.items()
             },
-            "deleted_items_excluded": _count_metric("items.deleted_items_excluded", tombstones_in_interval, "saved_items", "scope_items_capture"),
-            "deleted_items_unlocated": _count_metric("items.deleted_items_unlocated", tombstones_unlocated, "saved_items", "scope_items_capture"),
+            # BA-01: tombstone metrics count deleted items, not the live population.
+            "deleted_items_excluded": _count_metric("items.deleted_items_excluded", tombstones_in_interval, "saved_items", "scope_items_tombstones"),
+            "deleted_items_unlocated": _count_metric("items.deleted_items_unlocated", tombstones_unlocated, "saved_items", "scope_items_tombstones"),
             "coverage_ref": "cov_capture" if date_basis == "capture_time" else "cov_publication",
         }
 
@@ -2018,12 +2189,11 @@ def _execute_activity(
             changed_baseline_vids = baseline_assigned_vids.intersection(interval_affected_items)
             churn_num = len(changed_baseline_vids)
             if churn_denom == 0:
-                churn_metric = _ratio_metric("shelf_activity.churn", 0, 0, "scope_shelf_baseline", reason="empty_population")
+                churn_metric = _ratio_metric("shelf_activity.churn", 0, 0, "scope_shelf_baseline", reason="empty_population", denominator_metric_id="shelf_activity.churn.denominator")
                 churn_metric["initial_filing"] = True
             else:
-                churn_metric = _ratio_metric("shelf_activity.churn", churn_num, churn_denom, "scope_shelf_baseline")
+                churn_metric = _ratio_metric("shelf_activity.churn", churn_num, churn_denom, "scope_shelf_baseline", denominator_metric_id="shelf_activity.churn.denominator")
                 churn_metric["initial_filing"] = False
-            _attach_denominator_evidence(churn_metric, "shelf_activity.churn.denominator")
 
             # Initial filing items: live survivors assigned in interval that were not assigned at start
             initial_filing_vids = [
@@ -2042,8 +2212,7 @@ def _execute_activity(
                 "percent": None,
                 "reason": "baseline_unavailable",
                 "evidence": {
-                    "metric_id": "shelf_activity.churn",
-                    "role": "numerator",
+                    **_evidence_descriptor("shelf_activity.churn", "numerator"),
                     "denominator": {"metric_id": "shelf_activity.churn.denominator", "role": "denominator"},
                 },
                 "initial_filing": None,
@@ -2089,8 +2258,10 @@ def _execute_activity(
                 s_end = sum(1 for vid, shelves in end_state.items() if s_id in shelves)
                 start_members = {vid for vid, shelves in start_state.items() if s_id in shelves}
                 s_churn_num = len(start_members.intersection(interval_affected_items))
-                s_churn = _ratio_metric(f"shelf_activity.shelves.{s_id}.churn", s_churn_num, s_start, "scope_shelf_baseline")
-                _attach_denominator_evidence(s_churn, f"shelf_activity.shelves.{s_id}.churn.denominator")
+                # BA-01: the per-shelf churn denominator is exactly the shelf's
+                # start-size relation, which is a returned metric with its own
+                # bound descriptor; the reference names it instead of a second id.
+                s_churn = _ratio_metric(f"shelf_activity.shelves.{s_id}.churn", s_churn_num, s_start, "scope_shelf_baseline", denominator_metric_id=f"shelf_activity.shelves.{s_id}.start_size")
             else:
                 s_start = None
                 s_end = None
@@ -2104,8 +2275,7 @@ def _execute_activity(
                     "percent": None,
                     "reason": "baseline_unavailable",
                     "evidence": {
-                        "metric_id": f"shelf_activity.shelves.{s_id}.churn",
-                        "role": "numerator",
+                        **_evidence_descriptor(f"shelf_activity.shelves.{s_id}.churn", "numerator"),
                         "denominator": {"metric_id": f"shelf_activity.shelves.{s_id}.churn.denominator", "role": "denominator"},
                     },
                 }
@@ -2531,7 +2701,9 @@ def _execute_activity(
         events_summary_rows = cleaned_events[:20]
 
         events_family = {
-            "total": _count_metric("events.total", total_events_count, "events", scope_items_ref),
+            # BA-01: combined events are their own population on their own clocks
+            # (item clock, applied journal time, revision creation time).
+            "total": _count_metric("events.total", total_events_count, "events", "scope_events"),
             "rows": events_summary_rows,
             "returned_rows": len(events_summary_rows),
             "omitted_rows": max(0, total_events_count - len(events_summary_rows)),
@@ -2621,6 +2793,34 @@ def _execute_activity(
                 "revision_ref": report_revision,
                 "coverage_ref": "cov_revisions",
             },
+            # BA-01: tombstone metrics are scoped to deleted items, not the live population.
+            "scope_items_tombstones": {
+                "population": "deleted_saved_items",
+                "clock": "capture_time",
+                "interval": canonical_interval,
+                "query_id": "Q1",
+                "query_version": CONTRACT_VERSION,
+                "revision_ref": report_revision,
+                "coverage_ref": "cov_capture",
+            },
+            # BA-01: combined events are a union population across clocks; the
+            # journal clock is named so event totals are not read as item counts.
+            "scope_events": {
+                "population": "combined_events",
+                "clock": "event_time",
+                "clocks": {
+                    ("capture" if date_basis == "capture_time" else "publication"): date_basis,
+                    "apply": "applied_journal_time",
+                    "taxonomy_version": "creation_time",
+                    "run": "creation_time",
+                },
+                "interval": canonical_interval,
+                "query_id": "Q1" if date_basis == "capture_time" else "Q2",
+                "query_ids": ["Q1" if date_basis == "capture_time" else "Q2", "Q3", "Q8"],
+                "query_version": CONTRACT_VERSION,
+                "revision_ref": report_revision,
+                "coverage_ref": "cov_shelf_activity",
+            },
         }
 
         # Active taxonomy hash
@@ -2654,6 +2854,9 @@ def _execute_activity(
             "active_taxonomy_version_id": active_version_id,
             "active_taxonomy_hash": active_tax_hash,
             "scopes": scopes,
+            # BA-01: metric-to-support relation registry; each metric's compact
+            # evidence descriptor names one of these by ``relation``.
+            "relations": _build_relation_registry(date_basis, scope_items_ref),
             "evidence_request": {
                 "interval": canonical_interval,
                 "date_basis": date_basis,
@@ -2874,6 +3077,123 @@ def _execute_activity(
         }
 
         # -------------------------------------------------------------------
+        # BA-01: metric-to-support relation registry. Every returned metric id
+        # is an evidence selector; the same lookup binds the compact descriptor
+        # counts/hashes and serves the paged evidence endpoint, so a descriptor
+        # always reconciles with its page.
+        # -------------------------------------------------------------------
+        valid_metric_ids: Set[str] = {
+            "items.total",
+            "items.live_population",
+            "items.capture_time_available",
+            "items.capture_time_unavailable",
+            "items.publication_time_available",
+            "items.publication_time_unavailable",
+            "items.deleted_items_excluded",
+            "items.deleted_items_unlocated",
+            "shelf_activity.churn.denominator",
+        }
+        for r in by_source_type_rows + by_creator_rows + by_joint_rows + daily_rows:
+            valid_metric_ids.add(r["count"]["metric_id"])
+            valid_metric_ids.add(r["share"]["metric_id"])
+        for sh_r in shelves_rows:
+            for k in ("current_size", "start_size", "end_size", "churn", "added", "removed", "net"):
+                if sh_r.get(k) and isinstance(sh_r[k], dict) and "metric_id" in sh_r[k]:
+                    valid_metric_ids.add(sh_r[k]["metric_id"])
+        for s_r in all_source_details:
+            for k in ("captures_in_interval", "new_observations"):
+                if isinstance(s_r.get(k), dict) and "metric_id" in s_r[k]:
+                    valid_metric_ids.add(s_r[k]["metric_id"])
+            state_map = s_r.get("new_observations_by_state")
+            if isinstance(state_map, dict):
+                for st_m in state_map.values():
+                    if isinstance(st_m, dict) and "metric_id" in st_m:
+                        valid_metric_ids.add(st_m["metric_id"])
+
+        def _register_metric_tree(obj: Any) -> None:
+            if isinstance(obj, dict):
+                mid = obj.get("metric_id")
+                if isinstance(mid, str):
+                    valid_metric_ids.add(mid)
+                for child in obj.values():
+                    _register_metric_tree(child)
+            elif isinstance(obj, list):
+                for child in obj:
+                    _register_metric_tree(child)
+
+        _register_metric_tree(items_family)
+        _register_metric_tree(shelf_family)
+        _register_metric_tree(sources_family)
+        _register_metric_tree(revisions_family)
+        _register_metric_tree(events_family)
+
+        daily_buckets_map = {
+            hashlib.sha256(f"{format_canonical_utc(b[0])}_{format_canonical_utc(b[1])}".encode("utf-8")).hexdigest()[:16]: (b[0], b[1])
+            for b in daily_buckets
+        }
+
+        # Group index: one pass over the selected items so per-bucket, per-type
+        # and per-hint lookups are O(group) rather than O(items) per metric.
+        group_index = _build_item_group_index(selected_items, daily_buckets, date_basis)
+
+        def _rows_for(m_id: str, row_limit: Optional[int] = None) -> Optional[_EvidenceRows]:
+            return _lookup_evidence(
+                m_id,
+                valid_metric_ids=valid_metric_ids,
+                selected_items=selected_items,
+                captured_in_interval_items=captured_in_interval_items,
+                unlinked_hint_groups=unlinked_hint_groups,
+                live_yoinks=live_yoinks,
+                tombstone_yoinks=tombstone_yoinks,
+                interval_applies=interval_applies,
+                all_item_shelves=all_item_shelves,
+                daily_buckets_map=daily_buckets_map,
+                vid_to_sources=vid_to_sources,
+                source_to_vids=source_to_vids,
+                source_obs_in_interval=source_obs_in_interval,
+                active_source_rows=active_source_rows,
+                all_shelf_versions=all_shelf_versions,
+                all_runs=all_runs,
+                date_basis=date_basis,
+                dt_start=dt_start,
+                dt_end=dt_end,
+                as_of_dt=as_of_dt,
+                as_of_str=as_of_str,
+                start_state=start_state,
+                end_state=end_state,
+                baseline_assigned_vids=baseline_assigned_vids,
+                changed_baseline_vids=changed_baseline_vids,
+                initial_filing_vids=initial_filing_vids,
+                cleaned_events=cleaned_events,
+                group_index=group_index,
+                row_limit=row_limit,
+            )
+
+        def _bind_returned_metrics(*subtrees: Any) -> Optional[dict]:
+            """Bind compact descriptors (exact counts only) for every metric
+            about to be returned. Counts walk the support relation without
+            constructing observation rows. Denominator references that are
+            themselves returned metrics stay as ``{metric_id,role}`` selectors;
+            the churn denominator has no metric of its own and is bound in place."""
+            bound = 0
+            for metric in _iter_metric_dicts(list(subtrees)):
+                ev = metric["evidence"]
+                if "row_count" not in ev:
+                    _bind_support(ev, _rows_for(metric["metric_id"], row_limit=0))
+                den = ev.get("denominator")
+                if isinstance(den, dict) and "row_count" not in den:
+                    den_id = den.get("metric_id")
+                    if den_id == "shelf_activity.churn.denominator":
+                        den["relation"] = _relation_id_for(den_id)
+                        _bind_support(den, _rows_for(den_id, row_limit=0))
+                bound += 1
+                if bound % 25 == 0:
+                    dl = _check_deadline()
+                    if dl is not None:
+                        return dl
+            return None
+
+        # -------------------------------------------------------------------
         # Build Detail Response if requested
         # -------------------------------------------------------------------
         if detail is not None:
@@ -2898,124 +3218,17 @@ def _execute_activity(
             elif detail == "evidence":
                 # Metric evidence lookup
                 assert metric_id is not None
-                valid_metric_ids: Set[str] = {
-                    "items.total",
-                    "items.live_population",
-                    "items.capture_time_available",
-                    "items.capture_time_unavailable",
-                    "items.publication_time_available",
-                    "items.publication_time_unavailable",
-                    "items.deleted_items_excluded",
-                    "items.deleted_items_unlocated",
-                }
-                for r in by_source_type_rows:
-                    valid_metric_ids.add(r["count"]["metric_id"])
-                    valid_metric_ids.add(r["share"]["metric_id"])
-                for r in by_creator_rows:
-                    valid_metric_ids.add(r["count"]["metric_id"])
-                    valid_metric_ids.add(r["share"]["metric_id"])
-                for r in by_joint_rows:
-                    valid_metric_ids.add(r["count"]["metric_id"])
-                    valid_metric_ids.add(r["share"]["metric_id"])
-                for r in daily_rows:
-                    valid_metric_ids.add(r["count"]["metric_id"])
-                    valid_metric_ids.add(r["share"]["metric_id"])
-                for k in (
-                    "applied_operations", "membership_additions", "membership_removals",
-                    "membership_mutations", "affected_items", "item_change_events",
-                    "primary_change_events", "metadata_only_item_events", "policy_change_events",
-                    "activation_events", "current_assigned_items", "current_memberships",
-                    "initial_filing_items", "churn"
-                ):
-                    if k in shelf_family and isinstance(shelf_family[k], dict) and "metric_id" in shelf_family[k]:
-                        valid_metric_ids.add(shelf_family[k]["metric_id"])
-                for sh_r in shelves_rows:
-                    for k in ("current_size", "start_size", "end_size", "churn"):
-                        if sh_r.get(k) and isinstance(sh_r[k], dict) and "metric_id" in sh_r[k]:
-                            valid_metric_ids.add(sh_r[k]["metric_id"])
-                for k in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
-                    if k in sources_family and isinstance(sources_family[k], dict) and "metric_id" in sources_family[k]:
-                        valid_metric_ids.add(sources_family[k]["metric_id"])
-                for s_r in all_source_details:
-                    if "captures_in_interval" in s_r and isinstance(s_r["captures_in_interval"], dict):
-                        valid_metric_ids.add(s_r["captures_in_interval"]["metric_id"])
-                    if "new_observations" in s_r and isinstance(s_r["new_observations"], dict):
-                        valid_metric_ids.add(s_r["new_observations"]["metric_id"])
-                for k in ("taxonomy_versions_created", "runs_created"):
-                    if k in revisions_family and isinstance(revisions_family[k], dict) and "metric_id" in revisions_family[k]:
-                        valid_metric_ids.add(revisions_family[k]["metric_id"])
-                for sh_r in shelves_rows:
-                    for k in ("added", "removed", "net"):
-                        if sh_r.get(k) and isinstance(sh_r[k], dict) and "metric_id" in sh_r[k]:
-                            valid_metric_ids.add(sh_r[k]["metric_id"])
-                if isinstance(items_family.get("publication_unavailable_by_reason"), dict):
-                    for v in items_family["publication_unavailable_by_reason"].values():
-                        if isinstance(v, dict) and "metric_id" in v:
-                            valid_metric_ids.add(v["metric_id"])
-                if isinstance(events_family.get("total"), dict) and "metric_id" in events_family["total"]:
-                    valid_metric_ids.add(events_family["total"]["metric_id"])
-                for s_r in all_source_details:
-                    state_map = s_r.get("new_observations_by_state")
-                    if isinstance(state_map, dict):
-                        for st_m in state_map.values():
-                            if isinstance(st_m, dict) and "metric_id" in st_m:
-                                valid_metric_ids.add(st_m["metric_id"])
-
-                def _register_metric_tree(obj: Any) -> None:
-                    if isinstance(obj, dict):
-                        mid = obj.get("metric_id")
-                        if isinstance(mid, str):
-                            valid_metric_ids.add(mid)
-                        for child in obj.values():
-                            _register_metric_tree(child)
-                    elif isinstance(obj, list):
-                        for child in obj:
-                            _register_metric_tree(child)
-
-                _register_metric_tree(items_family)
-                _register_metric_tree(shelf_family)
-                _register_metric_tree(sources_family)
-                _register_metric_tree(revisions_family)
-                _register_metric_tree(events_family)
-
-                daily_buckets_map = {
-                    hashlib.sha256(f"{format_canonical_utc(b[0])}_{format_canonical_utc(b[1])}".encode("utf-8")).hexdigest()[:16]: (b[0], b[1])
-                    for b in daily_buckets
-                }
-
-                ev_rows = _lookup_evidence(
-                    metric_id,
-                    valid_metric_ids=valid_metric_ids,
-                    selected_items=selected_items,
-                    captured_in_interval_items=captured_in_interval_items,
-                    unlinked_hint_groups=unlinked_hint_groups,
-                    live_yoinks=live_yoinks,
-                    tombstone_yoinks=tombstone_yoinks,
-                    interval_applies=interval_applies,
-                    all_item_shelves=all_item_shelves,
-                    daily_buckets_map=daily_buckets_map,
-                    vid_to_sources=vid_to_sources,
-                    source_to_vids=source_to_vids,
-                    source_obs_in_interval=source_obs_in_interval,
-                    active_source_rows=active_source_rows,
-                    all_shelf_versions=all_shelf_versions,
-                    all_runs=all_runs,
-                    date_basis=date_basis,
-                    dt_start=dt_start,
-                    dt_end=dt_end,
-                    as_of_dt=as_of_dt,
-                    as_of_str=as_of_str,
-                    start_state=start_state,
-                    end_state=end_state,
-                    baseline_assigned_vids=baseline_assigned_vids,
-                    changed_baseline_vids=changed_baseline_vids,
-                    initial_filing_vids=initial_filing_vids,
-                    cleaned_events=cleaned_events,
-                )
+                # Bounded: rows beyond the requested page are counted, not built.
+                ev_rows = _rows_for(metric_id, row_limit=offset + limit)
                 if ev_rows is None:
                     return error_envelope("not_found", f"Metric ID not found: {metric_id}")
-                detail_total = len(ev_rows)
-                detail_rows = ev_rows[offset : offset + limit]
+                detail_total = ev_rows.total_rows
+                detail_rows = list(ev_rows[offset : offset + limit])
+
+            if detail != "evidence":
+                dl_err = _bind_returned_metrics(detail_rows)
+                if dl_err is not None:
+                    return dl_err
 
             next_page = None
             if offset + len(detail_rows) < detail_total:
@@ -3092,6 +3305,12 @@ def _execute_activity(
         # -------------------------------------------------------------------
         # Build Summary Response
         # -------------------------------------------------------------------
+        # BA-01: bind compact descriptors for the returned families only (top-20
+        # rows); detail pages bind their own rows when requested.
+        dl_err = _bind_returned_metrics(items_family, shelf_family, sources_family, revisions_family, events_family)
+        if dl_err is not None:
+            return dl_err
+
         summary_response = {
             "ok": True,
             "schema_version": SCHEMA_VERSION,
@@ -3145,7 +3364,7 @@ def _execute_activity(
                 ret_len = len(items_family["by_type_creator_hint"])
                 pagination_map["type_creator_hints"]["returned_rows"] = ret_len
                 pagination_map["type_creator_hints"]["omitted_rows"] = pagination_map["type_creator_hints"]["total_rows"] - ret_len
-                pagination_map["type_creator_hints"]["other_count"] = sum(r["count"]["value"] for r in by_joint_rows[ret_len:])
+                pagination_map["type_creator_hints"]["other_count"] = sum(_metric_value_or_zero(r["count"]) for r in by_joint_rows[ret_len:])
                 if ret_len < pagination_map["type_creator_hints"]["total_rows"]:
                     pagination_map["type_creator_hints"]["next"] = {
                         "interval": canonical_interval,
@@ -3162,7 +3381,7 @@ def _execute_activity(
                 ret_len = len(items_family["by_creator_hint"])
                 pagination_map["creator_hints"]["returned_rows"] = ret_len
                 pagination_map["creator_hints"]["omitted_rows"] = pagination_map["creator_hints"]["total_rows"] - ret_len
-                pagination_map["creator_hints"]["other_count"] = sum(r["count"]["value"] for r in by_creator_rows[ret_len:])
+                pagination_map["creator_hints"]["other_count"] = sum(_metric_value_or_zero(r["count"]) for r in by_creator_rows[ret_len:])
                 if ret_len < pagination_map["creator_hints"]["total_rows"]:
                     pagination_map["creator_hints"]["next"] = {
                         "interval": canonical_interval,
@@ -3255,8 +3474,53 @@ def _execute_activity(
 # Evidence Lookup
 # ---------------------------------------------------------------------------
 
+def _build_item_group_index(selected_items: List[dict], daily_buckets: List[Tuple[datetime, datetime]], date_basis: str) -> dict:
+    """One pass over the selected items: members per source type, creator hint,
+    joint key and daily bucket, in selected-item order (BA-01 registry support;
+    keeps per-metric descriptor binding bounded)."""
+    by_type: Dict[str, List[dict]] = {}
+    by_creator: Dict[str, List[dict]] = {}
+    by_joint: Dict[str, List[dict]] = {}
+    by_bucket: Dict[str, List[dict]] = {}
+    bucket_keys = [
+        (b_start, b_end, hashlib.sha256(f"{format_canonical_utc(b_start)}_{format_canonical_utc(b_end)}".encode("utf-8")).hexdigest()[:16])
+        for b_start, b_end in daily_buckets
+    ]
+    for item in selected_items:
+        stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
+        by_type.setdefault(stype, []).append(item)
+        platform, c_field, c_val = _creator_hint_key(item)
+        k_hash = hashlib.sha256(json.dumps([platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+        by_creator.setdefault(k_hash, []).append(item)
+        j_hash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+        by_joint.setdefault(j_hash, []).append(item)
+        target_dt = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+        if target_dt is not None:
+            for b_start, b_end, b_hash in bucket_keys:
+                if b_start <= target_dt < b_end:
+                    by_bucket.setdefault(b_hash, []).append(item)
+                    break
+    return {"by_type": by_type, "by_creator": by_creator, "by_joint": by_joint, "by_bucket": by_bucket}
+
+
 def _selected_observation_row(item: dict, date_basis: str) -> dict:
-    """Evidence row for a selected item, attributing publication instants to their source relation. BA-03."""
+    """Memoised per item and clock; callers get a shallow copy they may re-detail."""
+    cache = item.get("_obs_rows")
+    if cache is None:
+        cache = {}
+        item["_obs_rows"] = cache
+    row = cache.get(date_basis)
+    if row is None:
+        row = _build_selected_observation_row(item, date_basis)
+        cache[date_basis] = row
+    return dict(row)
+
+
+def _build_selected_observation_row(item: dict, date_basis: str) -> dict:
+    """Evidence row for a selected item, attributing publication instants to their source relation. BA-03.
+
+    The observation hash covers every selected observation field, including the
+    channel: a channel-only correction changes the selected observation (BA-01)."""
     if date_basis == "publication_time" and item.get("pub_dt") is not None:
         dt_ev = item["pub_dt"]
         pub_tier = item.get("pub_tier")
@@ -3267,6 +3531,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
                 "item_id": entry["item_id"],
                 "published_at_ms": raw_clock,
                 "author": item.get("author"),
+                "channel": item.get("channel"),
             }
             row_details = {
                 "video_id": item["video_id"],
@@ -3295,7 +3560,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
         if pub_tier == "direct_episode_parse" and item.get("selected_pub_entry"):
             ep = item["selected_pub_entry"]
             raw_clock = ep["published_at"]
-            obs_dict = {"id": ep["id"], "published_at": raw_clock, "author": item.get("author")}
+            obs_dict = {"id": ep["id"], "published_at": raw_clock, "author": item.get("author"), "channel": item.get("channel")}
             return {
                 "row_id": str(ep["id"]),
                 "source_table": "podcast_episodes",
@@ -3307,6 +3572,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
                     "video_id": item["video_id"],
                     "episode_id": ep["id"],
                     "author": item.get("author"),
+                    "channel": item.get("channel"),
                     "direct_episode_parse": True,
                     "follow_up": f"get_library_item('{item['video_id']}')",
                 },
@@ -3321,11 +3587,13 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
             "observation_hash": canonical_json_hash({
                 "v": item["video_id"],
                 "a": item.get("author"),
+                "ch": item.get("channel"),
                 "c": raw_clock,
             }),
             "details": {
                 "video_id": item["video_id"],
                 "author": item.get("author"),
+                "channel": item.get("channel"),
                 "follow_up": f"get_library_item('{item['video_id']}')",
             },
         }
@@ -3336,6 +3604,7 @@ def _selected_observation_row(item: dict, date_basis: str) -> dict:
         "t": item.get("source_type"),
         "p": item.get("platform"),
         "a": item.get("author"),
+        "ch": item.get("channel"),
         "c": raw_clock,
     }
     return {
@@ -3386,8 +3655,15 @@ def _lookup_evidence(
     changed_baseline_vids: Optional[Set[str]] = None,
     initial_filing_vids: Optional[List[str]] = None,
     cleaned_events: Optional[List[dict]] = None,
-) -> Optional[List[dict]]:
-    """Return supporting evidence rows for a given metric ID."""
+    group_index: Optional[dict] = None,
+    row_limit: Optional[int] = None,
+) -> Optional["_EvidenceRows"]:
+    """Return supporting evidence rows for a given metric ID.
+
+    This is the single metric-to-support relation lookup (BA-01): the compact
+    descriptors on returned metrics are bound from these rows, and the paged
+    evidence endpoint serves the same rows. Every supporting observation is
+    counted (``total_rows``); at most ``row_limit`` rows are constructed."""
     if metric_id not in valid_metric_ids:
         return None
 
@@ -3408,12 +3684,12 @@ def _lookup_evidence(
     if cleaned_events is None:
         cleaned_events = []
 
-    rows: List[dict] = []
+    rows = _EvidenceRows(row_limit)
 
     # 1. items.total
     if metric_id == "items.total":
         for item in selected_items:
-            rows.append(_selected_observation_row(item, date_basis))
+            rows.add(lambda:_selected_observation_row(item, date_basis))
         return rows
 
     # 2. Availability and exclusion metrics
@@ -3421,7 +3697,7 @@ def _lookup_evidence(
         for item in live_yoinks:
             dt_ev = item["capture_dt"]
             raw_clock = item["raw_yoinked_at"]
-            rows.append({
+            rows.add(lambda:{
                 "row_id": item["video_id"],
                 "source_table": "yoinks",
                 "source_key": item["video_id"],
@@ -3437,7 +3713,7 @@ def _lookup_evidence(
             if item["capture_dt"] is not None:
                 dt_ev = item["capture_dt"]
                 raw_clock = item["raw_yoinked_at"]
-                rows.append({
+                rows.add(lambda:{
                     "row_id": item["video_id"],
                     "source_table": "yoinks",
                     "source_key": item["video_id"],
@@ -3451,7 +3727,7 @@ def _lookup_evidence(
     if metric_id == "items.capture_time_unavailable":
         for item in live_yoinks:
             if item["capture_dt"] is None:
-                rows.append({
+                rows.add(lambda:{
                     "row_id": item["video_id"],
                     "source_table": "yoinks",
                     "source_key": item["video_id"],
@@ -3463,18 +3739,17 @@ def _lookup_evidence(
         return rows
 
     if metric_id == "items.publication_time_available":
+        # BA-03: availability reuses the admitted candidate relation (source key,
+        # encoding, normalized instant, provenance, observation hash) that the
+        # selected total/group/bucket evidence uses.
+        def _availability_row(item: dict) -> dict:
+            row = _selected_observation_row(item, "publication_time")
+            row["details"] = {**row.get("details", {}), "tier": item.get("pub_tier")}
+            return row
+
         for item in live_yoinks:
-            if item["pub_dt"] is not None:
-                dt_ev = item["pub_dt"]
-                rows.append({
-                    "row_id": item["video_id"],
-                    "source_table": "yoinks",
-                    "source_key": item["video_id"],
-                    "event_time": format_canonical_utc(dt_ev),
-                    "original_clock_encoding": str(item["raw_pub_clock"]),
-                    "observation_hash": canonical_json_hash({"v": item["video_id"], "pub": True}),
-                    "details": {"video_id": item["video_id"], "tier": item["pub_tier"]},
-                })
+            if item.get("pub_dt") is not None:
+                rows.add(lambda: _availability_row(item))
         return rows
 
     if metric_id == "items.publication_time_unavailable" or metric_id.startswith("items.publication_unavailable_by_reason."):
@@ -3499,7 +3774,7 @@ def _lookup_evidence(
                 source_table = candidates[0].get("source_table", source_table)
                 source_key = candidates[0].get("source_key", source_key)
                 details["conflicting_source_keys"] = [c.get("source_key") for c in candidates]
-            rows.append({
+            rows.add(lambda:{
                 "row_id": item["video_id"],
                 "source_table": source_table,
                 "source_key": source_key,
@@ -3522,7 +3797,7 @@ def _lookup_evidence(
                 dt_cap, _ = parse_iso_utc(item["raw_yoinked_at"])
             if dt_cap is None or not (dt_start <= dt_cap < dt_end):
                 continue
-            rows.append({
+            rows.add(lambda:{
                 "row_id": item["video_id"],
                 "source_table": "yoinks",
                 "source_key": item["video_id"],
@@ -3545,7 +3820,7 @@ def _lookup_evidence(
                 dt_cap, _ = parse_iso_utc(item["raw_yoinked_at"])
             if dt_cap is not None:
                 continue
-            rows.append({
+            rows.add(lambda:{
                 "row_id": item["video_id"],
                 "source_table": "yoinks",
                 "source_key": item["video_id"],
@@ -3565,10 +3840,15 @@ def _lookup_evidence(
         parts = metric_id.split(".")
         if len(parts) >= 4 and parts[3] in ("count", "share"):
             stype = parts[2]
-            for item in selected_items:
-                match = (item["source_type"] == stype) if stype in CANONICAL_SOURCE_TYPES else (item["source_type"] not in CANONICAL_SOURCE_TYPES)
-                if match:
-                    rows.append(_selected_observation_row(item, date_basis))
+            if group_index is not None:
+                members = group_index["by_type"].get(stype, [])
+            else:
+                members = [
+                    item for item in selected_items
+                    if ((item["source_type"] == stype) if stype in CANONICAL_SOURCE_TYPES else (item["source_type"] not in CANONICAL_SOURCE_TYPES))
+                ]
+            for item in members:
+                rows.add(lambda:_selected_observation_row(item, date_basis))
             return rows
 
     # 4. Creator hints
@@ -3576,22 +3856,32 @@ def _lookup_evidence(
         parts = metric_id.split(".")
         if len(parts) >= 4 and parts[3] in ("count", "share"):
             k_hash = parts[2]
-            for item in selected_items:
+            if group_index is not None:
+                members = group_index["by_creator"].get(k_hash, [])
+            else:
+                members = []
+                for item in selected_items:
+                    platform, c_field, c_val = _creator_hint_key(item)
+                    item_khash = hashlib.sha256(json.dumps([platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+                    if item_khash == k_hash:
+                        members.append(item)
+            def _creator_row(item: dict) -> dict:
                 platform, c_field, c_val = _creator_hint_key(item)
-                item_khash = hashlib.sha256(json.dumps([platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
-                if item_khash == k_hash:
-                    row = _selected_observation_row(item, date_basis)
-                    row["details"] = {
-                        **row.get("details", {}),
-                        "author": item["author"],
-                        "channel": item["channel"],
-                        "original_author": item["author"],
-                        "original_channel": item["channel"],
-                        "hint": _display_hint(c_val)[0],
-                        "original_hint": item.get("author") or item.get("channel") or "",
-                        "platform": platform,
-                    }
-                    rows.append(row)
+                row = _selected_observation_row(item, date_basis)
+                row["details"] = {
+                    **row.get("details", {}),
+                    "author": item["author"],
+                    "channel": item["channel"],
+                    "original_author": item["author"],
+                    "original_channel": item["channel"],
+                    "hint": _display_hint(c_val)[0],
+                    "original_hint": item.get("author") or item.get("channel") or "",
+                    "platform": platform,
+                }
+                return row
+
+            for item in members:
+                rows.add(lambda: _creator_row(item))
             return rows
 
     # 5. Joint type + creator hints
@@ -3599,24 +3889,35 @@ def _lookup_evidence(
         parts = metric_id.split(".")
         if len(parts) >= 4 and parts[3] in ("count", "share"):
             j_hash = parts[2]
-            for item in selected_items:
+            if group_index is not None:
+                members = group_index["by_joint"].get(j_hash, [])
+            else:
+                members = []
+                for item in selected_items:
+                    platform, c_field, c_val = _creator_hint_key(item)
+                    stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
+                    item_jhash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+                    if item_jhash == j_hash:
+                        members.append(item)
+            def _joint_row(item: dict) -> dict:
                 platform, c_field, c_val = _creator_hint_key(item)
                 stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
-                item_jhash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
-                if item_jhash == j_hash:
-                    row = _selected_observation_row(item, date_basis)
-                    row["details"] = {
-                        **row.get("details", {}),
-                        "source_type": stype,
-                        "author": item["author"],
-                        "channel": item["channel"],
-                        "original_author": item["author"],
-                        "original_channel": item["channel"],
-                        "platform": platform,
-                        "hint": _display_hint(c_val)[0],
-                        "original_hint": item.get("author") or item.get("channel") or "",
-                    }
-                    rows.append(row)
+                row = _selected_observation_row(item, date_basis)
+                row["details"] = {
+                    **row.get("details", {}),
+                    "source_type": stype,
+                    "author": item["author"],
+                    "channel": item["channel"],
+                    "original_author": item["author"],
+                    "original_channel": item["channel"],
+                    "platform": platform,
+                    "hint": _display_hint(c_val)[0],
+                    "original_hint": item.get("author") or item.get("channel") or "",
+                }
+                return row
+
+            for item in members:
+                rows.add(lambda: _joint_row(item))
             return rows
 
     # 6. Daily buckets
@@ -3626,23 +3927,90 @@ def _lookup_evidence(
             b_hash = parts[2]
             if b_hash in daily_buckets_map:
                 b_start, b_end = daily_buckets_map[b_hash]
-                for item in selected_items:
-                    target_dt = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
-                    assert target_dt is not None
-                    if b_start <= target_dt < b_end:
-                        rows.append(_selected_observation_row(item, date_basis))
+                if group_index is not None:
+                    members = group_index["by_bucket"].get(b_hash, [])
+                else:
+                    members = []
+                    for item in selected_items:
+                        target_dt = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                        assert target_dt is not None
+                        if b_start <= target_dt < b_end:
+                            members.append(item)
+                for item in members:
+                    rows.add(lambda:_selected_observation_row(item, date_basis))
                 return rows
 
     # 7. Shelf activity
     live_vid_set = {it["video_id"] for it in live_yoinks}
 
+    def _apply_row(app: dict, s_id: Optional[str] = None) -> dict:
+        """Applied-journal evidence: operation identity, revisions, undo binding,
+        and thin per-item before/after shelf identities (never the decoded
+        forward/inverse maps). Deleted items are marked and exposed by identity only."""
+        dt_ev = app["created_at_dt"]
+        assert dt_ev is not None
+        details: Dict[str, Any] = {
+            "apply_id": app["apply_id"],
+            "operation_sequence": app["operation_sequence"],
+            "kind": app["kind"],
+            "before_revision": app["before_revision"],
+            "after_revision": app["after_revision"],
+            "undo_of": app["undo_of"],
+        }
+        item_changes = app.get("item_changes") or []
+        if s_id is not None:
+            details["shelf_id"] = s_id
+            item_changes = [
+                ch for ch in item_changes
+                if ch.get("item_deleted") or s_id in ch.get("before_shelves", []) or s_id in ch.get("after_shelves", [])
+            ]
+        # Bounded: one evidence row never carries more than one page of item
+        # changes; omission is explicit pagination metadata (BA-10).
+        details["item_changes"] = item_changes[:EVIDENCE_PAGE_LIMIT]
+        details["item_changes_omitted"] = max(0, len(item_changes) - EVIDENCE_PAGE_LIMIT)
+        if app.get("has_deleted_item"):
+            details["item_deleted"] = True
+        return {
+            "row_id": app["apply_id"],
+            "source_table": "library_applies",
+            "source_key": app["operation_sequence"],
+            "event_time": format_canonical_utc(dt_ev),
+            "original_clock_encoding": str(app["raw_created_at"]),
+            "observation_hash": app["authoritative_record_hash"],
+            "details": details,
+        }
+
+    def _replayed_member_row(vid: str, s_id: str, info: Any, role: str, dt_role: datetime) -> dict:
+        """A replayed (historical) membership names the retained apply that
+        produced it; a current item_shelves key is never fabricated for it."""
+        app_id = info.get("_apply_id") if isinstance(info, dict) else None
+        det: Dict[str, Any] = {"video_id": vid, "shelf_id": s_id, "role": role}
+        if app_id:
+            det["apply_id"] = app_id
+            det["operation_sequence"] = info.get("_operation_sequence")
+        record_hash = info.get("_record_hash") if isinstance(info, dict) else None
+        return {
+            "row_id": vid,
+            "source_table": "library_applies" if app_id else "item_shelves",
+            "source_key": app_id if app_id else f"{vid}_{s_id}",
+            "event_time": format_canonical_utc(dt_role),
+            "original_clock_encoding": str(info.get("_created_at")) if (isinstance(info, dict) and info.get("_created_at")) else None,
+            "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": role, "apply": app_id, "rh": record_hash}),
+            "details": det,
+        }
+
     if metric_id == "shelf_activity.current_assigned_items":
-        assigned_vids = sorted({r[0] for r in all_item_shelves if r[0] in live_vid_set})
-        for vid in assigned_vids:
-            sh_rows = [r for r in all_item_shelves if r[0] == vid]
+        # One pass to group memberships by item (bounded work, BA-11).
+        shelves_by_vid: Dict[str, List[tuple]] = {}
+        for r in all_item_shelves:
+            if r[0] in live_vid_set:
+                shelves_by_vid.setdefault(r[0], []).append(r)
+
+        def _assigned_row(vid: str) -> dict:
+            sh_rows = shelves_by_vid.get(vid, [])
             assigned_at = sh_rows[0][9] if sh_rows else None
             dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
-            rows.append({
+            return {
                 "row_id": vid,
                 "source_table": "item_shelves",
                 "source_key": vid,
@@ -3654,7 +4022,10 @@ def _lookup_evidence(
                     "shelves": [r[1] for r in sh_rows],
                     "follow_up": f"get_library_item('{vid}')",
                 },
-            })
+            }
+
+        for vid in sorted(shelves_by_vid.keys()):
+            rows.add(lambda: _assigned_row(vid))
         return rows
 
     if metric_id == "shelf_activity.current_memberships":
@@ -3663,7 +4034,7 @@ def _lookup_evidence(
                 vid, s_id = r[0], r[1]
                 assigned_at = r[9]
                 dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
-                rows.append({
+                rows.add(lambda:{
                     "row_id": f"{vid}_{s_id}",
                     "source_table": "item_shelves",
                     "source_key": f"{vid}_{s_id}",
@@ -3689,7 +4060,7 @@ def _lookup_evidence(
                         vid = r[0]
                         assigned_at = r[9]
                         dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
-                        rows.append({
+                        rows.add(lambda:{
                             "row_id": vid,
                             "source_table": "item_shelves",
                             "source_key": f"{vid}_{s_id}",
@@ -3704,84 +4075,85 @@ def _lookup_evidence(
                 return rows
             elif metric_kind in ("start_size", "end_size"):
                 state = start_state if metric_kind == "start_size" else end_state
+                dt_role = dt_start if metric_kind == "start_size" else dt_end
                 for vid, shelves in sorted(state.items()):
                     if s_id in shelves:
-                        rows.append({
-                            "row_id": vid,
-                            "source_table": "item_shelves",
-                            "source_key": f"{vid}_{s_id}",
-                            "event_time": format_canonical_utc(dt_start) if metric_kind == "start_size" else format_canonical_utc(dt_end),
-                            "original_clock_encoding": None,
-                            "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": metric_kind}),
-                            "details": {"video_id": vid, "shelf_id": s_id, "role": metric_kind},
-                        })
+                        rows.add(lambda:_replayed_member_row(vid, s_id, shelves[s_id], metric_kind, dt_role))
                 return rows
             elif metric_kind in ("churn", "added", "removed", "net"):
-                if metric_kind == "churn" and metric_id.endswith(".denominator"):
+                if metric_kind == "churn":
+                    if metric_id.endswith(".denominator"):
+                        for vid, shelves in sorted(start_state.items()):
+                            if s_id in shelves:
+                                rows.add(lambda:_replayed_member_row(vid, s_id, shelves[s_id], "denominator", dt_start))
+                        return rows
+                    # BA-01: the per-shelf churn numerator is the shelf's start
+                    # members whose membership changed in the interval; an
+                    # operation that only touched metadata is not support.
                     for vid, shelves in sorted(start_state.items()):
-                        if s_id in shelves:
-                            rows.append({
-                                "row_id": vid,
-                                "source_table": "item_shelves",
-                                "source_key": f"{vid}_{s_id}",
-                                "event_time": format_canonical_utc(dt_start),
-                                "original_clock_encoding": None,
-                                "observation_hash": canonical_json_hash({"v": vid, "s": s_id, "role": "denominator"}),
-                                "details": {"video_id": vid, "shelf_id": s_id, "role": "denominator"},
-                            })
+                        if s_id in shelves and vid in changed_baseline_vids:
+                            rows.add(lambda:_replayed_member_row(vid, s_id, shelves[s_id], "churn", dt_start))
                     return rows
+                # BA-01: shelf-level journal counts bind only operations that
+                # added to / removed from this shelf, never operation-wide
+                # additions or a merely referenced shelf.
                 for app in interval_applies:
-                    if s_id in app.get("referenced_shelves", set()):
-                        if metric_kind == "added" and not app.get("additions"):
-                            continue
-                        if metric_kind == "removed" and not app.get("removals"):
-                            continue
-                        dt_ev = app["created_at_dt"]
-                        assert dt_ev is not None
-                        rows.append({
-                            "row_id": app["apply_id"],
-                            "source_table": "library_applies",
-                            "source_key": app["operation_sequence"],
-                            "event_time": format_canonical_utc(dt_ev),
-                            "original_clock_encoding": str(app["raw_created_at"]),
-                            "observation_hash": app["authoritative_record_hash"],
-                            "details": {
-                                "apply_id": app["apply_id"],
-                                "shelf_id": s_id,
-                                "operation_sequence": app["operation_sequence"],
-                            },
-                        })
+                    sh_adds = app.get("shelf_additions") or {}
+                    sh_rems = app.get("shelf_removals") or {}
+                    if metric_kind == "added" and not sh_adds.get(s_id):
+                        continue
+                    if metric_kind == "removed" and not sh_rems.get(s_id):
+                        continue
+                    if metric_kind == "net" and not (sh_adds.get(s_id) or sh_rems.get(s_id)):
+                        continue
+                    rows.add(lambda:_apply_row(app, s_id=s_id))
                 return rows
 
     if metric_id == "shelf_activity.churn.denominator" or metric_id.endswith(".denominator") and metric_id.startswith("shelf_activity.churn"):
         for vid in sorted(baseline_assigned_vids):
-            rows.append({
+            shelves = start_state.get(vid) or {}
+            first_shelf = sorted(shelves.keys())[0] if shelves else None
+            info = shelves.get(first_shelf) if first_shelf else None
+            app_id = info.get("_apply_id") if isinstance(info, dict) else None
+            det: Dict[str, Any] = {"video_id": vid, "role": "denominator", "shelves": sorted(shelves.keys())}
+            if app_id:
+                det["apply_id"] = app_id
+                det["operation_sequence"] = info.get("_operation_sequence")
+            rows.add(lambda:{
                 "row_id": vid,
-                "source_table": "item_shelves",
-                "source_key": vid,
+                "source_table": "library_applies" if app_id else "item_shelves",
+                "source_key": app_id if app_id else vid,
                 "event_time": format_canonical_utc(dt_start),
-                "original_clock_encoding": None,
-                "observation_hash": canonical_json_hash({"v": vid, "role": "denominator"}),
-                "details": {"video_id": vid, "role": "denominator"},
+                "original_clock_encoding": str(info.get("_created_at")) if (isinstance(info, dict) and info.get("_created_at")) else None,
+                "observation_hash": canonical_json_hash({"v": vid, "role": "denominator", "shelves": sorted(shelves.keys()), "apply": app_id}),
+                "details": det,
             })
         return rows
 
     if metric_id == "shelf_activity.churn":
         for vid in sorted(changed_baseline_vids):
-            rows.append({
+            shelves = start_state.get(vid) or {}
+            first_shelf = sorted(shelves.keys())[0] if shelves else None
+            info = shelves.get(first_shelf) if first_shelf else None
+            app_id = info.get("_apply_id") if isinstance(info, dict) else None
+            det: Dict[str, Any] = {"video_id": vid, "role": "churn", "start_shelves": sorted(shelves.keys())}
+            if app_id:
+                det["apply_id"] = app_id
+                det["operation_sequence"] = info.get("_operation_sequence")
+            rows.add(lambda:{
                 "row_id": vid,
-                "source_table": "item_shelves",
-                "source_key": vid,
+                "source_table": "library_applies" if app_id else "item_shelves",
+                "source_key": app_id if app_id else vid,
                 "event_time": format_canonical_utc(dt_start),
-                "original_clock_encoding": None,
-                "observation_hash": canonical_json_hash({"v": vid, "role": "churn"}),
-                "details": {"video_id": vid},
+                "original_clock_encoding": str(info.get("_created_at")) if (isinstance(info, dict) and info.get("_created_at")) else None,
+                "observation_hash": canonical_json_hash({"v": vid, "role": "churn", "shelves": sorted(shelves.keys()), "apply": app_id}),
+                "details": det,
             })
         return rows
 
     if metric_id == "shelf_activity.initial_filing_items":
         for vid in initial_filing_vids:
-            rows.append({
+            rows.add(lambda:{
                 "row_id": vid,
                 "source_table": "yoinks",
                 "source_key": vid,
@@ -3793,26 +4165,6 @@ def _lookup_evidence(
         return rows
 
     if metric_id.startswith("shelf_activity."):
-        def _apply_row(app: dict) -> dict:
-            dt_ev = app["created_at_dt"]
-            assert dt_ev is not None
-            return {
-                "row_id": app["apply_id"],
-                "source_table": "library_applies",
-                "source_key": app["operation_sequence"],
-                "event_time": format_canonical_utc(dt_ev),
-                "original_clock_encoding": str(app["raw_created_at"]),
-                "observation_hash": app["authoritative_record_hash"],
-                "details": {
-                    "apply_id": app["apply_id"],
-                    "operation_sequence": app["operation_sequence"],
-                    "kind": app["kind"],
-                    "before_revision": app["before_revision"],
-                    "after_revision": app["after_revision"],
-                    "undo_of": app["undo_of"],
-                },
-            }
-
         filtered = interval_applies
         if metric_id == "shelf_activity.metadata_only_item_events":
             filtered = [a for a in interval_applies if a.get("metadata_only_count")]
@@ -3833,7 +4185,7 @@ def _lookup_evidence(
         elif metric_id == "shelf_activity.affected_items":
             filtered = [a for a in interval_applies if a.get("affected_vids")]
         for app in filtered:
-            rows.append(_apply_row(app))
+            rows.add(lambda:_apply_row(app))
         return rows
 
     # 8. Sources
@@ -3847,7 +4199,7 @@ def _lookup_evidence(
                     dt_ev = item["capture_dt"]
                     assert dt_ev is not None
                     raw_clock = item["raw_yoinked_at"]
-                    rows.append({
+                    rows.add(lambda:{
                         "row_id": vid,
                         "source_table": "yoinks",
                         "source_key": vid,
@@ -3872,7 +4224,7 @@ def _lookup_evidence(
                         vid = item["video_id"]
                         dt_ev = item["capture_dt"]
                         raw_clock = item["raw_yoinked_at"]
-                        rows.append({
+                        rows.add(lambda:{
                             "row_id": vid,
                             "source_table": "yoinks",
                             "source_key": vid,
@@ -3896,7 +4248,7 @@ def _lookup_evidence(
                 if e_id not in seen_entries:
                     seen_entries.add(e_id)
                     dt_fs, _ = parse_epoch_ms(o[5])
-                    rows.append({
+                    rows.add(lambda:{
                         "row_id": e_id,
                         "source_table": "source_items",
                         "source_key": o[0],
@@ -3911,12 +4263,43 @@ def _lookup_evidence(
                     })
             return rows
 
+        if len(parts) >= 4 and parts[2] == "new_observations_by_state":
+            # BA-01: per-state source observation metrics have exact evidence:
+            # the interval's first-seen entries in that state.
+            s_id = parts[1]
+            target_state = parts[3]
+            obs_list = source_obs_in_interval.get(s_id, [])
+            seen_entries = set()
+            for o in obs_list:
+                if o[7] != target_state:
+                    continue
+                e_id = o[2]
+                if e_id in seen_entries:
+                    continue
+                seen_entries.add(e_id)
+                dt_fs, _ = parse_epoch_ms(o[5])
+                rows.add(lambda:{
+                    "row_id": e_id,
+                    "source_table": "source_items",
+                    "source_key": o[0],
+                    "event_time": format_canonical_utc(dt_fs) if dt_fs else None,
+                    "original_clock_encoding": str(o[5]),
+                    "observation_hash": canonical_json_hash({"item_id": o[0], "first_seen_ms": o[5], "state": target_state}),
+                    "details": {
+                        "entry_id": e_id,
+                        "source_id": s_id,
+                        "item_id": o[0],
+                        "state": target_state,
+                    },
+                })
+            return rows
+
         # Aggregate source counts
         s_name = parts[1] if len(parts) >= 2 else None
         if s_name in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
             if s_name == "active_sources_count":
                 for s_row in active_source_rows:
-                    rows.append({
+                    rows.add(lambda:{
                         "row_id": s_row["source_id"],
                         "source_table": "source_subscriptions",
                         "source_key": s_row["source_id"],
@@ -3930,7 +4313,7 @@ def _lookup_evidence(
                 for item in captured_in_interval_items:
                     vid = item["video_id"]
                     if vid_to_sources.get(vid):
-                        rows.append({
+                        rows.add(lambda:{
                             "row_id": vid,
                             "source_table": "yoinks",
                             "source_key": vid,
@@ -3944,7 +4327,7 @@ def _lookup_evidence(
                 for item in captured_in_interval_items:
                     vid = item["video_id"]
                     if len(vid_to_sources.get(vid, set())) > 1:
-                        rows.append({
+                        rows.add(lambda:{
                             "row_id": vid,
                             "source_table": "yoinks",
                             "source_key": vid,
@@ -3958,7 +4341,7 @@ def _lookup_evidence(
                 if unlinked_hint_groups:
                     for (p, f, v), group_items in sorted(unlinked_hint_groups.items(), key=lambda x: (x[0][0], x[0][1], x[0][2])):
                         h_hash = hashlib.sha256(f"{p}_{f}_{v}".encode("utf-8")).hexdigest()[:16]
-                        rows.append({
+                        rows.add(lambda:{
                             "row_id": h_hash,
                             "source_table": "yoinks",
                             "source_key": h_hash,
@@ -3971,7 +4354,7 @@ def _lookup_evidence(
                     for item in captured_in_interval_items:
                         vid = item["video_id"]
                         if not vid_to_sources.get(vid):
-                            rows.append({
+                            rows.add(lambda:{
                                 "row_id": vid,
                                 "source_table": "yoinks",
                                 "source_key": vid,
@@ -3987,7 +4370,7 @@ def _lookup_evidence(
         for r in all_runs:
             dt_r, _ = parse_native_creation_clock(r[5])
             if dt_r and dt_start <= dt_r < dt_end:
-                rows.append({
+                rows.add(lambda:{
                     "row_id": r[0],
                     "source_table": "library_runs",
                     "source_key": r[0],
@@ -4000,7 +4383,7 @@ def _lookup_evidence(
 
     if metric_id == "events.total":
         for ev in cleaned_events:
-            rows.append({
+            rows.add(lambda:{
                 "row_id": ev.get("event_id"),
                 "source_table": "events",
                 "source_key": ev.get("event_id"),
@@ -4015,7 +4398,7 @@ def _lookup_evidence(
         for sv in all_shelf_versions:
             dt_sv, _ = parse_native_creation_clock(sv[3])
             if dt_sv and dt_start <= dt_sv < dt_end:
-                rows.append({
+                rows.add(lambda:{
                     "row_id": sv[0],
                     "source_table": "shelf_versions",
                     "source_key": sv[0],
