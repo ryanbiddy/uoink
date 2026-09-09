@@ -1,0 +1,34 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_isolation.py",
+      "tests/test_installer_files_complete.py",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_installer_download_accuracy.py",
+      "tests/test_u11_installer_overhaul.py",
+      "tests/test_splash_hotfix.py",
+      "tests/test_c01_mcp_stdio.py",
+      "tests/test_s6_suite_integration.py",
+      "tests/test_migration_step0_characterization.py",
+      "tests/test_source_subscriptions_migration.py",
+      "tests/test_mac_layout_prep.py",
+      "tests/test_u12_first_run_polish.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-g1-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-g1\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-g1\\tests.log"
+  }
+]

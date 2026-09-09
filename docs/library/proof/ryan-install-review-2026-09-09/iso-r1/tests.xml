@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="7" time="0.189" timestamp="2026-09-09T09:03:00.162313-07:00" hostname="Ryan-PC"><testcase classname="tests.test_install_isolation_integrator_review" name="test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-profile]" time="0.001"><failure message="Failed: DID NOT RAISE IsolationError">tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-port]" time="0.000"><failure message="Failed: DID NOT RAISE IsolationError">tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-from-install-dir]" time="0.000"><failure message="Failed: DID NOT RAISE IsolationError">tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_live_pid_without_creation_identity_is_not_owned" time="0.000"><failure message="AssertionError: assert 'alive' != 'alive'&#10; +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, None)&#10; +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness&#10; +    and   70196 = &lt;built-in function getpid&gt;()&#10; +      where &lt;built-in function getpid&gt; = os.getpid">tests\test_install_isolation_integrator_review.py:17: in test_live_pid_without_creation_identity_is_not_owned
+    assert iso._pid_liveness(os.getpid(), None) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, None)
+E    +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness
+E    +    and   70196 = &lt;built-in function getpid&gt;()
+E    +      where &lt;built-in function getpid&gt; = os.getpid</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_different_creation_identity_is_not_owned" time="0.001"><failure message="AssertionError: assert 'alive' != 'alive'&#10; +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, (1788969779799 + 1))&#10; +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness&#10; +    and   70196 = &lt;built-in function getpid&gt;()&#10; +      where &lt;built-in function getpid&gt; = os.getpid">tests\test_install_isolation_integrator_review.py:23: in test_different_creation_identity_is_not_owned
+    assert iso._pid_liveness(os.getpid(), created + 1) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, (1788969779799 + 1))
+E    +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness
+E    +    and   70196 = &lt;built-in function getpid&gt;()
+E    +      where &lt;built-in function getpid&gt; = os.getpid</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_unavailable_creation_lookup_is_not_owned" time="0.001"><failure message="AssertionError: assert 'alive' != 'alive'&#10; +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, 1788969779799)&#10; +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness&#10; +    and   70196 = &lt;built-in function getpid&gt;()&#10; +      where &lt;built-in function getpid&gt; = os.getpid">tests\test_install_isolation_integrator_review.py:31: in test_unavailable_creation_lookup_is_not_owned
+    assert iso._pid_liveness(os.getpid(), created) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = &lt;function _pid_liveness at 0x0000025373304930&gt;(70196, 1788969779799)
+E    +    where &lt;function _pid_liveness at 0x0000025373304930&gt; = iso._pid_liveness
+E    +    and   70196 = &lt;built-in function getpid&gt;()
+E    +      where &lt;built-in function getpid&gt; = os.getpid</failure></testcase><testcase classname="tests.test_install_isolation_integrator_review" name="test_missing_expected_executable_is_not_owned" time="0.001"><failure message="AssertionError: assert 'alive' != 'alive'&#10; +  where 'alive' = &lt;function _identity_liveness at 0x00000253733047D0&gt;({'pid': 70196, 'created_ms': 1788969779799, 'executable': ''})&#10; +    where &lt;function _identity_liveness at 0x00000253733047D0&gt; = iso._identity_liveness">tests\test_install_isolation_integrator_review.py:38: in test_missing_expected_executable_is_not_owned
+    assert iso._identity_liveness(identity) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = &lt;function _identity_liveness at 0x00000253733047D0&gt;({'pid': 70196, 'created_ms': 1788969779799, 'executable': ''})
+E    +    where &lt;function _identity_liveness at 0x00000253733047D0&gt; = iso._identity_liveness</failure></testcase></testsuite></testsuites>

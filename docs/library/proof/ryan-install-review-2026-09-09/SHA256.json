@@ -1,0 +1,77 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "iso-g1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "iso-g1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "iso-g1/results.json": {
+      "bytes": 1259,
+      "sha256": "71ab9238e46ffce9fec6fc8d617f58c94e1fb8357432a8196f2e14789bbc25ac"
+    },
+    "iso-g1/tests.log": {
+      "bytes": 2202,
+      "sha256": "5b56db9b59d86562e0d13368cfa942ccd1a5ff9a6da14923130a452e915bcdd5"
+    },
+    "iso-g1/tests.xml": {
+      "bytes": 12922,
+      "sha256": "b5b57971a44c8ce7163d41ce687cfae013949709f993f38356b257a70289bd46"
+    },
+    "iso-r1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "iso-r1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "iso-r1/results.json": {
+      "bytes": 828,
+      "sha256": "cd5d27081089ffbc8e0f0ce946cec4c0fb713affc4d9602af58616b22db881e4"
+    },
+    "iso-r1/tests.log": {
+      "bytes": 4393,
+      "sha256": "e50276d29c492cc01a4434faeb32670d05ede1a770223d2536a50fe246eb06c6"
+    },
+    "iso-r1/tests.xml": {
+      "bytes": 5802,
+      "sha256": "edd9de9bd926d6edfca597c6d66e7b21daade4fea7371789d3228b65cd87cbf5"
+    },
+    "iso-wi1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "iso-wi1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "iso-wi1/results.json": {
+      "bytes": 1329,
+      "sha256": "0561a7900fa4194a7936c9752607913ba527977eba4c17784424f1424ef787f7"
+    },
+    "iso-wi1/tests.log": {
+      "bytes": 12822,
+      "sha256": "3f4387376ce9ba5e51d9a9536a03be01e1b94f96fbe45f5d5cfd29d5dbc52fa0"
+    },
+    "iso-wi1/tests.xml": {
+      "bytes": 32339,
+      "sha256": "174b54e0260ac889edce0a2879e2e144ff39dcaac03b460617c9c2b4f882a489"
+    },
+    "original.patch": {
+      "bytes": 114132,
+      "sha256": "cc325954c858ef0865cd466d96590857fbb28fcb680064838e068e4347b1118e"
+    },
+    "test_install_isolation_integrator_review.py": {
+      "bytes": 1369,
+      "sha256": "2fa456aef28ad6814ab96eca8446fd742ad80bc869988c7d1e554b81dca1064a"
+    }
+  }
+}

@@ -1471,3 +1471,22 @@ Installation isolation worker `fd647a72` has completed. Its report claims
 92 passes / one existing skip; independent source and process review are next.
 C22 `9c866bb0` and Phase 4 kit `81060797` remain active. No current source
 package or installed receipt is claimed.
+
+### 2026-09-09 - Installer review rejected incomplete ownership; backup verified
+
+Authorized backup `origin/cc/living-library` is exactly
+`512fecbb4aa384e27fdd7bc822c4d77255183522`, verified with ls-remote. No main or
+candidate-branch push occurred.
+
+Installer isolation `fd647a72` is not integrated. Independent original suite:
+90 passed / two failed / one skipped (48.85 seconds), distinct from the
+worker's 92-pass/one-skip claim. Venv redirector/process-image differences
+require a direct-runtime observation without changing fixtures. Seven new
+read-only review probes fail: missing option values become normal mode, and
+incomplete or different process creation/executable identity is accepted.
+Source review also finds uninstall mode not recovered from durable metadata
+and premature/final-directory validation issues. The full original patch and
+18-file proof seal are under `proof/ryan-install-review-2026-09-09`.
+`RYAN-INSTALL-ISOLATION-REVIEW-BRIEF-2026-09-09.md` governs the repair; no Inno
+execution or default helper/port probe is authorized. Empty-helper logs also
+expose a standing-capture transaction error to investigate after kit review.

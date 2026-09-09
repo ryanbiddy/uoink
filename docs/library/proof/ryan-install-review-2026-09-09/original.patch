@@ -1,0 +1,3077 @@
+diff --git a/build.ps1 b/build.ps1
+index 155e803ebf0f7ca01af70daf1593697ef3e94c27..a684a3bfb2a54b4812abf6e54e1eb3f28a8ace91 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -277,6 +277,7 @@ foreach ($f in @(
+     'server.py',
+     'index.py',
+     '_platform.py',
++    'uoink_install_isolation.py',
+     'migrate_install.py',
+     'channels.py',
+     'workspaces.py',
+@@ -543,6 +544,7 @@ Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir
+ # migrate_install.py `import _platform` at module top -- omitting it ships a
+ # helper that crashes with ModuleNotFoundError before binding the port.
+ Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
++Copy-Item (Join-Path $RepoRoot 'uoink_install_isolation.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
+@@ -642,7 +644,7 @@ Write-Step 'Staged smoke'
+ Push-Location $StagingDir
+ try {
+     & '.\python\python.exe' -m py_compile `
+-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
++        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+     if ($LASTEXITCODE -ne 0) {
+         throw 'staged smoke: py_compile of staged Python files failed'
+     }
+diff --git a/docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md b/docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..73d0c44ba90ce86934b8325c81a5728c27e16c57
+--- /dev/null
++++ b/docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md
+@@ -0,0 +1,221 @@
++# Install isolation worker report (Grok)
++
++Status: **source complete in this worktree**. Integrator owns independent
++verification, rebuild and the final installed operator kit. This worker did
++not run Inno, did not contact port 5179 (including negative probes), did not
++open the live index, did not set `ANTHROPIC_API_KEY`, did not enable
++`librarian_apply_enabled`, and did not commit or push.
++
++## What shipped
++
++One stdlib configuration module, `uoink_install_isolation.py`, is the
++explicit interface. HTTP helper, stdio, dashboard, splash, suite lease,
++legacy migration and Inno isolated mode reuse it. Default production
++behavior is unchanged when isolation is not requested: `127.0.0.1:5179`
++and `_platform.user_data_dir()`.
++
++### 1. Isolated profile and non-5179 port (fail closed)
++
++Isolation is requested only by `--isolated-profile` + `--isolated-port`,
++the matching `UOINK_ISOLATED_*` inheritance variables, or
++`--isolated-from-install-dir` reading `{app}\isolated-install.json`.
++Partial or conflicting requests exit 2 before product code can open
++default data. Rejected: missing, relative, normal `%LOCALAPPDATA%\Uoink`,
++legacy Yoink, Desktop corpus, root volume, protected system paths, and
++port 5179.
++
++### 2. Inno isolated-install mode
++
++`/ISOLATED=1 /PROFILE=<abs> /PORT=<non-5179> /DIR=<abs-app>` skips
++`upgrade_prep.ps1` (no 5179 probe, no helper-by-prefix stop), skips the
++ordinary splash-sentinel delete, skips HKCU Run, skips the finish-page
++helper launch, skips ordinary shortcuts, and writes
++`{app}\isolated-install.json`. Isolated shortcuts pass the declared
++profile and port. Ordinary reuse of `{localappdata}\Uoink` or an existing
++`server.py` without the marker is refused. A recorded
++`runtime-identity.json` refuses upgrade until the isolated stop command
++runs. Normal install/upgrade ownership is unchanged when `/ISOLATED` is
++absent.
++
++### 3. Runtime bindings
++
++`server.py` applies isolation before `DATA_ROOT` / token / log / output.
++Stdio (`uoink_mcp.py`), dashboard and splash apply it before opening
++URLs or sentinels. Suite leases and manifests use the declared port and
++write under `<profile>\suite-services.d`, not the user's RyanSuite
++directory. Isolated `/file` roots are only the declared profile. Legacy
++Yoink migration is `skipped_isolated_install`. Occupied isolated ports
++fail closed with `isolated-port-occupied` and exclusive bind
++(`SO_EXCLUSIVEADDRUSE` on Windows); they never fall back to 5179.
++Splash/dashboard/stdio children inherit `--isolated-profile` /
++`--isolated-port` and the matching environment.
++
++### 4. Owned stop identity
++
++Stop is `python uoink_install_isolation.py --isolated-stop ...`. It
++reads `<profile>\runtime-identity.json` and terminates only when pid,
++executable image and creation time match that record. It never kills by
++PID alone, process name, a shared-port probe, or a textual directory
++prefix. Isolation upgrade check returns
++`isolated-running-requires-stop` while the owned helper is alive.
++Stock `stop-server.ps1` / uninstall scripts were not run.
++
++### 5. Staging
++
++`uoink_install_isolation.py` is in `build.ps1` existence check, Copy-Item
++staging, py_compile, and Inno `[Files]`.
++
++## Operator commands (for Astra's runbook; not executed here)
++
++Create the disposable profile directory first. Never use the ordinary
++`%LOCALAPPDATA%\Uoink` path or port 5179.
++
++Isolated setup (example shape only; do not run the current sealed
++package until Astra rebuilds):
++
++```text
++Uoink-Setup-<version>.exe /VERYSILENT /NORESTART /SUPPRESSMSGBOXES ^
++  /DIR="<absolute app dir>" /ISOLATED=1 ^
++  /PROFILE="<absolute existing profile dir>" /PORT=<non-5179>
++```
++
++Start:
++
++```text
++"<app>\python\pythonw.exe" "<app>\server.py" --isolated-profile "<profile>" --isolated-port <port>
++```
++
++Stdio:
++
++```text
++"<app>\python\python.exe" "<app>\uoink_mcp.py" --isolated-profile "<profile>" --isolated-port <port>
++```
++
++Stop:
++
++```text
++"<app>\python\python.exe" "<app>\uoink_install_isolation.py" --isolated-stop --isolated-from-install-dir "<app>"
++```
++
++Equivalent explicit stop:
++
++```text
++python uoink_install_isolation.py --isolated-stop --isolated-profile "<profile>" --isolated-port <port>
++```
++
++Upgrade preflight (must be stopped first):
++
++```text
++python uoink_install_isolation.py --isolated-upgrade-check --isolated-from-install-dir "<app>" --isolated-profile "<profile>" --isolated-port <port>
++```
++
++### Validation errors (stderr `uoink isolated install: <code>: ...`, exit 2 unless noted)
++
++| Code | When |
++|---|---|
++| `isolated-profile-missing` | Isolation requested without a profile |
++| `isolated-profile-relative` | Profile is not absolute |
++| `isolated-profile-not-found` | Profile directory does not exist |
++| `isolated-profile-not-directory` | Profile path is not a directory |
++| `isolated-profile-normal-data` | Profile is/contains ordinary Uoink data or Desktop corpus |
++| `isolated-profile-legacy-data` | Profile collides with Yoink data |
++| `isolated-profile-root-volume` | Profile is a drive/volume root |
++| `isolated-profile-unsafe` | Profile is a protected system path |
++| `isolated-profile-conflict` | CLI/env/marker disagree, or profile equals app dir |
++| `isolated-port-missing` | Isolation requested without a port |
++| `isolated-port-invalid` | Port is not an integer 1-65535 |
++| `isolated-port-forbidden` | Port is 5179 |
++| `isolated-install-ordinary-reuse` | Isolated mode pointed at the ordinary install or an unmarked `server.py` |
++| `isolated-install-marker-mismatch` | Existing `isolated-install.json` disagrees |
++| `isolated-install-marker-missing` | `--isolated-from-install-dir` has no marker |
++| `isolated-port-occupied` | Declared port cannot be bound (helper exit 1) |
++| `isolated-running-requires-stop` | Upgrade check while owned helper is alive (exit 3) |
++| `isolated-stop-identity-missing` | Stop with no identity is a no-op success |
++| `isolated-stop-identity-mismatch` | Identity does not match the live process (exit 4) |
++
++## Tests
++
++New file only: `tests/test_install_isolation.py` (27 cases). No existing
++test, fixture, assertion, skip or parameter was edited.
++
++Covered: fail-closed validation before canary/default access; valid
++startup on a disposable profile and non-5179 loopback port; GUI/stdio
++inheritance; exclusive occupied-port refusal; owned stop that refuses a
++same-executable decoy; installer source checks; suite lease address.
++
++## Commands and results
++
++Worktree:
++
++`C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok`
++
++Syntax:
++
++```text
++python -B -m py_compile uoink_install_isolation.py server.py uoink_mcp.py uoink_dashboard.py uoink_splash.py suite_service.py migrate_install.py tests/test_install_isolation.py
++```
++
++Exit 0.
++
++### Preserved failures (before repair)
++
++Unguarded process run of four helper tests, 141.35 s, **4 failed**:
++
++- `test_isolated_startup_binds_profile_and_port` — helper hung; stdout PIPE filled by logging.
++- `test_occupied_isolated_port_is_refused` — same hang, then Windows `SO_REUSEADDR` allowed a second bind.
++- `test_upgrade_check_refuses_a_live_owned_helper` — helper never answered `/health` (pipe hang).
++- `test_stdio_inherits_isolated_profile` — child ImportError for the MCP SDK because `APPDATA` was redirected to the canary.
++
++Those results stay failed. They are not the guarded suite.
++
++### Repairs before rerun
++
++1. Helper process tests write stdout to a log file instead of an unread PIPE.
++2. Isolated `_YoinkHTTPServer.server_bind` sets `allow_reuse_address=False` and `SO_EXCLUSIVEADDRUSE`; the occupancy holder does the same.
++3. Child env no longer overrides `APPDATA`; user site-packages is prepended onto `PYTHONPATH`; stdio skip checks `FastMCP`/`anyio`.
++
++Rerun of `tests/test_install_isolation.py` after those repairs: **27 passed**, 8.13 s.
++
++### Named guarded suite (authoritative for this worker)
++
++```text
++python -B docs/library/proof/ryan-corrected-01-2026-09-09/integrator_verify.py --root <worktree> --label iso-g1 tests/test_install_isolation.py tests/test_installer_files_complete.py tests/test_installer_dependency_lock.py tests/test_installer_download_accuracy.py tests/test_u11_installer_overhaul.py tests/test_splash_hotfix.py tests/test_c01_mcp_stdio.py tests/test_s6_suite_integration.py tests/test_migration_step0_characterization.py tests/test_source_subscriptions_migration.py tests/test_mac_layout_prep.py tests/test_u12_first_run_polish.py
++```
++
++`ANTHROPIC_API_KEY` removed. Guard forbids live `%LOCALAPPDATA%\Uoink\index.db` and port 5179. Exit **0**.
++
++**92 passed, 1 skipped, 5 warnings, 19.43 s.** The skip is the existing S6 symlink-privilege case (`WinError 1314`), not a new failure. Pytest command, XML and log: worktree `_scratch/iso-g1/` (`tests.log`, `tests.xml`, `results.json`).
++
++Startup/path companions identified and included: `tests/test_mac_layout_prep.py`, `tests/test_u12_first_run_polish.py`.
++
++## Bounded diff
++
++Tracked edits (`git diff --stat`):
++
++```text
++ build.ps1           |   4 +-
++ installer/uoink.iss | 255 ++++++++++++++++++++++++++++++++++++++++++++++++++--
++ migrate_install.py  |  13 +++
++ server.py           | 105 +++++++++++++++---
++ suite_service.py    |  42 ++++++--
++ uoink_dashboard.py  |  19 +++-
++ uoink_mcp.py        |   3 +
++ uoink_splash.py     |  51 ++++++---
++ 8 files changed, 440 insertions(+), 52 deletions(-)
++```
++
++Untracked (required deliverables):
++
++- `uoink_install_isolation.py`
++- `tests/test_install_isolation.py`
++- `docs/library/RYAN-INSTALL-ISOLATION-WORKER-2026-09-09.md`
++
++`_platform.py` and every existing test file are unchanged. Full patch is the worktree working tree; workers do not commit.
++
++## Not done here (integrator / Astra)
++
++- Independent checkout verification of this diff
++- Full tree
++- Installer rebuild/reseal
++- Editing `INSTALL-RECEIPT-RUNBOOK-2026-09-09.md`
++- Any installed receipt, C22, or live helper observation
+diff --git a/installer/uoink.iss b/installer/uoink.iss
+index ba47b77f76dad9166dd35e99b89831f2af722de3..88335e83a4f2e04b11f2a5185fd84d8d6d9d75d2 100644
+--- a/installer/uoink.iss
++++ b/installer/uoink.iss
+@@ -126,6 +126,10 @@ Source: "staging\scripts\recall_hook.py"; DestDir: "{app}\scripts"; Flags: ignor
+ ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
+ ; this at module top. Omitting it crashes the helper before it binds the port.
+ Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
++; Isolated installed-profile configuration. server.py, uoink_mcp.py, the
++; splash/dashboard wrappers and the isolated stop command import this before
++; opening default data. Must ship or isolated mode cannot start.
++Source: "staging\uoink_install_isolation.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\workspaces.py"; DestDir: "{app}"; Flags: ignoreversion
+@@ -224,13 +228,31 @@ Name: "{group}\Uoink"; \
+   Parameters: """{app}\server.py"" --show-dashboard"; \
+   WorkingDir: "{app}"; \
+   IconFilename: "{app}\uoink.ico"; \
+-  Comment: "Start Uoink"
++  Comment: "Start Uoink"; \
++  Check: not IsolatedInstall
++
++Name: "{group}\Uoink"; \
++  Filename: "{app}\python\pythonw.exe"; \
++  Parameters: """{app}\server.py"" --isolated-profile ""{param:PROFILE}"" --isolated-port {param:PORT} --show-dashboard"; \
++  WorkingDir: "{app}"; \
++  IconFilename: "{app}\uoink.ico"; \
++  Comment: "Start isolated Uoink"; \
++  Check: IsolatedInstall
+ 
+ Name: "{group}\Stop Uoink"; \
+   Filename: "{app}\stop-server.bat"; \
+   WorkingDir: "{app}"; \
+   IconFilename: "{app}\uoink.ico"; \
+-  Comment: "Stop Uoink"
++  Comment: "Stop Uoink"; \
++  Check: not IsolatedInstall
++
++Name: "{group}\Stop Uoink"; \
++  Filename: "{app}\python\python.exe"; \
++  Parameters: """{app}\uoink_install_isolation.py"" --isolated-stop --isolated-from-install-dir ""{app}"""; \
++  WorkingDir: "{app}"; \
++  IconFilename: "{app}\uoink.ico"; \
++  Comment: "Stop isolated Uoink"; \
++  Check: IsolatedInstall
+ 
+ Name: "{group}\Open Uoink folder"; \
+   Filename: "{app}"; \
+@@ -249,7 +271,17 @@ Name: "{autodesktop}\Uoink"; \
+   WorkingDir: "{app}"; \
+   IconFilename: "{app}\uoink.ico"; \
+   Comment: "Start Uoink"; \
+-  Tasks: desktopicon
++  Tasks: desktopicon; \
++  Check: not IsolatedInstall
++
++Name: "{autodesktop}\Uoink"; \
++  Filename: "{app}\python\pythonw.exe"; \
++  Parameters: """{app}\server.py"" --isolated-profile ""{param:PROFILE}"" --isolated-port {param:PORT} --show-dashboard"; \
++  WorkingDir: "{app}"; \
++  IconFilename: "{app}\uoink.ico"; \
++  Comment: "Start isolated Uoink"; \
++  Tasks: desktopicon; \
++  Check: IsolatedInstall
+ 
+ [Registry]
+ ; Auto-start the helper on every Windows login. uninsdeletevalue removes the
+@@ -258,7 +290,8 @@ Name: "{autodesktop}\Uoink"; \
+ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
+   ValueType: string; ValueName: "Uoink"; \
+   ValueData: """{app}\python\pythonw.exe"" ""{app}\server.py"""; \
+-  Flags: uninsdeletevalue
++  Flags: uninsdeletevalue; \
++  Check: not IsolatedInstall
+ 
+ [Run]
+ ; "Set up the browser button now" checkbox on the finish page (default checked).
+@@ -266,7 +299,8 @@ Filename: "{app}\python\pythonw.exe"; \
+   Parameters: """{app}\server.py"""; \
+   WorkingDir: "{app}"; \
+   Description: "Set up the browser button now"; \
+-  Flags: postinstall nowait skipifsilent
++  Flags: postinstall nowait skipifsilent; \
++  Check: not IsolatedInstall
+ 
+ [UninstallRun]
+ ; Stop a running server before file removal so unins doesn't fail on locked
+@@ -274,7 +308,15 @@ Filename: "{app}\python\pythonw.exe"; \
+ Filename: "{app}\stop-server.bat"; \
+   WorkingDir: "{app}"; \
+   Flags: runhidden waituntilterminated; \
+-  RunOnceId: "StopUoink"
++  RunOnceId: "StopUoink"; \
++  Check: not IsolatedInstall
++
++Filename: "{app}\python\python.exe"; \
++  Parameters: """{app}\uoink_install_isolation.py"" --isolated-stop --isolated-from-install-dir ""{app}"""; \
++  WorkingDir: "{app}"; \
++  Flags: runhidden waituntilterminated; \
++  RunOnceId: "StopIsolatedUoink"; \
++  Check: IsolatedInstall
+ 
+ [UninstallDelete]
+ ; Pip and the running Python create files we didn't ship (.pyc caches, the
+@@ -321,6 +363,174 @@ var
+   DefaultNextLeft: Integer;
+   DefaultNextWidth: Integer;
+ 
++function IsolatedInstall(): Boolean;
++begin
++  Result := CompareText(Trim(ExpandConstant('{param:ISOLATED}')), '1') = 0;
++end;
++
++function IsolatedProfile(): String;
++begin
++  Result := RemoveQuotes(Trim(ExpandConstant('{param:PROFILE}')));
++end;
++
++function IsolatedPort(): Integer;
++begin
++  Result := StrToIntDef(Trim(ExpandConstant('{param:PORT}')), -1);
++end;
++
++function JsonEscape(const S: String): String;
++begin
++  Result := S;
++  StringChangeEx(Result, '\', '\\', True);
++  StringChangeEx(Result, '"', '\"', True);
++end;
++
++function IsolatedPathIsAbsolute(const Profile: String): Boolean;
++begin
++  Result := False;
++  if Length(Profile) >= 3 then
++  begin
++    if (Profile[2] = ':') and (Profile[3] = '\') then
++      Result := True
++    else if (Profile[1] = '\') and (Profile[2] = '\') then
++      Result := True;
++  end;
++end;
++
++function IsolatedPathIsRootVolume(const Profile: String): Boolean;
++begin
++  Result := (Length(Profile) = 3) and (Profile[2] = ':') and (Profile[3] = '\');
++end;
++
++procedure IsolatedAbort(const CodeAndMessage: String);
++begin
++  Log('isolated install refused: ' + CodeAndMessage);
++  if not WizardSilent then
++    MsgBox(CodeAndMessage, mbError, MB_OK);
++end;
++
++function IsolatedMarkerMatches(const AppDir, Profile: String; Port: Integer): Boolean;
++var
++  Body: AnsiString;
++  MarkerPath: String;
++begin
++  MarkerPath := AppDir + '\isolated-install.json';
++  if not LoadStringFromFile(MarkerPath, Body) then
++  begin
++    Result := False;
++    Exit;
++  end;
++  Result := (Pos(JsonEscape(Profile), String(Body)) > 0) and
++            (Pos('"port": ' + IntToStr(Port), String(Body)) > 0);
++end;
++
++function InitializeSetup(): Boolean;
++var
++  Profile: String;
++  Port: Integer;
++  AppDir: String;
++  NormalData: String;
++  LegacyData: String;
++begin
++  Result := True;
++  if not IsolatedInstall() then
++    Exit;
++
++  Profile := IsolatedProfile();
++  Port := IsolatedPort();
++  AppDir := ExpandConstant('{app}');
++  NormalData := ExpandConstant('{localappdata}\Uoink');
++  LegacyData := ExpandConstant('{localappdata}\Yoink');
++
++  if Profile = '' then
++  begin
++    IsolatedAbort('isolated-profile-missing: isolated mode requires /PROFILE=<absolute directory>');
++    Result := False;
++    Exit;
++  end;
++  if not IsolatedPathIsAbsolute(Profile) then
++  begin
++    IsolatedAbort('isolated-profile-relative: isolated /PROFILE must be an absolute directory');
++    Result := False;
++    Exit;
++  end;
++  if IsolatedPathIsRootVolume(Profile) then
++  begin
++    IsolatedAbort('isolated-profile-root-volume: isolated /PROFILE cannot be a drive root');
++    Result := False;
++    Exit;
++  end;
++  if not DirExists(Profile) then
++  begin
++    IsolatedAbort('isolated-profile-not-found: isolated /PROFILE must already exist');
++    Result := False;
++    Exit;
++  end;
++  if CompareText(Profile, NormalData) = 0 then
++  begin
++    IsolatedAbort('isolated-profile-normal-data: isolated /PROFILE cannot be the ordinary Uoink data root');
++    Result := False;
++    Exit;
++  end;
++  if CompareText(Profile, LegacyData) = 0 then
++  begin
++    IsolatedAbort('isolated-profile-legacy-data: isolated /PROFILE cannot be the legacy Yoink data root');
++    Result := False;
++    Exit;
++  end;
++  if Port < 1 then
++  begin
++    IsolatedAbort('isolated-port-missing: isolated mode requires /PORT=<loopback port>');
++    Result := False;
++    Exit;
++  end;
++  if (Port < 1) or (Port > 65535) then
++  begin
++    IsolatedAbort('isolated-port-invalid: isolated /PORT must be an integer 1-65535');
++    Result := False;
++    Exit;
++  end;
++  if Port = 5179 then
++  begin
++    IsolatedAbort('isolated-port-forbidden: isolated /PORT cannot be 5179');
++    Result := False;
++    Exit;
++  end;
++  if CompareText(AppDir, NormalData) = 0 then
++  begin
++    IsolatedAbort('isolated-install-ordinary-reuse: isolated /DIR cannot be the ordinary install directory');
++    Result := False;
++    Exit;
++  end;
++  if CompareText(AppDir, Profile) = 0 then
++  begin
++    IsolatedAbort('isolated-profile-conflict: isolated /PROFILE cannot be the install directory');
++    Result := False;
++    Exit;
++  end;
++  if FileExists(AppDir + '\isolated-install.json') then
++  begin
++    if not IsolatedMarkerMatches(AppDir, Profile, Port) then
++    begin
++      IsolatedAbort('isolated-install-marker-mismatch: existing isolated-install.json does not match /PROFILE and /PORT');
++      Result := False;
++      Exit;
++    end;
++  end
++  else if FileExists(AppDir + '\server.py') then
++  begin
++    IsolatedAbort('isolated-install-ordinary-reuse: refusing to treat an ordinary installation as isolated');
++    Result := False;
++    Exit;
++  end;
++  if FileExists(Profile + '\runtime-identity.json') then
++  begin
++    IsolatedAbort('isolated-running-requires-stop: owned isolated helper still recorded as running; run the isolated stop command first');
++    Result := False;
++    Exit;
++  end;
++end;
++
+ function LegacyYoinkPresent(): Boolean;
+ begin
+   Result := DirExists(ExpandConstant('{localappdata}\Yoink'));
+@@ -414,7 +624,7 @@ begin
+     the wizard's first screen (mock 1.2.1). }
+   if PageID = wpWelcome then
+     Result := True;
+-  if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
++  if (PageID = MigratePage.ID) and ((not LegacyYoinkPresent()) or IsolatedInstall()) then
+     Result := True;
+ end;
+ 
+@@ -453,6 +663,13 @@ var
+ begin
+   Result := '';
+   NeedsRestart := False;
++  (* Isolated installs never probe 5179, never stop a helper by name/prefix,
++     and never touch the ordinary %LOCALAPPDATA%\Uoink splash sentinel. *)
++  if IsolatedInstall() then
++  begin
++    Log('PrepareToInstall: isolated mode skips upgrade_prep.ps1 and ordinary sentinel delete');
++    Exit;
++  end;
+   SentinelPath := ExpandConstant('{localappdata}\Uoink\.first-run-done');
+ 
+   (* dontcopy file -- ExtractTemporaryFile pulls it into {tmp} the first
+@@ -532,10 +749,34 @@ begin
+   Log('Post-install verification: bundled files verified for {#AppVersion}');
+ end;
+ 
++procedure WriteIsolatedMarker();
++var
++  MarkerPath: String;
++  Body: String;
++begin
++  MarkerPath := ExpandConstant('{app}\isolated-install.json');
++  Body :=
++    '{' + #13#10 +
++    '  "mode": "isolated",' + #13#10 +
++    '  "profile": "' + JsonEscape(IsolatedProfile()) + '",' + #13#10 +
++    '  "port": ' + IntToStr(IsolatedPort()) + ',' + #13#10 +
++    '  "host": "127.0.0.1",' + #13#10 +
++    '  "app_dir": "' + JsonEscape(ExpandConstant('{app}')) + '"' + #13#10 +
++    '}' + #13#10;
++  if SaveStringToFile(MarkerPath, Body, False) then
++    Log('Post-install: wrote isolated-install.json')
++  else
++    Log('Post-install: failed to write isolated-install.json');
++end;
++
+ procedure CurStepChanged(CurStep: TSetupStep);
+ begin
+   if CurStep = ssPostInstall then
++  begin
++    if IsolatedInstall() then
++      WriteIsolatedMarker();
+     VerifyInstalledHelper();
++  end;
+ end;
+ 
+ { Finding 2.2 (creative review v2.2, AG): override Next/Back chrome on
+diff --git a/migrate_install.py b/migrate_install.py
+index d24422cf36e5a01087397365dd137fada4cd255b..e5a326a0edcfb41231029e8e4e39051f473add01 100644
+--- a/migrate_install.py
++++ b/migrate_install.py
+@@ -291,6 +291,19 @@ def run_migration(*, dry_run: bool = False, app_dir: Path | None = None) -> dict
+     Returns a status dict. Idempotent and safe to call on every boot: a
+     completed migration is a near-no-op (it only re-checks the 7-day cleanup).
+     """
++    try:
++        import uoink_install_isolation as iso
++        isolated = iso.current_binding()
++    except Exception:
++        isolated = None
++    if isolated is not None:
++        return {
++            "dry_run": dry_run,
++            "old_root": None,
++            "new_root": str(isolated.profile),
++            "steps": [{"isolated": "skipped_isolated_install"}],
++            "outcome": "skipped_isolated_install",
++        }
+     if app_dir is None:
+         app_dir = Path(__file__).parent.resolve()
+     new_root = _new_data_root()
+diff --git a/server.py b/server.py
+index 7358d3b360262a369377c8abef0b85b8d3ec9fd6..400d6c549ac756e3ed73a09ee93a2f774d52f5af 100644
+--- a/server.py
++++ b/server.py
+@@ -53,6 +53,10 @@ else:
+ HERE = Path(__file__).parent.resolve()
+ sys.path.insert(0, str(HERE))
+ 
++# Isolation must be validated before any later import can open default data.
++import uoink_install_isolation as _install_isolation  # noqa: E402
++_install_isolation.apply_from_process()
++
+ 
+ def _read_version() -> str:
+     try:
+@@ -144,7 +148,7 @@ from uoink_core.storage import (  # noqa: E402
+ 
+ # --- Constants -------------------------------------------------------------
+ HOST = "127.0.0.1"
+-PORT = 5179
++PORT = _install_isolation.listen_port(5179)
+ VERSION = _read_version()
+ DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
+ 
+@@ -436,10 +440,14 @@ PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
+ # this via /token (gated by chrome-extension:// origin) on first launch
+ # and includes it in X-Uoink-Token on every subsequent request. The legacy
+ # X-Yoink-Token header is still accepted through the v2.x alias window.
+-TOKEN_PATH = HERE / "token.txt"
++_ISOLATION = _install_isolation.current_binding()
++TOKEN_PATH = (
++    _ISOLATION.token_path if _ISOLATION is not None else HERE / "token.txt"
++)
+ # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
+ # so the same helper runs on Windows + macOS without per-call branches.
+-DATA_ROOT = _platform.user_data_dir()
++# Isolated installs substitute the declared profile instead of the normal root.
++DATA_ROOT = _install_isolation.data_root(_platform.user_data_dir())
+ RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
+ SETTINGS_PATH = DATA_ROOT / "settings.json"
+ JOBS_PATH = DATA_ROOT / "jobs.json"
+@@ -1878,6 +1886,9 @@ def _get_output_root() -> Path:
+     A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
+     the Desktop path turns out to be unwritable -- see
+     _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
++    isolated = _install_isolation.current_binding()
++    if isolated is not None:
++        return isolated.output_dir
+     override = (os.environ.get("UOINK_OUTPUT_DIR")
+                 or os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
+     if override:
+@@ -1935,6 +1946,15 @@ def _apply_output_root_fallback() -> None:
+     so /health and /diagnose can warn. /file accepts both candidates
+     either way, so legacy yoinks still on the Desktop remain readable."""
+     global DESKTOP_ROOT, SESSIONS_ROOT, _OUTPUT_ROOT_FALLBACK
++    isolated = _install_isolation.current_binding()
++    if isolated is not None:
++        DESKTOP_ROOT = isolated.output_dir
++        SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
++        try:
++            DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
++        except OSError as e:
++            log.warning("isolated output root: cannot create %s -- %s", DESKTOP_ROOT, e)
++        return
+     try:
+         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+     except OSError as e:
+@@ -1968,6 +1988,15 @@ def _allowed_roots() -> set[Path]:
+     the user opts in to move their Desktop corpus, they may still have
+     uoinks under Desktop\\Uoink OR legacy yoinks under Desktop\\Yoink whose
+     thumbnails the Memory page needs to render."""
++    isolated = _install_isolation.current_binding()
++    if isolated is not None:
++        roots: set[Path] = set()
++        for candidate in (isolated.output_dir, isolated.profile):
++            try:
++                roots.add(candidate.resolve())
++            except OSError:
++                pass
++        return roots
+     roots: set[Path] = set()
+     desktop = _get_desktop_dir()
+     for candidate in (DESKTOP_ROOT, desktop / "Uoink", desktop / "Yoink",
+@@ -1980,7 +2009,9 @@ def _allowed_roots() -> set[Path]:
+ 
+ 
+ # --- Logging ---------------------------------------------------------------
+-LOG_PATH = HERE / "server.log"
++LOG_PATH = (
++    _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
++)
+ logging.basicConfig(
+     level=logging.INFO,
+     format="%(asctime)s %(levelname)s %(message)s",
+@@ -17072,10 +17103,13 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
+         if script.exists():
+             exe = _bundled_interpreter(gui=True) or Path(sys.executable)
+             creationflags = 0x08000000 if sys.platform == "win32" else 0
++            env = os.environ.copy()
++            env.update(_install_isolation.child_environ())
+             subprocess.Popen(
+-                [str(exe), str(script)],
++                [str(exe), str(script), *_install_isolation.child_argv()],
+                 cwd=str(HERE),
+                 creationflags=creationflags,
++                env=env,
+             )
+             log.info("dashboard: spawned (%s)", reason)
+             return True
+@@ -17083,7 +17117,7 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
+         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
+ 
+     try:
+-        webbrowser.open(f"http://{HOST}:{PORT}/dashboard")
++        webbrowser.open(_install_isolation.helper_url("/dashboard"))
+         log.info("dashboard: opened browser fallback (%s)", reason)
+         return True
+     except Exception as e:
+@@ -17098,6 +17132,13 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
+     so Ctrl+C still exits promptly."""
+     request_queue_size = 16
+ 
++    def server_bind(self):
++        if _install_isolation.current_binding() is not None:
++            self.allow_reuse_address = False
++            if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
++                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
++        super().server_bind()
++
+ 
+ def main(*, show_dashboard: bool = False):
+     global _active_migration_version
+@@ -17121,11 +17162,15 @@ def main(*, show_dashboard: bool = False):
+     # idempotent, so this is a near-no-op on every boot after the first. Runs
+     # before _get_index() so the copied index.db / settings are in place under
+     # the new \Uoink\ DATA_ROOT before anything reads them. Never fatal.
+-    try:
+-        _mig = migrate_install.run_migration(app_dir=HERE)
+-        log.info("install migration: %s", _mig.get("outcome"))
+-    except Exception as e:
+-        log.warning("install migration raised (non-fatal): %s", e)
++    # Isolated installs must not copy the ordinary Yoink/Uoink library.
++    if _install_isolation.current_binding() is None:
++        try:
++            _mig = migrate_install.run_migration(app_dir=HERE)
++            log.info("install migration: %s", _mig.get("outcome"))
++        except Exception as e:
++            log.warning("install migration raised (non-fatal): %s", e)
++    else:
++        log.info("install migration: skipped_isolated_install")
+ 
+     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
+     # active output root to %LOCALAPPDATA%\Uoink\output before the first
+@@ -17141,7 +17186,11 @@ def main(*, show_dashboard: bool = False):
+         # Port held by something we couldn't probe via /health (different
+         # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
+         # restart-on-failure policy recover or surface the outage.
+-        log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
++        # Isolated mode never falls back to production port 5179.
++        if _install_isolation.current_binding() is not None:
++            log.error("isolated-port-occupied: failed to bind %s:%d -- %s", HOST, PORT, e)
++        else:
++            log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
+         sys.exit(1)
+ 
+     _migrate_plaintext_anthropic_key()
+@@ -17201,13 +17250,29 @@ def main(*, show_dashboard: bool = False):
+     _start_podcast_feed_scheduler_thread()
+ 
+     # Bind succeeded -- now safe to claim the PID file.
+-    pid_file = HERE / "server.pid"
++    isolated = _install_isolation.current_binding()
++    pid_file = isolated.pid_path if isolated is not None else HERE / "server.pid"
+     try:
+         pid_file.write_text(str(os.getpid()), encoding="utf-8")
+     except OSError:
+         pass
+     import atexit
+     atexit.register(lambda: pid_file.unlink(missing_ok=True))
++    if isolated is not None:
++        try:
++            _install_isolation.write_runtime_identity(
++                isolated,
++                pid=os.getpid(),
++                executable=sys.executable,
++                script=str(HERE / "server.py"),
++                created_ms=_install_isolation.current_process_created_ms(),
++                nonce=secrets.token_hex(8),
++            )
++        except OSError as e:
++            log.error("isolated identity write failed: %s", e)
++            server.server_close()
++            sys.exit(1)
++        atexit.register(lambda binding=isolated: binding.identity_path.unlink(missing_ok=True))
+ 
+     # S6: advertise only the resident address and bounded capabilities.
+     # The lease is deliberately token-free and non-executable; credentials
+@@ -17272,8 +17337,13 @@ def main(*, show_dashboard: bool = False):
+                 _splash_script = str(HERE / "uoink_splash.py")
+                 _splash_pyw = str(_bundled_interpreter(gui=True) or sys.executable)
+                 _splash_flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
+-                subprocess.Popen([_splash_pyw, _splash_script],
+-                                 creationflags=_splash_flags)
++                _splash_env = os.environ.copy()
++                _splash_env.update(_install_isolation.child_environ())
++                subprocess.Popen(
++                    [_splash_pyw, _splash_script, *_install_isolation.child_argv()],
++                    creationflags=_splash_flags,
++                    env=_splash_env,
++                )
+                 splash_spawned = True
+                 log.info("splash: spawned (version %s)", VERSION)
+         except Exception as e:
+@@ -17744,6 +17814,8 @@ def doctor_payload() -> dict:
+ def run_cli(argv: list[str]) -> int:
+     """Tiny CLI dispatcher for the helper. Returns a process exit code.
+ 
++    - --isolated-stop / --isolated-upgrade-check : owned isolated identity
++      commands. They never probe port 5179 or kill by name/prefix.
+     - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
+       copy / move / delete and the keyring entry it'd rewrite, changing
+       nothing. De-risks the clean-VM upgrade test.
+@@ -17766,6 +17838,9 @@ def run_cli(argv: list[str]) -> int:
+     - --show-dashboard  : run the server, then open the dashboard window.
+     (no flag)           : run the server.
+     """
++    if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
++        return _install_isolation.cli(argv)
++    argv = _install_isolation.strip_cli(argv)
+     if argv and argv[0] == "doctor":
+         argv = ["--doctor", *argv[1:]]
+     elif argv and argv[0] == "rebuild-index":
+diff --git a/suite_service.py b/suite_service.py
+index f36bcb79ed3124c9a083ca50b85faffe2de2609c..bd04db2dd1019efb044fc70c13af2cc2be4eb813 100644
+--- a/suite_service.py
++++ b/suite_service.py
+@@ -35,6 +35,24 @@ def utc_now() -> str:
+     )
+ 
+ 
++def _active_port() -> int:
++    try:
++        import uoink_install_isolation as iso
++        binding = iso.current_binding()
++    except Exception:
++        binding = None
++    return binding.port if binding is not None else DEFAULT_PORT
++
++
++def _active_base_url() -> str:
++    try:
++        import uoink_install_isolation as iso
++        binding = iso.current_binding()
++    except Exception:
++        binding = None
++    return binding.base_url if binding is not None else BASE_URL
++
++
+ def service_manifest(service_version: str) -> dict:
+     """Return the exact public ``ryan.suite.service`` v1 provider shape."""
+     return {
+@@ -47,7 +65,7 @@ def service_manifest(service_version: str) -> dict:
+             "service_version": service_version,
+             "api_version": 1,
+             "resident": True,
+-            "default_port": DEFAULT_PORT,
++            "default_port": _active_port(),
+             "health": {
+                 "contract": "ryan.suite.health",
+                 "version": 1,
+@@ -134,15 +152,16 @@ def runtime_lease(
+     started_at: str,
+ ) -> dict:
+     """Return Uoink's exact token-free ``ryan.suite.runtime-lease`` v1."""
++    url = _active_base_url()
+     return {
+         "contract": "ryan.suite.runtime-lease",
+         "version": 1,
+         "service_id": SERVICE_ID,
+         "service_version": service_version,
+         "api_version": 1,
+-        "base_url": BASE_URL,
+-        "health_url": f"{BASE_URL}{HEALTH_PATH}",
+-        "manifest_url": f"{BASE_URL}{MANIFEST_PATH}",
++        "base_url": url,
++        "health_url": f"{url}{HEALTH_PATH}",
++        "manifest_url": f"{url}{MANIFEST_PATH}",
+         "capabilities": list(CAPABILITIES),
+         "ui": {
+             "home": UI["home"],
+@@ -161,9 +180,18 @@ def write_runtime_lease(
+     started_at: str,
+ ) -> Path:
+     """Atomically replace Uoink's runtime lease with per-user permissions."""
+-    registry = (
+-        runtime_registry_dir() if registry_dir is None else Path(registry_dir)
+-    )
++    if registry_dir is None:
++        try:
++            import uoink_install_isolation as iso
++            binding = iso.current_binding()
++        except Exception:
++            binding = None
++        if binding is not None:
++            registry = binding.suite_registry_dir()
++        else:
++            registry = runtime_registry_dir()
++    else:
++        registry = Path(registry_dir)
+     registry.mkdir(parents=True, exist_ok=True)
+     destination = registry / f"{SERVICE_ID}.json"
+     payload = runtime_lease(
+diff --git a/tests/test_install_isolation.py b/tests/test_install_isolation.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e30afb97fcea75992bf5ae28feb57278f6200d64
+--- /dev/null
++++ b/tests/test_install_isolation.py
+@@ -0,0 +1,728 @@
++"""Isolated installed-profile regressions.
++
++Covers fail-closed validation before forbidden access, valid
++startup/address/profile bindings, inherited GUI/stdio arguments, occupied-port
++refusal, and owned stop identity. Never contacts port 5179, never opens the
++live index, and never runs Inno or stock stop/uninstall scripts.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import site
++import socket
++import subprocess
++import sys
++import threading
++import time
++import urllib.error
++import urllib.request
++from pathlib import Path
++
++import pytest
++
++import uoink_install_isolation as iso
++
++ROOT = Path(__file__).resolve().parent.parent
++PRODUCTION_PORT = 5179
++
++
++def _free_loopback_port() -> int:
++    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++    sock.bind(("127.0.0.1", 0))
++    port = int(sock.getsockname()[1])
++    sock.close()
++    if port == PRODUCTION_PORT:
++        return _free_loopback_port()
++    return port
++
++
++def _child_env(canary: Path) -> dict[str, str]:
++    env = dict(os.environ)
++    env.pop("ANTHROPIC_API_KEY", None)
++    env.pop("UOINK_ISOLATED_PROFILE", None)
++    env.pop("UOINK_ISOLATED_PORT", None)
++    env.pop("UOINK_ISOLATED_APP_DIR", None)
++    env["PYTHONDONTWRITEBYTECODE"] = "1"
++    env["PYTHONUTF8"] = "1"
++    env["LOCALAPPDATA"] = str(canary)
++    env["USERPROFILE"] = str(canary)
++    env["XDG_DATA_HOME"] = str(canary / "xdg")
++    inherited = [part for part in env.get("PYTHONPATH", "").split(os.pathsep) if part]
++    extra = []
++    try:
++        extra.append(site.getusersitepackages())
++    except Exception:
++        pass
++    env["PYTHONPATH"] = os.pathsep.join([str(ROOT), *extra, *inherited])
++    env["librarian_apply_enabled"] = "false"
++    return env
++
++
++def _start_isolated_helper(profile: Path, port: int, canary: Path, log_path: Path) -> subprocess.Popen:
++    handle = log_path.open("w", encoding="utf-8")
++    proc = subprocess.Popen(
++        [
++            sys.executable,
++            "-B",
++            str(ROOT / "server.py"),
++            iso.CLI_PROFILE,
++            str(profile),
++            iso.CLI_PORT,
++            str(port),
++        ],
++        cwd=str(ROOT),
++        env=_child_env(canary),
++        stdout=handle,
++        stderr=subprocess.STDOUT,
++        text=True,
++    )
++    proc._iso_log_handle = handle  # type: ignore[attr-defined]
++    return proc
++
++
++def _stop_isolated_helper(profile: Path, port: int, canary: Path, proc: subprocess.Popen) -> subprocess.CompletedProcess:
++    stop = subprocess.run(
++        [
++            sys.executable,
++            "-B",
++            str(ROOT / "uoink_install_isolation.py"),
++            iso.CLI_STOP,
++            iso.CLI_PROFILE,
++            str(profile),
++            iso.CLI_PORT,
++            str(port),
++        ],
++        cwd=str(ROOT),
++        env=_child_env(canary),
++        capture_output=True,
++        text=True,
++        timeout=30,
++    )
++    try:
++        proc.wait(timeout=15)
++    except subprocess.TimeoutExpired:
++        proc.kill()
++        proc.wait(timeout=5)
++    handle = getattr(proc, "_iso_log_handle", None)
++    if handle is not None:
++        try:
++            handle.close()
++        except OSError:
++            pass
++    return stop
++
++
++def _canary_index(canary: Path) -> Path:
++    return canary / "Uoink" / "index.db"
++
++
++# ---- fail-closed validation -------------------------------------------------
++def test_missing_profile_fails_before_default_data(tmp_path):
++    canary = tmp_path / "user"
++    canary.mkdir()
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.resolve_from_process(
++            [iso.CLI_PORT, "5180"],
++            environ={"LOCALAPPDATA": str(canary), "USERPROFILE": str(canary)},
++        )
++    assert caught.value.code == "isolated-profile-missing"
++    assert not _canary_index(canary).exists()
++
++
++def test_relative_profile_is_rejected(tmp_path):
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(profile="relative-profile", port=5180)
++    assert caught.value.code == "isolated-profile-relative"
++
++
++def test_missing_profile_directory_is_rejected(tmp_path):
++    missing = tmp_path / "no-such-profile"
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(profile=missing, port=5180)
++    assert caught.value.code == "isolated-profile-not-found"
++
++
++def test_normal_data_profile_is_rejected(tmp_path):
++    canary = tmp_path / "user"
++    normal = canary / "Uoink"
++    normal.mkdir(parents=True)
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(
++            profile=normal,
++            port=5180,
++            environ={"LOCALAPPDATA": str(canary), "USERPROFILE": str(canary)},
++            platform_name="win32",
++            home=canary,
++        )
++    assert caught.value.code == "isolated-profile-normal-data"
++
++
++def test_legacy_data_profile_is_rejected(tmp_path):
++    canary = tmp_path / "user"
++    legacy = canary / "Yoink"
++    legacy.mkdir(parents=True)
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(
++            profile=legacy,
++            port=5180,
++            environ={"LOCALAPPDATA": str(canary), "USERPROFILE": str(canary)},
++            platform_name="win32",
++            home=canary,
++        )
++    assert caught.value.code == "isolated-profile-legacy-data"
++
++
++def test_root_volume_profile_is_rejected():
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(
++            profile="C:\\",
++            port=5180,
++            require_existing=False,
++            platform_name="win32",
++            environ={},
++            home=Path("C:\\Users\\nobody"),
++        )
++    assert caught.value.code == "isolated-profile-root-volume"
++
++
++def test_unsafe_system_profile_is_rejected(tmp_path):
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(
++            profile=r"C:\Windows",
++            port=5180,
++            require_existing=False,
++            platform_name="win32",
++            environ={"WINDIR": r"C:\Windows", "LOCALAPPDATA": str(tmp_path)},
++            home=tmp_path,
++        )
++    assert caught.value.code == "isolated-profile-unsafe"
++
++
++def test_conflicting_cli_and_env_profiles_are_rejected(tmp_path):
++    first = tmp_path / "one"
++    second = tmp_path / "two"
++    first.mkdir()
++    second.mkdir()
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.resolve_from_process(
++            [iso.CLI_PROFILE, str(first), iso.CLI_PORT, "5180"],
++            environ={
++                iso.ENV_PROFILE: str(second),
++                iso.ENV_PORT: "5180",
++                "LOCALAPPDATA": str(tmp_path / "user"),
++            },
++        )
++    assert caught.value.code == "isolated-profile-conflict"
++
++
++def test_production_port_is_forbidden(tmp_path):
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(profile=profile, port=PRODUCTION_PORT)
++    assert caught.value.code == "isolated-port-forbidden"
++
++
++def test_invalid_port_is_rejected(tmp_path):
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_binding(profile=profile, port="not-a-port")
++    assert caught.value.code == "isolated-port-invalid"
++
++
++def test_ordinary_install_reuse_is_refused(tmp_path):
++    app = tmp_path / "Uoink App"
++    profile = tmp_path / "profile"
++    app.mkdir()
++    profile.mkdir()
++    (app / "server.py").write_text("# ordinary install\n", encoding="utf-8")
++    binding = iso.validate_binding(profile=profile, port=5180)
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_install_reuse(
++            app_dir=app,
++            binding=binding,
++            environ={"LOCALAPPDATA": str(tmp_path / "user")},
++            platform_name="win32",
++            home=tmp_path / "user",
++        )
++    assert caught.value.code == "isolated-install-ordinary-reuse"
++
++
++def test_mismatched_install_marker_is_refused(tmp_path):
++    app = tmp_path / "app"
++    profile = tmp_path / "profile"
++    other = tmp_path / "other"
++    app.mkdir()
++    profile.mkdir()
++    other.mkdir()
++    first = iso.validate_binding(profile=other, port=5181, app_dir=app)
++    iso.write_install_marker(app, first)
++    binding = iso.validate_binding(profile=profile, port=5180, app_dir=app)
++    with pytest.raises(iso.IsolationError) as caught:
++        iso.validate_install_reuse(app_dir=app, binding=binding)
++    assert caught.value.code == "isolated-install-marker-mismatch"
++
++
++def test_no_isolation_request_leaves_production_unchanged():
++    assert iso.resolve_from_process(["--show-dashboard"], environ={}) is None
++    assert iso.listen_port(5179) == 5179
++    assert iso.base_url() == "http://127.0.0.1:5179"
++
++
++def test_invalid_isolation_exits_before_server_opens_canary(tmp_path):
++    canary = tmp_path / "user"
++    canary.mkdir()
++    port = _free_loopback_port()
++    proc = subprocess.run(
++        [
++            sys.executable,
++            "-B",
++            str(ROOT / "server.py"),
++            iso.CLI_PROFILE,
++            "relative-profile",
++            iso.CLI_PORT,
++            str(port),
++        ],
++        cwd=str(ROOT),
++        env=_child_env(canary),
++        capture_output=True,
++        text=True,
++        timeout=30,
++    )
++    assert proc.returncode == iso.EXIT_VALIDATION
++    assert "isolated-profile-relative" in proc.stderr
++    assert not _canary_index(canary).exists()
++    assert not (canary / "Uoink" / "token.txt").exists()
++
++
++def test_forbidden_port_argument_does_not_open_canary(tmp_path):
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    proc = subprocess.run(
++        [
++            sys.executable,
++            "-B",
++            str(ROOT / "server.py"),
++            iso.CLI_PROFILE,
++            str(profile),
++            iso.CLI_PORT,
++            str(PRODUCTION_PORT),
++        ],
++        cwd=str(ROOT),
++        env=_child_env(canary),
++        capture_output=True,
++        text=True,
++        timeout=30,
++    )
++    assert proc.returncode == iso.EXIT_VALIDATION
++    assert "isolated-port-forbidden" in proc.stderr
++    assert not _canary_index(canary).exists()
++    assert list(profile.iterdir()) == []
++
++
++# ---- valid binding / installer source --------------------------------------
++def test_valid_binding_and_durable_marker(tmp_path):
++    profile = tmp_path / "receipt" / "empty"
++    app = tmp_path / "receipt" / "Uoink App"
++    profile.mkdir(parents=True)
++    app.mkdir(parents=True)
++    port = _free_loopback_port()
++    with iso.bound_isolation(profile=profile, port=port, app_dir=app) as binding:
++        assert binding.profile == profile.resolve()
++        assert binding.port == port
++        assert binding.port != PRODUCTION_PORT
++        assert binding.base_url == f"http://127.0.0.1:{port}"
++        marker = iso.write_install_marker(app, binding)
++        payload = iso.read_install_marker(app)
++        assert marker.name == "isolated-install.json"
++        assert payload["mode"] == "isolated"
++        assert payload["port"] == port
++        iso.validate_install_reuse(app_dir=app, binding=binding)
++        assert iso.child_argv()[:4] == [
++            iso.CLI_PROFILE,
++            str(binding.profile),
++            iso.CLI_PORT,
++            str(port),
++        ]
++    assert iso.current_binding() is None
++
++
++def test_inno_isolated_mode_skips_5179_prep_and_ordinary_launch():
++    iss = (ROOT / "installer" / "uoink.iss").read_text(encoding="utf-8")
++    assert "function IsolatedInstall(): Boolean;" in iss
++    assert "isolated mode skips upgrade_prep.ps1" in iss
++    assert "isolated-port-forbidden" in iss
++    assert "isolated-install-ordinary-reuse" in iss
++    assert "isolated-running-requires-stop" in iss
++    assert "Check: IsolatedInstall" in iss
++    assert "Check: not IsolatedInstall" in iss
++    run_section = iss.split("[Run]", 1)[1].split("[UninstallRun]", 1)[0]
++    assert "--show-dashboard" not in run_section
++    assert 'Check: not IsolatedInstall' in run_section
++    registry = iss.split("[Registry]", 1)[1].split("[Run]", 1)[0]
++    assert "CurrentVersion\\Run" in registry
++    assert "Check: not IsolatedInstall" in registry
++    assert "staging\\uoink_install_isolation.py" in iss
++    assert "WriteIsolatedMarker" in iss
++
++
++def test_helper_stdio_and_gui_entries_apply_isolation_before_default_data():
++    server_src = (ROOT / "server.py").read_text(encoding="utf-8")
++    mcp_src = (ROOT / "uoink_mcp.py").read_text(encoding="utf-8")
++    dash_src = (ROOT / "uoink_dashboard.py").read_text(encoding="utf-8")
++    splash_src = (ROOT / "uoink_splash.py").read_text(encoding="utf-8")
++    assert server_src.index("apply_from_process()") < server_src.index("DATA_ROOT =")
++    assert mcp_src.index("apply_from_process()") < mcp_src.index("import server")
++    assert "helper_url(\"/dashboard\")" in dash_src
++    assert "helper_url(\"/splash\")" in splash_src
++    assert "helper_url(\"/health\")" in splash_src
++    assert "skipped_isolated_install" in (ROOT / "migrate_install.py").read_text(
++        encoding="utf-8"
++    )
++
++
++def test_dashboard_and_splash_inherit_declared_address(tmp_path):
++    import uoink_dashboard
++    import uoink_splash
++
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    port = _free_loopback_port()
++    with iso.bound_isolation(profile=profile, port=port):
++        assert uoink_dashboard._target_url() == f"http://127.0.0.1:{port}/dashboard"
++        assert uoink_splash._splash_url() == f"http://127.0.0.1:{port}/splash"
++        assert uoink_splash._sentinel_path() == profile.resolve() / ".first-run-done"
++        assert iso.helper_url("/health") == f"http://127.0.0.1:{port}/health"
++    assert uoink_dashboard._target_url() == "http://127.0.0.1:5179/dashboard"
++
++
++def test_stdio_child_argv_and_env_are_explicit(tmp_path):
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    port = _free_loopback_port()
++    binding = iso.validate_binding(profile=profile, port=port)
++    argv = iso.child_argv(binding)
++    env = iso.child_environ(binding)
++    assert argv[0] == iso.CLI_PROFILE
++    assert env[iso.ENV_PROFILE] == str(binding.profile)
++    assert env[iso.ENV_PORT] == str(port)
++
++
++# ---- process: startup, occupancy, stop -------------------------------------
++def _wait_health(port: int, timeout: float = 40.0) -> dict:
++    deadline = time.time() + timeout
++    last = None
++    while time.time() < deadline:
++        try:
++            with urllib.request.urlopen(
++                f"http://127.0.0.1:{port}/health", timeout=1.0
++            ) as response:
++                return json.loads(response.read().decode("utf-8"))
++        except (urllib.error.URLError, TimeoutError, ConnectionError, json.JSONDecodeError) as error:
++            last = error
++            time.sleep(0.2)
++    raise AssertionError(f"isolated helper did not answer /health: {last}")
++
++
++def test_isolated_startup_binds_profile_and_port(tmp_path):
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    port = _free_loopback_port()
++    log_path = tmp_path / "helper.log"
++    proc = _start_isolated_helper(profile, port, canary, log_path)
++    try:
++        health = _wait_health(port)
++        assert isinstance(health, dict)
++        assert (profile / "index.db").exists()
++        assert (profile / "token.txt").exists()
++        assert (profile / iso.IDENTITY_FILENAME).exists()
++        assert not _canary_index(canary).exists()
++        identity = json.loads((profile / iso.IDENTITY_FILENAME).read_text(encoding="utf-8"))
++        assert identity["port"] == port
++        assert identity["pid"] == proc.pid
++        lease_dir = profile / "suite-services.d"
++        if lease_dir.exists():
++            lease = json.loads((lease_dir / "uoink.json").read_text(encoding="utf-8"))
++            assert lease["base_url"] == f"http://127.0.0.1:{port}"
++            assert "5179" not in json.dumps(lease)
++    except Exception as error:
++        helper_log = (profile / "server.log").read_text(encoding="utf-8")[-4000:] if (profile / "server.log").exists() else ""
++        raise AssertionError(f"{error}\n{helper_log}") from error
++    finally:
++        stop = _stop_isolated_helper(profile, port, canary, proc)
++        assert stop.returncode == 0, stop.stderr
++        assert proc.returncode is not None
++
++
++def test_occupied_isolated_port_is_refused(tmp_path):
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    holder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++    if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
++        holder.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
++    holder.bind(("127.0.0.1", 0))
++    port = int(holder.getsockname()[1])
++    if port == PRODUCTION_PORT:
++        holder.close()
++        pytest.skip("ephemeral port collided with production port")
++    holder.listen(1)
++    log_path = tmp_path / "occupied.log"
++    proc = _start_isolated_helper(profile, port, canary, log_path)
++    try:
++        try:
++            code = proc.wait(timeout=40)
++        except subprocess.TimeoutExpired:
++            proc.kill()
++            proc.wait(timeout=5)
++            raise AssertionError(log_path.read_text(encoding="utf-8")[-4000:])
++        assert code != 0
++        combined = log_path.read_text(encoding="utf-8")
++        assert "isolated-port-occupied" in combined or "Failed to bind" in combined
++        assert not _canary_index(canary).exists()
++    finally:
++        handle = getattr(proc, "_iso_log_handle", None)
++        if handle is not None:
++            try:
++                handle.close()
++            except OSError:
++                pass
++        holder.close()
++
++
++def test_stop_requires_owned_identity_not_pid_name_or_prefix(tmp_path):
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    decoy = subprocess.Popen(
++        [sys.executable, "-B", "-c", "import time; time.sleep(60)"],
++        cwd=str(profile),
++    )
++    try:
++        missing = subprocess.run(
++            [
++                sys.executable,
++                "-B",
++                str(ROOT / "uoink_install_isolation.py"),
++                iso.CLI_STOP,
++                iso.CLI_PROFILE,
++                str(profile),
++                iso.CLI_PORT,
++                str(_free_loopback_port()),
++            ],
++            cwd=str(ROOT),
++            env=_child_env(canary),
++            capture_output=True,
++            text=True,
++            timeout=20,
++        )
++        assert missing.returncode == 0
++        assert decoy.poll() is None
++
++        forged = {
++            "mode": "isolated",
++            "pid": decoy.pid,
++            "executable": str(Path(sys.executable).resolve()),
++            "script": str(ROOT / "server.py"),
++            "created_ms": 1,
++            "port": 5180,
++            "profile": str(profile.resolve()),
++            "host": "127.0.0.1",
++            "nonce": "forged",
++        }
++        (profile / iso.IDENTITY_FILENAME).write_text(
++            json.dumps(forged), encoding="utf-8"
++        )
++        binding = iso.validate_binding(profile=profile, port=5180)
++        # Creation identity does not match, so this is not the owned helper.
++        # Stop must not kill the decoy just because the pid/name/prefix match.
++        assert iso.stop_owned_helper(binding) == iso.EXIT_OK
++        assert decoy.poll() is None
++    finally:
++        decoy.kill()
++        decoy.wait(timeout=5)
++
++
++def test_upgrade_check_refuses_a_live_owned_helper(tmp_path):
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    port = _free_loopback_port()
++    log_path = tmp_path / "upgrade.log"
++    proc = _start_isolated_helper(profile, port, canary, log_path)
++    try:
++        _wait_health(port)
++        check = subprocess.run(
++            [
++                sys.executable,
++                "-B",
++                str(ROOT / "uoink_install_isolation.py"),
++                iso.CLI_UPGRADE_CHECK,
++                iso.CLI_PROFILE,
++                str(profile),
++                iso.CLI_PORT,
++                str(port),
++            ],
++            cwd=str(ROOT),
++            env=_child_env(canary),
++            capture_output=True,
++            text=True,
++            timeout=20,
++        )
++        assert check.returncode == iso.EXIT_RUNNING
++        assert "isolated-running-requires-stop" in check.stderr
++        assert proc.poll() is None
++    except Exception as error:
++        helper_log = (profile / "server.log").read_text(encoding="utf-8")[-4000:] if (profile / "server.log").exists() else ""
++        raise AssertionError(f"{error}\n{helper_log}") from error
++    finally:
++        _stop_isolated_helper(profile, port, canary, proc)
++
++
++def test_stdio_inherits_isolated_profile(tmp_path):
++    try:
++        import anyio  # noqa: F401
++        from mcp.server.fastmcp import FastMCP  # noqa: F401
++    except ImportError:
++        pytest.skip("mcp SDK not installed")
++    canary = tmp_path / "user"
++    profile = tmp_path / "profile"
++    canary.mkdir()
++    profile.mkdir()
++    port = _free_loopback_port()
++    env = _child_env(canary)
++    proc = subprocess.Popen(
++        [
++            sys.executable,
++            "-B",
++            "-P",
++            str(ROOT / "uoink_mcp.py"),
++            iso.CLI_PROFILE,
++            str(profile),
++            iso.CLI_PORT,
++            str(port),
++        ],
++        cwd=str(tmp_path),
++        env=env,
++        stdin=subprocess.PIPE,
++        stdout=subprocess.PIPE,
++        stderr=subprocess.PIPE,
++        text=True,
++    )
++    err_chunks: list[str] = []
++
++    def _drain_err() -> None:
++        if proc.stderr is None:
++            return
++        for line in proc.stderr:
++            err_chunks.append(line)
++
++    threading.Thread(target=_drain_err, daemon=True).start()
++    try:
++        assert proc.stdin is not None and proc.stdout is not None
++        proc.stdin.write(
++            json.dumps(
++                {
++                    "jsonrpc": "2.0",
++                    "id": 1,
++                    "method": "initialize",
++                    "params": {
++                        "protocolVersion": "2024-11-05",
++                        "capabilities": {},
++                        "clientInfo": {"name": "iso", "version": "0"},
++                    },
++                }
++            )
++            + "\n"
++        )
++        proc.stdin.flush()
++        deadline = time.time() + 40
++        answered = None
++        while time.time() < deadline:
++            if proc.poll() is not None:
++                raise AssertionError(
++                    f"stdio exited {proc.returncode}: {''.join(err_chunks[-20:])}"
++                )
++            line = proc.stdout.readline()
++            if not line:
++                continue
++            try:
++                message = json.loads(line)
++            except json.JSONDecodeError:
++                continue
++            if message.get("id") == 1:
++                answered = message
++                break
++        assert answered is not None and "result" in answered
++        assert (profile / "index.db").exists() or (profile / "token.txt").exists()
++        assert not _canary_index(canary).exists()
++    finally:
++        try:
++            proc.stdin.close()
++        except Exception:
++            pass
++        try:
++            proc.wait(timeout=10)
++        except Exception:
++            proc.kill()
++            proc.wait(timeout=5)
++
++
++def test_spawn_dashboard_passes_isolation_argv(tmp_path, monkeypatch):
++    import server
++
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    port = _free_loopback_port()
++    captured = {}
++
++    class _Proc:
++        pass
++
++    def fake_popen(cmd, **kwargs):
++        captured["cmd"] = cmd
++        captured["env"] = kwargs.get("env")
++        return _Proc()
++
++    monkeypatch.setattr(server.subprocess, "Popen", fake_popen)
++    monkeypatch.setattr(server, "HERE", tmp_path)
++    (tmp_path / "uoink_dashboard.py").write_text("# stub\n", encoding="utf-8")
++    with iso.bound_isolation(profile=profile, port=port):
++        assert server._spawn_dashboard_window(reason="iso") is True
++    assert iso.CLI_PROFILE in captured["cmd"]
++    assert str(port) in captured["cmd"]
++    assert captured["env"][iso.ENV_PORT] == str(port)
++
++
++def test_suite_lease_follows_isolated_port(tmp_path):
++    import suite_service
++
++    profile = tmp_path / "profile"
++    profile.mkdir()
++    port = _free_loopback_port()
++    with iso.bound_isolation(profile=profile, port=port):
++        manifest = suite_service.service_manifest("3.8.0")
++        lease = suite_service.runtime_lease("3.8.0", pid=1, started_at="2026-09-09T00:00:00Z")
++        path = suite_service.write_runtime_lease(
++            service_version="3.8.0",
++            pid=1,
++            started_at="2026-09-09T00:00:00Z",
++        )
++        assert manifest["service"]["default_port"] == port
++        assert lease["base_url"] == f"http://127.0.0.1:{port}"
++        assert path.parent == profile.resolve() / "suite-services.d"
++        assert "5179" not in json.dumps(lease)
++    production = suite_service.service_manifest("3.8.0")
++    assert production["service"]["default_port"] == PRODUCTION_PORT
+diff --git a/uoink_dashboard.py b/uoink_dashboard.py
+index 781fbbfa8d6e43d494d96a9ceb4eef2cd902665f..e92afc614e33b4fd6ba92bec8bc271e518724556 100644
+--- a/uoink_dashboard.py
++++ b/uoink_dashboard.py
+@@ -27,18 +27,29 @@ from pathlib import Path
+ log = logging.getLogger("uoink.dashboard")
+ 
+ HERE = Path(__file__).parent.resolve()
++sys.path.insert(0, str(HERE))
++import uoink_install_isolation as _install_isolation  # noqa: E402
++_install_isolation.apply_from_process()
++
+ DASHBOARD_URL = "http://127.0.0.1:5179/dashboard"
+ WIDTH, HEIGHT = 1280, 800
+ ICON_PATH = HERE / "uoink.ico"
+ _ICON_HANDLES = []
+ 
+ 
++def _dashboard_url() -> str:
++    return _install_isolation.helper_url("/dashboard")
++
++
+ def _target_url() -> str:
+-    if len(sys.argv) > 1:
+-        candidate = str(sys.argv[1])
+-        if candidate.startswith(DASHBOARD_URL):
++    bound = _dashboard_url()
++    for candidate in sys.argv[1:]:
++        if candidate.startswith(bound) or (
++            _install_isolation.current_binding() is None
++            and candidate.startswith(DASHBOARD_URL)
++        ):
+             return candidate
+-    return DASHBOARD_URL
++    return bound
+ 
+ 
+ class JsApi:
+diff --git a/uoink_install_isolation.py b/uoink_install_isolation.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..eb22492b9a2c23dbdb534b795628ff756138da73
+--- /dev/null
++++ b/uoink_install_isolation.py
+@@ -0,0 +1,1251 @@
++"""Supported isolated installed profile and non-5179 loopback binding.
++
++Dependency-free (stdlib only). Entry points import this module and call
++``apply_from_process()`` before any product code can open the default
++library. When isolation is not requested this module is a no-op and
++production still uses ``127.0.0.1:5179`` plus the normal per-user data root.
++
++Isolation is explicit: ``--isolated-profile`` and ``--isolated-port`` together,
++or the matching environment variables for subprocess inheritance, or a durable
++``isolated-install.json`` marker next to an isolated install. Partial or
++conflicting requests fail closed. Port 5179 is never a valid isolated port.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import sys
++from contextlib import contextmanager
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Mapping
++
++PRODUCTION_PORT = 5179
++PRODUCTION_HOST = "127.0.0.1"
++MARKER_FILENAME = "isolated-install.json"
++IDENTITY_FILENAME = "runtime-identity.json"
++CLI_PROFILE = "--isolated-profile"
++CLI_PORT = "--isolated-port"
++CLI_FROM_INSTALL = "--isolated-from-install-dir"
++CLI_STOP = "--isolated-stop"
++CLI_UPGRADE_CHECK = "--isolated-upgrade-check"
++ENV_PROFILE = "UOINK_ISOLATED_PROFILE"
++ENV_PORT = "UOINK_ISOLATED_PORT"
++ENV_APP_DIR = "UOINK_ISOLATED_APP_DIR"
++ISOLATION_MODE = "isolated"
++
++# Exit codes for the isolation CLI (start still uses the helper's 0/1).
++EXIT_OK = 0
++EXIT_VALIDATION = 2
++EXIT_RUNNING = 3
++EXIT_STOP_IDENTITY = 4
++EXIT_USAGE = 5
++
++_PROCESS_START_TOLERANCE_MS = 2_000
++_FILETIME_EPOCH_OFFSET_100NS = 116_444_736_000_000_000
++_STILL_ACTIVE = 259
++_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
++_PROCESS_TERMINATE = 0x0001
++
++_CURRENT: IsolationBinding | None = None
++_ENV_SNAPSHOT: dict[str, str | None] | None = None
++
++
++class IsolationError(ValueError):
++    """Fail-closed isolation request. ``code`` is the stable operator token."""
++
++    def __init__(self, code: str, message: str) -> None:
++        self.code = code
++        super().__init__(f"{code}: {message}")
++
++
++@dataclass(frozen=True)
++class IsolationBinding:
++    """One declared isolated profile and loopback port."""
++
++    profile: Path
++    port: int
++    host: str = PRODUCTION_HOST
++    app_dir: Path | None = None
++
++    @property
++    def base_url(self) -> str:
++        return f"http://{self.host}:{self.port}"
++
++    @property
++    def output_dir(self) -> Path:
++        return self.profile / "output"
++
++    @property
++    def token_path(self) -> Path:
++        return self.profile / "token.txt"
++
++    @property
++    def pid_path(self) -> Path:
++        return self.profile / "server.pid"
++
++    @property
++    def identity_path(self) -> Path:
++        return self.profile / IDENTITY_FILENAME
++
++    @property
++    def log_path(self) -> Path:
++        return self.profile / "server.log"
++
++    def suite_registry_dir(self) -> Path:
++        return self.profile / "suite-services.d"
++
++    def helper_url(self, path: str) -> str:
++        suffix = path if path.startswith("/") else f"/{path}"
++        return f"{self.base_url}{suffix}"
++
++
++def current_binding() -> IsolationBinding | None:
++    return _CURRENT
++
++
++def production_user_data_dir(
++    *,
++    platform_name: str | None = None,
++    environ: Mapping[str, str] | None = None,
++    home: Path | None = None,
++) -> Path:
++    """Normal (non-isolated) per-user data root. Never consults isolation."""
++    platform_name = sys.platform if platform_name is None else platform_name
++    environ = os.environ if environ is None else environ
++    home = Path.home() if home is None else Path(home)
++    if platform_name == "win32":
++        base = environ.get("LOCALAPPDATA") or str(home / "AppData" / "Local")
++        return Path(base) / "Uoink"
++    if platform_name == "darwin":
++        return home / "Library" / "Application Support" / "Uoink"
++    xdg = environ.get("XDG_DATA_HOME")
++    base = Path(xdg) if xdg else home / ".local" / "share"
++    return base / "Uoink"
++
++
++def production_legacy_data_dir(
++    *,
++    platform_name: str | None = None,
++    environ: Mapping[str, str] | None = None,
++    home: Path | None = None,
++) -> Path:
++    platform_name = sys.platform if platform_name is None else platform_name
++    environ = os.environ if environ is None else environ
++    home = Path.home() if home is None else Path(home)
++    if platform_name == "win32":
++        base = environ.get("LOCALAPPDATA") or str(home / "AppData" / "Local")
++        return Path(base) / "Yoink"
++    if platform_name == "darwin":
++        return home / "Library" / "Application Support" / "Yoink"
++    xdg = environ.get("XDG_DATA_HOME")
++    base = Path(xdg) if xdg else home / ".local" / "share"
++    return base / "Yoink"
++
++
++def production_desktop_corpus_dirs(
++    *,
++    platform_name: str | None = None,
++    environ: Mapping[str, str] | None = None,
++    home: Path | None = None,
++) -> tuple[Path, Path]:
++    platform_name = sys.platform if platform_name is None else platform_name
++    environ = os.environ if environ is None else environ
++    home = Path.home() if home is None else Path(home)
++    if platform_name == "win32":
++        desktop = Path(environ.get("USERPROFILE") or str(home)) / "Desktop"
++    else:
++        desktop = home / "Desktop"
++    return desktop / "Uoink", desktop / "Yoink"
++
++
++def production_default_install_dir(
++    *,
++    platform_name: str | None = None,
++    environ: Mapping[str, str] | None = None,
++    home: Path | None = None,
++) -> Path:
++    """Ordinary Inno DefaultDirName: the same folder as the normal data root."""
++    return production_user_data_dir(
++        platform_name=platform_name, environ=environ, home=home
++    )
++
++
++def data_root(production: Path) -> Path:
++    binding = current_binding()
++    return binding.profile if binding is not None else Path(production)
++
++
++def listen_port(production_port: int = PRODUCTION_PORT) -> int:
++    binding = current_binding()
++    return binding.port if binding is not None else int(production_port)
++
++
++def listen_host(production_host: str = PRODUCTION_HOST) -> str:
++    binding = current_binding()
++    return binding.host if binding is not None else production_host
++
++
++def base_url(production: str = f"http://{PRODUCTION_HOST}:{PRODUCTION_PORT}") -> str:
++    binding = current_binding()
++    return binding.base_url if binding is not None else production
++
++
++def helper_url(path: str) -> str:
++    suffix = path if path.startswith("/") else f"/{path}"
++    return f"{base_url()}{suffix}"
++
++
++def child_argv(binding: IsolationBinding | None = None) -> list[str]:
++    """Arguments a helper must pass to splash, dashboard and stdio children."""
++    chosen = current_binding() if binding is None else binding
++    if chosen is None:
++        return []
++    args = [CLI_PROFILE, str(chosen.profile), CLI_PORT, str(chosen.port)]
++    if chosen.app_dir is not None:
++        args.extend([CLI_FROM_INSTALL, str(chosen.app_dir)])
++    return args
++
++
++def child_environ(binding: IsolationBinding | None = None) -> dict[str, str]:
++    chosen = current_binding() if binding is None else binding
++    if chosen is None:
++        return {}
++    env = {
++        ENV_PROFILE: str(chosen.profile),
++        ENV_PORT: str(chosen.port),
++    }
++    if chosen.app_dir is not None:
++        env[ENV_APP_DIR] = str(chosen.app_dir)
++    return env
++
++
++def strip_cli(argv: list[str]) -> list[str]:
++    """Return argv without isolation flags so the ordinary CLI can dispatch."""
++    remaining: list[str] = []
++    i = 0
++    while i < len(argv):
++        arg = argv[i]
++        if arg in {CLI_PROFILE, CLI_PORT, CLI_FROM_INSTALL} and i + 1 < len(argv):
++            i += 2
++            continue
++        if arg in {CLI_STOP, CLI_UPGRADE_CHECK}:
++            i += 1
++            continue
++        remaining.append(arg)
++        i += 1
++    return remaining
++
++
++def apply_from_process(
++    argv: list[str] | None = None,
++    environ: Mapping[str, str] | None = None,
++) -> IsolationBinding | None:
++    """Validate an isolation request from argv/env. No-op when not requested.
++
++    Invalid requests print the stable error code and exit 2 so a product
++    import cannot continue into default data.
++    """
++    try:
++        binding = resolve_from_process(argv=argv, environ=environ)
++    except IsolationError as error:
++        print(f"uoink isolated install: {error}", file=sys.stderr)
++        raise SystemExit(EXIT_VALIDATION) from error
++    _set_current(binding)
++    if binding is not None:
++        _export_env(binding)
++    return binding
++
++
++def apply_explicit(
++    *,
++    profile: Path | str,
++    port: int | str,
++    app_dir: Path | str | None = None,
++    environ: Mapping[str, str] | None = None,
++    platform_name: str | None = None,
++    home: Path | None = None,
++    require_existing: bool = True,
++) -> IsolationBinding:
++    binding = validate_binding(
++        profile=profile,
++        port=port,
++        app_dir=app_dir,
++        environ=environ,
++        platform_name=platform_name,
++        home=home,
++        require_existing=require_existing,
++    )
++    _set_current(binding)
++    _export_env(binding)
++    return binding
++
++
++@contextmanager
++def bound_isolation(
++    *,
++    profile: Path | str,
++    port: int | str,
++    app_dir: Path | str | None = None,
++    environ: Mapping[str, str] | None = None,
++    platform_name: str | None = None,
++    home: Path | None = None,
++    require_existing: bool = True,
++):
++    """Apply an isolated binding for the duration of a test or helper."""
++    previous = current_binding()
++    previous_env = _capture_env()
++    try:
++        yield apply_explicit(
++            profile=profile,
++            port=port,
++            app_dir=app_dir,
++            environ=environ,
++            platform_name=platform_name,
++            home=home,
++            require_existing=require_existing,
++        )
++    finally:
++        _set_current(previous)
++        _restore_env(previous_env)
++
++
++def resolve_from_process(
++    argv: list[str] | None = None,
++    environ: Mapping[str, str] | None = None,
++    *,
++    platform_name: str | None = None,
++    home: Path | None = None,
++    require_existing: bool = True,
++) -> IsolationBinding | None:
++    argv = list(sys.argv[1:] if argv is None else argv)
++    environ = os.environ if environ is None else environ
++    parsed = _parse_isolation_inputs(argv, environ)
++    if not parsed["requested"]:
++        return None
++    if parsed["conflicts"]:
++        raise IsolationError(
++            "isolated-profile-conflict",
++            parsed["conflicts"][0],
++        )
++    profile = parsed["profile"]
++    port = parsed["port"]
++    app_dir = parsed["app_dir"]
++    if not profile:
++        raise IsolationError(
++            "isolated-profile-missing",
++            "isolated mode requires an absolute --isolated-profile "
++            f"(or {ENV_PROFILE} / {CLI_FROM_INSTALL} marker)",
++        )
++    if port is None or port == "":
++        raise IsolationError(
++            "isolated-port-missing",
++            "isolated mode requires --isolated-port "
++            f"(or {ENV_PORT} / {CLI_FROM_INSTALL} marker)",
++        )
++    return validate_binding(
++        profile=profile,
++        port=port,
++        app_dir=app_dir,
++        environ=environ,
++        platform_name=platform_name,
++        home=home,
++        require_existing=require_existing,
++    )
++
++
++def validate_binding(
++    *,
++    profile: Path | str,
++    port: int | str,
++    app_dir: Path | str | None = None,
++    environ: Mapping[str, str] | None = None,
++    platform_name: str | None = None,
++    home: Path | None = None,
++    require_existing: bool = True,
++) -> IsolationBinding:
++    environ = os.environ if environ is None else environ
++    platform_name = sys.platform if platform_name is None else platform_name
++    home = Path.home() if home is None else Path(home)
++    resolved_profile = _validate_profile(
++        profile,
++        environ=environ,
++        platform_name=platform_name,
++        home=home,
++        require_existing=require_existing,
++    )
++    resolved_port = _validate_port(port)
++    resolved_app: Path | None = None
++    if app_dir:
++        resolved_app = _validate_app_dir(
++            app_dir,
++            profile=resolved_profile,
++            environ=environ,
++            platform_name=platform_name,
++            home=home,
++        )
++    return IsolationBinding(
++        profile=resolved_profile,
++        port=resolved_port,
++        host=PRODUCTION_HOST,
++        app_dir=resolved_app,
++    )
++
++
++def validate_install_reuse(
++    *,
++    app_dir: Path | str,
++    binding: IsolationBinding,
++    environ: Mapping[str, str] | None = None,
++    platform_name: str | None = None,
++    home: Path | None = None,
++) -> None:
++    """Refuse to treat an ordinary install as isolated, and refuse mismatched markers."""
++    environ = os.environ if environ is None else environ
++    platform_name = sys.platform if platform_name is None else platform_name
++    home = Path.home() if home is None else Path(home)
++    app = Path(app_dir)
++    if not _is_absolute(app):
++        raise IsolationError(
++            "isolated-install-app-relative",
++            "isolated install directory must be an absolute path",
++        )
++    try:
++        resolved_app = app.resolve()
++    except OSError as error:
++        raise IsolationError(
++            "isolated-install-app-unsafe",
++            f"isolated install directory could not be resolved: {error}",
++        ) from error
++    default_install = production_default_install_dir(
++        platform_name=platform_name, environ=environ, home=home
++    )
++    if _same_path(resolved_app, default_install):
++        raise IsolationError(
++            "isolated-install-ordinary-reuse",
++            "isolated mode refuses the ordinary install directory "
++            f"{default_install}",
++        )
++    if _same_path(resolved_app, binding.profile):
++        raise IsolationError(
++            "isolated-profile-conflict",
++            "isolated profile must not be the install directory",
++        )
++    marker_path = resolved_app / MARKER_FILENAME
++    server_present = (resolved_app / "server.py").is_file()
++    if marker_path.is_file():
++        marker = read_install_marker(resolved_app)
++        if not _same_path(Path(marker["profile"]), binding.profile):
++            raise IsolationError(
++                "isolated-install-marker-mismatch",
++                "existing isolated-install.json profile does not match "
++                "the requested profile",
++            )
++        if int(marker["port"]) != binding.port:
++            raise IsolationError(
++                "isolated-install-marker-mismatch",
++                "existing isolated-install.json port does not match "
++                "the requested port",
++            )
++        return
++    if server_present:
++        raise IsolationError(
++            "isolated-install-ordinary-reuse",
++            "refusing to label an ordinary installation isolated; "
++            f"{MARKER_FILENAME} is missing next to server.py",
++        )
++
++
++def install_marker_payload(binding: IsolationBinding) -> dict:
++    payload = {
++        "mode": ISOLATION_MODE,
++        "profile": str(binding.profile),
++        "port": binding.port,
++        "host": binding.host,
++    }
++    if binding.app_dir is not None:
++        payload["app_dir"] = str(binding.app_dir)
++    return payload
++
++
++def write_install_marker(app_dir: Path | str, binding: IsolationBinding) -> Path:
++    destination = Path(app_dir) / MARKER_FILENAME
++    destination.parent.mkdir(parents=True, exist_ok=True)
++    encoded = json.dumps(install_marker_payload(binding), indent=2) + "\n"
++    tmp = destination.with_suffix(".json.tmp")
++    tmp.write_text(encoded, encoding="utf-8")
++    os.replace(tmp, destination)
++    return destination
++
++
++def read_install_marker(app_dir: Path | str) -> dict:
++    path = Path(app_dir) / MARKER_FILENAME
++    try:
++        payload = json.loads(path.read_text(encoding="utf-8"))
++    except FileNotFoundError as error:
++        raise IsolationError(
++            "isolated-install-marker-missing",
++            f"{MARKER_FILENAME} is missing under {app_dir}",
++        ) from error
++    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
++        raise IsolationError(
++            "isolated-install-marker-mismatch",
++            f"{MARKER_FILENAME} is unreadable: {error}",
++        ) from error
++    if not isinstance(payload, dict) or payload.get("mode") != ISOLATION_MODE:
++        raise IsolationError(
++            "isolated-install-marker-mismatch",
++            f"{MARKER_FILENAME} is not an isolated-install marker",
++        )
++    if not payload.get("profile") or payload.get("port") is None:
++        raise IsolationError(
++            "isolated-install-marker-mismatch",
++            f"{MARKER_FILENAME} is missing profile or port",
++        )
++    return payload
++
++
++def write_runtime_identity(
++    binding: IsolationBinding,
++    *,
++    pid: int,
++    executable: str,
++    script: str,
++    created_ms: int | None,
++    nonce: str,
++) -> Path:
++    payload = {
++        "mode": ISOLATION_MODE,
++        "pid": int(pid),
++        "executable": str(Path(executable).resolve()) if executable else "",
++        "script": str(Path(script).resolve()) if script else "",
++        "created_ms": created_ms,
++        "port": binding.port,
++        "profile": str(binding.profile),
++        "host": binding.host,
++        "nonce": nonce,
++    }
++    if binding.app_dir is not None:
++        payload["app_dir"] = str(binding.app_dir)
++    path = binding.identity_path
++    tmp = path.with_suffix(".json.tmp")
++    tmp.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
++    os.replace(tmp, path)
++    return path
++
++
++def read_runtime_identity(binding: IsolationBinding) -> dict:
++    path = binding.identity_path
++    try:
++        payload = json.loads(path.read_text(encoding="utf-8"))
++    except FileNotFoundError as error:
++        raise IsolationError(
++            "isolated-stop-identity-missing",
++            f"{IDENTITY_FILENAME} is missing under {binding.profile}",
++        ) from error
++    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
++        raise IsolationError(
++            "isolated-stop-identity-mismatch",
++            f"{IDENTITY_FILENAME} is unreadable: {error}",
++        ) from error
++    if not isinstance(payload, dict) or payload.get("mode") != ISOLATION_MODE:
++        raise IsolationError(
++            "isolated-stop-identity-mismatch",
++            f"{IDENTITY_FILENAME} is not an isolated runtime identity",
++        )
++    return payload
++
++
++def current_process_created_ms() -> int | None:
++    try:
++        if os.name == "nt":
++            import ctypes
++
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.GetCurrentProcess.restype = ctypes.c_void_p
++            return _windows_process_created_ms(kernel32.GetCurrentProcess())
++        return _posix_process_created_ms(os.getpid())
++    except Exception:
++        return None
++
++
++def owned_process_status(binding: IsolationBinding) -> str:
++    """``alive``, ``dead`` or ``unknown`` for the profile-owned identity."""
++    try:
++        identity = read_runtime_identity(binding)
++    except IsolationError as error:
++        if error.code == "isolated-stop-identity-missing":
++            return "dead"
++        return "unknown"
++    return _identity_liveness(identity)
++
++
++def stop_owned_helper(binding: IsolationBinding) -> int:
++    """Stop only the process named by the profile-owned runtime identity.
++
++    Never kills by PID, process name, a shared-port probe, or a directory
++    prefix. Missing identity is a no-op success when nothing is recorded.
++    """
++    try:
++        identity = read_runtime_identity(binding)
++    except IsolationError as error:
++        if error.code == "isolated-stop-identity-missing":
++            return EXIT_OK
++        print(f"uoink isolated install: {error}", file=sys.stderr)
++        return EXIT_STOP_IDENTITY
++    if int(identity.get("port", -1)) != binding.port:
++        print(
++            "uoink isolated install: isolated-stop-identity-mismatch: "
++            "identity port does not match the declared isolated port",
++            file=sys.stderr,
++        )
++        return EXIT_STOP_IDENTITY
++    if not _same_path(Path(str(identity.get("profile") or "")), binding.profile):
++        print(
++            "uoink isolated install: isolated-stop-identity-mismatch: "
++            "identity profile does not match the declared isolated profile",
++            file=sys.stderr,
++        )
++        return EXIT_STOP_IDENTITY
++    status = _identity_liveness(identity)
++    if status == "dead":
++        _unlink_identity(binding)
++        return EXIT_OK
++    if status != "alive":
++        print(
++            "uoink isolated install: isolated-stop-identity-mismatch: "
++            "owned process identity could not be confirmed",
++            file=sys.stderr,
++        )
++        return EXIT_STOP_IDENTITY
++    if not _terminate_owned(identity):
++        print(
++            "uoink isolated install: isolated-stop-identity-mismatch: "
++            "refusing to terminate a process that failed the ownership check",
++            file=sys.stderr,
++        )
++        return EXIT_STOP_IDENTITY
++    _unlink_identity(binding)
++    return EXIT_OK
++
++
++def upgrade_allowed(binding: IsolationBinding) -> int:
++    """Refuse a running isolated upgrade; require the explicit stop command."""
++    status = owned_process_status(binding)
++    if status == "alive":
++        print(
++            "uoink isolated install: isolated-running-requires-stop: "
++            "the owned isolated helper is still running; "
++            "run the isolated stop command before upgrade",
++            file=sys.stderr,
++        )
++        return EXIT_RUNNING
++    if status == "unknown":
++        print(
++            "uoink isolated install: isolated-stop-identity-mismatch: "
++            "cannot prove the owned helper is stopped",
++            file=sys.stderr,
++        )
++        return EXIT_STOP_IDENTITY
++    return EXIT_OK
++
++
++def cli(argv: list[str] | None = None) -> int:
++    argv = list(sys.argv[1:] if argv is None else argv)
++    try:
++        if CLI_STOP in argv:
++            binding = resolve_from_process(argv)
++            if binding is None:
++                raise IsolationError(
++                    "isolated-profile-missing",
++                    "isolated stop requires a declared profile and port",
++                )
++            return stop_owned_helper(binding)
++        if CLI_UPGRADE_CHECK in argv:
++            binding = resolve_from_process(argv)
++            if binding is None:
++                raise IsolationError(
++                    "isolated-profile-missing",
++                    "isolated upgrade check requires a declared profile and port",
++                )
++            if parsed_app_dir(argv) is not None:
++                validate_install_reuse(
++                    app_dir=parsed_app_dir(argv),
++                    binding=binding,
++                )
++            return upgrade_allowed(binding)
++        binding = resolve_from_process(argv)
++    except IsolationError as error:
++        print(f"uoink isolated install: {error}", file=sys.stderr)
++        return EXIT_VALIDATION
++    if binding is None:
++        print(
++            "usage: python uoink_install_isolation.py "
++            f"{CLI_STOP}|{CLI_UPGRADE_CHECK} {CLI_PROFILE} PATH {CLI_PORT} PORT",
++            file=sys.stderr,
++        )
++        return EXIT_USAGE
++    print(json.dumps(install_marker_payload(binding), indent=2))
++    return EXIT_OK
++
++
++def parsed_app_dir(argv: list[str]) -> str | None:
++    parsed = _parse_isolation_inputs(argv, os.environ)
++    return parsed["app_dir"]
++
++
++# --------------------------------------------------------------------------
++# Internal validation
++# --------------------------------------------------------------------------
++def _parse_isolation_inputs(
++    argv: list[str],
++    environ: Mapping[str, str],
++) -> dict:
++    cli_profile = None
++    cli_port = None
++    cli_app = None
++    i = 0
++    stop_or_check = False
++    while i < len(argv):
++        arg = argv[i]
++        if arg == CLI_PROFILE and i + 1 < len(argv):
++            cli_profile = argv[i + 1]
++            i += 2
++            continue
++        if arg == CLI_PORT and i + 1 < len(argv):
++            cli_port = argv[i + 1]
++            i += 2
++            continue
++        if arg == CLI_FROM_INSTALL and i + 1 < len(argv):
++            cli_app = argv[i + 1]
++            i += 2
++            continue
++        if arg in {CLI_STOP, CLI_UPGRADE_CHECK}:
++            stop_or_check = True
++            i += 1
++            continue
++        i += 1
++    env_profile = (environ.get(ENV_PROFILE) or "").strip() or None
++    env_port = (environ.get(ENV_PORT) or "").strip() or None
++    env_app = (environ.get(ENV_APP_DIR) or "").strip() or None
++    marker_profile = None
++    marker_port = None
++    marker_app = None
++    conflicts: list[str] = []
++    if cli_app:
++        try:
++            marker = read_install_marker(cli_app)
++            marker_profile = str(marker["profile"])
++            marker_port = str(marker["port"])
++            marker_app = str(Path(cli_app))
++        except IsolationError as error:
++            conflicts.append(str(error))
++    profile_sources = [
++        value for value in (cli_profile, marker_profile, env_profile) if value
++    ]
++    port_sources = [value for value in (cli_port, marker_port, env_port) if value]
++    if cli_profile and marker_profile and not _same_path(Path(cli_profile), Path(marker_profile)):
++        conflicts.append("CLI profile does not match isolated-install.json")
++    if cli_profile and env_profile and not _same_path(Path(cli_profile), Path(env_profile)):
++        conflicts.append("CLI profile does not match UOINK_ISOLATED_PROFILE")
++    if marker_profile and env_profile and cli_profile is None:
++        if not _same_path(Path(marker_profile), Path(env_profile)):
++            conflicts.append("isolated-install.json profile does not match environment")
++    if cli_port and marker_port and str(cli_port) != str(marker_port):
++        conflicts.append("CLI port does not match isolated-install.json")
++    if cli_port and env_port and str(cli_port) != str(env_port):
++        conflicts.append("CLI port does not match UOINK_ISOLATED_PORT")
++    if marker_port and env_port and cli_port is None and str(marker_port) != str(env_port):
++        conflicts.append("isolated-install.json port does not match environment")
++    profile = cli_profile or marker_profile or env_profile
++    port = cli_port or marker_port or env_port
++    app_dir = cli_app or marker_app or env_app
++    requested = bool(
++        profile_sources
++        or port_sources
++        or cli_app
++        or env_app
++        or stop_or_check
++    )
++    return {
++        "requested": requested,
++        "profile": profile,
++        "port": port,
++        "app_dir": app_dir,
++        "conflicts": conflicts,
++    }
++
++
++def _validate_port(port: int | str) -> int:
++    raw = str(port).strip()
++    if not raw:
++        raise IsolationError(
++            "isolated-port-missing",
++            "isolated mode requires a declared loopback port",
++        )
++    try:
++        value = int(raw, 10)
++    except (TypeError, ValueError) as error:
++        raise IsolationError(
++            "isolated-port-invalid",
++            f"isolated port {raw!r} is not an integer",
++        ) from error
++    if value < 1 or value > 65535:
++        raise IsolationError(
++            "isolated-port-invalid",
++            f"isolated port {value} is outside 1-65535",
++        )
++    if value == PRODUCTION_PORT:
++        raise IsolationError(
++            "isolated-port-forbidden",
++            f"isolated mode cannot use production port {PRODUCTION_PORT}",
++        )
++    return value
++
++
++def _validate_profile(
++    profile: Path | str,
++    *,
++    environ: Mapping[str, str],
++    platform_name: str,
++    home: Path,
++    require_existing: bool,
++) -> Path:
++    raw = str(profile).strip()
++    if not raw:
++        raise IsolationError(
++            "isolated-profile-missing",
++            "isolated mode requires an absolute profile directory",
++        )
++    path = Path(raw)
++    if not _is_absolute(path):
++        raise IsolationError(
++            "isolated-profile-relative",
++            f"isolated profile {raw!r} is not absolute",
++        )
++    try:
++        resolved = path.resolve()
++    except OSError as error:
++        raise IsolationError(
++            "isolated-profile-unsafe",
++            f"isolated profile could not be resolved: {error}",
++        ) from error
++    if _is_root_volume(resolved, platform_name=platform_name):
++        raise IsolationError(
++            "isolated-profile-root-volume",
++            f"isolated profile {resolved} is a root volume",
++        )
++    if _is_unsafe_system_path(resolved, platform_name=platform_name, environ=environ, home=home):
++        raise IsolationError(
++            "isolated-profile-unsafe",
++            f"isolated profile {resolved} is a protected system path",
++        )
++    forbidden = _forbidden_library_paths(
++        platform_name=platform_name, environ=environ, home=home
++    )
++    for candidate in forbidden:
++        if _same_path(resolved, candidate) or _is_nested(resolved, candidate) or _is_nested(candidate, resolved):
++            code = (
++                "isolated-profile-legacy-data"
++                if candidate.name.lower() == "yoink"
++                else "isolated-profile-normal-data"
++            )
++            raise IsolationError(
++                code,
++                f"isolated profile {resolved} collides with {candidate}",
++            )
++    if require_existing:
++        if not path.exists() and not resolved.exists():
++            raise IsolationError(
++                "isolated-profile-not-found",
++                f"isolated profile {resolved} does not exist",
++            )
++        if not resolved.is_dir():
++            raise IsolationError(
++                "isolated-profile-not-directory",
++                f"isolated profile {resolved} is not a directory",
++            )
++    return resolved
++
++
++def _validate_app_dir(
++    app_dir: Path | str,
++    *,
++    profile: Path,
++    environ: Mapping[str, str],
++    platform_name: str,
++    home: Path,
++) -> Path:
++    path = Path(str(app_dir).strip())
++    if not _is_absolute(path):
++        raise IsolationError(
++            "isolated-install-app-relative",
++            "isolated install directory must be an absolute path",
++        )
++    try:
++        resolved = path.resolve()
++    except OSError as error:
++        raise IsolationError(
++            "isolated-install-app-unsafe",
++            f"isolated install directory could not be resolved: {error}",
++        ) from error
++    if _is_root_volume(resolved, platform_name=platform_name):
++        raise IsolationError(
++            "isolated-profile-root-volume",
++            f"isolated install directory {resolved} is a root volume",
++        )
++    if _same_path(resolved, profile):
++        raise IsolationError(
++            "isolated-profile-conflict",
++            "isolated profile must not be the install directory",
++        )
++    default_install = production_default_install_dir(
++        platform_name=platform_name, environ=environ, home=home
++    )
++    if _same_path(resolved, default_install):
++        raise IsolationError(
++            "isolated-install-ordinary-reuse",
++            "isolated mode refuses the ordinary install directory",
++        )
++    return resolved
++
++
++def _forbidden_library_paths(
++    *,
++    platform_name: str,
++    environ: Mapping[str, str],
++    home: Path,
++) -> list[Path]:
++    paths = [
++        production_user_data_dir(
++            platform_name=platform_name, environ=environ, home=home
++        ),
++        production_legacy_data_dir(
++            platform_name=platform_name, environ=environ, home=home
++        ),
++    ]
++    paths.extend(
++        production_desktop_corpus_dirs(
++            platform_name=platform_name, environ=environ, home=home
++        )
++    )
++    return [_safe_resolve(path) for path in paths]
++
++
++def _safe_resolve(path: Path) -> Path:
++    try:
++        return path.resolve()
++    except OSError:
++        return path
++
++
++def _is_absolute(path: Path) -> bool:
++    return path.is_absolute()
++
++
++def _is_root_volume(path: Path, *, platform_name: str) -> bool:
++    resolved = _safe_resolve(path)
++    if resolved.parent == resolved:
++        return True
++    if platform_name == "win32":
++        drive = resolved.drive
++        if drive and resolved == Path(drive + "\\"):
++            return True
++        parts = resolved.parts
++        if len(parts) <= 1:
++            return True
++        if resolved.anchor == resolved:
++            return True
++    return False
++
++
++def _is_unsafe_system_path(
++    path: Path,
++    *,
++    platform_name: str,
++    environ: Mapping[str, str],
++    home: Path,
++) -> bool:
++    resolved = _safe_resolve(path)
++    if platform_name == "win32":
++        windir = Path(environ.get("WINDIR") or r"C:\Windows")
++        program_files = Path(environ.get("ProgramFiles") or r"C:\Program Files")
++        program_files_x86 = Path(
++            environ.get("ProgramFiles(x86)") or r"C:\Program Files (x86)"
++        )
++        protected = [windir, program_files, program_files_x86]
++        for candidate in protected:
++            candidate = _safe_resolve(candidate)
++            if _same_path(resolved, candidate) or _is_nested(resolved, candidate):
++                return True
++        return False
++    protected = [Path("/"), Path("/etc"), Path("/usr"), Path("/bin"), Path("/sbin"), Path("/System")]
++    for candidate in protected:
++        if _same_path(resolved, candidate) or (
++            candidate != Path("/") and _is_nested(resolved, candidate)
++        ):
++            return True
++    return False
++
++
++def _same_path(left: Path, right: Path) -> bool:
++    try:
++        a = os.path.normcase(os.path.normpath(str(left.resolve())))
++        b = os.path.normcase(os.path.normpath(str(right.resolve())))
++    except OSError:
++        a = os.path.normcase(os.path.normpath(str(left)))
++        b = os.path.normcase(os.path.normpath(str(right)))
++    return a == b
++
++
++def _is_nested(inner: Path, outer: Path) -> bool:
++    try:
++        inner.resolve().relative_to(outer.resolve())
++        return not _same_path(inner, outer)
++    except (OSError, ValueError):
++        return False
++
++
++def _set_current(binding: IsolationBinding | None) -> None:
++    global _CURRENT
++    _CURRENT = binding
++
++
++def _export_env(binding: IsolationBinding) -> None:
++    global _ENV_SNAPSHOT
++    if _ENV_SNAPSHOT is None:
++        _ENV_SNAPSHOT = _capture_env()
++    os.environ[ENV_PROFILE] = str(binding.profile)
++    os.environ[ENV_PORT] = str(binding.port)
++    if binding.app_dir is not None:
++        os.environ[ENV_APP_DIR] = str(binding.app_dir)
++    elif ENV_APP_DIR in os.environ and _ENV_SNAPSHOT.get(ENV_APP_DIR) is None:
++        os.environ.pop(ENV_APP_DIR, None)
++
++
++def _capture_env() -> dict[str, str | None]:
++    return {
++        ENV_PROFILE: os.environ.get(ENV_PROFILE),
++        ENV_PORT: os.environ.get(ENV_PORT),
++        ENV_APP_DIR: os.environ.get(ENV_APP_DIR),
++    }
++
++
++def _restore_env(snapshot: dict[str, str | None] | None) -> None:
++    global _ENV_SNAPSHOT
++    if snapshot is None:
++        return
++    for key, value in snapshot.items():
++        if value is None:
++            os.environ.pop(key, None)
++        else:
++            os.environ[key] = value
++    _ENV_SNAPSHOT = None
++
++
++def _unlink_identity(binding: IsolationBinding) -> None:
++    try:
++        binding.identity_path.unlink(missing_ok=True)
++    except OSError:
++        pass
++    try:
++        binding.pid_path.unlink(missing_ok=True)
++    except OSError:
++        pass
++
++
++# --------------------------------------------------------------------------
++# Process identity
++# --------------------------------------------------------------------------
++def _identity_liveness(identity: dict) -> str:
++    try:
++        pid = int(identity["pid"])
++    except (KeyError, TypeError, ValueError):
++        return "unknown"
++    created_ms = identity.get("created_ms")
++    try:
++        created = None if created_ms is None else int(created_ms)
++    except (TypeError, ValueError):
++        return "unknown"
++    expected_exe = str(identity.get("executable") or "")
++    live_exe = _process_executable(pid)
++    if live_exe is None:
++        return _pid_liveness(pid, created)
++    if expected_exe and not _same_path(Path(live_exe), Path(expected_exe)):
++        return "dead"
++    return _pid_liveness(pid, created)
++
++
++def _pid_liveness(pid: int, created_ms: int | None) -> str:
++    try:
++        if os.name == "nt":
++            import ctypes
++
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.OpenProcess.restype = ctypes.c_void_p
++            handle = kernel32.OpenProcess(
++                _PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid)
++            )
++            if not handle:
++                error = ctypes.get_last_error()
++                # 87 = ERROR_INVALID_PARAMETER: the pid is not a live process.
++                return "dead" if error in {87, 0x57} else "unknown"
++            try:
++                code = ctypes.c_ulong()
++                kernel32.GetExitCodeProcess.argtypes = [
++                    ctypes.c_void_p,
++                    ctypes.POINTER(ctypes.c_ulong),
++                ]
++                kernel32.GetExitCodeProcess.restype = ctypes.c_int
++                if not kernel32.GetExitCodeProcess(ctypes.c_void_p(handle), ctypes.byref(code)):
++                    return "unknown"
++                if int(code.value) != _STILL_ACTIVE:
++                    return "dead"
++                if created_ms is not None:
++                    actual = _windows_process_created_ms(ctypes.c_void_p(handle))
++                    if (
++                        actual is not None
++                        and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS
++                    ):
++                        return "dead"
++                return "alive"
++            finally:
++                kernel32.CloseHandle(ctypes.c_void_p(handle))
++        try:
++            os.kill(int(pid), 0)
++        except ProcessLookupError:
++            return "dead"
++        except PermissionError:
++            pass
++        if created_ms is not None:
++            actual = _posix_process_created_ms(int(pid))
++            if (
++                actual is not None
++                and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS
++            ):
++                return "dead"
++        return "alive"
++    except Exception:
++        return "unknown"
++
++
++def _process_executable(pid: int) -> str | None:
++    try:
++        if os.name == "nt":
++            import ctypes
++            from ctypes import wintypes
++
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.OpenProcess.restype = ctypes.c_void_p
++            handle = kernel32.OpenProcess(
++                _PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid)
++            )
++            if not handle:
++                return None
++            try:
++                kernel32.QueryFullProcessImageNameW.argtypes = [
++                    wintypes.HANDLE,
++                    wintypes.DWORD,
++                    wintypes.LPWSTR,
++                    ctypes.POINTER(wintypes.DWORD),
++                ]
++                kernel32.QueryFullProcessImageNameW.restype = wintypes.BOOL
++                size = wintypes.DWORD(32768)
++                buf = ctypes.create_unicode_buffer(size.value)
++                if not kernel32.QueryFullProcessImageNameW(
++                    wintypes.HANDLE(handle), 0, buf, ctypes.byref(size)
++                ):
++                    return None
++                return buf.value
++            finally:
++                kernel32.CloseHandle(ctypes.c_void_p(handle))
++        return os.path.realpath(f"/proc/{pid}/exe")
++    except OSError:
++        return None
++
++
++def _windows_process_created_ms(handle) -> int | None:
++    import ctypes
++    from ctypes import wintypes
++
++    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++    if not isinstance(handle, ctypes.c_void_p):
++        handle = ctypes.c_void_p(handle)
++
++    class _FILETIME(ctypes.Structure):
++        _fields_ = [("dwLowDateTime", wintypes.DWORD), ("dwHighDateTime", wintypes.DWORD)]
++
++    creation, exit_, kernel, user = (_FILETIME() for _ in range(4))
++    kernel32.GetProcessTimes.argtypes = [
++        ctypes.c_void_p,
++        ctypes.POINTER(_FILETIME),
++        ctypes.POINTER(_FILETIME),
++        ctypes.POINTER(_FILETIME),
++        ctypes.POINTER(_FILETIME),
++    ]
++    kernel32.GetProcessTimes.restype = ctypes.c_int
++    if not kernel32.GetProcessTimes(
++        handle,
++        ctypes.byref(creation),
++        ctypes.byref(exit_),
++        ctypes.byref(kernel),
++        ctypes.byref(user),
++    ):
++        return None
++    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
++    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
++
++
++def _posix_process_created_ms(pid: int) -> int | None:
++    try:
++        with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
++            stat = handle.read()
++        with open("/proc/stat", "r", encoding="ascii", errors="replace") as handle:
++            boot = next(int(line.split()[1]) for line in handle if line.startswith("btime "))
++        ticks = int(stat.rsplit(")", 1)[1].split()[19])
++        hertz = os.sysconf("SC_CLK_TCK")
++        return boot * 1000 + (ticks * 1000) // hertz
++    except (OSError, ValueError, IndexError, StopIteration, AttributeError):
++        return None
++
++
++def _terminate_owned(identity: dict) -> bool:
++    if _identity_liveness(identity) != "alive":
++        return False
++    pid = int(identity["pid"])
++    expected_exe = str(identity.get("executable") or "")
++    live_exe = _process_executable(pid)
++    if expected_exe and live_exe and not _same_path(Path(live_exe), Path(expected_exe)):
++        return False
++    try:
++        if os.name == "nt":
++            import ctypes
++
++            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
++            kernel32.OpenProcess.restype = ctypes.c_void_p
++            handle = kernel32.OpenProcess(
++                _PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION,
++                False,
++                pid,
++            )
++            if not handle:
++                return False
++            try:
++                if expected_exe:
++                    live = _process_executable(pid)
++                    if live and not _same_path(Path(live), Path(expected_exe)):
++                        return False
++                kernel32.TerminateProcess.argtypes = [ctypes.c_void_p, ctypes.c_uint]
++                kernel32.TerminateProcess.restype = ctypes.c_int
++                return bool(kernel32.TerminateProcess(ctypes.c_void_p(handle), 1))
++            finally:
++                kernel32.CloseHandle(ctypes.c_void_p(handle))
++        os.kill(pid, 15)
++        return True
++    except OSError:
++        return False
++
++
++if __name__ == "__main__":
++    raise SystemExit(cli(sys.argv[1:]))
+diff --git a/uoink_mcp.py b/uoink_mcp.py
+index e812f596b8e993c2a764268088719f6b1830730a..f9a5fafa76e2260afe4104b4e2cca8dc56a3b987 100644
+--- a/uoink_mcp.py
++++ b/uoink_mcp.py
+@@ -42,6 +42,9 @@ _APP_DIR = str(Path(__file__).resolve().parent)
+ if _APP_DIR not in sys.path:
+     sys.path.insert(0, _APP_DIR)
+ 
++import uoink_install_isolation as _install_isolation  # noqa: E402
++_install_isolation.apply_from_process()
++
+ 
+ try:
+     import anyio
+diff --git a/uoink_splash.py b/uoink_splash.py
+index 4d6a157173cfc17d04f5ebda0563914b736f0955..84b83dd98ae85928d3586363e9edf52c541d85de 100644
+--- a/uoink_splash.py
++++ b/uoink_splash.py
+@@ -39,6 +39,10 @@ from pathlib import Path
+ log = logging.getLogger("uoink.splash")
+ 
+ HERE = Path(__file__).parent.resolve()
++sys.path.insert(0, str(HERE))
++import uoink_install_isolation as _install_isolation  # noqa: E402
++_install_isolation.apply_from_process()
++
+ SPLASH_URL = "http://127.0.0.1:5179/splash"
+ DASHBOARD_SETTINGS_URL = "http://127.0.0.1:5179/dashboard#settings/byo-key"
+ WIDTH, HEIGHT = 640, 450
+@@ -62,24 +66,33 @@ def _read_version() -> str:
+ VERSION = _read_version()
+ 
+ 
+-def _sentinel_path() -> Path:
+-    """Resolve %LOCALAPPDATA%\\Uoink\\.first-run-done via _platform."""
++def _data_root() -> Path:
++    binding = _install_isolation.current_binding()
++    if binding is not None:
++        return binding.profile
+     try:
+-        sys.path.insert(0, str(HERE))
+-        import _platform  # noqa: F401 -- import for its side effect of resolving the path
+-        return _platform.user_data_dir() / ".first-run-done"
++        import _platform
++        return _platform.user_data_dir()
+     except Exception:
+-        return HERE / ".first-run-done"
++        return HERE
++
++
++def _sentinel_path() -> Path:
++    """Resolve the first-run sentinel under the active data root."""
++    return _data_root() / ".first-run-done"
+ 
+ 
+ def _extension_sentinel_path() -> Path:
+-    """Resolve %LOCALAPPDATA%\\Uoink\\.extension-loaded for the load hint."""
+-    try:
+-        sys.path.insert(0, str(HERE))
+-        import _platform
+-        return _platform.user_data_dir() / ".extension-loaded"
+-    except Exception:
+-        return HERE / ".extension-loaded"
++    """Resolve .extension-loaded under the active data root."""
++    return _data_root() / ".extension-loaded"
++
++
++def _splash_url() -> str:
++    return _install_isolation.helper_url("/splash")
++
++
++def _dashboard_settings_url() -> str:
++    return _install_isolation.helper_url("/dashboard#settings/byo-key")
+ 
+ 
+ def _extension_dir() -> Path:
+@@ -177,7 +190,7 @@ def _sentinel_current(path: Path) -> bool:
+ 
+ def _helper_health_ok() -> bool:
+     try:
+-        with urllib.request.urlopen("http://127.0.0.1:5179/health", timeout=1.0) as res:
++        with urllib.request.urlopen(_install_isolation.helper_url("/health"), timeout=1.0) as res:
+             payload = json.loads(res.read().decode("utf-8"))
+             return bool(payload.get("ok", True))
+     except Exception:
+@@ -341,10 +354,12 @@ def _spawn_dashboard(url: str | None = None) -> None:
+     script = str(HERE / "uoink_dashboard.py")
+     try:
+         creationflags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
+-        cmd = [sys.executable, script]
++        cmd = [sys.executable, script, *_install_isolation.child_argv()]
+         if url:
+             cmd.append(url)
+-        subprocess.Popen(cmd, creationflags=creationflags)
++        env = os.environ.copy()
++        env.update(_install_isolation.child_environ())
++        subprocess.Popen(cmd, creationflags=creationflags, env=env)
+     except Exception as e:
+         log.warning("spawn dashboard failed: %s", e)
+ 
+@@ -370,7 +385,7 @@ class JsApi:
+         return True
+ 
+     def open_settings(self):
+-        _spawn_dashboard(DASHBOARD_SETTINGS_URL)
++        _spawn_dashboard(_dashboard_settings_url())
+         self._dismiss()
+         return True
+ 
+@@ -518,7 +533,7 @@ def main() -> int:
+     final_x = sw - WIDTH - MARGIN
+ 
+     api = JsApi()
+-    window_kwargs = {"url": SPLASH_URL}
++    window_kwargs = {"url": _splash_url()}
+     if not _helper_health_ok():
+         window_kwargs = {
+             "html": _failed_splash_html("Uoink failed to start. Check the helper log."),

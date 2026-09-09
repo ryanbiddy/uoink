@@ -1,0 +1,56 @@
+FFFFFFF                                                                  [100%]
+================================== FAILURES ===================================
+_ test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-profile] _
+tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError
+_ test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-port] _
+tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError
+_ test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-from-install-dir] _
+tests\test_install_isolation_integrator_review.py:12: in test_incomplete_isolation_flag_never_becomes_ordinary_mode
+    with pytest.raises(iso.IsolationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE IsolationError
+____________ test_live_pid_without_creation_identity_is_not_owned _____________
+tests\test_install_isolation_integrator_review.py:17: in test_live_pid_without_creation_identity_is_not_owned
+    assert iso._pid_liveness(os.getpid(), None) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = <function _pid_liveness at 0x0000025373304930>(70196, None)
+E    +    where <function _pid_liveness at 0x0000025373304930> = iso._pid_liveness
+E    +    and   70196 = <built-in function getpid>()
+E    +      where <built-in function getpid> = os.getpid
+________________ test_different_creation_identity_is_not_owned ________________
+tests\test_install_isolation_integrator_review.py:23: in test_different_creation_identity_is_not_owned
+    assert iso._pid_liveness(os.getpid(), created + 1) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = <function _pid_liveness at 0x0000025373304930>(70196, (1788969779799 + 1))
+E    +    where <function _pid_liveness at 0x0000025373304930> = iso._pid_liveness
+E    +    and   70196 = <built-in function getpid>()
+E    +      where <built-in function getpid> = os.getpid
+________________ test_unavailable_creation_lookup_is_not_owned ________________
+tests\test_install_isolation_integrator_review.py:31: in test_unavailable_creation_lookup_is_not_owned
+    assert iso._pid_liveness(os.getpid(), created) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = <function _pid_liveness at 0x0000025373304930>(70196, 1788969779799)
+E    +    where <function _pid_liveness at 0x0000025373304930> = iso._pid_liveness
+E    +    and   70196 = <built-in function getpid>()
+E    +      where <built-in function getpid> = os.getpid
+________________ test_missing_expected_executable_is_not_owned ________________
+tests\test_install_isolation_integrator_review.py:38: in test_missing_expected_executable_is_not_owned
+    assert iso._identity_liveness(identity) != "alive"
+E   AssertionError: assert 'alive' != 'alive'
+E    +  where 'alive' = <function _identity_liveness at 0x00000253733047D0>({'pid': 70196, 'created_ms': 1788969779799, 'executable': ''})
+E    +    where <function _identity_liveness at 0x00000253733047D0> = iso._identity_liveness
+=========================== short test summary info ===========================
+FAILED tests/test_install_isolation_integrator_review.py::test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-profile]
+FAILED tests/test_install_isolation_integrator_review.py::test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-port]
+FAILED tests/test_install_isolation_integrator_review.py::test_incomplete_isolation_flag_never_becomes_ordinary_mode[--isolated-from-install-dir]
+FAILED tests/test_install_isolation_integrator_review.py::test_live_pid_without_creation_identity_is_not_owned
+FAILED tests/test_install_isolation_integrator_review.py::test_different_creation_identity_is_not_owned
+FAILED tests/test_install_isolation_integrator_review.py::test_unavailable_creation_lookup_is_not_owned
+FAILED tests/test_install_isolation_integrator_review.py::test_missing_expected_executable_is_not_owned
+7 failed in 0.23s

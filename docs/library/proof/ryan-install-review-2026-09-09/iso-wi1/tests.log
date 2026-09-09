@@ -1,0 +1,151 @@
+....................F..F..........................................s..... [ 77%]
+.....................                                                    [100%]
+================================== FAILURES ===================================
+________________ test_isolated_startup_binds_profile_and_port _________________
+tests\test_install_isolation.py:451: in test_isolated_startup_binds_profile_and_port
+    assert identity["pid"] == proc.pid
+E   AssertionError: assert 42660 == 69748
+E    +  where 69748 = <Popen: returncode: None args: ['E:\\AI\\projects\\uoink\\checkouts\\Yoink-l...>.pid
+
+The above exception was the direct cause of the following exception:
+tests\test_install_isolation.py:459: in test_isolated_startup_binds_profile_and_port
+    raise AssertionError(f"{error}\n{helper_log}") from error
+E   assert 42660 == 69748
+E    +  where 69748 = <Popen: returncode: None args: ['E:\\AI\\projects\\uoink\\checkouts\\Yoink-l...>.pid
+E   index migration 0030 (0030_media_depth.sql)
+E   2026-09-09 09:02:01,366 INFO seeded 5 default style anchors
+E   2026-09-09 09:02:01,366 INFO default style anchors: seeded 5 on first run
+E   2026-09-09 09:02:01,366 INFO Restored 0 job record(s) from the library index
+E   2026-09-09 09:02:01,369 ERROR standing capture startup reconciliation failed
+E   Traceback (most recent call last):
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 17225, in main
+E       _source_startup_reconciliation()
+E       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 8748, in _source_startup_reconciliation
+E       imported = service.import_legacy_registries()
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 4281, in import_legacy_registries
+E       with self.store.write() as conn:
+E            ~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 1990, in write
+E       with self.index.write_transaction() as conn:
+E            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\index.py", line 515, in write_transaction
+E       raise RuntimeError(
+E       ...<2 lines>...
+E       )
+E   RuntimeError: cannot start a write transaction while another transaction is active
+E   2026-09-09 09:02:01,375 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+E   2026-09-09 09:02:01,389 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+E   2026-09-09 09:02:01,390 ERROR source watch tick could not select due polls
+E   Traceback (most recent call last):
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 8952, in _podcast_feed_scheduler_tick
+E       due = _standing_due_polls()
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 8770, in _standing_due_polls
+E       service.expire_poll_leases()
+E       ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 3030, in expire_poll_leases
+E       with self.store.write() as conn:
+E            ~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 1990, in write
+E       with self.index.write_transaction() as conn:
+E            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\index.py", line 515, in write_transaction
+E       raise RuntimeError(
+E       ...<2 lines>...
+E       )
+E   RuntimeError: cannot start a write transaction while another transaction is active
+E   2026-09-09 09:02:01,723 INFO Uoink server v3.8.0 running on http://127.0.0.1:56849
+E   2026-09-09 09:02:01,723 INFO Ready to uoink. Click any YouTube video's Uoink button.
+E   2026-09-09 09:02:01,724 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\_scratch\iso-wi1-0\t16\profile\output
+E   2026-09-09 09:02:01,724 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\_scratch\iso-wi1-0\t16\profile\server.log
+E   2026-09-09 09:02:01,726 INFO desktop notification queued: foreground fullscreen
+E   2026-09-09 09:02:01,727 INFO GET /health from 127.0.0.1 -> ok
+_______________ test_upgrade_check_refuses_a_live_owned_helper ________________
+tests\test_install_isolation.py:584: in test_upgrade_check_refuses_a_live_owned_helper
+    assert check.returncode == iso.EXIT_RUNNING
+E   AssertionError: assert 0 == 3
+E    +  where 0 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe',...d647a72-24b\\grok\\_scratch\\iso-wi1-0\\t19\\profile', '--isolated-port', '60739'], returncode=0, stdout='', stderr='').returncode
+E    +  and   3 = iso.EXIT_RUNNING
+
+The above exception was the direct cause of the following exception:
+tests\test_install_isolation.py:589: in test_upgrade_check_refuses_a_live_owned_helper
+    raise AssertionError(f"{error}\n{helper_log}") from error
+E   assert 0 == 3
+E    +  where 0 = CompletedProcess(args=['E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe',...d647a72-24b\\grok\\_scratch\\iso-wi1-0\\t19\\profile', '--isolated-port', '60739'], returncode=0, stdout='', stderr='').returncode
+E    +  and   3 = iso.EXIT_RUNNING
+E   O applying index migration 0013 (0013_monitored_playlists.sql)
+E   2026-09-09 09:02:19,486 INFO applying index migration 0014 (0014_writing_studio.sql)
+E   2026-09-09 09:02:19,487 INFO applying index migration 0015 (0015_universal_site.sql)
+E   2026-09-09 09:02:19,489 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+E   2026-09-09 09:02:19,491 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+E   2026-09-09 09:02:19,493 INFO applying index migration 0018 (0018_writing_drafts.sql)
+E   2026-09-09 09:02:19,494 INFO applying index migration 0019 (0019_auto_uoink.sql)
+E   2026-09-09 09:02:19,496 INFO applying index migration 0020 (0020_platform_author.sql)
+E   2026-09-09 09:02:19,498 INFO applying index migration 0021 (0021_suite_engagement.sql)
+E   2026-09-09 09:02:19,500 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+E   2026-09-09 09:02:19,502 INFO applying index migration 0023 (0023_podcast_watch.sql)
+E   2026-09-09 09:02:19,505 INFO applying index migration 0024 (0024_clips.sql)
+E   2026-09-09 09:02:19,506 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+E   2026-09-09 09:02:19,508 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+E   2026-09-09 09:02:19,509 INFO applying index migration 0027 (0027_library_substrate.sql)
+E   2026-09-09 09:02:19,513 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+E   2026-09-09 09:02:19,515 INFO applying index migration 0030 (0030_media_depth.sql)
+E   2026-09-09 09:02:19,529 INFO seeded 5 default style anchors
+E   2026-09-09 09:02:19,529 INFO default style anchors: seeded 5 on first run
+E   2026-09-09 09:02:19,529 INFO Restored 0 job record(s) from the library index
+E   2026-09-09 09:02:19,533 ERROR standing capture startup reconciliation failed
+E   Traceback (most recent call last):
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 17225, in main
+E       _source_startup_reconciliation()
+E       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\server.py", line 8748, in _source_startup_reconciliation
+E       imported = service.import_legacy_registries()
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 4281, in import_legacy_registries
+E       with self.store.write() as conn:
+E            ~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\source_subscriptions.py", line 1990, in write
+E       with self.index.write_transaction() as conn:
+E            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+E     File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+E       return next(self.gen)
+E     File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\index.py", line 515, in write_transaction
+E       raise RuntimeError(
+E       ...<2 lines>...
+E       )
+E   RuntimeError: cannot start a write transaction while another transaction is active
+E   2026-09-09 09:02:19,539 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+E   2026-09-09 09:02:19,553 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+E   2026-09-09 09:02:19,600 INFO Uoink server v3.8.0 running on http://127.0.0.1:60739
+E   2026-09-09 09:02:19,600 INFO Ready to uoink. Click any YouTube video's Uoink button.
+E   2026-09-09 09:02:19,600 INFO Output: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\_scratch\iso-wi1-0\t19\profile\output
+E   2026-09-09 09:02:19,600 INFO Log file: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\_scratch\iso-wi1-0\t19\profile\server.log
+E   2026-09-09 09:02:19,876 INFO desktop notification queued: foreground fullscreen
+E   2026-09-09 09:02:19,877 INFO GET /health from 127.0.0.1 -> ok
+============================== warnings summary ===============================
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s01_rerun_is_idempotent_and_preserves_import_receipt_and_hold
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+tests/test_source_subscriptions_migration.py::test_s02_old_delete_routes_archive_and_preserve_rows
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\fd647a72-24b\grok\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-wi1-0\\t38\\outside.mp4' -> 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\fd647a72-24b\\grok\\_scratch\\iso-wi1-0\\t38\\symlink-media\\video.mp4'
+FAILED tests/test_install_isolation.py::test_isolated_startup_binds_profile_and_port
+FAILED tests/test_install_isolation.py::test_upgrade_check_refuses_a_live_owned_helper
+2 failed, 90 passed, 1 skipped, 5 warnings in 48.85s
