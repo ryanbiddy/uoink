@@ -90,7 +90,8 @@ AV-5m4a3 Grok `888d4940` integrated at `ffdbef4`. AZ-5h2 Grok `098fb14d` integra
 AV-5m4b3 Grok `260ef22c` is rejected with its complete diff retained.
 AZ-5g2 Grok `769107e6-1cc5-447a-85d7-25de3c4ff054` is integrated at `a39c7e6`
 with an independent supplement. AV-5m4b4 Grok `e2580c74-1d67-43ad-a5d2-f443409a0c6c`
-finished from `564836c` and is rejected after AW-9. Dispatch AV-5m4b5 next.
+finished from `564836c` and is rejected after AW-9. AV-5m4b5 Grok
+`a4af542b-c8bb-4958-97f4-185951daaad0` is active from `39d7e19` (20:50 PDT).
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -107,7 +108,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    AV-5m2 remains rejected. AV-5m4a
    timed out and its partial diff is rejected. AV-5m4b and AV-5m4b2 are
    rejected after AW-5/AW-7. B3 is rejected after AW-8; B4 is rejected after
-   AW-9. Dispatch and verify AV-5m4b5 (grok) under
+   AW-9. Verify active AV-5m4b5 (grok) under
    `PHASE4-AV5M4B5-BRIEF-2026-09-08.md`. Finish AW-4 (codex), then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
@@ -157,7 +158,7 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Integrator log
 
-### 2026-09-08 16:24 PDT — Astra takeover and AS-9
+### 2026-09-08 16:24 PDT â€” Astra takeover and AS-9
 
 Actual takeover checkout was clean at `fc99942`; the earlier ~17:00 handoff time was
 approximate. AS-9 is integrated at `6807361`. Integrator verification in both its
@@ -180,7 +181,7 @@ fixture suite is 27/28. Do not integrate this diff. BA-2 raw packet measurements
 from retained 59,281/59,190 bytes to observed 58,694/58,369; that documentation assertion
 also remains failed. AZ-5a3 must repair compaction before the measurement refresh.
 
-### 2026-09-08 16:26 PDT — AZ-5a3 brief and measurement setup repair
+### 2026-09-08 16:26 PDT â€” AZ-5a3 brief and measurement setup repair
 
 The first standalone byte-measurement helper stopped at MCP SDK import because the
 redirected profile omitted pywin32's installed paths. No measurement resulted. The
@@ -191,7 +192,7 @@ only 12 creator rows. This was fixture serialization, not a real-client receipt.
 Retain the AZ-5a2 rejection. The AS-9 full-tree run is in progress with S21 and only
 the still-open AW-3, BA-3, BA-measurements3 and BD reproduction files excluded.
 
-### 2026-09-08 16:33 PDT — AV-5m1 integrated; full-tree environment failures
+### 2026-09-08 16:33 PDT â€” AV-5m1 integrated; full-tree environment failures
 
 AV-5m1 applied cleanly with three-way integration at `9489141`. Checkout verification
 has 203 passes and only the seven D12-D15 failures assigned to AV-5m2. D01-D03 stay
@@ -211,7 +212,7 @@ Browser inventory exposes only the Codex in-app browser, with no normal Chrome
 session connected. No further BD-27 playback attempt was made. Its two partial
 observations and Ryan's normal-browser gate remain unchanged.
 
-### 2026-09-08 16:38 PDT — BC-3c integrated; Gemini quota; repaired verification
+### 2026-09-08 16:38 PDT â€” BC-3c integrated; Gemini quota; repaired verification
 
 BC-3c integrated cleanly at `c8ddf9b`: worker and checkout each have 156 passes and
 the same five BC-3a failures. This includes all 147 named companions. The changed
@@ -231,7 +232,7 @@ its interpreter. Its .pth resolves installed dependencies and carries the guard 
 children even when tests replace PYTHONPATH or use isolated Python. No global package
 or test change was required. See `_scratch/ig-env-repair` for commands and output.
 
-### 2026-09-08 16:43 PDT — Active work after provider rerouting
+### 2026-09-08 16:43 PDT â€” Active work after provider rerouting
 
 Three independent Grok worktrees are active: AV-5m2 `6b5e5f1e` at `633eb99`,
 AZ-5a3g `54108a1f` and BC-3a2 `5aca8450` at `fc544f2`. Their files are separate
@@ -240,7 +241,7 @@ was reported around 17:50 PDT; no new Gemini retry is planned before then.
 Claude workers share Fable's nearly spent subscription. Codex remains available
 for the AW-4, BA-4 and BD-2 reviews when their repaired candidates are ready.
 
-### 2026-09-08 16:56 PDT — Full-tree verification after BC-3c
+### 2026-09-08 16:56 PDT â€” Full-tree verification after BC-3c
 
 Full-tree verification of `e6c6ed0` with the repaired disposable environment:
 **1,976 passed, four failed, three skipped, one existing xfail**, 309.63 seconds.
@@ -258,7 +259,7 @@ the five AW-3 requirements. Preparation verified Claude Code 2.1.261 with claude
 Max subscription authentication and no API key; no model ran. Execute only after
 AV-5m2 and AW-4. No client or installed receipt is credited by this preparation.
 
-### 2026-09-08 17:05 PDT — Draft review and conflicting acceptance setup
+### 2026-09-08 17:05 PDT â€” Draft review and conflicting acceptance setup
 
 The three Grok runs are active and executing tests. Control Room buffers their
 message output; recent task-local tool logs establish activity. Do not infer a
@@ -271,7 +272,7 @@ in `INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md` explains the underlying fixture
 conflicts and the Ryan rulings required under the prohibition on acceptance-test
 edits. Reject test-specific production exceptions; continue the general repairs.
 
-### 2026-09-08 17:12 PDT — AZ-5a3g integrated; AV-5m2 and BC-3a2 rejected
+### 2026-09-08 17:12 PDT â€” AZ-5a3g integrated; AV-5m2 and BC-3a2 rejected
 
 AZ-5a3g integrated with three-way apply at `d437b59`. Worker and checkout each
 have **382 passed, 15 failed** (93.46 s / 89.21 s). All 28 fixtures, 18 BA-01/03
@@ -292,7 +293,7 @@ integrated. New AV-5m3 and BC-3a3 briefs require general safety repairs and reta
 the conflicting unchanged acceptance setup for Ryan. Neither green worker
 claims nor the fixture conflicts excuse unfinished implementation.
 
-### 2026-09-08 17:20 PDT — Three repair runs and client recorder preparation
+### 2026-09-08 17:20 PDT â€” Three repair runs and client recorder preparation
 
 AZ-5d `e739a5ec-e3b0-4ddf-bc6c-b5ec9faf75dc`, AV-5m3
 `c5f611c8-2aa8-470d-ab2a-77aa3fa5ee40`, and BC-3a3
@@ -308,7 +309,7 @@ native MCP prompt syntax; neither preparation nor documentation lookup is a
 client receipt. The real observation still waits for the repaired/frozen AW-4
 candidate. No client model has run during this takeover.
 
-### 2026-09-08 17:26 PDT — BD-27 observed through Windows computer-use
+### 2026-09-08 17:26 PDT â€” BD-27 observed through Windows computer-use
 
 Correction to the earlier browser inventory: the browser connector exposes only
 the in-app browser, but a separate deferred `node_repl` tool plus the installed
@@ -330,7 +331,7 @@ both the working files and committed blobs. The `bd-player-*` proof directory
 also needs `-text` attributes so a future Windows checkout cannot change its
 sealed JSON line endings; that preservation rule is recorded with this entry.
 
-### 2026-09-08 17:40 PDT — BC-3a3 integrated; BD-2 review started
+### 2026-09-08 17:40 PDT â€” BC-3a3 integrated; BD-2 review started
 
 BC-3a3 integrated with three-way apply at `00fe216`. Worker and checkout each
 have **155 passed, 11 failed** (67.37 s / 62.73 s), including all five new
@@ -346,7 +347,7 @@ transcripts and capture plans can be read before their owning caller mints
 the ticket. That timing concern is being reproduced; no new finding or Phase 6
 acceptance is claimed from inspection alone.
 
-### 2026-09-08 17:44 PDT — BD-2 owning defects and AZ-5d rejection
+### 2026-09-08 17:44 PDT â€” BD-2 owning defects and AZ-5d rejection
 
 BD-2 reproduced stale capture replacement (one failed / one podcast-history
 control passed, 9.48 s). The separately briefed unseen-podcast probe also failed
@@ -361,7 +362,7 @@ AZ-5d2 brief removes that workaround, preserves the general repairs and adds
 an independent adapter-deadline test. The frozen unary/clock wrapper conflict
 is recorded for Ryan. Four measurement failures remain AZ-5g work.
 
-### 2026-09-08 17:53 PDT — AV-5m3 integrated; AW-4 repairs reserved
+### 2026-09-08 17:53 PDT â€” AV-5m3 integrated; AW-4 repairs reserved
 
 AV-5m3 integrated at `270e569`, explicitly as intermediate work. Worker and
 checkout each have **209 passed, eight failed** (64.43 s / 67.72 s), including
@@ -378,7 +379,7 @@ a surviving old parent thread, and temp-root-dependent exclusion. AV-5m4a and
 AV-5m4b reserve separate repair regions; integrate both with three-way apply
 and review their overlap. None of these implementation gaps is a Ryan blocker.
 
-### 2026-09-08 18:18 PDT — AZ-5d2 verified and integrated
+### 2026-09-08 18:18 PDT â€” AZ-5d2 verified and integrated
 
 AZ-5d2 Grok `7afd1cb4` independently produced **470 passed, five failed**
 in both roots (123.01 s worker, 109.21 s checkout). Logs/XML/commands:
@@ -399,7 +400,7 @@ partial diff is under independent verification; it is not accepted. The
 draft still directly writes a new binding, swallows witness failures and
 fallbacks from identity-checked unlink on TypeError. AV-5m4b remains active.
 
-### 2026-09-08 18:20 PDT — BC-3d integrated; two bounded repair continuations
+### 2026-09-08 18:20 PDT â€” BC-3d integrated; two bounded repair continuations
 
 BC-3d integrated at `897f0d2` after clean three-way apply and independent
 **158 passed, 11 failed** in each root (79.87 s worker, 72.70 s checkout).
@@ -418,7 +419,7 @@ is integrated. AV-5m4a2 has a bounded Grok repair brief; AV-5m4b retains
 its separate lifetime/exclusion scope. AZ-5g Gemini was dispatched from
 `14f9e1b`; source-only client preparation is still unexecuted.
 
-### 2026-09-08 18:26 PDT — final SDK serialization gap; active runs
+### 2026-09-08 18:26 PDT â€” final SDK serialization gap; active runs
 
 Preliminary BA-4 added an independent actual SDK stdio probe on the current
 AZ-5d2 implementation. It injects elapsed time at final JSON-RPC serialization
@@ -435,7 +436,7 @@ BC-3e Grok `21cb8de9` and AV-5m4a2 Grok `53f50b6f` (base `d9ccba5`),
 AV-5m4b Grok `5c22dbae` (base `98d8b35`). The first three started at
 18:16/18:20/18:20 PDT; AV-5m4b remains on its original lifetime scope.
 
-### 2026-09-08 18:31 PDT — AV-5m4b rejected; AW-5 reproduced
+### 2026-09-08 18:31 PDT â€” AV-5m4b rejected; AW-5 reproduced
 
 AV-5m4b Grok `5c22dbae` finished. Independent full union: **214 passed,
 14 failed**, 65.52 s (`_scratch/av5m4b-wi`). Twelve are the eight retained
@@ -456,7 +457,7 @@ proposed implementation tests remain archived; only implementation-specific
 path assertions in those unintegrated tests may be adapted with explanation.
 All committed acceptance tests remain frozen.
 
-### 2026-09-08 18:42 PDT — AZ-5g retained as incomplete; transport repair next
+### 2026-09-08 18:42 PDT â€” AZ-5g retained as incomplete; transport repair next
 
 AZ-5g Gemini `5e9baea5` ended with Control Room status completed but no
 required report. Independent full union produced **474 passed, one failed**,
@@ -747,7 +748,7 @@ before newline; the 24 KiB dashboard target remains missed. Run the full tree
 on this handoff commit with S21 and still-open AW-5/AW-7 excluded, as before.
 B4 remains active; Phase 4 implementation/client work remains our queue.
 
-### 2026-09-08 20:53 PDT - Phase 5 closure full tree; B4 rejected by AW-9
+### 2026-09-08 20:50 PDT - Phase 5 closure full tree; B4 rejected by AW-9
 
 Full tree on fixed `44968d9`: **2,106 passed, 26 failed, three skipped,
 one existing xfail**, 514.25 seconds. The four stale G2 measurement-document
@@ -775,3 +776,12 @@ have a lifetime owner established before child launch, independent of the
 request thread, and survive any unconfirmed start/stop failure. An uncertain
 writer remains implementation work. The next B5 brief requires those actual
 boundaries and preserves A3 identity and isolated final local mutation.
+
+### 2026-09-08 20:52 PDT - B5 dispatched
+
+AV-5m4b5 Grok `a4af542b-c8bb-4958-97f4-185951daaad0` started at
+20:50 PDT from `39d7e19`. Its brief requires all three AW-9 cases and the
+full B4 union, plus proof that the gate becomes available after proven
+physical death. AW-9 and full-tree proof seals matched every staged blob
+before the preceding commit. The real-client run remains gated on the
+finished implementation review; source/client preparation can continue.
