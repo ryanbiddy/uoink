@@ -1,0 +1,65 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "authorized-test-changes.patch": {
+      "bytes": 10163,
+      "sha256": "c712d40724f5e136433eb3c2e0a28109fa6e5611de8b22c74fbc952632b130c6"
+    },
+    "cases.json": {
+      "bytes": 434992,
+      "sha256": "b08c139732d7249b2cc9bc61ee4edaf5e4b2256cd5f489138d6e1eee193e82a9"
+    },
+    "comparison.json": {
+      "bytes": 6197,
+      "sha256": "cef4ade910154509c31be4b050b4157d1d744c393ce2a54199c2c3d725f5c70f"
+    },
+    "environment.json": {
+      "bytes": 625,
+      "sha256": "d90f231d3d7c65b8f2b968897a827373a018f7b4f704f5782e775f4d0675204c"
+    },
+    "failures.json": {
+      "bytes": 2518,
+      "sha256": "431b4b41d06104f8371eea1f7086f280024241c22b6bc99def2e1881e51ef4d5"
+    },
+    "final-native-media-environment.json": {
+      "bytes": 663,
+      "sha256": "86e82f4c66c85b81e25faf53907dea9ed48c8f06ece4cb34f4514b83102c41a7"
+    },
+    "ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "results.json": {
+      "bytes": 768,
+      "sha256": "40044c16280cd4e4add051efdf9eb18bac7f2f3fda2e7fc6da57cab70b6705ed"
+    },
+    "seal_security_tree_observation.py": {
+      "bytes": 6101,
+      "sha256": "2179f679f2f4cc3c73b6c16f4a16022a1f93393afc13c66fa89b13c023f920bc"
+    },
+    "sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "summary.json": {
+      "bytes": 55562,
+      "sha256": "14114341a3657e0f24bd99e5403f1831fabc73925afbd642431c127cd94396a6"
+    },
+    "test-source-bindings.json": {
+      "bytes": 1315,
+      "sha256": "c700b8b4d1b4f50aae7002dd718801999765745ebdadff66084f5a0b4c1aeab0"
+    },
+    "tests.log": {
+      "bytes": 10885,
+      "sha256": "ca5e1ca75ce4425e6cc12bcfd7acae66cfc2b487239ac6c85ab47b8a59eb7183"
+    },
+    "tests.xml": {
+      "bytes": 351345,
+      "sha256": "39463579d5cb898480c1f7f8a9c854a3f8ae583076006cbd8b21b2f79f80d68a"
+    }
+  }
+}

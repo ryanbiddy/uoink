@@ -1,0 +1,26 @@
+{
+  "tests.library_work_astra.test_phase3_acceptance7::test_as7_c21_at6_receipt_records_process_exit_status": {
+    "status": "failed",
+    "seconds": 0.0,
+    "detail": {
+      "message": "AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nassert ({})",
+      "text": "tests\\library_work_astra\\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status\n    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (\nE   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\nE   assert ({})"
+    }
+  },
+  "tests.test_long_video_v324::test_screenshot_phase_end_to_end": {
+    "status": "failed",
+    "seconds": 0.003,
+    "detail": {
+      "message": "PermissionError: P4 execution/fetch sentinel",
+      "text": "tests\\test_long_video_v324.py:316: in test_screenshot_phase_end_to_end\n    gen = subprocess.run(\nC:\\Python314\\Lib\\subprocess.py:555: in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nC:\\Python314\\Lib\\subprocess.py:1039: in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\nC:\\Python314\\Lib\\subprocess.py:1549: in _execute_child\n    sys.audit(\"subprocess.Popen\", executable, args, cwd, env)\n_scratch\\ryan-security-final-tree-02-0\\t291\\r\\p\\guard\\sitecustomize.py:40: in audit\n    raise PermissionError('P4 execution/fetch sentinel')\nE   PermissionError: P4 execution/fetch sentinel"
+    }
+  },
+  "tests.test_screenshot_extraction_cm10::test_limited_range_15_second_fixture_produces_eight_jpegs": {
+    "status": "failed",
+    "seconds": 0.003,
+    "detail": {
+      "message": "PermissionError: P4 execution/fetch sentinel",
+      "text": "tests\\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs\n    generated = subprocess.run(\nC:\\Python314\\Lib\\subprocess.py:555: in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nC:\\Python314\\Lib\\subprocess.py:1039: in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\nC:\\Python314\\Lib\\subprocess.py:1549: in _execute_child\n    sys.audit(\"subprocess.Popen\", executable, args, cwd, env)\n_scratch\\ryan-security-final-tree-02-0\\t291\\r\\p\\guard\\sitecustomize.py:40: in audit\n    raise PermissionError('P4 execution/fetch sentinel')\nE   PermissionError: P4 execution/fetch sentinel"
+    }
+  }
+}

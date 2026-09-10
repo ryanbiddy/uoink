@@ -1,0 +1,190 @@
+diff --git a/tests/library_work_astra/test_phase4_aw2_acceptance.py b/tests/library_work_astra/test_phase4_aw2_acceptance.py
+index 30ae31418635b195c6fb39d19ef488d23d9685a9..aebdac5205f1220f0b6d719f7d5c934bd4577509 100644
+--- a/tests/library_work_astra/test_phase4_aw2_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw2_acceptance.py
+@@ -341,7 +341,7 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+ 
+     def blocked_replace(src, dst):
+         if Path(dst) == target:
+@@ -355,7 +355,7 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
+         finally:
+             finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         result = env.mirror.resync(budget_s=0.1)
+diff --git a/tests/library_work_astra/test_phase4_aw3_acceptance.py b/tests/library_work_astra/test_phase4_aw3_acceptance.py
+index 10257527e7cde19174c18071fa82f867dce37a40..d99f06b37dc5754ce611b7fe0810c998910f7484 100644
+--- a/tests/library_work_astra/test_phase4_aw3_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw3_acceptance.py
+@@ -189,7 +189,7 @@ def interrupted_item_temp(env, monkeypatch):
+     export(env)
+     mutate_clip(env)
+     target = item_file(env)
+-    original_replace, original_unlink = mirror.os.replace, Path.unlink
++    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
+     allocated = []
+ 
+     def failed_replace(src, dst):
+@@ -204,8 +204,8 @@ def interrupted_item_temp(env, monkeypatch):
+         return original_unlink(path, *args, **kwargs)
+ 
+     with monkeypatch.context() as blocked:
+-        blocked.setattr(mirror.os, "replace", failed_replace)
+-        blocked.setattr(Path, "unlink", failed_unlink)
++        blocked.setattr(env.mirror, "_io_replace", failed_replace)
++        blocked.setattr(env.mirror, "_io_unlink", failed_unlink)
+         env.mirror.resync()
+     assert len(allocated) == 1 and allocated[0].is_file()
+     intent = env.mirror._load_intents()[mirror.item_key("a")]
+@@ -246,7 +246,7 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+     published = []
+     personal = b"USER EDIT AFTER TIMEOUT"
+ 
+@@ -265,7 +265,7 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
+         finally:
+             finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         result = env.mirror.resync(budget_s=0.1)
+@@ -306,7 +306,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+     plans = []
+ 
+     def blocked_first_replace(src, dst):
+@@ -323,7 +323,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
+             if plan is plans[0]:
+                 finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_first_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_first_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         first = env.mirror.resync(budget_s=0.1)
+diff --git a/tests/library_work_astra/test_phase4_aw_acceptance.py b/tests/library_work_astra/test_phase4_aw_acceptance.py
+index 97377847f5890d47e0e4590eddf3fb6359120eeb..4c10c6bf789ad1a7a11608c9fdefef52ef40bc51 100644
+--- a/tests/library_work_astra/test_phase4_aw_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw_acceptance.py
+@@ -351,7 +351,7 @@ def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
+     target = item_file(env)
+     mutate_clip(env)
+     env.mirror.on_committed_event("source_refresh", video_id="a")
+-    original_replace, original_unlink = mirror.os.replace, Path.unlink
++    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
+ 
+     def fail_replace(src, dst):
+         if Path(dst) == target:
+@@ -364,8 +364,8 @@ def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
+         return original_unlink(path, *args, **kwargs)
+ 
+     with monkeypatch.context() as patch:
+-        patch.setattr(mirror.os, "replace", fail_replace)
+-        patch.setattr(Path, "unlink", fail_temp_cleanup)
++        patch.setattr(env.mirror, "_io_replace", fail_replace)
++        patch.setattr(env.mirror, "_io_unlink", fail_temp_cleanup)
+         env.mirror.resync()
+     orphans = list(target.parent.glob(target.name + ".*.tmp"))
+     assert len(orphans) == 1
+diff --git a/tests/test_existing_index_read_open.py b/tests/test_existing_index_read_open.py
+index 2f21cb5da08c1509b98a2fb4a5c25e6168d29910..4c1f777537affb6e40c5f20da660d96470580735 100644
+--- a/tests/test_existing_index_read_open.py
++++ b/tests/test_existing_index_read_open.py
+@@ -4,6 +4,7 @@ import sqlite3
+ import pytest
+ 
+ from index import Index
++from server import _get_index as _production_get_index
+ 
+ 
+ def test_existing_open_never_creates_missing_storage(tmp_path):
+@@ -25,6 +26,7 @@ def test_read_open_does_not_migrate_then_explicit_backend_promotes(tmp_path, mon
+         calls.append(True)
+         return original(conn)
+     monkeypatch.setattr(index, "_run_migrations", migrations)
++    monkeypatch.setattr(server, "_get_index", _production_get_index)
+     monkeypatch.setattr(server, "INDEX_PATH", path)
+     monkeypatch.setattr(server, "_index_singleton", None)
+     reader = server._get_existing_index(timeout_s=1)
+diff --git a/tests/test_install_receipt_c22_kit.py b/tests/test_install_receipt_c22_kit.py
+index fc94c99cf1c3cdbb214f70bed16b1785606e3ea3..c63513b07aef928bf4256113af9922840ce664ba 100644
+--- a/tests/test_install_receipt_c22_kit.py
++++ b/tests/test_install_receipt_c22_kit.py
+@@ -220,8 +220,9 @@ def test_plan_inno_does_not_execute(scratch):
+     plan = runner.plan_inno(example_manifest(), execute=False)
+     assert plan["execute"] is False
+     joined = " ".join(plan["argv"])
+-    assert "/ISOLATEDPROFILE=" in joined
+-    assert "/ISOLATEDPORT=" in joined
++    assert "/ISOLATED=1" in joined
++    assert "/PROFILE=" in joined
++    assert "/PORT=" in joined
+     assert str(FORBIDDEN_PORT) not in joined
+     with pytest.raises(C22ValidationError, match="Inno"):
+         runner.plan_inno(example_manifest(), execute=True)
+@@ -280,10 +281,18 @@ def test_empty_and_versioned_populated_profiles(scratch):
+     assert snap["schema_version"] == 27
+ 
+ 
+-def test_synthetic_helper_scenarios_and_verdict(scratch):
++def test_synthetic_helper_scenarios_and_verdict(scratch, monkeypatch):
+     """Labeled non-installed synthetic instrument check. Not installed credit."""
+     helper_port = _free_port()
+     fixture_port = _free_port()
++    # Current scenarios measure original child methods and module provenance.
++    # Use the existing source-runtime fixture with synthetic acquisition;
++    # the stand-alone HTTP stub cannot provide that evidence.
++    from install_receipt.source_runtime import provision
++    app = scratch / "Uoink Source Fixture"
++    provision(dest=app, profile=scratch / "receipt" / "profiles" / "empty",
++              port=helper_port)
++    monkeypatch.setattr(sys.modules[__name__], "_install", lambda root: app)
+     runner = _runner(scratch, port=helper_port)
+     scenarios = ScenarioRunner(runner, fixture_port=fixture_port)
+     try:
+diff --git a/tests/test_install_receipt_p4_kit.py b/tests/test_install_receipt_p4_kit.py
+index 756a2d5792ede0d54885b6e91a55242fd94e6f07..5c4b9097af9ffe333a830763ab49b1efb25b8995 100644
+--- a/tests/test_install_receipt_p4_kit.py
++++ b/tests/test_install_receipt_p4_kit.py
+@@ -450,7 +450,7 @@ def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: P
+     assert attached["not_a_silent_substitute_for_original_installed_route"] is True
+     assert any(Path(v).name == "uoink_mcp.py" for v in original_args)
+     assert any(Path(v).name == "attached_entry.py" for v in attached_args)
+-    settings = json.loads((profile / "Uoink" / "settings.json").read_text(encoding="utf-8"))
++    settings = json.loads((profile / "settings.json").read_text(encoding="utf-8"))
+     assert settings["librarian_apply_enabled"] is False
+     sentinel = (profile / "client" / "protected-sentinel.bin").read_bytes()
+     assert sentinel == common.PROTECTED_SENTINEL_BYTES
+diff --git a/tests/test_installer_dependency_lock.py b/tests/test_installer_dependency_lock.py
+index 43d9af819d4615d4d981c8a4e77a8e7b9031c5a1..f5aa7a83281c343f6124a0bd1ffc4ecdfd04daaa 100644
+--- a/tests/test_installer_dependency_lock.py
++++ b/tests/test_installer_dependency_lock.py
+@@ -21,8 +21,8 @@ def test_installer_lock_is_complete_and_exact() -> None:
+ 
+     assert len(locked) >= 100
+     assert locked["yt-dlp"] == "2026.7.4"
+-    assert locked["pillow"] == "10.4.0"
+-    assert locked["mcp"] == "1.27.1"
++    assert locked["pillow"] == "12.3.0"
++    assert locked["mcp"] == "1.28.1"
+     assert locked["faster-whisper"] == "1.2.1"
+     assert locked["whisperx"] == "3.8.6"
+     assert locked["torch"] == "2.8.0"

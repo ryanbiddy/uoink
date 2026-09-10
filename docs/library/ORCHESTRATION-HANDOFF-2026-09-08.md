@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Replacement package-04 built from `86bfede`; 341,085,750 bytes, scan reports no threats and package is unsigned. Corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | 32,218 installed inputs, nine compiler-only inputs, 142 source bindings sealed. Four updated dependency versions verified from actual bundled metadata | Final tree with 34 new payload cases and verified bundled ffmpeg next; then delegated installed receipts. Audit retains 19 entries / 15 issues in four packages |
+| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree: 2,484 passed / three failed / two skipped / one xfailed | All twelve earlier setup failures pass; AT6 remains. Both new media failures are blocked by a leaked P4 audit hook before FFmpeg executes | Follow final-media repair brief and native-binary security review before replacement/final tree/installation; 19 Python advisory entries remain, with native-binary audit separate |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -157,7 +157,11 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    for a newly sealed package after full-tree verification; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
    is still owed. Same-account results cannot be called throwaway-account results.
-4. Package-04 is built and sealed from 86bfede; generated notices reviewed at
+4. Complete 7109182 has three failures: historical AT6 and two P4-guard/media
+   execution conflicts. Follow RYAN-FINAL-MEDIA-REPAIR-BRIEF-2026-09-09.md; no
+   existing test edits or guard weakening. Review native FFmpeg/Python security
+   separately from the Python-package audit before the next candidate.
+   Package-04 is built and sealed from 86bfede; generated notices reviewed at
    3265171 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
    dependency advisories or supply a signature. Run the committed complete tree with
@@ -2350,3 +2354,25 @@ rebuild is owed. Package-04 seals that documentary distinction. The verified
 bundled ffmpeg/ffprobe were copied to a private test PATH for the next complete
 tree, exercising an existing synthetic-media test without editing its oracle.
 No Setup has run yet. Proof: proof/candidate-package-04-2026-09-09/SHA256.json.
+
+### 2026-09-09 21:57 PDT — final tree reveals media execution conflict
+
+Exact 7109182 completes with 2,484 passed, three failed, two skipped and one
+xfail in 1,568.94 seconds. All twelve prior setup failures pass; all 44 added
+regressions are present and none is missing. The original AT6 exit is absent.
+Both new media failures raise P4 execution/fetch sentinel before spawning
+FFmpeg. Do not describe them as decoder failures or successful media observations.
+The earlier long-video test silently returned when FFmpeg was absent; its prior
+passed label did not mean its media body ran. The short-video case was skipped.
+libx264 is an additional static prerequisite, not the observed failure here.
+Proof: proof/ryan-security-final-tree-02-2026-09-09/SHA256.json.
+
+No Setup has run. Agent Install 04 contains only prepared synthetic C22 fixtures.
+Gemini is reviewing native-binary versions because the old January 2025 FFmpeg
+pin predates later security fixes and the Python 3.11.9 archive is also old.
+The earlier council established binary hashes, not complete native-binary
+security currency. Public upstream metadata/checksums are in scope; no media
+or model download is authorized. Keep the 19-entry Python audit separate.
+The next run requires the concrete final-media repair and exact no-test-edit
+review. Package-04, its scan and all prior failed observations remain retained.
+Backup origin/cc/living-library was verified at 7109182; later work needs backup.
