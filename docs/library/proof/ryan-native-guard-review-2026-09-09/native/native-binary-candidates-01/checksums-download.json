@@ -1,0 +1,13 @@
+{
+  "role": "checksums",
+  "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-09-14-51/checksums.sha256",
+  "metadata_sha256": "sha256:aa986dca86145c882de21c9f3646b2bb304ced582643d2cca2a43b654f4fb323",
+  "declared_bytes": 5728,
+  "start_utc": "2026-09-10T05:00:25.982200+00:00",
+  "executed": false,
+  "http_status": 200,
+  "bytes": 5728,
+  "sha256": "aa986dca86145c882de21c9f3646b2bb304ced582643d2cca2a43b654f4fb323",
+  "status": "hash-verified; not executed",
+  "end_utc": "2026-09-10T05:00:26.338724+00:00"
+}

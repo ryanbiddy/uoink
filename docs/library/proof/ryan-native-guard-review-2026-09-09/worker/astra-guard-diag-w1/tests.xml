@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="1.927" timestamp="2026-09-09T22:09:58.159088-07:00" hostname="Ryan-PC"><testcase classname="tests.test_install_receipt_p4_kit" name="test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false" time="0.644" /><testcase classname="tests.test_screenshot_extraction_cm10" name="test_limited_range_15_second_fixture_produces_eight_jpegs" time="0.002"><failure message="PermissionError: P4 execution/fetch sentinel">tests\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs
+    generated = subprocess.run(
+C:\Python314\Lib\subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+C:\Python314\Lib\subprocess.py:1549: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+_scratch\astra-guard-diag-w1-0\t0\r\p\guard\sitecustomize.py:40: in audit
+    raise PermissionError('P4 execution/fetch sentinel')
+E   PermissionError: P4 execution/fetch sentinel</failure></testcase></testsuite></testsuites>

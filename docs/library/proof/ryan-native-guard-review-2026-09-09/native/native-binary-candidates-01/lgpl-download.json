@@ -1,0 +1,13 @@
+{
+  "role": "lgpl",
+  "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-09-14-51/ffmpeg-n8.1.2-51-g7ba069f4f1-win64-lgpl-8.1.zip",
+  "metadata_sha256": "sha256:419c60e7d0f8b788b17b45ec4c7d7d5476f36474ed88957ca469c2ab50cbb4b9",
+  "declared_bytes": 169523249,
+  "start_utc": "2026-09-10T05:00:26.350205+00:00",
+  "executed": false,
+  "http_status": 200,
+  "bytes": 169523249,
+  "sha256": "419c60e7d0f8b788b17b45ec4c7d7d5476f36474ed88957ca469c2ab50cbb4b9",
+  "status": "hash-verified; not executed",
+  "end_utc": "2026-09-10T05:00:31.864926+00:00"
+}

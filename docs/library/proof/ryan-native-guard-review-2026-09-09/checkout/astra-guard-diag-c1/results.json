@@ -1,0 +1,24 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false",
+      "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-guard-diag-c1-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-guard-diag-c1\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-guard-diag-c1\\tests.log"
+  }
+]

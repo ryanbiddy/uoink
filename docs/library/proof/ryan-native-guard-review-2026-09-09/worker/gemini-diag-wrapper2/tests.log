@@ -1,0 +1,94 @@
+
+=== DIAGNOSTIC: sys.addaudithook registration ===
+Pytest Node: tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false (call)
+Hook Target: <function audit at 0x000001D618EAC670>
+Call Stack:
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(_console_main())
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py", line 253, in _console_main
+    code = _main(prog=_get_prog_name(sys.argv))
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py", line 229, in _main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\main.py", line 377, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\main.py", line 330, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\main.py", line 384, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\main.py", line 408, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 139, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 249, in call_and_report
+    call = CallInfo.from_call(
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 361, in from_call
+    result: TResult | None = func()
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 250, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\runner.py", line 184, in pytest_runtest_call
+    item.runtest()
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py", line 1707, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py", line 167, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini\tests\test_install_receipt_p4_kit.py", line 428, in test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false
+    receipt_out = prepare.prepare(binding)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini\scripts\install_receipt\p4_prepare_fixture.py", line 368, in prepare
+    exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini\_scratch\gemini-diag-wrapper2-0\t0\r\p\guard\sitecustomize.py", line 42, in <module>
+    sys.addaudithook(audit)
+  File "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini\_scratch\diag_audit_wrapper.py", line 9, in _diagnostic_addaudithook
+    frames = traceback.format_stack()
+================================================
+.F
+================================== FAILURES ===================================
+__________ test_limited_range_15_second_fixture_produces_eight_jpegs __________
+tests\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs
+    generated = subprocess.run(
+C:\Python314\Lib\subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+C:\Python314\Lib\subprocess.py:1549: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+_scratch\gemini-diag-wrapper2-0\t0\r\p\guard\sitecustomize.py:40: in audit
+    raise PermissionError('P4 execution/fetch sentinel')
+E   PermissionError: P4 execution/fetch sentinel
+=========================== short test summary info ===========================
+FAILED tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs
+1 failed, 1 passed in 1.68s

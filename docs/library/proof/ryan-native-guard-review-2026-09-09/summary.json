@@ -1,0 +1,35 @@
+{
+  "source": "e6f520c0bf548ff7500cc879e0eb2bf1feb23825",
+  "diagnostic_worker": "e0082e87-00e4-4c77-9cb4-b1d03485f036",
+  "native_review_worker": "a8752e4f-c54",
+  "product_or_test_edits": false,
+  "independent_guard_worker": {
+    "passed": 1,
+    "failed": 1,
+    "seconds": 1.93
+  },
+  "independent_guard_checkout": {
+    "passed": 1,
+    "failed": 1,
+    "seconds": 1.57
+  },
+  "original_media_gpl_worker": {
+    "passed": 2,
+    "seconds": 2.86
+  },
+  "original_media_gpl_checkout": {
+    "passed": 2,
+    "seconds": 2.24
+  },
+  "shipping_lgpl_first_probe": {
+    "passed": 3,
+    "failed": 1,
+    "seconds": 3.03
+  },
+  "shipping_lgpl_corrected_probe": {
+    "passed": 4,
+    "failed": 0,
+    "seconds": 2.68
+  },
+  "scope": "Synthetic media only. Rejected parent-guard deletion. Final complete partitioned tree still pending. GPL remains private test-only. No Setup, live-index, 5179, model, diarization or credential execution."
+}

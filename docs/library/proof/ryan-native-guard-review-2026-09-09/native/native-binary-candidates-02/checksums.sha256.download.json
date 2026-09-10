@@ -1,0 +1,10 @@
+{
+  "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/checksums.sha256",
+  "start_utc": "2026-09-10T05:08:49.321424+00:00",
+  "executed": false,
+  "http_status": 200,
+  "bytes": 5728,
+  "sha256": "5a831b23711edf09476291bfbb104cc4e9c78ab6d9a3978ff27da1ee76b01c5b",
+  "status": "downloaded",
+  "end_utc": "2026-09-10T05:08:49.716854+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-binary-candidates-01\\ffmpeg-n8.1.2-51-g7ba069f4f1-win64-gpl-8.1.zip",
+  "sha256": "4e40699fa864811312d6c1895ea4873beaf8475e1188563fee57fac860554601",
+  "bytes": 191851425,
+  "utc_start": "2026-09-10T05:08:58.2421654+00:00",
+  "exit": 0,
+  "antivirus_enabled": true,
+  "realtime_enabled": true,
+  "definitions": "1.459.133.0",
+  "remediation_disabled": true,
+  "settings_changed": false,
+  "scope": "Custom archive scan; existing cloud/sample policies retained; not a vulnerability clearance",
+  "utc_end": "2026-09-10T05:09:04.3970337+00:00",
+  "sha256_after": "4e40699fa864811312d6c1895ea4873beaf8475e1188563fee57fac860554601"
+}

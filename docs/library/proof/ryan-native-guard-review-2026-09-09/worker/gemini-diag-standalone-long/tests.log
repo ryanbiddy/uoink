@@ -1,0 +1,14 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________________ test_screenshot_phase_end_to_end _______________________
+tests\test_long_video_v324.py:322: in test_screenshot_phase_end_to_end
+    _assert(gen.returncode == 0 and video.exists(),
+tests\test_long_video_v324.py:36: in _assert
+    raise AssertionError(msg)
+E   AssertionError: failed to synthesize 2-hour video: [vost#0:0 @ 00000239d0c0ac00] Unknown encoder 'libx264'
+E   [vost#0:0 @ 00000239d0c0ac00] Error selecting an encoder
+E   Error opening output file C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini\_scratch\gemini-diag-standalone-long-0\t0\video.mp4.
+E   Error opening output files: Encoder not found
+=========================== short test summary info ===========================
+FAILED tests/test_long_video_v324.py::test_screenshot_phase_end_to_end - Asse...
+1 failed in 1.63s

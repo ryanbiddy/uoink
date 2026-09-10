@@ -1,0 +1,25 @@
+{
+  "archive": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-binary-candidates-01\\ffmpeg-n8.1.2-51-g7ba069f4f1-win64-gpl-8.1.zip",
+  "archive_sha256": "4e40699fa864811312d6c1895ea4873beaf8475e1188563fee57fac860554601",
+  "scan": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-scan-gpl-01\\scan.json",
+  "start_utc": "2026-09-10T05:10:48.836927+00:00",
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-bin-gpl-01\\ffmpeg.exe",
+      "zip_member": "ffmpeg-n8.1.2-51-g7ba069f4f1-win64-gpl-8.1/bin/ffmpeg.exe",
+      "bytes": 162800128,
+      "sha256": "b74bd2209fe38026ae9f73ad676e626599bdc1efd950fe32d40b23184fb1a060",
+      "version_exit": 0,
+      "version_first_line": "ffmpeg version n8.1.2-51-g7ba069f4f1-20260909 Copyright (c) 2000-2026 the FFmpeg developers"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-bin-gpl-01\\ffprobe.exe",
+      "zip_member": "ffmpeg-n8.1.2-51-g7ba069f4f1-win64-gpl-8.1/bin/ffprobe.exe",
+      "bytes": 162594816,
+      "sha256": "70be4ea32723b313df89603ba7cfbd818862e8785c20eb9008c27ef161ae84c0",
+      "version_exit": 0,
+      "version_first_line": "ffprobe version n8.1.2-51-g7ba069f4f1-20260909 Copyright (c) 2007-2026 the FFmpeg developers"
+    }
+  ],
+  "end_utc": "2026-09-10T05:10:59.288675+00:00"
+}

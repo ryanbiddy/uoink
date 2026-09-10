@@ -1,0 +1,18 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+__________ test_limited_range_15_second_fixture_produces_eight_jpegs __________
+tests\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs
+    generated = subprocess.run(
+C:\Python314\Lib\subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+C:\Python314\Lib\subprocess.py:1549: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+_scratch\gemini-diag-p4-then-media-0\t0\r\p\guard\sitecustomize.py:40: in audit
+    raise PermissionError('P4 execution/fetch sentinel')
+E   PermissionError: P4 execution/fetch sentinel
+=========================== short test summary info ===========================
+FAILED tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs
+1 failed, 1 passed in 2.05s

@@ -1,0 +1,23 @@
+[
+  {
+    "url": "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases?per_page=3",
+    "status": 200,
+    "file": "btbn-releases.json",
+    "bytes": 293161,
+    "utc": "2026-09-10T04:53:21.107264+00:00"
+  },
+  {
+    "url": "https://ffmpeg.org/security.html",
+    "status": 200,
+    "file": "ffmpeg-security.html",
+    "bytes": 174101,
+    "utc": "2026-09-10T04:53:22.278099+00:00"
+  },
+  {
+    "url": "https://devguide.python.org/versions/",
+    "status": 200,
+    "file": "python-support.html",
+    "bytes": 128754,
+    "utc": "2026-09-10T04:53:22.472023+00:00"
+  }
+]

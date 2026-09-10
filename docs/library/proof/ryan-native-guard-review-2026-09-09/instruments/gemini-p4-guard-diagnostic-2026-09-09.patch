@@ -1,0 +1,380 @@
+diff --git a/docs/library/GEMINI-P4-GUARD-DIAGNOSTIC-2026-09-09.md b/docs/library/GEMINI-P4-GUARD-DIAGNOSTIC-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..a44527eab28e4d68ad1c0bbc691111c7e07ad2fd
+--- /dev/null
++++ b/docs/library/GEMINI-P4-GUARD-DIAGNOSTIC-2026-09-09.md
+@@ -0,0 +1,374 @@
++# P4 Audit-Hook Diagnostic: Parent Process Activation and Media Failures
++
++Date: 2026-09-09  
++Investigator: Gemini (Worker in local multi-model control room)  
++Project: uoink-library  
++Reference Briefs:
++- `_scratch/P4-GUARD-DIAGNOSTIC-BRIEF-2026-09-09.md`
++- `docs/library/RYAN-FINAL-MEDIA-REPAIR-BRIEF-2026-09-09.md`
++Failed Test Run Reference:
++- `_scratch/ryan-security-final-tree-02/tests.log` (Full-tree commit `7109182`: 2,484 passed, 3 failed, 2 skipped, 1 xfailed)
++
++---
++
++## 1. Executive Summary
++
++This diagnostic identifies the exact root cause of the two media test failures in the full-tree test run recorded at `_scratch/ryan-security-final-tree-02/tests.log`:
++- `tests/test_long_video_v324.py::test_screenshot_phase_end_to_end`
++- `tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs`
++
++Both tests aborted before FFmpeg could execute, raising:
++```text
++PermissionError: P4 execution/fetch sentinel
++```
++from `_scratch/ryan-security-final-tree-02-0/t291/r/p/guard/sitecustomize.py:40`.
++
++### Core Findings
++1. **The Exact Mechanism of Leakage**:
++   The P4 audit hook is installed directly into the shared pytest parent process by line 368 of `scripts/install_receipt/p4_prepare_fixture.py`:
++   ```python
++   exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
++   ```
++   Where `guard` is the fixture's generated `profile / "guard" / "sitecustomize.py"`.
++   Line 42 of `sitecustomize.py` calls `sys.addaudithook(audit)`. In Python, audit hooks cannot be removed, unhooked, or cleared for the remaining lifetime of the process.
++
++2. **The Earlier Test That Caused It**:
++   Testcase 1283 (out of 2490) in the full tree:
++   ```text
++   tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false
++   ```
++   This test called `prepare.prepare(binding)` with `isolated_port=18082`. During that test, pytest assigned temporary directory `_scratch/ryan-security-final-tree-02-0/t291` as `tmp_path`. Line 368 of `p4_prepare_fixture.py` compiled and executed `t291/r/p/guard/sitecustomize.py`, permanently binding the `audit` function into the parent pytest process.
++
++3. **How Subsequent Media Tests Failed**:
++   Later in the exact same pytest process, test 1756 (`test_long_video_v324.py`) and test 2204 (`test_screenshot_extraction_cm10.py`) invoked `subprocess.run(["ffmpeg", ...])`. In Python's `subprocess._execute_child`, Python dispatches the audit event `sys.audit("subprocess.Popen", executable, args, cwd, env)`. The lingering P4 hook caught this event, identified `"ffmpeg"` in its banned executable set (`('claude', 'codex', 'grok', 'gemini', 'yt-dlp', 'ffmpeg', 'curl')`), and raised `PermissionError('P4 execution/fetch sentinel')`.
++
++4. **Separate Media Prerequisite (libx264 vs. ffv1)**:
++   - `test_limited_range_15_second_fixture_produces_eight_jpegs` uses `-c:v ffv1`. When run in isolation with the reviewed LGPL FFmpeg (`_scratch/final-native-bin-01`), it passes cleanly (1 passed in 1.85s).
++   - `test_screenshot_phase_end_to_end` uses `-c:v libx264`. The LGPL FFmpeg build omits `libx264` (which requires GPL). When run in isolation with LGPL FFmpeg, it reaches FFmpeg but fails with `Unknown encoder 'libx264'`. This confirms Astra's observation: the long-video test requires a private GPL FFmpeg build as a separate test prerequisite, but the failure in `ryan-security-final-tree-02` was the parent P4 guard activation blocking process spawn altogether.
++
++5. **Narrow Repair Recommendation**:
++   Remove line 368 (`exec(compile(guard.read_text(...)))`) from `scripts/install_receipt/p4_prepare_fixture.py`. The guard is strictly designed for child subprocesses (`sitecustomize for stdio children: refuse live index, 5179, model/fetch`), which already load `sitecustomize.py` via `PYTHONPATH` or interpreter installation. Subprocess isolation is independently validated by `prove_guard_canary`. Eliminating in-process execution prevents parent pollution without weakening any guard or assertion.
++
++---
++
++## 2. Forensic Trace and Identification
++
++### A. Failure Signature in `_scratch/ryan-security-final-tree-02/tests.log`
++
++```text
++______________________ test_screenshot_phase_end_to_end _______________________
++tests\test_long_video_v324.py:316: in test_screenshot_phase_end_to_end
++    gen = subprocess.run(
++C:\Python314\Lib\subprocess.py:555: in run
++    with Popen(*popenargs, **kwargs) as process:
++         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\subprocess.py:1039: in __init__
++    self._execute_child(args, executable, preexec_fn, close_fds,
++C:\Python314\Lib\subprocess.py:1549: in _execute_child
++    sys.audit("subprocess.Popen", executable, args, cwd, env)
++_scratch\ryan-security-final-tree-02-0\t291\r\p\guard\sitecustomize.py:40: in audit
++    raise PermissionError('P4 execution/fetch sentinel')
++E   PermissionError: P4 execution/fetch sentinel
++__________ test_limited_range_15_second_fixture_produces_eight_jpegs __________
++tests\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs
++    generated = subprocess.run(
++C:\Python314\Lib\subprocess.py:555: in run
++    with Popen(*popenargs, **kwargs) as process:
++         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\subprocess.py:1039: in __init__
++    self._execute_child(args, executable, preexec_fn, close_fds,
++C:\Python314\Lib\subprocess.py:1549: in _execute_child
++    sys.audit("subprocess.Popen", executable, args, cwd, env)
++_scratch\ryan-security-final-tree-02-0\t291\r\p\guard\sitecustomize.py:40: in audit
++    raise PermissionError('P4 execution/fetch sentinel')
++E   PermissionError: P4 execution/fetch sentinel
++```
++
++### B. Directory `t291` Origin and Identification
++
++In `integrator_verify.py`, the test runner installs an internal path fixture:
++```python
++(guard / 'ig_paths.py').write_text(
++    'import pytest\n@pytest.fixture\ndef tmp_path(tmp_path_factory):\n    return tmp_path_factory.mktemp("t")\n',
++    encoding='utf-8',
++)
++```
++Each test requesting `tmp_path` receives a sequentially numbered subdirectory under `--basetemp`: `t0`, `t1`, ..., `t291`.
++
++Inspecting `_scratch/ryan-security-final-tree-02-0/t291/r/p/preparation.json`:
++- `prepared_at`: `2026-09-10T04:44:42.424402+00:00`
++- `isolated_profile`: `.../t291/r/p`
++- `isolated_port`: `18082`
++- `items`: `["p4fx-timed-01", "p4fx-text-01", "p4fx-hostile-01"]`
++
++Checking test definitions across the entire codebase for `isolated_port=18082` and `p4_prepare_fixture.prepare`:
++- In `tests/test_install_receipt_p4_kit.py`:
++  ```python
++  413: def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: Path):
++  414:     receipt = tmp_path / "r"
++  415:     profile = receipt / "p"
++  416:     receipt.mkdir()
++  417:     manifest = _manifest(tmp_path / "m.json")
++  418:     binding = common.validate_isolation(
++  419:         isolated_profile=profile,
++  420:         isolated_port=18082,
++  421:         receipt_root=receipt,
++  422:         installed_app=ROOT,
++  423:         installed_interpreter=Path(sys.executable),
++  424:         package_manifest=manifest,
++  425:         instrument_only=True,
++  426:         original_local=Path(os.environ.get("P4_ORIGINAL_LOCALAPPDATA") or os.environ["LOCALAPPDATA"]),
++  427:     )
++  428:     receipt_out = prepare.prepare(binding)
++  ```
++- In `_scratch/ryan-security-final-tree-02/tests.xml`:
++  - Node 1283: `tests.test_install_receipt_p4_kit::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false`
++  - Node 1756: `tests.test_long_video_v324::test_screenshot_phase_end_to_end`
++  - Node 2204: `tests.test_screenshot_extraction_cm10::test_limited_range_15_second_fixture_produces_eight_jpegs`
++
++Testcase 1283 is the exact test that ran against `t291` and installed the audit hook.
++
++---
++
++## 3. The Activation Mechanism in `p4_prepare_fixture.py`
++
++In `scripts/install_receipt/p4_prepare_fixture.py`:
++```python
++348: def prepare(binding: dict) -> dict:
++349:     profile = Path(binding["isolated_profile"])
++350:     receipt = Path(binding["receipt_root"])
++351:     app = Path(binding["installed_app"])
++...
++357:     guard = write_guard(profile, binding)
++358:     env = isolation_env(binding, extra={"route_label": "fixture-prepare"})
++...
++364:     saved_env = {key: os.environ.get(key) for key in _env_keys}
++365:     for key in _env_keys:
++366:         if key in env:
++367:             os.environ[key] = env[key]
++368:     exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
++369:     canary = prove_guard_canary(
++370:         interpreter=Path(binding["installed_interpreter"]),
++371:         env=env, profile=profile, cwd=profile,
++372:     )
++```
++
++At line 357, `write_guard` writes `P4_SITECUSTOMIZE` into `profile / "guard" / "sitecustomize.py"`.
++At line 368, `exec(compile(...))` executes that file in-process.
++
++Inside `sitecustomize.py`:
++```python
++1001:     if event == 'subprocess.Popen':
++1002:         command = args[1]
++1003:         first = command[0] if isinstance(command, (tuple, list)) else str(command).split()[0]
++1004:         name = Path(str(first)).stem.lower()
++1005:         if name in ('claude', 'codex', 'grok', 'gemini', 'yt-dlp', 'ffmpeg', 'curl'):
++1006:             raise PermissionError('P4 execution/fetch sentinel')
++1007: 
++1008: sys.addaudithook(audit)
++```
++
++While `prepare()` restores `saved_env` before returning (lines 849-853), `sys.addaudithook` has no reversal mechanism. The hook registered during `test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false` remains active across the entire process lifetime.
++
++---
++
++## 4. Empirical Diagnostic Verifications
++
++All diagnostic runs were executed using the private native interpreter `_scratch/ig-native/Scripts/python.exe`, the guarded `_scratch/integrator_verify.py`, and the reviewed LGPL FFmpeg binaries at `_scratch/final-native-bin-01` added to `PATH`. All paid API keys were stripped and `IG_FORBIDDEN_LIVE` was set to the forbidden index path.
++
++### Run 1: Standalone Short Media Case (No P4 Predecessor)
++Command:
++```powershell
++$env:PATH = "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\final-native-bin-01;" + $env:PATH
++$env:IG_FORBIDDEN_LIVE = "C:\Users\hello\AppData\Local\Uoink\index.db"
++E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe `
++    E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py `
++    --root C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini `
++    --label gemini-diag-standalone-media `
++    tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs
++```
++Result:
++```text
++START tests
++tests exit 0
++.                                                                        [100%]
++1 passed in 1.85s
++```
++**Finding**: When the P4 test has not preceded it, `test_limited_range_15_second_fixture_produces_eight_jpegs` runs and passes with LGPL FFmpeg (`ffv1`).
++
++---
++
++### Run 2: Minimal Sequence — P4 Test Followed by Short Media Case
++Command:
++```powershell
++E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe `
++    E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py `
++    --root C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini `
++    --label gemini-diag-p4-then-media `
++    tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false `
++    tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs
++```
++Result:
++```text
++START tests
++tests exit 1
++.F                                                                       [100%]
++================================== FAILURES ===================================
++__________ test_limited_range_15_second_fixture_produces_eight_jpegs __________
++tests\test_screenshot_extraction_cm10.py:45: in test_limited_range_15_second_fixture_produces_eight_jpegs
++    generated = subprocess.run(
++C:\Python314\Lib\subprocess.py:555: in run
++    with Popen(*popenargs, **kwargs) as process:
++C:\Python314\Lib\subprocess.py:1039: in __init__
++    self._execute_child(args, executable, preexec_fn, close_fds,
++C:\Python314\Lib\subprocess.py:1549: in _execute_child
++    sys.audit("subprocess.Popen", executable, args, cwd, env)
++_scratch\gemini-diag-p4-then-media-0\t0\r\p\guard\sitecustomize.py:40: in audit
++    raise PermissionError('P4 execution/fetch sentinel')
++E   PermissionError: P4 execution/fetch sentinel
++=========================== short test summary info ===========================
++FAILED tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs
++1 failed, 1 passed in 2.05s
++```
++**Finding**: Running the single P4 preparation test immediately beforehand reproduces the exact parent audit hook failure on the media test in the shared pytest runner.
++
++---
++
++### Run 3: Standalone Long Video Media Case (LGPL FFmpeg)
++Command:
++```powershell
++E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe `
++    E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py `
++    --root C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini `
++    --label gemini-diag-standalone-long `
++    tests/test_long_video_v324.py::test_screenshot_phase_end_to_end
++```
++Result:
++```text
++START tests
++tests exit 1
++F                                                                        [100%]
++================================== FAILURES ===================================
++______________________ test_screenshot_phase_end_to_end _______________________
++tests\test_long_video_v324.py:322: in test_screenshot_phase_end_to_end
++    _assert(gen.returncode == 0 and video.exists(),
++tests\test_long_video_v324.py:36: in _assert
++    raise AssertionError(msg)
++E   AssertionError: failed to synthesize 2-hour video: [vost#0:0 @ 00000239d0c0ac00] Unknown encoder 'libx264'
++E   [vost#0:0 @ 00000239d0c0ac00] Error selecting an encoder
++E   Error opening output files: Encoder not found
++=========================== short test summary info ===========================
++FAILED tests/test_long_video_v324.py::test_screenshot_phase_end_to_end - Asse...
++1 failed in 1.63s
++```
++**Finding**: Without the P4 audit hook, FFmpeg spawns without permission error. The failure is strictly the absence of `libx264` in the LGPL build.
++
++---
++
++### Run 4: P4 Test Followed by Long Video Media Case
++Command:
++```powershell
++E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe `
++    E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py `
++    --root C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\e0082e87-00e\gemini `
++    --label gemini-diag-p4-then-long `
++    tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false `
++    tests/test_long_video_v324.py::test_screenshot_phase_end_to_end
++```
++Result:
++```text
++START tests
++tests exit 1
++.F                                                                       [100%]
++================================== FAILURES ===================================
++______________________ test_screenshot_phase_end_to_end _______________________
++tests\test_long_video_v324.py:316: in test_screenshot_phase_end_to_end
++    gen = subprocess.run(
++C:\Python314\Lib\subprocess.py:555: in run
++    with Popen(*popenargs, **kwargs) as process:
++C:\Python314\Lib\subprocess.py:1039: in __init__
++    self._execute_child(args, executable, preexec_fn, close_fds,
++C:\Python314\Lib\subprocess.py:1549: in _execute_child
++    sys.audit("subprocess.Popen", executable, args, cwd, env)
++_scratch\gemini-diag-p4-then-long-0\t0\r\p\guard\sitecustomize.py:40: in audit
++    raise PermissionError('P4 execution/fetch sentinel')
++E   PermissionError: P4 execution/fetch sentinel
++=========================== short test summary info ===========================
++FAILED tests/test_long_video_v324.py::test_screenshot_phase_end_to_end - Perm...
++1 failed, 1 passed in 1.75s
++```
++**Finding**: Preceded by the P4 preparation test, `test_screenshot_phase_end_to_end` is aborted at `sys.audit` before FFmpeg is invoked, masking the missing `libx264` encoder.
++
++---
++
++### Run 5: Diagnostic Hook Stack Trace Capture
++Using an ignored scratch plugin `_scratch/diag_audit_wrapper.py` that wraps `sys.addaudithook` to record the caller stack and active pytest node while delegating to the original hook:
++
++```text
++=== DIAGNOSTIC: sys.addaudithook registration ===
++Pytest Node: tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false (call)
++Hook Target: <function audit at 0x000001D618EAC670>
++Call Stack:
++  File ".../pytest/runner.py", line 184, in pytest_runtest_call
++    item.runtest()
++  File ".../pytest/python.py", line 167, in pytest_pyfunc_call
++    result = testfunction(**testargs)
++  File "tests/test_install_receipt_p4_kit.py", line 428, in test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false
++    receipt_out = prepare.prepare(binding)
++  File "scripts/install_receipt/p4_prepare_fixture.py", line 368, in prepare
++    exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
++  File ".../t0/r/p/guard/sitecustomize.py", line 42, in <module>
++    sys.addaudithook(audit)
++================================================
++```
++
++---
++
++## 5. Architectural Analysis: Why Child Guards Must Not Leak
++
++1. **Intended Isolation Boundary**:
++   The P4 sitecustomize guard was designed for child processes launched under the isolated profile:
++   ```python
++   def write_guard(profile: Path, binding: dict) -> Path:
++       """sitecustomize for stdio children: refuse live index, 5179, model/fetch."""
++   ```
++   Child processes load `profile/guard/sitecustomize.py` at startup when `PYTHONPATH` includes `profile/guard` (or when installed into embeddable Python's `site-packages`).
++
++2. **Subprocess Canary Proof**:
++   Immediately after writing the guard, `prepare()` calls `prove_guard_canary(...)`. This spawns a separate, owned Python child process with `PYTHONPATH=profile/guard` and tests that a forbidden database connection raises `PermissionError`. The subprocess proves automatic loading and guard enforcement without requiring any in-process execution in the parent.
++
++3. **In-Process `exec` Contamination**:
++   Line 368 in `scripts/install_receipt/p4_prepare_fixture.py`:
++   ```python
++   exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
++   ```
++   was carried over from earlier standalone utility scripts (`aw-rerun-2026-09-08/prepare_fixture.py`) that ran in dedicated, single-purpose CLI processes. Executing this file in-process inside a shared test suite violates process boundaries by permanently attaching the hook to pytest itself.
++
++---
++
++## 6. Recommended Narrow Repair
++
++### Primary Recommendation: Product/Instrument Lifecycle Repair
++Delete line 368 of `scripts/install_receipt/p4_prepare_fixture.py`:
++```diff
++--- a/scripts/install_receipt/p4_prepare_fixture.py
+++++ b/scripts/install_receipt/p4_prepare_fixture.py
++@@ -365,7 +365,6 @@ def prepare(binding: dict) -> dict:
++     for key in _env_keys:
++         if key in env:
++             os.environ[key] = env[key]
++-    exec(compile(guard.read_text(encoding="utf-8"), str(guard), "exec"), {})
++     canary = prove_guard_canary(
++         interpreter=Path(binding["installed_interpreter"]),
++         env=env, profile=profile, cwd=profile,
++```
++
++**Rationale & Verification**:
++- **Preserves all guards**: Child processes continue to load `sitecustomize.py` via `write_guard` and `PYTHONPATH` / `install_guard_into_interpreter`.
++- **Preserves all assertions**: `prove_guard_canary` continues to verify that the guard rejects canary operations in child subprocesses.
++- **Zero assertion weakening**: No tests or fixtures are skipped or modified.
++- **Clean test suite lifecycle**: Eliminates the permanent registration of audit hooks in the parent pytest runner.
++
++### Prerequisite for `test_screenshot_phase_end_to_end`
++- `tests/test_long_video_v324.py::test_screenshot_phase_end_to_end` requires the `libx264` video encoder.
++- As specified in `RYAN-FINAL-MEDIA-REPAIR-BRIEF-2026-09-09.md`, a private hash-verified GPL FFmpeg test binary must be provided for test suites exercising this test, separate from the shipping LGPL build.

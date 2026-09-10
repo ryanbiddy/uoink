@@ -1,0 +1,18 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+______________________ test_screenshot_phase_end_to_end _______________________
+tests\test_long_video_v324.py:316: in test_screenshot_phase_end_to_end
+    gen = subprocess.run(
+C:\Python314\Lib\subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+C:\Python314\Lib\subprocess.py:1549: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+_scratch\gemini-diag-p4-then-long-0\t0\r\p\guard\sitecustomize.py:40: in audit
+    raise PermissionError('P4 execution/fetch sentinel')
+E   PermissionError: P4 execution/fetch sentinel
+=========================== short test summary info ===========================
+FAILED tests/test_long_video_v324.py::test_screenshot_phase_end_to_end - Perm...
+1 failed, 1 passed in 1.75s

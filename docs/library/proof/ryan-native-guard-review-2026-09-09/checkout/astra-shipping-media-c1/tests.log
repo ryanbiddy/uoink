@@ -1,0 +1,10 @@
+...F                                                                     [100%]
+================================== FAILURES ===================================
+______________ test_shipping_decoder_handles_long_h264_and_audio ______________
+_scratch\test_native_shipping_probe.py:32: in test_shipping_decoder_handles_long_h264_and_audio
+    assert 0<count<=server.MAX_SCREENSHOTS
+E   assert 240 <= 200
+E    +  where 200 = server.MAX_SCREENSHOTS
+=========================== short test summary info ===========================
+FAILED _scratch/test_native_shipping_probe.py::test_shipping_decoder_handles_long_h264_and_audio
+1 failed, 3 passed in 3.03s

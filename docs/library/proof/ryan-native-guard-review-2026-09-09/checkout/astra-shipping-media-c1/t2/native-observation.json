@@ -1,0 +1,46 @@
+[
+  {
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-bin-gpl-01\\ffmpeg.exe",
+      "-y",
+      "-loglevel",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "testsrc=size=192x108:rate=1:duration=7200",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-shipping-media-c1-0\\t2\\synthetic-two-hours.mp4"
+    ],
+    "exit": 0,
+    "seconds": 1.1411673999973573,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-bin-lgpl-02\\ffmpeg.exe",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-shipping-media-c1-0\\t2\\synthetic-two-hours.mp4",
+      "-vf",
+      "fps=1/30",
+      "-pix_fmt",
+      "yuvj420p",
+      "-q:v",
+      "2",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-shipping-media-c1-0\\t2\\shots\\shot_%04d.jpg"
+    ],
+    "exit": 0,
+    "seconds": 0.45301739999558777,
+    "stdout": "",
+    "stderr": ""
+  }
+]

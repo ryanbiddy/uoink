@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree: 2,484 passed / three failed / two skipped / one xfailed | All twelve earlier setup failures pass; AT6 remains. Both new media failures are blocked by a leaked P4 audit hook before FFmpeg executes | Follow final-media repair brief and native-binary security review before replacement/final tree/installation; 19 Python advisory entries remain, with native-binary audit separate |
+| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Media diagnosis verified; original two cases now pass in each isolated process. Shipping LGPL qualification has four passes. Parent receipt guard remains unchanged | Integrate bounded FFmpeg pin repair and decide Python from exact-pin qualification; freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -157,15 +157,19 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    for a newly sealed package after full-tree verification; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
    is still owed. Same-account results cannot be called throwaway-account results.
-4. Complete 7109182 has three failures: historical AT6 and two P4-guard/media
-   execution conflicts. Follow RYAN-FINAL-MEDIA-REPAIR-BRIEF-2026-09-09.md; no
-   existing test edits or guard weakening. Review native FFmpeg/Python security
-   separately from the Python-package audit before the next candidate.
+4. Complete 7109182 retains three failures: historical AT6 and two P4-guard/media
+   execution conflicts. The diagnosis and execution repair are independently
+   verified in ASTRA-NATIVE-AND-GUARD-REVIEW-2026-09-09.md. Keep the parent guard;
+   use a fully accounted two-process final tree under the final-media brief.
+   Original media cases have two passes in each root; LGPL probe has four passes.
+   Gemini's bounded FFmpeg pin repair and Python 3.13 exact-pin qualification are
+   running from e6f520c. Review native risks separately from the Python audit.
    Package-04 is built and sealed from 86bfede; generated notices reviewed at
    3265171 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
    dependency advisories or supply a signature. Run the committed complete tree with
-   only S21 excluded. Preserve historical failures, including unavailable AT6 exit.
+   only S21 absent across the two process partitions; prove a disjoint complete
+   node-id union and label the aggregate. Preserve the unavailable AT6 exit failure.
    Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
    assemble new evidence and push only origin/cc/living-library.
 5. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
@@ -2376,3 +2380,29 @@ or model download is authorized. Keep the 19-entry Python audit separate.
 The next run requires the concrete final-media repair and exact no-test-edit
 review. Package-04, its scan and all prior failed observations remain retained.
 Backup origin/cc/living-library was verified at 7109182; later work needs backup.
+
+### 2026-09-09 22:16 PDT - Native review and media execution conditions
+
+Gemini e0082e87 traced the P4 parent guard to prepare's in-process exec. Astra
+reproduced one pass / one failure in both roots (1.93/1.57 seconds). Reject the
+suggested deletion: the same parent subsequently imports installed modules and
+prepares fixtures. A child canary cannot protect that parent. The original guard,
+product, fixtures and assertions remain unchanged. A reviewed two-process final
+tree must preserve all cases exactly once, only S21 absent, with raw partitions
+and a clearly labeled aggregate; never call it a monolithic pass.
+
+With a verified private GPL FFmpeg tool, the two original media cases pass in
+both roots (2.86/2.24 seconds). The retained monthly shipping LGPL 8.1.2 archive
+passes both published hash authorities and Defender, then four synthetic decoder
+checks in 2.68 seconds. Astra's first new probe omitted the caller's cap loop:
+three passes / one failure are retained with its exact instrument correction.
+The correction changes no original test. The 109-file proof seal includes every
+diagnostic-wrapper attempt, raw report patches, native metadata and scan receipts.
+
+The native Gemini report miscounts package inputs and overstates integrity,
+installed observation and SmartScreen certainty; Astra's verdict corrects these.
+No full security clearance follows. The report's Python retention proposal did
+not test exact-pin compatibility. Two bounded Gemini runs now qualify Python
+3.13.15 and update only FFmpeg's shipping pin/cache/doc. Both start from e6f520c.
+No Setup has run; Agent Install 04 remains prepared only. Preserve package-04
+before replacing it, then finish the committed tree and actual installation.
