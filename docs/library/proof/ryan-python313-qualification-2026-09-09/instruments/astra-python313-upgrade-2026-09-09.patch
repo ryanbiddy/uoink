@@ -1,0 +1,149 @@
+diff --git a/THIRD-PARTY-NOTICES.md b/THIRD-PARTY-NOTICES.md
+index 2ae6fe6a0644886c61bb7718a18198e7b234a101..c24a2e8c2117d01a5ffd1965216423451b7c0aa8 100644
+--- a/THIRD-PARTY-NOTICES.md
++++ b/THIRD-PARTY-NOTICES.md
+@@ -18,7 +18,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | asteroid-filterbanks | 0.4.0 | MIT License | https://github.com/asteroid-team/asteroid-filterbanks |
+ | attrs | 26.1.0 | UNKNOWN | https://www.attrs.org/en/stable/changelog.html |
+ | av | 18.0.0 | UNKNOWN | https://pyav.basswood.io |
+-| backports.tarfile | 1.2.0 | MIT License | https://github.com/jaraco/backports.tarfile |
+ | bottle | 0.13.4 | MIT License | http://bottlepy.org/ |
+ | certifi | 2026.7.22 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
+ | cffi | 2.1.0 | UNKNOWN | https://cffi.readthedocs.io/en/latest/whatsnew.html |
+@@ -48,7 +47,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | httpx-sse | 0.4.3 | MIT | https://github.com/florimondmanca/httpx-sse |
+ | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
+ | idna | 3.18 | UNKNOWN | https://github.com/kjd/idna |
+-| importlib_metadata | 9.0.0 | UNKNOWN | https://github.com/python/importlib_metadata |
+ | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
+ | jaraco.context | 6.1.2 | UNKNOWN | https://github.com/jaraco/jaraco.context |
+ | jaraco.functools | 4.6.0 | UNKNOWN | https://github.com/jaraco/jaraco.functools |
+@@ -149,7 +147,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
+ | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
+ | yt-dlp | 2026.7.4 | UNKNOWN | https://github.com/yt-dlp/yt-dlp |
+-| zipp | 4.1.0 | UNKNOWN | https://github.com/jaraco/zipp |
+ 
+ ## ffmpeg (bundled binary, not a Python package)
+ 
+diff --git a/build.ps1 b/build.ps1
+index 727e64d69687cffe416073efa3d341ac38bb1e53..9dd092c8f5fc5466a5ab7b9012564db237da9515 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -78,9 +78,9 @@ if ($ManifestVersion -ne $VERSION) {
+     throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
+ }
+ 
+-# Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
+-# source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
+-$PYTHON_VERSION = '3.11.9'
++# Official Windows binary with current 3.13 security fixes. The reviewed
++# Python 3.13 graph retains package versions and removes three old backports.
++$PYTHON_VERSION = '3.13.15'
+ $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
+ $GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'
+ $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT/public/get-pip.py"
+@@ -145,7 +145,7 @@ $WHISPERX_VERSION = '3.8.6'
+ # paste the new hash here, and rebuild. Subsequent builds fail with
+ # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
+ # file so a re-run pulls fresh.
+-$PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
++$PYTHON_SHA256 = "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf"
+ $FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
+ $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
+ 
+@@ -390,7 +390,7 @@ $embedPython = "$StagingDir\python\python.exe"
+ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
+ 
+ # 2d. Install the direct runtime dependencies while constraining the complete
+-#     transitive graph to the reviewed Windows/CPython 3.11 lock. Artifact
++#     transitive graph to the reviewed Windows/CPython 3.13 lock. Artifact
+ #     hashes remain a separate release control. Pillow drives the multimodal
+ #     paste-corpus generator
+ #     (resize / re-encode / base64 screenshots for clipboard embedding).
+@@ -425,7 +425,7 @@ if ($LASTEXITCODE -eq 0) {
+     if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
+     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
+     # Remove the tool and its tool-only dependencies. tomli is not required by
+-    # the runtime graph on Python 3.11; wcwidth arrives only through prettytable.
++    # the runtime graph on Python 3.13; wcwidth arrives only through prettytable.
+     & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
+ } else {
+     Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'
+diff --git a/docs/build-installer.md b/docs/build-installer.md
+index 9d80d86ea297e7d1c9395889c3bb031a8adc2642..5397f29406a605449496fdecda99a69f49d85f2c 100644
+--- a/docs/build-installer.md
++++ b/docs/build-installer.md
+@@ -65,7 +65,7 @@ changes.
+ The installer lays out `%LOCALAPPDATA%\Uoink\`:
+ 
+ ```
+-python\           Python 3.11 embeddable + the pinned runtime packages listed below
++python\           Python 3.13 embeddable + the pinned runtime packages listed below
+ bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
+ server.py         The local HTTP helper
+ uoink_mcp.py      MCP stdio entry point for agent clients
+@@ -90,7 +90,7 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
+ 
+ ## Where dependencies come from
+ 
+-- **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
++- **Python embeddable** — `https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
+ - **ffmpeg** — BtbN `n7.1` Windows static win64 LGPL build:
+   `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
+   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
+@@ -109,7 +109,7 @@ installed into the embeddable Python with the exact pip versions below.
+ 
+ | Component | Version | SHA256 | Notes |
+ |---|---|---|---|
+-| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
++| Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+ | ffmpeg | n7.1 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+ | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
+ | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
+@@ -142,7 +142,7 @@ When bumping a directly-downloaded component:
+ 
+ The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
+ `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
+-Windows/CPython 3.11 transitive graph are exact-version constrained by
++Windows/CPython 3.13 transitive graph are exact-version constrained by
+ `requirements-installer-lock.txt`. After build-only tooling is removed,
+ `scripts/verify_installer_lock.py` compares the final installed inventory to
+ that lock and fails on a missing, unexpected, or changed package. Distribution
+diff --git a/requirements-installer-lock.txt b/requirements-installer-lock.txt
+index 1c1bc0ccfadc0c92b68da18e5c25b9ec11545fca..9971faddc6cb919d70c6faf5be041d1ab77e9a04 100644
+--- a/requirements-installer-lock.txt
++++ b/requirements-installer-lock.txt
+@@ -3,7 +3,10 @@
+ # Snapshot source:
+ #   Draft Uoink-Setup-3.6.0.exe lock candidate built from
+ #   90149eec3d9b0572a98d8d1d91cb12772859feba on 2026-07-23.
+-#   CPython 3.11 x86-64, Windows; build-only tooling removed.
++#   Original CPython 3.11 x86-64 Windows inventory, with later reviewed updates.
++#   Python 3.13.15 qualification on 2026-09-09 retains all runtime versions and
++#   removes backports.tarfile, importlib_metadata and zipp, whose dependency
++#   markers no longer select them. The candidate build verifies the exact set.
+ #
+ # This file constrains the complete final site-packages inventory, not only
+ # Uoink's direct dependencies. Update it only from a reviewed clean installer
+@@ -20,7 +23,6 @@ anyio==4.14.2
+ asteroid-filterbanks==0.4.0
+ attrs==26.1.0
+ av==18.0.0
+-backports.tarfile==1.2.0
+ bottle==0.13.4
+ certifi==2026.7.22
+ cffi==2.1.0
+@@ -50,7 +52,6 @@ httpx-sse==0.4.3
+ httpx==0.28.1
+ huggingface_hub==0.36.2
+ idna==3.18
+-importlib_metadata==9.0.0
+ jaraco.classes==3.4.0
+ jaraco.context==6.1.2
+ jaraco.functools==4.6.0
+@@ -151,4 +152,3 @@ uvicorn==0.51.0
+ whisperx==3.8.6
+ yarl==1.24.5
+ yt-dlp==2026.7.4
+-zipp==4.1.0

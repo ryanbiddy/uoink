@@ -1,0 +1,2508 @@
+{
+  "timestamp": "2026-09-10T05:15:42Z",
+  "total_pins": 142,
+  "qualified_count": 137,
+  "failed_count": 5,
+  "source_only_count": 2,
+  "qualified": [
+    {
+      "package": "aiohappyeyeballs",
+      "version": "2.7.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "aiohappyeyeballs-2.7.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "aiohappyeyeballs-2.7.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "aiohttp",
+      "version": "3.14.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "aiohttp-3.14.3-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "aiohttp-3.14.3-cp310-cp310-win_amd64.whl",
+        "aiohttp-3.14.3-cp311-cp311-win_amd64.whl",
+        "aiohttp-3.14.3-cp312-cp312-win_amd64.whl",
+        "aiohttp-3.14.3-cp313-cp313-win_amd64.whl",
+        "aiohttp-3.14.3-cp314-cp314t-win_amd64.whl",
+        "aiohttp-3.14.3-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "aiosignal",
+      "version": "1.4.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "aiosignal-1.4.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "aiosignal-1.4.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "alembic",
+      "version": "1.18.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "alembic-1.18.5-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "alembic-1.18.5-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "annotated-types",
+      "version": "0.7.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "annotated_types-0.7.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "annotated_types-0.7.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "anyio",
+      "version": "4.14.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "anyio-4.14.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "anyio-4.14.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "asteroid-filterbanks",
+      "version": "0.4.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "asteroid_filterbanks-0.4.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "asteroid_filterbanks-0.4.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.6",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "attrs",
+      "version": "26.1.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "attrs-26.1.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "attrs-26.1.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "av",
+      "version": "18.0.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "av-18.0.0-cp311-abi3-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": true,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [
+        "av-18.0.0-cp311-abi3-win_amd64.whl",
+        "av-18.0.0-cp314-cp314t-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "backports.tarfile",
+      "version": "1.2.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "backports.tarfile-1.2.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "backports.tarfile-1.2.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "bottle",
+      "version": "0.13.4",
+      "pip_dryrun_success": true,
+      "wheel_selected": "bottle-0.13.4-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "bottle-0.13.4-py2.py3-none-any.whl"
+      ],
+      "requires_python": null,
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "certifi",
+      "version": "2026.7.22",
+      "pip_dryrun_success": true,
+      "wheel_selected": "certifi-2026.7.22-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "certifi-2026.7.22-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "cffi",
+      "version": "2.1.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "cffi-2.1.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "cffi-2.1.0-cp310-cp310-win_amd64.whl",
+        "cffi-2.1.0-cp311-cp311-win_amd64.whl",
+        "cffi-2.1.0-cp312-cp312-win_amd64.whl",
+        "cffi-2.1.0-cp313-cp313-win_amd64.whl",
+        "cffi-2.1.0-cp314-cp314t-win_amd64.whl",
+        "cffi-2.1.0-cp314-cp314-win_amd64.whl",
+        "cffi-2.1.0-cp315-cp315t-win_amd64.whl",
+        "cffi-2.1.0-cp315-cp315-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "charset-normalizer",
+      "version": "3.4.9",
+      "pip_dryrun_success": true,
+      "wheel_selected": "charset_normalizer-3.4.9-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "charset_normalizer-3.4.9-cp310-cp310-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp311-cp311-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp312-cp312-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp313-cp313-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp314-cp314t-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp314-cp314-win_amd64.whl",
+        "charset_normalizer-3.4.9-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "charset_normalizer-3.4.9-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "click",
+      "version": "8.4.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "click-8.4.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "click-8.4.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "clr_loader",
+      "version": "0.2.10",
+      "pip_dryrun_success": true,
+      "wheel_selected": "clr_loader-0.2.10-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "clr_loader-0.2.10-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "colorama",
+      "version": "0.4.6",
+      "pip_dryrun_success": true,
+      "wheel_selected": "colorama-0.4.6-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "colorama-0.4.6-py2.py3-none-any.whl"
+      ],
+      "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "colorlog",
+      "version": "6.11.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "colorlog-6.11.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "colorlog-6.11.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.6",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "contourpy",
+      "version": "1.3.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "contourpy-1.3.3-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "contourpy-1.3.3-cp311-cp311-win_amd64.whl",
+        "contourpy-1.3.3-cp312-cp312-win_amd64.whl",
+        "contourpy-1.3.3-cp313-cp313t-win_amd64.whl",
+        "contourpy-1.3.3-cp313-cp313-win_amd64.whl",
+        "contourpy-1.3.3-cp314-cp314t-win_amd64.whl",
+        "contourpy-1.3.3-cp314-cp314-win_amd64.whl",
+        "contourpy-1.3.3-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "cryptography",
+      "version": "50.0.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "cryptography-50.0.1-cp311-abi3-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": true,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [
+        "cryptography-50.0.1-cp311-abi3-win_amd64.whl",
+        "cryptography-50.0.1-cp314-cp314t-win_amd64.whl",
+        "cryptography-50.0.1-cp39-abi3-win_amd64.whl",
+        "cryptography-50.0.1-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": "!=3.9.0,!=3.9.1,>=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "ctranslate2",
+      "version": "4.8.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "ctranslate2-4.8.1-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "ctranslate2-4.8.1-cp310-cp310-win_amd64.whl",
+        "ctranslate2-4.8.1-cp311-cp311-win_amd64.whl",
+        "ctranslate2-4.8.1-cp312-cp312-win_amd64.whl",
+        "ctranslate2-4.8.1-cp313-cp313-win_amd64.whl",
+        "ctranslate2-4.8.1-cp314-cp314t-win_amd64.whl",
+        "ctranslate2-4.8.1-cp314-cp314-win_amd64.whl",
+        "ctranslate2-4.8.1-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "cycler",
+      "version": "0.12.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "cycler-0.12.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "cycler-0.12.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "defusedxml",
+      "version": "0.7.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "defusedxml-0.7.1-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "defusedxml-0.7.1-py2.py3-none-any.whl"
+      ],
+      "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "einops",
+      "version": "0.8.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "einops-0.8.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "einops-0.8.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "faster-whisper",
+      "version": "1.2.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "faster_whisper-1.2.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "faster_whisper-1.2.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "filelock",
+      "version": "3.32.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "filelock-3.32.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "filelock-3.32.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "flatbuffers",
+      "version": "25.12.19",
+      "pip_dryrun_success": true,
+      "wheel_selected": "flatbuffers-25.12.19-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "flatbuffers-25.12.19-py2.py3-none-any.whl"
+      ],
+      "requires_python": null,
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "fonttools",
+      "version": "4.63.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "fonttools-4.63.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "fonttools-4.63.0-cp310-cp310-win_amd64.whl",
+        "fonttools-4.63.0-cp311-cp311-win_amd64.whl",
+        "fonttools-4.63.0-cp312-cp312-win_amd64.whl",
+        "fonttools-4.63.0-cp313-cp313-win_amd64.whl",
+        "fonttools-4.63.0-cp314-cp314t-win_amd64.whl",
+        "fonttools-4.63.0-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "fonttools-4.63.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "frozenlist",
+      "version": "1.8.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "frozenlist-1.8.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "frozenlist-1.8.0-cp310-cp310-win_amd64.whl",
+        "frozenlist-1.8.0-cp311-cp311-win_amd64.whl",
+        "frozenlist-1.8.0-cp312-cp312-win_amd64.whl",
+        "frozenlist-1.8.0-cp313-cp313t-win_amd64.whl",
+        "frozenlist-1.8.0-cp313-cp313-win_amd64.whl",
+        "frozenlist-1.8.0-cp314-cp314t-win_amd64.whl",
+        "frozenlist-1.8.0-cp314-cp314-win_amd64.whl",
+        "frozenlist-1.8.0-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "frozenlist-1.8.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "fsspec",
+      "version": "2026.6.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "fsspec-2026.6.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "fsspec-2026.6.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "googleapis-common-protos",
+      "version": "1.75.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "googleapis_common_protos-1.75.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "googleapis_common_protos-1.75.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "greenlet",
+      "version": "3.5.4",
+      "pip_dryrun_success": true,
+      "wheel_selected": "greenlet-3.5.4-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "greenlet-3.5.4-cp310-cp310-win_amd64.whl",
+        "greenlet-3.5.4-cp311-cp311-win_amd64.whl",
+        "greenlet-3.5.4-cp312-cp312-win_amd64.whl",
+        "greenlet-3.5.4-cp313-cp313-win_amd64.whl",
+        "greenlet-3.5.4-cp314-cp314t-win_amd64.whl",
+        "greenlet-3.5.4-cp314-cp314-win_amd64.whl",
+        "greenlet-3.5.4-cp315-cp315t-win_amd64.whl",
+        "greenlet-3.5.4-cp315-cp315-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "grpcio",
+      "version": "1.82.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "grpcio-1.82.1-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "grpcio-1.82.1-cp310-cp310-win_amd64.whl",
+        "grpcio-1.82.1-cp311-cp311-win_amd64.whl",
+        "grpcio-1.82.1-cp312-cp312-win_amd64.whl",
+        "grpcio-1.82.1-cp313-cp313-win_amd64.whl",
+        "grpcio-1.82.1-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "h11",
+      "version": "0.16.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "h11-0.16.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "h11-0.16.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "httpcore",
+      "version": "1.0.9",
+      "pip_dryrun_success": true,
+      "wheel_selected": "httpcore-1.0.9-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "httpcore-1.0.9-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "httpx-sse",
+      "version": "0.4.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "httpx_sse-0.4.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "httpx_sse-0.4.3-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "httpx",
+      "version": "0.28.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "httpx-0.28.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "httpx-0.28.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "huggingface_hub",
+      "version": "0.36.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "huggingface_hub-0.36.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "huggingface_hub-0.36.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8.0",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "idna",
+      "version": "3.18",
+      "pip_dryrun_success": true,
+      "wheel_selected": "idna-3.18-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "idna-3.18-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "importlib_metadata",
+      "version": "9.0.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "importlib_metadata-9.0.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "importlib_metadata-9.0.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "jaraco.classes",
+      "version": "3.4.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jaraco.classes-3.4.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jaraco.classes-3.4.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "jaraco.context",
+      "version": "6.1.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jaraco_context-6.1.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jaraco_context-6.1.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "jaraco.functools",
+      "version": "4.6.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jaraco_functools-4.6.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jaraco_functools-4.6.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "Jinja2",
+      "version": "3.1.6",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jinja2-3.1.6-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jinja2-3.1.6-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "joblib",
+      "version": "1.5.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "joblib-1.5.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "joblib-1.5.3-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "jsonschema-specifications",
+      "version": "2025.9.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jsonschema_specifications-2025.9.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "jsonschema",
+      "version": "4.26.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "jsonschema-4.26.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "jsonschema-4.26.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "julius",
+      "version": "0.2.8",
+      "pip_dryrun_success": true,
+      "wheel_selected": "julius-0.2.8-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "julius-0.2.8-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9.0",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "keyring",
+      "version": "25.7.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "keyring-25.7.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "keyring-25.7.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "kiwisolver",
+      "version": "1.5.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "kiwisolver-1.5.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "kiwisolver-1.5.0-cp310-cp310-win_amd64.whl",
+        "kiwisolver-1.5.0-cp311-cp311-win_amd64.whl",
+        "kiwisolver-1.5.0-cp312-cp312-win_amd64.whl",
+        "kiwisolver-1.5.0-cp313-cp313-win_amd64.whl",
+        "kiwisolver-1.5.0-cp314-cp314t-win_amd64.whl",
+        "kiwisolver-1.5.0-cp314-cp314-win_amd64.whl",
+        "kiwisolver-1.5.0-graalpy312-graalpy250_312_native-win_amd64.whl",
+        "kiwisolver-1.5.0-pp310-pypy310_pp73-win_amd64.whl",
+        "kiwisolver-1.5.0-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "lightning-utilities",
+      "version": "0.15.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "lightning_utilities-0.15.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "lightning_utilities-0.15.3-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "lightning",
+      "version": "2.6.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "lightning-2.6.5-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "lightning-2.6.5-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "Mako",
+      "version": "1.3.12",
+      "pip_dryrun_success": true,
+      "wheel_selected": "mako-1.3.12-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "mako-1.3.12-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "markdown-it-py",
+      "version": "4.2.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "markdown_it_py-4.2.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "markdown_it_py-4.2.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "MarkupSafe",
+      "version": "3.0.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "markupsafe-3.0.3-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "markupsafe-3.0.3-cp310-cp310-win_amd64.whl",
+        "markupsafe-3.0.3-cp311-cp311-win_amd64.whl",
+        "markupsafe-3.0.3-cp312-cp312-win_amd64.whl",
+        "markupsafe-3.0.3-cp313-cp313t-win_amd64.whl",
+        "markupsafe-3.0.3-cp313-cp313-win_amd64.whl",
+        "markupsafe-3.0.3-cp314-cp314t-win_amd64.whl",
+        "markupsafe-3.0.3-cp314-cp314-win_amd64.whl",
+        "markupsafe-3.0.3-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "matplotlib",
+      "version": "3.11.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "matplotlib-3.11.1-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "matplotlib-3.11.1-cp311-cp311-win_amd64.whl",
+        "matplotlib-3.11.1-cp312-cp312-win_amd64.whl",
+        "matplotlib-3.11.1-cp313-cp313t-win_amd64.whl",
+        "matplotlib-3.11.1-cp313-cp313-win_amd64.whl",
+        "matplotlib-3.11.1-cp314-cp314t-win_amd64.whl",
+        "matplotlib-3.11.1-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "mcp",
+      "version": "1.28.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "mcp-1.28.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "mcp-1.28.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "mdurl",
+      "version": "0.1.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "mdurl-0.1.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "mdurl-0.1.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "more-itertools",
+      "version": "11.1.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "more_itertools-11.1.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "more_itertools-11.1.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "mpmath",
+      "version": "1.3.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "mpmath-1.3.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "mpmath-1.3.0-py3-none-any.whl"
+      ],
+      "requires_python": "",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "multidict",
+      "version": "6.7.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "multidict-6.7.1-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "multidict-6.7.1-cp310-cp310-win_amd64.whl",
+        "multidict-6.7.1-cp311-cp311-win_amd64.whl",
+        "multidict-6.7.1-cp312-cp312-win_amd64.whl",
+        "multidict-6.7.1-cp313-cp313t-win_amd64.whl",
+        "multidict-6.7.1-cp313-cp313-win_amd64.whl",
+        "multidict-6.7.1-cp314-cp314t-win_amd64.whl",
+        "multidict-6.7.1-cp314-cp314-win_amd64.whl",
+        "multidict-6.7.1-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "multidict-6.7.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "narwhals",
+      "version": "2.24.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "narwhals-2.24.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "narwhals-2.24.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "networkx",
+      "version": "3.6.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "networkx-3.6.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "networkx-3.6.1-py3-none-any.whl"
+      ],
+      "requires_python": "!=3.14.1,>=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "nltk",
+      "version": "3.10.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "nltk-3.10.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "nltk-3.10.3-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "numpy",
+      "version": "2.4.6",
+      "pip_dryrun_success": true,
+      "wheel_selected": "numpy-2.4.6-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "numpy-2.4.6-cp311-cp311-win_amd64.whl",
+        "numpy-2.4.6-cp312-cp312-win_amd64.whl",
+        "numpy-2.4.6-cp313-cp313t-win_amd64.whl",
+        "numpy-2.4.6-cp313-cp313-win_amd64.whl",
+        "numpy-2.4.6-cp314-cp314t-win_amd64.whl",
+        "numpy-2.4.6-cp314-cp314-win_amd64.whl",
+        "numpy-2.4.6-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "onnxruntime",
+      "version": "1.27.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "onnxruntime-1.27.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "onnxruntime-1.27.0-cp311-cp311-win_amd64.whl",
+        "onnxruntime-1.27.0-cp312-cp312-win_amd64.whl",
+        "onnxruntime-1.27.0-cp313-cp313-win_amd64.whl",
+        "onnxruntime-1.27.0-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-api",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_api-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_api-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-common",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_exporter_otlp_proto_common-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_exporter_otlp_proto_common-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-grpc",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_exporter_otlp_proto_grpc-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_exporter_otlp_proto_grpc-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-http",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_exporter_otlp_proto_http-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_exporter_otlp_proto_http-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-exporter-otlp",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_exporter_otlp-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_exporter_otlp-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-proto",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_proto-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_proto-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-sdk",
+      "version": "1.44.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_sdk-1.44.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_sdk-1.44.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "opentelemetry-semantic-conventions",
+      "version": "0.65b0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "opentelemetry_semantic_conventions-0.65b0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "opentelemetry_semantic_conventions-0.65b0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "optuna",
+      "version": "4.9.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "optuna-4.9.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "optuna-4.9.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "packaging",
+      "version": "26.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "packaging-26.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "packaging-26.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pandas",
+      "version": "3.0.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pandas-3.0.5-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "pandas-3.0.5-cp311-cp311-win_amd64.whl",
+        "pandas-3.0.5-cp312-cp312-win_amd64.whl",
+        "pandas-3.0.5-cp313-cp313-win_amd64.whl",
+        "pandas-3.0.5-cp314-cp314t-win_amd64.whl",
+        "pandas-3.0.5-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pillow",
+      "version": "12.3.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pillow-12.3.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "pillow-12.3.0-cp310-cp310-win_amd64.whl",
+        "pillow-12.3.0-cp311-cp311-win_amd64.whl",
+        "pillow-12.3.0-cp312-cp312-win_amd64.whl",
+        "pillow-12.3.0-cp313-cp313-win_amd64.whl",
+        "pillow-12.3.0-cp314-cp314t-win_amd64.whl",
+        "pillow-12.3.0-cp314-cp314-win_amd64.whl",
+        "pillow-12.3.0-cp315-cp315t-win_amd64.whl",
+        "pillow-12.3.0-cp315-cp315-win_amd64.whl",
+        "pillow-12.3.0-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "primePy",
+      "version": "1.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "primePy-1.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "primePy-1.3-py3-none-any.whl"
+      ],
+      "requires_python": "",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "propcache",
+      "version": "0.5.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "propcache-0.5.2-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "propcache-0.5.2-cp310-cp310-win_amd64.whl",
+        "propcache-0.5.2-cp311-cp311-win_amd64.whl",
+        "propcache-0.5.2-cp312-cp312-win_amd64.whl",
+        "propcache-0.5.2-cp313-cp313t-win_amd64.whl",
+        "propcache-0.5.2-cp313-cp313-win_amd64.whl",
+        "propcache-0.5.2-cp314-cp314t-win_amd64.whl",
+        "propcache-0.5.2-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "propcache-0.5.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "protobuf",
+      "version": "7.35.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "protobuf-7.35.1-cp310-abi3-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": true,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [
+        "protobuf-7.35.1-cp310-abi3-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "protobuf-7.35.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannote-audio",
+      "version": "4.0.7",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannote_audio-4.0.7-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannote_audio-4.0.7-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannote-core",
+      "version": "6.0.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannote_core-6.0.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannote_core-6.0.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannote-database",
+      "version": "6.1.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannote_database-6.1.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannote_database-6.1.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannote-metrics",
+      "version": "4.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannote_metrics-4.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannote_metrics-4.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannote-pipeline",
+      "version": "4.0.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannote_pipeline-4.0.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannote_pipeline-4.0.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyannoteai-sdk",
+      "version": "0.4.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyannoteai_sdk-0.4.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyannoteai_sdk-0.4.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pycparser",
+      "version": "3.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pycparser-3.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pycparser-3.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pydantic-settings",
+      "version": "2.14.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pydantic_settings-2.14.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pydantic_settings-2.14.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pydantic",
+      "version": "2.13.4",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pydantic-2.13.4-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pydantic-2.13.4-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pydantic_core",
+      "version": "2.46.4",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pydantic_core-2.46.4-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "pydantic_core-2.46.4-cp310-cp310-win_amd64.whl",
+        "pydantic_core-2.46.4-cp311-cp311-win_amd64.whl",
+        "pydantic_core-2.46.4-cp312-cp312-win_amd64.whl",
+        "pydantic_core-2.46.4-cp313-cp313-win_amd64.whl",
+        "pydantic_core-2.46.4-cp314-cp314t-win_amd64.whl",
+        "pydantic_core-2.46.4-cp314-cp314-win_amd64.whl",
+        "pydantic_core-2.46.4-cp39-cp39-win_amd64.whl",
+        "pydantic_core-2.46.4-pp311-pypy311_pp73-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "Pygments",
+      "version": "2.20.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pygments-2.20.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pygments-2.20.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "PyJWT",
+      "version": "2.13.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyjwt-2.13.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyjwt-2.13.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pyparsing",
+      "version": "3.3.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyparsing-3.3.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pyparsing-3.3.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pystray",
+      "version": "0.19.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pystray-0.19.5-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pystray-0.19.5-py2.py3-none-any.whl"
+      ],
+      "requires_python": "",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "python-dateutil",
+      "version": "2.9.0.post0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "python_dateutil-2.9.0.post0-py2.py3-none-any.whl"
+      ],
+      "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "python-dotenv",
+      "version": "1.2.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "python_dotenv-1.2.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "python_dotenv-1.2.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "python-multipart",
+      "version": "0.0.32",
+      "pip_dryrun_success": true,
+      "wheel_selected": "python_multipart-0.0.32-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "python_multipart-0.0.32-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pythonnet",
+      "version": "3.0.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pythonnet-3.0.5-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pythonnet-3.0.5-py3-none-any.whl"
+      ],
+      "requires_python": "<3.14,>=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pytorch-lightning",
+      "version": "2.6.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pytorch_lightning-2.6.5-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pytorch_lightning-2.6.5-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pytorch-metric-learning",
+      "version": "2.9.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pytorch_metric_learning-2.9.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pytorch_metric_learning-2.9.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.0",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pywin32-ctypes",
+      "version": "0.2.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pywin32_ctypes-0.2.3-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pywin32_ctypes-0.2.3-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.6",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "pywin32",
+      "version": "312",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pywin32-312-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "pywin32-312-cp310-cp310-win_amd64.whl",
+        "pywin32-312-cp311-cp311-win_amd64.whl",
+        "pywin32-312-cp312-cp312-win_amd64.whl",
+        "pywin32-312-cp313-cp313-win_amd64.whl",
+        "pywin32-312-cp314-cp314-win_amd64.whl",
+        "pywin32-312-cp315-cp315-win_amd64.whl",
+        "pywin32-312-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "PyYAML",
+      "version": "6.0.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "pyyaml-6.0.3-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "pyyaml-6.0.3-cp310-cp310-win_amd64.whl",
+        "pyyaml-6.0.3-cp311-cp311-win_amd64.whl",
+        "pyyaml-6.0.3-cp312-cp312-win_amd64.whl",
+        "pyyaml-6.0.3-cp313-cp313-win_amd64.whl",
+        "pyyaml-6.0.3-cp314-cp314t-win_amd64.whl",
+        "pyyaml-6.0.3-cp314-cp314-win_amd64.whl",
+        "PyYAML-6.0.3-cp38-cp38-win_amd64.whl",
+        "pyyaml-6.0.3-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "referencing",
+      "version": "0.37.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "referencing-0.37.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "referencing-0.37.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "regex",
+      "version": "2026.7.19",
+      "pip_dryrun_success": true,
+      "wheel_selected": "regex-2026.7.19-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "regex-2026.7.19-cp310-cp310-win_amd64.whl",
+        "regex-2026.7.19-cp311-cp311-win_amd64.whl",
+        "regex-2026.7.19-cp312-cp312-win_amd64.whl",
+        "regex-2026.7.19-cp313-cp313t-win_amd64.whl",
+        "regex-2026.7.19-cp313-cp313-win_amd64.whl",
+        "regex-2026.7.19-cp314-cp314t-win_amd64.whl",
+        "regex-2026.7.19-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "requests",
+      "version": "2.34.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "requests-2.34.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "requests-2.34.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "rich",
+      "version": "15.0.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "rich-15.0.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "rich-15.0.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9.0",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "rpds-py",
+      "version": "2026.6.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "rpds_py-2026.6.3-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "rpds_py-2026.6.3-cp311-cp311-win_amd64.whl",
+        "rpds_py-2026.6.3-cp312-cp312-win_amd64.whl",
+        "rpds_py-2026.6.3-cp313-cp313-win_amd64.whl",
+        "rpds_py-2026.6.3-cp314-cp314t-win_amd64.whl",
+        "rpds_py-2026.6.3-cp314-cp314-win_amd64.whl",
+        "rpds_py-2026.6.3-cp315-cp315t-win_amd64.whl",
+        "rpds_py-2026.6.3-cp315-cp315-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "safetensors",
+      "version": "0.8.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "safetensors-0.8.0-cp310-abi3-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": true,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [
+        "safetensors-0.8.0-cp310-abi3-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "scikit-learn",
+      "version": "1.9.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "scikit_learn-1.9.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "scikit_learn-1.9.0-cp311-cp311-win_amd64.whl",
+        "scikit_learn-1.9.0-cp312-cp312-win_amd64.whl",
+        "scikit_learn-1.9.0-cp313-cp313-win_amd64.whl",
+        "scikit_learn-1.9.0-cp314-cp314t-win_amd64.whl",
+        "scikit_learn-1.9.0-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "scipy",
+      "version": "1.17.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "scipy-1.17.1-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "scipy-1.17.1-cp311-cp311-win_amd64.whl",
+        "scipy-1.17.1-cp312-cp312-win_amd64.whl",
+        "scipy-1.17.1-cp313-cp313t-win_amd64.whl",
+        "scipy-1.17.1-cp313-cp313-win_amd64.whl",
+        "scipy-1.17.1-cp314-cp314t-win_amd64.whl",
+        "scipy-1.17.1-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.11",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "six",
+      "version": "1.17.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "six-1.17.0-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "six-1.17.0-py2.py3-none-any.whl"
+      ],
+      "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "sortedcontainers",
+      "version": "2.4.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "sortedcontainers-2.4.0-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "sortedcontainers-2.4.0-py2.py3-none-any.whl"
+      ],
+      "requires_python": "",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "SQLAlchemy",
+      "version": "2.0.51",
+      "pip_dryrun_success": true,
+      "wheel_selected": "sqlalchemy-2.0.51-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "sqlalchemy-2.0.51-cp310-cp310-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp311-cp311-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp312-cp312-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp313-cp313-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp314-cp314t-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp314-cp314-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp38-cp38-win_amd64.whl",
+        "sqlalchemy-2.0.51-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "sqlalchemy-2.0.51-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "sse-starlette",
+      "version": "3.4.6",
+      "pip_dryrun_success": true,
+      "wheel_selected": "sse_starlette-3.4.6-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "sse_starlette-3.4.6-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "starlette",
+      "version": "1.3.1",
+      "pip_dryrun_success": true,
+      "wheel_selected": "starlette-1.3.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "starlette-1.3.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "sympy",
+      "version": "1.14.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "sympy-1.14.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "sympy-1.14.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "threadpoolctl",
+      "version": "3.6.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "threadpoolctl-3.6.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "threadpoolctl-3.6.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "tokenizers",
+      "version": "0.22.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "tokenizers-0.22.2-cp39-abi3-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": true,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [
+        "tokenizers-0.22.2-cp39-abi3-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "torch-audiomentations",
+      "version": "0.12.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torch_audiomentations-0.12.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "torch_audiomentations-0.12.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.6",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "torch",
+      "version": "2.8.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torch-2.8.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "torch-2.8.0-cp310-cp310-win_amd64.whl",
+        "torch-2.8.0-cp311-cp311-win_amd64.whl",
+        "torch-2.8.0-cp312-cp312-win_amd64.whl",
+        "torch-2.8.0-cp313-cp313t-win_amd64.whl",
+        "torch-2.8.0-cp313-cp313-win_amd64.whl",
+        "torch-2.8.0-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9.0",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "torch_pitch_shift",
+      "version": "1.2.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torch_pitch_shift-1.2.5-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "torch_pitch_shift-1.2.5-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.4",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "torchaudio",
+      "version": "2.8.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torchaudio-2.8.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "torchaudio-2.8.0-cp310-cp310-win_amd64.whl",
+        "torchaudio-2.8.0-cp311-cp311-win_amd64.whl",
+        "torchaudio-2.8.0-cp312-cp312-win_amd64.whl",
+        "torchaudio-2.8.0-cp313-cp313t-win_amd64.whl",
+        "torchaudio-2.8.0-cp313-cp313-win_amd64.whl",
+        "torchaudio-2.8.0-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": null,
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "torchcodec",
+      "version": "0.7.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torchcodec-0.7.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "torchcodec-0.7.0-cp310-cp310-win_amd64.whl",
+        "torchcodec-0.7.0-cp311-cp311-win_amd64.whl",
+        "torchcodec-0.7.0-cp312-cp312-win_amd64.whl",
+        "torchcodec-0.7.0-cp313-cp313-win_amd64.whl",
+        "torchcodec-0.7.0-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.8",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "torchmetrics",
+      "version": "1.9.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torchmetrics-1.9.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "torchmetrics-1.9.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "torchvision",
+      "version": "0.23.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "torchvision-0.23.0-cp313-cp313-win_amd64.whl",
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "torchvision-0.23.0-cp310-cp310-win_amd64.whl",
+        "torchvision-0.23.0-cp311-cp311-win_amd64.whl",
+        "torchvision-0.23.0-cp312-cp312-win_amd64.whl",
+        "torchvision-0.23.0-cp313-cp313t-win_amd64.whl",
+        "torchvision-0.23.0-cp313-cp313-win_amd64.whl",
+        "torchvision-0.23.0-cp39-cp39-win_amd64.whl"
+      ],
+      "pure_wheels": [],
+      "requires_python": ">=3.9",
+      "has_sdist": false,
+      "dryrun_error": null
+    },
+    {
+      "package": "tqdm",
+      "version": "4.69.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "tqdm-4.69.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "tqdm-4.69.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.8",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "transformers",
+      "version": "4.57.6",
+      "pip_dryrun_success": true,
+      "wheel_selected": "transformers-4.57.6-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "transformers-4.57.6-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9.0",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "typing-inspection",
+      "version": "0.4.2",
+      "pip_dryrun_success": true,
+      "wheel_selected": "typing_inspection-0.4.2-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "typing_inspection-0.4.2-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "typing_extensions",
+      "version": "4.16.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "typing_extensions-4.16.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "typing_extensions-4.16.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.9",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "tzdata",
+      "version": "2026.3",
+      "pip_dryrun_success": true,
+      "wheel_selected": "tzdata-2026.3-py2.py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "tzdata-2026.3-py2.py3-none-any.whl"
+      ],
+      "requires_python": ">=2",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "urllib3",
+      "version": "2.7.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "urllib3-2.7.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "urllib3-2.7.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "uvicorn",
+      "version": "0.51.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "uvicorn-0.51.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "uvicorn-0.51.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "yarl",
+      "version": "1.24.5",
+      "pip_dryrun_success": true,
+      "wheel_selected": "yarl-1.24.5-cp313-cp313-win_amd64.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": true,
+      "all_win_amd64_wheels": [
+        "yarl-1.24.5-cp310-cp310-win_amd64.whl",
+        "yarl-1.24.5-cp311-cp311-win_amd64.whl",
+        "yarl-1.24.5-cp312-cp312-win_amd64.whl",
+        "yarl-1.24.5-cp313-cp313-win_amd64.whl",
+        "yarl-1.24.5-cp314-cp314t-win_amd64.whl",
+        "yarl-1.24.5-cp314-cp314-win_amd64.whl"
+      ],
+      "pure_wheels": [
+        "yarl-1.24.5-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "yt-dlp",
+      "version": "2026.7.4",
+      "pip_dryrun_success": true,
+      "wheel_selected": "yt_dlp-2026.7.4-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "yt_dlp-2026.7.4-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    },
+    {
+      "package": "zipp",
+      "version": "4.1.0",
+      "pip_dryrun_success": true,
+      "wheel_selected": "zipp-4.1.0-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "zipp-4.1.0-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.10",
+      "has_sdist": true,
+      "dryrun_error": null
+    }
+  ],
+  "failed": [
+    {
+      "package": "antlr4-python3-runtime",
+      "version": "4.9.3",
+      "pip_dryrun_success": false,
+      "wheel_selected": null,
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [],
+      "requires_python": "",
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\n\nERROR: Could not find a version that satisfies the requirement antlr4-python3-runtime==4.9.3 (from versions: 4.11.0, 4.11.1, 4.12.0, 4.13.0, 4.13.1, 4.13.2)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for antlr4-python3-runtime==4.9.3"
+    },
+    {
+      "package": "omegaconf",
+      "version": "2.3.1",
+      "pip_dryrun_success": false,
+      "wheel_selected": "omegaconf-2.3.1-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "omegaconf-2.3.1-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.6",
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\nCollecting omegaconf==2.3.1\n  Downloading omegaconf-2.3.1-py3-none-any.whl.metadata (4.5 kB)\nINFO: pip is looking at multiple versions of omegaconf to determine which version is compatible with other requirements. This could take a while.\n\nERROR: Could not find a version that satisfies the requirement antlr4-python3-runtime==4.9.* (from omegaconf) (from versions: 4.11.0, 4.11.1, 4.12.0, 4.13.0, 4.13.1, 4.13.2)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for antlr4-python3-runtime==4.9.*"
+    },
+    {
+      "package": "proxy_tools",
+      "version": "0.1.0",
+      "pip_dryrun_success": false,
+      "wheel_selected": null,
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [],
+      "requires_python": null,
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\n\nERROR: Could not find a version that satisfies the requirement proxy_tools==0.1.0 (from versions: none)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for proxy_tools==0.1.0"
+    },
+    {
+      "package": "pywebview",
+      "version": "5.4",
+      "pip_dryrun_success": false,
+      "wheel_selected": "pywebview-5.4-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "pywebview-5.4-py3-none-any.whl"
+      ],
+      "requires_python": ">=3.7",
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\nCollecting pywebview==5.4\n  Downloading pywebview-5.4-py3-none-any.whl.metadata (4.5 kB)\nCollecting pythonnet (from pywebview==5.4)\n  Downloading pythonnet-3.1.0-cp310.cp311.cp312.cp313.cp314-none-win32.win_amd64.whl.metadata (6.5 kB)\nINFO: pip is looking at multiple versions of pywebview to determine which version is compatible with other requirements. This could take a while.\n\nERROR: Ignored the following versions that require a different python version: 3.0.0.post1 Requires-Python >=3.7,<3.11; 3.0.1 Requires-Python >=3.7,<3.12; 3.0.2 Requires-Python >=3.7,<3.12; 3.0.3 Requires-Python >=3.7,<3.13; 3.0.4 Requires-Python >=3.7,<3.13\nERROR: Could not find a version that satisfies the requirement proxy_tools (from pywebview) (from versions: none)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for proxy_tools"
+    },
+    {
+      "package": "whisperx",
+      "version": "3.8.6",
+      "pip_dryrun_success": false,
+      "wheel_selected": "whisperx-3.8.6-py3-none-any.whl",
+      "pure_wheel": true,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [
+        "whisperx-3.8.6-py3-none-any.whl"
+      ],
+      "requires_python": "<3.14,>=3.10",
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\nCollecting whisperx==3.8.6\n  Downloading whisperx-3.8.6-py3-none-any.whl.metadata (16 kB)\nCollecting ctranslate2>=4.5.0 (from whisperx==3.8.6)\n  Using cached ctranslate2-4.8.2-cp313-cp313-win_amd64.whl.metadata (11 kB)\nCollecting faster-whisper>=1.2.0 (from whisperx==3.8.6)\n  Using cached faster_whisper-1.2.1-py3-none-any.whl.metadata (16 kB)\nCollecting nltk>=3.9.1 (from whisperx==3.8.6)\n  Using cached nltk-3.10.3-py3-none-any.whl.metadata (3.2 kB)\nCollecting numpy>=2.1.0 (from whisperx==3.8.6)\n  Using cached numpy-2.5.3-cp313-cp313-win_amd64.whl.metadata (6.6 kB)\nCollecting omegaconf>=2.3.0 (from whisperx==3.8.6)\n  Using cached omegaconf-2.3.1-py3-none-any.whl.metadata (4.5 kB)\nCollecting pandas>=2.2.3 (from whisperx==3.8.6)\n  Using cached pandas-3.0.5-cp313-cp313-win_amd64.whl.metadata (19 kB)\nCollecting pyannote-audio>=4.0.0 (from whisperx==3.8.6)\n  Using cached pyannote_audio-4.0.7-py3-none-any.whl.metadata (13 kB)\nCollecting huggingface-hub<1.0.0 (from whisperx==3.8.6)\n  Using cached huggingface_hub-0.36.2-py3-none-any.whl.metadata (15 kB)\nCollecting torch~=2.8.0 (from whisperx==3.8.6)\n  Using cached torch-2.8.0-cp313-cp313-win_amd64.whl.metadata (30 kB)\nCollecting torchaudio~=2.8.0 (from whisperx==3.8.6)\n  Using cached torchaudio-2.8.0-cp313-cp313-win_amd64.whl.metadata (7.2 kB)\nCollecting torchvision~=0.23.0 (from whisperx==3.8.6)\n  Using cached torchvision-0.23.0-cp313-cp313-win_amd64.whl.metadata (6.1 kB)\nCollecting torchcodec<0.8.0,>=0.6.0 (from whisperx==3.8.6)\n  Using cached torchcodec-0.7.0-cp313-cp313-win_amd64.whl.metadata (9.7 kB)\nCollecting transformers>=4.48.0 (from whisperx==3.8.6)\n  Downloading transformers-5.17.0-py3-none-any.whl.metadata (32 kB)\nCollecting filelock (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached filelock-3.32.6-py3-none-any.whl.metadata (2.0 kB)\nCollecting fsspec>=2023.5.0 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached fsspec-2026.7.0-py3-none-any.whl.metadata (10 kB)\nCollecting packaging>=20.9 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)\nCollecting pyyaml>=5.1 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached pyyaml-6.0.3-cp313-cp313-win_amd64.whl.metadata (2.4 kB)\nCollecting requests (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)\nCollecting tqdm>=4.42.1 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached tqdm-4.70.0-py3-none-any.whl.metadata (57 kB)\nCollecting typing-extensions>=3.7.4.3 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)\nCollecting sympy>=1.13.3 (from torch~=2.8.0->whisperx==3.8.6)\n  Using cached sympy-1.14.0-py3-none-any.whl.metadata (12 kB)\nCollecting networkx (from torch~=2.8.0->whisperx==3.8.6)\n  Using cached networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)\nCollecting jinja2 (from torch~=2.8.0->whisperx==3.8.6)\n  Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)\nCollecting setuptools (from torch~=2.8.0->whisperx==3.8.6)\n  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)\nCollecting pillow!=8.3.*,>=5.3.0 (from torchvision~=0.23.0->whisperx==3.8.6)\n  Using cached pillow-12.3.0-cp313-cp313-win_amd64.whl.metadata (9.3 kB)\nCollecting tokenizers<1,>=0.13 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached tokenizers-0.23.2-cp310-abi3-win_amd64.whl.metadata (10 kB)\nCollecting onnxruntime<2,>=1.14 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached onnxruntime-1.29.0-cp313-cp313-win_amd64.whl.metadata (5.8 kB)\nCollecting av>=11 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached av-18.1.0-cp311-abi3-win_amd64.whl.metadata (5.1 kB)\nCollecting flatbuffers (from onnxruntime<2,>=1.14->faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached flatbuffers-25.12.19-py2.py3-none-any.whl.metadata (1.0 kB)\nCollecting protobuf>=4.25.8 (from onnxruntime<2,>=1.14->faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached protobuf-7.36.1-cp310-abi3-win_amd64.whl.metadata (595 bytes)\nCollecting defusedxml (from nltk>=3.9.1->whisperx==3.8.6)\n  Using cached defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)\nCollecting click (from nltk>=3.9.1->whisperx==3.8.6)\n  Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)\nCollecting joblib (from nltk>=3.9.1->whisperx==3.8.6)\n  Using cached joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)\nCollecting regex>=2021.8.3 (from nltk>=3.9.1->whisperx==3.8.6)\n  Using cached regex-2026.9.10-cp313-cp313-win_amd64.whl.metadata (41 kB)\nINFO: pip is looking at multiple versions of omegaconf to determine which version is compatible with other requirements. This could take a while.\nCollecting omegaconf>=2.3.0 (from whisperx==3.8.6)\n  Downloading omegaconf-2.3.0-py3-none-any.whl.metadata (3.9 kB)\nCollecting numpy>=2.1.0 (from whisperx==3.8.6)\n  Downloading numpy-2.5.2-cp313-cp313-win_amd64.whl.metadata (6.6 kB)\nCollecting fsspec>=2023.5.0 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Using cached fsspec-2026.6.0-py3-none-any.whl.metadata (10 kB)\nINFO: pip is still looking at multiple versions of omegaconf to determine which version is compatible with other requirements. This could take a while.\nCollecting av>=11 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Using cached av-18.0.0-cp311-abi3-win_amd64.whl.metadata (4.7 kB)\nCollecting tokenizers<1,>=0.13 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Downloading tokenizers-0.23.1-cp310-abi3-win_amd64.whl.metadata (10 kB)\nCollecting onnxruntime<2,>=1.14 (from faster-whisper>=1.2.0->whisperx==3.8.6)\n  Downloading onnxruntime-1.28.0-cp313-cp313-win_amd64.whl.metadata (5.7 kB)\nINFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. See https://pip.pypa.io/warnings/backtracking for guidance. If you want to abort this run, press Ctrl + C.\nCollecting faster-whisper>=1.2.0 (from whisperx==3.8.6)\n  Downloading faster_whisper-1.2.0-py3-none-any.whl.metadata (16 kB)\nCollecting pyyaml>=5.1 (from huggingface-hub<1.0.0->whisperx==3.8.6)\n  Downloading PyYAML-6.0.2-cp313-cp313-win_amd64.whl.metadata (2.1 kB)\nCollecting ctranslate2>=4.5.0 (from whisperx==3.8.6)\n  Using cached ctranslate2-4.8.1-cp313-cp313-win_amd64.whl.metadata (11 kB)\nCollecting huggingface-hub<1.0.0 (from whisperx==3.8.6)\n  Downloading huggingface_hub-0.36.1-py3-none-any.whl.metadata (15 kB)\n\nThe conflict is caused by:\n    omegaconf 2.3.1 depends on antlr4-python3-runtime==4.9.*\n    omegaconf 2.3.0 depends on antlr4-python3-runtime==4.9.*\n\nAdditionally, some packages in these conflicts have no matching distributions available for your environment:\n    antlr4-python3-runtime\n\nTo fix this you could try to:\n1. loosen the range of package versions you've specified\n2. remove package versions to allow pip to attempt to solve the dependency conflict\n\n\nERROR: Cannot install whisperx because these package versions have conflicting dependencies.\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts"
+    }
+  ],
+  "source_only": [
+    {
+      "package": "antlr4-python3-runtime",
+      "version": "4.9.3",
+      "pip_dryrun_success": false,
+      "wheel_selected": null,
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [],
+      "requires_python": "",
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\n\nERROR: Could not find a version that satisfies the requirement antlr4-python3-runtime==4.9.3 (from versions: 4.11.0, 4.11.1, 4.12.0, 4.13.0, 4.13.1, 4.13.2)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for antlr4-python3-runtime==4.9.3"
+    },
+    {
+      "package": "proxy_tools",
+      "version": "0.1.0",
+      "pip_dryrun_success": false,
+      "wheel_selected": null,
+      "pure_wheel": false,
+      "abi3_win_amd64": false,
+      "cp313_win_amd64": false,
+      "all_win_amd64_wheels": [],
+      "pure_wheels": [],
+      "requires_python": null,
+      "has_sdist": true,
+      "dryrun_error": "Defaulting to user installation because normal site-packages is not writeable\n\nERROR: Could not find a version that satisfies the requirement proxy_tools==0.1.0 (from versions: none)\n\n[notice] A new release of pip is available: 26.1.2 -> 26.2.1\n[notice] To update, run: python.exe -m pip install --upgrade pip\nERROR: No matching distribution found for proxy_tools==0.1.0"
+    }
+  ]
+}

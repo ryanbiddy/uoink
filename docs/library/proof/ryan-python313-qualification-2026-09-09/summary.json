@@ -1,0 +1,31 @@
+{
+  "source_before_commit": "e1d81bc940ecd376f70cdfae8be99a4a1e7ace20",
+  "target_python": "3.13.15",
+  "exact_runtime_packages": 139,
+  "runtime_inventory_equals_proposed_lock": true,
+  "separate_build_tools": {
+    "pip": "26.1.2",
+    "setuptools": "83.0.0",
+    "wheel": "0.47.0"
+  },
+  "worker_build_suites": {
+    "passed": 36,
+    "seconds": 2.43
+  },
+  "premature_conflicted_checkout_suites": {
+    "passed": 36,
+    "seconds": 1.97,
+    "accepted_for_build": false
+  },
+  "resolved_checkout_suites": {
+    "passed": 36,
+    "seconds": 1.95
+  },
+  "native_probe": {
+    "passed": 15,
+    "failed": 1,
+    "failure": "torchcodec native shared library dependency",
+    "guard_refusals": 1
+  },
+  "scope": "Dependency graph and build configuration accepted; native failure remains repair work. No model/inference/diarization/Setup. No existing acceptance test changed."
+}

@@ -78,9 +78,9 @@ if ($ManifestVersion -ne $VERSION) {
     throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
 }
 
-# Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
-# source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
-$PYTHON_VERSION = '3.11.9'
+# Official Windows binary with current 3.13 security fixes. The reviewed
+# Python 3.13 graph retains package versions and removes three old backports.
+$PYTHON_VERSION = '3.13.15'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'
 $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT/public/get-pip.py"
@@ -145,7 +145,7 @@ $WHISPERX_VERSION = '3.8.6'
 # paste the new hash here, and rebuild. Subsequent builds fail with
 # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
 # file so a re-run pulls fresh.
-$PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
+$PYTHON_SHA256 = "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf"
 $FFMPEG_SHA256 = "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365"
 $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
@@ -390,7 +390,7 @@ $embedPython = "$StagingDir\python\python.exe"
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
 # 2d. Install the direct runtime dependencies while constraining the complete
-#     transitive graph to the reviewed Windows/CPython 3.11 lock. Artifact
+#     transitive graph to the reviewed Windows/CPython 3.13 lock. Artifact
 #     hashes remain a separate release control. Pillow drives the multimodal
 #     paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
@@ -425,7 +425,7 @@ if ($LASTEXITCODE -eq 0) {
     if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
     # Remove the tool and its tool-only dependencies. tomli is not required by
-    # the runtime graph on Python 3.11; wcwidth arrives only through prettytable.
+    # the runtime graph on Python 3.13; wcwidth arrives only through prettytable.
     & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
 } else {
     Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'

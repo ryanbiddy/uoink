@@ -1,0 +1,15 @@
+{
+  "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-binary-candidates-03\\python-3.13.15-embed-amd64.zip",
+  "sha256": "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf",
+  "bytes": 11009825,
+  "utc_start": "2026-09-10T05:22:49.7293651+00:00",
+  "exit": 0,
+  "antivirus_enabled": true,
+  "realtime_enabled": true,
+  "definitions": "1.459.133.0",
+  "remediation_disabled": true,
+  "settings_changed": false,
+  "scope": "Custom archive scan; existing cloud/sample policies retained; not a vulnerability clearance",
+  "utc_end": "2026-09-10T05:22:51.8464588+00:00",
+  "sha256_after": "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf"
+}

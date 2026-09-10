@@ -18,7 +18,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | asteroid-filterbanks | 0.4.0 | MIT License | https://github.com/asteroid-team/asteroid-filterbanks |
 | attrs | 26.1.0 | UNKNOWN | https://www.attrs.org/en/stable/changelog.html |
 | av | 18.0.0 | UNKNOWN | https://pyav.basswood.io |
-| backports.tarfile | 1.2.0 | MIT License | https://github.com/jaraco/backports.tarfile |
 | bottle | 0.13.4 | MIT License | http://bottlepy.org/ |
 | certifi | 2026.7.22 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
 | cffi | 2.1.0 | UNKNOWN | https://cffi.readthedocs.io/en/latest/whatsnew.html |
@@ -48,7 +47,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | httpx-sse | 0.4.3 | MIT | https://github.com/florimondmanca/httpx-sse |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
 | idna | 3.18 | UNKNOWN | https://github.com/kjd/idna |
-| importlib_metadata | 9.0.0 | UNKNOWN | https://github.com/python/importlib_metadata |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
 | jaraco.context | 6.1.2 | UNKNOWN | https://github.com/jaraco/jaraco.context |
 | jaraco.functools | 4.6.0 | UNKNOWN | https://github.com/jaraco/jaraco.functools |
@@ -149,7 +147,6 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.7.4 | UNKNOWN | https://github.com/yt-dlp/yt-dlp |
-| zipp | 4.1.0 | UNKNOWN | https://github.com/jaraco/zipp |
 
 ## ffmpeg (bundled binary, not a Python package)
 

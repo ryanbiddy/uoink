@@ -1,0 +1,28 @@
+{
+  "expected_count": 142,
+  "resolved_runtime_count": 139,
+  "missing": [
+    "backports-tarfile",
+    "importlib-metadata",
+    "zipp"
+  ],
+  "extra": [],
+  "changed": {},
+  "build_only_selected_under_ignore_installed": {
+    "setuptools": "84.0.0"
+  },
+  "actual_python": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.13.15",
+    "os_name": "nt",
+    "platform_machine": "AMD64",
+    "platform_release": "11",
+    "platform_system": "Windows",
+    "platform_version": "10.0.26200",
+    "python_full_version": "3.13.15",
+    "platform_python_implementation": "CPython",
+    "python_version": "3.13",
+    "sys_platform": "win32"
+  },
+  "scope": "Actual CPython 3.13 direct-build graph. Resolver exit zero. Initial collector failed decoding UTF-8 as cp1252; this reads the same saved report, without a resolver rerun. No model execution."
+}

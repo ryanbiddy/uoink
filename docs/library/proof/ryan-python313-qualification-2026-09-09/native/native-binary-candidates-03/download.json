@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "url": "https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip.spdx.json",
+      "started_utc": "2026-09-10T05:22:47.109261+00:00",
+      "executed": false,
+      "http_status": 200,
+      "bytes": 15341,
+      "sha256": "ba428f93acb06764f0005246f8ca48bb1c04feef64ce7db0b177fb2fd371c423",
+      "finished_utc": "2026-09-10T05:22:47.259194+00:00"
+    },
+    {
+      "url": "https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip",
+      "started_utc": "2026-09-10T05:22:47.259309+00:00",
+      "executed": false,
+      "http_status": 200,
+      "bytes": 11009825,
+      "sha256": "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf",
+      "finished_utc": "2026-09-10T05:22:47.543116+00:00"
+    }
+  ],
+  "official_sbom_matches_archive": true,
+  "scope": "Software dependency candidate only; not executed"
+}

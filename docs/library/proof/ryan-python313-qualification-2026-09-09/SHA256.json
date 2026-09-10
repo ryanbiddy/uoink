@@ -1,0 +1,241 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "actual-graph/bootstrap.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actual-graph/bootstrap.stdout": {
+      "bytes": 877,
+      "sha256": "02e72044ffb09da19d1e16285838545239318481325beba921fe60e3422a8595"
+    },
+    "actual-graph/commands.json": {
+      "bytes": 1994,
+      "sha256": "0ea778fcaf1affa8808efa9ffe1bb8910e63588476bf3bb42a7f3a1141726e1b"
+    },
+    "actual-graph/graph-diff.json": {
+      "bytes": 896,
+      "sha256": "a15bd8790b4373ccdd1b3790c363a8ff70b597898d00a61f6f3d27bbec11f251"
+    },
+    "actual-graph/install-command.json": {
+      "bytes": 948,
+      "sha256": "489cf804bdbc42c88460751d6515cfbe52e1e3e4206d1369024aecb92453105f"
+    },
+    "actual-graph/install-report.json": {
+      "bytes": 2079145,
+      "sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303"
+    },
+    "actual-graph/install.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actual-graph/install.stdout": {
+      "bytes": 37666,
+      "sha256": "aec0733af2050bdb45bebcbf1a159ca5f5eead4fb87d8f2db055a414d597fd90"
+    },
+    "actual-graph/original_qualifier.py": {
+      "bytes": 4498,
+      "sha256": "27ed5d29710c5cd284943872559242feebff066b4a3c4e8564a38cd05f85b273"
+    },
+    "actual-graph/python313.original._pth": {
+      "bytes": 80,
+      "sha256": "35ddf94682ff9aa713a8d63557242ad00f3f28fdd39337f02c3bda4c0f791577"
+    },
+    "actual-graph/resolution.json": {
+      "bytes": 2091396,
+      "sha256": "6e5a259c2f1d3837418db00ffd0a1fd5ea1d8a3f198ca62a239af531be142f40"
+    },
+    "actual-graph/resolve.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actual-graph/resolve.stdout": {
+      "bytes": 23794,
+      "sha256": "19490972419e75628487476f8adc5defef5fd749b8c38e73b841e090082759e8"
+    },
+    "actual-graph/version.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actual-graph/version.stdout": {
+      "bytes": 119,
+      "sha256": "d417bfb920534e668d3876455a1c79565eb56d6ca743f612a5dfed9e8c5caf9f"
+    },
+    "checkout/astra-python313-c1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "checkout/astra-python313-c1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "checkout/astra-python313-c1/results.json": {
+      "bytes": 1004,
+      "sha256": "7444ad03ccc63d0161e1e25c8a14d0c3f3fd337c88c95644719e252c26d85a4e"
+    },
+    "checkout/astra-python313-c1/tests.log": {
+      "bytes": 101,
+      "sha256": "6e2ec014f74dc0fd71bb0d8817b998bde01086c1d66ddc3cd022b0ab46979d0c"
+    },
+    "checkout/astra-python313-c1/tests.xml": {
+      "bytes": 4944,
+      "sha256": "7501f4e85e250b012178e64b41088e9731c6af86cc9a126ce8e21e8a293f5c00"
+    },
+    "checkout/astra-python313-c2/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "checkout/astra-python313-c2/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "checkout/astra-python313-c2/results.json": {
+      "bytes": 1004,
+      "sha256": "b28e0d58236043ca0540e2ef3ec7565520beade401d35f86451f47184ce4c78b"
+    },
+    "checkout/astra-python313-c2/tests.log": {
+      "bytes": 101,
+      "sha256": "f5abce1aa0affee5ab8918e798fc73796592b9374e6d4e821260f6382f150c23"
+    },
+    "checkout/astra-python313-c2/tests.xml": {
+      "bytes": 4944,
+      "sha256": "4a9a62d45497bcf0dd20f11cb98f57835e05fb5e4a16a5719bbd0c53c7bda73a"
+    },
+    "instruments/astra-python313-upgrade-2026-09-09.patch": {
+      "bytes": 9055,
+      "sha256": "9590f20f3945f58f3579650250b9e23b7690833b2627ff27b5aa94e3023021c6"
+    },
+    "instruments/fetch_python313_candidate.py": {
+      "bytes": 1614,
+      "sha256": "e9bbb4a0927b49d77a47fc3d81793892a8e5fe7f1e43d892776497390ef04455"
+    },
+    "instruments/gemini-python313-qualification-2026-09-09.patch": {
+      "bytes": 15477,
+      "sha256": "045b775789ed7c249c75966976b4e933e22015327f6263c4fe6e8f368a5f7803"
+    },
+    "instruments/inspect_python313_resolution.py": {
+      "bytes": 1420,
+      "sha256": "347a580cb63c6a9a113e98316f32a0995aa4a74e829c6a3bc88bb43a2e5510d7"
+    },
+    "instruments/install_python313_qualification.py": {
+      "bytes": 2201,
+      "sha256": "a5d09f052c3619ae90bc429c815fde8bbe48bb12f505c0a8a65256ea1599fbae"
+    },
+    "instruments/PYTHON-313-QUALIFICATION-BRIEF-2026-09-09.md": {
+      "bytes": 1847,
+      "sha256": "bc993c371612a30009398f48334f2ff36c726cc969b47b74882a6433f8400759"
+    },
+    "instruments/PYTHON-313-UPGRADE-BRIEF-2026-09-09.md": {
+      "bytes": 2398,
+      "sha256": "b76fb44e90cbb24d6eed479e0fccbfbd3e693f61db28b861cf9efe538be8ae31"
+    },
+    "instruments/PYTHON-INTEGRATION-CONFLICT-REPAIR-2026-09-09.md": {
+      "bytes": 815,
+      "sha256": "56cc54efc605d66f6a02f3221afda6023380a0507d58035974d13c448351831c"
+    },
+    "instruments/python313-conflicted-application.patch": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "instruments/python313_runtime_probe.py": {
+      "bytes": 2933,
+      "sha256": "7a1336471b748df008e9af2c5df3553087184c18577e0ae646433c5a8ebac3c5"
+    },
+    "instruments/qualify_python313_graph.py": {
+      "bytes": 4498,
+      "sha256": "27ed5d29710c5cd284943872559242feebff066b4a3c4e8564a38cd05f85b273"
+    },
+    "instruments/run_python313_probe.ps1": {
+      "bytes": 1146,
+      "sha256": "2f3f16764240d2753824ec08672ce74b7f7f3274746af1f16d4e6c7bd3a2e33e"
+    },
+    "instruments/TORCHCODEC-DLL-REPAIR-BRIEF-2026-09-09.md": {
+      "bytes": 2974,
+      "sha256": "736122b386f5a375ec7e578739b09108baed786e9b8a76c0a7a1cee24df81a8c"
+    },
+    "native/native-binary-candidates-03/download.json": {
+      "bytes": 907,
+      "sha256": "2ca3eb853f3618aa8a3d5a62c88e97a4a989c0702299a856b3db26f342837240"
+    },
+    "native/native-binary-candidates-03/python-3.13.15-embed-amd64.zip.spdx.json": {
+      "bytes": 15341,
+      "sha256": "ba428f93acb06764f0005246f8ca48bb1c04feef64ce7db0b177fb2fd371c423"
+    },
+    "native/native-scan-python-03/scan.json": {
+      "bytes": 708,
+      "sha256": "fdd1af43ec52b8b713ed0cdfb02824de8ad55320b5e73fb993bdb0f1cb469fc0"
+    },
+    "native/native-scan-python-03/scan.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native/native-scan-python-03/scan.stdout": {
+      "bytes": 175,
+      "sha256": "4bf8e76112cc60d811bbc6877c964904b839ee286934006559ff4dfcd267f1b7"
+    },
+    "native/python313-runtime-probe-01/guard-events.json": {
+      "bytes": 66,
+      "sha256": "5b2b608dc42966dcb33258c2860fe40ac978fcaf15dd215818e9c9157d2ad3cf"
+    },
+    "native/python313-runtime-probe-01/inventory.json": {
+      "bytes": 3909,
+      "sha256": "d2df02878e771e089ef4b1b5cdb813e8070810e3c59f343958f0f935a51bdc1d"
+    },
+    "native/python313-runtime-probe-01/results.json": {
+      "bytes": 9367,
+      "sha256": "251b88cc5420e009abec9d5eb44953e81486a2e7218f44138d1e7caff1ffadef"
+    },
+    "native/python313-runtime-probe-01/summary.json": {
+      "bytes": 464,
+      "sha256": "56938981b1081fba1cad3bb6e71bec7b38e17593390160d3df8c4573eb09d860"
+    },
+    "seal_python313_review.py": {
+      "bytes": 3686,
+      "sha256": "d01f3286e1460c96d5062fc5d235fd7cede60346a33ca8305d15175d4fc38f57"
+    },
+    "summary.json": {
+      "bytes": 908,
+      "sha256": "7cb0b2df45c1c18394d6388e847383c86834cc97711c85cef4aa20cbea8a0e30"
+    },
+    "worker/astra-python313-w1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/astra-python313-w1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/astra-python313-w1/results.json": {
+      "bytes": 1151,
+      "sha256": "a8d78278a283b1ff89ae8abf169e5b6d298b2a38f7743ea895df8a358eb60131"
+    },
+    "worker/astra-python313-w1/tests.log": {
+      "bytes": 101,
+      "sha256": "a26a9d0712d2b7e290a2e072439d897cff1057e98602277c8597e261d3608445"
+    },
+    "worker/astra-python313-w1/tests.xml": {
+      "bytes": 4944,
+      "sha256": "4e3c44a4acf4ea8a0aba57e4c338c3ad735047776ab5f63ae3ade92762fd78de"
+    },
+    "worker/breakdown_summary.txt": {
+      "bytes": 2724,
+      "sha256": "774b8da3185bb3fc2c8a022530f1d27cb157eea326a573e9555933fd52f8dc91"
+    },
+    "worker/pip_dryrun_summary.json": {
+      "bytes": 232703,
+      "sha256": "bbad0b00a74ef8fe7fa1276e24448b0eb895460fcc037ed969936b06788aca74"
+    },
+    "worker/pypi_qualification_summary.json": {
+      "bytes": 387295,
+      "sha256": "f85fba12dd627834d499a3cabcdd043923dd0d2e7c07edfc2d8be37cd26fed59"
+    },
+    "worker/qualification_report.json": {
+      "bytes": 89787,
+      "sha256": "019c4c60711e0ea14f10bc3682f2ffc9e2d89cdecb13ddd6d0ed9f3c5a33c6d6"
+    },
+    "worker/requirements_140.txt": {
+      "bytes": 2875,
+      "sha256": "12a9b06d4948a53fc9a275de535148fbf055804fffc73ec22a6b0c84c5b37409"
+    }
+  }
+}

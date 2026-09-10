@@ -1,0 +1,120 @@
+[
+  {
+    "module": "PIL.Image",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\PIL\\Image.py",
+      "synthetic_png_roundtrip": true
+    }
+  },
+  {
+    "module": "cryptography.fernet",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\cryptography\\fernet.py"
+    }
+  },
+  {
+    "module": "mcp",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\mcp\\__init__.py"
+    }
+  },
+  {
+    "module": "pydantic",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\pydantic\\__init__.py"
+    }
+  },
+  {
+    "module": "numpy",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\numpy\\__init__.py"
+    }
+  },
+  {
+    "module": "av",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\av\\__init__.py"
+    }
+  },
+  {
+    "module": "torch",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torch\\__init__.py",
+      "synthetic_tensor_sum": 6
+    }
+  },
+  {
+    "module": "torchaudio",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchaudio\\__init__.py",
+      "synthetic_resample_shape": [
+        1,
+        800
+      ]
+    }
+  },
+  {
+    "module": "torchvision",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchvision\\__init__.py"
+    }
+  },
+  {
+    "module": "ctranslate2",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\ctranslate2\\__init__.py"
+    }
+  },
+  {
+    "module": "onnxruntime",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\onnxruntime\\__init__.py"
+    }
+  },
+  {
+    "module": "faster_whisper",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\faster_whisper\\__init__.py"
+    }
+  },
+  {
+    "module": "torchcodec",
+    "status": "failed",
+    "error": "RuntimeError: Could not load libtorchcodec. Likely causes:\n          1. FFmpeg is not properly installed in your environment. We support\n             versions 4, 5, 6 and 7.\n          2. The PyTorch version (2.8.0+cpu) is not compatible with\n             this version of TorchCodec. Refer to the version compatibility\n             table:\n             https://github.com/pytorch/torchcodec?tab=readme-ov-file#installing-torchcodec.\n          3. Another runtime dependency; see exceptions below.\n        The following exceptions were raised as we tried to load libtorchcodec:\n        \n[start of libtorchcodec loading traceback]\nFFmpeg version 7: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core7.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 6: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core6.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 5: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core5.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 4: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core4.dll' (or one of its dependencies). Try using the full path with constructor syntax.\n[end of libtorchcodec loading traceback].",
+    "traceback": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313_runtime_probe.py\", line 17, in <module>\n    module=importlib.import_module(name)\n  File \"importlib\\__init__.py\", line 88, in import_module\n  File \"<frozen importlib._bootstrap>\", line 1395, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1023, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\__init__.py\", line 10, in <module>\n    from . import decoders, samplers  # noqa\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\decoders\\__init__.py\", line 7, in <module>\n    from .._core import AudioStreamMetadata, VideoStreamMetadata\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\_core\\__init__.py\", line 8, in <module>\n    from ._metadata import (\n    ...<5 lines>...\n    )\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\_core\\_metadata.py\", line 16, in <module>\n    from torchcodec._core.ops import (\n    ...<3 lines>...\n    )\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\_core\\ops.py\", line 84, in <module>\n    load_torchcodec_shared_libraries()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\_core\\ops.py\", line 69, in load_torchcodec_shared_libraries\n    raise RuntimeError(\n    ...<11 lines>...\n    )\nRuntimeError: Could not load libtorchcodec. Likely causes:\n          1. FFmpeg is not properly installed in your environment. We support\n             versions 4, 5, 6 and 7.\n          2. The PyTorch version (2.8.0+cpu) is not compatible with\n             this version of TorchCodec. Refer to the version compatibility\n             table:\n             https://github.com/pytorch/torchcodec?tab=readme-ov-file#installing-torchcodec.\n          3. Another runtime dependency; see exceptions below.\n        The following exceptions were raised as we tried to load libtorchcodec:\n        \n[start of libtorchcodec loading traceback]\nFFmpeg version 7: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core7.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 6: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core6.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 5: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core5.dll' (or one of its dependencies). Try using the full path with constructor syntax.\nFFmpeg version 4: Could not find module 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\torchcodec\\libtorchcodec_core4.dll' (or one of its dependencies). Try using the full path with constructor syntax.\n[end of libtorchcodec loading traceback].\n"
+  },
+  {
+    "module": "clr",
+    "status": "passed",
+    "detail": {
+      "file": "unknown",
+      "clr_version": "4.0.30319.42000"
+    }
+  },
+  {
+    "module": "webview",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\webview\\__init__.py"
+    }
+  },
+  {
+    "module": "win32api",
+    "status": "passed",
+    "detail": {
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\Lib\\site-packages\\win32\\win32api.pyd"
+    }
+  }
+]

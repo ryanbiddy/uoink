@@ -1,0 +1,65 @@
+[
+  {
+    "label": "version",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import sys,ssl,sqlite3; print(sys.version); print(ssl.OPENSSL_VERSION); print(sqlite3.sqlite_version)"
+    ],
+    "started_utc": "2026-09-10T05:23:55.308928+00:00",
+    "exit": 0,
+    "finished_utc": "2026-09-10T05:23:55.691070+00:00"
+  },
+  {
+    "label": "bootstrap",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\python.exe",
+      "-I",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\cache\\get-pip.py",
+      "--no-warn-script-location",
+      "--no-compile",
+      "pip==26.1.2",
+      "setuptools==83.0.0",
+      "wheel==0.47.0",
+      "packaging==26.2"
+    ],
+    "started_utc": "2026-09-10T05:23:55.700227+00:00",
+    "exit": 0,
+    "finished_utc": "2026-09-10T05:23:59.030805+00:00"
+  },
+  {
+    "label": "resolve",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\python.exe",
+      "-I",
+      "-B",
+      "-m",
+      "pip",
+      "install",
+      "--dry-run",
+      "--ignore-installed",
+      "--no-build-isolation",
+      "--no-compile",
+      "--report",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\resolution.json",
+      "--constraint",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\requirements-installer-lock.txt",
+      "yt-dlp==2026.07.04",
+      "Pillow==12.3.0",
+      "mcp==1.28.1",
+      "keyring==25.7.0",
+      "pystray==0.19.5",
+      "pywebview==5.4",
+      "pythonnet==3.0.5",
+      "faster-whisper==1.2.1",
+      "whisperx==3.8.6"
+    ],
+    "started_utc": "2026-09-10T05:23:59.032164+00:00",
+    "exit": 0,
+    "finished_utc": "2026-09-10T05:24:17.897722+00:00"
+  }
+]

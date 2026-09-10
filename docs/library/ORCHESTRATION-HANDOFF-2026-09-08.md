@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Original two media cases pass in each isolated process; shipping LGPL qualification has four passes. FFmpeg pin repair has 36 passes in each root; parent guard unchanged | Decide Python from exact-pin qualification; freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately |
+| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | FFmpeg and Python pin suites each have 36 passes in both roots. Python 3.13 installs 139 exact packages; native probe has 15 passes / one TorchCodec DLL failure | Repair missing shared decoder runtime, freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -163,8 +163,11 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    use a fully accounted two-process final tree under the final-media brief.
    Original media cases have two passes in each root; LGPL probe has four passes.
    Gemini cadfc013's bounded FFmpeg pin repair is integrated with 36 independent
-   passes in each root. Python 3.13 exact-pin qualification continues from
-   e6f520c. Review native risks separately from the Python audit.
+   passes in each root. Python 3.13.15's actual installed graph has 139 exact
+   runtime packages after three obsolete compatibility packages are removed.
+   Its independent native probe has 15 passes / one TorchCodec shared-DLL
+   failure. Follow ASTRA-PYTHON313-INTEGRATION-2026-09-09.md and the bounded
+   TorchCodec repair brief; Gemini is working from e1d81bc. No model inference.
    Package-04 is built and sealed from 86bfede; generated notices reviewed at
    3265171 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
@@ -2422,3 +2425,26 @@ retained monthly release; the GPL daily tool remains private and never ships.
 Python qualification is still running; it must establish actual compatible
 wheels or exact blockers. No installation has run. Commit 1f57b56 contains the
 accepted diagnosis, rejected guard deletion and complete failed-probe history.
+
+### 2026-09-09 22:36 PDT - Python upgrade qualified; missing decoder DLL remains
+
+The official Python 3.13.15 archive matches its SPDX SHA256 and passes Defender.
+Astra's actual interpreter resolves and installs 139 exact runtime versions;
+backports.tarfile, importlib-metadata and zipp are no longer selected. The first
+UTF-8 collector failed after successful resolution and was repaired by reading
+the same retained report. No resolver rerun occurred. Gemini's no-deps metadata
+check alone did not establish the graph or normal cp313 ABI compatibility.
+
+The bounded Python pin/lock/notices/doc supplement passed 36 tests in the worker
+(2.43 seconds). Adjacent FFmpeg/Python hunks conflicted in checkout. One premature
+static run has 36 passes but cannot accept that conflicted build. Both new pins
+were retained; no unmerged paths and a PowerShell parse preceded the accepted
+36-pass checkout observation (1.95 seconds). No existing test changed.
+
+Native probe: 15 passed / one failed, TorchCodec cannot load a dependency of its
+existing DLL. One socket-bind attempt was refused by the probe. No model, weights,
+diarization or ordinary helper ran. A bounded Gemini repair now packages a patched
+compatible LGPL shared FFmpeg runtime and registers its app-owned DLL directory.
+That worker starts from e1d81bc, before the Python supplement; preserve both changes
+when integrating. The 59-file proof retains the partial/failed claims and actual
+successful graph separately. No Setup has run; installation remains Astra's work.

@@ -65,7 +65,7 @@ changes.
 The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
-python\           Python 3.11 embeddable + the pinned runtime packages listed below
+python\           Python 3.13 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
@@ -90,7 +90,7 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
 
 ## Where dependencies come from
 
-- **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
+- **Python embeddable** — `https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
 - **ffmpeg** — BtbN `n8.1.2` Windows static win64 LGPL build:
   `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`.
   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
@@ -109,7 +109,7 @@ installed into the embeddable Python with the exact pip versions below.
 
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
-| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+| Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
 | ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
 | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
 | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
@@ -142,7 +142,7 @@ When bumping a directly-downloaded component:
 
 The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
 `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
-Windows/CPython 3.11 transitive graph are exact-version constrained by
+Windows/CPython 3.13 transitive graph are exact-version constrained by
 `requirements-installer-lock.txt`. After build-only tooling is removed,
 `scripts/verify_installer_lock.py` compares the final installed inventory to
 that lock and fails on a missing, unexpected, or changed package. Distribution

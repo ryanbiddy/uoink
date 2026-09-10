@@ -1,0 +1,6 @@
+[
+  {
+    "event": "socket.bind",
+    "refused": true
+  }
+]

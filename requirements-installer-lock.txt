@@ -3,7 +3,10 @@
 # Snapshot source:
 #   Draft Uoink-Setup-3.6.0.exe lock candidate built from
 #   90149eec3d9b0572a98d8d1d91cb12772859feba on 2026-07-23.
-#   CPython 3.11 x86-64, Windows; build-only tooling removed.
+#   Original CPython 3.11 x86-64 Windows inventory, with later reviewed updates.
+#   Python 3.13.15 qualification on 2026-09-09 retains all runtime versions and
+#   removes backports.tarfile, importlib_metadata and zipp, whose dependency
+#   markers no longer select them. The candidate build verifies the exact set.
 #
 # This file constrains the complete final site-packages inventory, not only
 # Uoink's direct dependencies. Update it only from a reviewed clean installer
@@ -20,7 +23,6 @@ anyio==4.14.2
 asteroid-filterbanks==0.4.0
 attrs==26.1.0
 av==18.0.0
-backports.tarfile==1.2.0
 bottle==0.13.4
 certifi==2026.7.22
 cffi==2.1.0
@@ -50,7 +52,6 @@ httpx-sse==0.4.3
 httpx==0.28.1
 huggingface_hub==0.36.2
 idna==3.18
-importlib_metadata==9.0.0
 jaraco.classes==3.4.0
 jaraco.context==6.1.2
 jaraco.functools==4.6.0
@@ -151,4 +152,3 @@ uvicorn==0.51.0
 whisperx==3.8.6
 yarl==1.24.5
 yt-dlp==2026.7.4
-zipp==4.1.0
