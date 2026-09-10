@@ -1,0 +1,16 @@
+{
+  "utc": "2026-09-10T03:14:49.9786922Z",
+  "reason": "Receipt worker baseline predates credential isolation; interrupt before fresh corrected-baseline verification.",
+  "processes": [
+    {
+      "pid": 74892,
+      "stopped": true,
+      "created": "2026-09-09T20:08:00.018046-07:00"
+    },
+    {
+      "pid": 59664,
+      "stopped": true,
+      "created": "2026-09-09T20:14:48.543341-07:00"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "helper-standing-first",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first",
+    "--isolated-port",
+    "49894"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed",
+  "started_utc": "2026-09-10T02:55:01Z",
+  "child": {
+    "pid": 56712,
+    "created_ms": 1789008901674,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1789008901679,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 56712,
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025501Z-helper-standing-first.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025501Z-helper-standing-first.stderr.log",
+  "synthetic": true
+}

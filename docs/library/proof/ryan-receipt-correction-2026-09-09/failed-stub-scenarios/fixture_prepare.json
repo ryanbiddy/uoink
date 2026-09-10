@@ -1,0 +1,83 @@
+{
+  "empty": {
+    "kind": "empty",
+    "index_present": false,
+    "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+    "librarian_apply_enabled": false
+  },
+  "populated": {
+    "kind": "populated_legacy",
+    "fixture_version": "c22-legacy-populated-v1-schema27",
+    "schema_version": 27,
+    "target_schema_after_helper": 30,
+    "index_sha256": "b0579461da33fcf21ecbf3d43e84412a5f08f839bdb378c9105728ed148c2a6d",
+    "markdown_sha256": "474212828140970e3126bbbaa40aa49fdb8dbb3abe26c4090c32ec6573d4d050",
+    "sidecar_sha256": "0ede6756fda156604492e438b1f8bef539d6b565738637a9ac1c19f7129bf870",
+    "timed_video_id": "c22legacytimed000",
+    "text_video_id": "c22legacytext00000",
+    "work_id": "wk_c22_legacy_1",
+    "run_id": "run_c22_legacy_1",
+    "librarian_apply_enabled": false,
+    "construction": "kit-side SQL 0001-0027; not installed credit"
+  },
+  "extra": {
+    "one-off": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "manual-first": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "standing-first": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "child-life": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "child-interrupt": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "child-regfail": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    },
+    "relaunch": {
+      "kind": "empty",
+      "index_present": false,
+      "settings_sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+      "librarian_apply_enabled": false
+    }
+  },
+  "feed_base": "http://127.0.0.1:49895",
+  "feed_url": "http://127.0.0.1:49895/feed.xml",
+  "synthetic_host": "c22-fixture.invalid",
+  "phase2_baselines": {
+    "empty": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "populated": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "one-off": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "manual-first": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "standing-first": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "child-life": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "child-interrupt": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "child-regfail": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "relaunch": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6"
+  },
+  "immutable_baselines": true,
+  "resumed_without_regeneration": false
+}

@@ -220,8 +220,9 @@ def test_plan_inno_does_not_execute(scratch):
     plan = runner.plan_inno(example_manifest(), execute=False)
     assert plan["execute"] is False
     joined = " ".join(plan["argv"])
-    assert "/ISOLATEDPROFILE=" in joined
-    assert "/ISOLATEDPORT=" in joined
+    assert "/ISOLATED=1" in joined
+    assert "/PROFILE=" in joined
+    assert "/PORT=" in joined
     assert str(FORBIDDEN_PORT) not in joined
     with pytest.raises(C22ValidationError, match="Inno"):
         runner.plan_inno(example_manifest(), execute=True)
@@ -280,10 +281,18 @@ def test_empty_and_versioned_populated_profiles(scratch):
     assert snap["schema_version"] == 27
 
 
-def test_synthetic_helper_scenarios_and_verdict(scratch):
+def test_synthetic_helper_scenarios_and_verdict(scratch, monkeypatch):
     """Labeled non-installed synthetic instrument check. Not installed credit."""
     helper_port = _free_port()
     fixture_port = _free_port()
+    # Current scenarios measure original child methods and module provenance.
+    # Use the existing source-runtime fixture with synthetic acquisition;
+    # the stand-alone HTTP stub cannot provide that evidence.
+    from install_receipt.source_runtime import provision
+    app = scratch / "Uoink Source Fixture"
+    provision(dest=app, profile=scratch / "receipt" / "profiles" / "empty",
+              port=helper_port)
+    monkeypatch.setattr(sys.modules[__name__], "_install", lambda root: app)
     runner = _runner(scratch, port=helper_port)
     scenarios = ScenarioRunner(runner, fixture_port=fixture_port)
     try:

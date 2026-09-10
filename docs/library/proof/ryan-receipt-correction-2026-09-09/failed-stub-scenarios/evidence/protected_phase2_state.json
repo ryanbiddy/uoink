@@ -1,0 +1,400 @@
+{
+  "id": "protected_phase2_state",
+  "status": "pass",
+  "empty_compare": {
+    "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "populated_compare": {
+    "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "after_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "unchanged": true,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "extra_compares": {
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "all_profile_compares": {
+    "empty": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "populated": {
+      "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+      "after_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+      "unchanged": true,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "runtime_guard_events": {
+    "profiles": {
+      "empty": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\empty\\c22-guard-events.jsonl",
+        "sha256": "f4187543c6de444f19265cbf0c831b5e75fd440fbbb172320154375ee29bec09",
+        "event_count": 4,
+        "guard_loads": 2,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "populated": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\populated\\c22-guard-events.jsonl",
+        "sha256": "074e5f36695f1c63d238a94c8e8f5c1a3b2981b8f50f4f308b9d9f72a034f260",
+        "event_count": 4,
+        "guard_loads": 2,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "one-off": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\one-off\\c22-guard-events.jsonl",
+        "sha256": "829c6a7feca0768ee0391279f8e6f848c869e40116a03f88ebab2a896e20360f",
+        "event_count": 4,
+        "guard_loads": 1,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "manual-first": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\manual-first\\c22-guard-events.jsonl",
+        "sha256": "a9273da92d5b45abd78ffac6a64c0e1e2cf949875f3a3fe172fa2e68c146ed11",
+        "event_count": 4,
+        "guard_loads": 1,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "standing-first": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\c22-guard-events.jsonl",
+        "sha256": "0aa14ac792698d6764c1ea6b8709f3f19af4ea0c2302f452b18365ca046cead9",
+        "event_count": 4,
+        "guard_loads": 1,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-life": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-life\\c22-guard-events.jsonl",
+        "sha256": "a65569f2c4dfef3944b136a4c82d63cc38b12e648dc58d762776d80673d60fda",
+        "event_count": 4,
+        "guard_loads": 2,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 76036,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe -B -c \"import time; time.sleep(8)\""
+          }
+        ],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-interrupt": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-interrupt\\c22-guard-events.jsonl",
+        "sha256": "341cccb32a9c9d72600ad30d789d7ac9e6851c42076d9a9995140a96bde61b2f",
+        "event_count": 4,
+        "guard_loads": 2,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-regfail": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\c22-guard-events.jsonl",
+        "sha256": "27d298ac7a42e9af3248e67b02653ae949671d638d1df2e5be81fab99f6ecebe",
+        "event_count": 6,
+        "guard_loads": 3,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 58136,
+            "command": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe -B -c \"import time; time.sleep(8)\""
+          }
+        ],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "relaunch": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\relaunch\\c22-guard-events.jsonl",
+        "sha256": "39add730ef1f8a0e408a939fd311ee1184a664c4a5097dae052318917a792feb",
+        "event_count": 4,
+        "guard_loads": 2,
+        "subprocess_attempts": [],
+        "blocked_capability_probes": [],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      }
+    },
+    "ok": true,
+    "scope": "guard load and recorded attempts; blocked attempts cannot count as zero attempts"
+  },
+  "settings_and_pins": {
+    "empty": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "populated": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "one-off": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "manual-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "standing-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "child-life": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "child-interrupt": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "child-regfail": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    },
+    "relaunch": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": false,
+      "ok": true
+    }
+  },
+  "compared_profiles": [
+    "empty",
+    "populated",
+    "one-off",
+    "manual-first",
+    "standing-first",
+    "child-life",
+    "child-interrupt",
+    "child-regfail",
+    "relaunch"
+  ],
+  "empty": {
+    "library_meta": null,
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": null,
+    "shelf_versions": null,
+    "shelf_nodes": null,
+    "item_shelves": [],
+    "source_classification_policy": null,
+    "source_classification_outbox": null
+  },
+  "populated": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": null,
+    "source_classification_outbox": null
+  },
+  "baseline_recorded_before_scenarios": true,
+  "librarian_apply_enabled": false,
+  "self_authorized_after_state": false
+}

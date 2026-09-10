@@ -450,7 +450,7 @@ def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: P
     assert attached["not_a_silent_substitute_for_original_installed_route"] is True
     assert any(Path(v).name == "uoink_mcp.py" for v in original_args)
     assert any(Path(v).name == "attached_entry.py" for v in attached_args)
-    settings = json.loads((profile / "Uoink" / "settings.json").read_text(encoding="utf-8"))
+    settings = json.loads((profile / "settings.json").read_text(encoding="utf-8"))
     assert settings["librarian_apply_enabled"] is False
     sentinel = (profile / "client" / "protected-sentinel.bin").read_bytes()
     assert sentinel == common.PROTECTED_SENTINEL_BYTES

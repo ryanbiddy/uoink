@@ -1,0 +1,9 @@
+{
+  "worker_original": "Partial; no completed report, not accepted",
+  "receipt-c-w1": "171 passed, 1 failed; stand-alone stub lacks original child/provenance behavior",
+  "receipt-c-w2": "Aborted before final XML/count; stale worker credential baseline; exact process-stop record retained",
+  "receipt-c-w3": "172 passed in 818.26 seconds; integrated credential baseline applied first",
+  "receipt-c-c2": "See original tests.xml/results.json for independent checkout result",
+  "installed_credit": false,
+  "credential_limit": "Earlier source fixtures did not prove ordinary-keyring non-access. No real credential was queried to investigate."
+}

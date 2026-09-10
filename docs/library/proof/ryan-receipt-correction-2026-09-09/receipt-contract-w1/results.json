@@ -1,0 +1,24 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_receipt_c22_kit.py::test_plan_inno_does_not_execute",
+      "tests/test_install_receipt_p4_kit.py::test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\receipt-contract-w1-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\receipt-contract-w1\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\receipt-contract-w1\\tests.log"
+  }
+]

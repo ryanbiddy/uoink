@@ -1,0 +1,231 @@
+diff --git a/scripts/install_receipt/stub_helper.py b/scripts/install_receipt/stub_helper.py
+index 7b103b3c923a70961399b568c93f86b22375b477..35f775e664a1388df210257ac6b94bb0730a606d 100644
+--- a/scripts/install_receipt/stub_helper.py
++++ b/scripts/install_receipt/stub_helper.py
+@@ -90,7 +90,8 @@ def open_db(profile: Path) -> sqlite3.Connection:
+             state TEXT,
+             charged INTEGER NOT NULL DEFAULT 0,
+             origin TEXT,
+-            item_id TEXT
++            item_id TEXT,
++            started_at_ms INTEGER
+         );
+         CREATE TABLE IF NOT EXISTS source_items (
+             item_id TEXT PRIMARY KEY,
+@@ -106,6 +107,22 @@ def open_db(profile: Path) -> sqlite3.Connection:
+             new_state TEXT,
+             after_revision INTEGER
+         );
++        CREATE TABLE IF NOT EXISTS podcast_feeds (
++            id INTEGER PRIMARY KEY AUTOINCREMENT,
++            feed_url TEXT UNIQUE,
++            poll_interval_min INTEGER DEFAULT 60,
++            auto_ingest INTEGER DEFAULT 0,
++            source_id TEXT
++        );
++        CREATE TABLE IF NOT EXISTS podcast_episodes (
++            id INTEGER PRIMARY KEY AUTOINCREMENT,
++            feed_id INTEGER,
++            guid TEXT UNIQUE,
++            title TEXT,
++            status TEXT DEFAULT 'discovered',
++            transcript_local_path TEXT,
++            source_id TEXT
++        );
+         CREATE TABLE IF NOT EXISTS yoinks (
+             video_id TEXT PRIMARY KEY,
+             title TEXT,
+@@ -244,6 +261,14 @@ def make_handler(state: State):
+                 })
+             if parsed.path == "/c22/snapshot":
+                 return self._json(200, {"ok": True, **state.snapshot()})
++            if parsed.path == "/podcasts/feeds":
++                rows = [dict(r) for r in state.conn.execute(
++                    "SELECT * FROM podcast_feeds")]
++                return self._json(200, {"ok": True, "feeds": rows, "count": len(rows)})
++            if parsed.path == "/podcasts/episodes":
++                rows = [dict(r) for r in state.conn.execute(
++                    "SELECT * FROM podcast_episodes")]
++                return self._json(200, {"ok": True, "episodes": rows, "count": len(rows)})
+             self._json(404, {"ok": False, "error": "not found"})
+ 
+         def do_POST(self):
+@@ -274,6 +299,16 @@ def make_handler(state: State):
+                 return self._extract(body)
+             if parsed.path == "/sources/refresh":
+                 return self._refresh(body)
++            if parsed.path == "/podcasts/feeds":
++                return self._podcast_feed_add(body)
++            if parsed.path == "/podcasts/feeds/poll":
++                return self._podcast_feed_poll(body)
++            if parsed.path == "/podcasts/episodes/download":
++                return self._podcast_episode_download(body)
++            if parsed.path == "/podcasts/episodes/transcribe":
++                return self._podcast_episode_transcribe(body)
++            if parsed.path == "/podcasts/episodes/to-corpus":
++                return self._podcast_episode_to_corpus(body)
+             self._json(404, {"ok": False, "error": "not found"})
+ 
+         def _register(self, body: dict):
+@@ -404,11 +439,12 @@ def make_handler(state: State):
+             start_id = "st_stand_" + source_id[-6:]
+             item_id = "si_stand_" + source_id[-6:]
+             video_id = "vid_stand_" + source_id[-6:]
++            now_ms = int(time.time() * 1000)
+             state.conn.execute(
+                 "INSERT INTO source_capture_starts"
+                 "(start_id, source_id, capture_key, state, charged, origin, "
+-                "item_id) VALUES (?,?,?,?,1,'standing',?)",
+-                (start_id, source_id, capture_key, "succeeded", item_id))
++                "item_id, started_at_ms) VALUES (?,?,?,?,1,'standing',?,?)",
++                (start_id, source_id, capture_key, "succeeded", item_id, now_ms))
+             state.conn.execute(
+                 "INSERT INTO source_items"
+                 "(item_id, source_id, entry_id, capture_key, outcome) "
+@@ -424,6 +460,117 @@ def make_handler(state: State):
+             self._maybe_child(start_id)
+             state.conn.commit()
+ 
++        def _podcast_feed_add(self, body: dict):
++            url = body.get("feed_url") or "http://127.0.0.1/feed.xml"
++            interval = int(body.get("poll_interval_min") or 15)
++            auto_ingest = 1 if body.get("auto_ingest") else 0
++            sid = "src_" + str(abs(hash(url)) % 10**12)
++            with state.lock:
++                state.conn.execute(
++                    "INSERT OR IGNORE INTO source_subscriptions"
++                    "(source_id, kind, url, consent_state, revision, "
++                    "consent_epoch) VALUES (?,?,?,?,0,0)",
++                    (sid, "podcast_rss", url, "off"))
++                state.conn.execute(
++                    "INSERT OR IGNORE INTO podcast_feeds"
++                    "(feed_url, poll_interval_min, auto_ingest, source_id) "
++                    "VALUES (?,?,?,?)",
++                    (url, interval, auto_ingest, sid))
++                state.conn.commit()
++                row = dict(state.conn.execute(
++                    "SELECT * FROM podcast_feeds WHERE feed_url=?",
++                    (url,)).fetchone())
++            return self._json(200, {"ok": True, "feed": row})
++
++        def _podcast_feed_poll(self, body: dict):
++            feed_id = body.get("feed_id")
++            with state.lock:
++                feed = state.conn.execute(
++                    "SELECT * FROM podcast_feeds WHERE id=?", (feed_id,)).fetchone()
++                sid = feed["source_id"] if feed else None
++                variants = [
++                    ("c22-synthetic-guid-default", "C22 Synthetic Default Episode"),
++                    ("c22-synthetic-guid-one-off", "C22 Synthetic One-Off Episode"),
++                    ("c22-synthetic-guid-manual", "C22 Synthetic Manual Episode"),
++                    ("c22-synthetic-guid-standing", "C22 Synthetic Standing Episode"),
++                ]
++                for guid, title in variants:
++                    existing = state.conn.execute(
++                        "SELECT id FROM podcast_episodes WHERE guid=?", (guid,)).fetchone()
++                    if not existing:
++                        transcript = str(state.profile / "fixtures" / "synthetic-transcript.json")
++                        state.conn.execute(
++                            "INSERT INTO podcast_episodes"
++                            "(feed_id, guid, title, status, transcript_local_path, source_id) "
++                            "VALUES (?,?,?, 'transcribed', ?, ?)",
++                            (feed_id, guid, title, transcript, sid))
++                state.conn.commit()
++            return self._json(200, {"ok": True, "polled": True, "feed_id": feed_id})
++
++        def _podcast_episode_download(self, body: dict):
++            ep_id = body.get("episode_id")
++            with state.lock:
++                state.conn.execute(
++                    "UPDATE podcast_episodes SET status='downloaded' WHERE id=?",
++                    (ep_id,))
++                state.conn.commit()
++            return self._json(200, {"ok": True, "downloaded": True})
++
++        def _podcast_episode_transcribe(self, body: dict):
++            ep_id = body.get("episode_id")
++            transcript = str(state.profile / "fixtures" / "synthetic-transcript.json")
++            with state.lock:
++                state.conn.execute(
++                    "UPDATE podcast_episodes SET status='transcribed', "
++                    "transcript_local_path=? WHERE id=?",
++                    (transcript, ep_id))
++                state.conn.commit()
++            return self._json(200, {"ok": True, "transcribed": True})
++
++        def _podcast_episode_to_corpus(self, body: dict):
++            ep_id = body.get("episode_id")
++            with state.lock:
++                ep = state.conn.execute(
++                    "SELECT * FROM podcast_episodes WHERE id=?", (ep_id,)).fetchone()
++                guid = ep["guid"] if ep else str(ep_id)
++                sid = ep["source_id"] if ep else None
++                feed_id = ep["feed_id"] if ep else None
++                feed_url = ""
++                if feed_id:
++                    f_row = state.conn.execute(
++                        "SELECT feed_url FROM podcast_feeds WHERE id=?", (feed_id,)).fetchone()
++                    if f_row:
++                        feed_url = f_row["feed_url"]
++                capture_key = "podcast:" + str(abs(hash(feed_url or guid)) % 10**12)
++                start_id = "st_man_" + capture_key[-8:]
++                item_id = "si_man_" + capture_key[-8:]
++                video_id = "vid_man_" + capture_key[-8:]
++                existing_start = state.conn.execute(
++                    "SELECT * FROM source_capture_starts WHERE capture_key=?", (capture_key,)).fetchone()
++                if not existing_start:
++                    state.conn.execute(
++                        "INSERT INTO source_capture_starts"
++                        "(start_id, source_id, capture_key, state, charged, origin, item_id) "
++                        "VALUES (?,?,?, 'succeeded', 0, 'manual', ?)",
++                        (start_id, sid, capture_key, item_id))
++                existing_item = state.conn.execute(
++                    "SELECT * FROM source_items WHERE capture_key=?", (capture_key,)).fetchone()
++                if not existing_item:
++                    state.conn.execute(
++                        "INSERT INTO source_items"
++                        "(item_id, source_id, entry_id, capture_key, outcome) "
++                        "VALUES (?,?,'c22-entry-1',?,'committed')",
++                        (item_id, sid, capture_key))
++                corpus = str(state.profile / "output" / video_id / "item.md")
++                Path(corpus).parent.mkdir(parents=True, exist_ok=True)
++                Path(corpus).write_text("C22 manual publication\n", encoding="utf-8")
++                state.conn.execute(
++                    "INSERT OR REPLACE INTO yoinks(video_id, title, corpus_path, sidecar_path) "
++                    "VALUES (?,?,?,?)",
++                    (video_id, ep["title"] if ep else "C22 capture", corpus, corpus.replace(".md", ".json")))
++                state.conn.commit()
++            return self._json(200, {"ok": True, "video_id": video_id})
++
+         def _refresh(self, body: dict):
+             return self._json(200, {"ok": True, "refreshed": True})
+ 
+diff --git a/tests/test_install_receipt_c22_kit.py b/tests/test_install_receipt_c22_kit.py
+index fc94c99cf1c3cdbb214f70bed16b1785606e3ea3..a7b5ecad6da729435185b60577564e7c46132e64 100644
+--- a/tests/test_install_receipt_c22_kit.py
++++ b/tests/test_install_receipt_c22_kit.py
+@@ -220,8 +220,9 @@ def test_plan_inno_does_not_execute(scratch):
+     plan = runner.plan_inno(example_manifest(), execute=False)
+     assert plan["execute"] is False
+     joined = " ".join(plan["argv"])
+-    assert "/ISOLATEDPROFILE=" in joined
+-    assert "/ISOLATEDPORT=" in joined
++    assert "/ISOLATED=1" in joined
++    assert "/PROFILE=" in joined
++    assert "/PORT=" in joined
+     assert str(FORBIDDEN_PORT) not in joined
+     with pytest.raises(C22ValidationError, match="Inno"):
+         runner.plan_inno(example_manifest(), execute=True)
+diff --git a/tests/test_install_receipt_p4_kit.py b/tests/test_install_receipt_p4_kit.py
+index 756a2d5792ede0d54885b6e91a55242fd94e6f07..5c4b9097af9ffe333a830763ab49b1efb25b8995 100644
+--- a/tests/test_install_receipt_p4_kit.py
++++ b/tests/test_install_receipt_p4_kit.py
+@@ -450,7 +450,7 @@ def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: P
+     assert attached["not_a_silent_substitute_for_original_installed_route"] is True
+     assert any(Path(v).name == "uoink_mcp.py" for v in original_args)
+     assert any(Path(v).name == "attached_entry.py" for v in attached_args)
+-    settings = json.loads((profile / "Uoink" / "settings.json").read_text(encoding="utf-8"))
++    settings = json.loads((profile / "settings.json").read_text(encoding="utf-8"))
+     assert settings["librarian_apply_enabled"] is False
+     sentinel = (profile / "client" / "protected-sentinel.bin").read_bytes()
+     assert sentinel == common.PROTECTED_SENTINEL_BYTES

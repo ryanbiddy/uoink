@@ -1,0 +1,26 @@
+{
+  "id": "install",
+  "status": "unexecuted",
+  "reason": "Inno is Ryan's throwaway-operator step",
+  "plan": {
+    "argv": [
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink-Setup-synthetic.exe",
+      "/VERYSILENT",
+      "/NORESTART",
+      "/SUPPRESSMSGBOXES",
+      "/DIR=\"C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed\"",
+      "/ISOLATED=1",
+      "/PROFILE=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\empty",
+      "/PORT=49894",
+      "/NOCLOSEAPPLICATIONS",
+      "/NORESTARTAPPLICATIONS"
+    ],
+    "execute": false,
+    "reason": "Inno is an operator step; this kit does not auto-run it",
+    "required_close_switches": [
+      "/NOCLOSEAPPLICATIONS",
+      "/NORESTARTAPPLICATIONS"
+    ]
+  },
+  "agreed_inno_shape": true
+}

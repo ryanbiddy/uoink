@@ -1,0 +1,6 @@
+{
+  "id": "registered_child_lifetime",
+  "status": "fail",
+  "error": "C22ValidationError: registered child lifetime requires an alive exact identity",
+  "preserved": true
+}

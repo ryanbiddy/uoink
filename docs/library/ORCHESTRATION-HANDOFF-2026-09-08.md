@@ -91,11 +91,11 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt fixture correction is under verification | Rebuilt-package installed C22 delegated to Astra; exact account/mode must be recorded |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Rebuilt-package installed C22 delegated to Astra; exact account/mode must be recorded |
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections, safe agent installation and complete tree pending |
+| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots; safe agent installation and complete tree pending |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -149,9 +149,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    worktree, integrate raw diffs through three-way apply, repeat checkout suites.
 3. Credential repair is integrated with 117 passes / one existing xfail in both
    roots. Advisory worker 48452609 and dependency repair 4d4cc9ce are reviewed;
-   see ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md. Complete partial receipt
-   worker 269acc98 under RYAN-RECEIPT-SOURCE-FIXTURE-REPAIR-2026-09-09.md
-   before rebuilding or installing. Follow
+   see ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md. Partial receipt worker 269acc98 is now completed by Astra under
+   RYAN-RECEIPT-SOURCE-FIXTURE-REPAIR-2026-09-09.md: 172 passes in both roots.
+   Preserve its failed and aborted instrument attempts. Follow
    RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
    ASTRA-AGENT-INSTALLATION-VERDICT-2026-09-09.md approves the corrected procedure
    for a newly sealed package after full-tree verification; preserve ordinary data,
@@ -381,44 +381,26 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-Pending 2026-09-09: `RYAN-IO-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
-contains the exact three-file/eight-case interception patch (4,298 bytes,
-SHA-256 `d64bde5d71b4349cb498bf267e6dda9b73a67f1f673b85889e9ac0c32e256929`).
-All 150 assertion syntax trees are unchanged. Approval was requested because
-Ryan froze further fixture edits. The proposal has not been applied or run.
-This does not waive the separate missing historical AT6 child exit status.
+- The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
+  failed; any release disposition of missing evidence belongs to Ryan.
+- The revised dependency audit retains 19 entries / 15 distinct issues in four
+  packages. Keep Astra's reachability and compatibility findings in the release
+  notes. Their release disposition cannot be described as a clean security audit.
+- Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
+  diarization runs; chapters and cited ranges are the release scope.
+- Main merge/publication and new fetch scope remain unauthorized. Phase 5 Part B
+  is deferred. Standing program decisions: ORCHESTRATION-V1 signature, watchdog
+  installation, PR strategy and adapter allow-list.
 
-Additional 2026-09-09 proposal: `RYAN-READ-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
-documents the new read-opening test's two-line setup correction. The earlier
-discovery-route test leaves the backend getter replaced; the ordered pair
-reproduces one failure / three passes. All 13 assertions remain identical.
-Exact unapplied patch: 649 bytes, SHA-256
-`32ecbcce8d4040308324cc739914eb56106535e91e780991d7cc02683659a0f5`.
-Together both proposals touch four files and preserve 163 assertion trees.
-No fixture edit or pass is inferred from this diagnosis.
-
-- Three additional receipt-test contract/setup conflicts are documented in
-  RYAN-FINAL-RECEIPT-CONTRACT-DISPOSITION-BRIEF-2026-09-09.md: obsolete Inno
-  switches, old synthetic helper routes and the old nested settings path.
-  They remain failed and unchanged. Any fixture/assertion disposition requires
-  Ryan's explicit ruling under the further-fixture freeze.
-- The historical AT6 child exit cannot be reconstructed. Retain its failed
-  audit outcome; any release disposition of that missing evidence is Ryan's.
-- Actual installed Inno package receipts (Phase 3 C22, Phase 4), plus the
-  browser/client/everyday evidence from the completed executable runbook.
-  Product, both instruments, package and complete-tree agent work are recorded;
-  final ZIP/backup precede Ryan's session. No missing command is shifted to him.
-- Phase 6 speaker gate remains blocked by Ryan's explicit ruling. No diarization
-  runs or attribution claims; chapters and cited ranges are the release scope.
-- Main merge remains unauthorized. No new fetch scope is authorized.
-- Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
-
-The five fixture decisions, Phase 2 option 3 and retained X-link condition are
-resolved owner rulings. Residual test failures after the corrected tree belong
-in product repair briefs, not under Blockers for Ryan.
-
-The installation-path defect is also product work. Do not treat a missing
-safe installer command as a request for another owner permission.
+Fixture approvals and Phase 2 option 3 are resolved. The reviewed mirror/read
+corrections and all three receipt corrections are applied and verified. The X
+HTTP 403 stays blocked. Astra owns the remaining safe installation and evidence
+work under Ryan's delegation; this is not a pending installation permission.
+Use the dedicated installation-receipts directory outside the checkout because
+installed provenance correctly rejects source-checkout module paths. Record the
+actual same-account mode. Fresh client sign-in/usage-credit verification remains
+an operator capability if unavailable to the agent; never copy ordinary secrets.
+Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
 
@@ -2278,3 +2260,21 @@ is still verifying the current credential baseline; then integrate its three
 files, run the new complete tree, build/reseal/scan and execute installed checks.
 Authorized backup was verified at ef99954 on origin/cc/living-library; later
 commits need the closing branch backup. No main or candidate-branch push occurred.
+
+### 2026-09-09 receipt correction integration — original oracles preserved
+
+The repaired worker union passed 172 tests in 818.26 seconds; the independent
+checkout union passed 172 in 816.08 seconds. Only the three receipt fixture/copier
+files entered through raw diff and three-way apply. All 17 original scenario
+assertions are unchanged. The first instrument repair's 171 passes / one failure
+and the next interrupted observation remain separate records. The successful
+worker first received the integrated credential repair; old source fixtures
+cannot establish ordinary-keyring non-access. No actual credential was queried.
+Proof: proof/ryan-receipt-correction-2026-09-09/SHA256.json.
+
+Before Setup, Astra found that the first reviewed destination was inside the
+checkout and would correctly fail Phase 4 installed provenance. A separate
+path-repair brief requires E:\AI\projects\uoink\installation-receipts, preserving
+the complete checkout exclusion. Gemini is reviewing the path adjustment and
+package-bound observer. No Setup has run. Complete committed tree, rebuild/seal,
+new Defender scan and actual installed C22/P4/browser work remain next.

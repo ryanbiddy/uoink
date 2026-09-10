@@ -1,0 +1,661 @@
+{
+  "id": "standing_first",
+  "status": "pass",
+  "consented": {
+    "register_source": {
+      "ok": true,
+      "source": {
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "kind": "podcast_rss",
+        "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "consent_state": "off",
+        "revision": 0,
+        "consent_epoch": 0
+      },
+      "_http_status": 200
+    },
+    "add_feed": {
+      "ok": true,
+      "feed": {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "poll_interval_min": 15,
+        "auto_ingest": 0,
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      },
+      "_http_status": 200
+    },
+    "list_sources": {
+      "ok": true,
+      "sources": [
+        {
+          "source_id": "src_6feb60d798ac1dbe0091610b",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0
+        }
+      ],
+      "_http_status": 200
+    },
+    "list_feeds": {
+      "ok": true,
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+          "poll_interval_min": 15,
+          "auto_ingest": 0,
+          "source_id": "src_6feb60d798ac1dbe0091610b"
+        }
+      ],
+      "count": 1,
+      "_http_status": 200
+    },
+    "loopback_register_refused": false,
+    "feed_id": 1,
+    "source_id": "src_6feb60d798ac1dbe0091610b",
+    "consent_intent": {
+      "ok": true,
+      "user_intent_token": "c22-intent",
+      "_http_status": 200
+    },
+    "consent": {
+      "ok": true,
+      "source": {
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "kind": "podcast_rss",
+        "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1
+      },
+      "_http_status": 200
+    }
+  },
+  "published": {
+    "poll": {
+      "ok": true,
+      "polled": true,
+      "feed_id": 1,
+      "_http_status": 200
+    },
+    "episodes": {
+      "ok": true,
+      "episodes": [
+        {
+          "id": 1,
+          "feed_id": 1,
+          "guid": "c22-standing-ep-1",
+          "title": "C22 standing-first episode",
+          "status": "discovered",
+          "transcript_local_path": null,
+          "source_id": "src_6feb60d798ac1dbe0091610b"
+        }
+      ],
+      "count": 1,
+      "_http_status": 200
+    },
+    "episode_id": 1,
+    "download": {
+      "ok": true,
+      "synthetic": true,
+      "downloaded": true,
+      "_http_status": 200
+    },
+    "transcribe": {
+      "ok": true,
+      "synthetic": true,
+      "model_invoked": false,
+      "_http_status": 200
+    },
+    "to_corpus": {
+      "ok": true,
+      "synthetic": true,
+      "deduped": true,
+      "_http_status": 200
+    }
+  },
+  "standing_before_manual": {
+    "counts": {
+      "schema_version": 1,
+      "c22_migrations": 1,
+      "source_subscriptions": 1,
+      "source_capture_starts": 1,
+      "source_items": 1,
+      "source_consent_receipts": 1,
+      "podcast_feeds": 1,
+      "sqlite_sequence": 1,
+      "podcast_episodes": 0,
+      "yoinks": 1,
+      "library_work": 0,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_attempts": 0,
+      "item_shelves": 0,
+      "c22_children": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "entry_id": "c22-entry-1",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "outcome": "committed"
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-standing-first-on",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "old_state": "off",
+        "new_state": "on",
+        "after_revision": 1
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "kind": "podcast_rss",
+        "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "poll_interval_min": 15,
+        "auto_ingest": 0,
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      }
+    ],
+    "episodes": [],
+    "yoinks": [
+      {
+        "video_id": "vid_stand_91610b",
+        "title": "C22 standing",
+        "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.md",
+        "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.json"
+      }
+    ],
+    "publication_count": 1,
+    "capture_keys": [
+      "podcast:6feb60d798ac1dbe0091610b"
+    ],
+    "video_ids": [],
+    "episode_ids": []
+  },
+  "after_manual": {
+    "counts": {
+      "schema_version": 1,
+      "c22_migrations": 1,
+      "source_subscriptions": 1,
+      "source_capture_starts": 1,
+      "source_items": 1,
+      "source_consent_receipts": 1,
+      "podcast_feeds": 1,
+      "sqlite_sequence": 2,
+      "podcast_episodes": 1,
+      "yoinks": 1,
+      "library_work": 0,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_attempts": 0,
+      "item_shelves": 0,
+      "c22_children": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "entry_id": "c22-entry-1",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "outcome": "committed"
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-standing-first-on",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "old_state": "off",
+        "new_state": "on",
+        "after_revision": 1
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "kind": "podcast_rss",
+        "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "poll_interval_min": 15,
+        "auto_ingest": 0,
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      }
+    ],
+    "episodes": [
+      {
+        "id": 1,
+        "feed_id": 1,
+        "guid": "c22-standing-ep-1",
+        "title": "C22 standing-first episode",
+        "status": "transcribed",
+        "transcript_local_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\fixtures\\synthetic-transcript.json",
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      }
+    ],
+    "yoinks": [
+      {
+        "video_id": "vid_stand_91610b",
+        "title": "C22 standing",
+        "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.md",
+        "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.json"
+      }
+    ],
+    "publication_count": 1,
+    "capture_keys": [
+      "podcast:6feb60d798ac1dbe0091610b"
+    ],
+    "video_ids": [],
+    "episode_ids": [
+      "1"
+    ]
+  },
+  "pubs_before_manual": 1,
+  "synthetic_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+  "episode_guid": "c22-standing-ep-1",
+  "helper_stop": {
+    "identity": {
+      "pid": 56712,
+      "created_ms": 1789008901674,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008901679,
+      "from_popen": true,
+      "poll": null
+    },
+    "quit_http": {
+      "status": 200,
+      "body": "{\"ok\": true, \"stopping\": true}"
+    },
+    "token_present": true,
+    "exit": 0,
+    "stopped": true,
+    "port_freed": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "live_index_forbidden": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+      "opened": false,
+      "hashed": false,
+      "exists_probed": false,
+      "mtime_ns": null,
+      "sha256": null,
+      "bytes": null,
+      "note": "forbidden live index path recorded as a string only"
+    }
+  },
+  "ledger": {
+    "counts": {
+      "schema_version": 1,
+      "c22_migrations": 1,
+      "source_subscriptions": 1,
+      "source_capture_starts": 1,
+      "source_items": 1,
+      "source_consent_receipts": 1,
+      "podcast_feeds": 1,
+      "sqlite_sequence": 2,
+      "podcast_episodes": 1,
+      "yoinks": 1,
+      "library_work": 0,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_attempts": 0,
+      "item_shelves": 0,
+      "c22_children": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "entry_id": "c22-entry-1",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "outcome": "committed"
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-standing-first-on",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "old_state": "off",
+        "new_state": "on",
+        "after_revision": 1
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "kind": "podcast_rss",
+        "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/standing-first/feed.xml",
+        "poll_interval_min": 15,
+        "auto_ingest": 0,
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      }
+    ],
+    "episodes": [
+      {
+        "id": 1,
+        "feed_id": 1,
+        "guid": "c22-standing-ep-1",
+        "title": "C22 standing-first episode",
+        "status": "transcribed",
+        "transcript_local_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\fixtures\\synthetic-transcript.json",
+        "source_id": "src_6feb60d798ac1dbe0091610b"
+      }
+    ],
+    "yoinks": [
+      {
+        "video_id": "vid_stand_91610b",
+        "title": "C22 standing",
+        "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.md",
+        "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.json"
+      }
+    ],
+    "publication_count": 1,
+    "capture_keys": [
+      "podcast:6feb60d798ac1dbe0091610b"
+    ],
+    "video_ids": [],
+    "episode_ids": [
+      "1"
+    ]
+  },
+  "ledger_delta": {
+    "new_starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "new_yoinks": [
+      {
+        "video_id": "vid_stand_91610b",
+        "title": "C22 standing",
+        "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.md",
+        "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.json"
+      }
+    ],
+    "new_receipts": [
+      {
+        "operation_key": "c22-standing-first-on",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "old_state": "off",
+        "new_state": "on",
+        "after_revision": 1
+      }
+    ],
+    "new_items": [
+      {
+        "item_id": "si_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "entry_id": "c22-entry-1",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "outcome": "committed"
+      }
+    ],
+    "new_capture_keys": [
+      "podcast:6feb60d798ac1dbe0091610b"
+    ],
+    "new_standing_charges": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "mutated_prior_starts": [],
+    "publication_delta": 1,
+    "standing_charge_delta": 1
+  },
+  "standing_charges": 1,
+  "publication_count": 1,
+  "deduped": true,
+  "helper_status": {
+    "ok": true,
+    "source": {
+      "source_id": "src_6feb60d798ac1dbe0091610b",
+      "kind": "podcast_rss",
+      "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+      "consent_state": "on",
+      "revision": 1,
+      "consent_epoch": 1
+    },
+    "items": [
+      {
+        "item_id": "si_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "entry_id": "c22-entry-1",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "outcome": "committed"
+      }
+    ],
+    "starts": [
+      {
+        "start_id": "st_stand_91610b",
+        "source_id": "src_6feb60d798ac1dbe0091610b",
+        "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+        "state": "succeeded",
+        "charged": 1,
+        "origin": "standing",
+        "item_id": "si_stand_91610b",
+        "started_at_ms": 1789008902420
+      }
+    ],
+    "snapshot": {
+      "schema_version": 30,
+      "sources": [
+        {
+          "source_id": "src_6feb60d798ac1dbe0091610b",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/standing-first/feed.xml",
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1
+        }
+      ],
+      "starts": [
+        {
+          "start_id": "st_stand_91610b",
+          "source_id": "src_6feb60d798ac1dbe0091610b",
+          "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_91610b",
+          "started_at_ms": 1789008902420
+        }
+      ],
+      "items": [
+        {
+          "item_id": "si_stand_91610b",
+          "source_id": "src_6feb60d798ac1dbe0091610b",
+          "entry_id": "c22-entry-1",
+          "capture_key": "podcast:6feb60d798ac1dbe0091610b",
+          "outcome": "committed"
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-standing-first-on",
+          "source_id": "src_6feb60d798ac1dbe0091610b",
+          "old_state": "off",
+          "new_state": "on",
+          "after_revision": 1
+        }
+      ],
+      "yoinks": [
+        {
+          "video_id": "vid_stand_91610b",
+          "title": "C22 standing",
+          "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.md",
+          "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first\\output\\vid_stand_91610b\\item.json"
+        }
+      ],
+      "work": [],
+      "children": [],
+      "identity": {
+        "pid": 56712,
+        "created_ms": 1789008901832
+      },
+      "port": 49894,
+      "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\standing-first",
+      "synthetic": true
+    },
+    "_http_status": 200
+  }
+}

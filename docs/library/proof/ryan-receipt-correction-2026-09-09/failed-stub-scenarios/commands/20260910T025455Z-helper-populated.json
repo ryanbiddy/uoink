@@ -1,0 +1,27 @@
+{
+  "name": "helper-populated",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\populated",
+    "--isolated-port",
+    "49894"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed",
+  "started_utc": "2026-09-10T02:54:55Z",
+  "child": {
+    "pid": 21800,
+    "created_ms": 1789008895725,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1789008895727,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 21800,
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025455Z-helper-populated.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025455Z-helper-populated.stderr.log",
+  "synthetic": true
+}

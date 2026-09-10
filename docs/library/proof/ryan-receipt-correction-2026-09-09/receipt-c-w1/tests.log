@@ -1,0 +1,15 @@
+.................F...................................................... [ 41%]
+........................................................................ [ 83%]
+............................                                             [100%]
+================================== FAILURES ===================================
+_________________ test_synthetic_helper_scenarios_and_verdict _________________
+tests\test_install_receipt_c22_kit.py:329: in test_synthetic_helper_scenarios_and_verdict
+    assert outcomes[key]["status"] == "pass", (key, outcomes[key])
+E   AssertionError: ('one_off_capture', {'id': 'one_off_capture', 'status': 'fail', 'extract': {'ok': True, 'synthetic': True, 'url': 'htt...alid/one-off/feed.xml', 'poll_interval_min': 15, 'auto_ingest': 0, ...}], 'count': 1, '_http_status': 200}, ...}, ...})
+E   assert 'fail' == 'pass'
+E     
+E     - pass
+E     + fail
+=========================== short test summary info ===========================
+FAILED tests/test_install_receipt_c22_kit.py::test_synthetic_helper_scenarios_and_verdict
+1 failed, 171 passed in 745.15s (0:12:25)

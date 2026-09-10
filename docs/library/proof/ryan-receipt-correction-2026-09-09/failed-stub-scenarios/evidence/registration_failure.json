@@ -1,0 +1,567 @@
+{
+  "id": "registration_failure",
+  "status": "fail",
+  "restart_observation": {
+    "before": {
+      "incarnations": [],
+      "claims": [],
+      "children": [],
+      "locks": []
+    },
+    "after": {
+      "incarnations": [],
+      "claims": [],
+      "children": [],
+      "locks": []
+    },
+    "ledger_before": {
+      "counts": {
+        "schema_version": 1,
+        "c22_migrations": 1,
+        "source_subscriptions": 1,
+        "source_capture_starts": 1,
+        "source_items": 1,
+        "source_consent_receipts": 1,
+        "podcast_feeds": 1,
+        "sqlite_sequence": 1,
+        "podcast_episodes": 0,
+        "yoinks": 1,
+        "library_work": 0,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_attempts": 0,
+        "item_shelves": 0,
+        "c22_children": 1
+      },
+      "starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "charged_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_charge_count": 1,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [
+        {
+          "item_id": "si_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "entry_id": "c22-entry-1",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "outcome": "committed"
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-regfail-on",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "old_state": "off",
+          "new_state": "on",
+          "after_revision": 1
+        }
+      ],
+      "subscriptions": [
+        {
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1
+        }
+      ],
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "poll_interval_min": 15,
+          "auto_ingest": 0,
+          "source_id": "src_ed9d93abecc83471802d0b44"
+        }
+      ],
+      "episodes": [],
+      "yoinks": [
+        {
+          "video_id": "vid_stand_2d0b44",
+          "title": "C22 standing",
+          "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.md",
+          "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.json"
+        }
+      ],
+      "publication_count": 1,
+      "capture_keys": [
+        "podcast:ed9d93abecc83471802d0b44"
+      ],
+      "video_ids": [],
+      "episode_ids": []
+    },
+    "ledger_after": {
+      "counts": {
+        "schema_version": 1,
+        "c22_migrations": 1,
+        "source_subscriptions": 1,
+        "source_capture_starts": 1,
+        "source_items": 1,
+        "source_consent_receipts": 1,
+        "podcast_feeds": 1,
+        "sqlite_sequence": 1,
+        "podcast_episodes": 0,
+        "yoinks": 1,
+        "library_work": 0,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_attempts": 0,
+        "item_shelves": 0,
+        "c22_children": 1
+      },
+      "starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "charged_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_charge_count": 1,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [
+        {
+          "item_id": "si_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "entry_id": "c22-entry-1",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "outcome": "committed"
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-regfail-on",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "old_state": "off",
+          "new_state": "on",
+          "after_revision": 1
+        }
+      ],
+      "subscriptions": [
+        {
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1
+        }
+      ],
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "poll_interval_min": 15,
+          "auto_ingest": 0,
+          "source_id": "src_ed9d93abecc83471802d0b44"
+        }
+      ],
+      "episodes": [],
+      "yoinks": [
+        {
+          "video_id": "vid_stand_2d0b44",
+          "title": "C22 standing",
+          "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.md",
+          "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.json"
+        }
+      ],
+      "publication_count": 1,
+      "capture_keys": [
+        "podcast:ed9d93abecc83471802d0b44"
+      ],
+      "video_ids": [],
+      "episode_ids": []
+    },
+    "first_identity": {
+      "pid": 58136,
+      "created_ms": 1789008962167,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008962171,
+      "from_popen": true,
+      "poll": null
+    },
+    "second_identity": {
+      "pid": 55580,
+      "created_ms": 1789008988540,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008988542,
+      "from_popen": true,
+      "poll": null
+    },
+    "terminated": {
+      "identity": {
+        "pid": 58136,
+        "created_ms": 1789008962167,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1789008962171,
+        "from_popen": true,
+        "poll": null
+      },
+      "handle_stop": {
+        "method": "popen_handle",
+        "pid": 58136,
+        "taskkill": false,
+        "checked_identity": {
+          "pid": 58136,
+          "created_ms": 1789008962167,
+          "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+          "observed_ms": 1789008988233,
+          "from_popen": true,
+          "poll": null
+        },
+        "exit": 1,
+        "stopped": true
+      },
+      "exit": 1,
+      "stopped": true
+    },
+    "stop": {
+      "identity": {
+        "pid": 55580,
+        "created_ms": 1789008988540,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1789008988542,
+        "from_popen": true,
+        "poll": null
+      },
+      "quit_http": {
+        "status": 200,
+        "body": "{\"ok\": true, \"stopping\": true}"
+      },
+      "token_present": true,
+      "exit": 0,
+      "stopped": true,
+      "port_freed": true,
+      "opened_live_index": false,
+      "hashed_live_index": false,
+      "live_index_forbidden": {
+        "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+        "opened": false,
+        "hashed": false,
+        "exists_probed": false,
+        "mtime_ns": null,
+        "sha256": null,
+        "bytes": null,
+        "note": "forbidden live index path recorded as a string only"
+      }
+    }
+  },
+  "injection": "registration_failure",
+  "distinct_from": "launch_interrupt",
+  "driven": {
+    "consented": {
+      "register_source": {
+        "ok": true,
+        "source": {
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0
+        },
+        "_http_status": 200
+      },
+      "add_feed": {
+        "ok": true,
+        "feed": {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "poll_interval_min": 15,
+          "auto_ingest": 0,
+          "source_id": "src_ed9d93abecc83471802d0b44"
+        },
+        "_http_status": 200
+      },
+      "list_sources": {
+        "ok": true,
+        "sources": [
+          {
+            "source_id": "src_ed9d93abecc83471802d0b44",
+            "kind": "podcast_rss",
+            "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+            "consent_state": "off",
+            "revision": 0,
+            "consent_epoch": 0
+          }
+        ],
+        "_http_status": 200
+      },
+      "list_feeds": {
+        "ok": true,
+        "feeds": [
+          {
+            "id": 1,
+            "feed_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+            "poll_interval_min": 15,
+            "auto_ingest": 0,
+            "source_id": "src_ed9d93abecc83471802d0b44"
+          }
+        ],
+        "count": 1,
+        "_http_status": 200
+      },
+      "loopback_register_refused": false,
+      "feed_id": 1,
+      "source_id": "src_ed9d93abecc83471802d0b44",
+      "consent_intent": {
+        "ok": true,
+        "user_intent_token": "c22-intent",
+        "_http_status": 200
+      },
+      "consent": {
+        "ok": true,
+        "source": {
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1
+        },
+        "_http_status": 200
+      }
+    },
+    "refresh": {
+      "ok": true,
+      "refreshed": true,
+      "_http_status": 200
+    },
+    "standing": {
+      "counts": {
+        "schema_version": 1,
+        "c22_migrations": 1,
+        "source_subscriptions": 1,
+        "source_capture_starts": 1,
+        "source_items": 1,
+        "source_consent_receipts": 1,
+        "podcast_feeds": 1,
+        "sqlite_sequence": 1,
+        "podcast_episodes": 0,
+        "yoinks": 1,
+        "library_work": 0,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_attempts": 0,
+        "item_shelves": 0,
+        "c22_children": 1
+      },
+      "starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "charged_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_starts": [
+        {
+          "start_id": "st_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "state": "succeeded",
+          "charged": 1,
+          "origin": "standing",
+          "item_id": "si_stand_2d0b44",
+          "started_at_ms": 1789008962950
+        }
+      ],
+      "standing_charge_count": 1,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [
+        {
+          "item_id": "si_stand_2d0b44",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "entry_id": "c22-entry-1",
+          "capture_key": "podcast:ed9d93abecc83471802d0b44",
+          "outcome": "committed"
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-regfail-on",
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "old_state": "off",
+          "new_state": "on",
+          "after_revision": 1
+        }
+      ],
+      "subscriptions": [
+        {
+          "source_id": "src_ed9d93abecc83471802d0b44",
+          "kind": "podcast_rss",
+          "url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1
+        }
+      ],
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+          "poll_interval_min": 15,
+          "auto_ingest": 0,
+          "source_id": "src_ed9d93abecc83471802d0b44"
+        }
+      ],
+      "episodes": [],
+      "yoinks": [
+        {
+          "video_id": "vid_stand_2d0b44",
+          "title": "C22 standing",
+          "corpus_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.md",
+          "sidecar_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-regfail\\output\\vid_stand_2d0b44\\item.json"
+        }
+      ],
+      "publication_count": 1,
+      "capture_keys": [
+        "podcast:ed9d93abecc83471802d0b44"
+      ],
+      "video_ids": [],
+      "episode_ids": []
+    },
+    "synthetic_url": "http://c22-fixture.invalid/child-regfail/feed.xml",
+    "episode_guid": "c22-child-regfail-ep-1",
+    "episode_title": "C22 registration-failure episode",
+    "ownership": [],
+    "helper_state": {
+      "incarnations": [],
+      "claims": [],
+      "children": [],
+      "locks": []
+    },
+    "inject_child_file": null
+  },
+  "unresolved": [],
+  "surviving_unregistered": [],
+  "instrument": {
+    "instrument": {
+      "product_module": null,
+      "helper_driven": true,
+      "inject": "registration_failure"
+    },
+    "ownership": []
+  },
+  "helper_stop": {
+    "identity": {
+      "pid": 58136,
+      "created_ms": 1789008962167,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008962171,
+      "from_popen": true,
+      "poll": null
+    },
+    "quit_http": null,
+    "token_present": true,
+    "exit": 1,
+    "stopped": true,
+    "port_freed": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "live_index_forbidden": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+      "opened": false,
+      "hashed": false,
+      "exists_probed": false,
+      "mtime_ns": null,
+      "sha256": null,
+      "bytes": null,
+      "note": "forbidden live index path recorded as a string only"
+    }
+  },
+  "surviving_until_exit": [],
+  "registration_failure_oracle": {
+    "unresolved": [],
+    "surviving": [],
+    "unknown_cannot_pass": false,
+    "child_exited": false,
+    "ok": false
+  },
+  "restart_oracle": {
+    "ok": false,
+    "issues": [
+      "restart did not retain unresolved ownership and exclusion",
+      "charge, start or publication count is missing or changed"
+    ],
+    "scope": "unknown launch ownership survives restart; no replacement or release is authorized"
+  }
+}

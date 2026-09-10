@@ -1,15 +1,21 @@
 # Acceptance fixture conflicts found during integration
 
-Current authority: Ryan's 2026-09-09 ruling authorizes only the five corrections
-recorded below. The earlier requests for permission remain as history. Behavior
-assertions stay unchanged; any failure after the corrected full tree is a product
-defect requiring a repair brief, with no further fixture edits.
+Current authority: Ryan authorized the original five fixture corrections and
+later explicitly approved the two reviewed mirror/read proposals and continued
+receipt corrections. Those older pending-approval entries below are historical.
+The behavior assertions and original failures remain; corrections do not waive
+the separate historical AT6 evidence gap.
 
-2026-09-09 continuation: `RYAN-IO-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md`
-contains an exact additional proposal for the eight parent-interception cases.
-It is **not authorized, applied or executed**. The three-file patch preserves
-150 assertions and changes only the interception target to the real isolated
-writer dispatch methods. The original failed observations and test bytes remain.
+The latest receipt integration corrects supported Inno switch expectations and
+the isolated settings path. One C22 scenario provisions the existing production
+source-runtime fixture with synthetic acquisition so its original child and
+provenance oracles can run. Its 17 assertion syntax trees are unchanged against
+c7a8426, as are the Phase 4 apply-false and sentinel requirements. The copier
+excludes build archives. Only those three files are in the final receipt patch.
+Exact diff and all original, failed and aborted attempts:
+proof/ryan-receipt-correction-2026-09-09/SHA256.json. Review:
+ASTRA-RECEIPT-CORRECTION-VERDICT-2026-09-09.md. The independent 14-file union has
+172 passes in both roots. These are instrument results, not installed credit.
 
 Reviewer: Astra, 2026-09-08. Checkout: `dad34eb`. This is a source-inspection
 finding, not a passing runtime receipt. Preserve the existing acceptance files.

@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-interrupt",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "-s",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed\\server.py",
+    "--isolated-profile",
+    "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\child-interrupt",
+    "--isolated-port",
+    "49894"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed",
+  "started_utc": "2026-09-10T02:55:33Z",
+  "child": {
+    "pid": 72440,
+    "created_ms": 1789008933838,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1789008933842,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 72440,
+  "stdout_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025533Z-helper-child-interrupt.stdout.log",
+  "stderr_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\commands\\20260910T025533Z-helper-child-interrupt.stderr.log",
+  "synthetic": true
+}

@@ -1,0 +1,36 @@
+{
+  "status": "prepared",
+  "inputs": {
+    "schema": "c22-runner-inputs-v1",
+    "created_utc": "2026-09-10T02:54:49.170952+00:00",
+    "synthetic": true,
+    "userprofile": "C:\\Users\\hello",
+    "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "installed_app": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed",
+      "server_py": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink Installed\\server.py",
+      "interpreter": null,
+      "has_space": true,
+      "bundled_python": false
+    },
+    "package": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\Uoink-Setup-synthetic.exe",
+      "bytes": 21,
+      "sha256": "c6d1c24cde86168cb46c881f896952d3ab5455ed8fbf61078ed69d3af05e8bf8",
+      "matched_supplied_digest": true
+    },
+    "isolated_profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\empty",
+    "isolated_port": 49894,
+    "manifest": {
+      "path": null,
+      "sealed_by": null,
+      "expected_package_sha256": null,
+      "candidate_sha": null,
+      "installer_source_sha": null
+    }
+  },
+  "updated_utc": "2026-09-10T02:54:49.171819+00:00",
+  "receipt_root": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt"
+}

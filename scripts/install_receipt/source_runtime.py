@@ -30,7 +30,7 @@ ISOLATION_MODULE = "uoink_install_isolation.py"
 _COPY_SKIP_DIRS = {
     ".git", "__pycache__", "_scratch", "docs", "tests", ".pytest_cache",
     "tauri-ui", "extension", "build-prompts", "vendor", "scripts",
-    "installer", "skills",
+    "installer", "skills", "build",
 }
 
 

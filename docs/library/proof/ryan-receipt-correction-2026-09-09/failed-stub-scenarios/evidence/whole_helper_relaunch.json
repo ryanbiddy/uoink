@@ -1,0 +1,379 @@
+{
+  "id": "whole_helper_relaunch",
+  "status": "pass",
+  "first_identity": {
+    "pid": 72052,
+    "created_ms": 1789008903750,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1789008903754,
+    "from_popen": true,
+    "poll": null
+  },
+  "second_identity": {
+    "pid": 16200,
+    "created_ms": 1789008904765,
+    "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "observed_ms": 1789008904767,
+    "from_popen": true,
+    "poll": null
+  },
+  "terminated": {
+    "identity": {
+      "pid": 72052,
+      "created_ms": 1789008903750,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008903754,
+      "from_popen": true,
+      "poll": null
+    },
+    "handle_stop": {
+      "method": "popen_handle",
+      "pid": 72052,
+      "taskkill": false,
+      "checked_identity": {
+        "pid": 72052,
+        "created_ms": 1789008903750,
+        "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+        "observed_ms": 1789008904464,
+        "from_popen": true,
+        "poll": null
+      },
+      "exit": 1,
+      "stopped": true
+    },
+    "exit": 1,
+    "stopped": true
+  },
+  "first_liveness_after_kill": "dead",
+  "same_process": false,
+  "before": {
+    "label": "relaunch-before",
+    "utc": "2026-09-10T02:55:04.437658+00:00",
+    "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\relaunch",
+    "schema_version": 30,
+    "integrity": {
+      "present": true,
+      "integrity": "ok",
+      "foreign_keys": [],
+      "foreign_key_violations": 0,
+      "sha256": "75236277c9d11d2b9713685bcd47705693d25fc4912a192575273d18ddc1ca83",
+      "bytes": 114688
+    },
+    "counts": {
+      "schema_version": 1,
+      "c22_migrations": 1,
+      "source_subscriptions": 0,
+      "source_capture_starts": 0,
+      "source_items": 0,
+      "source_consent_receipts": 0,
+      "podcast_feeds": 0,
+      "sqlite_sequence": 0,
+      "podcast_episodes": 0,
+      "yoinks": 0,
+      "library_work": 0,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_attempts": 0,
+      "item_shelves": 0,
+      "c22_children": 0
+    },
+    "ledger": {
+      "source_subscriptions": [],
+      "source_consent_receipts": [],
+      "source_user_intents": null,
+      "source_detection_cursors": null,
+      "source_items": [],
+      "source_capture_starts": []
+    },
+    "phase2": {
+      "library_meta": null,
+      "library_runs": [],
+      "library_manifest": [],
+      "library_work": [],
+      "library_attempts": [],
+      "shelves": null,
+      "shelf_versions": null,
+      "shelf_nodes": null,
+      "item_shelves": [],
+      "source_classification_policy": null,
+      "source_classification_outbox": null
+    },
+    "files": {
+      "settings.json": {
+        "path": "settings.json",
+        "bytes": 356,
+        "sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+        "is_file": true,
+        "missing": false
+      },
+      "taxonomy.json": {
+        "path": "taxonomy.json",
+        "bytes": 387,
+        "sha256": "b14b889864fced5e99aee0060e6b45bef571072214deee9cf7f95fb183bdaa58",
+        "is_file": true,
+        "missing": false
+      },
+      "taxonomy.json.migrated": {
+        "path": "taxonomy.json.migrated",
+        "bytes": null,
+        "sha256": null,
+        "is_file": false,
+        "missing": true
+      },
+      "index.db": {
+        "path": "index.db",
+        "bytes": 114688,
+        "sha256": "75236277c9d11d2b9713685bcd47705693d25fc4912a192575273d18ddc1ca83",
+        "is_file": true,
+        "missing": false
+      }
+    },
+    "settings": {
+      "librarian_apply_enabled": false,
+      "diarization_default": false,
+      "comment_intelligence_enabled": false,
+      "hook_type_enabled": false,
+      "entity_extraction_enabled": false,
+      "asr_fallback_enabled": false,
+      "claim_verification_enabled": false,
+      "auto_uoink_enabled": false,
+      "notifications_enabled": false,
+      "whisper_model": "base"
+    },
+    "legacy_video_ids": {
+      "timed_present": false,
+      "text_present": false,
+      "yoink_ids": [],
+      "source": "yoinks.video_id"
+    },
+    "phase2_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+    "ledger_hash": "b5c152b50ffa744ea414a7d38ab20baace29ecc4ab2e6f89286b2738e565ca96",
+    "child_records": [],
+    "ledger_summary": {
+      "counts": {
+        "schema_version": 1,
+        "c22_migrations": 1,
+        "source_subscriptions": 0,
+        "source_capture_starts": 0,
+        "source_items": 0,
+        "source_consent_receipts": 0,
+        "podcast_feeds": 0,
+        "sqlite_sequence": 0,
+        "podcast_episodes": 0,
+        "yoinks": 0,
+        "library_work": 0,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_attempts": 0,
+        "item_shelves": 0,
+        "c22_children": 0
+      },
+      "starts": [],
+      "charged_starts": [],
+      "standing_starts": [],
+      "standing_charge_count": 0,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [],
+      "receipts": [],
+      "subscriptions": [],
+      "feeds": [],
+      "episodes": [],
+      "yoinks": [],
+      "publication_count": 0,
+      "capture_keys": [],
+      "video_ids": [],
+      "episode_ids": []
+    }
+  },
+  "after": {
+    "label": "relaunch-after",
+    "utc": "2026-09-10T02:55:05.445241+00:00",
+    "profile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\269acc98-ac8\\gemini\\_scratch\\c22-kit\\t-zre_ulgc\\receipt\\profiles\\relaunch",
+    "schema_version": 30,
+    "integrity": {
+      "present": true,
+      "integrity": "ok",
+      "foreign_keys": [],
+      "foreign_key_violations": 0,
+      "sha256": "75236277c9d11d2b9713685bcd47705693d25fc4912a192575273d18ddc1ca83",
+      "bytes": 114688
+    },
+    "counts": {
+      "schema_version": 1,
+      "c22_migrations": 1,
+      "source_subscriptions": 0,
+      "source_capture_starts": 0,
+      "source_items": 0,
+      "source_consent_receipts": 0,
+      "podcast_feeds": 0,
+      "sqlite_sequence": 0,
+      "podcast_episodes": 0,
+      "yoinks": 0,
+      "library_work": 0,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_attempts": 0,
+      "item_shelves": 0,
+      "c22_children": 0
+    },
+    "ledger": {
+      "source_subscriptions": [],
+      "source_consent_receipts": [],
+      "source_user_intents": null,
+      "source_detection_cursors": null,
+      "source_items": [],
+      "source_capture_starts": []
+    },
+    "phase2": {
+      "library_meta": null,
+      "library_runs": [],
+      "library_manifest": [],
+      "library_work": [],
+      "library_attempts": [],
+      "shelves": null,
+      "shelf_versions": null,
+      "shelf_nodes": null,
+      "item_shelves": [],
+      "source_classification_policy": null,
+      "source_classification_outbox": null
+    },
+    "files": {
+      "settings.json": {
+        "path": "settings.json",
+        "bytes": 356,
+        "sha256": "7fb76f6e8a020a723490c5238d29c42102f9eb00c30939a5595d0ce0ba231ca1",
+        "is_file": true,
+        "missing": false
+      },
+      "taxonomy.json": {
+        "path": "taxonomy.json",
+        "bytes": 387,
+        "sha256": "b14b889864fced5e99aee0060e6b45bef571072214deee9cf7f95fb183bdaa58",
+        "is_file": true,
+        "missing": false
+      },
+      "taxonomy.json.migrated": {
+        "path": "taxonomy.json.migrated",
+        "bytes": null,
+        "sha256": null,
+        "is_file": false,
+        "missing": true
+      },
+      "index.db": {
+        "path": "index.db",
+        "bytes": 114688,
+        "sha256": "75236277c9d11d2b9713685bcd47705693d25fc4912a192575273d18ddc1ca83",
+        "is_file": true,
+        "missing": false
+      }
+    },
+    "settings": {
+      "librarian_apply_enabled": false,
+      "diarization_default": false,
+      "comment_intelligence_enabled": false,
+      "hook_type_enabled": false,
+      "entity_extraction_enabled": false,
+      "asr_fallback_enabled": false,
+      "claim_verification_enabled": false,
+      "auto_uoink_enabled": false,
+      "notifications_enabled": false,
+      "whisper_model": "base"
+    },
+    "legacy_video_ids": {
+      "timed_present": false,
+      "text_present": false,
+      "yoink_ids": [],
+      "source": "yoinks.video_id"
+    },
+    "phase2_hash": "ec3617d44ad628b6a87de2175403eedf8a7dac1cbc6065d7ccebb505374d8da1",
+    "ledger_hash": "b5c152b50ffa744ea414a7d38ab20baace29ecc4ab2e6f89286b2738e565ca96",
+    "child_records": [],
+    "ledger_summary": {
+      "counts": {
+        "schema_version": 1,
+        "c22_migrations": 1,
+        "source_subscriptions": 0,
+        "source_capture_starts": 0,
+        "source_items": 0,
+        "source_consent_receipts": 0,
+        "podcast_feeds": 0,
+        "sqlite_sequence": 0,
+        "podcast_episodes": 0,
+        "yoinks": 0,
+        "library_work": 0,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_attempts": 0,
+        "item_shelves": 0,
+        "c22_children": 0
+      },
+      "starts": [],
+      "charged_starts": [],
+      "standing_starts": [],
+      "standing_charge_count": 0,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [],
+      "receipts": [],
+      "subscriptions": [],
+      "feeds": [],
+      "episodes": [],
+      "yoinks": [],
+      "publication_count": 0,
+      "capture_keys": [],
+      "video_ids": [],
+      "episode_ids": []
+    }
+  },
+  "ownership_before": {
+    "incarnations": [],
+    "claims": [],
+    "children": [],
+    "locks": []
+  },
+  "ownership_after": {
+    "incarnations": [],
+    "claims": [],
+    "children": [],
+    "locks": []
+  },
+  "health_before": {
+    "ok": true,
+    "synthetic": true,
+    "port": 49894,
+    "_http_status": 200
+  },
+  "health_after": {
+    "ok": true,
+    "synthetic": true,
+    "port": 49894,
+    "_http_status": 200
+  },
+  "dashboard": "http://127.0.0.1:49894/dashboard",
+  "helper_stop": {
+    "identity": {
+      "pid": 72052,
+      "created_ms": 1789008903750,
+      "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "observed_ms": 1789008903754,
+      "from_popen": true,
+      "poll": null
+    },
+    "quit_http": null,
+    "token_present": true,
+    "exit": 1,
+    "stopped": true,
+    "port_freed": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "live_index_forbidden": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+      "opened": false,
+      "hashed": false,
+      "exists_probed": false,
+      "mtime_ns": null,
+      "sha256": null,
+      "bytes": null,
+      "note": "forbidden live index path recorded as a string only"
+    }
+  }
+}
