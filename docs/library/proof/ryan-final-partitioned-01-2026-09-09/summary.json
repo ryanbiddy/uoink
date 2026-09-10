@@ -1,0 +1,35 @@
+{
+  "source": "9a62e8405cb891d0502860831d085f4ec37909a0",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2489,
+    "failed": 1,
+    "xfailed": 1,
+    "skipped": 2
+  },
+  "cases": 2493,
+  "seconds_including_collection": 1477.4192113000317,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree; not a monolithic pytest run",
+  "finished_utc": "2026-09-10T06:29:04.289307+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "partition": "main"
+    }
+  },
+  "previous_collected_cases": 2490,
+  "new_cases": [
+    "tests/test_packaged_decoder_loader.py::test_import_registers_only_app_directory_and_retains_handle",
+    "tests/test_packaged_decoder_loader.py::test_incomplete_installed_runtime_fails_before_registration",
+    "tests/test_packaged_decoder_loader.py::test_redirected_dll_is_rejected"
+  ],
+  "missing_prior_cases": [],
+  "test_process_seconds": {
+    "main": 1463.206,
+    "media": 1.492
+  },
+  "total_test_process_seconds": 1464.6979999999999,
+  "source_scope_check": "No modifications/deletions to prior tests or P4 fixture guard; added regression file only"
+}

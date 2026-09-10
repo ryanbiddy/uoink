@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | All 139 runtime pins match staging. Shared decoder repair has 42 passes in both roots and real staged product-loader WAV decoding passes | Freeze complete partitioned tree, then actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
+| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Actual isolated Setup/reinstall, installed C22/P4 and browser/client evidence. Nineteen Python advisory entries remain separately; no model/speaker runs |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -173,9 +173,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Package-05 is built and sealed from 6b5aed8; generated notices reviewed at
    45cd6f7 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
-   dependency advisories or supply a signature. Run the committed complete tree with
-   only S21 absent across the two process partitions; prove a disjoint complete
-   node-id union and label the aggregate. Preserve the unavailable AT6 exit failure.
+   dependency advisories or supply a signature. The committed complete tree at
+   9a62e84 now has 2,489 passes / one failure / two skips / one xfail, with only
+   S21 absent across the disjoint complete union. Preserve AT6's unavailable exit.
+   Follow ASTRA-PARTITIONED-TREE-VERDICT-2026-09-09.md into actual installation.
    Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
    assemble new evidence and push only origin/cc/living-library.
 5. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
@@ -2489,3 +2490,19 @@ documentary correction. The final partition instrument permits only added tests
 since 7109182, with no modifications/deletions to existing tests or the P4 guard.
 Three new decoder regressions must appear in the complete disjoint case union.
 No Setup has run. Agent Install 05 is the fresh outside-checkout destination.
+
+### 2026-09-09 - Complete partitioned verification records one historical failure
+
+Exact 9a62e84 completes with 2,489 passed, one failed, two skipped and one xfail.
+All 2,493 cases occur exactly once; three new decoder regressions and no missing
+prior case. Only S21 is absent. Main exits one (1,463.23 s printed); the two
+media cases exit zero (1.49 s printed). XML process durations total 1,464.698 s;
+launcher time including collection is 1,477.419 s. The aggregate stays FAIL for
+the unavailable historical AT6 exit. SEC-06 and both platform skips remain.
+No existing test or P4 guard was edited. The 43-file proof is
+proof/ryan-final-partitioned-01-2026-09-09/SHA256.json.
+
+No new failure appears. Package source is unchanged. Agent Install 05 has nine
+prepared synthetic profiles only; actual Setup is the next authorized step.
+The branch-only backup at 9a62e84 was independently verified against origin.
+Later evidence commits need the final backup. No main/candidate push occurred.

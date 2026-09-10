@@ -1,0 +1,9 @@
+{
+  "source": "9a62e8405cb891d0502860831d085f4ec37909a0",
+  "scope": "Complete tree in two test processes, plus read-only collection. Only S21 absent; no existing test or guard edited.",
+  "media_partition": [
+    "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end",
+    "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs"
+  ],
+  "started_utc": "2026-09-10T06:04:26.870137+00:00"
+}
