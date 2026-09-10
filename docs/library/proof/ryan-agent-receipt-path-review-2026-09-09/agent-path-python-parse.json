@@ -1,0 +1,18 @@
+[
+  {
+    "path": "_scratch\\agent_receipt_observe-reviewed-proposal.py",
+    "bytes": 9457,
+    "sha256": "6fc78a115d443c3fb52a1764bb9ae9f8ee7024a04cf4b30ffce969ccb404146e",
+    "grammar": "Python 3.11",
+    "ast_nodes": 1938,
+    "parse_errors": 0
+  },
+  {
+    "path": "_scratch\\agent_receipt_observe.py",
+    "bytes": 9642,
+    "sha256": "c511c551949744324b27f1b436d6973d940a7c5bd63e2072b4e2d65c388fd204",
+    "grammar": "Python 3.11",
+    "ast_nodes": 1988,
+    "parse_errors": 0
+  }
+]

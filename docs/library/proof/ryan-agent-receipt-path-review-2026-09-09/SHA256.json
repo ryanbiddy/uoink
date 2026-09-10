@@ -1,0 +1,41 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "agent-install-path-reviewed-proposal.ps1": {
+      "bytes": 12946,
+      "sha256": "f0d8130140b7b490a99fb68e7ff890bc62de959e986a7a3ab600c8a12ea37c01"
+    },
+    "agent-path-powershell-parse.json": {
+      "bytes": 407,
+      "sha256": "c8f2b986a355089abd601f11d3c43a455812fd93ba51d6853a166508c2cb1623"
+    },
+    "agent-path-python-parse.json": {
+      "bytes": 509,
+      "sha256": "358216a3f4751bc5f9e47c3e036120aae7b4f21c95d99048fb84e322a332d78a"
+    },
+    "agent_install.ps1": {
+      "bytes": 12979,
+      "sha256": "f09764f2cda7dca4d63b1cbeec599b314b62d2f1995b4ef31702cf0a1345b472"
+    },
+    "agent_receipt_observe-reviewed-proposal.py": {
+      "bytes": 9457,
+      "sha256": "6fc78a115d443c3fb52a1764bb9ae9f8ee7024a04cf4b30ffce969ccb404146e"
+    },
+    "agent_receipt_observe.py": {
+      "bytes": 9642,
+      "sha256": "c511c551949744324b27f1b436d6973d940a7c5bd63e2072b4e2d65c388fd204"
+    },
+    "driver-correction.patch": {
+      "bytes": 1560,
+      "sha256": "6ea0796a1dbbc6bf313741071e86ac6159ffe559d9dfbf9a67608a463804eb96"
+    },
+    "gemini-agent-path-review.patch": {
+      "bytes": 13471,
+      "sha256": "2ebbbfdac347fa55b4d8572624ffe197f9507221c89164089353fe4535ee68ce"
+    },
+    "observer-correction.patch": {
+      "bytes": 1828,
+      "sha256": "c1024c40575c9b0b0d7a789ca3cd6f46767b6028f69112431b7eb9bb6d2dcdf1"
+    }
+  }
+}

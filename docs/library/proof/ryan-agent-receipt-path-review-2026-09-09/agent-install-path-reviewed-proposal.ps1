@@ -5,10 +5,10 @@ param(
     [Parameter(Mandatory=$true)][ValidateSet('install','same-version-reinstall')][string]$Stage
 )
 $ErrorActionPreference = 'Stop'
+$taskRepo = 'E:\AI\projects\uoink\checkouts\Yoink-library'
 $taskScratch = [IO.Path]::GetFullPath('E:\AI\projects\uoink\installation-receipts').TrimEnd('\') + '\'
 $taskRoot = [IO.Path]::GetFullPath($ReceiptRoot).TrimEnd('\')
 if (-not $taskRoot.StartsWith($taskScratch,[StringComparison]::OrdinalIgnoreCase)) { throw 'Receipt must be inside the dedicated installation-receipts directory outside the checkout.' }
-if ($taskRoot.IndexOf(' ') -lt 0) { throw 'Receipt root must contain spaces in its name.' }
 if (-not (Test-Path -LiteralPath $taskRoot -PathType Container)) { throw 'Prepare the receipt fixtures first.' }
 $taskPrincipal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
 if ($taskPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'This receipt must not run elevated.' }

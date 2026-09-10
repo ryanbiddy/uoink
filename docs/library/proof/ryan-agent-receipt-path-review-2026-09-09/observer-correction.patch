@@ -1,0 +1,27 @@
+--- reviewed-proposal
++++ final-observer
+@@ -1,5 +1,5 @@
+ """Explicit package-bound, same-account installed receipt observation. Never runs Setup."""
+-import argparse, datetime as dt, hashlib, json, os, subprocess, sys, time, traceback
++import argparse, datetime as dt, hashlib, json, os, stat, subprocess, sys, time, traceback
+ from pathlib import Path
+ p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','c22','browser','p4-prepare','p4-check','p4-prepare-client','p4-collect'])
+ p.add_argument('--root',required=True,type=Path);p.add_argument('--seal',required=True,type=Path);p.add_argument('--package',required=True,type=Path)
+@@ -8,6 +8,8 @@
+ root=a.root.resolve();seal=a.seal.resolve();exe=a.package.resolve()
+ assert root.is_relative_to(Path(r'E:\AI\projects\uoink\installation-receipts')) and ' ' in str(root)
+ assert not root.is_relative_to(r),'Installed provenance must be outside the checkout'
++for entry in (a.root.absolute(),*a.root.absolute().parents):
++ if entry.exists():assert not entry.lstat().st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT,entry
+ assert seal.is_relative_to(r/'docs/library/proof')
+ def sha(q):
+  with q.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+@@ -25,7 +27,7 @@
+  os.environ.pop(key,None)
+ os.environ.update(IG_FORBIDDEN_LIVE=r'C:\Users\hello\AppData\Local\Uoink\index.db',PYTHONDONTWRITEBYTECODE='1',HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1')
+ # Preserve the actual USERPROFILE identity; isolate mutable child environment paths.
+-if a.stage=='prepare':root.mkdir(exist_ok=False)
++if a.stage=='prepare':root.mkdir(parents=True,exist_ok=False)
+ else:assert root.is_dir()
+ for key in ('LOCALAPPDATA','APPDATA','TEMP','TMP'):
+  q=root/'environment'/key;q.mkdir(parents=True,exist_ok=True);os.environ[key]=str(q)

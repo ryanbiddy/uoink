@@ -2275,6 +2275,18 @@ Proof: proof/ryan-receipt-correction-2026-09-09/SHA256.json.
 Before Setup, Astra found that the first reviewed destination was inside the
 checkout and would correctly fail Phase 4 installed provenance. A separate
 path-repair brief requires E:\AI\projects\uoink\installation-receipts, preserving
-the complete checkout exclusion. Gemini is reviewing the path adjustment and
-package-bound observer. No Setup has run. Complete committed tree, rebuild/seal,
+the complete checkout exclusion. Gemini b92b5301 reviewed the path adjustment and
+package-bound observer; Astra corrected parent creation and the path-space check. No Setup has run. Complete committed tree, rebuild/seal,
 new Defender scan and actual installed C22/P4/browser work remain next.
+
+### 2026-09-09 installed observer reviewed; full committed tree next
+
+Receipt fixture integration is 9ea7d08. Gemini b92b5301's proposed script hashes
+and syntax checks match Astra's independent observations. The final driver
+requires the dedicated installation-receipts parent outside the checkout and
+spaces in the path. The observer creates missing parents after reparse checks.
+Keep operator.json explicit before collection. The raw review incorrectly calls
+the path conflict an executed failure and names historical package-03; neither
+statement controls execution. No Setup ran. Use only the rebuilt package and
+its exact selected seal after the complete committed tree and fresh scan.
+Proof: proof/ryan-agent-receipt-path-review-2026-09-09/SHA256.json.

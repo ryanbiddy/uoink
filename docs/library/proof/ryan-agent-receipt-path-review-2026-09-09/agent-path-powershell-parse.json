@@ -1,0 +1,14 @@
+[
+  {
+    "path": "_scratch/agent-install-path-reviewed-proposal.ps1",
+    "bytes": 12946,
+    "sha256": "f0d8130140b7b490a99fb68e7ff890bc62de959e986a7a3ab600c8a12ea37c01",
+    "parse_errors": []
+  },
+  {
+    "path": "scripts/install_receipt/agent_install.ps1",
+    "bytes": 12979,
+    "sha256": "f09764f2cda7dca4d63b1cbeec599b314b62d2f1995b4ef31702cf0a1345b472",
+    "parse_errors": []
+  }
+]
