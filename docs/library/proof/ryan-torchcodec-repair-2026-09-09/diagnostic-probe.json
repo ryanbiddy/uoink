@@ -1,0 +1,14 @@
+{
+  "python": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+  "dll_directory": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01",
+  "status": "passed",
+  "model_invoked": false,
+  "sample_rate": 16000,
+  "shape": [
+    1,
+    16000
+  ],
+  "torch_version": "2.8.0+cpu",
+  "torchcodec_version": "0.7.0",
+  "guard_events": []
+}

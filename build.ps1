@@ -107,6 +107,10 @@ $FFMPEG_VERSION = 'n8.1.2'
 # it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
 # single self-contained ffmpeg.exe -- no DLLs to ship).
 $FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip"
+# TorchCodec 0.7 loads the FFmpeg 7 ABI; the static CLI above has no shared DLLs.
+$FFMPEG_SHARED_VERSION = 'n7.1.5'
+$FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
+$FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.07.04'
 # Pillow is used for the multimodal paste-corpus generator (resize +
@@ -352,12 +356,15 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
 Write-Step 'Fetching dependencies'
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
 $ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
+$ffmpegSharedZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_SHARED_VERSION-win64-lgpl-shared.zip"
 $getPipPy  = Join-Path $CacheDir 'get-pip.py'
 
 Get-CachedFile $PYTHON_URL $pythonZip
 Confirm-Hash $pythonZip $PYTHON_SHA256 'Python embeddable'
 Get-CachedFile $FFMPEG_URL $ffmpegZip
 Confirm-Hash $ffmpegZip $FFMPEG_SHA256 'ffmpeg'
+Get-CachedFile $FFMPEG_SHARED_URL $ffmpegSharedZip
+Confirm-Hash $ffmpegSharedZip $FFMPEG_SHARED_SHA256 'ffmpeg shared runtime'
 Get-CachedFile $GETPIP_URL $getPipPy
 Confirm-Hash $getPipPy $GETPIP_SHA256 'get-pip.py'
 
@@ -502,6 +509,25 @@ if ($ffprobeExe) {
     Copy-Item $ffprobeExe.FullName "$StagingDir\bin\ffprobe.exe" -Force
 }
 Remove-Item -Recurse -Force $ffmpegTmp
+
+# Read only the seven pinned shared-runtime members; do not extract arbitrary
+# paths or replace the separately pinned CLI executables. Inno recurses bin/.
+$sharedBin = Join-Path $StagingDir 'bin\torchcodec'
+New-Item -ItemType Directory -Path $sharedBin | Out-Null
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$sharedArchive = [IO.Compression.ZipFile]::OpenRead($ffmpegSharedZip)
+try {
+    $sharedPrefix = 'ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/'
+    $sharedNames = @('avcodec-61.dll','avdevice-61.dll','avfilter-10.dll',
+        'avformat-61.dll','avutil-59.dll','swresample-5.dll','swscale-8.dll')
+    foreach ($sharedName in $sharedNames) {
+        $members = @($sharedArchive.Entries | Where-Object { $_.FullName -ceq ($sharedPrefix + $sharedName) })
+        if ($members.Count -ne 1) { throw "Expected one shared decoder member: $sharedName" }
+        [IO.Compression.ZipFileExtensions]::ExtractToFile($members[0], (Join-Path $sharedBin $sharedName), $false)
+    }
+} finally {
+    $sharedArchive.Dispose()
+}
 
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'

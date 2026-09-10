@@ -67,6 +67,7 @@ The installer lays out `%LOCALAPPDATA%\Uoink\`:
 ```
 python\           Python 3.13 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
+bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
 uoink_mcp_tools.py Shared MCP tool registry
@@ -111,6 +112,7 @@ installed into the embeddable Python with the exact pip versions below.
 |---|---|---|---|
 | Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
 | ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+| FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
 | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
 | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
 | MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |
@@ -181,6 +183,14 @@ if _BIN_DIR.is_dir():
 ```
 
 In dev mode (running from the repo) `bin\` doesn't exist and the line is a no-op — `ffmpeg` resolves via the user's existing PATH like before.
+
+`whisper_runner.py` registers the app-relative `bin/torchcodec` directory with
+`os.add_dll_directory` before any lazy WhisperX import and retains its handle.
+It rejects redirected directories and missing or redirected DLLs. This shared
+runtime is pinned separately from the standalone CLI; updating it requires
+keeping TorchCodec's supported ABI and checking real audio decoding. The retained
+archive URL and SHA256 are `$FFMPEG_SHARED_URL` and `$FFMPEG_SHARED_SHA256` in
+`build.ps1`. No model download is needed for the generated-WAV decoder check.
 
 yt-dlp is invoked as `[sys.executable, "-m", "yt_dlp"]`, so the right interpreter (the embeddable) drives the right `yt_dlp` package automatically.
 

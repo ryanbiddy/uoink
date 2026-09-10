@@ -1,0 +1,48 @@
+{
+  "archive_sha256": "0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0",
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\swscale-8.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/swscale-8.dll",
+      "bytes": 705024,
+      "sha256": "8a74ed235b17980e7f41de482c95b9ec8426c6d41235cab56c0eb74183b7d1e0"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\avfilter-10.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/avfilter-10.dll",
+      "bytes": 25192960,
+      "sha256": "5270813c632c7aa6b51ed41104dede624a346e4d32d0e3a6158069781b544e41"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\avformat-61.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/avformat-61.dll",
+      "bytes": 21862912,
+      "sha256": "3ef409dc46aea8cb163068637546033cfa6c2c92b9d0c0a1e1eee011027168a0"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\swresample-5.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/swresample-5.dll",
+      "bytes": 671232,
+      "sha256": "3906fac6b66139bd1a526f83cfcfd81cdb047a0ea9fc97b5761b7e7bf2722eb0"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\avdevice-61.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/avdevice-61.dll",
+      "bytes": 7450624,
+      "sha256": "4bd591b126fcec2093e481c11c3f28533fd5c3bd4bcf64484f14ef1db12d51f7"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\avcodec-61.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/avcodec-61.dll",
+      "bytes": 66260480,
+      "sha256": "30ec40e6210e592d02e626589a9997e3f793e83dac078aaa3ed410fcbdb20723"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torchcodec-native-01\\avutil-59.dll",
+      "member": "ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/avutil-59.dll",
+      "bytes": 2838528,
+      "sha256": "99cb38dcb14027a74651eae812d9dd992ec4d0e66d19c2fc55c24af6c66e9a54"
+    }
+  ],
+  "executed": false
+}

@@ -47,6 +47,30 @@ from typing import Any
 
 log = logging.getLogger("uoink.whisper_runner")
 
+
+def _register_packaged_decoder_dlls():
+    """Keep Windows' loader on the app-owned FFmpeg runtime for TorchCodec."""
+    if sys.platform != "win32":
+        return None
+    app = Path(__file__).resolve().parent
+    directory = app / "bin" / "torchcodec"
+    if not directory.exists():
+        return None  # Source checkouts do not carry the installed native runtime.
+    if directory.resolve() != directory or not directory.is_dir():
+        raise RuntimeError("Packaged decoder directory must stay inside the application")
+    names = ("avcodec-61.dll", "avdevice-61.dll", "avfilter-10.dll",
+             "avformat-61.dll", "avutil-59.dll", "swresample-5.dll", "swscale-8.dll")
+    for name in names:
+        path = directory / name
+        if not path.is_file() or path.resolve() != path:
+            raise RuntimeError(f"Missing or redirected packaged decoder library: {name}")
+    return os.add_dll_directory(str(directory))
+
+
+# server.py imports this module before probing WhisperX. Direct transcription
+# entry points also pass here. The handle must outlive all lazy native imports.
+_PACKAGED_DECODER_DLL_HANDLE = _register_packaged_decoder_dlls()
+
 # Bounded enum for the per-row transcription state. The dashboard reads
 # this directly. 'queued' is set when the user opts in; 'running' once
 # the worker picks it up; 'done' / 'failed' on completion.

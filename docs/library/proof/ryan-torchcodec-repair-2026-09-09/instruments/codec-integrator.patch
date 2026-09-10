@@ -1,0 +1,214 @@
+diff --git a/build.ps1 b/build.ps1
+index cfa38ca..658cbcc 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -107,6 +107,10 @@ $FFMPEG_VERSION = 'n8.1.2'
+ # it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
+ # single self-contained ffmpeg.exe -- no DLLs to ship).
+ $FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip"
++# TorchCodec 0.7 loads the FFmpeg 7 ABI; the static CLI above has no shared DLLs.
++$FFMPEG_SHARED_VERSION = 'n7.1.5'
++$FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
++$FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
+ # yt-dlp pip pin -- bump after compatibility-testing a new release.
+ $YTDLP_VERSION  = '2026.07.04'
+ # Pillow is used for the multimodal paste-corpus generator (resize +
+@@ -352,12 +356,15 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
+ Write-Step 'Fetching dependencies'
+ $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
+ $ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
++$ffmpegSharedZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_SHARED_VERSION-win64-lgpl-shared.zip"
+ $getPipPy  = Join-Path $CacheDir 'get-pip.py'
+ 
+ Get-CachedFile $PYTHON_URL $pythonZip
+ Confirm-Hash $pythonZip $PYTHON_SHA256 'Python embeddable'
+ Get-CachedFile $FFMPEG_URL $ffmpegZip
+ Confirm-Hash $ffmpegZip $FFMPEG_SHA256 'ffmpeg'
++Get-CachedFile $FFMPEG_SHARED_URL $ffmpegSharedZip
++Confirm-Hash $ffmpegSharedZip $FFMPEG_SHARED_SHA256 'ffmpeg shared runtime'
+ Get-CachedFile $GETPIP_URL $getPipPy
+ Confirm-Hash $getPipPy $GETPIP_SHA256 'get-pip.py'
+ 
+@@ -503,6 +510,25 @@ if ($ffprobeExe) {
+ }
+ Remove-Item -Recurse -Force $ffmpegTmp
+ 
++# Read only the seven pinned shared-runtime members; do not extract arbitrary
++# paths or replace the separately pinned CLI executables. Inno recurses bin/.
++$sharedBin = Join-Path $StagingDir 'bin\torchcodec'
++New-Item -ItemType Directory -Path $sharedBin | Out-Null
++Add-Type -AssemblyName System.IO.Compression.FileSystem
++$sharedArchive = [IO.Compression.ZipFile]::OpenRead($ffmpegSharedZip)
++try {
++    $sharedPrefix = 'ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/'
++    $sharedNames = @('avcodec-61.dll','avdevice-61.dll','avfilter-10.dll',
++        'avformat-61.dll','avutil-59.dll','swresample-5.dll','swscale-8.dll')
++    foreach ($sharedName in $sharedNames) {
++        $members = @($sharedArchive.Entries | Where-Object { $_.FullName -ceq ($sharedPrefix + $sharedName) })
++        if ($members.Count -ne 1) { throw "Expected one shared decoder member: $sharedName" }
++        [IO.Compression.ZipFileExtensions]::ExtractToFile($members[0], (Join-Path $sharedBin $sharedName), $false)
++    }
++} finally {
++    $sharedArchive.Dispose()
++}
++
+ # 2g. Server source + helpers + icon
+ Write-Host '    copying server source + templates...'
+ }
+diff --git a/docs/build-installer.md b/docs/build-installer.md
+index fd47385..dc30dee 100644
+--- a/docs/build-installer.md
++++ b/docs/build-installer.md
+@@ -67,6 +67,7 @@ The installer lays out `%LOCALAPPDATA%\Uoink\`:
+ ```
+ python\           Python 3.13 embeddable + the pinned runtime packages listed below
+ bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
++bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
+ server.py         The local HTTP helper
+ uoink_mcp.py      MCP stdio entry point for agent clients
+ uoink_mcp_tools.py Shared MCP tool registry
+@@ -111,6 +112,7 @@ installed into the embeddable Python with the exact pip versions below.
+ |---|---|---|---|
+ | Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+ | ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
++| FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
+ | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
+ | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
+ | MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |
+@@ -182,6 +184,14 @@ if _BIN_DIR.is_dir():
+ 
+ In dev mode (running from the repo) `bin\` doesn't exist and the line is a no-op — `ffmpeg` resolves via the user's existing PATH like before.
+ 
++`whisper_runner.py` registers the app-relative `bin/torchcodec` directory with
++`os.add_dll_directory` before any lazy WhisperX import and retains its handle.
++It rejects redirected directories and missing or redirected DLLs. This shared
++runtime is pinned separately from the standalone CLI; updating it requires
++keeping TorchCodec's supported ABI and checking real audio decoding. The retained
++archive URL and SHA256 are `$FFMPEG_SHARED_URL` and `$FFMPEG_SHARED_SHA256` in
++`build.ps1`. No model download is needed for the generated-WAV decoder check.
++
+ yt-dlp is invoked as `[sys.executable, "-m", "yt_dlp"]`, so the right interpreter (the embeddable) drives the right `yt_dlp` package automatically.
+ 
+ ### Dev mode output root override
+diff --git a/scripts/gen_third_party_notices.py b/scripts/gen_third_party_notices.py
+index 316e757..b89ba5f 100644
+--- a/scripts/gen_third_party_notices.py
++++ b/scripts/gen_third_party_notices.py
+@@ -25,12 +25,18 @@ FFMPEG_BLOCK = """\
+ ## ffmpeg (bundled binary, not a Python package)
+ 
+ - **Component:** ffmpeg / ffprobe, BtbN `win64-lgpl` build (see build.ps1
+-  `$FFMPEG_URL`).
++  `$FFMPEG_URL`), plus the LGPL shared FFmpeg 7.1.5 runtime in
++  `bin/torchcodec` (see `$FFMPEG_SHARED_URL`). TorchCodec 0.7 requires this
++  separate FFmpeg 7 ABI; the standalone CLI remains FFmpeg 8.1.2.
+ - **License:** LGPL v2.1+ (this build is compiled without the GPL-only
+   encoders such as libx264/libx265).
+ - **Source:** https://ffmpeg.org/download.html and
+   https://github.com/BtbN/FFmpeg-Builds . Uoink uses ffmpeg only to decode
+-  and extract audio for transcription.
++  and extract audio and video frames for transcription and cited evidence.
++- **Pinned shared build and source recipe:**
++  https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2026-07-31-14-10 .
++  Shared libraries may be replaced with compatible LGPL FFmpeg 7 libraries
++  in `bin/torchcodec`; Uoink does not statically link them into its own code.
+ - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ """
+ 
+diff --git a/tests/test_packaged_decoder_loader.py b/tests/test_packaged_decoder_loader.py
+new file mode 100644
+index 0000000..8b822aa
+--- /dev/null
++++ b/tests/test_packaged_decoder_loader.py
+@@ -0,0 +1,56 @@
++"""Regression coverage for the installed native decoder boundary."""
++import importlib.util
++from pathlib import Path
++import sys
++
++import pytest
++
++SOURCE = Path(__file__).resolve().parents[1] / "whisper_runner.py"
++DLLS = ("avcodec-61.dll", "avdevice-61.dll", "avfilter-10.dll",
++        "avformat-61.dll", "avutil-59.dll", "swresample-5.dll", "swscale-8.dll")
++
++
++def load_at(tmp_path, monkeypatch, complete=True):
++    app = tmp_path / "application"
++    native = app / "bin" / "torchcodec"
++    native.mkdir(parents=True)
++    for name in DLLS if complete else DLLS[:-1]:
++        (native / name).write_bytes(b"fixture; never loaded")
++    module_path = app / "whisper_runner.py"
++    module_path.write_bytes(SOURCE.read_bytes())
++    spec = importlib.util.spec_from_file_location("decoder_loader_probe", module_path)
++    module = importlib.util.module_from_spec(spec)
++    monkeypatch.setattr(sys, "platform", "win32")
++    return module, spec, native
++
++
++def test_import_registers_only_app_directory_and_retains_handle(tmp_path, monkeypatch):
++    module, spec, native = load_at(tmp_path, monkeypatch)
++    calls = []
++    handle = object()
++    monkeypatch.setattr("os.add_dll_directory", lambda path: calls.append(path) or handle, raising=False)
++    monkeypatch.chdir(tmp_path)
++    spec.loader.exec_module(module)
++    assert calls == [str(native)]
++    assert module._PACKAGED_DECODER_DLL_HANDLE is handle
++
++
++def test_incomplete_installed_runtime_fails_before_registration(tmp_path, monkeypatch):
++    module, spec, native = load_at(tmp_path, monkeypatch, complete=False)
++    calls = []
++    monkeypatch.setattr("os.add_dll_directory", lambda path: calls.append(path), raising=False)
++    with pytest.raises(RuntimeError, match="Missing or redirected.*swscale-8"):
++        spec.loader.exec_module(module)
++    assert calls == []
++
++
++def test_redirected_dll_is_rejected(tmp_path, monkeypatch):
++    module, spec, native = load_at(tmp_path, monkeypatch)
++    original = Path.resolve
++    def resolve(path, *args, **kwargs):
++        if path.name == "avcodec-61.dll":
++            return tmp_path / "outside.dll"
++        return original(path, *args, **kwargs)
++    monkeypatch.setattr(Path, "resolve", resolve)
++    with pytest.raises(RuntimeError, match="Missing or redirected.*avcodec-61"):
++        spec.loader.exec_module(module)
+diff --git a/whisper_runner.py b/whisper_runner.py
+index a842a44..7157e92 100644
+--- a/whisper_runner.py
++++ b/whisper_runner.py
+@@ -47,6 +47,30 @@ from typing import Any
+ 
+ log = logging.getLogger("uoink.whisper_runner")
+ 
++
++def _register_packaged_decoder_dlls():
++    """Keep Windows' loader on the app-owned FFmpeg runtime for TorchCodec."""
++    if sys.platform != "win32":
++        return None
++    app = Path(__file__).resolve().parent
++    directory = app / "bin" / "torchcodec"
++    if not directory.exists():
++        return None  # Source checkouts do not carry the installed native runtime.
++    if directory.resolve() != directory or not directory.is_dir():
++        raise RuntimeError("Packaged decoder directory must stay inside the application")
++    names = ("avcodec-61.dll", "avdevice-61.dll", "avfilter-10.dll",
++             "avformat-61.dll", "avutil-59.dll", "swresample-5.dll", "swscale-8.dll")
++    for name in names:
++        path = directory / name
++        if not path.is_file() or path.resolve() != path:
++            raise RuntimeError(f"Missing or redirected packaged decoder library: {name}")
++    return os.add_dll_directory(str(directory))
++
++
++# server.py imports this module before probing WhisperX. Direct transcription
++# entry points also pass here. The handle must outlive all lazy native imports.
++_PACKAGED_DECODER_DLL_HANDLE = _register_packaged_decoder_dlls()
++
+ # Bounded enum for the per-row transcription state. The dashboard reads
+ # this directly. 'queued' is set when the user opts in; 'running' once
+ # the worker picks it up; 'done' / 'failed' on completion.

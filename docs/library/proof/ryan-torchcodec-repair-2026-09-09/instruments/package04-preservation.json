@@ -1,0 +1,20 @@
+[
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "preserved_or_cache": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\Uoink-Setup-3.8.0-package04-677aa6f2.exe",
+    "sha256": "677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1",
+    "bytes": 341085750
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-binary-candidates-02\\ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip",
+    "preserved_or_cache": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\cache\\ffmpeg-n8.1.2-win64-lgpl.zip",
+    "sha256": "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365",
+    "bytes": 146078616
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native-binary-candidates-03\\python-3.13.15-embed-amd64.zip",
+    "preserved_or_cache": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\cache\\python-3.13.15-embed-amd64.zip",
+    "sha256": "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf",
+    "bytes": 11009825
+  }
+]

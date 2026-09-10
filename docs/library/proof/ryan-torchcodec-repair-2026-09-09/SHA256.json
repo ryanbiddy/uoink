@@ -1,0 +1,125 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "brief.md": {
+      "bytes": 1453,
+      "sha256": "175c2ef5da078dff3bdc06fb1831ec5399c64b24c9f7c11d34da4cead82b4400"
+    },
+    "checkout/results.json": {
+      "bytes": 1087,
+      "sha256": "c28788dbfb0957ef0c1f797039b50bb0eda2e128a9075a2ad615bd9a26145ba6"
+    },
+    "checkout/tests.log": {
+      "bytes": 101,
+      "sha256": "98b3bf18ef7de141c4cb022df6daf51e633d8822b13a5bd5bd1a3057131cf915"
+    },
+    "diagnostic-probe.json": {
+      "bytes": 413,
+      "sha256": "a0cd8c637326d519687ea55cd0822522a383c132479ff82508fa653474abef75"
+    },
+    "gemini-failed-run.txt": {
+      "bytes": 554,
+      "sha256": "2234b25eb0ab071c835c35dca2899f1c804f66286abeac00bd4cdba7545480a3"
+    },
+    "instruments/codec-integrator.patch": {
+      "bytes": 11091,
+      "sha256": "ba720c14b61124fdee167fbe72611eb892fc1e224bf58a42fa532a10a8956627"
+    },
+    "instruments/fetch_ffmpeg_shared_candidate.py": {
+      "bytes": 2068,
+      "sha256": "291743fb388dc78ffcce1a7db0eeaf0fa754c9d6f3d79fe1bf7de68b335b2fcb"
+    },
+    "instruments/package04-preservation.json": {
+      "bytes": 1133,
+      "sha256": "c5a20a28b212a4abc30981448f9c11243f685888f3007cba0800ec718086002c"
+    },
+    "instruments/prepare_product_codec_probe.py": {
+      "bytes": 1592,
+      "sha256": "29e1170e18e44937333d67894edd58cb962b6f7d0ae847d59004885b4429064d"
+    },
+    "instruments/prepare_torchcodec_dlls.py": {
+      "bytes": 1213,
+      "sha256": "d546a991929ff9634b92a9a67e294d33ceb4b1c123011dfa8944d8da8f4017d6"
+    },
+    "instruments/probe_torchcodec_product.py": {
+      "bytes": 2337,
+      "sha256": "d0b639e6ff23ef3e2a5f1f957691c0886bcfc364c7c67baa7a03a295c04c5fff"
+    },
+    "instruments/probe_torchcodec_shared.py": {
+      "bytes": 2092,
+      "sha256": "fa4059dc6c370ced69d6bbbd7e92555e4fbf33f1b8bc8236720939560544f700"
+    },
+    "instruments/read_active_codec_run.py": {
+      "bytes": 496,
+      "sha256": "b7e1b8791dd1d4bf9df1ff9c0a6ca58ac98b39ae3c2cf53a40f437a4fab19e22"
+    },
+    "instruments/run_codec_verification.py": {
+      "bytes": 1030,
+      "sha256": "9a725435fe8e13e557ba7ed49f268c4285aadc851e16c02da9b7449b98272ecf"
+    },
+    "instruments/run_product_codec_probe.ps1": {
+      "bytes": 1031,
+      "sha256": "384a46c88048b34e2eee6976bea26acc14a09f5e27970e2d31940b243bb44ca5"
+    },
+    "instruments/seal_codec_repair.py": {
+      "bytes": 2108,
+      "sha256": "d7cf8bf576f9318e6a88e8d1026424ca62008d19303854551ef31af185e35db6"
+    },
+    "native-dlls.json": {
+      "bytes": 2452,
+      "sha256": "32c6dde2528c6e9d213f8d1f4b59f514129fc24d3e1f3783a0455df59aad47fa"
+    },
+    "native-metadata/checksums.sha256": {
+      "bytes": 5728,
+      "sha256": "8051fa7760c174bde7adedbf7b5e6a123d145846affc2a0e69c25b2c5cea7d54"
+    },
+    "native-metadata/checksums.sha256.download.json": {
+      "bytes": 364,
+      "sha256": "6e7e6b914bb1e0b8694a8b147fbbf0653dfa90fc42f02942b752d6498dda1cdc"
+    },
+    "native-metadata/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip.download.json": {
+      "bytes": 406,
+      "sha256": "3d7b16c1e4a7314898310d0bbb98badb04b98f67978e20e293d518c10617f01d"
+    },
+    "native-metadata/release.json": {
+      "bytes": 86445,
+      "sha256": "19dce680bc4d7267f35f5c0e14448cd55b70bc19d354fff2fd0aa2cdc69b26bc"
+    },
+    "native-metadata/release.json.download.json": {
+      "bytes": 354,
+      "sha256": "a100ec6ee449e9b69130dc604779a2e55fb015aab3cc7ff4e5104b76d40bfbe6"
+    },
+    "native-metadata/selection.json": {
+      "bytes": 664,
+      "sha256": "c3dc57ba7617fec967780d51780ed1a2c29f2b5e3f6fc00ea7e49b6498162eaf"
+    },
+    "product-probe.json": {
+      "bytes": 442,
+      "sha256": "dad1638d9505e0a4ba6b7d174f0fffcc08a2130559ba7335669e98886f1c3f45"
+    },
+    "product-source-binding.json": {
+      "bytes": 2455,
+      "sha256": "2de9aabb834d4550a0c85d685a78baf8c2f7b464fe93542de163b19446ba7d87"
+    },
+    "scan/scan.json": {
+      "bytes": 732,
+      "sha256": "b2ee2c7c5997e7407d02cba2b8459ba65bb84ea5f9081e225b497da6170d736a"
+    },
+    "scan/scan.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scan/scan.stdout": {
+      "bytes": 199,
+      "sha256": "92eb3840b3e2dea4ad8a8e77c29c5a247932fb9a73a374eead19c56d7ac01a13"
+    },
+    "worker/results.json": {
+      "bytes": 1126,
+      "sha256": "ec6250528d36736ff85094167bc7030c2f178b852624dbe0efdce29b15d753a1"
+    },
+    "worker/tests.log": {
+      "bytes": 101,
+      "sha256": "726642b42c68e9120f37ed2a2d9df87d6986a2d4da2f5a35c9f017e0065acec2"
+    }
+  }
+}

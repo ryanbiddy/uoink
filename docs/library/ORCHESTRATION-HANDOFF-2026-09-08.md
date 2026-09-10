@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | FFmpeg and Python pin suites each have 36 passes in both roots. Python 3.13 installs 139 exact packages; native probe has 15 passes / one TorchCodec DLL failure | Repair missing shared decoder runtime, freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
+| Integration | Package-04 retained, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Python 3.13 installs 139 exact packages. Shared decoder repair has 42 passes in both roots and real staged product-loader WAV decoding passes | Build and seal package-05, freeze complete partitioned tree, then actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -166,8 +166,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    passes in each root. Python 3.13.15's actual installed graph has 139 exact
    runtime packages after three obsolete compatibility packages are removed.
    Its independent native probe has 15 passes / one TorchCodec shared-DLL
-   failure. Follow ASTRA-PYTHON313-INTEGRATION-2026-09-09.md and the bounded
-   TorchCodec repair brief; Gemini is working from e1d81bc. No model inference.
+   failure. Gemini c662e389 subsequently failed at its subscription limit with
+   no diff. Astra's bounded supplement repairs the missing runtime: 42 passes
+   in each root and real staged product-loader WAV decoding passes. Follow
+   ASTRA-TORCHCODEC-INTEGRATION-2026-09-09.md. No model inference.
    Package-04 is built and sealed from 86bfede; generated notices reviewed at
    3265171 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
@@ -2385,7 +2387,7 @@ The next run requires the concrete final-media repair and exact no-test-edit
 review. Package-04, its scan and all prior failed observations remain retained.
 Backup origin/cc/living-library was verified at 7109182; later work needs backup.
 
-### 2026-09-09 22:16 PDT - Native review and media execution conditions
+### 2026-09-09 - Native review and media execution conditions
 
 Gemini e0082e87 traced the P4 parent guard to prepare's in-process exec. Astra
 reproduced one pass / one failure in both roots (1.93/1.57 seconds). Reject the
@@ -2411,7 +2413,7 @@ not test exact-pin compatibility. Two bounded Gemini runs now qualify Python
 No Setup has run; Agent Install 04 remains prepared only. Preserve package-04
 before replacing it, then finish the committed tree and actual installation.
 
-### 2026-09-09 22:20 PDT - Shipping FFmpeg update integrated
+### 2026-09-09 - Shipping FFmpeg update integrated
 
 Gemini cadfc013's exact LGPL 8.1.2 pin and versioned cache passed all seven
 named suites independently in both roots: 36 passes in 4.09/3.10 seconds.
@@ -2426,7 +2428,7 @@ Python qualification is still running; it must establish actual compatible
 wheels or exact blockers. No installation has run. Commit 1f57b56 contains the
 accepted diagnosis, rejected guard deletion and complete failed-probe history.
 
-### 2026-09-09 22:36 PDT - Python upgrade qualified; missing decoder DLL remains
+### 2026-09-09 - Python upgrade qualified; missing decoder DLL remains
 
 The official Python 3.13.15 archive matches its SPDX SHA256 and passes Defender.
 Astra's actual interpreter resolves and installs 139 exact runtime versions;
@@ -2448,3 +2450,22 @@ compatible LGPL shared FFmpeg runtime and registers its app-owned DLL directory.
 That worker starts from e1d81bc, before the Python supplement; preserve both changes
 when integrating. The 59-file proof retains the partial/failed claims and actual
 successful graph separately. No Setup has run; installation remains Astra's work.
+
+### 2026-09-09 - Product decoder repair verified after Gemini quota failure
+
+Gemini c662e389 ended with a subscription-limit error and no diff; no paid
+fallback occurred. Astra's fresh detached repair worktree and raw patch each
+passed the same 42-check union (4.43/1.96 seconds). Three new boundary tests were
+added; no existing test changed. Seven pinned LGPL shared FFmpeg 7.1.5 DLLs now
+stage in bin/torchcodec, and the real transcription module registers only that
+resolved application directory while retaining the handle. Static FFmpeg 8.1.2
+and Python 3.13.15 remain pinned. Actual staged product-loader WAV decoding
+passes with no model or network/subprocess guard event. Installed decoding is
+still owed; do not credit a Setup observation from this probe.
+
+Package-04 was copied to a hash-verified private preservation path. Build the
+replacement, inventory/scan it, and run the complete accounted two-process tree
+before the delegated outside-checkout Setup. The Python proof's empty conflict
+patch is not evidence of conflict contents; original patch and resolved diff
+remain. Three approximate minute headings above were reduced to their known
+date. Proof: proof/ryan-torchcodec-repair-2026-09-09/SHA256.json.

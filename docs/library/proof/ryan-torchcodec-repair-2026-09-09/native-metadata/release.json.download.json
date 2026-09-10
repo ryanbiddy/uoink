@@ -1,0 +1,9 @@
+{
+  "url": "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/tags/autobuild-2026-07-31-14-10",
+  "start_utc": "2026-09-10T05:36:32.627895+00:00",
+  "executed": false,
+  "http_status": 200,
+  "bytes": 86445,
+  "sha256": "19dce680bc4d7267f35f5c0e14448cd55b70bc19d354fff2fd0aa2cdc69b26bc",
+  "end_utc": "2026-09-10T05:36:32.949815+00:00"
+}
