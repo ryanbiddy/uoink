@@ -443,6 +443,13 @@ def compare_installed_to_sealed(app: Path, bindings: list[dict], *,
 
 
 RUNTIME_PROBE_SOURCE = '''import json, sys
+from pathlib import Path
+if len(sys.argv) != 2 or not Path(sys.argv[1]).is_absolute():
+    raise SystemExit("runtime probe requires an absolute installed app directory")
+app = Path(sys.argv[1]).resolve(strict=True)
+if not app.is_dir():
+    raise SystemExit("runtime probe installed app must be a directory")
+sys.path.insert(0, str(app))
 info = {
     "sys_executable": sys.executable,
     "sys_path": list(sys.path),
@@ -500,7 +507,7 @@ def probe_runtime_provenance(interpreter: Path, app: Path, env: dict, *,
     stderr_file = tempfile.TemporaryFile()
     try:
         owned = spawn_owned(
-            [str(interpreter), "-B", str(script)],
+            [str(interpreter), "-B", str(script), str(app)],
             cwd=work, env=env, label="p4-runtime-probe",
             stdout=stdout_file, stderr=stderr_file,
         )

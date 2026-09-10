@@ -86,16 +86,16 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; corrected tree `80a4fa8`, replacement installer source `86bfede`)
+## State at handoff (updated 2026-09-10; package source `6b5aed8`, final receipt-tree refresh next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Rebuilt-package installed C22 delegated to Astra; exact account/mode must be recorded |
-| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Package-05 actual installed C22: 11 passed / zero failed / three original manual placeholders; browser supplement review pending; same account recorded |
+| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Actual prepare exposed embedded probe import defect; bounded repair has 63 passes in each root. Fresh installed/client/everyday receipts next |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Actual isolated Setup/reinstall, installed C22/P4 and browser/client evidence. Nineteen Python advisory entries remain separately; no model/speaker runs |
+| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Actual isolated Setup and same-version reinstall both exit zero; 32,054 installed hashes match. Receipt-source repair requires new complete tree. P4/client and final evidence remain; nineteen advisory entries retained |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -179,7 +179,14 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Follow ASTRA-PARTITIONED-TREE-VERDICT-2026-09-09.md into actual installation.
    Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
    assemble new evidence and push only origin/cc/living-library.
-5. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
+5. Package-05 Setup/reinstall and installed C22 now have actual observations.
+   Complete the fresh tree and fresh P4 directory under
+   P4-EMBEDDED-PROBE-REPAIR-BRIEF-2026-09-09.md and the 2026-09-10 verdict.
+   Preserve the initial Desktop observer refusal, decoder instrument failures
+   and P4 prepare failure. Original raw manual placeholders remain unchanged.
+   Review the actual browser supplement, then seal installed evidence and finish
+   notes/runbook/new ZIP. Real-client sign-in remains user-controlled.
+6. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
    fetch/speaker runs and deferred Part B remain unchanged.
 
 ### Previous delivered-artifact queue (historical; superseded above)
@@ -2506,3 +2513,26 @@ No new failure appears. Package source is unchanged. Agent Install 05 has nine
 prepared synthetic profiles only; actual Setup is the next authorized step.
 The branch-only backup at 9a62e84 was independently verified against origin.
 Later evidence commits need the final backup. No main/candidate push occurred.
+
+### 2026-09-10 - Actual installation and embedded receipt bootstrap
+
+Agent Install 05 is outside the checkout on this same non-elevated account.
+Actual Setup and same-version reinstall exit zero. All 32,054 installed file
+hashes match; ordinary registry/autorun and inspected shortcut effects remain
+unchanged. OneDrive Desktop contents were deliberately not traversed: reviewed
+observer metadata plus actual empty Tasks settings and Inno logs establish the
+selected no-desktop-task boundary. This is not throwaway-account isolation.
+
+Installed C22 records 11 passes / zero failures / three original unexecuted
+manual placeholders. Browser screenshots and before/after state were collected
+separately, with owned helper cleanup affirmed. Installed image/Fernet and WAV
+decoder checks pass under explicitly temporary no-site instrumentation; ._pth
+is restored byte-for-byte. Earlier instrument failures remain preserved.
+
+The first installed P4 prepare fails before fixtures because embedded Python
+omits the script directory. Its original guard and path restoration succeed.
+The bounded receipt bootstrap repair passes 63 checks in both worktree and
+checkout, with four new regressions and no existing test changed. Its raw diff
+was applied three-way. See ASTRA-P4-EMBEDDED-PROBE-VERDICT-2026-09-10.md.
+Now observe the fresh complete tree and retry installed P4 in a new directory.
+No packaged source changed and no installer rebuild is owed for this repair.

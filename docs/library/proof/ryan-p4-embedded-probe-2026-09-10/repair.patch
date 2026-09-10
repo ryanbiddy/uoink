@@ -1,0 +1,99 @@
+diff --git a/scripts/install_receipt/p4_common.py b/scripts/install_receipt/p4_common.py
+index 6df5f2f..f78487b 100644
+--- a/scripts/install_receipt/p4_common.py
++++ b/scripts/install_receipt/p4_common.py
+@@ -443,6 +443,13 @@ def compare_installed_to_sealed(app: Path, bindings: list[dict], *,
+ 
+ 
+ RUNTIME_PROBE_SOURCE = '''import json, sys
++from pathlib import Path
++if len(sys.argv) != 2 or not Path(sys.argv[1]).is_absolute():
++    raise SystemExit("runtime probe requires an absolute installed app directory")
++app = Path(sys.argv[1]).resolve(strict=True)
++if not app.is_dir():
++    raise SystemExit("runtime probe installed app must be a directory")
++sys.path.insert(0, str(app))
+ info = {
+     "sys_executable": sys.executable,
+     "sys_path": list(sys.path),
+@@ -500,7 +507,7 @@ def probe_runtime_provenance(interpreter: Path, app: Path, env: dict, *,
+     stderr_file = tempfile.TemporaryFile()
+     try:
+         owned = spawn_owned(
+-            [str(interpreter), "-B", str(script)],
++            [str(interpreter), "-B", str(script), str(app)],
+             cwd=work, env=env, label="p4-runtime-probe",
+             stdout=stdout_file, stderr=stderr_file,
+         )
+diff --git a/tests/test_install_receipt_p4_embedded_probe.py b/tests/test_install_receipt_p4_embedded_probe.py
+new file mode 100644
+index 0000000..ced981c
+--- /dev/null
++++ b/tests/test_install_receipt_p4_embedded_probe.py
+@@ -0,0 +1,66 @@
++"""Exercise the receipt probe with script-directory and site imports disabled."""
++import json
++from pathlib import Path
++import subprocess
++import sys
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts/install_receipt"))
++import p4_common as common
++
++NAMES = ("uoink_mcp", "server", "index", "library_cards", "library_work",
++         "library_prompts", "mcp")
++
++
++def make_app(tmp_path):
++    app = tmp_path / "installed app"
++    app.mkdir()
++    for name in NAMES:
++        (app / (name + ".py")).write_text('VERSION = "bound-fixture"\n', encoding="utf8")
++    return app
++
++
++def run_probe(app, source, arguments):
++    script = app / "probe.py"
++    script.write_text(source, encoding="utf8")
++    return subprocess.run([sys.executable, "-I", "-S", "-B", str(script), *arguments],
++                          cwd=app, capture_output=True, text=True, timeout=15)
++
++
++def test_isolated_runtime_needs_explicit_app_bootstrap(tmp_path):
++    app = make_app(tmp_path)
++    bare = run_probe(app, "import uoink_mcp\n", [])
++    assert bare.returncode != 0
++    assert "ModuleNotFoundError" in bare.stderr
++    bound = run_probe(app, common.RUNTIME_PROBE_SOURCE, [str(app)])
++    assert bound.returncode == 0, bound.stderr
++    receipt = json.loads(bound.stdout)
++    assert receipt["flags"]["isolated"] and receipt["flags"]["no_user_site"]
++    assert Path(receipt["sys_path"][0]) == app
++    assert set(receipt["modules"]) == set(NAMES)
++    for name in NAMES:
++        assert receipt["modules"][name]["ok"]
++        assert Path(receipt["modules"][name]["file"]) == app / (name + ".py")
++        assert receipt["dependency_versions"][name] == "bound-fixture"
++
++
++@pytest.mark.parametrize("arguments", [[], ["relative-app"]])
++def test_probe_refuses_unbound_or_relative_app(tmp_path, arguments):
++    app = make_app(tmp_path)
++    result = run_probe(app, common.RUNTIME_PROBE_SOURCE, arguments)
++    assert result.returncode != 0
++    assert "requires an absolute installed app directory" in result.stderr
++    assert not result.stdout
++
++
++def test_bound_probe_still_rejects_checkout_imports(tmp_path):
++    app = make_app(tmp_path)
++    result = run_probe(app, common.RUNTIME_PROBE_SOURCE, [str(app)])
++    assert result.returncode == 0, result.stderr
++    receipt = json.loads(result.stdout)
++    receipt["ok"] = True
++    reasons = common.evaluate_probe_for_installed(
++        receipt, app=app, interpreter=Path(sys.executable),
++        forbid_checkout=app, user_site=None)
++    assert any("resolved inside the checkout" in reason for reason in reasons)
