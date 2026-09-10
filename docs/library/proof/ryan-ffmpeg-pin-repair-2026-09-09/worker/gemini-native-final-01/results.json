@@ -1,0 +1,29 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_docs_live_contracts.py",
+      "tests/test_c02_reliability_faster_whisper.py",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_installer_download_accuracy.py",
+      "tests/test_installer_files_complete.py",
+      "tests/test_build_guide_accuracy.py",
+      "tests/test_current_doc_references.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cadfc013-476\\gemini\\_scratch\\gemini-native-final-01-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cadfc013-476\\gemini\\_scratch\\gemini-native-final-01\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cadfc013-476\\gemini\\_scratch\\gemini-native-final-01\\tests.log"
+  }
+]

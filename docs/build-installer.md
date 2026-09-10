@@ -91,8 +91,8 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
 ## Where dependencies come from
 
 - **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
-- **ffmpeg** — BtbN `n7.1` Windows static win64 LGPL build:
-  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
+- **ffmpeg** — BtbN `n8.1.2` Windows static win64 LGPL build:
+  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`.
   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
   the archive is discarded.
 - **get-pip.py** — PyPA `get-pip` commit
@@ -110,7 +110,7 @@ installed into the embeddable Python with the exact pip versions below.
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
 | Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
-| ffmpeg | n7.1 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+| ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
 | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
 | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
 | MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |

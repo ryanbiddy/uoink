@@ -100,13 +100,13 @@ $PACKAGING_VERSION  = '26.2'
 # feature-sufficient. Versioned release tag (not "latest") so the hash pin
 # below stays meaningful. THIRD-PARTY-NOTICES.md records the LGPL text +
 # where to get ffmpeg's source.
-$FFMPEG_VERSION = 'n7.1'
+$FFMPEG_VERSION = 'n8.1.2'
 # BtbN publishes dated release tags; the end-of-month builds are retained
 # long-term (daily builds get pruned), so we pin to a monthly snapshot. The
 # asset name carries the exact git revision, so this URL is fully pinned --
 # it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
 # single self-contained ffmpeg.exe -- no DLLs to ship).
-$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip"
+$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.07.04'
 # Pillow is used for the multimodal paste-corpus generator (resize +
@@ -146,7 +146,7 @@ $WHISPERX_VERSION = '3.8.6'
 # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
 # file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
-$FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
+$FFMPEG_SHA256 = "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365"
 $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
 # ---- Helpers ------------------------------------------------------------
@@ -351,7 +351,7 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
 # ---- 1. Download dependencies ------------------------------------------
 Write-Step 'Fetching dependencies'
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
-$ffmpegZip = Join-Path $CacheDir 'ffmpeg-win64-lgpl.zip'
+$ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
 $getPipPy  = Join-Path $CacheDir 'get-pip.py'
 
 Get-CachedFile $PYTHON_URL $pythonZip

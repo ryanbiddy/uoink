@@ -1,0 +1,141 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "brief.md": {
+      "bytes": 1786,
+      "sha256": "39d65b1f6e12061e3b0338cf4b8f92586d8950b4de0e1730654e7436301ff3b8"
+    },
+    "checkout/astra-native-pin-c1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "checkout/astra-native-pin-c1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "checkout/astra-native-pin-c1/results.json": {
+      "bytes": 1007,
+      "sha256": "a439751e3a7dcc82278a4bccd63ae509eb870a906a0a8adc027c13c3d89baae6"
+    },
+    "checkout/astra-native-pin-c1/tests.log": {
+      "bytes": 101,
+      "sha256": "248cfb124f69a1b3f3a3f01cc7213ffe076cf21345411caa105c1e2606e787bf"
+    },
+    "checkout/astra-native-pin-c1/tests.xml": {
+      "bytes": 4944,
+      "sha256": "5f0bf279cb4eb0c5f486f8c93dce6940e13116d7de65b52f04be0961f1bab944"
+    },
+    "seal_ffmpeg_pin_review.py": {
+      "bytes": 2056,
+      "sha256": "65af5cf4daa741bc9c0c21d558782bb4b4b22149707fe9b7113bc742fcf7339f"
+    },
+    "summary.json": {
+      "bytes": 687,
+      "sha256": "095c2134d7eccc8bb86075d5150b6054da3defa4ded6bcc2354ef17ff67b969d"
+    },
+    "worker/astra-native-pin-w1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/astra-native-pin-w1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/astra-native-pin-w1/results.json": {
+      "bytes": 1154,
+      "sha256": "7ef6cfb3af5214568ef3e7d5a72606d78403ac6dac3745e397048f8c08a6e1a9"
+    },
+    "worker/astra-native-pin-w1/tests.log": {
+      "bytes": 101,
+      "sha256": "66f13abec37ff49bb974f7f896eadeacbc44e7f7990ab99b92eae893ca86568e"
+    },
+    "worker/astra-native-pin-w1/tests.xml": {
+      "bytes": 4944,
+      "sha256": "1e7043bf55ecbf2a5a7f4546e8a85c655344acfe1b2851c570b32484bde18602"
+    },
+    "worker/gemini-native-baseline-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/gemini-native-baseline-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/gemini-native-baseline-01/results.json": {
+      "bytes": 1172,
+      "sha256": "1542eaa5066e5496fe07c811506913e209a507bb936215b7ae34c27498a11c3d"
+    },
+    "worker/gemini-native-baseline-01/tests.log": {
+      "bytes": 101,
+      "sha256": "6cdc5b8d84f5dd7b8ecc31731e6972213c635a16d0e1cbc6a5a1877a44856249"
+    },
+    "worker/gemini-native-baseline-01/tests.xml": {
+      "bytes": 4944,
+      "sha256": "210ccabc4049d1a08db7c9b01177e359dc20b98cd56f4f51e2f80dbfd13c3ee7"
+    },
+    "worker/gemini-native-core-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/gemini-native-core-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/gemini-native-core-01/results.json": {
+      "bytes": 1013,
+      "sha256": "72b6ca2ede1b426b5a57fdc06204062006494082976d039bd8be9172aaba1cf4"
+    },
+    "worker/gemini-native-core-01/tests.log": {
+      "bytes": 101,
+      "sha256": "15ff336c0efa721622c0b87b3144be6a4af8378c52b493fb2c6bd743cc108584"
+    },
+    "worker/gemini-native-core-01/tests.xml": {
+      "bytes": 3298,
+      "sha256": "ba3b84b2c3222e7e076b13fb97f175cf40e3f0fc07fdd2be8832560798097779"
+    },
+    "worker/gemini-native-final-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/gemini-native-final-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/gemini-native-final-01/results.json": {
+      "bytes": 1163,
+      "sha256": "c73e1889a8c39d9789739d7629aef58ccd018e9052e5642e0c92481c53ed80ef"
+    },
+    "worker/gemini-native-final-01/tests.log": {
+      "bytes": 101,
+      "sha256": "e5210bcf93d6685067b049d4987f0274b2a2d7394d5172a21eb453fb8cf734fb"
+    },
+    "worker/gemini-native-final-01/tests.xml": {
+      "bytes": 4944,
+      "sha256": "4fb50f5ef1110a8b21afb02eba900eca40f56e4526d0bbbcdfd26616670e5604"
+    },
+    "worker/gemini-native-pin-repair-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "worker/gemini-native-pin-repair-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "worker/gemini-native-pin-repair-01/results.json": {
+      "bytes": 1178,
+      "sha256": "4ba20f120a4a08097074c46b743b9fd7ba4bcf8382e9b9a1db8053cc8e9345eb"
+    },
+    "worker/gemini-native-pin-repair-01/tests.log": {
+      "bytes": 101,
+      "sha256": "47479a69e554cd69b82e0ba906765e7b09cc3ed1fb73929939654e6c54866088"
+    },
+    "worker/gemini-native-pin-repair-01/tests.xml": {
+      "bytes": 4944,
+      "sha256": "70e66674c659ab8ef43995bf547e37fd50313af3d7e011c499d0a95e7eb14c54"
+    },
+    "worker.patch": {
+      "bytes": 20584,
+      "sha256": "e618a2666d3fb18b42d7e9d184dc35c143f855f8353cd05537378ad19f74b2ed"
+    }
+  }
+}

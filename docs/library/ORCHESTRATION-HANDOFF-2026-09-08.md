@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Media diagnosis verified; original two cases now pass in each isolated process. Shipping LGPL qualification has four passes. Parent receipt guard remains unchanged | Integrate bounded FFmpeg pin repair and decide Python from exact-pin qualification; freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately |
+| Integration | Package-04 built from `86bfede`, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Original two media cases pass in each isolated process; shipping LGPL qualification has four passes. FFmpeg pin repair has 36 passes in each root; parent guard unchanged | Decide Python from exact-pin qualification; freeze complete partitioned tree, replacement package and actual installation. Nineteen Python advisory entries remain separately |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -162,8 +162,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    verified in ASTRA-NATIVE-AND-GUARD-REVIEW-2026-09-09.md. Keep the parent guard;
    use a fully accounted two-process final tree under the final-media brief.
    Original media cases have two passes in each root; LGPL probe has four passes.
-   Gemini's bounded FFmpeg pin repair and Python 3.13 exact-pin qualification are
-   running from e6f520c. Review native risks separately from the Python audit.
+   Gemini cadfc013's bounded FFmpeg pin repair is integrated with 36 independent
+   passes in each root. Python 3.13 exact-pin qualification continues from
+   e6f520c. Review native risks separately from the Python audit.
    Package-04 is built and sealed from 86bfede; generated notices reviewed at
    3265171 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
@@ -2406,3 +2407,18 @@ not test exact-pin compatibility. Two bounded Gemini runs now qualify Python
 3.13.15 and update only FFmpeg's shipping pin/cache/doc. Both start from e6f520c.
 No Setup has run; Agent Install 04 remains prepared only. Preserve package-04
 before replacing it, then finish the committed tree and actual installation.
+
+### 2026-09-09 22:20 PDT - Shipping FFmpeg update integrated
+
+Gemini cadfc013's exact LGPL 8.1.2 pin and versioned cache passed all seven
+named suites independently in both roots: 36 passes in 4.09/3.10 seconds.
+Three-way application was clean for build.ps1 and its current guide; the new
+report used Git's direct fallback. No test changed. Raw reports retain their
+stale package count and media-failure explanation, corrected in Astra's verdict.
+The 34-file pin proof references the prior native hash/scan/decoder seal.
+
+Package-04 must be preserved before a replacement build. The current pin is a
+retained monthly release; the GPL daily tool remains private and never ships.
+Python qualification is still running; it must establish actual compatible
+wheels or exact blockers. No installation has run. Commit 1f57b56 contains the
+accepted diagnosis, rejected guard deletion and complete failed-probe history.

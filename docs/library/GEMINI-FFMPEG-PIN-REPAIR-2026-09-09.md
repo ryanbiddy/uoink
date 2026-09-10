@@ -1,0 +1,270 @@
+# Gemini FFmpeg Pin Repair & Verification Report (2026-09-09)
+
+- **Worker:** Gemini
+- **Worktree:** `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\cadfc013-476\gemini`
+- **Scope:** Bounded repair of the shipping FFmpeg pin in `build.ps1` and its current build/version documentation in `docs/build-installer.md`. Independent verification of upstream release metadata and checksums. Documentation of Astra's corrections to earlier native review conclusions. Verification using guarded native runner `_scratch/integrator_verify.py` under `_scratch/ig-native/Scripts/python.exe`. No edits to tests or fixtures; no package lock or Python changes; no branch merge; no commits.
+
+---
+
+## 1. Astra's Corrections to Earlier Native Review Conclusions
+
+The earlier Gemini review (`docs/library/GEMINI-NATIVE-BINARY-SECURITY-2026-09-09.md`) contained two conclusions that required correction per Astra's integrator verdicts (`ASTRA-INSTALLED-PAYLOAD-VERDICT-2026-09-09.md` and `ASTRA-FINAL-SECURITY-COUNCIL-VERDICT-2026-09-09.md`):
+
+1. **Package Input Miscount:**
+   - *Earlier claim:* Gemini previously cited 25,781 compiler inputs from an outdated `staged-inventory.json`.
+   - *Correction:* Astra's derived seal producer derives roles directly from Inno Setup directives (`[Files]` and `[Wizard]`). The mapped inventory comprises **32,203 compiler inputs** (32,194 installed files, 8 wizard bitmaps, and 1 setup-only script: `upgrade_prep.ps1`). Furthermore, the verifier explicitly distinguishes **142 compiler bindings** from **141 installed files** (since `upgrade_prep.ps1` is an installer-only input with `dontcopy`).
+2. **Prerequisite Misidentification for Observed Test Failure:**
+   - *Earlier claim:* Gemini diagnosed the failure in `tests/test_long_video_v324.py::test_screenshot_phase_end_to_end` as an unmet runtime requirement for `libx264`, and recommended provisioning a separate GPL binary on PATH to satisfy that requirement.
+   - *Correction:* `libx264` is not a runtime prerequisite for Uoink's shipping application or media pipeline (which only uses FFmpeg for audio decoding/demuxing and `-frames:v 1` JPEG screenshot extraction). In ordinary test runs where FFmpeg is not on PATH, `test_screenshot_phase_end_to_end` cleanly skips (`skip end-to-end: ffmpeg not on PATH`). The failure only manifested when the bundled LGPL FFmpeg binary (which omits GPL encoders like `libx264`) was placed onto the test PATH during native verification. The synthetic video generation requirement in that test fixture was a test-only requirement, not a production dependency gap. Uoink's shipping package strictly remains LGPL.
+
+---
+
+## 2. Independent Verification of Release Metadata & Checksum
+
+The retained monthly LGPL 8.1.2 release was independently verified against primary source metadata:
+
+- **Upstream Tag:** `autobuild-2026-08-31-13-27`
+- **Asset Name:** `ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`
+- **Official Download URL:**
+  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`
+- **Official SHA256 Checksum:**
+  `f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365`
+- **Source Verification:**
+  Verified against BtbN's official `checksums.sha256` file published at:
+  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/checksums.sha256`
+  Line 19 records:
+  ```
+  f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365  ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip
+  ```
+- **Matching Test-Only GPL Checksum (for Astra's private test harness):**
+  ```
+  273abb45f3f9f76c303e35ff39f5bb6c23c163ae65f6244a32b7d4a7f6cf0616  ffmpeg-n8.1.2-50-g1a748fe2cd-win64-gpl-8.1.zip
+  ```
+- **Versioned Cache Filename:**
+  Updated `$ffmpegZip` in `build.ps1` from the unversioned `'ffmpeg-win64-lgpl.zip'` to `"ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"` (evaluating to `ffmpeg-n8.1.2-win64-lgpl.zip`). This ensures that `Confirm-Hash` does not treat an older cached snapshot as a hash mismatch and delete it.
+
+---
+
+## 3. Command Execution & Exit Records
+
+All verification was performed with `_scratch/ig-native/Scripts/python.exe` and `_scratch/integrator_verify.py` from the main checkout.
+
+### 3.1 Observed Failures During Inspection
+
+1. **Failure: Missing `IG_FORBIDDEN_LIVE` Environment Variable**
+   - **Command:**
+     ```powershell
+     & 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe' -c '...'
+     ```
+   - **Exit Code:** `1`
+   - **Observed Error:**
+     ```
+     Traceback (most recent call last):
+       ...
+       File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-full-as9\guard\sitecustomize.py", line 7, in audit
+         forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\', '/').lower()
+       File "<frozen os>", line 709, in __getitem__
+     KeyError: 'IG_FORBIDDEN_LIVE'
+     ```
+   - **Resolution:** As required by standing rules, `$env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"` was explicitly set prior to spawning the interpreter.
+
+2. **Failure: Integrator Network Guard Enforcement**
+   - **Command:**
+     ```powershell
+     $env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+     & 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe' -c 'import urllib.request; urllib.request.urlopen("https://github.com/...")'
+     ```
+   - **Exit Code:** `1`
+   - **Observed Error:**
+     ```
+     File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-full-as9\guard\sitecustomize.py", line 13, in audit
+       raise PermissionError('Integrator guard: external network / 5179 forbidden')
+     PermissionError: Integrator guard: external network / 5179 forbidden
+     ```
+   - **Resolution:** Python processes under `ig-native` strictly enforce the offline audit hook. Public release metadata was inspected via the external tool environment rather than through runtime sockets within the test runner.
+
+---
+
+### 3.2 Pre-Repair Baseline Verification (`gemini-native-baseline-01`)
+
+Executed across all 7 build, lock, and documentation suites prior to edits:
+- **Command:**
+  ```powershell
+  $env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+  $env:PYTHONDONTWRITEBYTECODE = '1'
+  & 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe' -B `
+    'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py' `
+    --root 'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\cadfc013-476\gemini' `
+    --label 'gemini-native-baseline-01' `
+    tests/test_docs_live_contracts.py `
+    tests/test_c02_reliability_faster_whisper.py `
+    tests/test_installer_dependency_lock.py `
+    tests/test_installer_download_accuracy.py `
+    tests/test_installer_files_complete.py `
+    tests/test_build_guide_accuracy.py `
+    tests/test_current_doc_references.py
+  ```
+- **Exit Code:** `0`
+- **Output:** `36 passed in 3.42s`
+
+---
+
+### 3.3 Post-Repair Extended Verification (`gemini-native-pin-repair-01`)
+
+Executed after updating `build.ps1` and `docs/build-installer.md`:
+- **Command:**
+  ```powershell
+  $env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+  $env:PYTHONDONTWRITEBYTECODE = '1'
+  & 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe' -B `
+    'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py' `
+    --root 'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\cadfc013-476\gemini' `
+    --label 'gemini-native-pin-repair-01' `
+    tests/test_docs_live_contracts.py `
+    tests/test_c02_reliability_faster_whisper.py `
+    tests/test_installer_dependency_lock.py `
+    tests/test_installer_download_accuracy.py `
+    tests/test_installer_files_complete.py `
+    tests/test_build_guide_accuracy.py `
+    tests/test_current_doc_references.py
+  ```
+- **Exit Code:** `0`
+- **Output:** `36 passed in 3.31s`
+
+---
+
+### 3.4 Post-Repair Core Suites Verification (`gemini-native-core-01`)
+
+Executed across the 4 core suites named in dependency and installer reviews:
+- **Command:**
+  ```powershell
+  $env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+  $env:PYTHONDONTWRITEBYTECODE = '1'
+  & 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe' -B `
+    'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py' `
+    --root 'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\cadfc013-476\gemini' `
+    --label 'gemini-native-core-01' `
+    tests/test_installer_dependency_lock.py `
+    tests/test_installer_files_complete.py `
+    tests/test_installer_download_accuracy.py `
+    tests/test_docs_live_contracts.py
+  ```
+- **Exit Code:** `0`
+- **Output:** `23 passed in 3.07s`
+
+---
+
+## 4. Test Suites for Astra to Repeat in Both Roots
+
+Astra can repeat verification in both roots using the following suites:
+
+### 4.1 Core 4 Suites (23 tests)
+```powershell
+$env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& '<main-checkout>\_scratch\ig-native\Scripts\python.exe' -B `
+  '<main-checkout>\_scratch\integrator_verify.py' `
+  --root '<root>' --label '<fresh-label>' `
+  tests/test_installer_dependency_lock.py `
+  tests/test_installer_files_complete.py `
+  tests/test_installer_download_accuracy.py `
+  tests/test_docs_live_contracts.py
+```
+
+### 4.2 Full 7 Build, Lock, and Documentation Suites (36 tests)
+```powershell
+$env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& '<main-checkout>\_scratch\ig-native\Scripts\python.exe' -B `
+  '<main-checkout>\_scratch\integrator_verify.py' `
+  --root '<root>' --label '<fresh-label>' `
+  tests/test_docs_live_contracts.py `
+  tests/test_c02_reliability_faster_whisper.py `
+  tests/test_installer_dependency_lock.py `
+  tests/test_installer_download_accuracy.py `
+  tests/test_installer_files_complete.py `
+  tests/test_build_guide_accuracy.py `
+  tests/test_current_doc_references.py
+```
+
+### Suite Breakdown Table
+
+| Suite | Cases | Coverage Focus | Result |
+|---|---|---|---|
+| `tests/test_installer_dependency_lock.py` | 5 | Lockfile completeness, exact pins, notices inventory diff, build script constraints | Passed (5/5) |
+| `tests/test_installer_files_complete.py` | 3 | Staging vs Inno Setup file mappings, first-party server imports, watchdog scripts | Passed (3/3) |
+| `tests/test_installer_download_accuracy.py` | 5 | Published installer versions, README asset links, checklist accuracy | Passed (5/5) |
+| `tests/test_docs_live_contracts.py` | 10 | Build script dependency constants vs `build-installer.md` snapshot (`FFMPEG_URL`, `FFMPEG_VERSION`) | Passed (10/10) |
+| `tests/test_c02_reliability_faster_whisper.py` | 2 | BtbN win64-LGPL wiring in `build.ps1`, notices generator presence | Passed (2/2) |
+| `tests/test_build_guide_accuracy.py` | 3 | Local script references in build guide, macOS artifact claims | Passed (3/3) |
+| `tests/test_current_doc_references.py` | 8 | Image links, live client claims, PowerShell script paths | Passed (8/8) |
+| **Total** | **36** | **All build, lock, and documentation suites** | **All Passed** |
+
+---
+
+## 5. Exact Git Diff
+
+```diff
+diff --git a/build.ps1 b/build.ps1
+index 727e64d..3b5ef72 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -100,13 +100,13 @@ $PACKAGING_VERSION  = '26.2'
+ # feature-sufficient. Versioned release tag (not "latest") so the hash pin
+ # below stays meaningful. THIRD-PARTY-NOTICES.md records the LGPL text +
+ # where to get ffmpeg's source.
+-$FFMPEG_VERSION = 'n7.1'
++$FFMPEG_VERSION = 'n8.1.2'
+ # BtbN publishes dated release tags; the end-of-month builds are retained
+ # long-term (daily builds get pruned), so we pin to a monthly snapshot. The
+ # asset name carries the exact git revision, so this URL is fully pinned --
+ # it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
+ # single self-contained ffmpeg.exe -- no DLLs to ship).
+-$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip"
++$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip"
+ # yt-dlp pip pin -- bump after compatibility-testing a new release.
+ $YTDLP_VERSION  = '2026.07.04'
+ # Pillow is used for the multimodal paste-corpus generator (resize +
+@@ -146,7 +146,7 @@ $WHISPERX_VERSION = '3.8.6'
+ # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
+ # file so a re-run pulls fresh.
+ $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
+-$FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
++$FFMPEG_SHA256 = "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365"
+ $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
+ 
+ # ---- Helpers ------------------------------------------------------------
+@@ -351,7 +351,7 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
+ # ---- 1. Download dependencies ------------------------------------------
+ Write-Step 'Fetching dependencies'
+ $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
+-$ffmpegZip = Join-Path $CacheDir 'ffmpeg-win64-lgpl.zip'
++$ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
+ $getPipPy  = Join-Path $CacheDir 'get-pip.py'
+ 
+ Get-CachedFile $PYTHON_URL $pythonZip
+diff --git a/docs/build-installer.md b/docs/build-installer.md
+index 9d80d86..f00197d 100644
+--- a/docs/build-installer.md
++++ b/docs/build-installer.md
+@@ -91,8 +91,8 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
+ ## Where dependencies come from
+ 
+ - **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
+-- **ffmpeg** — BtbN `n7.1` Windows static win64 LGPL build:
+-  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
++- **ffmpeg** — BtbN `n8.1.2` Windows static win64 LGPL build:
++  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`.
+   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
+   the archive is discarded.
+ - **get-pip.py** — PyPA `get-pip` commit
+@@ -110,7 +110,7 @@ installed into the embeddable Python with the exact pip versions below.
+ | Component | Version | SHA256 | Notes |
+ |---|---|---|---|
+ | Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+-| ffmpeg | n7.1 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
++| ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+ | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
+ | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
+ | MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |
+```
