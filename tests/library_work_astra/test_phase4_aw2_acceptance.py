@@ -341,7 +341,7 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
     env.mirror._clock = time.monotonic
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
+    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
 
     def blocked_replace(src, dst):
         if Path(dst) == target:
@@ -355,7 +355,7 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
         finally:
             finished.set()
 
-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
+    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
     try:
         result = env.mirror.resync(budget_s=0.1)

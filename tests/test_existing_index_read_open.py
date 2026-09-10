@@ -4,6 +4,7 @@ import sqlite3
 import pytest
 
 from index import Index
+from server import _get_index as _production_get_index
 
 
 def test_existing_open_never_creates_missing_storage(tmp_path):
@@ -25,6 +26,7 @@ def test_read_open_does_not_migrate_then_explicit_backend_promotes(tmp_path, mon
         calls.append(True)
         return original(conn)
     monkeypatch.setattr(index, "_run_migrations", migrations)
+    monkeypatch.setattr(server, "_get_index", _production_get_index)
     monkeypatch.setattr(server, "INDEX_PATH", path)
     monkeypatch.setattr(server, "_index_singleton", None)
     reader = server._get_existing_index(timeout_s=1)

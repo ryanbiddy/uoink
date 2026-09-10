@@ -92,10 +92,10 @@ establish safe installation isolation, and verify/correct resulting findings.
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 59 passes in both roots; new bundled C22 11 passed / zero failed / three unexecuted | Package-03, bundled and final-tree checks recorded; Ryan's installed receipt remains |
-| 4 | Historical client acceptance retains installed/fixture conditions; eight parent-interception failures remain | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
+| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer built/sealed at `67a274d`; final `12ce8a5` tree: 2,429 passed / 13 failed / three skipped / one xfailed, 1,542.35 s | Both receipt kits/startup repair integrated; package-03, bundled and complete-tree results sealed; final 771-file ZIP verified | Ryan: installed receipts, fixture/contract dispositions and release approval; final backup receipt supplies transport status |
+| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Approved corrections: mirror 180 passed; ordered reads 74 passed; 163 assertions unchanged | Gemini council running; receipt corrections, safe agent installation and new complete tree pending |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -137,7 +137,27 @@ I/O binding for subsequent fixtures. No corrected full-tree run had occurred
 at that checkpoint; the authorized correction and new result are above.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
-## Queue (in order; each item names its brief)
+## Queue (in order; updated after explicit correction/install approval)
+
+1. The two approved exact fixture corrections have 180 mirror and 74 ordered
+   read/resource/prompt passes. Their review and 14-file seal are in
+   RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md. No product rebuild owed.
+2. Three Gemini reviews run from d8d3b4f under GEMINI-FINAL-SECURITY-COUNCIL-BRIEF-
+   2026-09-09.md: installer b5c7290c, application/security 8e109b99, receipt
+   contract corrections 269acc98. Verify reports and named suites in each
+   worktree, integrate raw diffs through three-way apply, repeat checkout suites.
+3. Follow RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
+   Determine and review safe isolation before execution; preserve ordinary data,
+   processes, credentials and 5179. Actual installed and browser/client evidence
+   is still owed. Same-account results cannot be called throwaway-account results.
+4. Resolve actual new product findings, then run the committed complete tree with
+   only S21 excluded. Preserve historical failures, including unavailable AT6 exit.
+   Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
+   assemble new evidence and push only origin/cc/living-library.
+5. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
+   fetch/speaker runs and deferred Part B remain unchanged.
+
+### Previous delivered-artifact queue (historical; superseded above)
 
 All workers are integrated; no run remains active. Package-03 is sealed and
 both original bundled observations plus the final committed complete tree are
@@ -2143,3 +2163,21 @@ The 13 failures and three/eight unexecuted or unobserved C22/P4 fields remain;
 there is no release/main/installed approval. Ryan supplies the installed session
 and the explicit frozen-test dispositions. Speaker/no-fetch/Part B/apply rules
 remain unchanged. No active worker remains.
+
+
+### 2026-09-09 — approved corrections verified; final security council running
+
+Ryan approved both precise fixture patches, delegated the installation check to
+Astra and requested Gemini security review. Brief commit d8d3b4f records scope.
+Fresh guarded mirror observation approved-mirror-01: 180 passed, 125.43 seconds.
+Fresh ordered read/resource/prompt observation approved-read-01: 74 passed,
+13.53 seconds. All 163 assertion syntax trees and original case functions match
+721f125. Raw audit/diff/commands/logs/XML are sealed; no product source changed.
+The historical 13-failure tree remains failed until the new committed observation.
+
+Host preflight: Windows 11 Home, non-elevated agent, Windows Sandbox unavailable.
+Defender is active, signatures 1.459.133.0. A custom scan of the exact installer
+with remediation disabled exits zero and reports no threats; bytes unchanged.
+The executable is unsigned. Existing Defender cloud/sample settings were retained;
+this is not an offline-only scan or a comprehensive security certificate.
+Evidence currently at _scratch/installer-security-01 pending the council seal.

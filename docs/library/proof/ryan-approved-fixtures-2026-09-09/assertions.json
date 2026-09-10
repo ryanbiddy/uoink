@@ -1,0 +1,107 @@
+{
+  "base": "721f1251811487abc98ef8f912369751cc99323f",
+  "assertions_unchanged": 163,
+  "files": [
+    {
+      "path": "tests/library_work_astra/test_phase4_aw2_acceptance.py",
+      "assertions": 45,
+      "cases": [
+        "test_d01_backend_open_lock_obeys_deadline",
+        "test_d01_sqlite_busy_wait_obeys_deadline",
+        "test_d02_get_item_rechecks_after_corpus_admission",
+        "test_d03_redacts_complete_explicit_path",
+        "test_d04_preview_refusal_does_not_disclose_exception",
+        "test_d05_preview_recheck_is_pure_and_checks_evidence",
+        "test_d07_read_and_discovery_recheck_queue",
+        "test_d07_publication_rechecks_sampled_metadata",
+        "test_d07_publication_holds_source_lock_through_replace",
+        "test_d08_failed_store_initialization_retains_purge_retry",
+        "test_d08_interrupted_cleanup_cannot_report_success",
+        "test_d09_resync_repairs_missed_refresh",
+        "test_d09_fresh_resync_exports_shelf_and_brief",
+        "test_d09_scope_cleanup_keeps_local_brief",
+        "test_d10_brief_dependencies_rechecked_at_replace",
+        "test_d11_server_delivers_deletion_events_while_disabled",
+        "test_d11_soft_delete_removes_item_source_text",
+        "test_d12_unowned_temps_are_never_inferred_from_name_or_text",
+        "test_d13_replace_syscall_cannot_complete_after_timeout",
+        "test_d13_purge_rechecks_user_edit_before_unlink",
+        "test_d14_index_has_recoverable_intent_on_manifest_failure",
+        "test_d15_bound_volume_not_readopted_after_ledger_loss",
+        "test_d16_shelf_title_cannot_introduce_markdown_image"
+      ],
+      "before_sha256": "3a52a8091fbe1abf3f5774f975070a0cdc1aa77745b0808803e73cd0d0b19f06",
+      "after_sha256": "b23b4e218aff959af973609bad05f0b21f1d1ad076a9b036e00179e7251b600a"
+    },
+    {
+      "path": "tests/library_work_astra/test_phase4_aw3_acceptance.py",
+      "assertions": 45,
+      "cases": [
+        "test_d01_cold_database_open_obeys_deadline",
+        "test_d02_prompt_rechecks_cards_after_remaining_metadata_reads",
+        "test_d03_punctuation_and_symbol_led_absolute_paths_are_redacted",
+        "test_d07_publication_excludes_an_independent_sqlite_writer",
+        "test_d08_unreadable_day_retains_local_brief_cleanup_retry",
+        "test_d09_resync_reexports_explicitly_readmitted_scope_item",
+        "test_d10_brief_source_revision_rechecked_at_replace",
+        "test_d12_retry_keeps_ownership_of_interrupted_temp",
+        "test_d12_control_hard_purge_removes_unedited_recorded_temp",
+        "test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement",
+        "test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes",
+        "test_d14_index_intent_matches_exact_published_bytes",
+        "test_d13_timed_out_writer_cannot_erase_a_later_successful_sync",
+        "test_d15_failed_destination_binding_persistence_does_not_allow_readoption"
+      ],
+      "before_sha256": "27b8be47fa1f0009c8ec39c1d884dfa0911b7d688aa035307cd7bbdf3b42d861",
+      "after_sha256": "a4430c3b0f4f8f8fa888cb2c858bb7a617f217e5057921cc10bd9c8841b4c422"
+    },
+    {
+      "path": "tests/library_work_astra/test_phase4_aw_acceptance.py",
+      "assertions": 60,
+      "cases": [
+        "test_baseline_owned_export_and_brief_are_real",
+        "test_d1_real_index_lock_obeys_service_deadline",
+        "test_card_refuses_deletion_during_build",
+        "test_d2_shelf_refuses_clip_change_during_snapshot",
+        "test_d6_redacts_complete_explicit_absolute_paths",
+        "test_refusal_does_not_echo_unknown_request_key",
+        "test_reshelve_review_refuses_changed_run_binding",
+        "test_brief_hashes_use_contract_canonical_serializer",
+        "test_brief_rechecks_source_before_atomic_publication",
+        "test_brief_read_invalidates_changed_projection",
+        "test_server_hard_purge_cleans_briefs_when_mirror_disabled",
+        "test_brief_tool_publication_emits_committed_mirror_event",
+        "test_resync_rebuilds_from_current_sources_without_prior_events",
+        "test_bulk_wiring_events_schedule_current_derivatives",
+        "test_scope_narrowing_cleans_previously_exported_items",
+        "test_real_brief_dependencies_enforce_mirror_allowlist",
+        "test_real_brief_mirror_is_removed_when_dependency_deleted",
+        "test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files",
+        "test_missing_manifest_stops_replacement_for_reconciliation",
+        "test_unowned_temp_named_like_item_is_preserved",
+        "test_purge_removes_intent_owned_actual_temp_name",
+        "test_mirror_rechecks_authoritative_deletion_before_replace",
+        "test_timed_out_vault_worker_cannot_publish_after_return",
+        "test_manifest_failure_keeps_recovery_intent_and_no_success",
+        "test_missing_volume_marker_is_not_adopted_after_prior_sync",
+        "test_shelf_links_resolve_to_exported_item_files",
+        "test_generated_index_escapes_raw_identity_markup",
+        "test_mirror_preserves_user_edit_between_hash_and_replace",
+        "test_destination_lock_is_shared_across_local_ledgers"
+      ],
+      "before_sha256": "1d61b7dce1c0f1aa71bd7537a3423dbd3f87461b4e3d581e313d013c6becf556",
+      "after_sha256": "e1ae0189ded244cf1d9c1d11367d86047f8619c85ad3c329dc4ef3b4764ec857"
+    },
+    {
+      "path": "tests/test_existing_index_read_open.py",
+      "assertions": 13,
+      "cases": [
+        "test_existing_open_never_creates_missing_storage",
+        "test_read_open_does_not_migrate_then_explicit_backend_promotes",
+        "test_failed_promotion_preserves_original_read_connection"
+      ],
+      "before_sha256": "6dd3c6aca7c0db692e6bde8c07d02263faf6078d84fa1bfe4b3b0242bf8a9e0b",
+      "after_sha256": "44b717a211171f901761fcc312b61f56878cb41fba35cb5f3d9621278e7578ca"
+    }
+  ]
+}

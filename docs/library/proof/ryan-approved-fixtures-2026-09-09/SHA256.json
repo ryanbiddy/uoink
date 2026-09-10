@@ -1,0 +1,61 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "applied.patch": {
+      "bytes": 6607,
+      "sha256": "9ce3763e654555fe439fa826d7d0672401f12b73c36a03b3a986f749c2fe237f"
+    },
+    "approved-mirror-01/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "approved-mirror-01/results.json": {
+      "bytes": 2117,
+      "sha256": "4dad98043c389518a058b5eefff3c01118dd69bc69501a8e7a0c499905f321e7"
+    },
+    "approved-mirror-01/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "approved-mirror-01/tests.log": {
+      "bytes": 276,
+      "sha256": "ac9940d99684315c9a40f606e67fa3ffb640dd2b26e469e0c77d6f2e3035811c"
+    },
+    "approved-mirror-01/tests.xml": {
+      "bytes": 26243,
+      "sha256": "ec433836d1720d8b0db45a7d445d9c39b43ab9d51aa3eafa3d08d91ac22edd81"
+    },
+    "approved-read-01/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "approved-read-01/results.json": {
+      "bytes": 919,
+      "sha256": "0ce8bee98926ca4031035265072dd63be1068cc37761876832c538b731ab3c82"
+    },
+    "approved-read-01/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "approved-read-01/tests.log": {
+      "bytes": 749,
+      "sha256": "949ae0550bf63d2adcf3fd52d1c8adab48a3f9028af1dcb1e51c8cb166277ed4"
+    },
+    "approved-read-01/tests.xml": {
+      "bytes": 14680,
+      "sha256": "ff411c6f3858ed371da65ff0457236c2d2cd5e4821356be0a2c3ca01b8aab8b9"
+    },
+    "assertions.json": {
+      "bytes": 5887,
+      "sha256": "3444862e5bfbb6d5add03d1eb400b236fb08f54238018abf004dfac8b0c026cf"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "seal_approved_fixtures.py": {
+      "bytes": 1053,
+      "sha256": "0215c3045dfa53fc63c110dea726896a4ea396c2159b4c591e1508556246084c"
+    }
+  }
+}

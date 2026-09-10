@@ -189,7 +189,7 @@ def interrupted_item_temp(env, monkeypatch):
     export(env)
     mutate_clip(env)
     target = item_file(env)
-    original_replace, original_unlink = mirror.os.replace, Path.unlink
+    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
     allocated = []
 
     def failed_replace(src, dst):
@@ -204,8 +204,8 @@ def interrupted_item_temp(env, monkeypatch):
         return original_unlink(path, *args, **kwargs)
 
     with monkeypatch.context() as blocked:
-        blocked.setattr(mirror.os, "replace", failed_replace)
-        blocked.setattr(Path, "unlink", failed_unlink)
+        blocked.setattr(env.mirror, "_io_replace", failed_replace)
+        blocked.setattr(env.mirror, "_io_unlink", failed_unlink)
         env.mirror.resync()
     assert len(allocated) == 1 and allocated[0].is_file()
     intent = env.mirror._load_intents()[mirror.item_key("a")]
@@ -246,7 +246,7 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
     env.mirror._clock = time.monotonic
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
+    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
     published = []
     personal = b"USER EDIT AFTER TIMEOUT"
 
@@ -265,7 +265,7 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
         finally:
             finished.set()
 
-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
+    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
     try:
         result = env.mirror.resync(budget_s=0.1)
@@ -306,7 +306,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
     env.mirror._clock = time.monotonic
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
+    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
     plans = []
 
     def blocked_first_replace(src, dst):
@@ -323,7 +323,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
             if plan is plans[0]:
                 finished.set()
 
-    monkeypatch.setattr(mirror.os, "replace", blocked_first_replace)
+    monkeypatch.setattr(env.mirror, "_io_replace", blocked_first_replace)
     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
     try:
         first = env.mirror.resync(budget_s=0.1)

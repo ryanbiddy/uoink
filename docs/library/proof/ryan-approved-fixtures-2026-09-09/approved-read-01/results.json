@@ -1,0 +1,28 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_discovery_route.py",
+      "tests/test_existing_index_read_open.py",
+      "tests/test_preview_restart_read.py",
+      "tests/test_library_resources.py",
+      "tests/test_library_resource_trust.py",
+      "tests/test_library_prompts.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\approved-read-01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\approved-read-01\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\approved-read-01\\tests.log"
+  }
+]

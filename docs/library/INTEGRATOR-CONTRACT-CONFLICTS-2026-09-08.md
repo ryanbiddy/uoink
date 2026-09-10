@@ -152,3 +152,18 @@ permitted next action. No test, fixture, threshold, marker or parameter changed.
 The actual original bundled routes are separate evidence, not a waiver of these
 failed tests. Ryan's narrow five-correction authorization does not authorize
 changing the obsolete flags, extending the old stub, or changing the nested path.
+
+
+## Approved mirror/read corrections applied, 2026-09-09
+
+Ryan explicitly answered yes to the two prepared corrections and continued fixes.
+The exact previously linked patches are applied, with 163 unchanged assertion
+syntax trees across four files. Mirror callbacks move from parent os.replace /
+Path.unlink to the real instance dispatch methods; the read test binds the
+production getter instead of an earlier fixture's leftover lambda. Raw diff and
+before/after hashes: proof/ryan-approved-fixtures-2026-09-09/SHA256.json.
+One-page verdict: RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md.
+Focused results: 180 mirror passes, 125.43 seconds; 74 ordered read/resource/prompt
+passes, 13.53 seconds. No product source or intended behavior assertion changed.
+The three receipt-contract corrections are under independent Gemini review.
+The original AT6 exit remains missing; no acceptance waiver is inferred.

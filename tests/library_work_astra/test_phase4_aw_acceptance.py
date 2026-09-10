@@ -351,7 +351,7 @@ def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
     target = item_file(env)
     mutate_clip(env)
     env.mirror.on_committed_event("source_refresh", video_id="a")
-    original_replace, original_unlink = mirror.os.replace, Path.unlink
+    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
 
     def fail_replace(src, dst):
         if Path(dst) == target:
@@ -364,8 +364,8 @@ def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
         return original_unlink(path, *args, **kwargs)
 
     with monkeypatch.context() as patch:
-        patch.setattr(mirror.os, "replace", fail_replace)
-        patch.setattr(Path, "unlink", fail_temp_cleanup)
+        patch.setattr(env.mirror, "_io_replace", fail_replace)
+        patch.setattr(env.mirror, "_io_unlink", fail_temp_cleanup)
         env.mirror.resync()
     orphans = list(target.parent.glob(target.name + ".*.tmp"))
     assert len(orphans) == 1
