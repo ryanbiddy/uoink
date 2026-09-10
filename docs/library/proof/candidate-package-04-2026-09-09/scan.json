@@ -1,0 +1,18 @@
+{
+  "utc_start": "2026-09-10T04:24:59.4126993+00:00",
+  "package": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+  "package_sha256": "677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1",
+  "package_bytes": 341085750,
+  "signature": "NotSigned",
+  "signature_message": "The file E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe is not digitally signed. You cannot run this script on the current system. For more information about running scripts and setting execution policy, see about_Execution_Policies at https://go.microsoft.com/fwlink/?LinkID=135170",
+  "scanner": "C:\\Program Files\\Windows Defender\\MpCmdRun.exe",
+  "antivirus_enabled": true,
+  "real_time_enabled": true,
+  "definitions": "1.459.133.0",
+  "definitions_updated": "2026-09-09T09:35:17-07:00",
+  "scan": "Custom file scan; existing cloud/sample policies retained, not an offline-only claim",
+  "remediation_disabled": true,
+  "exit": 0,
+  "utc_end": "2026-09-10T04:24:59.5296623+00:00",
+  "package_sha256_after": "677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1"
+}

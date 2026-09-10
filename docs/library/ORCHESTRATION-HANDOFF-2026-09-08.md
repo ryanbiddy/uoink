@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; corrected tree `80a4fa8`, historical installer source `67a274d`)
+## State at handoff (updated 2026-09-09; corrected tree `80a4fa8`, replacement installer source `86bfede`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots and their full-tree cases pass; setup-only payload classification verified with 35 passes in both roots; replacement package/final tree and installed work remain |
+| Integration | Replacement package-04 built from `86bfede`; 341,085,750 bytes, scan reports no threats and package is unsigned. Corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | 32,218 installed inputs, nine compiler-only inputs, 142 source bindings sealed. Four updated dependency versions verified from actual bundled metadata | Final tree with 34 new payload cases and verified bundled ffmpeg next; then delegated installed receipts. Audit retains 19 entries / 15 issues in four packages |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -142,7 +142,7 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 1. The two approved exact fixture corrections have 180 mirror and 74 ordered
    read/resource/prompt passes. Their review and 14-file seal are in
    RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md. No product rebuild owed.
-2. Gemini A/B reports are integrated and independently verified; C ended partial.
+2. Gemini A/B reports are integrated and independently verified; C's initially partial work is now completed and verified at 9ea7d08.
    The three original reviews start from d8d3b4f under GEMINI-FINAL-SECURITY-COUNCIL-BRIEF-
    2026-09-09.md: installer b5c7290c, application/security 8e109b99, receipt
    contract corrections 269acc98. Verify reports and named suites in each
@@ -157,7 +157,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    for a newly sealed package after full-tree verification; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
    is still owed. Same-account results cannot be called throwaway-account results.
-4. Resolve actual new product findings, then run the committed complete tree with
+4. Package-04 is built and sealed from 86bfede; generated notices reviewed at
+   3265171 are the only subsequent change, outside the installer payload. The
+   fresh Defender scan reports no threats; this does not clear remaining
+   dependency advisories or supply a signature. Run the committed complete tree with
    only S21 excluded. Preserve historical failures, including unavailable AT6 exit.
    Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
    assemble new evidence and push only origin/cc/living-library.
@@ -2329,3 +2332,21 @@ PATH for the previously skipped synthetic-video case; no test is edited.
 The portable bound CLI selects the new seal explicitly, preserving original
 C22 behavior. Same-account installed observations remain Astra's delegated work;
 no ordinary upgrade-script execution or throwaway-account credit is inferred.
+
+### 2026-09-09 21:26 PDT — replacement package built, inventoried and scanned
+
+Build source 86bfede produced package-04, 341,085,750 bytes, SHA-256
+677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1.
+Its 32,227 compiler inputs map to 32,218 installed files, eight wizard resources
+and one dontcopy script. All 142 source bindings match. Actual wheel metadata
+confirms Pillow 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
+The scan exits zero and reports no threats; the EXE remains unsigned. No antivirus
+settings changed, and no complete security clearance is inferred.
+
+Build generation changed only THIRD-PARTY-NOTICES.md, reviewed in 3265171.
+Pillow's actual wheel declares MIT-CMU; the generator's UNKNOWN result is corrected
+with an explicit metadata note. This file is not a compiler/package input, so no
+rebuild is owed. Package-04 seals that documentary distinction. The verified
+bundled ffmpeg/ffprobe were copied to a private test PATH for the next complete
+tree, exercising an existing synthetic-media test without editing its oracle.
+No Setup has run yet. Proof: proof/candidate-package-04-2026-09-09/SHA256.json.

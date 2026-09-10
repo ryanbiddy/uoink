@@ -1,0 +1,8 @@
+{
+  "build_source": "86bfede784318228591c3c1e345befa2ef6b8883",
+  "observation_head": "32651717e8f28bc5fe00c8f3509e9eac2a5cd954",
+  "changed_paths": [
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "reason": "Only generated third-party notices were reviewed after compilation. Notices are not an Inno Files input or compiler resource. All staged source bindings still match the build-source blobs and current checkout bytes."
+}

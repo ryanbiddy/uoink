@@ -1,0 +1,40 @@
+{
+  "scope": "Original list-scenarios route only; no helper or Setup",
+  "positive_exit": 0,
+  "scenario_count": 14,
+  "negative_bad_hash_exit": 1,
+  "negative_refused_before_kit_import": true,
+  "script_sha256": "ef04ac3eff129d17818eeeb7e2b717335cb734acf68decc2ebe3949e14ee7c34",
+  "commands": [
+    [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_bound_c22.py",
+      "--kit-root",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\install_receipt",
+      "--package-seal",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-03-2026-09-09",
+      "--entry",
+      "cli",
+      "list-scenarios",
+      "--json"
+    ],
+    [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_bound_c22.py",
+      "--kit-root",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\install_receipt",
+      "--package-seal",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\bound-cli-preflight-01\\bad-seal",
+      "--entry",
+      "cli",
+      "list-scenarios",
+      "--json"
+    ]
+  ]
+}

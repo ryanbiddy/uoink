@@ -1,0 +1,105 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "bound-cli-invalid.stderr": {
+      "bytes": 312,
+      "sha256": "a6808d4eb66821c1269fc0c2737a5e23a8a8498e09053f98135b48d5b29efe15"
+    },
+    "bound-cli-invalid.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "bound-cli-packaged-source-equivalence.json": {
+      "bytes": 4852,
+      "sha256": "99e43c1b438175bd74dd5901ad73f202a794619c34e7452d11208f1207a04781"
+    },
+    "bound-cli-result.json": {
+      "bytes": 1297,
+      "sha256": "011533bff6391c8979f6227dcbd418b096b834bbbd0518f444fe7a68ea94235c"
+    },
+    "bound-cli-valid.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "bound-cli-valid.stdout": {
+      "bytes": 2443,
+      "sha256": "30a0ec0168ec4688a8d8aa83c6dc5ab877e90dc28031b81fd3357fb6b41768f2"
+    },
+    "build-receipt.json": {
+      "bytes": 1424,
+      "sha256": "8592dd9f98fecc602ea8e9c35929772417f8fe04d3709510e0bea71c67285186"
+    },
+    "build.log": {
+      "bytes": 43113,
+      "sha256": "77d6631619b2875b3830558816d40f12436da9bfc4a8d3300a12de4df911a234"
+    },
+    "check_installed_package_inputs.py": {
+      "bytes": 2220,
+      "sha256": "0186ddaa1323c60b041c160d3f47bf8b78f0d59f41ea6c46875d9df26fb84d7e"
+    },
+    "final-native-media-environment.json": {
+      "bytes": 663,
+      "sha256": "86e82f4c66c85b81e25faf53907dea9ed48c8f06ece4cb34f4514b83102c41a7"
+    },
+    "finalize_package04.py": {
+      "bytes": 2900,
+      "sha256": "6535a8ae1efbae9370b2dc7d095a57d8050d1bb6bdd0c83f41ac80cdf321e039"
+    },
+    "installer-definition.iss": {
+      "bytes": 70472,
+      "sha256": "2366eb4a9763ac0ae05d329fc2f82a3b0a523861e657e17a35cbb6a25f74426e"
+    },
+    "package-manifest.json": {
+      "bytes": 45501,
+      "sha256": "b68b0a8f829992d722af31a841a17c56241cfd052a5dc2158c4c57e2a5dbbb74"
+    },
+    "package_decoder_probe.py": {
+      "bytes": 3344,
+      "sha256": "c23087243c3a8989b8bd7b9f57ea40a270fc19b71bee0e101f6898fb06d5ef0c"
+    },
+    "post-build-review.json": {
+      "bytes": 417,
+      "sha256": "c8613e80f5c79e98ffc3679fc41fb14f84eb1b9bdcfc776af6ab24d57eb4ee83"
+    },
+    "run_bound_c22.py": {
+      "bytes": 1285,
+      "sha256": "ef04ac3eff129d17818eeeb7e2b717335cb734acf68decc2ebe3949e14ee7c34"
+    },
+    "runtime-distributions.json": {
+      "bytes": 19687,
+      "sha256": "33b74c9b5c724ed5cfce0a4afc667b74532c376fd958045ac27b71af2709d8ba"
+    },
+    "scan.json": {
+      "bytes": 1152,
+      "sha256": "21d9d81a4fd2cc4c13f9c334839682aad2b6b84ec0f6354aa8d9cac3a6dbdf01"
+    },
+    "scan.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scan.stdout": {
+      "bytes": 135,
+      "sha256": "b1d89fd20170433cb107678b39f91e30de78c7d955663ea5be83afc4cac1930d"
+    },
+    "scan_candidate_package.ps1": {
+      "bytes": 2621,
+      "sha256": "33845d3ac2cb5350462e8ea160697b298f81571494f38136b458a6a8de291607"
+    },
+    "seal_package_inputs04.py": {
+      "bytes": 7030,
+      "sha256": "a7a6e1af638ce828ecfc43e6cbb98af5e8ccfc5515fe32668c942af181046911"
+    },
+    "source-bindings.json": {
+      "bytes": 44989,
+      "sha256": "b900304198f2f2a2c74f97b340219133232be7e58f04bfa9e49bf9a99360fc52"
+    },
+    "staged-inventory.json": {
+      "bytes": 11936722,
+      "sha256": "fc55a51efeb014b51f145f075d6da814721d7a45a6350b236300320d014233ac"
+    },
+    "THIRD-PARTY-NOTICES.md": {
+      "bytes": 12535,
+      "sha256": "4b2968ed499eb3bba2b9da2183b13ec33cb6230c44b9adbb4091107c4c9251ea"
+    }
+  }
+}

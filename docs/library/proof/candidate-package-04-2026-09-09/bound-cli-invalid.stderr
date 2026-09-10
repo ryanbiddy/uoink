@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\run_bound_c22.py", line 17, in <module>
+    assert q.stat().st_size==row['bytes'] and digest==row['sha256'],name
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: payload.json

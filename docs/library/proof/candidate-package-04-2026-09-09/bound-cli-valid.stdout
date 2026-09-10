@@ -1,0 +1,72 @@
+[
+  {
+    "id": "install",
+    "as7": "actual isolated Inno command and exit",
+    "notes": "operator step; kit records argv and refuses auto-exec"
+  },
+  {
+    "id": "installed_provenance",
+    "as7": "bundled interpreter, module paths, 0028/schema 30",
+    "notes": "inventory plus executed provenance command"
+  },
+  {
+    "id": "empty_migration_replay",
+    "as7": "empty profile migrate, stop, reopen, no invented rows",
+    "notes": "executable against isolated helper"
+  },
+  {
+    "id": "populated_legacy_replay",
+    "as7": "versioned populated legacy fixture then replay",
+    "notes": "fixture c22-legacy-populated-v1-schema27"
+  },
+  {
+    "id": "one_off_capture",
+    "as7": "unrelated one-off while standing is off; zero standing charges",
+    "notes": "synthetic acquisition/transcript; real podcast publish routes"
+  },
+  {
+    "id": "manual_first",
+    "as7": "manual then standing consent; identities, charges, no dup",
+    "notes": "dedupe/charges from persisted ledger"
+  },
+  {
+    "id": "standing_first",
+    "as7": "consent first, standing capture, then same manual item",
+    "notes": "one standing charge, one publication"
+  },
+  {
+    "id": "whole_helper_relaunch",
+    "as7": "terminate owned helper by held handle; relaunch installed path",
+    "notes": "listener restart does not count"
+  },
+  {
+    "id": "registered_child_lifetime",
+    "as7": "actual registered child lifetime",
+    "notes": "original source_subscriptions child methods"
+  },
+  {
+    "id": "launch_interruption",
+    "as7": "interrupt between launch preparation and child registration",
+    "notes": "C22_INJECT=launch_interrupt; unresolved_launch retained"
+  },
+  {
+    "id": "registration_failure",
+    "as7": "separate registration-failure fixture",
+    "notes": "C22_INJECT=registration_failure; surviving child preserved"
+  },
+  {
+    "id": "browser_state_checkpoint",
+    "as7": "post-restart browser state paired with persisted state",
+    "notes": "unexecuted without an actual browser image in all modes"
+  },
+  {
+    "id": "protected_phase2_state",
+    "as7": "Phase 2 before/after hashes and allowed enqueue changes",
+    "notes": "apply remains false; hashes must match or deltas account"
+  },
+  {
+    "id": "upgrade_operator_step",
+    "as7": "preserve real installed upgrade command",
+    "notes": "same-version reinstall is not labeled cross-version"
+  }
+]

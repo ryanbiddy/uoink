@@ -1,0 +1,1008 @@
+{
+  "installer_source_sha": "86bfede784318228591c3c1e345befa2ef6b8883",
+  "build_source": "86bfede784318228591c3c1e345befa2ef6b8883",
+  "package_sha256": "677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1",
+  "package_bytes": 341085750,
+  "package_name": "Uoink-Setup-3.8.0.exe",
+  "files": [
+    {
+      "staged_path": "_platform.py",
+      "source_path": "_platform.py",
+      "source_git_blob": "e6eefc6446cf6f78d1fddf5c2d495833c236111c",
+      "checkout_and_staged_sha256": "657bd0d9d5f3dccf8862f17b119b7e9220e36f538432fbc01719fc8f5a7df197",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "assets/brand/tokens.css",
+      "source_path": "assets/brand/tokens.css",
+      "source_git_blob": "cf39491f668b6aab80aecdaec7b640dbc29a0073",
+      "checkout_and_staged_sha256": "d83aaf4b6783e70a75f653df9b558e6c8b569428d9b2a526186074c371470e3b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "assets/dashboard/index.html",
+      "source_path": "assets/dashboard/index.html",
+      "source_git_blob": "49142ffd9fef9c3da1f5cecee0e63a61fa391919",
+      "checkout_and_staged_sha256": "c870be3315b28c045c84926513279744c861bc652937f777e49f4b4ad07145e7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "assets/logo-mark-color.png",
+      "source_path": "assets/logo-mark-color.png",
+      "source_git_blob": "6d9937b8017556cd5c250ab209c644e04e6ad159",
+      "checkout_and_staged_sha256": "cefa685e996a3917b000463e690fb58eb5a94d1cf9c9bdaf3c7964599774f29f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "assets/splash/index.html",
+      "source_path": "assets/splash/index.html",
+      "source_git_blob": "750e389d3ba9d72c89eb659f87031bc519c24715",
+      "checkout_and_staged_sha256": "21e97a3f65458dc6e4ea7f600f3635727d10b0446097252e8d93989b8ef0b52a",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "channels.py",
+      "source_path": "channels.py",
+      "source_git_blob": "94468cf324c2d6b0e163e5a96fa87dcebbb84fa7",
+      "checkout_and_staged_sha256": "d77e22b318c0be014b0536b17dc90742b0eedfa6bc5d70502c416999fd819b45",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "claims.py",
+      "source_path": "claims.py",
+      "source_git_blob": "17cc4bb82ee43d0b61e569095c290bebf405d773",
+      "checkout_and_staged_sha256": "7a6a25a7d731f069670f149f6ecd28de48472b71ce2314f3b561bb4383ea705c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "clips.py",
+      "source_path": "clips.py",
+      "source_git_blob": "469347751f3bd3ac9734f05b0989a0fe713cb27a",
+      "checkout_and_staged_sha256": "c14b0cdd9c1d67fe893d781ff3c72f0ea6e66966cb7d3e990b5f12fbe70960b1",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "corpus_contract.py",
+      "source_path": "corpus_contract.py",
+      "source_git_blob": "025cb442136129968a7098cd17e9326909367717",
+      "checkout_and_staged_sha256": "f49b23c88fa0b64751d63bfc1fd5a1d35d797f0f74757979c189463e235efea4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "corpus_intelligence.py",
+      "source_path": "corpus_intelligence.py",
+      "source_git_blob": "8f94a91900abb92341d0f23ea34fcbb5c3f5600e",
+      "checkout_and_staged_sha256": "3b6fd54b6c4468fd73e363566b9f95cb3c4118562a9cf65958d5598ad64ab62e",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "corpus_provider.py",
+      "source_path": "corpus_provider.py",
+      "source_git_blob": "a19d89060f1e9116a49010573c7306761bf1ff57",
+      "checkout_and_staged_sha256": "16547b6ec64024e6a76db62f390261cc45c09a2938150700ca481c4f8f402a98",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "defaults/style_anchors.json",
+      "source_path": "defaults/style_anchors.json",
+      "source_git_blob": "74d0df62a77fca1616fa5dd57b9439755a072159",
+      "checkout_and_staged_sha256": "9885803d150c47bbcdb2ac43e7f995cc8c537997a4a6c4304d4c8dd2ab233712",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "engagement_contract.py",
+      "source_path": "engagement_contract.py",
+      "source_git_blob": "8e101e161f78a091774b6310ac4e4b7beb3db4e0",
+      "checkout_and_staged_sha256": "3259a9ef9eba362ae0ae3a1a10bb42e63ab4b713c28f64b5659ea758f947ef9f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/background.js",
+      "source_path": "extension/background.js",
+      "source_git_blob": "164ba52ece380fe47a67b2d024b300d0952abefd",
+      "checkout_and_staged_sha256": "6ea4320689efbccf36dae2b0e60fae589e02bf1d6535334d1baaa61bbe028b0e",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/brand/tokens.css",
+      "source_path": "extension/brand/tokens.css",
+      "source_git_blob": "cf39491f668b6aab80aecdaec7b640dbc29a0073",
+      "checkout_and_staged_sha256": "d83aaf4b6783e70a75f653df9b558e6c8b569428d9b2a526186074c371470e3b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/content-reddit.js",
+      "source_path": "extension/content-reddit.js",
+      "source_git_blob": "92e7a46d55de31b66262e7176077713b6e5d44c0",
+      "checkout_and_staged_sha256": "9ceca9f07f6d56fda3018648e9ab4a8a9312966754aae193798c497c55df4bde",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/content-x-article.js",
+      "source_path": "extension/content-x-article.js",
+      "source_git_blob": "bddb1cebead9c598d157f9b200e66912d8aa93fc",
+      "checkout_and_staged_sha256": "eb973e7cd3e432cc3b897b246526d52a54e29e8744adb433cbfd22eb66fe9943",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/content.js",
+      "source_path": "extension/content.js",
+      "source_git_blob": "5889a0a8b7157de5498e8b77bd3621e469d1121e",
+      "checkout_and_staged_sha256": "d4c7ab2846183af7028518367535e173011730500aec112c0681c3c38b6b27e7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-128-dark.png",
+      "source_path": "extension/icons/icon-128-dark.png",
+      "source_git_blob": "91dd4b72a93f523c297fdd54b492abd44ac29ade",
+      "checkout_and_staged_sha256": "fff68c4c9c472b672773dfec11e4954817b101450359cbfff093a823822953f7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-128-light.png",
+      "source_path": "extension/icons/icon-128-light.png",
+      "source_git_blob": "64f9b4b74963c724c1f6e0fef5252b771d03d6f6",
+      "checkout_and_staged_sha256": "cadd716f907d8628a7ba3c563d67da503ae8afa6fbe3a66e0c4d0f532c85b105",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-128.png",
+      "source_path": "extension/icons/icon-128.png",
+      "source_git_blob": "91dd4b72a93f523c297fdd54b492abd44ac29ade",
+      "checkout_and_staged_sha256": "fff68c4c9c472b672773dfec11e4954817b101450359cbfff093a823822953f7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-16-dark.png",
+      "source_path": "extension/icons/icon-16-dark.png",
+      "source_git_blob": "3a7b8ad1a240618db74db437a001e94318977a1e",
+      "checkout_and_staged_sha256": "e4317065eddc23a4696a4594550eff8609fc753a783ac093d709151475cf036b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-16-light.png",
+      "source_path": "extension/icons/icon-16-light.png",
+      "source_git_blob": "fa4132762a6539a68acf0e9c148d88613a6891d0",
+      "checkout_and_staged_sha256": "a5b41b4047602f82533e319b3d758d3bb55ba3b0d82786dd6dc088974a030452",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-16.png",
+      "source_path": "extension/icons/icon-16.png",
+      "source_git_blob": "3a7b8ad1a240618db74db437a001e94318977a1e",
+      "checkout_and_staged_sha256": "e4317065eddc23a4696a4594550eff8609fc753a783ac093d709151475cf036b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-32-dark.png",
+      "source_path": "extension/icons/icon-32-dark.png",
+      "source_git_blob": "107a99295920f38a3f400e75ed0c97aea4de32a1",
+      "checkout_and_staged_sha256": "2f1e37eee460276b73ab290919e59c6a75075ccf03ed759ce35bd9ac87117b38",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-32-light.png",
+      "source_path": "extension/icons/icon-32-light.png",
+      "source_git_blob": "21cfe76a12716441ce4d7c6e42de66058470de4a",
+      "checkout_and_staged_sha256": "4ddd5f079e6fe8ac1c6349d22b97c8a2db6e9c5b123a3d17bd8dc4beb6a31f45",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-32.png",
+      "source_path": "extension/icons/icon-32.png",
+      "source_git_blob": "107a99295920f38a3f400e75ed0c97aea4de32a1",
+      "checkout_and_staged_sha256": "2f1e37eee460276b73ab290919e59c6a75075ccf03ed759ce35bd9ac87117b38",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-48-dark.png",
+      "source_path": "extension/icons/icon-48-dark.png",
+      "source_git_blob": "c06d0f6775efa21f72cb7591494d7b4ad49ec10c",
+      "checkout_and_staged_sha256": "2b86f40bad77602258a4871069f7775da6badb3ae4948f7f36be7aedf9024d0b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-48-light.png",
+      "source_path": "extension/icons/icon-48-light.png",
+      "source_git_blob": "405f158cd255755efe7219a1e88479f2610b4f19",
+      "checkout_and_staged_sha256": "d99ff2668de72660accbeccf7ea5f41c3eb5b37ec52627de2d4d5bb113c10aa8",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon-48.png",
+      "source_path": "extension/icons/icon-48.png",
+      "source_git_blob": "c06d0f6775efa21f72cb7591494d7b4ad49ec10c",
+      "checkout_and_staged_sha256": "2b86f40bad77602258a4871069f7775da6badb3ae4948f7f36be7aedf9024d0b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon128.png",
+      "source_path": "extension/icons/icon128.png",
+      "source_git_blob": "bf83aec37fc04a32cd63435c9639d266462c1b1f",
+      "checkout_and_staged_sha256": "5805437ebcd5e2dc47299cde8b3c675912e1d0363b8c6c3f17d48784ff32210b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon16.png",
+      "source_path": "extension/icons/icon16.png",
+      "source_git_blob": "0e8a109a3a797f5b0e42fca6bc8557349a2125dc",
+      "checkout_and_staged_sha256": "c9b2efc332629e93c4f9ad4db0821de17494353bfabd3e122d51cbc04cf8f570",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon32.png",
+      "source_path": "extension/icons/icon32.png",
+      "source_git_blob": "1f2aed0d2b9553b509ae2098e8d20f2062d9f9cf",
+      "checkout_and_staged_sha256": "332b4ee1f5bd76e6825e1df379dccc9301d74b68bdda0cb52825a795bb84bf39",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/icons/icon48.png",
+      "source_path": "extension/icons/icon48.png",
+      "source_git_blob": "5f36edc859d61a5a93fc93eb66fa65aadf1b8659",
+      "checkout_and_staged_sha256": "acc0b395c4aae0295eaba5b9f91df91dfca6c6801f8d98b83feec74dbde66f4c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/lib/extract.js",
+      "source_path": "extension/lib/extract.js",
+      "source_git_blob": "be95c5f3881ee8ce8839854d5c043bf185e994b0",
+      "checkout_and_staged_sha256": "0b5bef170ae60fde141182ae66099df805e58a76f4c72be4d0a7ee23624f01f8",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/lib/mock-api.js",
+      "source_path": "extension/lib/mock-api.js",
+      "source_git_blob": "9464f5c607293e1f8a72bf77d2d025ffe0fa653a",
+      "checkout_and_staged_sha256": "021e93e562923ac064a96ed17de2a512b747a0c3dd373d41adb08160fe0a06f7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/lib/ui.js",
+      "source_path": "extension/lib/ui.js",
+      "source_git_blob": "d231cdf7439e47d4b745ffb7afa5613e5873b0fc",
+      "checkout_and_staged_sha256": "de362c3dae2c38fe339a65d39dfd7d05178bb512b4dd999c699924214de416b4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/lib/x-article.js",
+      "source_path": "extension/lib/x-article.js",
+      "source_git_blob": "07fd3899f92c572ba7caf29323f7b18bf9cea368",
+      "checkout_and_staged_sha256": "2b93ef3661c9eebce4f382feafd1c61755d77d2c37a8501e93e077e8652579fc",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/manifest.json",
+      "source_path": "extension/manifest.json",
+      "source_git_blob": "a1fc100a0f7ba4afc20172da810a9015ba0475eb",
+      "checkout_and_staged_sha256": "0fe09f3600f03b944654b40afcfc5870a604e337b1709cae342e04a951764d0c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/offscreen.html",
+      "source_path": "extension/offscreen.html",
+      "source_git_blob": "bfe63c0a4c54497f8fca5fe8f34c4b3863d90dc9",
+      "checkout_and_staged_sha256": "9cd95104842efd9e78124be4f87f55e5963ece0afa279c00e5b88888ee10548c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/offscreen.js",
+      "source_path": "extension/offscreen.js",
+      "source_git_blob": "f5127f79540e6f957c54e754e00ae3f78a82534b",
+      "checkout_and_staged_sha256": "aaba2e709b2a0eec6ef4655bc6ab2a398897925a07f00acbb26cf73236ee1cc2",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/popup.html",
+      "source_path": "extension/popup.html",
+      "source_git_blob": "4435cc36d1986e5396b6b2a80f9ddb17afc7cf63",
+      "checkout_and_staged_sha256": "4511713d3ac4c806d788fbfe1ec2dd31e9d39f8939c98524a7e53f16fd4601be",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/popup.js",
+      "source_path": "extension/popup.js",
+      "source_git_blob": "0155fae79152dada356631d69457e1131c48d140",
+      "checkout_and_staged_sha256": "338213cff84bca174c29712cfa7a6f6b25c7229b02f046fbedcde196a810cd4e",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/prompts.json",
+      "source_path": "extension/prompts.json",
+      "source_git_blob": "ac5f4fc77a132bd6552410b30d0b16a2da2227b4",
+      "checkout_and_staged_sha256": "380e9f4f6045818bca918b05c574d51be338743cc6c9bb4d1f277b69b049e27f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/setup.html",
+      "source_path": "extension/setup.html",
+      "source_git_blob": "97048ed160f3aa0a83b81a65191981a16ebdc142",
+      "checkout_and_staged_sha256": "1811e9aeecdaccba658ad9b27f2e74692674212b4b2f726c30415b845bb6dbbc",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/setup.js",
+      "source_path": "extension/setup.js",
+      "source_git_blob": "d0a977ff8fe1d8f5f7f3234546575ffa1d8f5e22",
+      "checkout_and_staged_sha256": "325f53251c2d4a3284ba4e0152d54df4fdb1cae3b5228188672ed78ad5fc790e",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/uoink-memory.css",
+      "source_path": "extension/uoink-memory.css",
+      "source_git_blob": "6a1e2ef3d5ad21307a9e7447fe7b5140e516e37d",
+      "checkout_and_staged_sha256": "41942e6e897c7e16c550bd91b58e68359e7202c1b52e55e6ee956fda57c3df25",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/uoink-memory.html",
+      "source_path": "extension/uoink-memory.html",
+      "source_git_blob": "f7af48188900f4bd1a7edc682a82c8818ee52d52",
+      "checkout_and_staged_sha256": "b806fb3443a255518aa9396cb09cc25439141d84aa135237f5add3b8d675ff16",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "extension/uoink-memory.js",
+      "source_path": "extension/uoink-memory.js",
+      "source_git_blob": "2669b554cabf5329fbf5c96e463a7af7fc910c90",
+      "checkout_and_staged_sha256": "9e8eb3c10145381fc3b4e53b2a486555abda73c7d06219b27fd821f303ff62af",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "helper/__init__.py",
+      "source_path": "helper/__init__.py",
+      "source_git_blob": "afae9b2d8f7d0b4249a254c58d377d160037877e",
+      "checkout_and_staged_sha256": "3408764600a1e36fcb4383948dc017f850d2a1244cf1764a957d52b166ec99b7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "helper/_version.py",
+      "source_path": "helper/_version.py",
+      "source_git_blob": "3014b057227cae96c8d10a0e6b11123de9b88897",
+      "checkout_and_staged_sha256": "4807de8261b00b6b92aff5bfe258071dfe059115d241b440da529e42d39e056b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "images.py",
+      "source_path": "images.py",
+      "source_git_blob": "8c1c2a916cc5c6751269cdbd0da542c6f4f0c12d",
+      "checkout_and_staged_sha256": "3ee9712025dc53a2660549df47acb6985684b99b7083fe88389486645e9f1357",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "index.py",
+      "source_path": "index.py",
+      "source_git_blob": "1aff0d519b998d188e818dd4fe7e5e129d509d6e",
+      "checkout_and_staged_sha256": "f64728a609160854e9225ba10314eab1b167542545c8d09bc2e4a07f9b582395",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_analysis.py",
+      "source_path": "library_analysis.py",
+      "source_git_blob": "ef264afeb5c560054d5bfa7d592c7a46184a1d46",
+      "checkout_and_staged_sha256": "b9df9402281bc4ee55c0fce37a5127878c9fa26956d5fa242de68aff724503fd",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_briefs.py",
+      "source_path": "library_briefs.py",
+      "source_git_blob": "2581f6538f82d5d0e52fc36b2abe733e4f95ed31",
+      "checkout_and_staged_sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_cards.py",
+      "source_path": "library_cards.py",
+      "source_git_blob": "9c9ef0d2bbef9bdec9f90688b65fd09d6d73e193",
+      "checkout_and_staged_sha256": "2befe80f5d7dbb23922f0f0f7cbd1886ef718447954387824405fd56907823c2",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_faithfulness.py",
+      "source_path": "library_faithfulness.py",
+      "source_git_blob": "a4531d4af261160428b8a5f56c5a4827b6c011bd",
+      "checkout_and_staged_sha256": "6e5f03dd73343197d9c81ebdef621d36563943052196580b319dcb9219c77760",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_media.py",
+      "source_path": "library_media.py",
+      "source_git_blob": "7b987c390e78058ef2c76c2f655343d6eccb3497",
+      "checkout_and_staged_sha256": "b4931e457553c8e4740a64459cab2bf92385e65945658b182bd5715119ed0697",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_mirror.py",
+      "source_path": "library_mirror.py",
+      "source_git_blob": "3ebeb54b94655862a3444c9146e7c9e951574130",
+      "checkout_and_staged_sha256": "b5205249721a64e6300f4e0bb950c2b1da8de77d0acd00a461c9615a8bc86c17",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_mirror_vault_io.py",
+      "source_path": "library_mirror_vault_io.py",
+      "source_git_blob": "c9b024f746ea02c2808254cffa857ae04fde7d6a",
+      "checkout_and_staged_sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_prompts.py",
+      "source_path": "library_prompts.py",
+      "source_git_blob": "54596f6736adf330e0c3070385b8669a6d5c87aa",
+      "checkout_and_staged_sha256": "e31c832af7c047a67831c1398adaf377cc3a927ac4b2d65156fb39662820d559",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_resources.py",
+      "source_path": "library_resources.py",
+      "source_git_blob": "aaf4d3c16eb1d3f04a5df674ef5b711d5ace1332",
+      "checkout_and_staged_sha256": "0c4510930f585fd15e8a8785f8a4b84ff7c7b3b6fe6465a05a8415a3b4a49681",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "library_work.py",
+      "source_path": "library_work.py",
+      "source_git_blob": "79884788266d0946b616f4f32a324a704d2aafde",
+      "checkout_and_staged_sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "media_handoff.py",
+      "source_path": "media_handoff.py",
+      "source_git_blob": "ae0e5519678994002517f912f026790ffc91c3a5",
+      "checkout_and_staged_sha256": "25b3b9774f3c25b8f666c70949f940f27e5a7657df287d3cdf085790c4645df5",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "memory_layer.py",
+      "source_path": "memory_layer.py",
+      "source_git_blob": "1c0814c943d424e634dd633bec45db7bc92b7121",
+      "checkout_and_staged_sha256": "432fe465be533901818aa23ff044b48bbfa602cbc6f87132382d29332d703086",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrate_install.py",
+      "source_path": "migrate_install.py",
+      "source_git_blob": "e5a326a0edcfb41231029e8e4e39051f473add01",
+      "checkout_and_staged_sha256": "8288f4b2bea3abf0f6c767f034994efbe6613434a1211353bd6c6a08e7877929",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0001_initial_schema.sql",
+      "source_path": "migrations/0001_initial_schema.sql",
+      "source_git_blob": "d4ccba4a8a06154cc1ca0b9c900fb154b246c09c",
+      "checkout_and_staged_sha256": "0f32eb97382d30f056089be2e6445c7b709a22153a6437684b3182150844edb8",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0002_entity_graph.sql",
+      "source_path": "migrations/0002_entity_graph.sql",
+      "source_git_blob": "518e419e511cde925000f90235bb977f96fb05bd",
+      "checkout_and_staged_sha256": "66c658c1c1398281db64e853522a020170f2be6a53cf7f1d7c7f8ab7a43e34ae",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0003_taxonomy_corrections.sql",
+      "source_path": "migrations/0003_taxonomy_corrections.sql",
+      "source_git_blob": "19c2ea675447aca2b5fc384ddcdfeaf5f3dd483d",
+      "checkout_and_staged_sha256": "2ee06af868e21f576a76502a967fa0e2a3e910e3b70a39eee85290df175b263c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0004_memory_indexes.sql",
+      "source_path": "migrations/0004_memory_indexes.sql",
+      "source_git_blob": "9058be81c3de2135f986df34f37e186d0a66bb16",
+      "checkout_and_staged_sha256": "e05a0274759d3935ad9577fc85f04095cc574dbaaed371ba988928626fa79e1f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0005_pending_yoinks.sql",
+      "source_path": "migrations/0005_pending_yoinks.sql",
+      "source_git_blob": "cb3c95c65450b6ca36f5d729e9c82cb4c6ba4809",
+      "checkout_and_staged_sha256": "9d7f30aec61a8295a3b2c2c3721a637d332e3a8e262cfa2c67494198d2591632",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0006_v2_schema.sql",
+      "source_path": "migrations/0006_v2_schema.sql",
+      "source_git_blob": "5d75d563106e58d864e67f6359b89286687830fa",
+      "checkout_and_staged_sha256": "d98c81f3821d307308adf4968d0a91b11c7723da979122bdf28dbcc59722b147",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0007_p4_workspaces.sql",
+      "source_path": "migrations/0007_p4_workspaces.sql",
+      "source_git_blob": "b8628c902ab3d2217028abf75d3834af345c23c5",
+      "checkout_and_staged_sha256": "4b5357c054f802a0198498d5205339a6f84b5ee65fd25b85950be3feedb3fca0",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0008_a2_claims.sql",
+      "source_path": "migrations/0008_a2_claims.sql",
+      "source_git_blob": "8786eddbc0ff976780b27274341f4d6034aa643d",
+      "checkout_and_staged_sha256": "cb0fd9cbdcda231111703d8231049867fb42565d721ff7d958613782378d2c5e",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0009_p5_scripts.sql",
+      "source_path": "migrations/0009_p5_scripts.sql",
+      "source_git_blob": "45abd9ae84b95d19e5afa5a9b2069e6f435bd5e4",
+      "checkout_and_staged_sha256": "d382e7cb4f800a1602bff9c38772489ed773da52760b3ba58e04715a7d135e8f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0010_podcast_feeds.sql",
+      "source_path": "migrations/0010_podcast_feeds.sql",
+      "source_git_blob": "b59233f50661fac31281d9b8472eb609d1a93da0",
+      "checkout_and_staged_sha256": "bd9b0b5619953a1c4f21893ee9d1ae604aa17bf569343e02ddd37d1839988789",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0011_podcast_audio.sql",
+      "source_path": "migrations/0011_podcast_audio.sql",
+      "source_git_blob": "1b192894954aaed346d232be9996f2c82b1739bf",
+      "checkout_and_staged_sha256": "c99e6422a4e614cbb995e86f44a211c3f3019cb361c369630db293446bc8c0b4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0012_whisper_transcripts.sql",
+      "source_path": "migrations/0012_whisper_transcripts.sql",
+      "source_git_blob": "a5d9be6061af6c875460c2fd123658ff707a5ed4",
+      "checkout_and_staged_sha256": "76b43f0c16fb5c86ed9bea6c29ceeb838d45c4f081a60dfa67a5e38cd17022bf",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0013_monitored_playlists.sql",
+      "source_path": "migrations/0013_monitored_playlists.sql",
+      "source_git_blob": "5b7897b7538300754df89afd45db99473154f35c",
+      "checkout_and_staged_sha256": "f297c91c21d32c79aab1da27815aaf923e98758853ca184e0316ac2932c35c1d",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0014_writing_studio.sql",
+      "source_path": "migrations/0014_writing_studio.sql",
+      "source_git_blob": "a01933f5fd4260f9263feb89e7473a4d08693c84",
+      "checkout_and_staged_sha256": "11afb78bbe1b72255842d1ae03fb507558fcfb7665e541f4ff270f9537f6afd0",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0015_universal_site.sql",
+      "source_path": "migrations/0015_universal_site.sql",
+      "source_git_blob": "7609df6f75d3cf6f0b21243502c804f93f5a9ce5",
+      "checkout_and_staged_sha256": "3e2613d1eb17f9e0546b974f116921c40dd9baef7bf8eb3fdf66f58d5d4efc67",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0016_default_style_anchors.sql",
+      "source_path": "migrations/0016_default_style_anchors.sql",
+      "source_git_blob": "a13a6502119c579db17be032db9177d3085dede4",
+      "checkout_and_staged_sha256": "b9ced1d9975ef324d10700ad7b55ef295e5c9015a035f86b28d8671a8792efcf",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0017_pending_long_video_mode.sql",
+      "source_path": "migrations/0017_pending_long_video_mode.sql",
+      "source_git_blob": "f7eba5da9560ad248cf05a47ea6455906e85c967",
+      "checkout_and_staged_sha256": "0ce133e6c9cd3f75e431185bf7456131ddf94572e6109311b96bfe25365d6d09",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0018_writing_drafts.sql",
+      "source_path": "migrations/0018_writing_drafts.sql",
+      "source_git_blob": "7afc4fd23de09f7fc04265a25df8f10e10b0a9b5",
+      "checkout_and_staged_sha256": "9ac53f9388ae510a3ee10fd1c06a41410ac35df8ade5a6535df1d960e7be2700",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0019_auto_uoink.sql",
+      "source_path": "migrations/0019_auto_uoink.sql",
+      "source_git_blob": "873dfedb0eaae84c702793c34b87d1b4258568d8",
+      "checkout_and_staged_sha256": "417068f8b4bb6435e2857bfb8ccc4730b42b0275d8da41732827eb966df1f0a3",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0020_platform_author.sql",
+      "source_path": "migrations/0020_platform_author.sql",
+      "source_git_blob": "5e2d6ee845d7470ca03e94c4c43a848a0340ff4d",
+      "checkout_and_staged_sha256": "4ea4a3607cff9415bef3a6d0cf1026e68176c9ec7fba123e35fc1cea5dc593a2",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0021_suite_engagement.sql",
+      "source_path": "migrations/0021_suite_engagement.sql",
+      "source_git_blob": "a929461daffd90f63f3d5d635d95dc3f4aadfacd",
+      "checkout_and_staged_sha256": "f550ad1cd16751c116b88b5e0c4a2f7bba8ad041ac1fb64a7c46ed17ab00ecb0",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0022_podcast_corpus.sql",
+      "source_path": "migrations/0022_podcast_corpus.sql",
+      "source_git_blob": "21db5afa1626813236a2a3b892a5b65e98f23f5e",
+      "checkout_and_staged_sha256": "281fd0e44fb7f611f1da8189a96898bf4b1980bcb82d78ef462f4879b04ddeb4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0023_podcast_watch.sql",
+      "source_path": "migrations/0023_podcast_watch.sql",
+      "source_git_blob": "3314bea384eaf85049eade2ec0a82ea8a4d9d8bd",
+      "checkout_and_staged_sha256": "8eb2459cc9f77f293e82317a69e45189ee59dd2ae4e8621c263a7c83f2ee0fa3",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0024_clips.sql",
+      "source_path": "migrations/0024_clips.sql",
+      "source_git_blob": "e5d3f936a6ed33295a96c1f270573c338085e0ea",
+      "checkout_and_staged_sha256": "c1d4c1de02d6be3650d825e41cab78e83e5553587ba74a156e3db5047c5b4302",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0025_source_type_backfill.sql",
+      "source_path": "migrations/0025_source_type_backfill.sql",
+      "source_git_blob": "405c403c5a97e5671e5c2def7f25395bd79a19e3",
+      "checkout_and_staged_sha256": "a05ff20c2517e3c681ef0cd11a9d21d96a62e203304648c65876070b61288a69",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0026_provenance_precedence.sql",
+      "source_path": "migrations/0026_provenance_precedence.sql",
+      "source_git_blob": "715dd8a0b8bba041da75fc14c8a6a2cd9980e4a8",
+      "checkout_and_staged_sha256": "874d161a02389db5c40511e989bf074afd1adf7c67c0653ddaf4938e59c12af9",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0027_library_substrate.sql",
+      "source_path": "migrations/0027_library_substrate.sql",
+      "source_git_blob": "4ebc4cac2a0f151d483f147c9449f57eaf4222ee",
+      "checkout_and_staged_sha256": "49cc76655c08b39a85c4c4bb82487b25d11932671112635cee3d3a9a50a485eb",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0028_source_subscriptions.sql",
+      "source_path": "migrations/0028_source_subscriptions.sql",
+      "source_git_blob": "8c59e679e39488daa8b139ca2b933298b022d53a",
+      "checkout_and_staged_sha256": "0aa6d273fd9c1b211eb39d573b7e4eb32766e9e9a12b38828264310d6f528dde",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "migrations/0030_media_depth.sql",
+      "source_path": "migrations/0030_media_depth.sql",
+      "source_git_blob": "595cb46acae0d46bcba0336560e10bc09be94310",
+      "checkout_and_staged_sha256": "54ed1be45f0a2017c36af17ada563486f2238b8154992b77e7c09c418d108bd4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "mobile_playlists.py",
+      "source_path": "mobile_playlists.py",
+      "source_git_blob": "57d1f2d20afac6bbbfbdf5b580d057e57142d8a1",
+      "checkout_and_staged_sha256": "35a70cb71cccc1f4066f1309caab863d93ce347aafc8c11f858e8fd320de09ca",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "notes.py",
+      "source_path": "notes.py",
+      "source_git_blob": "75d98f6acc81059445fac912543f407d2904456b",
+      "checkout_and_staged_sha256": "5a1c420ceb685cee81fe36e476700926c29376480f9ac69fd277bbac6817ffc5",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "openapi_bridge.py",
+      "source_path": "openapi_bridge.py",
+      "source_git_blob": "78c36bb3ceaf7989976754bf1b19a1bc21d538d7",
+      "checkout_and_staged_sha256": "2f50bdc2ae2f5e90074fb7bae466457c6f683da1ec36917563af754fdfc1dd21",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "page_extractor.py",
+      "source_path": "page_extractor.py",
+      "source_git_blob": "b0921c7710edb2c9728206a61c22cbe30773fc23",
+      "checkout_and_staged_sha256": "5637d8a0cfbf28008a99ec5080831fee80548082598c19602421a362a0d5bd7d",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "podcasts.py",
+      "source_path": "podcasts.py",
+      "source_git_blob": "ce4190f77b5c3d40e922581f1a52fefe5c0ee843",
+      "checkout_and_staged_sha256": "628074b574b370260be5185e668f6cf8c1e509e84db541651249332729c33ee0",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "provenance.py",
+      "source_path": "provenance.py",
+      "source_git_blob": "d805397277ae9a4f08e2b66bfa0ec27b29f8aac4",
+      "checkout_and_staged_sha256": "d05c0d0b78dc0575800f8849c0ae4c5926a47c625dc870d0515c958573dab71a",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "reddit_extractor.py",
+      "source_path": "reddit_extractor.py",
+      "source_git_blob": "803000f944aa893361008561d775540c7372b6e2",
+      "checkout_and_staged_sha256": "bfbd187d88bbd2d64e5a67d6ebb6af5917eafbd676471e0d6faae317464918f5",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "requirements.txt",
+      "source_path": "requirements.txt",
+      "source_git_blob": "f268eefbad424e25114cacc2b1628c100093ab38",
+      "checkout_and_staged_sha256": "db64e96192bd374f516943c822ac6d0c9020945196b98abfcf2ef76e65a375ef",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "scripts/install-watchdog.ps1",
+      "source_path": "scripts/install-watchdog.ps1",
+      "source_git_blob": "e099a19867c91d3682d82fab53ead54d63021ce0",
+      "checkout_and_staged_sha256": "b1eb065957f0f48e8ee373bebecc591f1f5eb35771f41c13729c3e0b000ba965",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "scripts/recall_hook.py",
+      "source_path": "scripts/recall_hook.py",
+      "source_git_blob": "ccff32ae2a27cd1963890f2a48bbaafcf0d558c0",
+      "checkout_and_staged_sha256": "d8b302bc94df6405dbca2f3294829f1245d0c0772ca682970612f9453921a6bf",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "scripts.py",
+      "source_path": "scripts.py",
+      "source_git_blob": "5d486d516179d14f232417d972eaf1cc083c3f20",
+      "checkout_and_staged_sha256": "aef29c3d3de77c75b01e7c5da5e7870f7aceb267a62a0af48274854a2b9220cd",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "server.py",
+      "source_path": "server.py",
+      "source_git_blob": "69133a44d7239c865104970aed24f5a7658395da",
+      "checkout_and_staged_sha256": "3e34b0013d6c5102cba9e0d2406863d84f90e45829df3a17f90ddd30511f0d83",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "skills/uoink/plugin.json",
+      "source_path": "skills/uoink/plugin.json",
+      "source_git_blob": "9b20f296d97af6a62919e61556ec6bf2bd4dcd8a",
+      "checkout_and_staged_sha256": "6b2084bde1b530b9042e13aab3c3a79b0eece79aa7a1bc213540da9218653159",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "skills/uoink/SKILL.md",
+      "source_path": "skills/uoink/SKILL.md",
+      "source_git_blob": "70e19faedb8d302156af4e806fde7cacdc59526e",
+      "checkout_and_staged_sha256": "8b723f4d3deef24412735bb873f8e524c06e4e15bd002607acf562c31caf4b3c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "skills/uoink/system-prompt.md",
+      "source_path": "skills/uoink/system-prompt.md",
+      "source_git_blob": "62c67b830cefe596175b4aa4f88a8fea96f2e13c",
+      "checkout_and_staged_sha256": "8d578fac016200a7e4bb85a7c85ee348aeaea73a00224be1ec6495ca508b6b1a",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "source_manifest.py",
+      "source_path": "source_manifest.py",
+      "source_git_blob": "5650ec3177bbdde9c5d3d6053e64ad5ba61cd17b",
+      "checkout_and_staged_sha256": "0a4eae057201fe1c8945d58dddb0f53163416d43d1974bbbac955465e7df94a4",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "source_subscriptions.py",
+      "source_path": "source_subscriptions.py",
+      "source_git_blob": "7a0c82e094fa7ac1b846bc1371759ebf67b54faf",
+      "checkout_and_staged_sha256": "c7070839060b168c1738cc4eaf606993df2e39dfbc8fb0cc80df64671eda7fa7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "stop-server.bat",
+      "source_path": "installer/templates/stop-server.bat",
+      "source_git_blob": "b04deebe1bae6a42f66d9aa30696e1a1e9d27869",
+      "checkout_and_staged_sha256": "08930b80b046c594ce3f9d2c8fee08c6d53a05db2a4da65cb2a607382f1ac996",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "stop-server.ps1",
+      "source_path": "installer/templates/stop-server.ps1",
+      "source_git_blob": "39ca0f68e8030586ac0e53d4400018c514c8e408",
+      "checkout_and_staged_sha256": "46706c3d33da0d661de88af59da93401f90154b491427f7bb6829d21d9e56f8b",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "suite_service.py",
+      "source_path": "suite_service.py",
+      "source_git_blob": "bd04db2dd1019efb044fc70c13af2cc2be4eb813",
+      "checkout_and_staged_sha256": "d0207b9224be5eeae80e0a4f7806960f7868a2ce1d1c8a681c2fea3cfee5a99a",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "taste_scoring.py",
+      "source_path": "taste_scoring.py",
+      "source_git_blob": "24d2b14767b239c02b54af3f35fadf8a9016aae1",
+      "checkout_and_staged_sha256": "f0a0c233be2141eae86b56751c23a06a4bdde789759adbf95d0608c5318e0685",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "topics.json",
+      "source_path": "topics.json",
+      "source_git_blob": "3d6e077cfa5848d81dfbd1eed74577d609c0607f",
+      "checkout_and_staged_sha256": "9e4a62658185a438a6d802242a9a43e57920aa482e3520a17bc7ae85a38f9712",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink",
+      "source_path": "uoink",
+      "source_git_blob": "f77d7232c4e2763c74f28ac8555988acc05644a3",
+      "checkout_and_staged_sha256": "456407da4c5c0ee4b8e9c8463e0336145adbe79d6189ba5cef3445d2e91e87f7",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink.cmd",
+      "source_path": "uoink.cmd",
+      "source_git_blob": "92350f1af5f14050bed30cea41c60c03f6736bb8",
+      "checkout_and_staged_sha256": "521b9271910a3d9dacdd344f50baf7e6ebd51084ff0e61e3877686bb20367cde",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_core/__init__.py",
+      "source_path": "uoink_core/__init__.py",
+      "source_git_blob": "537bfe060f93f550da61ca426545ce34bff3d5b4",
+      "checkout_and_staged_sha256": "1e9c88069df1e726d3e8affa8f7c00e1542c3fd18040576a0c0a17d5550eb593",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_core/storage.py",
+      "source_path": "uoink_core/storage.py",
+      "source_git_blob": "d5a60f58ec28c4f5714d74456005c1af6a4c877d",
+      "checkout_and_staged_sha256": "fe580c7961b7ed97f8a4429dabe035314f805ec50b581c56a9aac3905ffd94e5",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_dashboard.py",
+      "source_path": "uoink_dashboard.py",
+      "source_git_blob": "e92afc614e33b4fd6ba92bec8bc271e518724556",
+      "checkout_and_staged_sha256": "da99fa6b778bf5653bc403d699af7585125086a9590c693a5fafdb3f0104437c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_install_isolation.py",
+      "source_path": "uoink_install_isolation.py",
+      "source_git_blob": "303450adcd150d8d6e73e67d92e1bc9b411854d2",
+      "checkout_and_staged_sha256": "1b9337040b2ea954b0e2fb8ff6db4554db3dd313ffc808f7362cbc50ebaeb9a3",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_mcp.py",
+      "source_path": "uoink_mcp.py",
+      "source_git_blob": "ba93c8adb853fa607b33de874e9e00fe26f819fd",
+      "checkout_and_staged_sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_mcp_tools.py",
+      "source_path": "uoink_mcp_tools.py",
+      "source_git_blob": "98a7b0b9ca1771284260e1822959d5bfe0ec1b51",
+      "checkout_and_staged_sha256": "9d1a01b7061c0e3beaa39fed43343b6d28ef568f962410f64db0295743434775",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_reliability.py",
+      "source_path": "uoink_reliability.py",
+      "source_git_blob": "6badeda52bed44ead6ac4df8c9162bfe1fde02af",
+      "checkout_and_staged_sha256": "100c3b6217f8bff150b1a663d3c05fc9a2c30faf9d794bd8dcf48c0f5f6aa7e3",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_splash.py",
+      "source_path": "uoink_splash.py",
+      "source_git_blob": "84b83dd98ae85928d3586363e9edf52c541d85de",
+      "checkout_and_staged_sha256": "104047b1cd16f4c3c8c3852923346554b829b65ded98f1df3b3c31a38ec9ec8f",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "uoink_tray.py",
+      "source_path": "uoink_tray.py",
+      "source_git_blob": "d6915a521b1feed6ba66d2c25eb82cabc85d4fd2",
+      "checkout_and_staged_sha256": "00e10c707eb86cb3c562947c6ca8958a25e73c35608d81e8631194f2704d136c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    {
+      "staged_path": "usage_meter.py",
+      "source_path": "usage_meter.py",
+      "source_git_blob": "c51eee2e397f1f99b940e60fcfea39ae062a8364",
+      "checkout_and_staged_sha256": "d1ff1205e46c7a7a5f0b2684177989a86c2f21aba5b7450c22a4e1ca7049954c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "verify_install.ps1",
+      "source_path": "installer/verify_install.ps1",
+      "source_git_blob": "7a253d636a4671ba8e16bef0c16a068ecdd936b1",
+      "checkout_and_staged_sha256": "7cff30b00e0997b3c162d4909cb99cf7cc6e8d2aa27f85b7cb5398ccc44fbf82",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "VERSION",
+      "source_path": "VERSION",
+      "source_git_blob": "19811903a7f7584d7aa752ea29bbf9d74cf78b47",
+      "checkout_and_staged_sha256": "af88cc86a71fca3a89139c024a168b0919360213f5fe9e34472d68ccfb98e26c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "voice_dna/VOICE-DNA.md",
+      "source_path": "voice_dna/VOICE-DNA.md",
+      "source_git_blob": "a7b436647e096da24cc196be70b202083698c06f",
+      "checkout_and_staged_sha256": "a96f030bc0ba0df081ede612d7bff1ffa5a465976234c85646687ee9fb4ae6ee",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "voice_dna.py",
+      "source_path": "voice_dna.py",
+      "source_git_blob": "eae357ac812862206b7a77d98f9ed3e5dd7745bd",
+      "checkout_and_staged_sha256": "275df3c8a70cee066ec992dca179706b7ae46021d5affab6acdcadcee0ab52c5",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "whisper_runner.py",
+      "source_path": "whisper_runner.py",
+      "source_git_blob": "a842a4428e9144f8b20294695c2e7337272c4d07",
+      "checkout_and_staged_sha256": "747cd99c171f0bfc5e054af94d3a8affd9459a289a9e3565500a3da1ea41f921",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "workspaces.py",
+      "source_path": "workspaces.py",
+      "source_git_blob": "97416407334ad429221253ff27d5090692284ef8",
+      "checkout_and_staged_sha256": "1286e46bbf9153a7f49f1af189c49feb85a459e10bc5c0d6ce57ca3902cea4ea",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "writer_peer.py",
+      "source_path": "writer_peer.py",
+      "source_git_blob": "93d846bfb7c916e65282550edb3f308edebf4569",
+      "checkout_and_staged_sha256": "cae3d324e158ff77dd7e5c3bf5d1ba615e0da7df89d63d7f4d92090749be9987",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "writing_studio.py",
+      "source_path": "writing_studio.py",
+      "source_git_blob": "b504a4690b4a7727318cdbacc10ef794dee634ec",
+      "checkout_and_staged_sha256": "6251247a6b93d169ac92c563f7f2e9052a50e591d5daead1c5244081fb524348",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "x_article_extractor.py",
+      "source_path": "x_article_extractor.py",
+      "source_git_blob": "33f3998fbfd66354d88e11b49893b923eb26e6fd",
+      "checkout_and_staged_sha256": "fb91ee999adcc209cd97145f37fd9c8defbed3290796ffcde1eeceb7aa7ef827",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "x_extractor.py",
+      "source_path": "x_extractor.py",
+      "source_git_blob": "f8c9686a1ad2daca498e1454c85b17c0737f97b3",
+      "checkout_and_staged_sha256": "8b67b624d0925608522fca0434b7e729357d29e4767d45160d90f2d17db758e1",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "yoink_mcp.py",
+      "source_path": "yoink_mcp.py",
+      "source_git_blob": "08be43d7df7938bb869bd485c920b42e0e3d24cc",
+      "checkout_and_staged_sha256": "7bd69ed5259c06df111e0bfb6163aecafca1bb3b4f8b230864d4f68c2a0dd22c",
+      "install_role": "installed"
+    },
+    {
+      "staged_path": "yt_extract.py",
+      "source_path": "yt_extract.py",
+      "source_git_blob": "814d6bb729b69b204e4672806cfa4db1356deb1a",
+      "checkout_and_staged_sha256": "9157787eb5b242f37d5f798ce44b185a0c6b45d79d41b91c02616794a9b5d66d",
+      "install_role": "installed"
+    }
+  ],
+  "installed": false,
+  "published": false,
+  "created_utc": "2026-09-10T04:24:43.927299+00:00",
+  "inno_definition_sha256": "2366eb4a9763ac0ae05d329fc2f82a3b0a523861e657e17a35cbb6a25f74426e",
+  "runtime_sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+}

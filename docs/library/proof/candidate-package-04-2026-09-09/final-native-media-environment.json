@@ -1,0 +1,17 @@
+{
+  "reason": "Exercise the existing synthetic video case without changing tests or fetching media",
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\final-native-bin-01\\ffmpeg.exe",
+      "sha256": "64287d8d82972025fa91946dd62e7948270ed9e27563da582c43feb63381a134",
+      "bytes": 98318848,
+      "sealed_input": "bin/ffmpeg.exe"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\final-native-bin-01\\ffprobe.exe",
+      "sha256": "77dfa5394eb6b3c931b643d64ab75d22c33782ad75cd65a81796a9ef0f74f681",
+      "bytes": 98181632,
+      "sealed_input": "bin/ffprobe.exe"
+    }
+  ]
+}
