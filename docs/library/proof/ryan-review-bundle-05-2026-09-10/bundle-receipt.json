@@ -1,0 +1,14 @@
+{
+  "bundle_source": "7a7b9aa3c6f9001aee9b543b4f0bd12f9d750f4d",
+  "validation_source": "393010f80c53a95a6fa3c853a98b77924efa0250",
+  "build_source": "6b5aed8cb60be3e826af5f308015393a72c60b0d",
+  "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Living-Library-3-8-0-Review-Kit-05-2026-09-10.zip",
+  "bytes": 415554388,
+  "sha256": "b6b49a87622af82421c99f09307c6dcb707c005c2b1058a668d0a47672c9ac3b",
+  "manifest_sha256": "f24215be8c9c333068dcfb68c089826c5ed89fbdf4348b177883c14fc9cde552",
+  "payload_files": 1485,
+  "all_zip_member_hashes_verified": true,
+  "installed": true,
+  "installed_scope": "same-account isolated; see exact receipt verdict",
+  "published": false
+}

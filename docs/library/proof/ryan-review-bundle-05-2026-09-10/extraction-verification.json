@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "payloads": 1485,
+  "safe_paths": true,
+  "case_insensitive_collisions": false,
+  "all_extracted_hashes_match": true,
+  "release_ready": false,
+  "private_suite_inventory_included": false,
+  "bundle_source": "7a7b9aa3c6f9001aee9b543b4f0bd12f9d750f4d",
+  "validation_source": "393010f80c53a95a6fa3c853a98b77924efa0250"
+}

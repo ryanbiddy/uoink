@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "ref": "HEAD",
+  "head": "7a7b9aa3c6f9001aee9b543b4f0bd12f9d750f4d",
+  "payloads_verified": 333,
+  "proofs": [
+    "ryan-p4-embedded-probe-2026-09-10",
+    "ryan-final-partitioned-02-2026-09-10",
+    "ryan-agent-installed-05-2026-09-09",
+    "ryan-proof-byte-transport-2026-09-10"
+  ],
+  "scope": "Every local and Git object payload matches its retained byte count and SHA-256. Existing failed/partial measurements are unchanged."
+}

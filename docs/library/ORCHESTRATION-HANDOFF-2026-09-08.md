@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
+| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -2578,3 +2578,25 @@ observer refusal, not the user's sync failure; that diagnosis remains open.
 No other product source or remote changed.
 
 The complete 393010f tree accounts for 2,497 cases exactly once: 2,493 passed, 1 failed, 2 skipped and 1 xfailed. Its aggregate remains FAIL. Only S21 is absent; four new regressions and no prior case missing. No packaged source changed.
+
+### 2026-09-10 - Review kit delivered; release still held
+
+Review source 7a7b9aa binds complete validation 393010f and installer source
+6b5aed8. The new local kit contains 1,485 payloads; every ZIP member and extracted
+file hash matches, with no unsafe path or case-insensitive collision. All 333
+public proof payloads match their hashes in committed Git objects. Nine runbook
+PowerShell blocks parse without error; this is syntax verification only.
+
+Local artifact: build/Uoink-Living-Library-3-8-0-Review-Kit-05-2026-09-10.zip,
+415,554,388 bytes, SHA256
+b6b49a87622af82421c99f09307c6dcb707c005c2b1058a668d0a47672c9ac3b.
+Its release_ready=false is deliberate. It preserves package-05 while the bounded
+browser repair and fresh client/visual observations remain. The broader inventory
+and product-suite critique are excluded from this public-source kit and stay in
+the local report directory. Earlier packages and ZIPs remain unchanged.
+
+Proof: proof/ryan-review-bundle-05-2026-09-10/SHA256.json. The next source work is
+Queue 6, then a new complete tree and package only after that packaged UI repair.
+Back up this documentary commit only through origin/cc/living-library; no main
+merge or candidate-branch push. Keep the final transport receipt outside Git to
+avoid a self-referential commit/hash loop.

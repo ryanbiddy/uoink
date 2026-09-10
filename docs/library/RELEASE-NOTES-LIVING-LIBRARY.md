@@ -219,3 +219,15 @@ No live library index, resident helper on 5179, paid API or live label applicati
 belongs to this verification. No X access repair or new source-media fetch is
 included. The [handoff](ORCHESTRATION-HANDOFF-2026-09-08.md) retains each integration,
 failed/partial observation and remaining action.
+
+## Current review kit
+
+The local review kit is
+`build/Uoink-Living-Library-3-8-0-Review-Kit-05-2026-09-10.zip`:
+415,554,388 bytes, SHA-256
+`b6b49a87622af82421c99f09307c6dcb707c005c2b1058a668d0a47672c9ac3b`.
+It binds review source `7a7b9aa`, validation `393010f` and installer `6b5aed8`.
+All 1,485 ZIP and extracted payload hashes match. It contains the matching
+installer, receipt tools and notes, with release_ready=false. Preserve it as
+review evidence; the browser repair will require a later package. See the
+[delivery seal](proof/ryan-review-bundle-05-2026-09-10/SHA256.json).
