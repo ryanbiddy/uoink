@@ -1,7 +1,10 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-09; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-10; regenerate with `python scripts/gen_third_party_notices.py`.
+
+Pillow's license below is taken from the bundled wheel's `License-Expression`
+metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -84,7 +87,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
 | packaging | 26.2 | UNKNOWN | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
-| pillow | 12.3.0 | Historical Permission Notice and Disclaimer (HPND) | https://python-pillow.org |
+| pillow | 12.3.0 | MIT-CMU | https://python-pillow.github.io |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
 | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
