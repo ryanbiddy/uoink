@@ -30,3 +30,14 @@ The two plan/profile contract corrections are also retained. Record all diffs
 and reasons in the conflicts log and an integrator verdict before acceptance.
 If any behavior still fails, repair the actual product/instrument defect; do
 not weaken the oracle or keep modifying the scenario's setup.
+
+Verification baseline repair: receipt-c-w2 was interrupted after partial progress
+because worker 269acc98 still starts from d8d3b4f, before credential isolation.
+Archive its partial log and exact owned-process stop record; it has no passing
+suite count. Its source-runtime helper copies cannot prove the new credential
+boundary, and earlier source-runtime tests did not explicitly prevent OS keyring
+access. Do not query any real credential to investigate that uncertainty.
+Before receipt-c-w3, apply the reviewed credential patch to this worker's source
+baseline. Export only the three receipt fixture/copier files for integration;
+the credential repair is already in the checkout. Repeat the same 14-file union
+in that repaired worker and then checkout; no assertion or scenario change.

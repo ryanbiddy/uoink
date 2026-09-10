@@ -91,8 +91,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | C22 integrated 92 passed / two frozen failures; compatibility supplement 59 passes in both roots; new bundled C22 11 passed / zero failed / three unexecuted | Package-03, bundled and final-tree checks recorded; Ryan's installed receipt remains |
-| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt fixture correction is under verification | Rebuilt-package installed C22 delegated to Astra; exact account/mode must be recorded |
+| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
 | Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections, safe agent installation and complete tree pending |
@@ -2240,3 +2240,24 @@ incorrect. No such API is exposed by Uoink/WhisperX's sentence-tokenization path
 Default VAD does load the packaged PyAnnote checkpoint; it is not a speaker-only
 path. Keep all residuals and the exact packaged checkpoint hash in release notes.
 The current installed candidate is still unbuilt and Setup has not run.
+
+### 2026-09-09 — current-source receipt fixture; agent installation driver in review
+
+Receipt-c-w1 finished with 171 passes and one failing all-scenarios case, 745.15 s.
+The older stand-alone stub cannot meet original child-method/provenance oracles.
+The approved third receipt correction now provisions the existing source-runtime
+fixture in that case only; all 17 assertion syntax trees remain unchanged. The
+source copier excludes build artifacts. No stub-code changes are accepted.
+Receipt-c-w2 was interrupted because the worker baseline predates ddfd316's
+credential repair. Its partial observation and owned-process stop remain failed/
+aborted evidence; earlier source-runtime guards did not explicitly block keyring
+reads, so no claim about actual ordinary-keyring non-access follows. Do not query
+credentials to investigate. The reviewed credential patch is now applied to the
+worker baseline before receipt-c-w3. Export only the three receipt files.
+
+Agent installation driver cc970a5 is parsed and sent for a separate Gemini review
+under RYAN-AGENT-INSTALLATION-REVIEW-BRIEF-2026-09-09.md. It uses a fresh scratch
+app/profile, separate isolated AppId, no elevation, explicit process-close/
+restart suppression, no desktop task and a unique Start Menu group. Stage exits,
+actual user/SID and ordinary registry/shortcut hashes are retained. It is not yet
+approved by review or executed; a newly built and sealed package remains required.

@@ -1,12 +1,21 @@
 # Living Library integration candidate
 
-Version 3.8.0, 2026-09-09. **Candidate ready for Ryan's receipt session; release approval remains blocked.**
-The rebuilt installer, both receipt tools, complete notes and executable runbook
-are prepared for one throwaway Windows account. The final kit-inclusive tree
+Version 3.8.0, 2026-09-09. **Security repairs are integrated; the replacement installer and installed verification are pending.**
+Ryan approved the remaining setup corrections, delegated installation to Astra
+and requested Gemini security review. The last complete kit-inclusive tree
 at `12ce8a5fbd34c3472d55ae76afa17535b43c5282` has **2,429 passed, 13 failed, 3 skipped and 1 xfailed**.
 Every failure remains in the sealed result. Original bundled C22 and Phase 4
 checks are recorded below; neither substitutes for an actual installation.
 No merge to main or artifact publication has occurred.
+
+The newer source includes isolated credential storage (`ddfd316`) and four
+dependency updates (`c711feb`). These changes are not in the old installer or
+ZIP below. Do not use that package as verification of the repaired source.
+The two approved fixture patches pass 180 mirror and 74 ordered-read checks;
+the new credential union has 117 passes and one existing expected failure in
+both roots. Dependency build/lock checks pass 23 in both roots, and the revised
+142-pin runtime graph resolves for Windows Python 3.11. The new complete tree,
+rebuilt package and actual installed C22/P4 results remain pending.
 
 ## What this candidate adds
 
@@ -22,7 +31,7 @@ Phase 5 Part B is deferred. Phase 6 makes no speaker-attribution claim and runs
 no diarization. The Phase 4 X source remains a documented HTTP 403 blocked link;
 no access repair or replacement fetch is included.
 
-## Exact package
+## Last sealed package (historical; replacement pending)
 
 | Item | Value |
 |---|---|
@@ -46,20 +55,58 @@ The prior package-02 executable remains retained, SHA-256
 Its failed bundled C22 observation is preserved. Startup repair `67a274d`
 changes the shared backfill connection access and requires the new package.
 
-The active C22 loader consumes package-03; its historical API name and receipt
+The current C22 loader still consumes package-03; it must be rebound to the new
+seal before repaired-source installation. Its historical API name and receipt
 format remain compatible. The portable kit includes that complete package seal,
 both operator tools, fixture migrations, these notes, the runbook, final test
 proof and a per-file manifest. The ZIP receipt separately records the archive
-hash and verifies every member. The installer has not been run by Astra.
+hash and verifies every member. No installer has been run by Astra yet.
+
+## Security review and remaining dependency findings
+
+Gemini reviewed the Inno boundaries, application security and dependency graph;
+Astra checked the reports against source, independent suites and public package
+metadata. Isolated helpers now keep reads, writes, migration and invalid-key
+resets in a profile-derived credential namespace, without ordinary/legacy
+fallback. A shared Windows account still grants the account owner access to its
+own files and credentials; profile isolation does not sandbox same-user malware.
+
+Pillow 12.3.0 replaces the older image decoder on untrusted clip/paste paths.
+MCP moves to 1.28.1, cryptography to 50.0.1 and NLTK to 3.10.3. The revised-lock
+OSV query reports **19 advisory entries / 15 distinct alias-connected issues
+across four packages**, down from 95 / 55 across seven. This is not a clean audit.
+
+| Retained package | Remaining issues | Release limitation |
+|---|---:|---|
+| Lightning 2.6.5 | 1 | Checkpoint loading is affected; an upstream release containing the reported repair is unavailable. |
+| NLTK 3.10.3 | 1 | Model-artifact path APIs remain affected. Uoink/WhisperX's sentence-tokenization path does not expose those APIs. |
+| Torch 2.8.0 | 8 | WhisperX's published dependency constraint prevents a direct move to the patched newer line. |
+| Transformers 4.57.6 | 5 | Patched 5.x requires a Hugging Face Hub version incompatible with the current WhisperX constraint; affected model/training/export APIs are not first-party Uoink call sites. |
+
+Ordinary transcription uses PyAnnote voice detection and loads a checkpoint
+packaged with WhisperX. It does not bypass every checkpoint loader just because
+speaker attribution is disabled. The bundled checkpoint's origin and hash are
+recorded in [Astra's dependency verdict](ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md).
+Model downloads and diarization were not run for this release verification.
+Retained advisories require release review; neither user consent nor a local
+file path is a repair for unsafe deserialization.
+
+The old package-03 executable is unsigned. Its custom Microsoft Defender scan
+returned exit zero and reported no threats, with unchanged bytes. That scan does
+not cover a future rebuilt executable; the replacement needs its own scan and
+signature record. See [the council verdict](ASTRA-FINAL-SECURITY-COUNCIL-VERDICT-2026-09-09.md)
+and the sealed original/revised audit observations. No security certification
+or absence of unknown vulnerabilities is claimed.
 
 The isolated path now takes an explicit app directory, profile and non-5179 port.
 Inno requires close/restart suppression; uninstall validates its persisted
 identity and confirms owned termination before deletion. Focused verification
 has 118 passes / one skip in the corrected worker and 130 passes / one skip in
 checkout with read/startup companions. Actual Inno installation, registry effects
-and uninstall are still unexecuted. The operator runbook must use the sealed
-receipt kit before Ryan starts that session; ordinary launch defaults are not
-the receipt path.
+and uninstall are still unexecuted. Astra's delegated installation procedure
+uses a fresh app/data subtree and the supported isolated Inno flags. This host
+has no Windows Sandbox and the agent is not elevated. A same-account installed
+observation will be labelled as such; it is not a new Windows-account receipt.
 
 At `175bcef`, the original bundled stdio entry observed 32 tools, five resource
 templates, four prompts, exact native/fallback card equality and successful
@@ -167,11 +214,10 @@ while the text-only source's original X URL returned HTTP 403 and stays
 blocked. Null card source metadata and text-only timing were preserved.
 Ryan retained the X HTTP 403 as a documented blocked-link condition, with no
 access repair or new fetch. The five lifetime failures pass after `1063843`,
-including in the complete `263b7e4` tree. Eight parent-interception checks
-still fail; the exact three-file fixture proposal preserves all 150 assertion
-syntax trees and awaits Ryan's explicit approval. The proposal is unapplied.
-The isolated installation repair is built. The installed receipt kit is integrated and bundled. Ryan's actual installation
-and client observations remain outstanding.
+including in the complete `263b7e4` tree. Ryan has since approved the exact
+mirror fixture correction. All 180 focused mirror checks pass with their original
+behavior assertions preserved. Fresh full-tree and installed observations are
+still required; the historical failed tree is not relabelled by this focused run.
 
 ## Phase 5: descriptive library activity
 
