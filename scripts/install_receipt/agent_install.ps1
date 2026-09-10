@@ -96,7 +96,7 @@ if ($Stage -eq 'install') {
     if ($taskMarker.mode -ne 'isolated' -or $taskMarker.app_dir -ine $taskApp -or $taskMarker.profile -ine $taskProfile -or $taskMarker.port -ne $taskPort) { throw 'Installed ownership marker differs.' }
 }
 Write-Receipt (Join-Path $taskRoot ($Stage + '.before.json')) $taskBefore
-foreach ($taskKey in 'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN','ANTHROPIC_BASE_URL','OPENAI_API_KEY','XAI_API_KEY','GROK_API_KEY','GEMINI_API_KEY','GOOGLE_API_KEY') {
+foreach ($taskKey in 'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN','ANTHROPIC_BASE_URL','CLAUDE_CODE_USE_BEDROCK','CLAUDE_CODE_USE_VERTEX','CLAUDE_CODE_USE_FOUNDRY','OPENAI_API_KEY','XAI_API_KEY','GROK_API_KEY','GEMINI_API_KEY','GOOGLE_API_KEY') {
     Remove-Item -LiteralPath ('Env:' + $taskKey) -ErrorAction SilentlyContinue
 }
 $taskTemp = Join-Path $taskRoot ($Stage + '-temp')
@@ -127,6 +127,10 @@ try {
 $taskAfter=Get-Effects
 Write-Receipt (Join-Path $taskRoot ($Stage + '.after.json')) $taskAfter
 if ($null -eq $taskObservation.exit -or $taskObservation.exit -ne 0) { throw 'Installer did not return exit zero; preserve all evidence.' }
+$taskVerifyLog=Join-Path $taskTemp 'uoink-install-verify.log'
+if (-not (Test-Path -LiteralPath $taskVerifyLog -PathType Leaf)) { throw 'Files-only verification log is missing.' }
+$taskVerifyText=Get-Content -LiteralPath $taskVerifyLog -Raw
+if ($taskVerifyText -notmatch 'files-only install verification OK; live health probe skipped' -or $taskVerifyText -match 'MISSING bundled file|VERSION mismatch|could not read VERSION|verification FAILED') { throw 'Files-only verification did not succeed.' }
 foreach ($taskKey in $taskBefore.registry.Keys) {
     if ($taskKey.EndsWith($taskOrdinaryId) -and (($taskBefore.registry[$taskKey] | ConvertTo-Json -Compress) -ne ($taskAfter.registry[$taskKey] | ConvertTo-Json -Compress))) { throw 'Ordinary uninstall registry changed.' }
     if ($taskKey.StartsWith('HKLM:') -and (($taskBefore.registry[$taskKey] | ConvertTo-Json -Compress) -ne ($taskAfter.registry[$taskKey] | ConvertTo-Json -Compress))) { throw 'Machine-wide uninstall registry changed.' }
@@ -136,4 +140,31 @@ $taskInstalledMarker=Get-Content -LiteralPath (Join-Path $taskApp 'isolated-inst
 if ($taskInstalledMarker.mode -ne 'isolated' -or $taskInstalledMarker.app_dir -ine $taskApp -or $taskInstalledMarker.profile -ine $taskProfile -or $taskInstalledMarker.port -ne $taskPort) { throw 'New installed marker differs.' }
 $taskInstalledLocation=Get-ItemPropertyValue -LiteralPath $taskIsoKey -Name InstallLocation
 if ($taskInstalledLocation.TrimEnd('\') -ine $taskApp) { throw 'Isolated uninstall location differs.' }
+if (-not (Test-Path -LiteralPath $taskGroupPath -PathType Container)) { throw 'Isolated shortcut group is missing.' }
+Assert-PlainPath $taskGroupPath
+$taskShell=New-Object -ComObject WScript.Shell
+$taskExpectedLinks=@('Uoink Isolated.lnk','Stop Uoink Isolated.lnk','Open Uoink Isolated folder.lnk','Uninstall Uoink Isolated.lnk')
+$taskActualLinks=@(Get-ChildItem -LiteralPath $taskGroupPath -File -Filter '*.lnk')
+if ($taskActualLinks.Count -ne 4) { throw 'Unexpected isolated shortcut count.' }
+$taskLinkEvidence=@()
+foreach ($taskLinkName in $taskExpectedLinks) {
+    $taskLinkPath=Join-Path $taskGroupPath $taskLinkName
+    if (-not (Test-Path -LiteralPath $taskLinkPath -PathType Leaf)) { throw ('Missing shortcut: ' + $taskLinkName) }
+    Assert-PlainPath $taskLinkPath
+    $taskLink=$taskShell.CreateShortcut($taskLinkPath)
+    $taskTarget=[IO.Path]::GetFullPath($taskLink.TargetPath)
+    $taskArguments=[string]$taskLink.Arguments
+    $taskLinkEvidence += [ordered]@{path=$taskLinkPath;target=$taskTarget;arguments=$taskArguments;working_directory=$taskLink.WorkingDirectory;sha256=(Get-FileHash -LiteralPath $taskLinkPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+    switch ($taskLinkName) {
+        'Uoink Isolated.lnk' {
+            if ($taskTarget -ine (Join-Path $taskApp 'python\pythonw.exe') -or $taskArguments -ne ('"'+(Join-Path $taskApp 'server.py')+'" --isolated-profile "'+$taskProfile+'" --isolated-port '+$taskPort+' --show-dashboard')) { throw 'Isolated start shortcut differs.' }
+        }
+        'Stop Uoink Isolated.lnk' {
+            if ($taskTarget -ine (Join-Path $taskApp 'python\python.exe') -or $taskArguments -ne ('"'+(Join-Path $taskApp 'uoink_install_isolation.py')+'" --isolated-stop --isolated-from-install-dir "'+$taskApp+'"')) { throw 'Isolated stop shortcut differs.' }
+        }
+        'Open Uoink Isolated folder.lnk' { if ($taskTarget -ine $taskApp -or $taskArguments) { throw 'Isolated folder shortcut differs.' } }
+        'Uninstall Uoink Isolated.lnk' { if ((Split-Path -Parent $taskTarget) -ine $taskApp -or (Split-Path -Leaf $taskTarget) -notmatch '^unins\d+\.exe$' -or $taskArguments) { throw 'Isolated uninstall shortcut differs.' } }
+    }
+}
+Write-Receipt (Join-Path $taskRoot ($Stage + '.shortcuts.json')) $taskLinkEvidence
 Write-Output ($Stage + ' recorded with exit zero; installed helper/browser observations are still required.')

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    "/Q",
+    "/OE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agent-install-compile-01\\out",
+    "/FUoink-compile-only-agent-review",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agent-install-compile-01\\uoink.iss"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.8061447143554688,
+  "source_sha256": "2366eb4a9763ac0ae05d329fc2f82a3b0a523861e657e17a35cbb6a25f74426e",
+  "copy_sha256": "2366eb4a9763ac0ae05d329fc2f82a3b0a523861e657e17a35cbb6a25f74426e",
+  "artifact_executed": false,
+  "scope": "Exact Inno source compiled with dummy payloads; not a release build or installation"
+}

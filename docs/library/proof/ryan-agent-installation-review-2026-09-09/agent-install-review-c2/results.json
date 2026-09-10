@@ -1,0 +1,32 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_isolation.py",
+      "tests/test_install_isolation_integrator_review.py",
+      "tests/test_install_isolation_repair.py",
+      "tests/test_phase4_av5m3_isolation.py",
+      "tests/test_isolated_credential_store.py",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_installer_files_complete.py",
+      "tests/test_installer_download_accuracy.py",
+      "tests/test_docs_live_contracts.py",
+      "tests/test_inno_final_boundary.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agent-install-review-c2-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agent-install-review-c2\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agent-install-review-c2\\tests.log"
+  }
+]

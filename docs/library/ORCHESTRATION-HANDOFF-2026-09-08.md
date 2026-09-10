@@ -153,7 +153,8 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    worker 269acc98 under RYAN-RECEIPT-SOURCE-FIXTURE-REPAIR-2026-09-09.md
    before rebuilding or installing. Follow
    RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
-   Determine and review safe isolation before execution; preserve ordinary data,
+   ASTRA-AGENT-INSTALLATION-VERDICT-2026-09-09.md approves the corrected procedure
+   for a newly sealed package after full-tree verification; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
    is still owed. Same-account results cannot be called throwaway-account results.
 4. Resolve actual new product findings, then run the committed complete tree with
@@ -2261,3 +2262,19 @@ app/profile, separate isolated AppId, no elevation, explicit process-close/
 restart suppression, no desktop task and a unique Start Menu group. Stage exits,
 actual user/SID and ordinary registry/shortcut hashes are retained. It is not yet
 approved by review or executed; a newly built and sealed package remains required.
+
+### 2026-09-09 — agent installation procedure corrected and reviewed
+
+Gemini 6a8378f1 correctly found that DisableProgramGroupPage=yes ignores /GROUP;
+official Inno documentation confirms it. The revised directive plus skipped page
+allows the separate group while preserving wizard flow. The driver verifies all
+four actual shortcut targets/arguments and the fresh files-only check log. A
+proposed fatal Inno verification branch failed the existing non-fatal assertion
+(87 passed / one failed); it is rejected and sealed. The driver independently
+rejects missing/failed verification without changing Setup's raw exit or tests.
+Final union: 93 passed, 12.80 s; exact-source dummy compilation exit zero, 0.81 s.
+See ASTRA-AGENT-INSTALLATION-VERDICT-2026-09-09.md. No Setup has run. Receipt-c-w3
+is still verifying the current credential baseline; then integrate its three
+files, run the new complete tree, build/reseal/scan and execute installed checks.
+Authorized backup was verified at ef99954 on origin/cc/living-library; later
+commits need the closing branch backup. No main or candidate-branch push occurred.

@@ -1,0 +1,19 @@
+.............................................F.......................... [ 81%]
+................                                                         [100%]
+================================== FAILURES ===================================
+__________ test_inno_marker_match_is_exact_and_write_failure_aborts ___________
+tests\test_install_isolation_repair.py:221: in test_inno_marker_match_is_exact_and_write_failure_aborts
+    assert "RaiseException" not in verify_body
+E   assert 'RaiseException' not in "\nvar\n  Re...);\nend;\n\n"
+E     
+E     'RaiseException' is contained here:
+E       hen
+E             RaiseException('isolated-verify-failed: files-only verification failed with exit code ' + IntToStr(ResultCode));
+E     ?       ++++++++++++++
+E           SuppressibleMsgBox(
+E             'Uoink is installed, but setup could not verify every bundled file.' +...
+E     
+E     ...Full output truncated (46 lines hidden), use '-vv' to show
+=========================== short test summary info ===========================
+FAILED tests/test_install_isolation_repair.py::test_inno_marker_match_is_exact_and_write_failure_aborts
+1 failed, 87 passed in 12.58s

@@ -1,0 +1,77 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "agent-install-review-attempt1.patch": {
+      "bytes": 6901,
+      "sha256": "f604b034a098bb2f55a705a934c4b116fb4acf55bc896e2ba273145ac051a86d"
+    },
+    "agent-install-review-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "agent-install-review-c1/results.json": {
+      "bytes": 1120,
+      "sha256": "45011b213c7e2c6dd454b4e70f79c20169bbb19debf63325735472365fe7ffc5"
+    },
+    "agent-install-review-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "agent-install-review-c1/tests.log": {
+      "bytes": 1180,
+      "sha256": "fe85f3e0c89ae32acb20eb6b6b28ecb50ad5309b677d2a2a45b37bf582d12027"
+    },
+    "agent-install-review-c1/tests.xml": {
+      "bytes": 12542,
+      "sha256": "1b273529ca333990f048cc9d2ba5cbeb7292cf5d20708a012371c66bf11c2707"
+    },
+    "agent-install-review-c2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "agent-install-review-c2/results.json": {
+      "bytes": 1164,
+      "sha256": "1d3f3b9a6744883b4913bbb1636fe94b3bde628dd5d3c6481f33b8af0df388b1"
+    },
+    "agent-install-review-c2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "agent-install-review-c2/tests.log": {
+      "bytes": 183,
+      "sha256": "00c2debf73e68c9cf511ffd6bb3d090d9b533ce8da9be2ca3deac55344241e21"
+    },
+    "agent-install-review-c2/tests.xml": {
+      "bytes": 12109,
+      "sha256": "547257a32c7392b0d8cbdbd98815aaa1d3150e1c3202da42ed96d9731fcc66f2"
+    },
+    "agent-install-review.patch": {
+      "bytes": 20469,
+      "sha256": "93d39993ec0522412e389548ec4aa750bc5fbbaf3ebe2a06120c951adba61121"
+    },
+    "compile.json": {
+      "bytes": 695,
+      "sha256": "6d2527a795723c6f851a0cb9444356a487f7811a9ddcdb696e24607b8624cb42"
+    },
+    "compile_agent_install_review.py": {
+      "bytes": 1354,
+      "sha256": "87d1123caef911d71160aeafe4eb27ea634ab8b30c8d0fd53b82c7866a96952b"
+    },
+    "final-procedure.patch": {
+      "bytes": 6405,
+      "sha256": "c3f5a6a474d59aa45558b168888723d9be0372cf73e6de64b3500f3e3b49da27"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "iscc.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "seal_agent_install_review.py": {
+      "bytes": 1354,
+      "sha256": "5bb433b16a2fff67b3f722682d03890af116ed4ed4024c12072e41b33b1dcdbf"
+    }
+  }
+}

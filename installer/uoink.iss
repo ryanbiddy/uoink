@@ -42,7 +42,7 @@ AppSupportURL={#AppURL}
 VersionInfoVersion={#AppVersion}.0
 DefaultDirName={localappdata}\Uoink
 DefaultGroupName=Uoink
-DisableProgramGroupPage=yes
+DisableProgramGroupPage=no
 PrivilegesRequired=lowest
 OutputDir=..\build
 OutputBaseFilename=Uoink-Setup-{#AppVersion}
@@ -1465,6 +1465,10 @@ begin
   { Hide the stock Welcome page so our custom WelcomePage takes its place as
     the wizard's first screen (mock 1.2.1). }
   if PageID = wpWelcome then
+    Result := True;
+  { Keep the page hidden while allowing an explicit /GROUP for isolation.
+    DisableProgramGroupPage=yes would ignore that command-line argument. }
+  if PageID = wpSelectProgramGroup then
     Result := True;
   if (PageID = MigratePage.ID) and ((not LegacyYoinkPresent()) or IsolatedInstall()) then
     Result := True;
