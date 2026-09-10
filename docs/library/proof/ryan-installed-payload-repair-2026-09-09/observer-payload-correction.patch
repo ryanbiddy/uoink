@@ -1,0 +1,30 @@
+--- previous-reviewed-observer
++++ payload-aware-observer
+@@ -44,6 +44,7 @@
+ from install_receipt.evidence import build_verdict
+ from install_receipt.constants import SCENARIO_IDS
+ from install_receipt.process_identity import liveness
++from install_receipt.receipt_integrity import verify_installed_bindings
+ runner=None;scenarios=None
+ pth_before={str(q):sha(q) for q in (app/'python').glob('*._pth')} if app.exists() else {}
+ guard=app/'python/Lib/site-packages/sitecustomize.py'
+@@ -61,7 +62,8 @@
+    observed=json.loads((root/(label+'.json')).read_text(encoding='utf8'))
+    assert observed['exit']==0 and observed['package_sha256']==package['package_sha256']
+    assert (root/(label+'.shortcuts.json')).is_file()
+-  for row in package['files']:assert sha(app/row['staged_path'])==row['checkout_and_staged_sha256'],row['staged_path']
++  record['installed_binding_report_before']=verify_installed_bindings(app,manifest.load_candidate_package_02())
++  assert record['installed_binding_report_before']['ok'],record['installed_binding_report_before']
+   if a.stage in ('c22','browser'):
+    runner=OperatorRunner.continue_existing(receipt_root=c22,installed_app_path=app,package_path=exe,package_sha256=package['package_sha256'],isolated_profile=profile,isolated_port=port,synthetic=False,require_space=True,require_bundled_python=True)
+    if a.stage=='c22':
+@@ -92,7 +94,8 @@
+    with (root/(a.stage+'.stdout')).open('xb') as out,(root/(a.stage+'.stderr')).open('xb') as err:
+     result=subprocess.run(command,cwd=r,env=dict(os.environ),stdout=out,stderr=err,timeout=360)
+    record['exit']=result.returncode;assert result.returncode==0,'Original installed stage failed'
+-  record['source_bindings_after']=all(sha(app/row['staged_path'])==row['checkout_and_staged_sha256'] for row in package['files'])
++  record['installed_binding_report_after']=verify_installed_bindings(app,manifest.load_candidate_package_02())
++  record['source_bindings_after']=record['installed_binding_report_after']['ok']
+   assert record['source_bindings_after']
+  record['status']='completed_pending_independent_review'
+ except BaseException as exc:

@@ -1,0 +1,24 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_install_receipt_payload_roles.py",
+      "tests/test_install_receipt_c22_integrator_oracles.py::test_binding_checks_reject_missing_or_escaping_compiler_inputs",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w2-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w2\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w2\\tests.log"
+  }
+]

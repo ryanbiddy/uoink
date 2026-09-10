@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots and their full-tree cases pass; setup-only payload classification repair and installed work remain |
+| Integration | Installer remains sealed at `67a274d`; corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots and their full-tree cases pass; setup-only payload classification verified with 35 passes in both roots; replacement package/final tree and installed work remain |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -2310,3 +2310,22 @@ package must derive fresh counts. Gemini 73720c08's narrow verifier repair has
 35 passes, independently repeated in 6.23 seconds. Integrate it by raw diff,
 repeat checkout tests and run the newly committed complete tree. Then build and
 observe the reviewed outside-checkout installation. No installed result exists.
+
+### 2026-09-09 setup-only payload correction integrated
+
+Full-tree proof is committed as bfd82fa. Gemini 73720c08's payload verifier
+correction passed 35 worker tests, independently repeated with 35 passes in
+6.23 seconds; raw-diff/three-way checkout verification passed 35 in 3.72 seconds.
+No existing test changed. New seals retain 142 compiler bindings but explicitly
+separate the one dontcopy script from 141 installed source files. Unknown roles,
+app-file exemptions and missing/changed app bytes still fail. All actual Files
+destinations receive a separate complete installed-byte comparison.
+Proof: proof/ryan-installed-payload-repair-2026-09-09/SHA256.json.
+
+Next freeze the final source, build/reseal the replacement and complete a fresh
+full tree before Setup. The already completed 80a4fa8 tree remains separate.
+The pinned bundled ffmpeg can be hash-verified and added to the final native
+PATH for the previously skipped synthetic-video case; no test is edited.
+The portable bound CLI selects the new seal explicitly, preserving original
+C22 behavior. Same-account installed observations remain Astra's delegated work;
+no ordinary upgrade-script execution or throwaway-account credit is inferred.

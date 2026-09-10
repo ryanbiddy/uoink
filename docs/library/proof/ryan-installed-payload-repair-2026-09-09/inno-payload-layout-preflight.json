@@ -1,0 +1,56 @@
+{
+  "scope": "Static Files/Wizard directive mapping against historical sealed compiler inventory; no install or runtime claim",
+  "counts": {
+    "installed": 32194,
+    "compiler-resource": 8,
+    "installer-only": 1
+  },
+  "compiler_only": [
+    {
+      "path": "installer-assets/wizard-large-100.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-large-125.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-large-150.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-large-200.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-small-100.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-small-125.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-small-150.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "installer-assets/wizard-small-200.bmp",
+      "install_role": "compiler-resource",
+      "reason": "Wizard bitmap embedded into Setup; no Files destination"
+    },
+    {
+      "path": "upgrade_prep.ps1",
+      "install_role": "installer-only",
+      "reason": "Inno dontcopy; isolated PrepareToInstall skips the ordinary upgrade script",
+      "inno_source_pattern": "upgrade_prep.ps1"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "agent_receipt_observe-pre-payload.py": {
+      "bytes": 9642,
+      "sha256": "c511c551949744324b27f1b436d6973d940a7c5bd63e2072b4e2d65c388fd204"
+    },
+    "agent_receipt_observe.py": {
+      "bytes": 9868,
+      "sha256": "71d5f45e8800e9217545a2b7f6584f586c8274d7a8e374d2308360847011fd19"
+    },
+    "check_installed_package_inputs.py": {
+      "bytes": 2220,
+      "sha256": "0186ddaa1323c60b041c160d3f47bf8b78f0d59f41ea6c46875d9df26fb84d7e"
+    },
+    "inno-payload-layout-preflight.json": {
+      "bytes": 2014,
+      "sha256": "a0146cd354037110230da69cf32c3ea413d30e136289d54c975493be98eb7386"
+    },
+    "observer-payload-correction.patch": {
+      "bytes": 2159,
+      "sha256": "b28f17e4d457d20951169c72232247b4f3b9287a9604643328042d131f11d172"
+    },
+    "package_decoder_probe.py": {
+      "bytes": 3344,
+      "sha256": "c23087243c3a8989b8bd7b9f57ea40a270fc19b71bee0e101f6898fb06d5ef0c"
+    },
+    "payload-role-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "payload-role-c1/results.json": {
+      "bytes": 834,
+      "sha256": "5a17b2300cab569396fde289b2eea6dd493f36a38565a43bd5268ad255bcb9ea"
+    },
+    "payload-role-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "payload-role-c1/tests.log": {
+      "bytes": 101,
+      "sha256": "5ac628248a9abcbf2e9bb0c36b2baf567f6efa4ba1a550e0305bbc991a8dd037"
+    },
+    "payload-role-c1/tests.xml": {
+      "bytes": 5095,
+      "sha256": "c6088141ab6908e8afbdcf972ef5f151c1d7f78c7dcde01d63bdb9ec05e4bd1b"
+    },
+    "payload-role-w1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "payload-role-w1/results.json": {
+      "bytes": 915,
+      "sha256": "5e41632e803bcf86968f5924012fc3cd990bf78dbeff059a33d2d433567a0bf0"
+    },
+    "payload-role-w1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "payload-role-w1/tests.log": {
+      "bytes": 101,
+      "sha256": "85ee19022b905e54d374ca9e5d515d5d7378d6bb16ff754192e30199ae51d3ec"
+    },
+    "payload-role-w1/tests.xml": {
+      "bytes": 5095,
+      "sha256": "c8ff31b244fdb6122eee410de1fdc1c961749477ff6492fbddccd150260b9280"
+    },
+    "payload-role-w2/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "payload-role-w2/results.json": {
+      "bytes": 981,
+      "sha256": "d2a1bec8b114ce98aabd69eae4151eda68d5db460891dbe377a3b6ddce24446a"
+    },
+    "payload-role-w2/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "payload-role-w2/tests.log": {
+      "bytes": 101,
+      "sha256": "0e459cdaf79a158387ad2466156c88dc78a903d88d7951fbb584846b92eb98fd"
+    },
+    "payload-role-w2/tests.xml": {
+      "bytes": 5095,
+      "sha256": "6aece793e217fabfb2a03fb4e249df516bbfeec6159dac0ce8880938ad8e03a6"
+    },
+    "payload-role-worker.patch": {
+      "bytes": 29353,
+      "sha256": "be7dfa88aa21d98636fef8b4dc737cbf37050e0a85d05c62a92aa572d07ef177"
+    },
+    "run_bound_c22.py": {
+      "bytes": 1285,
+      "sha256": "ef04ac3eff129d17818eeeb7e2b717335cb734acf68decc2ebe3949e14ee7c34"
+    },
+    "scan_candidate_package.ps1": {
+      "bytes": 2621,
+      "sha256": "33845d3ac2cb5350462e8ea160697b298f81571494f38136b458a6a8de291607"
+    },
+    "seal_package_inputs04.py": {
+      "bytes": 6398,
+      "sha256": "0613b9ca035fa8b1c13503f0e484d3265ad320ef42d0f7d30adfc341c21ff014"
+    }
+  }
+}

@@ -153,24 +153,140 @@ def probe_released_capture_lock(profile, capture_key):
     return result
 
 
+def _is_valid_sha256(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    text = value.strip().lower()
+    return len(text) == 64 and all(c in "0123456789abcdef" for c in text)
+
+
+def _is_valid_git_blob(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    text = value.strip().lower()
+    return len(text) == 40 and all(c in "0123456789abcdef" for c in text)
+
+
 def verify_installed_bindings(app, sealed):
-    """Verify all named compiler inputs before importing the original product."""
+    """Verify all named compiler inputs before importing the original product.
+
+    Reports compiler bindings (142), installed files checked, and any explicit
+    compiler-only row separately. No status is a Setup or upgrade-execution receipt.
+    """
     root = Path(app).resolve()
-    rows = sealed.get("files_by_path") or {}
+    rows = sealed.get("files_by_path") if isinstance(sealed, dict) else None
+    if not isinstance(rows, dict):
+        rows = {}
     problems = []
     if len(rows) != 142:
         problems.append("expected 142 package source bindings")
+
+    compiler_only_row = None
+    installed_files_checked = 0
+
     for relative, row in rows.items():
-        # Compiler staging paths are relative to installer/staging.
-        relative = relative.removeprefix("installer/staging/")
-        path = (root / relative).resolve()
-        if not path.is_relative_to(root):
-            problems.append("binding escapes installed app: " + relative)
-        elif not path.is_file():
-            problems.append("missing installed input: " + relative)
-        elif hashlib.sha256(path.read_bytes()).hexdigest() != row.get("checkout_and_staged_sha256"):
-            problems.append("installed input hash mismatch: " + relative)
-    return {"ok": not problems, "files_checked": len(rows), "problems": problems}
+        if not isinstance(row, dict):
+            problems.append("binding row is not a dict: " + str(relative))
+            continue
+
+        normalized_relative = str(relative).replace("\\", "/").removeprefix("installer/staging/")
+        path = (root / normalized_relative).resolve()
+        escapes = not path.is_relative_to(root)
+        traversal = ".." in Path(normalized_relative).parts
+
+        role = row.get("install_role")
+        staged_path = row.get("staged_path")
+        source_path = row.get("source_path")
+        blob = row.get("source_git_blob")
+        sha = row.get("checkout_and_staged_sha256")
+
+        if escapes:
+            problems.append("binding escapes installed app: " + str(relative))
+            if role == "installer-only":
+                problems.append("cannot exempt escaping path: " + str(relative))
+            continue
+
+        if traversal:
+            problems.append("binding contains traversal: " + str(relative))
+            continue
+
+        if role == "installer-only":
+            is_upgrade_prep = (
+                normalized_relative == "upgrade_prep.ps1"
+                and str(staged_path or "").replace("\\", "/").removeprefix("installer/staging/") == "upgrade_prep.ps1"
+            )
+            if not is_upgrade_prep:
+                problems.append("cannot mark application file as installer-only: " + str(relative))
+                installed_files_checked += 1
+                if blob is not None and not _is_valid_git_blob(blob):
+                    problems.append("invalid source_git_blob: " + str(relative))
+                if not _is_valid_sha256(sha):
+                    problems.append("invalid checkout_and_staged_sha256: " + str(relative))
+                if not path.is_file():
+                    problems.append("missing installed input: " + str(relative))
+                elif _is_valid_sha256(sha):
+                    actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+                    if actual_sha != str(sha).strip().lower():
+                        problems.append("installed input hash mismatch: " + str(relative))
+                continue
+
+            has_error = False
+            if str(source_path or "").replace("\\", "/") != "installer/upgrade_prep.ps1":
+                problems.append("invalid compiler-only source_path: " + str(relative))
+                has_error = True
+            if not _is_valid_git_blob(blob):
+                problems.append("invalid source_git_blob: " + str(relative))
+                has_error = True
+            if not _is_valid_sha256(sha):
+                problems.append("invalid checkout_and_staged_sha256: " + str(relative))
+                has_error = True
+            if compiler_only_row is not None:
+                problems.append("multiple installer-only rows: " + str(relative))
+                has_error = True
+
+            if not has_error:
+                compiler_only_row = dict(row)
+            continue
+
+        if role is not None and role != "installed":
+            problems.append(f"rejected unknown install_role '{role}': " + str(relative))
+            installed_files_checked += 1
+            if blob is not None and not _is_valid_git_blob(blob):
+                problems.append("invalid source_git_blob: " + str(relative))
+            if not _is_valid_sha256(sha):
+                problems.append("invalid checkout_and_staged_sha256: " + str(relative))
+            if not path.is_file():
+                problems.append("missing installed input: " + str(relative))
+            elif _is_valid_sha256(sha):
+                actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+                if actual_sha != str(sha).strip().lower():
+                    problems.append("installed input hash mismatch: " + str(relative))
+            continue
+
+        installed_files_checked += 1
+        if blob is not None and not _is_valid_git_blob(blob):
+            problems.append("invalid source_git_blob: " + str(relative))
+        if sha is not None and not _is_valid_sha256(sha):
+            problems.append("invalid checkout_and_staged_sha256: " + str(relative))
+        if not path.is_file():
+            problems.append("missing installed input: " + str(relative))
+        elif sha is not None and _is_valid_sha256(sha):
+            actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual_sha != str(sha).strip().lower():
+                problems.append("installed input hash mismatch: " + str(relative))
+        elif sha is None:
+            problems.append("missing checkout_and_staged_sha256: " + str(relative))
+
+    return {
+        "ok": not problems,
+        "files_checked": installed_files_checked,
+        "installed_files_checked": installed_files_checked,
+        "compiler_bindings": len(rows),
+        "compiler_bindings_count": len(rows),
+        "compiler_only_row": compiler_only_row,
+        "installer_only_row": compiler_only_row,
+        "problems": problems,
+    }
 
 
 def unresolved_restart_integrity(observation):

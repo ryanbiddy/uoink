@@ -1,0 +1,571 @@
+diff --git a/docs/library/GEMINI-INSTALLED-PAYLOAD-REPAIR-2026-09-09.md b/docs/library/GEMINI-INSTALLED-PAYLOAD-REPAIR-2026-09-09.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..4dc08235f24db602806bedd3e9d32d7e019f4f48
+--- /dev/null
++++ b/docs/library/GEMINI-INSTALLED-PAYLOAD-REPAIR-2026-09-09.md
+@@ -0,0 +1,148 @@
++# Installed Payload Classification Repair Review
++
++**Date:** 2026-09-09  
++**Reviewer:** Gemini (Worker in local multi-model control room)  
++**Worktree:** `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\73720c08-178\gemini`  
++**Reference Brief:** `E:\AI\projects\uoink\checkouts\Yoink-library\docs\library\RYAN-INSTALLED-PAYLOAD-REPAIR-BRIEF-2026-09-09.md`  
++
++---
++
++## 1. Executive Summary and Problem Statement
++
++Before Setup execution, source inspection revealed a C22 verifier instrument defect:
++- The package's 142 source bindings represent compiler inputs.
++- One compiler input is `installer/upgrade_prep.ps1`, whose Inno Setup directive is explicitly `dontcopy`. It is an ordinary-upgrade script deliberately skipped by isolated `PrepareToInstall`, and is not an installed application file.
++- The verifier (`verify_installed_bindings` in `scripts/install_receipt/receipt_integrity.py`) incorrectly required all 142 compiler inputs to be present inside the installed application directory.
++- Installing `upgrade_prep.ps1` solely to appease the verifier is forbidden.
++
++Per Ryan's repair brief, Gemini was assigned to:
++1. Repair `scripts/install_receipt/receipt_integrity.py` to recognize compiler-only payload roles while preserving all existing checks and 142-binding counts.
++2. Add an independent test suite in `tests/test_install_receipt_payload_roles.py`.
++3. Verify changes using the guarded native runner `_scratch/integrator_verify.py` with worker label `payload-role-w1`.
++4. Maintain strict operational boundaries (no edits to existing tests, Inno scripts, product code, manifest defaults, helper behavior, or proof archives; no Setup execution; no port 5179 or live index access; no commits or branch merges).
++
++---
++
++## 2. Changes Implemented
++
++### A. Verifier Repair: `scripts/install_receipt/receipt_integrity.py`
++
++`verify_installed_bindings(app, sealed)` was updated with the following bounded logic:
++1. **Binding Count Preservation:** Retains strict verification that `len(rows) == 142`. If the row count differs, `"expected 142 package source bindings"` is reported.
++2. **Compiler-Only Role Authorization (`install_role="installer-only"`):**
++   - Authorized **strictly and exclusively** for:
++     - `staged_path`: `upgrade_prep.ps1`
++     - `source_path`: `installer/upgrade_prep.ps1`
++     - Valid 40-hex lowercase Git commit/blob (`source_git_blob`)
++     - Valid 64-hex lowercase SHA-256 digest (`checkout_and_staged_sha256`)
++     - Non-escaping path under app root
++   - When verified, this row is recorded separately in `compiler_only_row` (and `installer_only_row`) and is **not** required to exist inside the installed app directory.
++3. **Prevention of Improper Exemption:**
++   - Any attempt to mark application files (such as `server.py`, `index.py`, or `uoink_tray.py`) with `install_role="installer-only"` is explicitly rejected (`"cannot mark application file as installer-only: <path>"`). The file remains an installed-file requirement.
++   - Any escaping path marked `installer-only` is rejected with `"cannot exempt escaping path"` alongside `"binding escapes installed app"`.
++   - Traversal attempts (`..` in path components) are rejected.
++4. **Rejection of Unknown Roles and Malformed Hashes:**
++   - Unknown roles (e.g. `"unknown"`, `"optional"`, `"exempt"`, `"compiler-only"`, or non-string values) are rejected with `"rejected unknown install_role"`.
++   - Missing or non-64-hex digests generate `"invalid checkout_and_staged_sha256"`.
++   - Malformed Git blobs generate `"invalid source_git_blob"`.
++5. **Legacy Row Fidelity:**
++   - Unlabelled rows (`install_role is None`) or rows with `install_role="installed"` remain strict installed-file requirements. If a legacy unlabelled `upgrade_prep.ps1` is missing from the app, `"missing installed input: upgrade_prep.ps1"` is recorded.
++6. **Accurate Reporting Without False Claims:**
++   - The result dictionary reports:
++     - `"compiler_bindings"`: 142
++     - `"installed_files_checked"`: actual count of installed files verified (141 when 1 compiler-only row is present; 142 in legacy complete installations)
++     - `"files_checked"`: 141 (or 142), matching actual installed files and avoiding false claims
++     - `"compiler_only_row"`: dict of the validated compiler-only row (or `None`)
++     - `"problems"`: list of error descriptions
++     - `"ok"`: `True` if no problems exist, else `False`
++   - Clearly documented that no status constitutes a Setup or upgrade-execution receipt.
++
++### B. Independent Test Suite: `tests/test_install_receipt_payload_roles.py`
++
++Created an independent test suite with 34 test cases covering:
++1. `test_positive_exact_compiler_only`: 142 compiler bindings, 1 compiler-only `upgrade_prep.ps1` omitted from app, 141 installed files matching hashes -> passes, reports 142 compiler bindings, 141 installed files checked, and explicit `compiler_only_row`.
++2. `test_positive_legacy_installed`: 142 legacy unlabelled bindings all present in app -> passes, reports 142 installed files checked, `compiler_only_row is None`.
++3. `test_legacy_upgrade_prep_missing_fails`: unlabelled `upgrade_prep.ps1` missing from app -> fails with `"missing installed input: upgrade_prep.ps1"`.
++4. `test_omitted_runtime_bytes`: missing application file -> fails with `"missing installed input"`.
++5. `test_changed_runtime_bytes`: modified file content on disk -> fails with `"installed input hash mismatch"`.
++6. `test_attempts_to_exempt_another_file`: parameterized over `module_000.py` and `server.py` -> fails with `"cannot mark application file as installer-only"`.
++7. `test_traversal_and_escaping_rejected`: path traversal / escaping -> fails with `"escapes"`.
++8. `test_attempt_to_exempt_escaping_path`: escaping path marked `installer-only` -> fails with `"cannot exempt escaping path"` and `"escapes"`.
++9. `test_unknown_roles_rejected`: parameterized over `"unknown"`, `"exempt"`, `"optional"`, `"compiler-only"`, `123` -> fails with `"rejected unknown install_role"`.
++10. `test_invalid_sha256_rejected`: parameterized over truncated, malformed, non-hex, empty, and non-string digests -> fails with `"invalid checkout_and_staged_sha256"`.
++11. `test_invalid_blob_on_compiler_only_rejected`: parameterized over missing, truncated, 64-hex, and non-hex blobs -> fails with `"invalid source_git_blob"`.
++12. `test_invalid_blob_on_installed_row_rejected`: malformed blob on installed row -> fails with `"invalid source_git_blob"`.
++13. `test_incomplete_binding_counts_rejected`: parameterized over 141 rows (-1), 143 rows (+1), and 0 rows (-142) -> fails with `"expected 142 package source bindings"`.
++14. `test_installer_only_wrong_source_path_rejected`: `source_path != "installer/upgrade_prep.ps1"` -> fails with `"invalid compiler-only source_path"`.
++15. `test_reporting_no_false_claim_of_142_installed_files`: validates exact counts: `compiler_bindings == 142`, `files_checked == 141`, `installed_files_checked == 141`, `files_checked != 142`.
++
++---
++
++## 3. Verification Evidence
++
++### Guarded Native Runner Verification (`payload-role-w1`)
++
++Executed command:
++```powershell
++python E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py `
++    --root C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\73720c08-178\gemini `
++    --label payload-role-w1 `
++    tests/test_install_receipt_payload_roles.py `
++    tests/test_install_receipt_c22_integrator_oracles.py::test_binding_checks_reject_missing_or_escaping_compiler_inputs
++```
++
++Output:
++```text
++START tests
++tests exit 0 
++...................................                                      [100%]
++35 passed in 6.04s
++```
++
++`_scratch/payload-role-w1/results.json`:
++```json
++[
++  {
++    "name": "tests",
++    "command": [
++      "C:\\Python314\\python.exe",
++      "-B",
++      "-m",
++      "pytest",
++      "-q",
++      "-ra",
++      "--tb=short",
++      "-p",
++      "no:cacheprovider",
++      "-p",
++      "ig_paths",
++      "tests/test_install_receipt_payload_roles.py",
++      "tests/test_install_receipt_c22_integrator_oracles.py::test_binding_checks_reject_missing_or_escaping_compiler_inputs",
++      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w1-0",
++      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w1\\tests.xml"
++    ],
++    "exit": 0,
++    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\73720c08-178\\gemini\\_scratch\\payload-role-w1\\tests.log"
++  }
++]
++```
++
++All 35 tests passed cleanly with exit code 0 under the audit guard.
++
++---
++
++## 4. Operational Boundaries and Invariants Observed
++
++- **Allowed Files:** Only `scripts/install_receipt/receipt_integrity.py`, `tests/test_install_receipt_payload_roles.py`, and this review report were modified or created.
++- **No Existing Test Edits:** `tests/test_install_receipt_c22_integrator_oracles.py` and all other existing tests were untouched.
++- **No Inno / Product Code Edits:** No installer scripts (`.iss`), product runtime modules, manifest defaults, or proof archives were altered.
++- **No Execution / Credentials:** No Setup executable, original helper, model process, live credential store, or external network calls were made.
++- **Port 5179 Preserved:** Port 5179 was neither bound nor contacted.
++- **Git State:** Executed strictly within the assigned Git worktree; no commits created and no branches merged.
++
++---
++
++## 5. Handoff to Control Room and Astra
++
++1. **Astra Task:** Astra owns producing the new package seal entry with `install_role="installer-only"` for `upgrade_prep.ps1` from Inno's `dontcopy` entry, adapting outer observation checks, and matching the installed payload inventory against Inno's destination list.
++2. **Integrator Task:** Integrator can merge worker Gemini's branch and run `payload-role-c1` on the checkout tree.
+diff --git a/scripts/install_receipt/receipt_integrity.py b/scripts/install_receipt/receipt_integrity.py
+index 8ff3d0df4fb42e8828ac989cf1ce33b3a27a6f80..d872b8e15264ef47de3d8e137b029bf30d99184b 100644
+--- a/scripts/install_receipt/receipt_integrity.py
++++ b/scripts/install_receipt/receipt_integrity.py
+@@ -153,24 +153,140 @@ def probe_released_capture_lock(profile, capture_key):
+     return result
+ 
+ 
++def _is_valid_sha256(value: object) -> bool:
++    if not isinstance(value, str):
++        return False
++    text = value.strip().lower()
++    return len(text) == 64 and all(c in "0123456789abcdef" for c in text)
++
++
++def _is_valid_git_blob(value: object) -> bool:
++    if not isinstance(value, str):
++        return False
++    text = value.strip().lower()
++    return len(text) == 40 and all(c in "0123456789abcdef" for c in text)
++
++
+ def verify_installed_bindings(app, sealed):
+-    """Verify all named compiler inputs before importing the original product."""
++    """Verify all named compiler inputs before importing the original product.
++
++    Reports compiler bindings (142), installed files checked, and any explicit
++    compiler-only row separately. No status is a Setup or upgrade-execution receipt.
++    """
+     root = Path(app).resolve()
+-    rows = sealed.get("files_by_path") or {}
++    rows = sealed.get("files_by_path") if isinstance(sealed, dict) else None
++    if not isinstance(rows, dict):
++        rows = {}
+     problems = []
+     if len(rows) != 142:
+         problems.append("expected 142 package source bindings")
++
++    compiler_only_row = None
++    installed_files_checked = 0
++
+     for relative, row in rows.items():
+-        # Compiler staging paths are relative to installer/staging.
+-        relative = relative.removeprefix("installer/staging/")
+-        path = (root / relative).resolve()
+-        if not path.is_relative_to(root):
+-            problems.append("binding escapes installed app: " + relative)
+-        elif not path.is_file():
+-            problems.append("missing installed input: " + relative)
+-        elif hashlib.sha256(path.read_bytes()).hexdigest() != row.get("checkout_and_staged_sha256"):
+-            problems.append("installed input hash mismatch: " + relative)
+-    return {"ok": not problems, "files_checked": len(rows), "problems": problems}
++        if not isinstance(row, dict):
++            problems.append("binding row is not a dict: " + str(relative))
++            continue
++
++        normalized_relative = str(relative).replace("\\", "/").removeprefix("installer/staging/")
++        path = (root / normalized_relative).resolve()
++        escapes = not path.is_relative_to(root)
++        traversal = ".." in Path(normalized_relative).parts
++
++        role = row.get("install_role")
++        staged_path = row.get("staged_path")
++        source_path = row.get("source_path")
++        blob = row.get("source_git_blob")
++        sha = row.get("checkout_and_staged_sha256")
++
++        if escapes:
++            problems.append("binding escapes installed app: " + str(relative))
++            if role == "installer-only":
++                problems.append("cannot exempt escaping path: " + str(relative))
++            continue
++
++        if traversal:
++            problems.append("binding contains traversal: " + str(relative))
++            continue
++
++        if role == "installer-only":
++            is_upgrade_prep = (
++                normalized_relative == "upgrade_prep.ps1"
++                and str(staged_path or "").replace("\\", "/").removeprefix("installer/staging/") == "upgrade_prep.ps1"
++            )
++            if not is_upgrade_prep:
++                problems.append("cannot mark application file as installer-only: " + str(relative))
++                installed_files_checked += 1
++                if blob is not None and not _is_valid_git_blob(blob):
++                    problems.append("invalid source_git_blob: " + str(relative))
++                if not _is_valid_sha256(sha):
++                    problems.append("invalid checkout_and_staged_sha256: " + str(relative))
++                if not path.is_file():
++                    problems.append("missing installed input: " + str(relative))
++                elif _is_valid_sha256(sha):
++                    actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
++                    if actual_sha != str(sha).strip().lower():
++                        problems.append("installed input hash mismatch: " + str(relative))
++                continue
++
++            has_error = False
++            if str(source_path or "").replace("\\", "/") != "installer/upgrade_prep.ps1":
++                problems.append("invalid compiler-only source_path: " + str(relative))
++                has_error = True
++            if not _is_valid_git_blob(blob):
++                problems.append("invalid source_git_blob: " + str(relative))
++                has_error = True
++            if not _is_valid_sha256(sha):
++                problems.append("invalid checkout_and_staged_sha256: " + str(relative))
++                has_error = True
++            if compiler_only_row is not None:
++                problems.append("multiple installer-only rows: " + str(relative))
++                has_error = True
++
++            if not has_error:
++                compiler_only_row = dict(row)
++            continue
++
++        if role is not None and role != "installed":
++            problems.append(f"rejected unknown install_role '{role}': " + str(relative))
++            installed_files_checked += 1
++            if blob is not None and not _is_valid_git_blob(blob):
++                problems.append("invalid source_git_blob: " + str(relative))
++            if not _is_valid_sha256(sha):
++                problems.append("invalid checkout_and_staged_sha256: " + str(relative))
++            if not path.is_file():
++                problems.append("missing installed input: " + str(relative))
++            elif _is_valid_sha256(sha):
++                actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
++                if actual_sha != str(sha).strip().lower():
++                    problems.append("installed input hash mismatch: " + str(relative))
++            continue
++
++        installed_files_checked += 1
++        if blob is not None and not _is_valid_git_blob(blob):
++            problems.append("invalid source_git_blob: " + str(relative))
++        if sha is not None and not _is_valid_sha256(sha):
++            problems.append("invalid checkout_and_staged_sha256: " + str(relative))
++        if not path.is_file():
++            problems.append("missing installed input: " + str(relative))
++        elif sha is not None and _is_valid_sha256(sha):
++            actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
++            if actual_sha != str(sha).strip().lower():
++                problems.append("installed input hash mismatch: " + str(relative))
++        elif sha is None:
++            problems.append("missing checkout_and_staged_sha256: " + str(relative))
++
++    return {
++        "ok": not problems,
++        "files_checked": installed_files_checked,
++        "installed_files_checked": installed_files_checked,
++        "compiler_bindings": len(rows),
++        "compiler_bindings_count": len(rows),
++        "compiler_only_row": compiler_only_row,
++        "installer_only_row": compiler_only_row,
++        "problems": problems,
++    }
+ 
+ 
+ def unresolved_restart_integrity(observation):
+diff --git a/tests/test_install_receipt_payload_roles.py b/tests/test_install_receipt_payload_roles.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..4c8d87887692a8f47ff641263f1de03a3940a0a6
+--- /dev/null
++++ b/tests/test_install_receipt_payload_roles.py
+@@ -0,0 +1,254 @@
++"""Independent tests for C22 verifier payload roles and compiler-only bindings."""
++from __future__ import annotations
++
++import hashlib
++from pathlib import Path
++import sys
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
++from install_receipt.receipt_integrity import verify_installed_bindings
++
++VALID_BLOB = "acdf2c535be396e168929938897f6e2bee5bc174"
++
++
++def make_synthetic_package(tmp_path: Path, *, installer_only: bool = True):
++    """Create 142 synthetic bindings and populate tmp_path/app accordingly."""
++    app_dir = tmp_path / "app"
++    app_dir.mkdir(parents=True, exist_ok=True)
++
++    files_by_path: dict[str, dict[str, object]] = {}
++
++    for i in range(141):
++        rel = f"module_{i:03d}.py"
++        content = f"# module {i}\n".encode("utf-8")
++        file_path = app_dir / rel
++        file_path.write_bytes(content)
++        sha = hashlib.sha256(content).hexdigest()
++        files_by_path[rel] = {
++            "staged_path": rel,
++            "source_path": f"src/{rel}",
++            "source_git_blob": VALID_BLOB,
++            "checkout_and_staged_sha256": sha,
++        }
++
++    prep_content = b"# upgrade prep ps1 content\n"
++    prep_sha = hashlib.sha256(prep_content).hexdigest()
++    prep_row: dict[str, object] = {
++        "staged_path": "upgrade_prep.ps1",
++        "source_path": "installer/upgrade_prep.ps1",
++        "source_git_blob": VALID_BLOB,
++        "checkout_and_staged_sha256": prep_sha,
++    }
++
++    if installer_only:
++        prep_row["install_role"] = "installer-only"
++    else:
++        (app_dir / "upgrade_prep.ps1").write_bytes(prep_content)
++
++    files_by_path["upgrade_prep.ps1"] = prep_row
++    assert len(files_by_path) == 142
++
++    return app_dir, {"files_by_path": files_by_path}
++
++
++def test_positive_exact_compiler_only(tmp_path):
++    """Exact compiler-only row passes without requiring upgrade_prep.ps1 inside app."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    assert not (app_dir / "upgrade_prep.ps1").exists()
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is True
++    assert result["problems"] == []
++    assert result["compiler_bindings"] == 142
++    assert result["installed_files_checked"] == 141
++    assert result["files_checked"] == 141
++    assert result["compiler_only_row"] is not None
++    assert result["compiler_only_row"]["staged_path"] == "upgrade_prep.ps1"
++    assert result["compiler_only_row"]["install_role"] == "installer-only"
++
++
++def test_positive_legacy_installed(tmp_path):
++    """Legacy unlabelled rows require all 142 files inside app."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=False)
++    assert (app_dir / "upgrade_prep.ps1").is_file()
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is True
++    assert result["problems"] == []
++    assert result["compiler_bindings"] == 142
++    assert result["installed_files_checked"] == 142
++    assert result["files_checked"] == 142
++    assert result["compiler_only_row"] is None
++
++
++def test_legacy_upgrade_prep_missing_fails(tmp_path):
++    """Unlabelled legacy upgrade_prep.ps1 missing from app causes a failure."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=False)
++    (app_dir / "upgrade_prep.ps1").unlink()
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("missing installed input: upgrade_prep.ps1" in p for p in result["problems"])
++
++
++def test_omitted_runtime_bytes(tmp_path):
++    """Omitted application file inside app causes verifier failure."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    (app_dir / "module_000.py").unlink()
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("missing installed input: module_000.py" in p for p in result["problems"])
++
++
++def test_changed_runtime_bytes(tmp_path):
++    """Changed bytes in an installed file trigger a hash mismatch failure."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    (app_dir / "module_000.py").write_bytes(b"# corrupted content\n")
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("installed input hash mismatch: module_000.py" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("target", ["module_000.py", "server.py"])
++def test_attempts_to_exempt_another_file(tmp_path, target):
++    """No caller may mark an application file as installer-only."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    if target not in sealed["files_by_path"]:
++        content = b"# app file\n"
++        (app_dir / target).write_bytes(content)
++        sha = hashlib.sha256(content).hexdigest()
++        # Replace module_001.py to keep 142 count
++        del sealed["files_by_path"]["module_001.py"]
++        (app_dir / "module_001.py").unlink()
++        sealed["files_by_path"][target] = {
++            "staged_path": target,
++            "source_path": f"src/{target}",
++            "source_git_blob": VALID_BLOB,
++            "checkout_and_staged_sha256": sha,
++        }
++
++    sealed["files_by_path"][target]["install_role"] = "installer-only"
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("cannot mark application file as installer-only: " + target in p for p in result["problems"])
++
++
++def test_traversal_and_escaping_rejected(tmp_path):
++    """Paths escaping app or containing traversal are rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    # Escaping path
++    del sealed["files_by_path"]["module_000.py"]
++    (app_dir / "module_000.py").unlink()
++    sealed["files_by_path"]["../escape.py"] = {
++        "staged_path": "../escape.py",
++        "source_path": "src/escape.py",
++        "source_git_blob": VALID_BLOB,
++        "checkout_and_staged_sha256": "0" * 64,
++    }
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("escapes" in p for p in result["problems"])
++
++
++def test_attempt_to_exempt_escaping_path(tmp_path):
++    """Escaping path marked installer-only is rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    del sealed["files_by_path"]["module_000.py"]
++    (app_dir / "module_000.py").unlink()
++    sealed["files_by_path"]["../escape.py"] = {
++        "staged_path": "../escape.py",
++        "source_path": "installer/upgrade_prep.ps1",
++        "source_git_blob": VALID_BLOB,
++        "checkout_and_staged_sha256": "0" * 64,
++        "install_role": "installer-only",
++    }
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("escapes" in p for p in result["problems"])
++    assert any("cannot exempt escaping path" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("role", ["unknown", "exempt", "optional", "compiler-only", 123])
++def test_unknown_roles_rejected(tmp_path, role):
++    """Any role other than 'installed' or valid 'installer-only' is rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    sealed["files_by_path"]["upgrade_prep.ps1"]["install_role"] = role
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("rejected unknown install_role" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("bad_sha", ["short", "0" * 63, "g" * 64, 12345, ""])
++def test_invalid_sha256_rejected(tmp_path, bad_sha):
++    """Malformed checkout_and_staged_sha256 is rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    sealed["files_by_path"]["upgrade_prep.ps1"]["checkout_and_staged_sha256"] = bad_sha
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("invalid checkout_and_staged_sha256" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("bad_blob", ["short", "0" * 39, "g" * 40, "0" * 64, None, ""])
++def test_invalid_blob_on_compiler_only_rejected(tmp_path, bad_blob):
++    """Malformed or missing source_git_blob on installer-only row is rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    sealed["files_by_path"]["upgrade_prep.ps1"]["source_git_blob"] = bad_blob
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("invalid source_git_blob" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("bad_blob", ["short", "0" * 39, "g" * 40, "0" * 64])
++def test_invalid_blob_on_installed_row_rejected(tmp_path, bad_blob):
++    """Malformed source_git_blob on an installed row is rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    sealed["files_by_path"]["module_000.py"]["source_git_blob"] = bad_blob
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("invalid source_git_blob" in p for p in result["problems"])
++
++
++@pytest.mark.parametrize("count_offset", [-1, 1, -142])
++def test_incomplete_binding_counts_rejected(tmp_path, count_offset):
++    """Package seals with anything other than 142 bindings are rejected."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    if count_offset == -1:
++        del sealed["files_by_path"]["module_000.py"]
++    elif count_offset == 1:
++        sealed["files_by_path"]["extra.py"] = {
++            "staged_path": "extra.py",
++            "source_path": "src/extra.py",
++            "source_git_blob": VALID_BLOB,
++            "checkout_and_staged_sha256": "0" * 64,
++        }
++    elif count_offset == -142:
++        sealed["files_by_path"] = {}
++
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("expected 142 package source bindings" in p for p in result["problems"])
++
++
++def test_installer_only_wrong_source_path_rejected(tmp_path):
++    """upgrade_prep.ps1 with wrong source_path is rejected as compiler-only."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    sealed["files_by_path"]["upgrade_prep.ps1"]["source_path"] = "other/upgrade_prep.ps1"
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is False
++    assert any("invalid compiler-only source_path" in p for p in result["problems"])
++
++
++def test_reporting_no_false_claim_of_142_installed_files(tmp_path):
++    """Reports compiler bindings, installed files checked, and compiler-only row separately."""
++    app_dir, sealed = make_synthetic_package(tmp_path, installer_only=True)
++    result = verify_installed_bindings(app_dir, sealed)
++    assert result["ok"] is True
++    assert result["compiler_bindings"] == 142
++    assert result["installed_files_checked"] == 141
++    assert result["files_checked"] == 141
++    assert result["files_checked"] != 142
++    assert result["compiler_only_row"]["staged_path"] == "upgrade_prep.ps1"
