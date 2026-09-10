@@ -1,0 +1,114 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+....................................F................................... [  8%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 32%]
+...........................................x............................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 70%]
+...................s.................................................... [ 73%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 82%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+..s.......s............................................................. [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+........................................................................ [ 99%]
+........                                                                 [100%]
+================================== FAILURES ===================================
+____________ test_as7_c21_at6_receipt_records_process_exit_status _____________
+tests\library_work_astra\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status
+    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (
+E   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
+E   assert ({})
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase3_acceptance4.py: 1 warning
+tests/library_work_astra/test_phase3_publication.py: 1 warning
+tests/library_work_astra/test_phase3_repairs.py: 4 warnings
+tests/library_work_astra/test_phase6_bd2_acceptance.py: 8 warnings
+tests/library_work_astra/test_phase6_bd_acceptance.py: 4 warnings
+tests/security/test_security_findings.py: 4 warnings
+tests/test_phase0_podcast_repair.py: 4 warnings
+tests/test_phase6_bc2.py: 4 warnings
+tests/test_phase6_bc3f.py: 4 warnings
+tests/test_podcast_background_jobs.py: 16 warnings
+tests/test_podcast_corpus_bridge.py: 38 warnings
+tests/test_podcast_durability.py: 10 warnings
+tests/test_podcast_watch.py: 9 warnings
+tests/test_quiet_notifications.py: 1 warning
+tests/test_source_subscriptions_migration.py: 4 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py: 2 warnings
+tests/test_c03_durability.py: 4 warnings
+tests/test_corpus_contract_v1.py: 32 warnings
+tests/test_podcast_corpus_bridge.py: 4 warnings
+tests/test_taste_scoring.py: 3 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\memory_layer.py:90: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py::test_auto_uoink_poll
+tests/test_auto_uoink_poll.py::test_auto_uoink_does_not_burn_backlog_or_starve_plain_poll
+tests/test_auto_uoink_poll.py::test_taste_signal_cannot_override_consent_only_the_ledger_captures
+tests/test_discovery_route.py::test_discovery_route
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_restarted_job_reuses_a_completed_transcript
+tests/test_podcast_background_jobs.py::test_auto_transcription_publishes_and_toasts_after_corpus_commit
+tests/test_podcast_background_jobs.py::test_auto_publish_failure_preserves_completed_transcript_for_retry
+tests/test_podcast_durability.py::test_all_podcast_state_transitions_survive_close_reopen
+  E:\AI\projects\uoink\checkouts\Yoink-library\whisper_runner.py:84: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+  E:\AI\projects\uoink\checkouts\Yoink-library\server.py:9449: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    pixels = list(small.getdata())
+
+tests/test_workspaces_crud.py::test_crud_lifecycle
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_error_paths
+  E:\AI\projects\uoink\checkouts\Yoink-library\workspaces.py:40: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_mcpb_posix_build.py:16: POSIX build-script execution
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-security-final-tree-01-0\\t2193\\outside.mp4' -> 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-security-final-tree-01-0\\t2193\\symlink-media\\video.mp4'
+SKIPPED [1] tests\test_screenshot_extraction_cm10.py:41: ffmpeg not on PATH
+XFAIL tests/security/test_security_findings.py::test_sec_06_fts_query_non_ascii_dropped - SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
+1 failed, 2451 passed, 3 skipped, 1 xfailed, 183 warnings in 1427.78s (0:23:47)

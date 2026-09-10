@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-09; final tree `12ce8a5`, installer source `67a274d`)
+## State at handoff (updated 2026-09-09; corrected tree `80a4fa8`, historical installer source `67a274d`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots; safe agent installation and complete tree pending |
+| Integration | Installer remains sealed at `67a274d`; corrected `80a4fa8` tree has 2,451 passed / one historical AT6 failure / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections pass 172 in both roots and their full-tree cases pass; setup-only payload classification repair and installed work remain |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -2290,3 +2290,23 @@ the path conflict an executed failure and names historical package-03; neither
 statement controls execution. No Setup ran. Use only the rebuilt package and
 its exact selected seal after the complete committed tree and fresh scan.
 Proof: proof/ryan-agent-receipt-path-review-2026-09-09/SHA256.json.
+
+### 2026-09-09 21:10 PDT — corrected complete tree closes twelve setup failures
+
+At exact 80a4fa8e6182901c3e0f5a7ddeb806839a180050, the full tree has 2,451 passes,
+one failure, three skips and one existing xfail in 1,427.78 seconds. Only S21 is
+excluded. All twelve prior setup failures pass; none is missing and no new
+failure appears. Ten credential regressions were added. AT6's historical exit
+assertion is the sole failure. The raw outcome remains FAIL and is sealed in
+proof/ryan-security-final-tree-01-2026-09-09/SHA256.json.
+
+Before Setup, payload inspection found that Inno's dontcopy upgrade_prep.ps1 is
+one of the 142 compiler bindings but not an installed app file. Isolated
+PrepareToInstall also skips that ordinary-upgrade script. Do not claim the
+isolated reinstall exercises that script. Eight wizard bitmaps are compiler
+resources, not Files destinations. Static mapping of the old package gives
+32,194 installed inputs, eight wizard images and one setup-only script; the new
+package must derive fresh counts. Gemini 73720c08's narrow verifier repair has
+35 passes, independently repeated in 6.23 seconds. Integrate it by raw diff,
+repeat checkout tests and run the newly committed complete tree. Then build and
+observe the reviewed outside-checkout installation. No installed result exists.

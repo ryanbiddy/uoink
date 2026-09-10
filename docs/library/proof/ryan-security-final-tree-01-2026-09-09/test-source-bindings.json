@@ -1,0 +1,30 @@
+{
+  "tests/library_work_astra/test_phase4_aw2_acceptance.py": {
+    "baseline_blob": "30ae31418635b195c6fb39d19ef488d23d9685a9",
+    "candidate_blob": "aebdac5205f1220f0b6d719f7d5c934bd4577509"
+  },
+  "tests/library_work_astra/test_phase4_aw3_acceptance.py": {
+    "baseline_blob": "10257527e7cde19174c18071fa82f867dce37a40",
+    "candidate_blob": "d99f06b37dc5754ce611b7fe0810c998910f7484"
+  },
+  "tests/library_work_astra/test_phase4_aw_acceptance.py": {
+    "baseline_blob": "97377847f5890d47e0e4590eddf3fb6359120eeb",
+    "candidate_blob": "4c10c6bf789ad1a7a11608c9fdefef52ef40bc51"
+  },
+  "tests/test_existing_index_read_open.py": {
+    "baseline_blob": "2f21cb5da08c1509b98a2fb4a5c25e6168d29910",
+    "candidate_blob": "4c1f777537affb6e40c5f20da660d96470580735"
+  },
+  "tests/test_install_receipt_c22_kit.py": {
+    "baseline_blob": "fc94c99cf1c3cdbb214f70bed16b1785606e3ea3",
+    "candidate_blob": "c63513b07aef928bf4256113af9922840ce664ba"
+  },
+  "tests/test_install_receipt_p4_kit.py": {
+    "baseline_blob": "756a2d5792ede0d54885b6e91a55242fd94e6f07",
+    "candidate_blob": "5c4b9097af9ffe333a830763ab49b1efb25b8995"
+  },
+  "tests/test_installer_dependency_lock.py": {
+    "baseline_blob": "43d9af819d4615d4d981c8a4e77a8e7b9031c5a1",
+    "candidate_blob": "f5aa7a83281c343f6124a0bd1ffc4ecdfd04daaa"
+  }
+}
