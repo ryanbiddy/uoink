@@ -151,11 +151,17 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 ## ffmpeg (bundled binary, not a Python package)
 
 - **Component:** ffmpeg / ffprobe, BtbN `win64-lgpl` build (see build.ps1
-  `$FFMPEG_URL`).
+  `$FFMPEG_URL`), plus the LGPL shared FFmpeg 7.1.5 runtime in
+  `bin/torchcodec` (see `$FFMPEG_SHARED_URL`). TorchCodec 0.7 requires this
+  separate FFmpeg 7 ABI; the standalone CLI remains FFmpeg 8.1.2.
 - **License:** LGPL v2.1+ (this build is compiled without the GPL-only
   encoders such as libx264/libx265).
 - **Source:** https://ffmpeg.org/download.html and
   https://github.com/BtbN/FFmpeg-Builds . Uoink uses ffmpeg only to decode
-  and extract audio for transcription.
+  and extract audio and video frames for transcription and cited evidence.
+- **Pinned shared build and source recipe:**
+  https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2026-07-31-14-10 .
+  Shared libraries may be replaced with compatible LGPL FFmpeg 7 libraries
+  in `bin/torchcodec`; Uoink does not statically link them into its own code.
 - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
