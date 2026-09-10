@@ -57,6 +57,17 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   receipt session covering AS-7's C22 list, Phase 4 and everyday flows. Phase 5
   Part B is deferred. Live-index, 5179 and paid-API prohibitions remain in force.
 
+### New authorization, 2026-09-09 — corrections and agent installation
+
+Ryan explicitly approved the two proposed test-setup corrections and continued
+fixes, delegated the installation check to Astra, and requested Gemini review.
+Follow RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md and the new Gemini council brief.
+These supersede pending two-patch approval and Ryan-only execution entries below.
+All live-index, 5179, paid API, main merge, fetch/speaker and Part B restrictions
+remain. The historical 13 failures stay failed until fresh observed outcomes.
+Current work: apply/review both exact corrections, obtain three Gemini reviews,
+establish safe installation isolation, and verify/correct resulting findings.
+
 ## How runs work
 
 - Dispatch: `node bin/control-room.mjs run "uoink-library" "<goal: open <brief> first...>" --mode work --strategy parallel --agents <engine> --lead <engine> --approve`.
