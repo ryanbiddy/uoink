@@ -1,0 +1,558 @@
+{
+  "aiohappyeyeballs": {
+    "version": "2.7.1",
+    "metadata_sha256": "e68d1bf48aec9dcc2767343dedec25e12860085cba180e10bc3d3bdd031602ba"
+  },
+  "aiohttp": {
+    "version": "3.14.3",
+    "metadata_sha256": "e4d89e3c83a95cb74c235e2a80ea83ef75cdadf3d3a2fbf5ab8cf8eec3309ba9"
+  },
+  "aiosignal": {
+    "version": "1.4.0",
+    "metadata_sha256": "09247ef1da8bc696728d47130e702e4307f6f7d101d6c485bff9f3a71ce7008d"
+  },
+  "alembic": {
+    "version": "1.18.5",
+    "metadata_sha256": "d7fd3308b0b854d58f6c3bddc2c8c8a841e13f45a90abeb02f5ebea70b008e09"
+  },
+  "annotated-types": {
+    "version": "0.7.0",
+    "metadata_sha256": "ee5b6ac64b09274c026051813484025939564067801f485115d9cadc207cf791"
+  },
+  "antlr4-python3-runtime": {
+    "version": "4.9.3",
+    "metadata_sha256": "d1de5c7416841a56a3d73795e7f30587c2b8f3ba01fbbff68c094e308c629e7d"
+  },
+  "anyio": {
+    "version": "4.14.2",
+    "metadata_sha256": "c5e6fc4dfd833319913b287be7a30d9935e9208c7ef917630621855aaac4d419"
+  },
+  "asteroid-filterbanks": {
+    "version": "0.4.0",
+    "metadata_sha256": "c0bfd88dc491f9dabe16ccf53652b3abca8969b9c698b618d23ef2311819e148"
+  },
+  "attrs": {
+    "version": "26.1.0",
+    "metadata_sha256": "4cd40e690f23bf37cbcad34efd6758e062df1df07c86833f7e3ce95bf1fa38cc"
+  },
+  "av": {
+    "version": "18.0.0",
+    "metadata_sha256": "bcc58ead43a46a10f7abba729c37d0ee9be8315ba4eb7a621840266a7b92c15a"
+  },
+  "bottle": {
+    "version": "0.13.4",
+    "metadata_sha256": "441619180223f6ae8a92d1e88e4bbd48159c452bedae1e7c9c27f0673fa720d1"
+  },
+  "certifi": {
+    "version": "2026.7.22",
+    "metadata_sha256": "ef5af1638fbb23676ac3c5777dfcfc2cd9c348fe4172ed5ba3d277655b248090"
+  },
+  "cffi": {
+    "version": "2.1.0",
+    "metadata_sha256": "b91c3c381eab9e6d307680ef5ea22e91fa2e33ed9790aece5922e1621a087523"
+  },
+  "charset-normalizer": {
+    "version": "3.4.9",
+    "metadata_sha256": "83a2993c753cc6098985f8a75286025a01e96453403284ce25e3fef7665472e1"
+  },
+  "click": {
+    "version": "8.4.2",
+    "metadata_sha256": "194c9dd81d567f9081f026c7e401060fbafa7bc147c8e0a58b3668b40a64c031"
+  },
+  "clr_loader": {
+    "version": "0.2.10",
+    "metadata_sha256": "f4dd6889bebb3e94f0e1eed1eaf865d90eae811e63ed06adf3b7653deff07129"
+  },
+  "colorama": {
+    "version": "0.4.6",
+    "metadata_sha256": "7baed29eb50c3b29bdb33ff84e3177bf1bc05784f7685ecdcaa4471c7dd810cc"
+  },
+  "colorlog": {
+    "version": "6.11.0",
+    "metadata_sha256": "f20a9daf81ffbd7157dbd248a6dce0e47c5d29e76abb27f0409373c2f61b17ea"
+  },
+  "contourpy": {
+    "version": "1.3.3",
+    "metadata_sha256": "c43cef86baef09cff9c77975e578fa8cca0c9454df40dc176938b499a63de54a"
+  },
+  "cryptography": {
+    "version": "50.0.1",
+    "metadata_sha256": "8e9b5570da4686848ee5c6bb83fffc224bcddf9793136731dd050ce0c05fffe2"
+  },
+  "ctranslate2": {
+    "version": "4.8.1",
+    "metadata_sha256": "99fc2027042105d579d85e96ac55da5e9911b2233fe132d5ed9b04a90adb4d53"
+  },
+  "cycler": {
+    "version": "0.12.1",
+    "metadata_sha256": "23289e19b76f1e01394227696e6af2b6cd1ce79e89731209bf9195148b18ed36"
+  },
+  "defusedxml": {
+    "version": "0.7.1",
+    "metadata_sha256": "369d3cef64870daf849fba711cb8d05a7efe3c8d9ab0f763adc34079fe378bb1"
+  },
+  "einops": {
+    "version": "0.8.2",
+    "metadata_sha256": "0bd65db043688a44f4a29608c1cba521c932f7ff76f238bbd869441e15012653"
+  },
+  "faster-whisper": {
+    "version": "1.2.1",
+    "metadata_sha256": "b85622132a43897972924db98e024c0d40dcec19c577b1ee5640f1bc1b59aada"
+  },
+  "filelock": {
+    "version": "3.32.0",
+    "metadata_sha256": "d964d7bb976411acbc7b7641476c55193c33b919956fdc8a183c0733cd2db660"
+  },
+  "flatbuffers": {
+    "version": "25.12.19",
+    "metadata_sha256": "9f38239f96faa21522a6aadab6912e1e560708bbe9c9f696a0679c9403fa089e"
+  },
+  "fonttools": {
+    "version": "4.63.0",
+    "metadata_sha256": "4f5b717b2fac47775a2f22e2fc3930714979b038d20851daaf10d9032bea152d"
+  },
+  "frozenlist": {
+    "version": "1.8.0",
+    "metadata_sha256": "4278aeb3d18f1f8b7e6af5b6771ba9a8f327012a42d64509f9d4087b55f71a94"
+  },
+  "fsspec": {
+    "version": "2026.6.0",
+    "metadata_sha256": "20c85c024a69a059237c3a7985d381a3745017ae1d634c554b0c5901dde81095"
+  },
+  "googleapis-common-protos": {
+    "version": "1.75.0",
+    "metadata_sha256": "b137b6a2d3b8a620041ae60f00e756422e6a7a0ac9b0d30c3a6367e651f88f7f"
+  },
+  "greenlet": {
+    "version": "3.5.4",
+    "metadata_sha256": "cd54b553dbb3fe69d78b74d8cf0b37866614db8fd9df7dc66278e38c63daacb0"
+  },
+  "grpcio": {
+    "version": "1.82.1",
+    "metadata_sha256": "77e90d6d1b15c326d405fb502fb7a54546ac59dbeeef47707f78c2d304f01ef9"
+  },
+  "h11": {
+    "version": "0.16.0",
+    "metadata_sha256": "28f326098ac09fcba79b8f180f96087c841fe2456215cb7b872a9c7d5cd19d64"
+  },
+  "httpcore": {
+    "version": "1.0.9",
+    "metadata_sha256": "fe2d4fda6199128978779e0cf27f3c045c531863fcdd987eacc74f3a18d41c21"
+  },
+  "httpx": {
+    "version": "0.28.1",
+    "metadata_sha256": "febb9b0f8f3e80d57c8199c304f35c4336e8581d1d18d7983c92766b82793b25"
+  },
+  "httpx-sse": {
+    "version": "0.4.3",
+    "metadata_sha256": "d4c6d804ee5ac46e9b3b6595c27ab8ae2ba7cfb5f692c78b16ff463e4bd1a81e"
+  },
+  "huggingface_hub": {
+    "version": "0.36.2",
+    "metadata_sha256": "4dc2b0a3fb27bcba8b091f98bccff4b94369d269c9768aeaecd0b99d970665d9"
+  },
+  "idna": {
+    "version": "3.18",
+    "metadata_sha256": "46dfe6e5ac462d0f680ecd9abcf66e829b6a2334824b4d9e3979b31135caf281"
+  },
+  "jaraco.classes": {
+    "version": "3.4.0",
+    "metadata_sha256": "2e6b102232edd45ae1bb8a6b4091fd40cf3201a6bb6fd4bc97c5e8cd765a44b8"
+  },
+  "jaraco.context": {
+    "version": "6.1.2",
+    "metadata_sha256": "f1b65b60aea229af54e09b17ae0036cf048fe4a6161fa2e7966a8ea5c2321491"
+  },
+  "jaraco.functools": {
+    "version": "4.6.0",
+    "metadata_sha256": "6ed3cae5b8eef084c3c7b2385a0a8ac4c8155ab7c729212bea099bee69d5bd6c"
+  },
+  "jinja2": {
+    "version": "3.1.6",
+    "metadata_sha256": "68c5548fb67c4132a13898d9b31ec50c6bea2abdd915d921f214355c3a6499c8"
+  },
+  "joblib": {
+    "version": "1.5.3",
+    "metadata_sha256": "cee9c60896ae4e7a965a840fbde50d111d2f8018f61201d1ed2e9fc3dd4883e6"
+  },
+  "jsonschema": {
+    "version": "4.26.0",
+    "metadata_sha256": "05b189866ca98a96da3934bf6b83687ced3ff85325273b77e16b705f6d8b26d2"
+  },
+  "jsonschema-specifications": {
+    "version": "2025.9.1",
+    "metadata_sha256": "35abd41757f32b4ea24756920ded47b70173d77cbc052a5a6d3ab583b2e8d89d"
+  },
+  "julius": {
+    "version": "0.2.8",
+    "metadata_sha256": "3588a357640389582e3ffb146c25624a197fb94d2467916fda1721ec249497d0"
+  },
+  "keyring": {
+    "version": "25.7.0",
+    "metadata_sha256": "bd54de98fede6dc3e1f3cd89b4e37c95d8842a523bdbb9e52ab40edff1837163"
+  },
+  "kiwisolver": {
+    "version": "1.5.0",
+    "metadata_sha256": "07a45d631281216f6e2acd5c3454f7c4a11e1ad09f011544269cee8977edf4b3"
+  },
+  "lightning": {
+    "version": "2.6.5",
+    "metadata_sha256": "98ef91c2ec30f3c146316d757f71a258635f491e89ade5de63f7ee16e4f77d4d"
+  },
+  "lightning-utilities": {
+    "version": "0.15.3",
+    "metadata_sha256": "ac702eed93d1de9bc66702a71930d833bfe44b59d6a318025e752e28bbaf1e26"
+  },
+  "mako": {
+    "version": "1.3.12",
+    "metadata_sha256": "a995943060e020563a46d7d3065aeeee144d189741c351d20abb5ce87d349759"
+  },
+  "markdown-it-py": {
+    "version": "4.2.0",
+    "metadata_sha256": "72c36ff516755443b1ecb61e17b2567a990230b49a504b0eb0c42d5f82448a9c"
+  },
+  "markupsafe": {
+    "version": "3.0.3",
+    "metadata_sha256": "f0ae5dbb09d50fb5f7632c3d53f0220995ef76019e5892e0a545740136a4e3cb"
+  },
+  "matplotlib": {
+    "version": "3.11.1",
+    "metadata_sha256": "e42a4867d0c790804bce9ccd38972e1e71e24a81f2dbc9633efc71e63ce69f59"
+  },
+  "mcp": {
+    "version": "1.28.1",
+    "metadata_sha256": "d418a04b73eb6520d801fe6383b501283b66e21fc2f36bfda8dec6e42e3a877c"
+  },
+  "mdurl": {
+    "version": "0.1.2",
+    "metadata_sha256": "b53b29d48f499367053fda3c81e7ce27d2558380ebbf83e66023b02eb7ddd25d"
+  },
+  "more-itertools": {
+    "version": "11.1.0",
+    "metadata_sha256": "15588fd819d6d7f9d0ddc7b5283502d3512c5d1edadce573b78c1f0734055df0"
+  },
+  "mpmath": {
+    "version": "1.3.0",
+    "metadata_sha256": "44b66ea444b9c0d19ae94815d356bf047ae6b680c19268b5c265687cd6a81406"
+  },
+  "multidict": {
+    "version": "6.7.1",
+    "metadata_sha256": "3f52a21e43b0e57d05741fe479250f17864aafcb723c940e5aba5ebbdb25295e"
+  },
+  "narwhals": {
+    "version": "2.24.0",
+    "metadata_sha256": "c8aa441e88f6ee9e37ac5232c33552426f87a6a200c6c66038d37c17b3c1ca56"
+  },
+  "networkx": {
+    "version": "3.6.1",
+    "metadata_sha256": "aca5d94a97d1f70f301d033addb635f6e66be8973a00aba4127637eed2ef316a"
+  },
+  "nltk": {
+    "version": "3.10.3",
+    "metadata_sha256": "78584b6194873a677ecc029634f2178e6b962fababd4188a0049d76e6b64ba1e"
+  },
+  "numpy": {
+    "version": "2.4.6",
+    "metadata_sha256": "b082c52ccbe3b880bae177c35171b52ed6c947f3ad71e3762f2723f60a411de0"
+  },
+  "omegaconf": {
+    "version": "2.3.1",
+    "metadata_sha256": "24dc07ea1b801810c63c386cc47376727a774cce4493bfddf6454fe8335eb84e"
+  },
+  "onnxruntime": {
+    "version": "1.27.0",
+    "metadata_sha256": "89d4fcbc47b8f261237e4a5b3a6ee1be077a56ca34e71bccf506e415bd2d0cd5"
+  },
+  "opentelemetry-api": {
+    "version": "1.44.0",
+    "metadata_sha256": "42aabbbacd266627b5c3839a515150ca90c18f80c9d85ca6f6fa10d440a7eeaa"
+  },
+  "opentelemetry-exporter-otlp": {
+    "version": "1.44.0",
+    "metadata_sha256": "93748fe64ef0fd9aad15ee059433b0addf0bdfffc18ff07d78e8d91345bd36c9"
+  },
+  "opentelemetry-exporter-otlp-proto-common": {
+    "version": "1.44.0",
+    "metadata_sha256": "fa4a20e2a52c82aa56ebabccdd4877da74ab47c9eaef10fea83bec2666560ebc"
+  },
+  "opentelemetry-exporter-otlp-proto-grpc": {
+    "version": "1.44.0",
+    "metadata_sha256": "b5fa42549816bc336a459a9d3bfdefbaf9ee9bae1e1581feeb7817ed4d45f3b4"
+  },
+  "opentelemetry-exporter-otlp-proto-http": {
+    "version": "1.44.0",
+    "metadata_sha256": "dc21bafee23969fdf1b58052ca505eabf29705482af6b6a7634430bf96e7d3ec"
+  },
+  "opentelemetry-proto": {
+    "version": "1.44.0",
+    "metadata_sha256": "e239e361c2025a7e981dd99432160ba1186e9abe351290067a31fd12dc1ecce5"
+  },
+  "opentelemetry-sdk": {
+    "version": "1.44.0",
+    "metadata_sha256": "12cf968ea4d637e6adaa8a9b767f34c70a527e092fc7c7f0eb3e93d06148e7e0"
+  },
+  "opentelemetry-semantic-conventions": {
+    "version": "0.65b0",
+    "metadata_sha256": "93f167ca7673cbc0ed24ba8e052fb8c3936b260dff53b7106c574f515ec1deab"
+  },
+  "optuna": {
+    "version": "4.9.0",
+    "metadata_sha256": "178c18d42bbb66eef92d0446fae6538283b5afc0f88f86b5d59d70cdfb8f9851"
+  },
+  "packaging": {
+    "version": "26.2",
+    "metadata_sha256": "4f9cbcd7933415a4793f7767c98a2b6a512c823fc81c87337815705f230ecabf"
+  },
+  "pandas": {
+    "version": "3.0.5",
+    "metadata_sha256": "d0b10219e9d6ede31e61b4e08566428e760edf133c7e0ff73b85280be986ce8d"
+  },
+  "pillow": {
+    "version": "12.3.0",
+    "metadata_sha256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+  },
+  "primepy": {
+    "version": "1.3",
+    "metadata_sha256": "57372c6eeb6954b4bb5e2c2beab8feaa8818b089c6fe1ee0d29a7287bcd7eecc"
+  },
+  "propcache": {
+    "version": "0.5.2",
+    "metadata_sha256": "7c761f2a24b03f88e3d8c6823fcab75a35ed9887ce232a080694efa603f37f08"
+  },
+  "protobuf": {
+    "version": "7.35.1",
+    "metadata_sha256": "1c58cfd7acd805c087ceb1f14c27cdba3c52d074e1d7b05dacf31fdf413c0a8c"
+  },
+  "proxy_tools": {
+    "version": "0.1.0",
+    "metadata_sha256": "34f8db57e46ca03c6185c649a15cc52a0c9120f4f781e9b64701044b22a7fc86"
+  },
+  "pyannoteai-sdk": {
+    "version": "0.4.0",
+    "metadata_sha256": "206f9f6056bef6b13c267d8548aa3e6132d3884c655503886c4903bac42f005f"
+  },
+  "pyannote-audio": {
+    "version": "4.0.7",
+    "metadata_sha256": "5411f7ef49a4d5c91aafbb90c924bd98848c918971138619b3f55c40560e91c4"
+  },
+  "pyannote-core": {
+    "version": "6.0.1",
+    "metadata_sha256": "f4a5736308dae4ba7d47e3b7daf0c576e223216b379026d4cf68dc19197f4819"
+  },
+  "pyannote-database": {
+    "version": "6.1.1",
+    "metadata_sha256": "188840c16231955f4c0d7207f06d7c6a2b40f0ac744b0b337b1327146ace8456"
+  },
+  "pyannote-metrics": {
+    "version": "4.1",
+    "metadata_sha256": "4c459b6bd1c03c754bc80497047b73a07de7c4f0baf81229df7cbe08300878ad"
+  },
+  "pyannote-pipeline": {
+    "version": "4.0.0",
+    "metadata_sha256": "87a9a84e23e9be5dd9a265d3081d5c584db285789c8e37e3726f242367fc2d54"
+  },
+  "pycparser": {
+    "version": "3.0",
+    "metadata_sha256": "f547a60b0ab54cc2f242213d1f87960ad80df7dd5dfeb98d17a444d48bfb6b93"
+  },
+  "pydantic": {
+    "version": "2.13.4",
+    "metadata_sha256": "d1e56c3412492512fb6b59a9dfc25ab7af2a8204585cd7bca000513023133394"
+  },
+  "pydantic_core": {
+    "version": "2.46.4",
+    "metadata_sha256": "e2d0298dfb8712190ad250722e11a46a4391e71d687d5c7667c09e935cadc63b"
+  },
+  "pydantic-settings": {
+    "version": "2.14.2",
+    "metadata_sha256": "c0f50f045d2f48268cd6c467bef348b5da6184f354c1f03e5fc9bdf78b4cbc32"
+  },
+  "pygments": {
+    "version": "2.20.0",
+    "metadata_sha256": "e0528f51b30427fae94723662ba622f8d8db2a4d8d3f1365698d67a52450a845"
+  },
+  "pyjwt": {
+    "version": "2.13.0",
+    "metadata_sha256": "0d1b1321a5a688caacd763e006fbbe11f60110e9fe27ff8d23a679863d01a63c"
+  },
+  "pyparsing": {
+    "version": "3.3.2",
+    "metadata_sha256": "3311a8b949d70f71a2b9788a9327f11d9d5a6a8012d6c046ca254ad2de877f45"
+  },
+  "pystray": {
+    "version": "0.19.5",
+    "metadata_sha256": "073b0620fe49a47061d336d7110779e6ca808e8294b0aa5cd9d437b1979d8fb1"
+  },
+  "pythonnet": {
+    "version": "3.0.5",
+    "metadata_sha256": "379039f5cb9de87923de5be022d99a87acc916dd35cc9559c2c4b1a5d12135cc"
+  },
+  "python-dateutil": {
+    "version": "2.9.0.post0",
+    "metadata_sha256": "a9d436da322be808332f98d88325998e87cb693a678a9969feb4cfad729a6e93"
+  },
+  "python-dotenv": {
+    "version": "1.2.2",
+    "metadata_sha256": "59430a9dee8f8118dbf693e41c4a3e5150626d19901f4727503da9499f5a64a1"
+  },
+  "python-multipart": {
+    "version": "0.0.32",
+    "metadata_sha256": "e9d399d7dea5eddf0e4d24b5c24687a82e7e50bf2c2b30f8f8a06a64d887dd86"
+  },
+  "pytorch-lightning": {
+    "version": "2.6.5",
+    "metadata_sha256": "ae5960659361db3393f9a6915907b70a3b4da2246f026e7bdd834b574fb429ef"
+  },
+  "pytorch-metric-learning": {
+    "version": "2.9.0",
+    "metadata_sha256": "2cb018cbca2f9473f45c4042b39cff3943f760273c0132a9d2044bcad9ddcbd6"
+  },
+  "pywebview": {
+    "version": "5.4",
+    "metadata_sha256": "e131dd9a76d59f3619637904e428865dd7620ac431fb1b0bc34d9c07afc3c860"
+  },
+  "pywin32": {
+    "version": "312",
+    "metadata_sha256": "77f53e90408dd3bdcf5f73a20d6548504313dee2ad34f8b3794b2202583a84b1"
+  },
+  "pywin32-ctypes": {
+    "version": "0.2.3",
+    "metadata_sha256": "1e3767d3faff4d5b9c347160883831098d1f25acf4306b02c9acdcc6bfb5883b"
+  },
+  "pyyaml": {
+    "version": "6.0.3",
+    "metadata_sha256": "847a701020334386852b6e07bad1053cb0ce3da9ee1846e7e9d02b24e8bb3f8d"
+  },
+  "referencing": {
+    "version": "0.37.0",
+    "metadata_sha256": "c93b00e6ab1524fd60848376604c189a114374776475c25a31d57be47b29de6a"
+  },
+  "regex": {
+    "version": "2026.7.19",
+    "metadata_sha256": "1223d297d68f69c7ab0b515667a5b2e715ffed61626685bc1dcc280f93ce80f5"
+  },
+  "requests": {
+    "version": "2.34.2",
+    "metadata_sha256": "8c384ba3e979480faae2859d3c5e6c1276dd2c3616e322e124d52c8cfc556f27"
+  },
+  "rich": {
+    "version": "15.0.0",
+    "metadata_sha256": "fad34fc603fac4481bf81f8dd629492fc302c0ec31909c86644751512afb2e3b"
+  },
+  "rpds-py": {
+    "version": "2026.6.3",
+    "metadata_sha256": "e9deba3569d39352c663fd09d01d53a649c8ab2c28de1c37e80b3e2beaf84926"
+  },
+  "safetensors": {
+    "version": "0.8.0",
+    "metadata_sha256": "597731d1baf7a94219753fa0a74abd1a8a18562d50d98b2e25d91e11e3224d36"
+  },
+  "scikit-learn": {
+    "version": "1.9.0",
+    "metadata_sha256": "ee61a579f42d3edabe3e483db483475e33fffec04d7f3e69c539527bd93eaca6"
+  },
+  "scipy": {
+    "version": "1.17.1",
+    "metadata_sha256": "3a61ac02d145c9ca53f53d3f6f58d09017727a317731d0af02909730d4403e32"
+  },
+  "six": {
+    "version": "1.17.0",
+    "metadata_sha256": "562042078c2752549f6d8a7c86dbc5dd708088a7be6d80672ec7b07100b72468"
+  },
+  "sortedcontainers": {
+    "version": "2.4.0",
+    "metadata_sha256": "eedf115109e215001e904da0882851beae50b03c0b0161a8b9e74b7cfd679473"
+  },
+  "sqlalchemy": {
+    "version": "2.0.51",
+    "metadata_sha256": "4a6cf97c8553ad6bd2eee09249b799f387bf565443736d05af50a1afa6ce77fc"
+  },
+  "sse-starlette": {
+    "version": "3.4.6",
+    "metadata_sha256": "37c93cfd62a2295321c63ac1230a8501d871b72a49f635a74db02338fe57fa44"
+  },
+  "starlette": {
+    "version": "1.3.1",
+    "metadata_sha256": "d83ccd9665eb05d1f9393c75e209cb353990731a6215a609a0f1c5c0a6286c9a"
+  },
+  "sympy": {
+    "version": "1.14.0",
+    "metadata_sha256": "b756c2fbfd5be05ac5bdb0ebca61f55618f30f633ed92d88a5687429313a7595"
+  },
+  "threadpoolctl": {
+    "version": "3.6.0",
+    "metadata_sha256": "a45df8d07ea1883d772183a501d7d526076aa70dfcfddb276a2cbdc04def5341"
+  },
+  "tokenizers": {
+    "version": "0.22.2",
+    "metadata_sha256": "5ad9bccf21ae53d45f812703c80c7c03ecea300823655a2968f9e6778779bdb3"
+  },
+  "torch": {
+    "version": "2.8.0",
+    "metadata_sha256": "21d59cbe983b22e72dab5ba788617a631a4ec30357544ce90ca7d75aa51b3c04"
+  },
+  "torchaudio": {
+    "version": "2.8.0",
+    "metadata_sha256": "39c912d16311486d17ad8cfdc3ce7b532703706c410b140a74c9511fa8687fef"
+  },
+  "torchcodec": {
+    "version": "0.7.0",
+    "metadata_sha256": "3258a8f52a28b425744c8b91bd129c7ca91759411cea9c77a549613b54f49eb4"
+  },
+  "torchmetrics": {
+    "version": "1.9.0",
+    "metadata_sha256": "e9a6b10f6e5cabee5150afc30ed70fdd14e556b1b856979a3341d2cba21baadd"
+  },
+  "torchvision": {
+    "version": "0.23.0",
+    "metadata_sha256": "f3e83af19eaec8195f920dd36176654b45701547a63edc139369d560ae6553b8"
+  },
+  "torch-audiomentations": {
+    "version": "0.12.0",
+    "metadata_sha256": "c4c8d18fc4cf77de04f59728c81c603d279154056500a94b907832ebf56075af"
+  },
+  "torch_pitch_shift": {
+    "version": "1.2.5",
+    "metadata_sha256": "33db43e2bcbc1b140c58ce83876d1158b2dbab5ad86b1a01362ccf34c1860916"
+  },
+  "tqdm": {
+    "version": "4.69.0",
+    "metadata_sha256": "a0406c7575adf27f56a09afa6fbcdcd8d9951d12ca219698baa5627351b0d9a1"
+  },
+  "transformers": {
+    "version": "4.57.6",
+    "metadata_sha256": "91601044a74fe02571a825356754dbbaa9e1d3e3dd3c2237254c15e903e421e3"
+  },
+  "typing_extensions": {
+    "version": "4.16.0",
+    "metadata_sha256": "b05084ca1d50879865178d9fff9fabeab61bdfb1f361bfbde95421ffc8f9be46"
+  },
+  "typing-inspection": {
+    "version": "0.4.2",
+    "metadata_sha256": "61096cd0bfe3c7040b6f98c22b02d190fe01936d0ff7616c5134fed02891953a"
+  },
+  "tzdata": {
+    "version": "2026.3",
+    "metadata_sha256": "511c019df477939fe7f4c38e32ad74a570c4ebb05b13fd2fffd0f0f2dbe6f7b1"
+  },
+  "urllib3": {
+    "version": "2.7.0",
+    "metadata_sha256": "66147856d30bbb6bed01c6ce3326d0f48d84ed5f286ac177633a1486b82eace5"
+  },
+  "uvicorn": {
+    "version": "0.51.0",
+    "metadata_sha256": "07c70790c0cde6812f89168f7aa7c185800a690f7e657dfb5603848c1375017e"
+  },
+  "whisperx": {
+    "version": "3.8.6",
+    "metadata_sha256": "af593ed3bfc9eb206beb15f683333ba459dbf22690bb2b8d6c3d8c224cf91cf1"
+  },
+  "yarl": {
+    "version": "1.24.5",
+    "metadata_sha256": "828dd0df346ad989da5f5622011b6a07a4c6b7961aea718a7fc5a89e88cb4bc1"
+  },
+  "yt-dlp": {
+    "version": "2026.7.4",
+    "metadata_sha256": "2440052f5fb52e7b1d955ef52aa99120e0c63ebb605f53ef4e1424e4ac4c1daa"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "reason": "Retain the shipping LGPL CLI binaries separately from the private GPL final-test tools",
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\package05-static-bin\\ffmpeg.exe",
+      "sha256": "9c60da6c0b083110d59084ea39f60ae149aa3e031c3b4bb4f573fafa1c1e7cea",
+      "bytes": 113981440,
+      "sealed_input": "bin/ffmpeg.exe"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\package05-static-bin\\ffprobe.exe",
+      "sha256": "67176fa62f89f94c3bcd379fd05677a25651569a2eb8880ec2194e62c82be412",
+      "bytes": 113775616,
+      "sealed_input": "bin/ffprobe.exe"
+    }
+  ]
+}

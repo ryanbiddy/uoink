@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Rebuilt-package installed/client/everyday receipts pending; installation delegated to Astra |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-04 retained, unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | Python 3.13 installs 139 exact packages. Shared decoder repair has 42 passes in both roots and real staged product-loader WAV decoding passes | Build and seal package-05, freeze complete partitioned tree, then actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
+| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned; no Setup run. Complete `7109182` tree remains 2,484 passed / three failed / two skipped / one xfailed | All 139 runtime pins match staging. Shared decoder repair has 42 passes in both roots and real staged product-loader WAV decoding passes | Freeze complete partitioned tree, then actual installation. Nineteen Python advisory entries remain separately; no model/speaker runs |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -170,8 +170,8 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    no diff. Astra's bounded supplement repairs the missing runtime: 42 passes
    in each root and real staged product-loader WAV decoding passes. Follow
    ASTRA-TORCHCODEC-INTEGRATION-2026-09-09.md. No model inference.
-   Package-04 is built and sealed from 86bfede; generated notices reviewed at
-   3265171 are the only subsequent change, outside the installer payload. The
+   Package-05 is built and sealed from 6b5aed8; generated notices reviewed at
+   45cd6f7 are the only subsequent change, outside the installer payload. The
    fresh Defender scan reports no threats; this does not clear remaining
    dependency advisories or supply a signature. Run the committed complete tree with
    only S21 absent across the two process partitions; prove a disjoint complete
@@ -2469,3 +2469,23 @@ before the delegated outside-checkout Setup. The Python proof's empty conflict
 patch is not evidence of conflict contents; original patch and resolved diff
 remain. Three approximate minute headings above were reduced to their known
 date. Proof: proof/ryan-torchcodec-repair-2026-09-09/SHA256.json.
+
+### 2026-09-09 - Package-05 sealed; exact complete tree next
+
+Source 6b5aed8 built in 407.867 seconds. The replacement EXE is 388,987,465
+bytes, SHA256 95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49.
+Its 32,063 compiler inputs map to 32,054 installed files, eight wizard resources
+and one setup-only script. There are 142 source bindings, of which 141 install.
+All 139 runtime distributions match the lock with no extras. The bundled
+WhisperX checkpoint is unchanged and was not executed. Shipping CLI hashes
+match the separately verified LGPL 8.1.2 binaries. The 19-file package proof is
+proof/candidate-package-05-2026-09-09/SHA256.json.
+
+Defender exits zero and reports no threats, with unchanged package bytes and
+existing protection/cloud policies. The EXE remains unsigned. Generated notices
+were reviewed at 45cd6f7 using the actual Pillow wheel's MIT-CMU metadata;
+notices are outside the compiler inputs. No further rebuild is owed from that
+documentary correction. The final partition instrument permits only added tests
+since 7109182, with no modifications/deletions to existing tests or the P4 guard.
+Three new decoder regressions must appear in the complete disjoint case union.
+No Setup has run. Agent Install 05 is the fresh outside-checkout destination.
