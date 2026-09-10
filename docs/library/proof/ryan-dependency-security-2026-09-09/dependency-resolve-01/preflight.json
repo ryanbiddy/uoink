@@ -1,0 +1,14 @@
+{
+  "source": "c7a8426",
+  "kind": "disposable Python 3.11 metadata resolution; no product import/install",
+  "copied_runtime": {
+    "python.exe": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec",
+    "python3.dll": "db84bc052cfb121fe4db36242ba5f1d2c031b600ef5d8d752cf25b7c02b6bac6",
+    "python311.dll": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364",
+    "python311.zip": "7d0f59c930e7d3d9352399ea3c95c0272489b3c09a8e95faaedfa8a23e20e5b1",
+    "python311._pth": "5ab6eef584e230b321ff0ecbf7658b4343a7b864c9f96ace02ec10d203f9829b",
+    "vcruntime140.dll": "4d292623516f65c80482081e62d5dadb759dc16e851de5db24c3cbb57b87db83",
+    "vcruntime140_1.dll": "a113f192195f245f17389e6ecbed8005990bcb2476ddad33f7c4c6c86327afe5"
+  },
+  "new_lock_sha256": "29381989ee19ae85e27f599440ad40338d0fb3058dabbb57a713e065cec3ce64"
+}

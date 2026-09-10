@@ -1,0 +1,127 @@
+{
+  "source": "c7a842626ca1627859e7b0b363c3ce0a8ec207e4",
+  "utc_start": "2026-09-10T03:06:03.843784+00:00",
+  "lock_sha256": "29381989ee19ae85e27f599440ad40338d0fb3058dabbb57a713e065cec3ce64",
+  "packages": 142,
+  "endpoint": "https://api.osv.dev/v1/querybatch",
+  "scope": "Only public PyPI names and versions sent; no source, library, paths or credentials. Version database matches do not prove exploitability or absence of unknown vulnerabilities.",
+  "complete": true,
+  "pages": 1,
+  "affected_packages": 4,
+  "advisory_matches": 19,
+  "findings": [
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "lightning"
+      },
+      "version": "2.6.5",
+      "vulns": [
+        {
+          "id": "GHSA-qqmf-gpg7-g8gw",
+          "modified": "2026-09-03T20:10:28.917366Z"
+        },
+        {
+          "id": "PYSEC-2026-3624",
+          "modified": "2026-09-03T20:10:28.917366Z"
+        }
+      ]
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "nltk"
+      },
+      "version": "3.10.3",
+      "vulns": [
+        {
+          "id": "GHSA-8mgp-746c-j5xp",
+          "modified": "2026-09-02T14:45:06.878867Z"
+        }
+      ]
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torch"
+      },
+      "version": "2.8.0",
+      "vulns": [
+        {
+          "id": "GHSA-qfhq-4f3w-5fph",
+          "modified": "2026-06-10T18:26:26.736808Z"
+        },
+        {
+          "id": "GHSA-rrmf-rvhw-rf47",
+          "modified": "2026-07-17T17:15:51.452848Z"
+        },
+        {
+          "id": "GHSA-vgrw-7cvw-pwgx",
+          "modified": "2026-06-10T17:41:15.774477Z"
+        },
+        {
+          "id": "PYSEC-2025-203",
+          "modified": "2026-05-20T09:19:19.739357Z"
+        },
+        {
+          "id": "PYSEC-2025-204",
+          "modified": "2026-05-20T09:19:19.802802Z"
+        },
+        {
+          "id": "PYSEC-2025-206",
+          "modified": "2026-05-20T09:19:19.928295Z"
+        },
+        {
+          "id": "PYSEC-2026-139",
+          "modified": "2026-05-21T15:00:31.962442Z"
+        },
+        {
+          "id": "PYSEC-2026-2286",
+          "modified": "2026-07-13T07:26:23.701611Z"
+        }
+      ]
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "transformers"
+      },
+      "version": "4.57.6",
+      "vulns": [
+        {
+          "id": "GHSA-29pf-2h5f-8g72",
+          "modified": "2026-07-13T07:26:53.092052Z"
+        },
+        {
+          "id": "GHSA-69w3-r845-3855",
+          "modified": "2026-07-13T07:26:31.099252Z"
+        },
+        {
+          "id": "GHSA-fgcw-684q-jj6r",
+          "modified": "2026-07-21T12:46:29.682579Z"
+        },
+        {
+          "id": "GHSA-xrqw-3rrv-vx5w",
+          "modified": "2026-09-01T19:02:53.016620Z"
+        },
+        {
+          "id": "PYSEC-2025-217",
+          "modified": "2026-05-21T15:00:24.271970Z"
+        },
+        {
+          "id": "PYSEC-2026-2288",
+          "modified": "2026-07-13T16:45:06.516869Z"
+        },
+        {
+          "id": "PYSEC-2026-2289",
+          "modified": "2026-07-13T16:45:06.535860Z"
+        },
+        {
+          "id": "PYSEC-2026-2290",
+          "modified": "2026-07-23T15:00:26.322865Z"
+        }
+      ]
+    }
+  ],
+  "utc_end": "2026-09-10T03:06:04.306484+00:00"
+}

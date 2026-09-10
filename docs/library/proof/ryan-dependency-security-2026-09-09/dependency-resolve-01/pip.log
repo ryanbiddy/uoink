@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "C:\Python314\Lib\site-packages\pip\__pip-runner__.py", line 50, in <module>
+    runpy.run_module("pip", run_name="__main__", alter_sys=True)
+  File "<frozen runpy>", line 226, in run_module
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Python314\Lib\site-packages\pip\__main__.py", line 24, in <module>
+    sys.exit(_main())
+             ^^^^^^^
+  File "C:\Python314\Lib\site-packages\pip\_internal\cli\main.py", line 47, in main
+    from pip._internal.cli.autocompletion import autocomplete
+  File "C:\Python314\Lib\site-packages\pip\_internal\cli\autocompletion.py", line 12, in <module>
+    from pip._internal.cli.main_parser import create_main_parser
+  File "C:\Python314\Lib\site-packages\pip\_internal\cli\main_parser.py", line 11, in <module>
+    from pip._internal.build_env import get_runnable_pip
+  File "C:\Python314\Lib\site-packages\pip\_internal\build_env.py", line 22, in <module>
+    from pip._internal.cli.spinners import open_rich_spinner, open_spinner
+  File "C:\Python314\Lib\site-packages\pip\_internal\cli\spinners.py", line 22, in <module>
+    from pip._internal.utils.logging import get_console, get_indentation
+  File "C:\Python314\Lib\site-packages\pip\_internal\utils\logging.py", line 6, in <module>
+    import logging.handlers
+  File "logging\handlers.py", line 26, in <module>
+  File "socket.py", line 51, in <module>
+ModuleNotFoundError: No module named '_socket'

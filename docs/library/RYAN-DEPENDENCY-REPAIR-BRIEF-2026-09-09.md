@@ -32,3 +32,19 @@ apply and independent checks in both roots. Do not declare a clean vulnerability
 audit: Lightning 2.6.5 remains upstream-unfixed, and WhisperX 3.8.6 constrains
 Torch 2.8 and huggingface-hub below 1.0 (incompatible with Transformers 5.x).
 Those remaining findings require precise applicability and release notes.
+
+Resolution instrument repair: dependency-resolve-01 exited 1 before contacting
+PyPI because the minimal copied Python lacked its _socket extension. Preserve the
+trace. For dependency-resolve-02 copy the embeddable runtime's complete top-level
+.pyd/.dll set as well as interpreter and standard-library ZIP. Repeat the same
+dry resolution in that new disposable directory; no product source or installed
+site-packages is imported or modified. This corrects the resolution instrument,
+not a package compatibility failure.
+
+Resolution instrument repair 2: the complete interpreter in dependency-resolve-02
+reached PyPI, then antlr4's metadata build could not import setuptools.build_meta.
+The embeddable _pth ignores pip's temporary build-environment path injection.
+Preserve exit 2. For dependency-resolve-03 install only the build's pinned
+setuptools 83.0.0, wheel 0.47.0 and packaging 26.2 into that disposable runtime,
+and use --no-build-isolation as the actual installer build does. Resolve the same
+proposed graph; this retry does not change any dependency target or product test.

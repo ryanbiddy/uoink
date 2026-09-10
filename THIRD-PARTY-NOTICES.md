@@ -25,7 +25,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | colorama | 0.4.6 | BSD License | https://github.com/tartley/colorama |
 | colorlog | 6.11.0 | MIT License | https://github.com/borntyping/python-colorlog |
 | contourpy | 1.3.3 | BSD License | https://github.com/contourpy/contourpy |
-| cryptography | 49.0.0 | UNKNOWN | https://github.com/pyca/cryptography |
+| cryptography | 50.0.1 | UNKNOWN | https://github.com/pyca/cryptography |
 | ctranslate2 | 4.8.1 | MIT | https://opennmt.net |
 | cycler | 0.12.1 | BSD License | https://matplotlib.org/cycler/ |
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
@@ -62,14 +62,14 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
 | MarkupSafe | 3.0.3 | UNKNOWN | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
-| mcp | 1.27.1 | MIT License | https://modelcontextprotocol.io |
+| mcp | 1.28.1 | MIT License | https://modelcontextprotocol.io |
 | mdurl | 0.1.2 | MIT License | https://github.com/executablebooks/mdurl |
 | more-itertools | 11.1.0 | UNKNOWN | https://github.com/more-itertools/more-itertools |
 | mpmath | 1.3.0 | BSD License | http://mpmath.org/ |
 | multidict | 6.7.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
 | narwhals | 2.24.0 | UNKNOWN | https://github.com/narwhals-dev/narwhals |
 | networkx | 3.6.1 | UNKNOWN | https://networkx.org/ |
-| nltk | 3.10.0 | Apache Software License | https://www.nltk.org/ |
+| nltk | 3.10.3 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | UNKNOWN | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
 | onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |
@@ -84,7 +84,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
 | packaging | 26.2 | UNKNOWN | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
-| pillow | 10.4.0 | Historical Permission Notice and Disclaimer (HPND) | https://python-pillow.org |
+| pillow | 12.3.0 | Historical Permission Notice and Disclaimer (HPND) | https://python-pillow.org |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
 | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |

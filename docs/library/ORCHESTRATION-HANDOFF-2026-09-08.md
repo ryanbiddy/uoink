@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Approved corrections: mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one existing xfail in both roots | Rebuild owed after source repair; dependency triage, receipt corrections, safe agent installation and complete tree pending |
+| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one xfail in both roots. Four dependency updates: 23 passes in both roots; Python 3.11 graph resolves | Rebuild owed; updated audit has 19 entries / 15 issues in four packages. Receipt corrections, safe agent installation and complete tree pending |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -148,8 +148,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    contract corrections 269acc98. Verify reports and named suites in each
    worktree, integrate raw diffs through three-way apply, repeat checkout suites.
 3. Credential repair is integrated with 117 passes / one existing xfail in both
-   roots. Review completed advisory worker 48452609, repair feasible dependencies
-   and complete partial receipt worker 269acc98 under the integrator supplement
+   roots. Advisory worker 48452609 and dependency repair 4d4cc9ce are reviewed;
+   see ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md. Complete partial receipt
+   worker 269acc98 under RYAN-RECEIPT-SOURCE-FIXTURE-REPAIR-2026-09-09.md
    before rebuilding or installing. Follow
    RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
    Determine and review safe isolation before execution; preserve ordinary data,
@@ -2225,3 +2226,17 @@ instrument correction. Advisory worker 48452609 delivered a report; independent
 alias grouping confirms 55 issues among 95 records. Its reachability claims still
 need correction: WhisperX defaults to PyAnnote VAD during ordinary transcription,
 so disabling speaker runs alone does not remove every checkpoint-loading path.
+
+### 2026-09-09 — four dependency updates verified; remaining audit is explicit
+
+Gemini 4d4cc9ce's four pin updates pass 23 independent build/lock/doc checks in
+both roots. The full proposed graph resolves under disposable Python 3.11 with
+all 142 runtime versions exact; build-only setuptools is separately controlled.
+The first two resolution instrument failures and their concrete repairs remain
+in the seal. The fresh OSV result has 19 entries / 15 alias-connected issues in
+four packages, versus the original 95 / 55 in seven. NLTK 3.10.3 remains affected
+by its model-artifact path bypass; the raw worker triage's all-fixed claim is
+incorrect. No such API is exposed by Uoink/WhisperX's sentence-tokenization path.
+Default VAD does load the packaged PyAnnote checkpoint; it is not a speaker-only
+path. Keep all residuals and the exact packaged checkpoint hash in release notes.
+The current installed candidate is still unbuilt and Setup has not run.

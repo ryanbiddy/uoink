@@ -167,3 +167,15 @@ Focused results: 180 mirror passes, 125.43 seconds; 74 ordered read/resource/pro
 passes, 13.53 seconds. No product source or intended behavior assertion changed.
 The three receipt-contract corrections are under independent Gemini review.
 The original AT6 exit remains missing; no acceptance waiver is inferred.
+# 2026-09-09 — exact dependency-version unit assertions
+
+RYAN-DEPENDENCY-REPAIR-BRIEF-2026-09-09.md records the security upgrade scope.
+In tests/test_installer_dependency_lock.py, the two exact equality values change
+from pillow 10.4.0 to 12.3.0 and mcp 1.27.1 to 1.28.1. No equality operator,
+inventory assertion or case changes. The raw full diff is sealed as
+proof/ryan-dependency-security-2026-09-09/dependency-integrated.patch.
+Reason: the unit test must enforce the new reviewed exact security pins; retaining
+the vulnerable old version literals would contradict the authorized upgrade.
+Independent four-suite union: 23 passed in the worker and checkout. This is not
+the final full-tree or packaged-runtime observation. See the one-page dependency
+verdict for resolution results and the remaining four affected packages.

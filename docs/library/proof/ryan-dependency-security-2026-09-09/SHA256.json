@@ -1,0 +1,277 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "advisory-triage.patch": {
+      "bytes": 28283,
+      "sha256": "ebdaf7fd50fe49defbe35614ee10bcdfe0416c9ab1dc038937e0388c9d91812d"
+    },
+    "audit_installer_osv_02.py": {
+      "bytes": 2615,
+      "sha256": "8e33d9fa336154cb7131dee6a651c65412f3ec74c43d39c2d219fa6093a12fc7"
+    },
+    "baseline-check/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "baseline-check/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "baseline-check/results.json": {
+      "bytes": 974,
+      "sha256": "5d137df533d3e5a5274650ac37de4d0822954566797d765a1d660da620c9928d"
+    },
+    "baseline-check/tests.log": {
+      "bytes": 4792,
+      "sha256": "0144bc3fc7f79d16e45862018fb9d53e7b9ea1136d7b91dbe283ac675a6ed21f"
+    },
+    "baseline-check/tests.xml": {
+      "bytes": 4990,
+      "sha256": "90b5834f40e610071b64ace42f9caa4b672a2b16d7f28ed77d97705b07617164"
+    },
+    "baseline-check-ig2/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "baseline-check-ig2/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "baseline-check-ig2/results.json": {
+      "bytes": 1004,
+      "sha256": "56dc6590fd32a9bb48bfdc5380c05a7d18aa45ce6ed8e4438c9f894064cf9fb8"
+    },
+    "baseline-check-ig2/tests.log": {
+      "bytes": 101,
+      "sha256": "60619bc34a3149fc9fcdc009154ab975f8458b44377d97048770c49134efd4bf"
+    },
+    "baseline-check-ig2/tests.xml": {
+      "bytes": 3298,
+      "sha256": "07104f2fce544f473561eb383bdb4dc2c2b25d762c5369d029f961ae081bd724"
+    },
+    "dep-repair-final/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "dep-repair-final/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "dep-repair-final/results.json": {
+      "bytes": 998,
+      "sha256": "aac78864130e9c26a097adef6c71354f0681afb9c7a0801d5df2dbd91c53b711"
+    },
+    "dep-repair-final/tests.log": {
+      "bytes": 101,
+      "sha256": "8b8b5f0e9e9edffd4366e90d6f23f53e68cc3f0ff48fa73b1677d5416f08161d"
+    },
+    "dep-repair-final/tests.xml": {
+      "bytes": 3298,
+      "sha256": "732d820065a0727bc962bc0b1aeb3f2a9b7b141491f52ad5907ecc71d7f15231"
+    },
+    "dep-repair-g1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "dep-repair-g1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "dep-repair-g1/results.json": {
+      "bytes": 989,
+      "sha256": "7edd91d6407969bc2198866cc4000e461587f880b50751659c10bfcf6d3752c6"
+    },
+    "dep-repair-g1/tests.log": {
+      "bytes": 101,
+      "sha256": "77e2610dcdbdc6fd1924af1dd2681f2d1cdd6adcd46c00f3252268a166daa52a"
+    },
+    "dep-repair-g1/tests.xml": {
+      "bytes": 3298,
+      "sha256": "9006c4e15c0560e93f3b34c9f2f828ec8d1989ef3a57f6b173383569b2c93564"
+    },
+    "dependency-c1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "dependency-c1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "dependency-c1/results.json": {
+      "bytes": 842,
+      "sha256": "5c0444abcc839cbf46a277e457b706f3cacc6b861cadc1c6fefc90d3ba3ec354"
+    },
+    "dependency-c1/tests.log": {
+      "bytes": 101,
+      "sha256": "72da1e0ddca0f5a6a3c79033785d333d6f80a9cf02d80b174e21629cb988baba"
+    },
+    "dependency-c1/tests.xml": {
+      "bytes": 3298,
+      "sha256": "867da22a5d51cf9db3194e0344ac37d45bd788e1729b37478d26a776ac3e6027"
+    },
+    "dependency-integrated.patch": {
+      "bytes": 23385,
+      "sha256": "54843bc2b040c605ee2ad37208157e4323f455e40f503ac98a4e6ac53d368845"
+    },
+    "dependency-metadata-01/aliases.json": {
+      "bytes": 5157,
+      "sha256": "6ebcfdd8ef8300a75bed97b0d1f84532280068135fb35d5f745715ce3a910f5e"
+    },
+    "dependency-metadata-01/cryptography-50.0.1.json": {
+      "bytes": 45476,
+      "sha256": "02bbd8a2728dac94f7d6a4a3d5de523afdadc90ca5b1476845ad3f505861ea63"
+    },
+    "dependency-metadata-01/lightning.json": {
+      "bytes": 316511,
+      "sha256": "be2d145822bb6c14e00f249009049c8ddff6c0a2360a26507bac7aabb83e8eea"
+    },
+    "dependency-metadata-01/mcp-1.28.1.json": {
+      "bytes": 11553,
+      "sha256": "4304729389efeacb55c14319dbb9bec15976c5ff1bf946188f051fa6adc8c26f"
+    },
+    "dependency-metadata-01/nltk-3.10.3.json": {
+      "bytes": 7493,
+      "sha256": "2b427a4d43422d771578c857339e036b5b5d0ba8efb1cdbc4443883c86ed860b"
+    },
+    "dependency-metadata-01/nltk-latest.json": {
+      "bytes": 103290,
+      "sha256": "bcb887db94e1c4fe5eb120e7125ac9da760b3c07f4d8c8065079373fec07db3c"
+    },
+    "dependency-metadata-01/pillow-12.3.0.json": {
+      "bytes": 84184,
+      "sha256": "63159d6013cf20f98ff9caeb8b0b210b7f5877975587f4265397ffb0fd8c72a0"
+    },
+    "dependency-metadata-01/pyannote-audio.json": {
+      "bytes": 53066,
+      "sha256": "2bc7d739d11999866c256e0257834799ae804536af9cc732d9cdda4b93b91750"
+    },
+    "dependency-metadata-01/pyopenssl-26.3.0.json": {
+      "bytes": 24570,
+      "sha256": "0b204ad3cf9e41632bd79aa1d32636dd3d73b260b165e869ef77bf2d418bcbe1"
+    },
+    "dependency-metadata-01/summary.json": {
+      "bytes": 42999,
+      "sha256": "7c67ba5138cf7b1bd7f14faae853b8184a49ae50e5122d44c7b8afd82bb613b6"
+    },
+    "dependency-metadata-01/torch.json": {
+      "bytes": 850221,
+      "sha256": "12620a689ae61b70596486dfb3db7f393060f28cad092db7f2d52ec0449bede7"
+    },
+    "dependency-metadata-01/transformers-5.10.0.json": {
+      "bytes": 33073,
+      "sha256": "ac37eac52b02762bc97e81e3c1687504575e94e84c9fc85433be43a25587e1c1"
+    },
+    "dependency-metadata-01/whisperx.json": {
+      "bytes": 85126,
+      "sha256": "ca15efa5fc7ae3112475117e396b2bee6552622a79125a87b6ce6e761628c869"
+    },
+    "dependency-resolve-01/pip.log": {
+      "bytes": 1528,
+      "sha256": "a7a4cf86a02720b6d8a78018638926d473cac603b930c89a6bc18e14ce7a1609"
+    },
+    "dependency-resolve-01/preflight.json": {
+      "bytes": 865,
+      "sha256": "f8d33f6f828d63ca703cfc07a81334cc5ed5d0629e12b4404725f6222c0a176a"
+    },
+    "dependency-resolve-01/proposed-lock.txt": {
+      "bytes": 3491,
+      "sha256": "29381989ee19ae85e27f599440ad40338d0fb3058dabbb57a713e065cec3ce64"
+    },
+    "dependency-resolve-01/result.json": {
+      "bytes": 61,
+      "sha256": "de31fcf09797c26b5ef0167a7f001003573e49b2e8ce6eeb9a096700347f1939"
+    },
+    "dependency-resolve-02/pip.log": {
+      "bytes": 6724,
+      "sha256": "6e7a59698d67d14f4f7c25a2ddfa908217d9b6a1118544ce48a3f8f1f4370f4f"
+    },
+    "dependency-resolve-02/preflight.json": {
+      "bytes": 2997,
+      "sha256": "565e2127d257f29badac82d9ed49d2bbf09f4f0054719f404798d7898e6276dc"
+    },
+    "dependency-resolve-02/proposed-lock.txt": {
+      "bytes": 3491,
+      "sha256": "29381989ee19ae85e27f599440ad40338d0fb3058dabbb57a713e065cec3ce64"
+    },
+    "dependency-resolve-02/result.json": {
+      "bytes": 61,
+      "sha256": "8fdd5fd12b020dba8d7c050104014ad4dad003ef15bf31291175b7b96d2300e6"
+    },
+    "dependency-resolve-03/pip.log": {
+      "bytes": 27455,
+      "sha256": "7209289a78c7a6ca3f0970d229e3a31b8976f2c099d443d244d62a5dee9018a2"
+    },
+    "dependency-resolve-03/preflight.json": {
+      "bytes": 2997,
+      "sha256": "565e2127d257f29badac82d9ed49d2bbf09f4f0054719f404798d7898e6276dc"
+    },
+    "dependency-resolve-03/proposed-lock.txt": {
+      "bytes": 3491,
+      "sha256": "29381989ee19ae85e27f599440ad40338d0fb3058dabbb57a713e065cec3ce64"
+    },
+    "dependency-resolve-03/report.json": {
+      "bytes": 2104575,
+      "sha256": "44a2dce51ddb1166a88253bb9d37b133c7d870c39de9db1fcb1a75ab92371896"
+    },
+    "dependency-resolve-03/result.json": {
+      "bytes": 61,
+      "sha256": "94523f7892d90c1db89086a79f11aa0156d1804c370227c80429b0e6e4171878"
+    },
+    "dependency-resolve-03/tools.log": {
+      "bytes": 932,
+      "sha256": "921ea6ff9e7a22ce0003169d0914af63b6ba05f07c88eb162fa0b898ec41b7f2"
+    },
+    "dependency-w1/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "dependency-w1/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "dependency-w1/results.json": {
+      "bytes": 989,
+      "sha256": "d763e1814f47c3ca325bd06d0cca8aee4154329f5ff78649aa9ee55394a342af"
+    },
+    "dependency-w1/tests.log": {
+      "bytes": 101,
+      "sha256": "2ef66d74c03d66fc143e12c86081770cd82ffde9ffa87b78ed280867f63185bc"
+    },
+    "dependency-w1/tests.xml": {
+      "bytes": 3298,
+      "sha256": "58e3ecc45fbd269cff36ad00b47a4374a765d1f28977fb661f091beefc5abc1b"
+    },
+    "installer-osv-02/findings.json": {
+      "bytes": 2564,
+      "sha256": "31128e2342b073fc643c71e0b03b7ff72b4f306476cc9125aad113efbc47c9b7"
+    },
+    "installer-osv-02/request.json": {
+      "bytes": 18858,
+      "sha256": "8c2310363c0681e96c41e41d6eb24cc44aed79b85a3fa0d4d4c6d6129d7fbd2d"
+    },
+    "installer-osv-02/response-1.json": {
+      "bytes": 1760,
+      "sha256": "559f3fe3c41f8774f88ea616dd9b206905e50149dd59b0ce30b63a5411fabb02"
+    },
+    "installer-osv-02/summary.json": {
+      "bytes": 3408,
+      "sha256": "d8598f4efad3548caeedaf40bf24d0e8ab4c41effc7ee86c4201afe5be5a6bf5"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "prepare_dependency_resolution.py": {
+      "bytes": 1208,
+      "sha256": "6a0aab170a348b8ff53c818c0cf29a5754975af3bcbb54795a2c7cf2a0e00a8a"
+    },
+    "seal_dependency_integration.py": {
+      "bytes": 1632,
+      "sha256": "887be294f446614a7a72a5c62f9d7d01a1872104ea8ba1716ea43279c45e6016"
+    },
+    "verify_dependency_metadata.py": {
+      "bytes": 1909,
+      "sha256": "214e1dbe8eeb68e193bb1311b086546488f8902fe6bdf0bd9c212b8d570fd4eb"
+    }
+  }
+}

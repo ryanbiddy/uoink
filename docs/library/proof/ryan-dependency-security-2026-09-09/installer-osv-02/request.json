@@ -1,0 +1,998 @@
+{
+  "queries": [
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "aiohappyeyeballs"
+      },
+      "version": "2.7.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "aiohttp"
+      },
+      "version": "3.14.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "aiosignal"
+      },
+      "version": "1.4.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "alembic"
+      },
+      "version": "1.18.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "annotated-types"
+      },
+      "version": "0.7.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "antlr4-python3-runtime"
+      },
+      "version": "4.9.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "anyio"
+      },
+      "version": "4.14.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "asteroid-filterbanks"
+      },
+      "version": "0.4.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "attrs"
+      },
+      "version": "26.1.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "av"
+      },
+      "version": "18.0.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "backports.tarfile"
+      },
+      "version": "1.2.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "bottle"
+      },
+      "version": "0.13.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "certifi"
+      },
+      "version": "2026.7.22"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "cffi"
+      },
+      "version": "2.1.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "charset-normalizer"
+      },
+      "version": "3.4.9"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "click"
+      },
+      "version": "8.4.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "clr_loader"
+      },
+      "version": "0.2.10"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "colorama"
+      },
+      "version": "0.4.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "colorlog"
+      },
+      "version": "6.11.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "contourpy"
+      },
+      "version": "1.3.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "cryptography"
+      },
+      "version": "50.0.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "ctranslate2"
+      },
+      "version": "4.8.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "cycler"
+      },
+      "version": "0.12.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "defusedxml"
+      },
+      "version": "0.7.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "einops"
+      },
+      "version": "0.8.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "faster-whisper"
+      },
+      "version": "1.2.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "filelock"
+      },
+      "version": "3.32.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "flatbuffers"
+      },
+      "version": "25.12.19"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "fonttools"
+      },
+      "version": "4.63.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "frozenlist"
+      },
+      "version": "1.8.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "fsspec"
+      },
+      "version": "2026.6.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "googleapis-common-protos"
+      },
+      "version": "1.75.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "greenlet"
+      },
+      "version": "3.5.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "grpcio"
+      },
+      "version": "1.82.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "h11"
+      },
+      "version": "0.16.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "httpcore"
+      },
+      "version": "1.0.9"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "httpx-sse"
+      },
+      "version": "0.4.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "httpx"
+      },
+      "version": "0.28.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "huggingface_hub"
+      },
+      "version": "0.36.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "idna"
+      },
+      "version": "3.18"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "importlib_metadata"
+      },
+      "version": "9.0.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "jaraco.classes"
+      },
+      "version": "3.4.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "jaraco.context"
+      },
+      "version": "6.1.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "jaraco.functools"
+      },
+      "version": "4.6.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "Jinja2"
+      },
+      "version": "3.1.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "joblib"
+      },
+      "version": "1.5.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "jsonschema-specifications"
+      },
+      "version": "2025.9.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "jsonschema"
+      },
+      "version": "4.26.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "julius"
+      },
+      "version": "0.2.8"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "keyring"
+      },
+      "version": "25.7.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "kiwisolver"
+      },
+      "version": "1.5.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "lightning-utilities"
+      },
+      "version": "0.15.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "lightning"
+      },
+      "version": "2.6.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "Mako"
+      },
+      "version": "1.3.12"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "markdown-it-py"
+      },
+      "version": "4.2.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "MarkupSafe"
+      },
+      "version": "3.0.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "matplotlib"
+      },
+      "version": "3.11.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "mcp"
+      },
+      "version": "1.28.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "mdurl"
+      },
+      "version": "0.1.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "more-itertools"
+      },
+      "version": "11.1.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "mpmath"
+      },
+      "version": "1.3.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "multidict"
+      },
+      "version": "6.7.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "narwhals"
+      },
+      "version": "2.24.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "networkx"
+      },
+      "version": "3.6.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "nltk"
+      },
+      "version": "3.10.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "numpy"
+      },
+      "version": "2.4.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "omegaconf"
+      },
+      "version": "2.3.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "onnxruntime"
+      },
+      "version": "1.27.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-api"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-exporter-otlp-proto-common"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-exporter-otlp-proto-grpc"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-exporter-otlp-proto-http"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-exporter-otlp"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-proto"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-sdk"
+      },
+      "version": "1.44.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "opentelemetry-semantic-conventions"
+      },
+      "version": "0.65b0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "optuna"
+      },
+      "version": "4.9.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "packaging"
+      },
+      "version": "26.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pandas"
+      },
+      "version": "3.0.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pillow"
+      },
+      "version": "12.3.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "primePy"
+      },
+      "version": "1.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "propcache"
+      },
+      "version": "0.5.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "protobuf"
+      },
+      "version": "7.35.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "proxy_tools"
+      },
+      "version": "0.1.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannote-audio"
+      },
+      "version": "4.0.7"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannote-core"
+      },
+      "version": "6.0.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannote-database"
+      },
+      "version": "6.1.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannote-metrics"
+      },
+      "version": "4.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannote-pipeline"
+      },
+      "version": "4.0.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyannoteai-sdk"
+      },
+      "version": "0.4.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pycparser"
+      },
+      "version": "3.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pydantic-settings"
+      },
+      "version": "2.14.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pydantic"
+      },
+      "version": "2.13.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pydantic_core"
+      },
+      "version": "2.46.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "Pygments"
+      },
+      "version": "2.20.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "PyJWT"
+      },
+      "version": "2.13.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pyparsing"
+      },
+      "version": "3.3.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pystray"
+      },
+      "version": "0.19.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "python-dateutil"
+      },
+      "version": "2.9.0.post0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "python-dotenv"
+      },
+      "version": "1.2.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "python-multipart"
+      },
+      "version": "0.0.32"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pythonnet"
+      },
+      "version": "3.0.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pytorch-lightning"
+      },
+      "version": "2.6.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pytorch-metric-learning"
+      },
+      "version": "2.9.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pywebview"
+      },
+      "version": "5.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pywin32-ctypes"
+      },
+      "version": "0.2.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "pywin32"
+      },
+      "version": "312"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "PyYAML"
+      },
+      "version": "6.0.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "referencing"
+      },
+      "version": "0.37.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "regex"
+      },
+      "version": "2026.7.19"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "requests"
+      },
+      "version": "2.34.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "rich"
+      },
+      "version": "15.0.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "rpds-py"
+      },
+      "version": "2026.6.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "safetensors"
+      },
+      "version": "0.8.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "scikit-learn"
+      },
+      "version": "1.9.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "scipy"
+      },
+      "version": "1.17.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "six"
+      },
+      "version": "1.17.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "sortedcontainers"
+      },
+      "version": "2.4.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "SQLAlchemy"
+      },
+      "version": "2.0.51"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "sse-starlette"
+      },
+      "version": "3.4.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "starlette"
+      },
+      "version": "1.3.1"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "sympy"
+      },
+      "version": "1.14.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "threadpoolctl"
+      },
+      "version": "3.6.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "tokenizers"
+      },
+      "version": "0.22.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torch-audiomentations"
+      },
+      "version": "0.12.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torch"
+      },
+      "version": "2.8.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torch_pitch_shift"
+      },
+      "version": "1.2.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torchaudio"
+      },
+      "version": "2.8.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torchcodec"
+      },
+      "version": "0.7.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torchmetrics"
+      },
+      "version": "1.9.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "torchvision"
+      },
+      "version": "0.23.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "tqdm"
+      },
+      "version": "4.69.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "transformers"
+      },
+      "version": "4.57.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "typing-inspection"
+      },
+      "version": "0.4.2"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "typing_extensions"
+      },
+      "version": "4.16.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "tzdata"
+      },
+      "version": "2026.3"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "urllib3"
+      },
+      "version": "2.7.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "uvicorn"
+      },
+      "version": "0.51.0"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "whisperx"
+      },
+      "version": "3.8.6"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "yarl"
+      },
+      "version": "1.24.5"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "yt-dlp"
+      },
+      "version": "2026.7.4"
+    },
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "zipp"
+      },
+      "version": "4.1.0"
+    }
+  ]
+}

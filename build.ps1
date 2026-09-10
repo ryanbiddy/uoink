@@ -112,10 +112,10 @@ $YTDLP_VERSION  = '2026.07.04'
 # Pillow is used for the multimodal paste-corpus generator (resize +
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.
-$PILLOW_VERSION = '10.4.0'
+$PILLOW_VERSION = '12.3.0'
 # Official Model Context Protocol Python SDK for the stdio MCP server.
 # Also pinned in requirements.txt for dev installs and docs.
-$MCP_VERSION    = '1.27.1'
+$MCP_VERSION    = '1.28.1'
 # Windows Credential Manager wrapper for Anthropic API key storage.
 # Also pinned in requirements.txt for dev installs and docs.
 $KEYRING_VERSION = '25.7.0'
