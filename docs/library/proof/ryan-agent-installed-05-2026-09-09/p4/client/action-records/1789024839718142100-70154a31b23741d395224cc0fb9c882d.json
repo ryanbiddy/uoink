@@ -1,0 +1,19 @@
+{
+  "kind": "sentinel_request",
+  "utc": "2026-09-10T07:20:39.718135+00:00",
+  "monotonic_ns": 487466875568300,
+  "pid": 50680,
+  "request": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "record_action",
+      "arguments": {
+        "action": "shell",
+        "marker": "P4_BODY"
+      }
+    }
+  },
+  "effects_executed": []
+}

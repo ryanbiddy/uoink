@@ -1,0 +1,27 @@
+{
+  "name": "helper-standing-first",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\standing-first",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+  "started_utc": "2026-09-10T06:48:58Z",
+  "child": {
+    "pid": 33516,
+    "created_ms": 1789022938763,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+    "observed_ms": 1789022938767,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 33516,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\commands\\20260910T064858Z-helper-standing-first.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\commands\\20260910T064858Z-helper-standing-first.stderr.log",
+  "synthetic": false
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\seal_agent_installed05.py", line 66, in <module>
+    copy(a.summary,Path('summary.json'))
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\seal_agent_installed05.py", line 19, in copy
+    assert src.is_relative_to(root) or src.is_relative_to(r/'_scratch')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

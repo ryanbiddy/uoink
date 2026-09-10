@@ -1,0 +1,849 @@
+{
+  "scope": "All pinned versions in actual staging metadata. Installed bytes are still a separate pending observation. No model executed.",
+  "lock_sha256": "dd4f350f4a6a36dd5a12fafdd21989ffcae9233cc2342d07eaa2cdedc5cfef90",
+  "pins": 139,
+  "passed": 139,
+  "rows": [
+    {
+      "package": "aiohappyeyeballs",
+      "locked": "2.7.1",
+      "actual": "2.7.1",
+      "matches": true
+    },
+    {
+      "package": "aiohttp",
+      "locked": "3.14.3",
+      "actual": "3.14.3",
+      "matches": true
+    },
+    {
+      "package": "aiosignal",
+      "locked": "1.4.0",
+      "actual": "1.4.0",
+      "matches": true
+    },
+    {
+      "package": "alembic",
+      "locked": "1.18.5",
+      "actual": "1.18.5",
+      "matches": true
+    },
+    {
+      "package": "annotated-types",
+      "locked": "0.7.0",
+      "actual": "0.7.0",
+      "matches": true
+    },
+    {
+      "package": "antlr4-python3-runtime",
+      "locked": "4.9.3",
+      "actual": "4.9.3",
+      "matches": true
+    },
+    {
+      "package": "anyio",
+      "locked": "4.14.2",
+      "actual": "4.14.2",
+      "matches": true
+    },
+    {
+      "package": "asteroid-filterbanks",
+      "locked": "0.4.0",
+      "actual": "0.4.0",
+      "matches": true
+    },
+    {
+      "package": "attrs",
+      "locked": "26.1.0",
+      "actual": "26.1.0",
+      "matches": true
+    },
+    {
+      "package": "av",
+      "locked": "18.0.0",
+      "actual": "18.0.0",
+      "matches": true
+    },
+    {
+      "package": "bottle",
+      "locked": "0.13.4",
+      "actual": "0.13.4",
+      "matches": true
+    },
+    {
+      "package": "certifi",
+      "locked": "2026.7.22",
+      "actual": "2026.7.22",
+      "matches": true
+    },
+    {
+      "package": "cffi",
+      "locked": "2.1.0",
+      "actual": "2.1.0",
+      "matches": true
+    },
+    {
+      "package": "charset-normalizer",
+      "locked": "3.4.9",
+      "actual": "3.4.9",
+      "matches": true
+    },
+    {
+      "package": "click",
+      "locked": "8.4.2",
+      "actual": "8.4.2",
+      "matches": true
+    },
+    {
+      "package": "clr-loader",
+      "locked": "0.2.10",
+      "actual": "0.2.10",
+      "matches": true
+    },
+    {
+      "package": "colorama",
+      "locked": "0.4.6",
+      "actual": "0.4.6",
+      "matches": true
+    },
+    {
+      "package": "colorlog",
+      "locked": "6.11.0",
+      "actual": "6.11.0",
+      "matches": true
+    },
+    {
+      "package": "contourpy",
+      "locked": "1.3.3",
+      "actual": "1.3.3",
+      "matches": true
+    },
+    {
+      "package": "cryptography",
+      "locked": "50.0.1",
+      "actual": "50.0.1",
+      "matches": true
+    },
+    {
+      "package": "ctranslate2",
+      "locked": "4.8.1",
+      "actual": "4.8.1",
+      "matches": true
+    },
+    {
+      "package": "cycler",
+      "locked": "0.12.1",
+      "actual": "0.12.1",
+      "matches": true
+    },
+    {
+      "package": "defusedxml",
+      "locked": "0.7.1",
+      "actual": "0.7.1",
+      "matches": true
+    },
+    {
+      "package": "einops",
+      "locked": "0.8.2",
+      "actual": "0.8.2",
+      "matches": true
+    },
+    {
+      "package": "faster-whisper",
+      "locked": "1.2.1",
+      "actual": "1.2.1",
+      "matches": true
+    },
+    {
+      "package": "filelock",
+      "locked": "3.32.0",
+      "actual": "3.32.0",
+      "matches": true
+    },
+    {
+      "package": "flatbuffers",
+      "locked": "25.12.19",
+      "actual": "25.12.19",
+      "matches": true
+    },
+    {
+      "package": "fonttools",
+      "locked": "4.63.0",
+      "actual": "4.63.0",
+      "matches": true
+    },
+    {
+      "package": "frozenlist",
+      "locked": "1.8.0",
+      "actual": "1.8.0",
+      "matches": true
+    },
+    {
+      "package": "fsspec",
+      "locked": "2026.6.0",
+      "actual": "2026.6.0",
+      "matches": true
+    },
+    {
+      "package": "googleapis-common-protos",
+      "locked": "1.75.0",
+      "actual": "1.75.0",
+      "matches": true
+    },
+    {
+      "package": "greenlet",
+      "locked": "3.5.4",
+      "actual": "3.5.4",
+      "matches": true
+    },
+    {
+      "package": "grpcio",
+      "locked": "1.82.1",
+      "actual": "1.82.1",
+      "matches": true
+    },
+    {
+      "package": "h11",
+      "locked": "0.16.0",
+      "actual": "0.16.0",
+      "matches": true
+    },
+    {
+      "package": "httpcore",
+      "locked": "1.0.9",
+      "actual": "1.0.9",
+      "matches": true
+    },
+    {
+      "package": "httpx",
+      "locked": "0.28.1",
+      "actual": "0.28.1",
+      "matches": true
+    },
+    {
+      "package": "httpx-sse",
+      "locked": "0.4.3",
+      "actual": "0.4.3",
+      "matches": true
+    },
+    {
+      "package": "huggingface-hub",
+      "locked": "0.36.2",
+      "actual": "0.36.2",
+      "matches": true
+    },
+    {
+      "package": "idna",
+      "locked": "3.18",
+      "actual": "3.18",
+      "matches": true
+    },
+    {
+      "package": "jaraco-classes",
+      "locked": "3.4.0",
+      "actual": "3.4.0",
+      "matches": true
+    },
+    {
+      "package": "jaraco-context",
+      "locked": "6.1.2",
+      "actual": "6.1.2",
+      "matches": true
+    },
+    {
+      "package": "jaraco-functools",
+      "locked": "4.6.0",
+      "actual": "4.6.0",
+      "matches": true
+    },
+    {
+      "package": "jinja2",
+      "locked": "3.1.6",
+      "actual": "3.1.6",
+      "matches": true
+    },
+    {
+      "package": "joblib",
+      "locked": "1.5.3",
+      "actual": "1.5.3",
+      "matches": true
+    },
+    {
+      "package": "jsonschema",
+      "locked": "4.26.0",
+      "actual": "4.26.0",
+      "matches": true
+    },
+    {
+      "package": "jsonschema-specifications",
+      "locked": "2025.9.1",
+      "actual": "2025.9.1",
+      "matches": true
+    },
+    {
+      "package": "julius",
+      "locked": "0.2.8",
+      "actual": "0.2.8",
+      "matches": true
+    },
+    {
+      "package": "keyring",
+      "locked": "25.7.0",
+      "actual": "25.7.0",
+      "matches": true
+    },
+    {
+      "package": "kiwisolver",
+      "locked": "1.5.0",
+      "actual": "1.5.0",
+      "matches": true
+    },
+    {
+      "package": "lightning",
+      "locked": "2.6.5",
+      "actual": "2.6.5",
+      "matches": true
+    },
+    {
+      "package": "lightning-utilities",
+      "locked": "0.15.3",
+      "actual": "0.15.3",
+      "matches": true
+    },
+    {
+      "package": "mako",
+      "locked": "1.3.12",
+      "actual": "1.3.12",
+      "matches": true
+    },
+    {
+      "package": "markdown-it-py",
+      "locked": "4.2.0",
+      "actual": "4.2.0",
+      "matches": true
+    },
+    {
+      "package": "markupsafe",
+      "locked": "3.0.3",
+      "actual": "3.0.3",
+      "matches": true
+    },
+    {
+      "package": "matplotlib",
+      "locked": "3.11.1",
+      "actual": "3.11.1",
+      "matches": true
+    },
+    {
+      "package": "mcp",
+      "locked": "1.28.1",
+      "actual": "1.28.1",
+      "matches": true
+    },
+    {
+      "package": "mdurl",
+      "locked": "0.1.2",
+      "actual": "0.1.2",
+      "matches": true
+    },
+    {
+      "package": "more-itertools",
+      "locked": "11.1.0",
+      "actual": "11.1.0",
+      "matches": true
+    },
+    {
+      "package": "mpmath",
+      "locked": "1.3.0",
+      "actual": "1.3.0",
+      "matches": true
+    },
+    {
+      "package": "multidict",
+      "locked": "6.7.1",
+      "actual": "6.7.1",
+      "matches": true
+    },
+    {
+      "package": "narwhals",
+      "locked": "2.24.0",
+      "actual": "2.24.0",
+      "matches": true
+    },
+    {
+      "package": "networkx",
+      "locked": "3.6.1",
+      "actual": "3.6.1",
+      "matches": true
+    },
+    {
+      "package": "nltk",
+      "locked": "3.10.3",
+      "actual": "3.10.3",
+      "matches": true
+    },
+    {
+      "package": "numpy",
+      "locked": "2.4.6",
+      "actual": "2.4.6",
+      "matches": true
+    },
+    {
+      "package": "omegaconf",
+      "locked": "2.3.1",
+      "actual": "2.3.1",
+      "matches": true
+    },
+    {
+      "package": "onnxruntime",
+      "locked": "1.27.0",
+      "actual": "1.27.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-api",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-exporter-otlp",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-common",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-grpc",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-exporter-otlp-proto-http",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-proto",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-sdk",
+      "locked": "1.44.0",
+      "actual": "1.44.0",
+      "matches": true
+    },
+    {
+      "package": "opentelemetry-semantic-conventions",
+      "locked": "0.65b0",
+      "actual": "0.65b0",
+      "matches": true
+    },
+    {
+      "package": "optuna",
+      "locked": "4.9.0",
+      "actual": "4.9.0",
+      "matches": true
+    },
+    {
+      "package": "packaging",
+      "locked": "26.2",
+      "actual": "26.2",
+      "matches": true
+    },
+    {
+      "package": "pandas",
+      "locked": "3.0.5",
+      "actual": "3.0.5",
+      "matches": true
+    },
+    {
+      "package": "pillow",
+      "locked": "12.3.0",
+      "actual": "12.3.0",
+      "matches": true
+    },
+    {
+      "package": "primepy",
+      "locked": "1.3",
+      "actual": "1.3",
+      "matches": true
+    },
+    {
+      "package": "propcache",
+      "locked": "0.5.2",
+      "actual": "0.5.2",
+      "matches": true
+    },
+    {
+      "package": "protobuf",
+      "locked": "7.35.1",
+      "actual": "7.35.1",
+      "matches": true
+    },
+    {
+      "package": "proxy-tools",
+      "locked": "0.1.0",
+      "actual": "0.1.0",
+      "matches": true
+    },
+    {
+      "package": "pyannote-audio",
+      "locked": "4.0.7",
+      "actual": "4.0.7",
+      "matches": true
+    },
+    {
+      "package": "pyannote-core",
+      "locked": "6.0.1",
+      "actual": "6.0.1",
+      "matches": true
+    },
+    {
+      "package": "pyannote-database",
+      "locked": "6.1.1",
+      "actual": "6.1.1",
+      "matches": true
+    },
+    {
+      "package": "pyannote-metrics",
+      "locked": "4.1",
+      "actual": "4.1",
+      "matches": true
+    },
+    {
+      "package": "pyannote-pipeline",
+      "locked": "4.0.0",
+      "actual": "4.0.0",
+      "matches": true
+    },
+    {
+      "package": "pyannoteai-sdk",
+      "locked": "0.4.0",
+      "actual": "0.4.0",
+      "matches": true
+    },
+    {
+      "package": "pycparser",
+      "locked": "3.0",
+      "actual": "3.0",
+      "matches": true
+    },
+    {
+      "package": "pydantic",
+      "locked": "2.13.4",
+      "actual": "2.13.4",
+      "matches": true
+    },
+    {
+      "package": "pydantic-core",
+      "locked": "2.46.4",
+      "actual": "2.46.4",
+      "matches": true
+    },
+    {
+      "package": "pydantic-settings",
+      "locked": "2.14.2",
+      "actual": "2.14.2",
+      "matches": true
+    },
+    {
+      "package": "pygments",
+      "locked": "2.20.0",
+      "actual": "2.20.0",
+      "matches": true
+    },
+    {
+      "package": "pyjwt",
+      "locked": "2.13.0",
+      "actual": "2.13.0",
+      "matches": true
+    },
+    {
+      "package": "pyparsing",
+      "locked": "3.3.2",
+      "actual": "3.3.2",
+      "matches": true
+    },
+    {
+      "package": "pystray",
+      "locked": "0.19.5",
+      "actual": "0.19.5",
+      "matches": true
+    },
+    {
+      "package": "python-dateutil",
+      "locked": "2.9.0.post0",
+      "actual": "2.9.0.post0",
+      "matches": true
+    },
+    {
+      "package": "python-dotenv",
+      "locked": "1.2.2",
+      "actual": "1.2.2",
+      "matches": true
+    },
+    {
+      "package": "python-multipart",
+      "locked": "0.0.32",
+      "actual": "0.0.32",
+      "matches": true
+    },
+    {
+      "package": "pythonnet",
+      "locked": "3.0.5",
+      "actual": "3.0.5",
+      "matches": true
+    },
+    {
+      "package": "pytorch-lightning",
+      "locked": "2.6.5",
+      "actual": "2.6.5",
+      "matches": true
+    },
+    {
+      "package": "pytorch-metric-learning",
+      "locked": "2.9.0",
+      "actual": "2.9.0",
+      "matches": true
+    },
+    {
+      "package": "pywebview",
+      "locked": "5.4",
+      "actual": "5.4",
+      "matches": true
+    },
+    {
+      "package": "pywin32",
+      "locked": "312",
+      "actual": "312",
+      "matches": true
+    },
+    {
+      "package": "pywin32-ctypes",
+      "locked": "0.2.3",
+      "actual": "0.2.3",
+      "matches": true
+    },
+    {
+      "package": "pyyaml",
+      "locked": "6.0.3",
+      "actual": "6.0.3",
+      "matches": true
+    },
+    {
+      "package": "referencing",
+      "locked": "0.37.0",
+      "actual": "0.37.0",
+      "matches": true
+    },
+    {
+      "package": "regex",
+      "locked": "2026.7.19",
+      "actual": "2026.7.19",
+      "matches": true
+    },
+    {
+      "package": "requests",
+      "locked": "2.34.2",
+      "actual": "2.34.2",
+      "matches": true
+    },
+    {
+      "package": "rich",
+      "locked": "15.0.0",
+      "actual": "15.0.0",
+      "matches": true
+    },
+    {
+      "package": "rpds-py",
+      "locked": "2026.6.3",
+      "actual": "2026.6.3",
+      "matches": true
+    },
+    {
+      "package": "safetensors",
+      "locked": "0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "package": "scikit-learn",
+      "locked": "1.9.0",
+      "actual": "1.9.0",
+      "matches": true
+    },
+    {
+      "package": "scipy",
+      "locked": "1.17.1",
+      "actual": "1.17.1",
+      "matches": true
+    },
+    {
+      "package": "six",
+      "locked": "1.17.0",
+      "actual": "1.17.0",
+      "matches": true
+    },
+    {
+      "package": "sortedcontainers",
+      "locked": "2.4.0",
+      "actual": "2.4.0",
+      "matches": true
+    },
+    {
+      "package": "sqlalchemy",
+      "locked": "2.0.51",
+      "actual": "2.0.51",
+      "matches": true
+    },
+    {
+      "package": "sse-starlette",
+      "locked": "3.4.6",
+      "actual": "3.4.6",
+      "matches": true
+    },
+    {
+      "package": "starlette",
+      "locked": "1.3.1",
+      "actual": "1.3.1",
+      "matches": true
+    },
+    {
+      "package": "sympy",
+      "locked": "1.14.0",
+      "actual": "1.14.0",
+      "matches": true
+    },
+    {
+      "package": "threadpoolctl",
+      "locked": "3.6.0",
+      "actual": "3.6.0",
+      "matches": true
+    },
+    {
+      "package": "tokenizers",
+      "locked": "0.22.2",
+      "actual": "0.22.2",
+      "matches": true
+    },
+    {
+      "package": "torch",
+      "locked": "2.8.0",
+      "actual": "2.8.0",
+      "matches": true
+    },
+    {
+      "package": "torch-audiomentations",
+      "locked": "0.12.0",
+      "actual": "0.12.0",
+      "matches": true
+    },
+    {
+      "package": "torch-pitch-shift",
+      "locked": "1.2.5",
+      "actual": "1.2.5",
+      "matches": true
+    },
+    {
+      "package": "torchaudio",
+      "locked": "2.8.0",
+      "actual": "2.8.0",
+      "matches": true
+    },
+    {
+      "package": "torchcodec",
+      "locked": "0.7.0",
+      "actual": "0.7.0",
+      "matches": true
+    },
+    {
+      "package": "torchmetrics",
+      "locked": "1.9.0",
+      "actual": "1.9.0",
+      "matches": true
+    },
+    {
+      "package": "torchvision",
+      "locked": "0.23.0",
+      "actual": "0.23.0",
+      "matches": true
+    },
+    {
+      "package": "tqdm",
+      "locked": "4.69.0",
+      "actual": "4.69.0",
+      "matches": true
+    },
+    {
+      "package": "transformers",
+      "locked": "4.57.6",
+      "actual": "4.57.6",
+      "matches": true
+    },
+    {
+      "package": "typing-extensions",
+      "locked": "4.16.0",
+      "actual": "4.16.0",
+      "matches": true
+    },
+    {
+      "package": "typing-inspection",
+      "locked": "0.4.2",
+      "actual": "0.4.2",
+      "matches": true
+    },
+    {
+      "package": "tzdata",
+      "locked": "2026.3",
+      "actual": "2026.3",
+      "matches": true
+    },
+    {
+      "package": "urllib3",
+      "locked": "2.7.0",
+      "actual": "2.7.0",
+      "matches": true
+    },
+    {
+      "package": "uvicorn",
+      "locked": "0.51.0",
+      "actual": "0.51.0",
+      "matches": true
+    },
+    {
+      "package": "whisperx",
+      "locked": "3.8.6",
+      "actual": "3.8.6",
+      "matches": true
+    },
+    {
+      "package": "yarl",
+      "locked": "1.24.5",
+      "actual": "1.24.5",
+      "matches": true
+    },
+    {
+      "package": "yt-dlp",
+      "locked": "2026.7.4",
+      "actual": "2026.7.4",
+      "matches": true
+    }
+  ],
+  "unlocked_distributions": {},
+  "whisperx_checkpoint": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\whisperx\\assets\\pytorch_model.bin",
+    "bytes": 17719103,
+    "sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea",
+    "same_as_package03": true
+  }
+}

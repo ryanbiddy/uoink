@@ -1,0 +1,20 @@
+START tests
+tests exit 1 
+
+tests/test_workspaces_crud.py::test_crud_lifecycle
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_error_paths
+  E:\AI\projects\uoink\checkouts\Yoink-library\workspaces.py:40: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_mcpb_posix_build.py:16: POSIX build-script execution
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-02-main-0\\t2193\\outside.mp4' -> 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-02-main-0\\t2193\\symlink-media\\video.mp4'
+XFAIL tests/security/test_security_findings.py::test_sec_06_fts_query_non_ascii_dropped - SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
+1 failed, 2491 passed, 2 skipped, 2 deselected, 1 xfailed, 183 warnings in 1446.62s (0:24:06)

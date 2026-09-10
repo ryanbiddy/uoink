@@ -1,0 +1,13 @@
+{
+  "original_sha256": "f09764f2cda7dca4d63b1cbeec599b314b62d2f1995b4ef31702cf0a1345b472",
+  "supplement_sha256": "8f05dd4754ee4b019aa2a8db8dc9031dfbc1848bd0a2c445b4f6852105935af2",
+  "product_source_changed": false,
+  "initial_failure": {
+    "exit": 1,
+    "message": "Reparse path: C:\\Users\\hello\\OneDrive\\Desktop",
+    "stage": "ordinary-effects preflight before Setup",
+    "setup_started": false,
+    "app_directory_absent": true,
+    "install_record_absent": true
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "brief": "P4-COLLECTION-INPUT-REPAIR-2026-09-10.md",
+  "operator_json": "explicit empty object; missing observations stay unobserved",
+  "original_sha256": "ea06f37b04e3008af34d8fa4c45df9bffdf266a3d61376c5900f6a899ae22e48",
+  "corrected_wrapper_sha256": "90f16c001b407b0c38c539889b3e21d6ba42645571727a09cfaabbb3f7732f54",
+  "change": "outer evidence suffix only; same p4-02 profile and unmodified original collector"
+}

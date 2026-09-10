@@ -1,13 +1,19 @@
 # Living Library: one installed receipt session
 
-Use the sealed operator bundle on a new Windows account on this machine. This
-session supplies the installed evidence still needed for Phase 3 C22 and Phase 4.
+Ryan delegated the current installation check to Astra. Astra observed actual same-account Setup/reinstall, 32,054 matching installed files, 11 C22 passes and 15 Phase 4 collection passes. C22 visual evidence is partial and eight Phase 4 checkpoints remain unobserved. This does not approve an ordinary upgrade. See the release notes for the exact limits.
+
+The steps below are the reproducible procedure for one separate, fresh Windows
+account session on this machine. Do not repeat a completed agent stage in its
+existing directory. Each new observation gets fresh app and data paths.
+That account needs write access to the dedicated installation-receipts directory
+shown below. If preparation is refused, retain the refusal; this procedure does
+not elevate or change directory permissions.
 It does not approve a main merge or publication. The release notes and
 `release-state.json` identify the tested source and remaining failures.
 
-The installer is **Uoink-Setup-3.8.0.exe**, 339,059,334 bytes, SHA-256
-`a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe`, built from
-`67a274d5d0c67f48405c4fa242a1011c2cf671c1`. Use this package and the accompanying
+The installer is **Uoink-Setup-3.8.0.exe**, 388,987,465 bytes, SHA-256
+`95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49`, built from
+`6b5aed8cb60be3e826af5f308015393a72c60b0d`. Use this package and the accompanying
 tools together. Earlier d024baf5 and 9defc2a installers are retained historical packages.
 
 ## Before you begin
@@ -19,7 +25,7 @@ Extract the entire supplied ZIP into that account's Downloads folder, named
 or credentials from `C:\Users\hello`.
 
 The preparation tools use the machine's existing `C:\Python314\python.exe` with
-`-I -S`; product observations use the installed Python 3.11.9. Claude Code is
+`-I -S`; product observations use the installed Python 3.13.15. Claude Code is
 needed only for the later Phase 4 client step. Make its native executable
 available to the throwaway account before that step; the prior client version
 was 2.1.261. No client authentication or model invocation belongs in C22.
@@ -37,13 +43,15 @@ $opPython = 'C:\Python314\python.exe'
 if (-not (Test-Path -LiteralPath $opPython -PathType Leaf)) { throw 'The required system Python is unavailable.' }
 $opKit = Join-Path $opBundle 'scripts\install_receipt'
 $opPackage = Join-Path $opBundle 'Uoink-Setup-3.8.0.exe'
-$opHash = 'a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe'
+$opHash = '95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49'
 $opManifest = Join-Path $opBundle 'c22-operator-manifest.json'
 $opBindings = Join-Path $opBundle 'source-bindings.json'
-$opRoot = Join-Path $env:USERPROFILE 'Documents\Uoink Receipt 2026-09-09'
+$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-09'
 $opC22 = Join-Path $opRoot 'c22'
 $opEmpty = Join-Path $opC22 'profiles\empty'
-$opApp = Join-Path $env:LOCALAPPDATA 'Programs\Uoink Library Candidate'
+$opApp = Join-Path $opRoot 'app'
+$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-05-2026-09-09'
+$opBoundCli = Join-Path $opBundle 'run_bound_c22.py'
 if (Test-Path -LiteralPath $opRoot) { throw 'Preserve the existing receipt; do not overwrite it.' }
 if (Test-Path -LiteralPath $opApp) { throw 'This session requires a fresh application directory.' }
 foreach ($opKey in 'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN','ANTHROPIC_BASE_URL',
@@ -77,7 +85,7 @@ Start-Transcript -LiteralPath (Join-Path $opRoot 'operator-transcript.txt')
 [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); user=[Security.Principal.WindowsIdentity]::GetCurrent().Name;
     sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; profile=$env:USERPROFILE;
     package_sha256=$opHash; validation_source=$opSeal.validation_source; bundle_source=$opSeal.bundle_source;
-    installer_source='67a274d5d0c67f48405c4fa242a1011c2cf671c1'; install_started=$false
+    installer_source='6b5aed8cb60be3e826af5f308015393a72c60b0d'; install_started=$false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $opRoot 'operator-preflight.json') -Encoding utf8
 ```
 
@@ -92,80 +100,40 @@ including a populated legacy database built from the shipped fixture migrations.
 It does not run the installer or migrate the live library.
 
 ```powershell
-& $opPython -I -S -B (Join-Path $opKit 'cli.py') prepare-before-install `
+& $opPython -I -S -B $opBoundCli --kit-root $opKit --package-seal $opPackageSeal --entry cli prepare-before-install `
     --intended-app $opApp --package $opPackage --package-sha256 $opHash `
     --isolated-profile $opEmpty --isolated-port 18081 --fixture-port 18080 `
     --receipt-root $opC22 --manifest $opManifest
 if ($LASTEXITCODE -ne 0) { throw 'C22 preparation failed; preserve its receipt.' }
 ```
 
-Use this function for one install and one **same-version reinstall**. Each call
+Use the reviewed driver for one install and one **same-version reinstall**. Each call
 retains the exact command, package hash, UTC interval and actual process exit.
-The reinstall exercises installed replacement/preparation; it is not a
-cross-version binary upgrade. The legacy-data migration is measured separately
+The reviewed observer checks the actual files-only verification log, ordinary registry and inspected shortcut hashes, separate isolated uninstall entry, marker and all four actual shortcut targets. For a redirected Desktop it records metadata without opening its contents. Its actual saved Tasks setting must be empty; retain both settings INF files and the Inno icon-creation logs. It records the real user/SID/profile. Its conservative
+throwaway_account=false field grants no account-isolation credit by itself;
+Astra determines that from the independently recorded account identity.
+The reinstall exercises replacement by the same installed version. Isolated
+PrepareToInstall skips the ordinary upgrade_prep.ps1 script; that script and a
+cross-version binary upgrade are unobserved. Legacy-data migration is measured separately
 by the C22 scenarios. No older approved binary is included in this bundle.
 
 ```powershell
-function Save-InstallEffects([string]$opStage) {
-    $opRows = @()
-    foreach ($opHive in 'HKCU:','HKLM:') {
-        foreach ($opView in 'Software\Microsoft\Windows\CurrentVersion\Uninstall','Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall') {
-            foreach ($opId in '{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1','{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1') {
-                $opReg = Join-Path $opHive ($opView + '\' + $opId)
-                $opPresent = Test-Path -LiteralPath $opReg
-                $opValues = [ordered]@{}
-                if ($opPresent) {
-                    foreach ($opProperty in (Get-ItemProperty -LiteralPath $opReg).PSObject.Properties) {
-                        if ($opProperty.Name -notlike 'PS*') { $opValues[$opProperty.Name] = $opProperty.Value }
-                    }
-                }
-                $opRows += [ordered]@{ path=$opReg; present=$opPresent; values=$opValues }
-            }
-        }
-    }
-    $opRun = Get-ItemPropertyValue -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name Uoink -ErrorAction SilentlyContinue
-    $opLinks = @()
-    $opShell = New-Object -ComObject WScript.Shell
-    foreach ($opFolder in (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Uoink'),
-                         (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'),
-                         [Environment]::GetFolderPath('Desktop')) {
-        if (Test-Path -LiteralPath $opFolder) {
-            foreach ($opLink in Get-ChildItem -LiteralPath $opFolder -Filter '*.lnk' -File) {
-                if ($opFolder -notlike '*\Uoink' -and $opLink.Name -notlike '*Uoink*') { continue }
-                $opShortcut = $opShell.CreateShortcut($opLink.FullName)
-                $opLinks += [ordered]@{ path=$opLink.FullName; target=$opShortcut.TargetPath;
-                    arguments=$opShortcut.Arguments; working_directory=$opShortcut.WorkingDirectory;
-                    sha256=(Get-FileHash -LiteralPath $opLink.FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
-            }
-        }
-    }
-    $opMarker = Join-Path $opApp 'isolated-install.json'
-    $opMarkerData = if (Test-Path -LiteralPath $opMarker) { Get-Content -LiteralPath $opMarker -Raw } else { $null }
-    $opEffects = [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); registry=$opRows;
-        ordinary_autorun_value=$opRun; shortcuts=$opLinks; marker=$opMarkerData }
-    Write-ReceiptText (Join-Path $opRoot ($opStage + '.effects.json')) ($opEffects | ConvertTo-Json -Depth 12)
-}
-Save-InstallEffects 'before-install'
+$opInstallerDriver = Join-Path $opBundle 'agent_install_observer.ps1'
+& $opInstallerDriver -Package $opPackage -PackageHash $opHash -ReceiptRoot $opRoot -Stage install
+& $opInstallerDriver -Package $opPackage -PackageHash $opHash -ReceiptRoot $opRoot -Stage same-version-reinstall
+```
 
-function Invoke-ReceiptInstall([string]$opStage) {
-    $opRecord = Join-Path $opRoot ($opStage + '.json')
-    if (Test-Path -LiteralPath $opRecord) { throw 'This installer stage already has evidence.' }
-    $opLog = Join-Path $opRoot ($opStage + '.inno.log')
-    $opArgs = @('/VERYSILENT','/NORESTART','/SUPPRESSMSGBOXES',
-        ('/DIR="' + $opApp + '"'), '/ISOLATED=1', ('/PROFILE="' + $opEmpty + '"'),
-        '/PORT=18081','/NOCLOSEAPPLICATIONS','/NORESTARTAPPLICATIONS', ('/LOG="' + $opLog + '"'))
-    $opStart = [DateTimeOffset]::UtcNow.ToString('o')
-    $opProc = Start-Process -FilePath $opPackage -ArgumentList $opArgs -Wait -PassThru -WindowStyle Hidden
-    $opExit = $opProc.ExitCode
-    [ordered]@{ stage=$opStage; executable=$opPackage; arguments=$opArgs; package_sha256=$opHash;
-        utc_start=$opStart; utc_end=[DateTimeOffset]::UtcNow.ToString('o'); exit=$opExit;
-        log=$opLog; same_version_reinstall=($opStage -eq 'same-version-reinstall')
-    } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $opRecord -Encoding utf8
-    Save-InstallEffects $opStage
-    if ($null -eq $opExit -or $opExit -ne 0) { throw 'Installer did not report exit zero; stop and preserve all evidence.' }
-}
-Invoke-ReceiptInstall 'install'
-Invoke-ReceiptInstall 'same-version-reinstall'
+Compare every actual installed file with the sealed compiler-input inventory.
+The verifier accounts separately for eight embedded wizard images and the one
+setup-only script; it must not expect those files in the application directory.
+Then exercise the installed image decoder, ephemeral encryption and product-loader WAV decoding using synthetic bytes. The reviewed observer temporarily disables the embedded interpreter's explicit import-site line and restores its exact bytes in finally. Its report must affirm startup_restored=true. This is instrumented compatibility evidence, not an unmodified-startup claim. These checks do not start a model or open an index.
+
+```powershell
+& $opPython -I -S -B (Join-Path $opBundle 'check_installed_package_inputs.py') `
+    --seal $opPackageSeal --app $opApp --out (Join-Path $opRoot 'installed-file-comparison.json')
+if ($LASTEXITCODE -ne 0) { throw 'Installed file comparison failed; retain the evidence.' }
+& $opPython -I -S -B (Join-Path $opBundle 'run_installed_decoders.py') --root $opRoot
+if ($LASTEXITCODE -ne 0) { throw 'Instrumented installed decoder check failed; retain its output.' }
 ```
 
 Do not click ordinary shortcuts, enable login startup, or launch the normal
@@ -178,7 +146,7 @@ absence, not replaced by a screenshot of the source tree.
 ## C22: original installed helper and post-restart browser
 
 ```powershell
-& $opPython -I -S -B (Join-Path $opKit 'cli.py') run `
+& $opPython -I -S -B $opBoundCli --kit-root $opKit --package-seal $opPackageSeal --entry cli run `
     --installed-app $opApp --package $opPackage --package-sha256 $opHash `
     --isolated-profile $opEmpty --isolated-port 18081 --fixture-port 18080 `
     --receipt-root $opC22 --manifest $opManifest --continue-existing-receipt --scenario all
@@ -186,7 +154,7 @@ if ($LASTEXITCODE -ne 0) { throw 'C22 command failed; preserve the complete rece
 $opC22Verdict = Get-Content -LiteralPath (Join-Path $opC22 'evidence\verdict.json') -Raw | ConvertFrom-Json
 $opC22Verdict.counts | Format-List
 if ($opC22Verdict.counts.fail -ne 0) { throw 'A C22 scenario failed; do not retry it.' }
-& $opPython -I -S -B (Join-Path $opKit 'browser_checkpoint.py') --receipt-root $opC22 --profile-name child-life
+& $opPython -I -S -B $opBoundCli --kit-root $opKit --package-seal $opPackageSeal --entry browser --receipt-root $opC22 --profile-name child-life
 if ($LASTEXITCODE -ne 0) { throw 'Browser hold or owned cleanup failed.' }
 ```
 
@@ -335,7 +303,7 @@ credentials. Astra collects a scoped copy that excludes
 | AS-7 requirement | Evidence collected and independently checked |
 |---|---|
 | Actual install/reinstall | Package and validation-source hashes, exact argv, UTC and real exits; Inno/preparation logs, app paths, isolated marker, registry and shortcut effects. Same-version reinstall stays labeled. |
-| Bundled provenance | Python/MCP versions, actual executable/module paths, all 142 source bindings, migration 0028 and schema 30; no checkout/user-site fallback. |
+| Bundled provenance | Python/MCP versions, actual executable/module paths, all 142 compiler bindings with the one setup-only script separate, all 32,054 installed destination hashes, migration 0028 and schema 30; no checkout/user-site fallback. |
 | Empty/legacy replay | Frozen original fixture, migration history, integrity/foreign-key results and before/after retained identities/counts. |
 | Three capture orderings | Consent/revision/epoch, source/episode/item identities, complete starts/charges/publications and deduplication, with synthetic acquisition/transcript scope explicit. |
 | Process recovery | Exact helper/child identities, live/dead observations, incarnation/claim/lock files, retained charge and no duplicate start; registered-child settlement/release after proven death. Unresolved launch/registration cases must retain exclusion until terminal ownership is established. |

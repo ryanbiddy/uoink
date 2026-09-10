@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\package_decoder_probe.py", line 6, in <module>
+    assert app.is_relative_to(allowed) and out.is_relative_to(allowed) and sys.flags.isolated and sys.flags.no_site
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

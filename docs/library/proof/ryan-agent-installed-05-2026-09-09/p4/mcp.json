@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "uoink": {
+      "type": "stdio",
+      "command": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+      "args": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "--isolated-port",
+        "18282",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\records\\stdio",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "--isolated-port",
+        "18282"
+      ],
+      "env": {
+        "LOCALAPPDATA": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\environment\\LOCALAPPDATA",
+        "APPDATA": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\environment\\APPDATA",
+        "TEMP": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\tmp",
+        "TMP": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\tmp",
+        "XDG_DATA_HOME": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "UOINK_OUTPUT_DIR": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\output",
+        "UOINK_INDEX_PATH": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\index.db",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUTF8": "1",
+        "PYTHONPATH": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\guard;E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+        "P4_FIXTURE_ROOT": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "P4_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "P4_ISOLATED_PORT": "18282",
+        "P4_INSTALLED_APP": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+        "P4_FORBIDDEN_INDEX": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\environment\\LOCALAPPDATA\\Uoink\\index.db",
+        "MCP_TIMEOUT": "10000",
+        "ENABLE_TOOL_SEARCH": "false",
+        "DISABLE_AUTOUPDATER": "1",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+        "UOINK_ISOLATED_PROFILE": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile",
+        "UOINK_ISOLATED_PORT": "18282"
+      }
+    }
+  }
+}

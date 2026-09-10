@@ -1,0 +1,7 @@
+{
+  "first_exit": 1,
+  "message": "Changed guard: Assert-PlainPath",
+  "diagnosis": "The original guard has LF endings and the copied supplement has CRLF. Their lengths are 578 and 588; independently normalized text is identical.",
+  "repair": "Normalize CRLF to LF only in text comparisons. Preserve all guard syntax and the six decision cases. No Setup or product/test change.",
+  "rerun_brief": "Repeat the same observer validation after this exact newline comparison repair; keep the original failed attempt."
+}

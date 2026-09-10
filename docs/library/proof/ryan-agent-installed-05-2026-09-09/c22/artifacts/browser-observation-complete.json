@@ -1,0 +1,33 @@
+{
+  "utc": "2026-09-10T06:57:34.2773678+00:00",
+  "observer": "Astra",
+  "browser": "Comet",
+  "address": "http://127.0.0.1:18081/dashboard",
+  "source_url": "http://c22-fixture.invalid/child-life/feed.xml",
+  "visible": {
+    "consent": "On (Standing capture)",
+    "health_label": "healthy",
+    "enrolled": 1,
+    "enrollment_cap": 25,
+    "starts_used": 1,
+    "daily_cap": 10,
+    "remaining": 9,
+    "activity_running": 0,
+    "activity_queued": 0,
+    "activity_completed_loaded": 0
+  },
+  "screenshots": [
+    "browser-library.jpg",
+    "browser-sources-summary.jpg",
+    "browser-sources-detail.jpg",
+    "browser-activity.jpg"
+  ],
+  "raw_screenshot_mime": "image/jpeg",
+  "compatibility_image": "browser-checkpoint.png contains original JPEG bytes, accepted by the existing PNG/JPEG signature check; no image conversion",
+  "limitations": [
+    "Consent revision is in the paired persisted snapshot, not printed in the UI.",
+    "The source health pill describes detection. The persisted worker_lost retry reason is not exposed by the visible source/activity rows.",
+    "No capture, consent, fetch, authentication or source mutation control was used."
+  ],
+  "status": "observed_pending_independent_review"
+}

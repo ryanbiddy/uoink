@@ -1,0 +1,36 @@
+{
+  "source": "393010f80c53a95a6fa3c853a98b77924efa0250",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2493,
+    "failed": 1,
+    "xfailed": 1,
+    "skipped": 2
+  },
+  "cases": 2497,
+  "seconds_including_collection": 1463.5460580000072,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree; not a monolithic pytest run",
+  "finished_utc": "2026-09-10T07:37:49.405085+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "partition": "main"
+    }
+  },
+  "previous_collected_cases": 2493,
+  "new_cases": [
+    "tests/test_install_receipt_p4_embedded_probe.py::test_bound_probe_still_rejects_checkout_imports",
+    "tests/test_install_receipt_p4_embedded_probe.py::test_isolated_runtime_needs_explicit_app_bootstrap",
+    "tests/test_install_receipt_p4_embedded_probe.py::test_probe_refuses_unbound_or_relative_app[arguments0]",
+    "tests/test_install_receipt_p4_embedded_probe.py::test_probe_refuses_unbound_or_relative_app[arguments1]"
+  ],
+  "missing_prior_cases": [],
+  "test_process_seconds": {
+    "main": 1446.6,
+    "media": 4.529
+  },
+  "total_test_process_seconds": 1451.129,
+  "source_scope_check": "No modifications/deletions to prior tests or P4 fixture guard; added regression file only"
+}

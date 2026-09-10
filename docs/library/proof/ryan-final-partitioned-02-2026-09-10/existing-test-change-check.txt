@@ -1,0 +1,2 @@
+A	tests/test_install_receipt_p4_embedded_probe.py
+A	tests/test_packaged_decoder_loader.py

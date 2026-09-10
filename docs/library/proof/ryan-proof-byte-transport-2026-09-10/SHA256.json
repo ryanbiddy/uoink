@@ -1,0 +1,33 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "check_probe_proof_git_bytes.py": {
+      "bytes": 1114,
+      "sha256": "632e978674ee8379d64356d134b178b0c424c84f8a19b51f0812aabd26b0f6ff"
+    },
+    "document-encoding-repair.json": {
+      "bytes": 354,
+      "sha256": "6d0d2f215d6da1ef7e2aa6c5d41512698c6dcc7430f3f736442e213e02aed28d"
+    },
+    "index-verification.json": {
+      "bytes": 460,
+      "sha256": "e9d527fd2300bc08e0bbf428ed1d47022953039bf6d43aff5aa76bbb2cf38e1c"
+    },
+    "probe-proof-git-first-audit.json": {
+      "bytes": 2414,
+      "sha256": "d008883c3cc75bbf2b8909e4faed09a4ea948185f86781cd1b7b34e9ae6b8987"
+    },
+    "repair.md": {
+      "bytes": 515,
+      "sha256": "caa120c7d6b633f6c7b24dcac8fb4efb9ed3c83d1d1fef1e4e23d78b47db50e9"
+    },
+    "resume-summary-error.json": {
+      "bytes": 362,
+      "sha256": "8b844c424984be86b52e62bdc032b732c196bc83cc5dcfca98307fd20d3c3cc2"
+    },
+    "verify_candidate05_proof_bytes.py": {
+      "bytes": 1756,
+      "sha256": "1d99f161e0ad455cdb6fec4109bfb7948a4741058add70c22fa85ac4ed936191"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "failure": "The resume wrote the handoff successfully, then its progress-print referenced the omitted paths variable and raised NameError.",
+  "repair": "Do not repeat the completed handoff write. Continue only the remaining document finalizer after explicit UTF-8 draft reads.",
+  "scope": "Document orchestration only; no source, test or receipt rerun."
+}

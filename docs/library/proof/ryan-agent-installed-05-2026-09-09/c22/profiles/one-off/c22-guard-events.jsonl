@@ -1,0 +1,19 @@
+{"event": "guard_loaded", "pid": 52060, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\one-off", "injection": ""}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 52060, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\one-off\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\""}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "guard_loaded", "pid": 74188, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\one-off", "injection": ""}
+{"event": "subprocess_attempt", "pid": 52060, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18080)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.connect", "address": "('127.0.0.1', 18080)"}
+{"event": "guard_loaded", "pid": 66496, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\one-off", "injection": ""}
+{"event": "synthetic_transcript", "pid": 52060, "model_invoked": false}
+{"event": "network_attempt", "pid": 66496, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 66496, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 52060, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 52060, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}

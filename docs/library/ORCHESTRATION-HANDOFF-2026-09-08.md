@@ -86,16 +86,16 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-10; package source `6b5aed8`, final receipt-tree refresh next)
+## State at handoff (updated 2026-09-10; package source `6b5aed8`, complete receipt tree `393010f`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Package-05 actual installed C22: 11 passed / zero failed / three original manual placeholders; browser supplement review pending; same account recorded |
-| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Actual prepare exposed embedded probe import defect; bounded repair has 63 passes in each root. Fresh installed/client/everyday receipts next |
+| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Package-05 actual C22: 11 passed / zero failed / three original manual placeholders; browser partial (visible revision and recovery reason absent); same account recorded |
+| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Actual isolated Setup and same-version reinstall both exit zero; 32,054 installed hashes match. Receipt-source repair requires new complete tree. P4/client and final evidence remain; nineteen advisory entries retained |
+| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `9a62e84` tree: 2,489 passed / one failed / two skipped / one xfailed | All 2,493 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -179,14 +179,27 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Follow ASTRA-PARTITIONED-TREE-VERDICT-2026-09-09.md into actual installation.
    Update notes/delivery; rebuild only changed packaged source; preserve old ZIP;
    assemble new evidence and push only origin/cc/living-library.
-5. Package-05 Setup/reinstall and installed C22 now have actual observations.
-   Complete the fresh tree and fresh P4 directory under
-   P4-EMBEDDED-PROBE-REPAIR-BRIEF-2026-09-09.md and the 2026-09-10 verdict.
-   Preserve the initial Desktop observer refusal, decoder instrument failures
-   and P4 prepare failure. Original raw manual placeholders remain unchanged.
-   Review the actual browser supplement, then seal installed evidence and finish
-   notes/runbook/new ZIP. Real-client sign-in remains user-controlled.
-6. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
+5. Package-05 actual Setup/reinstall, C22, decoder and independent P4 observations
+   are reviewed and sealed. Read ASTRA-INSTALLED-CANDIDATE-VERDICT-2026-09-10.md.
+   The complete 393010f tree and original failed/partial attempts remain separate.
+   Notes/runbook and the product-suite exercise are updated; review kit delivery
+   is documentary and does not approve this candidate for an ordinary upgrade.
+6. Next product repair: BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10.md. Show consent
+   revision and the recorded recovery outcome using bounded existing source data.
+   Do not hide this fix inside the larger proposed redesign. Use a worktree,
+   raw diff/three-way apply and both-root verification. No acceptance test edits.
+7. That repair changes packaged source: complete its new tree, rebuild/reseal and
+   observe a fresh installed browser/state pair. Preserve package-05 and its kit.
+   Fresh Phase 4 client/visual observation also needs a new prepared profile:
+   p4-02 has already run collection's declared fixture deletion checks. Never
+   reuse it as a pristine client fixture. User-controlled fresh authentication
+   and confirmation of subscription/extra-usage settings remain required.
+8. A separate local product-suite review proposes phases 7–13 and a Control Room
+   reliability brief/interface concept. Files are under
+   E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
+   the broader computer inventory and cross-product critique stay local.
+   Other repositories were reviewed only; do not infer merges/pushes or rewrites.
+9. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
    fetch/speaker runs and deferred Part B remain unchanged.
 
 ### Previous delivered-artifact queue (historical; superseded above)
@@ -2536,3 +2549,32 @@ checkout, with four new regressions and no existing test changed. Its raw diff
 was applied three-way. See ASTRA-P4-EMBEDDED-PROBE-VERDICT-2026-09-10.md.
 Now observe the fresh complete tree and retry installed P4 in a new directory.
 No packaged source changed and no installer rebuild is owed for this repair.
+
+### 2026-09-10 - Installed verdict, product exercise and proof transport
+
+Actual package-05 Setup and same-version reinstall each exit zero. The 275-file
+installed proof retains 32,054 matching destinations, 11 C22 passes, three raw
+manual placeholders, four original JPEG screenshots and 15 Phase 4 passes with
+eight unobserved checkpoints. All observed owned children stop and guard/startup
+bytes restore. The browser pair is stable but visually incomplete: consent
+revision and worker_lost recovery are absent. A bounded product repair brief is
+queued; this is work for Astra, not a Ryan waiver. P4 client sign-in remains
+user-controlled; no credentials were copied and no model was invoked. Collection
+purged its declared fixture, so later client work requires a new profile.
+
+The first Git-byte audit of the new embedded-probe proof fails for four files
+whose line endings were normalized. Their original working bytes still match
+the seal. Exact -text rules and re-adding those bytes repair transport without
+changing measurements; retain the first failed audit. New proof paths must get
+their byte-preservation attribute before the first commit.
+
+The broader exercise reviewed relevant C:/E: project locations and the website,
+not every personal/cloud file. Its inventory and cross-product findings are in
+the separate local report directory, outside this public repository. Control
+Room's type check and 21 fake-provider tests pass, but a failed worker can still
+return CLI exit zero; integrators must inspect run state. The prototype is not
+live telemetry. OneDrive's redirected folders explain the conservative Desktop
+observer refusal, not the user's sync failure; that diagnosis remains open.
+No other product source or remote changed.
+
+The complete 393010f tree accounts for 2,497 cases exactly once: 2,493 passed, 1 failed, 2 skipped and 1 xfailed. Its aggregate remains FAIL. Only S21 is absent; four new regressions and no prior case missing. No packaged source changed.

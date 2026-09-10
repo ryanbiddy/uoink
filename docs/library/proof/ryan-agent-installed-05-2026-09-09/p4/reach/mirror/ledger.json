@@ -1,0 +1,62 @@
+{
+  "contract_version": "phase4-v1-2026-09-08",
+  "destination": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\p4-02\\profile\\vault",
+  "entries": {
+    "index:Library.md": {
+      "dependency_hash": "",
+      "desired_generation": 5,
+      "identity": "Library.md",
+      "kind": "index",
+      "last_file_hash": "1a1d062b035f0dd62da73133ba15f51243048916385e0efb8904728f366c9fee",
+      "pending_action": "write",
+      "relpath": "Library.md",
+      "status": "user_edit_conflict",
+      "written_generation": 3
+    },
+    "item:p4fx-hostile-01": {
+      "dependency_hash": "2a9e5d90d1cf6ad171dd023d106716a7b68812a0e7e352bfdfcf31f839816b0f",
+      "desired_generation": 1,
+      "identity": "p4fx-hostile-01",
+      "kind": "item",
+      "last_file_hash": "293ff7f6fe7a8a99d0019932d39ff0f65f6927f80f0d615a0e8134f4082141cd",
+      "pending_action": "none",
+      "relpath": "Library/b22e2df92643a292fdf8b71ca5a89ee707f525d3135e239d1cbc05978bf69168.md",
+      "status": "synced",
+      "written_generation": 1
+    },
+    "item:p4fx-text-01": {
+      "dependency_hash": "4e66977bebac559d2551564bd28a584c034113e72b8e8f1250f65afac312cd13",
+      "desired_generation": 1,
+      "identity": "p4fx-text-01",
+      "kind": "item",
+      "last_file_hash": "2ca729f57a9246bfd0c10e90ff83e8563493a05622a2b0f45bda928b3a027d39",
+      "pending_action": "none",
+      "relpath": "Library/f248ea83bc2e919ba0f12907523c7628b855fb2d87905f5138a752cf159427c0.md",
+      "status": "synced",
+      "written_generation": 1
+    },
+    "item:p4fx-timed-01": {
+      "dependency_hash": "f443f9f274a8c763b3de29665997664331c74e8e99ef6bc71733552133541bdf",
+      "desired_generation": 3,
+      "identity": "p4fx-timed-01",
+      "kind": "item",
+      "last_file_hash": "",
+      "pending_action": "none",
+      "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md",
+      "status": "purged",
+      "written_generation": 3
+    }
+  },
+  "exports_paused": false,
+  "marker": "p4-synthetic-vault",
+  "pause_reason": null,
+  "purged": {
+    "item:p4fx-timed-01": {
+      "generation": 3,
+      "identity": "p4fx-timed-01",
+      "purged_at": "2026-09-10T07:20:41Z",
+      "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,44 @@
+{
+  "started_utc": "2026-09-10T06:47:59.956355+00:00",
+  "startup_original_sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+  "startup_observation_sha256": "473736784f75c4cb823f0e23f6256850c8ac89ea375bf4278b235ea00d164aa5",
+  "commands": [
+    {
+      "command": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+        "-I",
+        "-S",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\package_decoder_probe.py",
+        "--app",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+        "--out",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\decoder-probe-02"
+      ],
+      "started_utc": "2026-09-10T06:47:59.956588+00:00",
+      "instrument": "package_decoder_probe.py",
+      "exit": 0,
+      "finished_utc": "2026-09-10T06:48:00.294712+00:00"
+    },
+    {
+      "command": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+        "-I",
+        "-S",
+        "-B",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\installed_codec_probe05.py",
+        "--app",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+        "--out",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\codec-probe-02"
+      ],
+      "started_utc": "2026-09-10T06:48:00.294829+00:00",
+      "instrument": "installed_codec_probe05.py",
+      "exit": 0,
+      "finished_utc": "2026-09-10T06:48:04.138046+00:00"
+    }
+  ],
+  "status": "passed",
+  "startup_restored": true,
+  "finished_utc": "2026-09-10T06:48:04.142105+00:00"
+}

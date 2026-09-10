@@ -1,0 +1,76 @@
+{
+  "utc": "2026-09-10T07:26:32.978279+00:00",
+  "package_sha256": "95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49",
+  "build_source": "6b5aed8cb60be3e826af5f308015393a72c60b0d",
+  "setup_observed": true,
+  "same_version_reinstall_observed": true,
+  "throwaway_account": false,
+  "ordinary_installation_replaced": false,
+  "account_scope": "Same non-elevated Windows account, separate app/data/credential namespace and uninstall/Start Menu entry. Not OS-wide containment.",
+  "installed_files_compared": 32054,
+  "installed_files_failed": 0,
+  "setup_exits": [
+    0,
+    0
+  ],
+  "desktop_observer": "Reviewed supplement skips redirected Desktop contents, records reparse metadata, and requires actual empty Tasks INF plus Inno no-desktop-task logs. Original pre-Setup refusal retained.",
+  "c22_raw_counts": {
+    "pass": 11,
+    "fail": 0,
+    "unexecuted": 3,
+    "executed": 11
+  },
+  "c22_automated_scenarios": "11 passed, 0 failed; original three manual placeholders retained",
+  "browser": {
+    "status": "partial",
+    "images": 4,
+    "same_state_before_after_stop": true,
+    "visible": "Standing consent on; enrollment 1/25, starts used 1/10, Activity has zero running/queued/completed-loaded items. Source detection health is healthy.",
+    "missing_visual_fields": [
+      "Consent revision appears only in persisted snapshot",
+      "Settled worker_lost reason is not shown in visible source/Activity rows"
+    ],
+    "image_format": "Original JPEG. Legacy browser-checkpoint.png is byte-identical JPEG; no conversion.",
+    "cleanup": "owned helper exit zero, port freed and exact startup/guard restoration affirmed"
+  },
+  "p4_raw_counts": {
+    "passed": 15,
+    "failed": 0,
+    "blocked": 0,
+    "unobserved": 8,
+    "pending_review": 0
+  },
+  "p4_route_installed_credit": true,
+  "p4_collection_installed_credit": false,
+  "p4_product_findings": [],
+  "p4_unobserved": [
+    "follow_citation",
+    "follow_local_citation",
+    "open_brief",
+    "jump_chapter_fixture",
+    "optional_player_jump",
+    "hostile_actions",
+    "actual_client_ordinary",
+    "actual_client_recall"
+  ],
+  "p4_notes": "Actual installed stdio route verified; overall collector keeps installed_credit false. Terminated transport/wrapper exit one is preserved, not a graceful-exit claim. Independent fixture checks used no real client.",
+  "client": "Prepared fresh empty isolated configuration; no credentials copied/inspected, no model invoked. User-controlled sign-in and subscription/extra-usage verification remain required.",
+  "decoders": "Installed image/crypto and product-loader WAV observations pass under temporarily disabled site import. Exact ._pth restored. This is instrumented compatibility evidence.",
+  "failed_history": [
+    "Desktop observer pre-Setup reparse refusal",
+    "Decoder launcher SystemRoot key error before spawn",
+    "Decoder probe no_site assertion before imports",
+    "P4 prepare embedded import failure",
+    "P4 collect explicit operator input missing before child spawn"
+  ],
+  "release_ready": false,
+  "main_merged": false,
+  "published": false,
+  "open": [
+    "Real-client and visual everyday-flow receipts",
+    "Browser missing visible revision/recovery detail",
+    "Historical AT6 exit disposition",
+    "Retained dependency findings and unsigned package",
+    "Ryan main/public release decision"
+  ]
+}

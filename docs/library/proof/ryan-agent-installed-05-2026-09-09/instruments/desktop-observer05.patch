@@ -1,0 +1,65 @@
+--- scripts/install_receipt/agent_install.ps1
++++ _scratch/agent_install_observer05.ps1
+@@ -51,6 +51,10 @@
+     try { return ([BitConverter]::ToString($taskSha.ComputeHash([Text.Encoding]::UTF8.GetBytes($taskText)))).Replace('-','').ToLowerInvariant() }
+     finally { $taskSha.Dispose() }
+ }
++function Test-UntraversedDesktop([string]$Folder,[string]$Desktop,[IO.FileAttributes]$Attributes) {
++    return ([IO.Path]::GetFullPath($Folder) -ieq [IO.Path]::GetFullPath($Desktop)) -and [bool]($Attributes -band [IO.FileAttributes]::ReparsePoint)
++}
++
+ function Get-Effects {
+     $taskRegistry = [ordered]@{}
+     foreach ($taskHive in 'HKCU:','HKLM:') {
+@@ -70,10 +74,17 @@
+     }
+     $taskRunValue = Get-ItemPropertyValue -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name Uoink -ErrorAction SilentlyContinue
+     $taskLinks = [ordered]@{}
++    $taskUntraversed = [ordered]@{}
+     foreach ($taskFolder in (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Uoink'),
+                             (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'),
+                             [Environment]::GetFolderPath('Desktop')) {
+         if (-not (Test-Path -LiteralPath $taskFolder)) { continue }
++        $taskFolderEntry = Get-Item -LiteralPath $taskFolder -Force
++        if (Test-UntraversedDesktop $taskFolder ([Environment]::GetFolderPath('Desktop')) $taskFolderEntry.Attributes) {
++            $taskDescriptor = [ordered]@{ path=$taskFolder; attributes=[string]$taskFolderEntry.Attributes; link_type=[string]$taskFolderEntry.LinkType; target=@($taskFolderEntry.Target); created_utc=$taskFolderEntry.CreationTimeUtc.ToString('o'); contents_observed=$false }
++            $taskUntraversed[$taskFolder] = [ordered]@{ metadata_sha256=(Get-TextHash ($taskDescriptor | ConvertTo-Json -Compress -Depth 5)); contents_observed=$false; reason='Ordinary reparse Desktop not traversed; selected tasks must exclude desktopicon' }
++            continue
++        }
+         Assert-PlainPath $taskFolder
+         foreach ($taskLink in Get-ChildItem -LiteralPath $taskFolder -File -Filter '*.lnk' | Sort-Object FullName) {
+             if ($taskFolder -notlike '*\Uoink' -and $taskLink.Name -notlike '*Uoink*') { continue }
+@@ -81,7 +92,7 @@
+             $taskLinks[$taskLink.FullName] = (Get-FileHash -LiteralPath $taskLink.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+         }
+     }
+-    return [ordered]@{ registry=$taskRegistry; ordinary_autorun_hash=(Get-TextHash ([string]$taskRunValue)); ordinary_shortcut_hashes=$taskLinks }
++    return [ordered]@{ registry=$taskRegistry; ordinary_autorun_hash=(Get-TextHash ([string]$taskRunValue)); ordinary_shortcut_hashes=$taskLinks; untraversed_desktop=$taskUntraversed }
+ }
+ $taskBefore = Get-Effects
+ if ($Stage -eq 'install') {
+@@ -106,9 +117,11 @@
+ $env:IG_FORBIDDEN_LIVE='C:\Users\hello\AppData\Local\Uoink\index.db'
+ $env:PYTHONDONTWRITEBYTECODE='1'; $env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
+ $taskLog = Join-Path $taskRoot ($Stage + '.inno.log')
++$taskInf = Join-Path $taskRoot ($Stage + '.selected-settings.inf')
++if (Test-Path -LiteralPath $taskInf) { throw 'Fresh saved-settings receipt required.' }
+ $taskArgs = @('/VERYSILENT','/NORESTART','/SUPPRESSMSGBOXES',('/DIR="'+$taskApp+'"'),
+     '/ISOLATED=1',('/PROFILE="'+$taskProfile+'"'),('/PORT='+$taskPort),
+-    '/NOCLOSEAPPLICATIONS','/NORESTARTAPPLICATIONS','/TASKS=""',('/GROUP="'+$taskGroup+'"'),('/LOG="'+$taskLog+'"'))
++    '/NOCLOSEAPPLICATIONS','/NORESTARTAPPLICATIONS','/TASKS=""',('/GROUP="'+$taskGroup+'"'),('/LOG="'+$taskLog+'"'),('/SAVEINF="'+$taskInf+'"'))
+ $taskIdentity=[Security.Principal.WindowsIdentity]::GetCurrent()
+ $taskObservation=[ordered]@{ stage=$Stage; executable=$taskPackage; arguments=$taskArgs; package_sha256=$PackageHash;
+     user=$taskIdentity.Name; sid=$taskIdentity.User.Value; windows_profile=$env:USERPROFILE;
+@@ -136,6 +149,11 @@
+     if ($taskKey.StartsWith('HKLM:') -and (($taskBefore.registry[$taskKey] | ConvertTo-Json -Compress) -ne ($taskAfter.registry[$taskKey] | ConvertTo-Json -Compress))) { throw 'Machine-wide uninstall registry changed.' }
+ }
+ if ($taskBefore.ordinary_autorun_hash -ne $taskAfter.ordinary_autorun_hash -or ($taskBefore.ordinary_shortcut_hashes | ConvertTo-Json -Compress) -ne ($taskAfter.ordinary_shortcut_hashes | ConvertTo-Json -Compress)) { throw 'Ordinary autorun/shortcuts changed.' }
++if (($taskBefore.untraversed_desktop | ConvertTo-Json -Compress -Depth 5) -ne ($taskAfter.untraversed_desktop | ConvertTo-Json -Compress -Depth 5)) { throw 'Untraversed Desktop metadata changed.' }
++if (-not (Test-Path -LiteralPath $taskInf -PathType Leaf)) { throw 'Saved selected-settings receipt missing.' }
++$taskSelectedLines = @(Get-Content -LiteralPath $taskInf | Where-Object { $_ -match '(?i)^Tasks=' })
++if ($taskSelectedLines.Count -ne 1 -or $taskSelectedLines[0].Substring(6).Trim() -ne '') { throw 'Setup selected tasks; desktop exclusion is not established.' }
++Write-Receipt (Join-Path $taskRoot ($Stage + '.desktop-observation.json')) ([ordered]@{ selected_tasks=@(); saved_settings_sha256=(Get-FileHash -LiteralPath $taskInf -Algorithm SHA256).Hash.ToLowerInvariant(); untraversed_desktop=$taskAfter.untraversed_desktop; claim='No selected desktopicon task; reparse Desktop contents not inspected' })
+ $taskInstalledMarker=Get-Content -LiteralPath (Join-Path $taskApp 'isolated-install.json') -Raw | ConvertFrom-Json
+ if ($taskInstalledMarker.mode -ne 'isolated' -or $taskInstalledMarker.app_dir -ine $taskApp -or $taskInstalledMarker.profile -ine $taskProfile -or $taskInstalledMarker.port -ne $taskPort) { throw 'New installed marker differs.' }
+ $taskInstalledLocation=Get-ItemPropertyValue -LiteralPath $taskIsoKey -Name InstallLocation

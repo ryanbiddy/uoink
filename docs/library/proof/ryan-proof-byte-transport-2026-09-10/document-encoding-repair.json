@@ -1,0 +1,4 @@
+{
+  "failure": "Documentation publisher used Windows default cp1252 for the UTF-8 handoff and raised UnicodeDecodeError before writing it. Proof copying and attributes had completed.",
+  "repair": "Read the handoff and draft documents explicitly as UTF-8; resume only the pending handoff/documents section. No test, source or observation changed."
+}

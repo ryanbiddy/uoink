@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "python": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+  "app": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+  "model_invoked": false,
+  "shape": [
+    1,
+    16000
+  ],
+  "sample_rate": 16000,
+  "torch_version": "2.8.0+cpu",
+  "torchcodec_version": "0.7.0",
+  "product_module_sha256": "71bd744fd4bc4f44243a2642a918958426dd21f0c06d341cc2c758cb27ce1ef5",
+  "guard_events": []
+}

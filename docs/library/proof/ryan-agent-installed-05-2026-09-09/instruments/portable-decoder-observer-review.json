@@ -1,0 +1,13 @@
+{
+  "original_sha256": "ca6c2edc12c88d250b87a247c7595a03420fcf3b0e91009fe50237598d05655b",
+  "portable_sha256": "79e9a9a68d53646a571d4aa34fcfa68054041bd7f326f7e47a34c61f77d4f782",
+  "changes": {
+    "import datetime as dt,hashlib,json,os,subprocess": "import argparse,datetime as dt,hashlib,json,os,subprocess",
+    "r=Path(__file__).resolve().parents[1]": "r=Path(__file__).resolve().parent\np=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',required=True,type=Path);args=p.parse_args()",
+    "root=Path(r'E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05');app=root/'app'": "root=args.root.resolve();assert root.is_relative_to(Path(r'E:\\AI\\projects\\uoink\\installation-receipts'));app=root/'app'",
+    "str(r/'_scratch'/script)": "str(r/script)",
+    "('installed_codec_probe05.py','codec-probe-02')": "('installed_codec_probe.py','codec-probe-02')"
+  },
+  "help_exit": 0,
+  "review": "Only explicit receipt root and portable bundle-relative input locations changed. Original startup restore, subprocess guards and expected behavior unchanged. Parse/help checked; actual decoding evidence is the original installed v3 observation, not a second executed claim."
+}

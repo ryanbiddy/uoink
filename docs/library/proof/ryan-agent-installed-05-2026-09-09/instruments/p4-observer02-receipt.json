@@ -1,0 +1,12 @@
+{
+  "reason": "Fresh directory and output names after the documented failed embedded probe attempt. Same package and guard boundary; no behavior change.",
+  "brief": "P4-EMBEDDED-PROBE-REPAIR-BRIEF-2026-09-09.md",
+  "source_sha256": "71d5f45e8800e9217545a2b7f6584f586c8274d7a8e374d2308360847011fd19",
+  "output_sha256": "ea06f37b04e3008af34d8fa4c45df9bffdf266a3d61376c5900f6a899ae22e48",
+  "changes": {
+    "record_path=root/(a.stage+'-observation.json')": "record_path=root/(a.stage+'-02-observation.json')",
+    "p4=root/'p4';p4.mkdir(exist_ok=True)": "p4=root/'p4-02';p4.mkdir(exist_ok=True)",
+    "root/(a.stage+'.stdout')": "root/(a.stage+'-02.stdout')",
+    "root/(a.stage+'.stderr')": "root/(a.stage+'-02.stderr')"
+  }
+}

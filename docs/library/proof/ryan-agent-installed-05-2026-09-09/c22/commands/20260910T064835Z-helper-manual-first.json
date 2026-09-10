@@ -1,0 +1,27 @@
+{
+  "name": "helper-manual-first",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\manual-first",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+  "started_utc": "2026-09-10T06:48:35Z",
+  "child": {
+    "pid": 76736,
+    "created_ms": 1789022915494,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+    "observed_ms": 1789022915498,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 76736,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\commands\\20260910T064835Z-helper-manual-first.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\commands\\20260910T064835Z-helper-manual-first.stderr.log",
+  "synthetic": false
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "command": [
+      "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\\python\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\package_decoder_probe.py",
+      "--app",
+      "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+      "--out",
+      "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\decoder-probe"
+    ],
+    "started_utc": "2026-09-10T06:46:44.556014+00:00",
+    "instrument": "package_decoder_probe.py",
+    "exit": 1,
+    "finished_utc": "2026-09-10T06:46:44.636702+00:00"
+  }
+]

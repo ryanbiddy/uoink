@@ -1,0 +1,57 @@
+﻿{
+    "utc":  "2026-09-10T06:41:47.8738498+00:00",
+    "parse_errors":  0,
+    "decision_cases":  [
+                           {
+                               "name":  "regular Desktop",
+                               "actual":  false,
+                               "expected":  false,
+                               "passed":  true
+                           },
+                           {
+                               "name":  "reparse Desktop",
+                               "actual":  true,
+                               "expected":  true,
+                               "passed":  true
+                           },
+                           {
+                               "name":  "regular Start Menu",
+                               "actual":  false,
+                               "expected":  false,
+                               "passed":  true
+                           },
+                           {
+                               "name":  "reparse Start Menu",
+                               "actual":  false,
+                               "expected":  false,
+                               "passed":  true
+                           },
+                           {
+                               "name":  "Desktop child",
+                               "actual":  false,
+                               "expected":  false,
+                               "passed":  true
+                           },
+                           {
+                               "name":  "case-normalized Desktop",
+                               "actual":  true,
+                               "expected":  true,
+                               "passed":  true
+                           }
+                       ],
+    "static_checks":  [
+                          "Assert-PlainPath unchanged",
+                          "Write-Receipt unchanged",
+                          "Get-TextHash unchanged",
+                          "Installed marker, registry ownership and four exact shortcuts unchanged",
+                          "/TASKS=\"\"",
+                          "/NOCLOSEAPPLICATIONS",
+                          "/NORESTARTAPPLICATIONS",
+                          "/ISOLATED=1",
+                          "/SAVEINF=",
+                          "Setup selected tasks; desktop exclusion is not established."
+                      ],
+    "supplement_sha256":  "8f05dd4754ee4b019aa2a8db8dc9031dfbc1848bd0a2c445b4f6852105935af2",
+    "setup_executed":  false,
+    "exit":  0
+}

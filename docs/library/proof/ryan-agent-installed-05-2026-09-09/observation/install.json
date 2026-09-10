@@ -1,0 +1,29 @@
+{
+    "stage":  "install",
+    "executable":  "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "arguments":  [
+                      "/VERYSILENT",
+                      "/NORESTART",
+                      "/SUPPRESSMSGBOXES",
+                      "/DIR=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app\"",
+                      "/ISOLATED=1",
+                      "/PROFILE=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\empty\"",
+                      "/PORT=18081",
+                      "/NOCLOSEAPPLICATIONS",
+                      "/NORESTARTAPPLICATIONS",
+                      "/TASKS=\"\"",
+                      "/GROUP=\"Uoink Living Library Receipt Agent Install 05\"",
+                      "/LOG=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\install.inno.log\"",
+                      "/SAVEINF=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\install.selected-settings.inf\""
+                  ],
+    "package_sha256":  "95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49",
+    "user":  "RYAN-PC\\hello",
+    "sid":  "S-1-5-21-2385033889-3211132971-3401775885-1001",
+    "windows_profile":  "C:\\Users\\hello",
+    "isolation":  "same Windows account; isolated app/data/credential namespace",
+    "throwaway_account":  false,
+    "utc_start":  "2026-09-10T06:42:19.5066097+00:00",
+    "exit":  0,
+    "process_id":  71168,
+    "utc_end":  "2026-09-10T06:43:10.4156859+00:00"
+}
