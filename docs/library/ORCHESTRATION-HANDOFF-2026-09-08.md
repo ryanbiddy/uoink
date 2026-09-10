@@ -95,7 +95,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated: 68 passed / one frozen path failure in both roots; both original prompts succeed. X HTTP 403 stays blocked | Bundled and final-tree checks recorded; Ryan's installed/client receipt remains |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Approved corrections: mirror 180 passed; ordered reads 74 passed; 163 assertions unchanged | Gemini council running; receipt corrections, safe agent installation and new complete tree pending |
+| Integration | Installer remains sealed at `67a274d`; historical `12ce8a5` tree has 2,429 passed / 13 failed / three skipped / one xfailed | Approved corrections: mirror 180 passed; ordered reads 74 passed. Credential repair: 117 passed / one existing xfail in both roots | Rebuild owed after source repair; dependency triage, receipt corrections, safe agent installation and complete tree pending |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -142,13 +142,15 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 1. The two approved exact fixture corrections have 180 mirror and 74 ordered
    read/resource/prompt passes. Their review and 14-file seal are in
    RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md. No product rebuild owed.
-2. Gemini A/B reports are integrated and independently verified; C remains active.
+2. Gemini A/B reports are integrated and independently verified; C ended partial.
    The three original reviews start from d8d3b4f under GEMINI-FINAL-SECURITY-COUNCIL-BRIEF-
    2026-09-09.md: installer b5c7290c, application/security 8e109b99, receipt
    contract corrections 269acc98. Verify reports and named suites in each
    worktree, integrate raw diffs through three-way apply, repeat checkout suites.
-3. Complete RYAN-ISOLATED-CREDENTIAL-REPAIR-BRIEF-2026-09-09.md and the seven-package
-   advisory review before rebuilding or installing. Follow
+3. Credential repair is integrated with 117 passes / one existing xfail in both
+   roots. Review completed advisory worker 48452609, repair feasible dependencies
+   and complete partial receipt worker 269acc98 under the integrator supplement
+   before rebuilding or installing. Follow
    RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
    Determine and review safe isolation before execution; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
@@ -2204,3 +2206,22 @@ All 95 full advisory records are retained for applicability and repair review.
 Only public package identifiers/versions were sent. Package-03 custom Defender
 scan reports no threats with unchanged bytes, but the EXE is unsigned. No Setup
 has run. Credential, dependency and receipt-contract work precedes installation.
+
+### 2026-09-09 — isolated credential repair integrated; council omissions recorded
+
+Gemini 4c02e121's credential repair passes the independent 117-case union with
+one existing SEC-06 xfail. Astra expanded the profile digest to 32 hex characters
+and removed unresolved-path fallback under the integrator supplement. Final union:
+worker 117 passed / one xfail in 13.75 s; checkout 117 passed / one xfail in 12.63 s.
+No existing tests changed. The raw original report omits an intermediate four-
+failure mirror observation; all fourteen worker/integrator observations remain
+sealed, including negative baseline and omitted failures. Packaged server changed:
+the current installer and ZIP need replacement after the remaining work, with
+their previous evidence retained. No Setup has run.
+
+Receipt worker 269acc98 ended with a partial diff and no report or verified result;
+its Control Room completed status is not acceptance. Astra is completing the
+instrument correction. Advisory worker 48452609 delivered a report; independent
+alias grouping confirms 55 issues among 95 records. Its reachability claims still
+need correction: WhisperX defaults to PyAnnote VAD during ordinary transcription,
+so disabling speaker runs alone does not remove every checkpoint-loading path.

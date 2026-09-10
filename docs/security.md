@@ -25,7 +25,7 @@ The helper never binds to a public network interface. The main security boundary
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
 | Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
-| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink`; the v2.1 install migration moves it from the legacy `Yoink` service), not in `settings.json`, and is never returned by `GET /settings`. |
+| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
 
 ## Public endpoints
@@ -168,20 +168,31 @@ Comment Intelligence, Hook Type, and Entity Extraction are optional BYO-key feat
 
 Starting in v2.0, the key is stored through Python `keyring`:
 
-- Service: `Uoink` (renamed from `Yoink` in v2.1; the first-run install migration copies the entry and deletes the legacy one)
+- Service (normal mode): `Uoink` (renamed from `Yoink` in v2.1; the first-run install migration copies the entry and deletes the legacy one)
+- Service (isolated mode): `Uoink-isolated-<hash>` where `<hash>` is a deterministic 32-character hex digest of the canonical validated profile path (`hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]`). This separates profile credentials even when sharing loopback ports and preserves credential identity across port changes. Path resolution errors do not select an alternate credential namespace.
 - Username: `anthropic_key`
 - Windows backend: Windows Credential Manager
 - macOS backend: macOS Keychain
 
 `settings.json` stores only public booleans and key status flags. `GET /settings` returns `anthropic_key_set: true|false`, never the key itself.
 
+Isolated mode credential semantics:
+
+- Read, write, and delete operations in isolated mode operate strictly on the profile's isolated service namespace (`Uoink-isolated-<hash>`).
+- Isolated reads fail closed when no key is present: they never fall back to the ordinary `Uoink` service or legacy `Yoink` service.
+- Two profiles sharing a loopback port do not share credentials.
+- A profile that changes ports retains its credential identity because the namespace is derived solely from the canonical profile path.
+- In isolated mode, plaintext `anthropic_key` migration from the isolated `settings.json` writes exclusively to the isolated service namespace.
+- Destructive operations such as Anthropic 401 invalid-key resets clear only the isolated profile's credential entry, never mutating or clearing ordinary `Uoink` credentials.
+- Normal (non-isolated) mode retains existing `Uoink` storage with `Yoink` read fallback and one-time install migration.
+
 Migration behavior:
 
-1. On helper startup, if legacy `%LOCALAPPDATA%\Uoink\settings.json` (or a pre-rename `\Yoink\settings.json` migrated into it) contains plaintext `anthropic_key`, Uoink attempts to move it into keyring.
+1. On helper startup, if legacy `%LOCALAPPDATA%\Uoink\settings.json` (or an isolated profile's `settings.json`) contains plaintext `anthropic_key`, Uoink attempts to move it into keyring.
 2. On successful migration, the plaintext field is removed from `settings.json`.
 3. If keyring is unavailable, migration is skipped and logged; Uoink does not silently create a new plaintext fallback.
 
-Anthropic 401 responses destructively clear the saved key from keyring and mark `anthropic_key_set` false until the user saves a key again.
+Anthropic 401 responses destructively clear the saved key from keyring (scoped to the active service namespace) and mark `anthropic_key_set` false until the user saves a key again.
 
 ## Persistence files
 

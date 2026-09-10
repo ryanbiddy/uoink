@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="10" time="0.770" timestamp="2026-09-09T19:35:27.744101-07:00" hostname="Ryan-PC"><testcase classname="tests.test_isolated_credential_store" name="test_isolated_read" time="0.009"><failure message="AssertionError: assert '' == 'test-iso-key-1'&#10;  &#10;  - test-iso-key-1">tests\test_isolated_credential_store.py:89: in test_isolated_read
+    assert val == "test-iso-key-1"
+E   AssertionError: assert '' == 'test-iso-key-1'
+E     
+E     - test-iso-key-1</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_isolated_set" time="0.010"><failure message="AssertionError: assert None == 'test-iso-key-set'&#10; +  where None = &lt;built-in method get of dict object at 0x000001F894A82E00&gt;(('Uoink-isolated-ba175c5b392f5ca5', 'anthropic_key'))&#10; +    where &lt;built-in method get of dict object at 0x000001F894A82E00&gt; = {('Uoink', 'anthropic_key'): 'test-iso-key-set'}.get&#10; +      where {('Uoink', 'anthropic_key'): 'test-iso-key-set'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F8934B5A90&gt;.passwords">tests\test_isolated_credential_store.py:101: in test_isolated_set
+    assert fake_kr.passwords.get((expected_svc, server.KEYRING_ANTHROPIC_USERNAME)) == "test-iso-key-set"
+E   AssertionError: assert None == 'test-iso-key-set'
+E    +  where None = &lt;built-in method get of dict object at 0x000001F894A82E00&gt;(('Uoink-isolated-ba175c5b392f5ca5', 'anthropic_key'))
+E    +    where &lt;built-in method get of dict object at 0x000001F894A82E00&gt; = {('Uoink', 'anthropic_key'): 'test-iso-key-set'}.get
+E    +      where {('Uoink', 'anthropic_key'): 'test-iso-key-set'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F8934B5A90&gt;.passwords</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_isolated_delete" time="0.008"><failure message="AssertionError: assert ('Uoink-isolated-22a462d989d1654e', 'anthropic_key') not in {('Uoink-isolated-22a462d989d1654e', 'anthropic_key'): 'test-iso-key-del'}&#10; +  where {('Uoink-isolated-22a462d989d1654e', 'anthropic_key'): 'test-iso-key-del'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F895C65950&gt;.passwords">tests\test_isolated_credential_store.py:114: in test_isolated_delete
+    assert (expected_svc, server.KEYRING_ANTHROPIC_USERNAME) not in fake_kr.passwords
+E   AssertionError: assert ('Uoink-isolated-22a462d989d1654e', 'anthropic_key') not in {('Uoink-isolated-22a462d989d1654e', 'anthropic_key'): 'test-iso-key-del'}
+E    +  where {('Uoink-isolated-22a462d989d1654e', 'anthropic_key'): 'test-iso-key-del'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F895C65950&gt;.passwords</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_absent_key_no_fallback" time="0.008"><failure message="AssertionError: assert 'ordinary-key' == ''&#10;  &#10;  + ordinary-key">tests\test_isolated_credential_store.py:128: in test_absent_key_no_fallback
+    assert val == ""
+E   AssertionError: assert 'ordinary-key' == ''
+E     
+E     + ordinary-key</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_profile_separation_same_port" time="0.009"><failure message="AssertionError: Isolated operation leaked access to ordinary service: {'op': 'set', 'service': 'Uoink', 'username': 'anthropic_key'}&#10;assert 'Uoink' not in ('Uoink', 'Yoink')">tests\test_isolated_credential_store.py:141: in test_profile_separation_same_port
+    assert_no_ordinary_service_calls(fake_kr)
+tests\test_isolated_credential_store.py:61: in assert_no_ordinary_service_calls
+    assert call["service"] not in ("Uoink", "Yoink"), (
+E   AssertionError: Isolated operation leaked access to ordinary service: {'op': 'set', 'service': 'Uoink', 'username': 'anthropic_key'}
+E   assert 'Uoink' not in ('Uoink', 'Yoink')</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_stable_profile_identity_different_ports" time="0.008"><failure message="AssertionError: Isolated operation leaked access to ordinary service: {'op': 'set', 'service': 'Uoink', 'username': 'anthropic_key'}&#10;assert 'Uoink' not in ('Uoink', 'Yoink')">tests\test_isolated_credential_store.py:163: in test_stable_profile_identity_different_ports
+    assert_no_ordinary_service_calls(fake_kr)
+tests\test_isolated_credential_store.py:61: in assert_no_ordinary_service_calls
+    assert call["service"] not in ("Uoink", "Yoink"), (
+E   AssertionError: Isolated operation leaked access to ordinary service: {'op': 'set', 'service': 'Uoink', 'username': 'anthropic_key'}
+E   assert 'Uoink' not in ('Uoink', 'Yoink')</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_ordinary_legacy_compatibility" time="0.000" /><testcase classname="tests.test_isolated_credential_store" name="test_isolated_reset_401_path" time="0.009"><failure message="AssertionError: Isolated operation leaked access to ordinary service: {'op': 'delete', 'service': 'Uoink', 'username': 'anthropic_key'}&#10;assert 'Uoink' not in ('Uoink', 'Yoink')">tests\test_isolated_credential_store.py:200: in test_isolated_reset_401_path
+    assert_no_ordinary_service_calls(fake_kr)
+tests\test_isolated_credential_store.py:61: in assert_no_ordinary_service_calls
+    assert call["service"] not in ("Uoink", "Yoink"), (
+E   AssertionError: Isolated operation leaked access to ordinary service: {'op': 'delete', 'service': 'Uoink', 'username': 'anthropic_key'}
+E   assert 'Uoink' not in ('Uoink', 'Yoink')</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_isolated_public_settings" time="0.012"><failure message="AssertionError: Isolated operation leaked access to ordinary service: {'op': 'get', 'service': 'Uoink', 'username': 'anthropic_key'}&#10;assert 'Uoink' not in ('Uoink', 'Yoink')">tests\test_isolated_credential_store.py:214: in test_isolated_public_settings
+    assert_no_ordinary_service_calls(fake_kr)
+tests\test_isolated_credential_store.py:61: in assert_no_ordinary_service_calls
+    assert call["service"] not in ("Uoink", "Yoink"), (
+E   AssertionError: Isolated operation leaked access to ordinary service: {'op': 'get', 'service': 'Uoink', 'username': 'anthropic_key'}
+E   assert 'Uoink' not in ('Uoink', 'Yoink')</failure></testcase><testcase classname="tests.test_isolated_credential_store" name="test_isolated_plaintext_migration" time="0.009"><failure message="AssertionError: assert None == 'sk-ant-plaintext-val'&#10; +  where None = &lt;built-in method get of dict object at 0x000001F89363AC40&gt;(('Uoink-isolated-94a459892f506aa4', 'anthropic_key'))&#10; +    where &lt;built-in method get of dict object at 0x000001F89363AC40&gt; = {('Uoink', 'anthropic_key'): 'ordinary-untouched'}.get&#10; +      where {('Uoink', 'anthropic_key'): 'ordinary-untouched'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F894A2A650&gt;.passwords">tests\test_isolated_credential_store.py:235: in test_isolated_plaintext_migration
+    assert fake_kr.passwords.get((expected_svc, server.KEYRING_ANTHROPIC_USERNAME)) == "sk-ant-plaintext-val"
+E   AssertionError: assert None == 'sk-ant-plaintext-val'
+E    +  where None = &lt;built-in method get of dict object at 0x000001F89363AC40&gt;(('Uoink-isolated-94a459892f506aa4', 'anthropic_key'))
+E    +    where &lt;built-in method get of dict object at 0x000001F89363AC40&gt; = {('Uoink', 'anthropic_key'): 'ordinary-untouched'}.get
+E    +      where {('Uoink', 'anthropic_key'): 'ordinary-untouched'} = &lt;test_isolated_credential_store.RecordingFakeKeyring object at 0x000001F894A2A650&gt;.passwords</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,59 @@
+.............................................................FFFF......x [ 66%]
+....................................                                     [100%]
+================================== FAILURES ===================================
+__________ test_timeout_kills_worker_and_keeps_independent_user_edit __________
+tests\test_phase4_av5m3_isolation.py:66: in test_timeout_kills_worker_and_keeps_independent_user_edit
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:67: in export
+    assert item_file(env, vid).is_file(), result
+E   AssertionError: {'ok': True, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'synced': 1, ...}
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a0/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a0/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/...-2b3/gemini/_scratch/isolated-cred-companions-01-0/a0/v'), mirror=<library_mirror.Mirror object at 0x000002189248E7B0>), 'a')
+________________ test_live_worker_lease_blocks_a_second_mirror ________________
+tests\test_phase4_av5m3_isolation.py:107: in test_live_worker_lease_blocks_a_second_mirror
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:67: in export
+    assert item_file(env, vid).is_file(), result
+E   AssertionError: {'ok': True, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'synced': 1, ...}
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a1/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a1/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/...-2b3/gemini/_scratch/isolated-cred-companions-01-0/a1/v'), mirror=<library_mirror.Mirror object at 0x0000021892569BD0>), 'a')
+_____________ test_recorded_temp_hash_does_not_delete_user_bytes ______________
+tests\test_phase4_av5m3_isolation.py:129: in test_recorded_temp_hash_does_not_delete_user_bytes
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:67: in export
+    assert item_file(env, vid).is_file(), result
+E   AssertionError: {'ok': True, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'synced': 1, ...}
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a2/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a2/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/...-2b3/gemini/_scratch/isolated-cred-companions-01-0/a2/v'), mirror=<library_mirror.Mirror object at 0x000002189256A990>), 'a')
+_________________ test_failed_replace_retains_temp_generation _________________
+tests\test_phase4_av5m3_isolation.py:148: in test_failed_replace_retains_temp_generation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:67: in export
+    assert item_file(env, vid).is_file(), result
+E   AssertionError: {'ok': True, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'synced': 1, ...}
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a3/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').is_file
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/_scratch/isolated-cred-companions-01-0/a3/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/4c02e121-2b3/gemini/...-2b3/gemini/_scratch/isolated-cred-companions-01-0/a3/v'), mirror=<library_mirror.Mirror object at 0x00000218926D55B0>), 'a')
+============================== warnings summary ===============================
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\4c02e121-2b3\gemini\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+XFAIL tests/security/test_security_findings.py::test_sec_06_fts_query_non_ascii_dropped - SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries
+FAILED tests/test_phase4_av5m3_isolation.py::test_timeout_kills_worker_and_keeps_independent_user_edit
+FAILED tests/test_phase4_av5m3_isolation.py::test_live_worker_lease_blocks_a_second_mirror
+FAILED tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes
+FAILED tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation
+4 failed, 103 passed, 1 xfailed, 4 warnings in 12.02s

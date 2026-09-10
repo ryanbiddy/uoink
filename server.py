@@ -459,6 +459,31 @@ KEYRING_SERVICE = "Uoink"
 # fallback read can reference one source of truth.
 KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
+
+
+def _isolated_binding() -> _install_isolation.IsolationBinding | None:
+    return _install_isolation.current_binding() or _ISOLATION
+
+
+def _isolated_keyring_service(profile: Path | str) -> str:
+    resolved = Path(profile).resolve()
+    canonical = os.path.normcase(os.path.normpath(str(resolved)))
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+    return f"Uoink-isolated-{digest}"
+
+
+def _keyring_service_name() -> str:
+    binding = _isolated_binding()
+    if binding is not None:
+        return _isolated_keyring_service(binding.profile)
+    return KEYRING_SERVICE
+
+
+def _settings_path() -> Path:
+    binding = _isolated_binding()
+    if binding is not None:
+        return binding.profile / "settings.json"
+    return SETTINGS_PATH
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -1096,9 +1121,10 @@ def _normalize_settings(data: dict) -> dict:
 def _read_settings() -> dict:
     with _settings_lock:
         data: dict = {}
-        if SETTINGS_PATH.exists():
+        settings_file = _settings_path()
+        if settings_file.exists():
             try:
-                raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+                raw = json.loads(settings_file.read_text(encoding="utf-8"))
                 if isinstance(raw, dict):
                     data = raw
             except (OSError, json.JSONDecodeError) as e:
@@ -1108,13 +1134,14 @@ def _read_settings() -> dict:
 
 def _write_settings(data: dict) -> None:
     with _settings_lock:
-        SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        settings_file = _settings_path()
+        settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
-        tmp = SETTINGS_PATH.with_suffix(".json.tmp")
+        tmp = settings_file.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
-        tmp.replace(SETTINGS_PATH)
+        tmp.replace(settings_file)
         try:
-            os.chmod(SETTINGS_PATH, 0o600)
+            os.chmod(settings_file, 0o600)
         except OSError:
             pass
 
@@ -1226,6 +1253,11 @@ def _get_saved_anthropic_key() -> str:
         log.debug("%s", err)
         return ""
     try:
+        binding = _isolated_binding()
+        if binding is not None:
+            service = _isolated_keyring_service(binding.profile)
+            key = _keyring.get_password(service, KEYRING_ANTHROPIC_USERNAME)
+            return key or ""
         key = _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
         if key:
             return key
@@ -1251,16 +1283,17 @@ def _store_saved_anthropic_key(key: str) -> None:
             raise err
         return
     try:
+        service = _keyring_service_name()
         if key:
             _keyring.set_password(
-                KEYRING_SERVICE,
+                service,
                 KEYRING_ANTHROPIC_USERNAME,
                 key,
             )
         else:
             try:
                 _keyring.delete_password(
-                    KEYRING_SERVICE,
+                    service,
                     KEYRING_ANTHROPIC_USERNAME,
                 )
             except Exception:
@@ -1273,10 +1306,11 @@ def _store_saved_anthropic_key(key: str) -> None:
 
 def _migrate_plaintext_anthropic_key() -> None:
     """Move legacy settings.json anthropic_key into the OS credential store."""
-    if not SETTINGS_PATH.exists():
+    settings_file = _settings_path()
+    if not settings_file.exists():
         return
     try:
-        raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+        raw = json.loads(settings_file.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         log.warning("settings migration skipped: read failed (%s)", e)
         return

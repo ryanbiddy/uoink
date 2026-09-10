@@ -1,0 +1,31 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_isolated_credential_store.py",
+      "tests/test_g25_settings_polish.py",
+      "tests/test_install_isolation.py",
+      "tests/test_install_isolation_integrator_review.py",
+      "tests/test_install_isolation_repair.py",
+      "tests/test_phase4_av5m3_isolation.py",
+      "tests/security",
+      "tests/test_mcp_slug_security.py",
+      "tests/test_docs_live_contracts.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\4c02e121-2b3\\gemini\\_scratch\\credential-w2-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\4c02e121-2b3\\gemini\\_scratch\\credential-w2\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\4c02e121-2b3\\gemini\\_scratch\\credential-w2\\tests.log"
+  }
+]
