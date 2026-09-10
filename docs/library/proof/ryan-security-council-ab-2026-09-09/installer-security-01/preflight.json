@@ -1,0 +1,21 @@
+{
+  "utc": "2026-09-10T02:26:11.5043193+00:00",
+  "package": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+  "sha256": "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+  "signature": "NotSigned",
+  "defender": {
+    "AMRunningMode": "Normal",
+    "AMServiceEnabled": true,
+    "AntivirusEnabled": true,
+    "RealTimeProtectionEnabled": true,
+    "AntivirusSignatureLastUpdated": "2026-09-09T09:35:17-07:00",
+    "AntivirusSignatureVersion": "1.459.133.0"
+  },
+  "cloud_settings": {
+    "MAPSReporting": 2,
+    "SubmitSamplesConsent": 1,
+    "DisableBlockAtFirstSeen": false,
+    "DisableArchiveScanning": false
+  },
+  "settings_changed": false
+}

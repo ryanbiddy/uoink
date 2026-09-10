@@ -142,11 +142,14 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 1. The two approved exact fixture corrections have 180 mirror and 74 ordered
    read/resource/prompt passes. Their review and 14-file seal are in
    RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md. No product rebuild owed.
-2. Three Gemini reviews run from d8d3b4f under GEMINI-FINAL-SECURITY-COUNCIL-BRIEF-
+2. Gemini A/B reports are integrated and independently verified; C remains active.
+   The three original reviews start from d8d3b4f under GEMINI-FINAL-SECURITY-COUNCIL-BRIEF-
    2026-09-09.md: installer b5c7290c, application/security 8e109b99, receipt
    contract corrections 269acc98. Verify reports and named suites in each
    worktree, integrate raw diffs through three-way apply, repeat checkout suites.
-3. Follow RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
+3. Complete RYAN-ISOLATED-CREDENTIAL-REPAIR-BRIEF-2026-09-09.md and the seven-package
+   advisory review before rebuilding or installing. Follow
+   RYAN-APPROVED-CLOSURE-BRIEF-2026-09-09.md for the delegated installation.
    Determine and review safe isolation before execution; preserve ordinary data,
    processes, credentials and 5179. Actual installed and browser/client evidence
    is still owed. Same-account results cannot be called throwaway-account results.
@@ -2181,3 +2184,23 @@ with remediation disabled exits zero and reports no threats; bytes unchanged.
 The executable is unsigned. Existing Defender cloud/sample settings were retained;
 this is not an offline-only scan or a comprehensive security certificate.
 Evidence currently at _scratch/installer-security-01 pending the council seal.
+
+
+### 2026-09-09 — council A/B independently verified; credential repair required
+
+Gemini A b5c7290c and B 8e109b99 completed. Raw report diffs integrated through
+three-way apply (new-file direct fallback). Independent worker/checkout isolation
+suites: 53 passes in 7.51/6.75 seconds. Security suites: 40 passes and one existing
+SEC-06 xfail in 1.38/1.18 seconds. ASTRA-FINAL-SECURITY-COUNCIL-VERDICT-2026-09-09.md
+corrects unsupported absolutes, marker-atomicity wording and A's case count.
+The code still shares the ordinary/legacy keyring service in isolated mode.
+Astra confirmed that path statically and dispatched a bounded Gemini repair from
+63d7aa2. No actual credential query is permitted for its reproduction. A changed
+server requires a new sealed installer before installed-helper execution.
+
+The public OSV query covers 142 exact installer-lock versions, returns seven
+packages with 95 advisory entries (aliases included), and is not a clean audit.
+All 95 full advisory records are retained for applicability and repair review.
+Only public package identifiers/versions were sent. Package-03 custom Defender
+scan reports no threats with unchanged bytes, but the EXE is unsigned. No Setup
+has run. Credential, dependency and receipt-contract work precedes installation.

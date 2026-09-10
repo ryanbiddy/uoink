@@ -1,0 +1,13 @@
+.....................x...................                                [100%]
+============================== warnings summary ===============================
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\8e109b99-190\gemini\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+XFAIL tests/security/test_security_findings.py::test_sec_06_fts_query_non_ascii_dropped - SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries
+40 passed, 1 xfailed, 4 warnings in 1.38s

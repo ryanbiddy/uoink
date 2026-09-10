@@ -1,0 +1,15 @@
+{
+  "utc_end": "2026-09-10T02:26:13.1838798+00:00",
+  "executable": "C:\\Program Files\\Windows Defender\\MpCmdRun.exe",
+  "arguments": [
+    "-Scan",
+    "-ScanType",
+    "3",
+    "-File",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "-DisableRemediation"
+  ],
+  "exit": 0,
+  "sha256_after": "a89112bb53425cbd9c5c0c662a2f239cbdde069294af9389c90021ddc2af60fe",
+  "bytes_unchanged": true
+}

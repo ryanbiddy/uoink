@@ -1,0 +1,133 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "audit_installer_osv.py": {
+      "bytes": 2577,
+      "sha256": "699adc271dfcf4c28b5b75e790215db1375128846c1d52b7c8aedce778dd3ece"
+    },
+    "council-a-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "council-a-c1/results.json": {
+      "bytes": 839,
+      "sha256": "9f42b2e2a895b746f21a3ef6765fc7e88bdbe397b52b3eb84b7f68f2406754a4"
+    },
+    "council-a-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "council-a-c1/tests.log": {
+      "bytes": 101,
+      "sha256": "d3b4cb044e8fb6b706e438b677aac48608f2825a5f8e386a9d42e72df7bf5c5c"
+    },
+    "council-a-c1/tests.xml": {
+      "bytes": 7040,
+      "sha256": "5b22ae0593b62b0197548300c57b369b856f95bfda82a252b091f8a47ab8b601"
+    },
+    "council-a-w1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "council-a-w1/results.json": {
+      "bytes": 986,
+      "sha256": "8636c6020de6d1c3b84432b1eb2146bdb885a3e0c52fc81d5007743144d1dcac"
+    },
+    "council-a-w1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "council-a-w1/tests.log": {
+      "bytes": 101,
+      "sha256": "0e6ffe5d1918e516976094f8a9cf018542abcdfee6d64f9ccaff459bd347c4fc"
+    },
+    "council-a-w1/tests.xml": {
+      "bytes": 7040,
+      "sha256": "f8102fad9c28949abb9fbc85c3af52e01ebcfe945716c0566332bef2cc44a4f7"
+    },
+    "council-a.patch": {
+      "bytes": 27209,
+      "sha256": "bd23b9976c8b59ea0f8efb051cde4c2b4a58f194d8a10cfb02404c1960322703"
+    },
+    "council-b-c1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "council-b-c1/results.json": {
+      "bytes": 711,
+      "sha256": "c0faae34630b2274bba6fcbcd3f890da3f89aa28828ed1eae909ab24e02d44f7"
+    },
+    "council-b-c1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "council-b-c1/tests.log": {
+      "bytes": 1286,
+      "sha256": "8c11d5e99734b7d1c84f48af399433da752c7e19b8b8806840f7dbe30b5cfada"
+    },
+    "council-b-c1/tests.xml": {
+      "bytes": 6116,
+      "sha256": "b2fe75cba6cc587dee556fe72bebb00a9a0639e643701c7cce0dfa0d75194fe4"
+    },
+    "council-b-w1/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "council-b-w1/results.json": {
+      "bytes": 858,
+      "sha256": "f5e722c14de595f2cdc10b2974ed3769c56162de7ab4e14cdccac097d4317d4f"
+    },
+    "council-b-w1/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "council-b-w1/tests.log": {
+      "bytes": 1331,
+      "sha256": "c170ff1cfabe1b6c9be89fbdf5c0da64da2c23522f8875d54ae05d8aacc5b2be"
+    },
+    "council-b-w1/tests.xml": {
+      "bytes": 6116,
+      "sha256": "6e3db7aa7ec907cde9c354c244d9e49db440cd8d23f72feb485d7c3352145176"
+    },
+    "council-b.patch": {
+      "bytes": 32236,
+      "sha256": "f5de34907d6cf60793fe6f2f0b1498bf2098a1877de94c434cbdd991a0523a2b"
+    },
+    "installer-osv-01/findings.json": {
+      "bytes": 11041,
+      "sha256": "059bd0c9fbb4dbe91be4f02320782fbc5a8a2a546945d8b078280ff2cf0a8d40"
+    },
+    "installer-osv-01/request.json": {
+      "bytes": 18858,
+      "sha256": "99c14b72d691c484e33738e58f595654b393a981b98e31932513a26c7cc710ec"
+    },
+    "installer-osv-01/response-1.json": {
+      "bytes": 6962,
+      "sha256": "4dc771a5ca72dfcc00f6ce43be8054e2c3ac34fb0f1f26cb4a3389a1d4520235"
+    },
+    "installer-osv-01/summary.json": {
+      "bytes": 12547,
+      "sha256": "ad6f32430bb29568c99fbc32d112a30aa6fff3ab8390701c50ca80ab984e7bb0"
+    },
+    "installer-security-01/preflight.json": {
+      "bytes": 723,
+      "sha256": "d638f85034e48f5a8de9e3c6613292e7880dfd49f99038c5ba4e5be9143d681e"
+    },
+    "installer-security-01/scan.json": {
+      "bytes": 450,
+      "sha256": "9a11ece19351d2306976fcc7ca3800329efa82ec96c2628ea5acd29725f17d4f"
+    },
+    "installer-security-01/scan.log": {
+      "bytes": 135,
+      "sha256": "b1d89fd20170433cb107678b39f91e30de78c7d955663ea5be83afc4cac1930d"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "seal_council_ab.py": {
+      "bytes": 1566,
+      "sha256": "a5c9766f8750b0f9afb45187ced1d298f1d38da96142d8ff6c2444421f45d3e8"
+    }
+  }
+}
