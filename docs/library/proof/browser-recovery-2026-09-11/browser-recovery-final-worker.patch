@@ -1,0 +1,948 @@
+diff --git a/assets/dashboard/index.html b/assets/dashboard/index.html
+index 49142ff..dba4556 100644
+--- a/assets/dashboard/index.html
++++ b/assets/dashboard/index.html
+@@ -3531,6 +3531,55 @@
+       color: var(--vermillion);
+       border: 1px solid rgba(255, 61, 0, 0.3);
+     }
++    .capture-pill {
++      display: inline-flex;
++      align-items: center;
++      gap: 5px;
++      padding: 2px 8px;
++      border-radius: var(--pill-radius);
++      font-size: 11px;
++      font-weight: 500;
++      font-family: var(--font-mono);
++    }
++    .capture-pill.ready,
++    .capture-pill.idle {
++      background: rgba(0, 200, 83, 0.15);
++      color: var(--ok);
++      border: 1px solid rgba(0, 200, 83, 0.3);
++    }
++    .capture-pill.in-flight {
++      background: rgba(56, 189, 248, 0.15);
++      color: #38bdf8;
++      border: 1px solid rgba(56, 189, 248, 0.3);
++    }
++    .capture-pill.draining,
++    .capture-pill.uncertain,
++    .capture-pill.exhausted {
++      background: rgba(255, 210, 63, 0.15);
++      color: var(--acid);
++      border: 1px solid rgba(255, 210, 63, 0.3);
++    }
++    .capture-pill.failed {
++      background: rgba(255, 61, 0, 0.15);
++      color: var(--vermillion);
++      border: 1px solid rgba(255, 61, 0, 0.3);
++    }
++    .capture-pill.off {
++      background: rgba(143, 123, 110, 0.16);
++      color: var(--muted);
++      border: 1px solid rgba(143, 123, 110, 0.3);
++    }
++    .consent-revision-pill {
++      display: inline-flex;
++      align-items: center;
++      padding: 2px 7px;
++      border-radius: var(--pill-radius);
++      font-family: var(--font-mono);
++      font-size: 11px;
++      color: var(--muted);
++      background: rgba(255, 244, 236, 0.06);
++      border: 1px solid rgba(255, 244, 236, 0.14);
++    }
+     .subscription-consent-group {
+       display: flex;
+       align-items: center;
+@@ -3704,6 +3753,44 @@
+       font-size: 12px;
+       color: #fca5a5;
+     }
++    .source-recovery-box {
++      display: flex;
++      flex-direction: column;
++      gap: 6px;
++      padding: 10px 14px;
++      background: rgba(58, 31, 31, 0.4);
++      border: 1px solid rgba(255, 61, 0, 0.3);
++      border-radius: var(--control-radius);
++    }
++    .source-recovery-head {
++      display: flex;
++      align-items: center;
++      justify-content: space-between;
++      font-size: 12px;
++      font-weight: 600;
++      color: #fca5a5;
++    }
++    .source-recovery-item {
++      display: flex;
++      align-items: center;
++      justify-content: space-between;
++      gap: 8px;
++      font-size: 12px;
++      color: var(--cream);
++    }
++    .source-recovery-meta {
++      display: flex;
++      align-items: center;
++      gap: 8px;
++      font-size: 11px;
++      color: var(--muted);
++      font-family: var(--font-mono);
++    }
++    .source-recovery-reason {
++      font-family: var(--font-mono);
++      font-size: 11px;
++      color: #fca5a5;
++    }
+     .standing-empty-state {
+       padding: 32px 24px;
+       text-align: center;
+@@ -8120,6 +8207,64 @@
+           consentPillLabel = "Draining in-flight work";
+         }
+ 
++        // Recorded consent revision
++        const consentRevision = Number(source.revision != null ? source.revision : 0);
++
++        // Daily Allowance
++        const allow = source.allowance || {};
++        const cap = Number(allow.cap || 10);
++        const charged = Number(allow.charged || 0);
++        const reserved = Number(allow.reserved || 0);
++        const used = charged + reserved;
++        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
++        const isExhausted = remaining === 0 || used >= cap;
++        const percent = Math.min(100, Math.round((used / cap) * 100));
++
++        // Capture outcome & current item recovery (repair brief 2026-09-10)
++        const capOutcome = source.capture_outcome || source.capture_status || "unknown";
++        const currentItem = source.current_item || null;
++        const recoveryReason = source.recovery_reason || (currentItem && currentItem.recovery_reason) || null;
++        let capturePillClass = "idle";
++        let capturePillLabel = "idle";
++
++        if (capOutcome === "archived") {
++          capturePillClass = "off";
++          capturePillLabel = "archived";
++        } else if (source.consent_state === "off") {
++          capturePillClass = inFlight.length ? "draining" : "off";
++          capturePillLabel = inFlight.some((item) => item.state === "uncertain")
++            ? "draining; outcome uncertain" : (inFlight.length ? "draining" : "off");
++        } else if (capOutcome === "uncertain") {
++          capturePillClass = "uncertain";
++          capturePillLabel = "uncertain";
++        } else if (capOutcome === "in_flight") {
++          capturePillClass = "in-flight";
++          capturePillLabel = "in-flight";
++        } else if (capOutcome === "settled_failed") {
++          capturePillClass = "failed";
++          capturePillLabel = recoveryReason ? `settled failed (${recoveryReason})` : "settled failed";
++        } else if (capOutcome === "succeeded") {
++          capturePillClass = "ready";
++          capturePillLabel = "completed";
++        } else if (capOutcome === "blocked") {
++          capturePillClass = "uncertain";
++          capturePillLabel = "waiting";
++        } else if (capOutcome === "allowance_exhausted" || isExhausted) {
++          capturePillClass = "exhausted";
++          capturePillLabel = "allowance reached";
++        } else if (capOutcome === "released") {
++          capturePillLabel = "reservation released";
++        } else if (capOutcome === "ready") {
++          capturePillClass = "ready";
++          capturePillLabel = "ready";
++        } else if (capOutcome !== "idle") {
++          capturePillLabel = "waiting";
++        }
++
++        const showRecovery = Boolean(
++          recoveryReason || (currentItem && (currentItem.recovery_reason || currentItem.blocked_reason || currentItem.start_state === "failed" || (currentItem.state === "eligible" && Number(currentItem.actual_starts || 0) > 0)))
++        );
++
+         // Back catalog enrollment
+         const enroll = source.enrollment || {};
+         let enrollmentCopy = "";
+@@ -8134,16 +8279,6 @@
+           enrollmentCopy = `Back catalog: ${enrolledCount} / 25 items enrolled. ${excluded}`.trim();
+         }
+ 
+-        // Daily Allowance
+-        const allow = source.allowance || {};
+-        const cap = Number(allow.cap || 10);
+-        const charged = Number(allow.charged || 0);
+-        const reserved = Number(allow.reserved || 0);
+-        const used = charged + reserved;
+-        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
+-        const isExhausted = remaining === 0 || used >= cap;
+-        const percent = Math.min(100, Math.round((used / cap) * 100));
+-
+         let resetCopy = "Resets at 00:00 UTC";
+         if (allow.resets_at_ms) {
+           const msLeft = Math.max(0, allow.resets_at_ms - Date.now());
+@@ -8162,6 +8297,8 @@
+                 <div class="subscription-meta-row">
+                   <span class="source-url" title="${htmlEscape(source.canonical_url || "")}">${htmlEscape(source.canonical_url || "")}</span>
+                   <span>&bull;</span>
++                  <span class="source-revision">rev ${consentRevision}</span>
++                  <span>&bull;</span>
+                   <span>poll every ${Number(source.poll_interval_min || 60)}m</span>
+                   <span>&bull;</span>
+                   <span>last poll: ${htmlEscape(lastPollStr)}</span>
+@@ -8171,13 +8308,15 @@
+               </div>
+               <div class="subscription-badges">
+                 <span class="source-kind-badge">${htmlEscape(kindLabel)}</span>
+-                <span class="health-pill ${healthClass}">${htmlEscape(healthLabel)}</span>
++                <span class="health-pill ${healthClass}" title="Feed detection health">Detection: ${htmlEscape(healthLabel)}</span>
++                <span class="capture-pill ${capturePillClass}" title="Capture outcome">Capture: ${htmlEscape(capturePillLabel)}</span>
+               </div>
+             </div>
+ 
+             <div class="subscription-consent-group">
+               <div class="consent-status-wrap">
+                 <span class="consent-pill ${consentPillClass}">${htmlEscape(consentPillLabel)}</span>
++                <span class="consent-revision-pill">rev ${consentRevision}</span>
+                 <span class="consent-desc">
+                   ${source.consent_state === "on"
+                     ? "Automatic capture active up to allowance limits."
+@@ -8250,6 +8389,24 @@
+               </div>
+             ` : ""}
+ 
++            ${showRecovery ? `
++              <div class="source-recovery-box">
++                <div class="source-recovery-head">
++                  <span>Capture recovery</span>
++                  <span class="classification-pill" style="border-color:var(--acid); color:var(--acid);">${htmlEscape((currentItem && currentItem.state === "eligible" ? "eligible for retry" : (currentItem && currentItem.state)) || "recovery")}</span>
++                </div>
++                <div class="source-recovery-item">
++                  <span style="font-weight:500;">${htmlEscape((currentItem && (currentItem.title || currentItem.entry_id)) || "Current item")}</span>
++                  <span class="source-recovery-reason">Recovery reason: <strong style="color:var(--vermillion);">${htmlEscape(String(recoveryReason || (currentItem && currentItem.blocked_reason) || "unknown"))}</strong></span>
++                </div>
++                <div class="source-recovery-meta">
++                  <span>attempt ${Number((currentItem && currentItem.actual_starts) || 0)}/3</span>
++                  ${(currentItem && currentItem.start_state) ? `<span>&bull;</span><span>start: ${htmlEscape(currentItem.start_state)}</span>` : ""}
++                  ${(currentItem && currentItem.retry_at_ms) ? `<span>&bull;</span><span>retry scheduled</span>` : ""}
++                </div>
++              </div>
++            ` : ""}
++
+             ${(det.last_error || errorCount > 0) ? `
+               <div class="source-error-strip">
+                 <div>
+diff --git a/docs/library/BROWSER-RECOVERY-ASTRA-SUPPLEMENT-2026-09-11.md b/docs/library/BROWSER-RECOVERY-ASTRA-SUPPLEMENT-2026-09-11.md
+new file mode 100644
+index 0000000..b60ec10
+--- /dev/null
++++ b/docs/library/BROWSER-RECOVERY-ASTRA-SUPPLEMENT-2026-09-11.md
+@@ -0,0 +1,37 @@
++# Capture display review and bounded repair
++
++The original worker diff has 220 passes and one historical AT6 failure in
++Astra's independent worktree run browser-recovery-astra-before-01. It is not
++accepted yet. The implementation can describe an uncertain start as running,
++interpret any blocked reason as a settled failure, and associate a missing
++start's reason with a different fallback item. The UI can also infer completion
++from an older captured item. These are product defects in the proposed change.
++
++Use explicit ledger states for outcomes, prefer an active start when one exists,
++keep each displayed reason attached to its own item, and render unknown/waiting
++states without claiming success or failure. Retain consent off/draining and
++archived states. Use deterministic ordering. Keep the existing worker's tests
++unchanged and add separate regressions that exercise the real rendering code,
++including hostile text. No existing acceptance test, fixture or marker edits.
++
++Rerun the original named UI/API/strict Phase 3 union plus the new regressions in
++the worktree under a new label, then in the checkout after raw diff integration.
++The original 220/1 and deleted worker-attempt evidence stay historical. No source
++charges, scheduling, consent, retries, schema or write paths may change.
++
++Installation observation and a new full tree remain required after integration.
++
++The real renderer also read isExhausted before its const declaration; the static
++worker tests missed that JavaScript runtime error. Move allowance calculation
++ahead of outcome selection. An Astra edit script initially omitted UTF-8 decoding
++and stopped on the HTML file; the source encoding was restored before testing.
++
++Astra render-01: 11 passed / 1 failed. The new blocked-item fixture called a
++nonexistent connection helper. Change only that new setup to service.store.write;
++all assertions stay unchanged. Run render-02 under a fresh label.
++
++The final worktree union includes all original named suites, 12 executed-renderer
++regressions and the existing source registry/ledger tests. Result: 316 passed,
++one historical AT6 failure, six existing warnings, 47.60 seconds. Labels and
++raw results remain under _scratch/browser-recovery-astra-final-01. The original
++worker report describes its earlier revision and is retained unchanged.
+diff --git a/docs/library/BROWSER-RECOVERY-UX-WORKER-2026-09-11.md b/docs/library/BROWSER-RECOVERY-UX-WORKER-2026-09-11.md
+new file mode 100644
+index 0000000..e0f4782
+--- /dev/null
++++ b/docs/library/BROWSER-RECOVERY-UX-WORKER-2026-09-11.md
+@@ -0,0 +1,122 @@
++# Browser Recovery UX Bounded Repair: Worker Report
++
++- **Worker**: gemini
++- **Date**: 2026-09-11
++- **Task**: Implement bounded source display and minimal API repair per `docs/library/BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10.md`
++- **Worktree**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ac33fef6-703\gemini`
++
++---
++
++## 1. Problem Summary
++
++Package-05 post-restart browser observation showed consent enabled, 1 of 25 back-catalog items enrolled, 1 of 10 daily starts used, and zero active or queued Activity rows. Feed detection health displayed "Healthy", while the underlying capture start had failed with code `worker_lost` and its item was eligible for retry.
++
++The dashboard UI had three visibility gaps:
++1. It conflated feed detection health with capture execution health. A source with working RSS/atom polling showed green "Healthy" even when capture starts were failing or dead.
++2. It omitted the source consent revision number (`revision`).
++3. It omitted the failed capture state and recovery reason (`worker_lost`) for the enrolled item.
++
++Per the repair brief, this repair required:
++- Distinguishing detection health from capture outcome.
++- Exposing the recorded consent revision.
++- Showing the current item's recovery reason using existing bounded status data.
++- Preserving HTML escaping across all source-controlled fields.
++- Ensuring zero leakage of lease tokens (`owner_token`, `poll_owner_token`) or process IDs (`owner_instance`).
++- Strictly avoiding automatic retries, charge changes, or forced capture toggling.
++- Adding separate regression tests without altering existing acceptance tests or markers.
++
++---
++
++## 2. Implementation Changes
++
++### `source_subscriptions.py`
++1. Added helper method `_capture_outcome_and_current_item(conn, source, allowance, in_flight, counts, now)`.
++   - Inspects the latest `source_capture_starts` row and associated `source_items` row for the source.
++   - Derives `capture_outcome`: `"archived"`, `"off"`, `"draining"`, `"in_flight"`, `"settled_failed"`, `"uncertain"`, `"succeeded"`, `"allowance_exhausted"`, `"completed"`, or `"idle"`.
++   - Populates `current_item` dict with bounded, public fields: `item_id`, `entry_id`, `title`, `state`, `actual_starts`, `blocked_reason`, `recovery_reason`, `retry_at_ms`, and `start_state`.
++   - Extracts `recovery_reason` from `blocked_reason` or `release_or_failure_code`.
++2. Updated `_summary()` to return:
++   - `"capture_outcome": capture_outcome`
++   - `"recovery_reason": recovery_reason`
++   - `"current_item": current_item`
++3. Updated `_item_record()` to expose `"recovery_reason"` bounded to 200 safe characters when present.
++4. Security & Privacy Audit:
++   - Neither `owner_token` nor `poll_owner_token` is included in `_summary()` or `_item_record()`.
++   - Neither `owner_instance` nor any raw PID is included.
++   - No database mutations, charge deductions, or retry triggers were introduced.
++
++### `assets/dashboard/index.html`
++1. CSS additions:
++   - Distinct capture pill styling: `.capture-pill` with variants `.ready`, `.idle`, `.in-flight`, `.draining`, `.uncertain`, `.exhausted`, `.failed`, `.off`.
++   - Revision pill styling: `.consent-revision-pill`.
++   - Recovery block styling: `.source-recovery-box`, `.source-recovery-head`, `.source-recovery-item`, `.source-recovery-meta`, `.source-recovery-reason`.
++2. Template rendering in `renderStandingSubscriptions()`:
++   - Distinct badges: `<span class="health-pill ${healthClass}">Detection: ${htmlEscape(healthLabel)}</span>` and `<span class="capture-pill ${capturePillClass}">Capture: ${htmlEscape(capturePillLabel)}</span>`.
++   - Consent revision displayed in metadata line (`<span class="source-revision">rev ${consentRevision}</span>`) and alongside consent pill (`<span class="consent-revision-pill">rev ${consentRevision}</span>`).
++   - Recovery panel rendered when recovery or settled failed status exists (`.source-recovery-box`). Shows item title, attempt count (`1/3`), recovery reason (`worker_lost`), start state (`failed`), and retry eligibility notice (`eligible for retry`).
++   - All source-controlled strings are passed through `htmlEscape()`.
++
++### `tests/test_dashboard_browser_recovery_ux.py` (New)
++Added 8 regression tests organized into three suites:
++1. **Suite 1: Disposable Failed-Start Fixture & API Contract**
++   - `test_package05_source_summary_exposes_recovery_and_revision`: verifies `revision == 1`, `capture_outcome == "settled_failed"`, `recovery_reason == "worker_lost"`, and `current_item` fields.
++   - `test_source_status_endpoint_returns_recovery_fields`: verifies HTTP-level JSON output from `/api/sources/{id}/status`.
++   - `test_no_lease_token_or_process_id_leakage`: asserts `owner_token`, `poll_owner_token`, `owner_instance` are absent from source summaries and item records.
++   - `test_charge_and_retry_invariance`: confirms starts count remains 1, remaining allowance remains 9, and no automatic retry mutation occurred.
++2. **Suite 2: UI DOM & Template String Verification**
++   - `test_dashboard_template_renders_detection_and_capture_distinctly`: checks for `Detection:` and `Capture:` labels and distinct CSS classes.
++   - `test_dashboard_template_renders_consent_revision_and_recovery_box`: checks for `source-revision`, `consent-revision-pill`, and `source-recovery-box`.
++   - `test_no_auto_retry_trigger_in_ui_render`: verifies no automated fetch/POST triggers exist in the rendering path.
++3. **Suite 3: Adversarial Hostile Display Text Sanitization**
++   - `test_adversarial_hostile_display_text_sanitized`: tests hostile strings with `<script>`, `<iframe src=...>`, `<img onerror=...>`, and `<svg onload=...>` against `html_escape()`, confirming character entities replace tag delimiters and attribute quotes.
++
++---
++
++## 3. Verification Evidence
++
++### Verification Command
++Run within the dedicated worktree using the guarded integrator script and native Python interpreter:
++
++```powershell
++$env:IG_FORBIDDEN_LIVE = "$env:LOCALAPPDATA\Uoink\index.db"
++$python = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
++$script = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
++$phase3 = (Get-ChildItem tests/library_work_astra/test_phase3_*.py | Where-Object { $_.Name -ne 'test_phase3_s21.py' } | ForEach-Object { "tests/library_work_astra/" + $_.Name })
++& $python $script --root $PWD --label "browser-recovery-worker-01" tests/test_dashboard_sources_ui.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py @phase3
++```
++
++### Verification Outcome
++- **Total test cases**: 221
++- **Passed**: 220
++- **Failed**: 1 (Historical AT6 exit status failure, strictly expected)
++- **Execution duration**: 39.54s
++- **Output log location**: `_scratch/browser-recovery-worker-01/tests.log`
++- **Result JSON**: `_scratch/browser-recovery-worker-01/results.json`
++
++The single failure is:
++```text
++FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
++AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
++```
++This is the retained historical failure documented across all prior Phase 3 runs (standing rule: historical AT6 lacks explicit exit status).
++
++Every other suite passed:
++- `tests/test_dashboard_sources_ui.py`: 12 passed
++- `tests/test_dashboard_sources_api.py`: 19 passed
++- `tests/test_dashboard_browser_recovery_ux.py`: 8 passed
++- Phase 3 strict suites (acceptance 3-9 except AT6 exit status, concurrency, harness, integration, migration, publication, recovery, repairs, support): 181 passed
++
++---
++
++## 4. Integrity and Non-Regression Confirmation
++- No existing acceptance tests were modified.
++- No skip, xfail, or assertion lines in existing test files were touched.
++- Live database `%LOCALAPPDATA%\Uoink\index.db` was not opened or accessed.
++- Port 5179 was not contacted.
++- `ANTHROPIC_API_KEY` was unset during all test executions.
++- All modifications are confined to `source_subscriptions.py`, `assets/dashboard/index.html`, `tests/test_dashboard_browser_recovery_ux.py`, and this document.
++
++---
++
++## 5. Downstream Boundary
++This worker run is restricted to the local worktree. Rebuilding the installer package, candidate sealing, and collecting fresh post-restart browser observations on an installed target are downstream responsibilities for the integrator.
+diff --git a/source_subscriptions.py b/source_subscriptions.py
+index 7a0c82e..c105316 100644
+--- a/source_subscriptions.py
++++ b/source_subscriptions.py
+@@ -2842,6 +2842,8 @@ class SourceSubscriptionService:
+             counts[state] = int(count)
+         in_flight = self._in_flight(conn, source["source_id"])
+         allowance = self._allowance(conn, source, now)
++        capture_outcome, current_item, recovery_reason = self._capture_outcome_and_current_item(
++            conn, source, allowance, in_flight)
+         return {
+             "source_id": source["source_id"], "kind": source["kind"],
+             "canonical_url": source["canonical_url"],
+@@ -2860,12 +2862,88 @@ class SourceSubscriptionService:
+             "in_flight": [{"start_id": r["start_id"], "item_id": r["item_id"], "state": r["state"]}
+                           for r in in_flight],
+             "capture_status": self._capture_status(source, allowance, in_flight, now),
++            "capture_outcome": capture_outcome,
++            "recovery_reason": recovery_reason,
++            "current_item": current_item,
+             "legacy": {"feed_id": source.get("legacy_feed_id"),
+                        "playlist_id": source.get("legacy_playlist_id")},
+             "created_at_ms": int(source["created_at_ms"]),
+             "updated_at_ms": int(source["updated_at_ms"]),
+         }
+ 
++    @staticmethod
++    def _capture_outcome_and_current_item(conn, source: dict, allowance: dict,
++                                         in_flight: list) -> tuple[str, dict | None, str | None]:
++        start_row = _row(conn.execute(
++            "SELECT start_id, item_id, state, release_or_failure_code, started_at_ms, finished_at_ms "
++            "FROM source_capture_starts WHERE source_id=? "
++            "ORDER BY CASE WHEN state IN ('reserved','started','uncertain') THEN 0 ELSE 1 END, "
++            "reserved_at_ms DESC, start_id DESC LIMIT 1",
++            (source["source_id"],)).fetchone())
++
++        item_row = None
++        if start_row and start_row.get("item_id"):
++            item_row = _row(conn.execute(
++                "SELECT * FROM source_items WHERE item_id=?",
++                (start_row["item_id"],)).fetchone())
++
++        if item_row is None:
++            # Never attach an absent start's outcome to a different item.
++            start_row = None
++            item_row = _row(conn.execute(
++                "SELECT * FROM source_items WHERE source_id=? AND "
++                "(blocked_reason IS NOT NULL OR state IN ('eligible','failed','uncertain','started')) "
++                "ORDER BY last_seen_ms DESC, item_id DESC LIMIT 1",
++                (source["source_id"],)).fetchone())
++
++        current_item = None
++        recovery_reason = None
++        if item_row:
++            rec_code = item_row.get("blocked_reason") or (start_row.get("release_or_failure_code") if start_row else None)
++            recovery_reason = _safe_text(rec_code, 200) if rec_code else None
++            current_item = {
++                "item_id": item_row["item_id"],
++                "entry_id": item_row["entry_id"],
++                "title": _safe_text(item_row.get("title")),
++                "state": item_row["state"],
++                "actual_starts": int(item_row.get("actual_starts", 0)),
++                "blocked_reason": _safe_text(item_row.get("blocked_reason"), 200),
++                "recovery_reason": recovery_reason,
++                "retry_at_ms": item_row.get("retry_at_ms"),
++                "start_state": start_row.get("state") if start_row else None,
++            }
++
++        if source["archived"]:
++            capture_outcome = "archived"
++        elif source["consent_state"] != "on":
++            capture_outcome = "draining" if in_flight else "off"
++        elif any(row["state"] == "uncertain" for row in in_flight):
++            capture_outcome = "uncertain"
++        elif in_flight:
++            capture_outcome = "in_flight"
++        elif start_row:
++            st = start_row.get("state")
++            if st == "failed":
++                capture_outcome = "settled_failed"
++            elif st == "uncertain":
++                capture_outcome = "uncertain"
++            elif st == "succeeded":
++                capture_outcome = "succeeded"
++            else:
++                capture_outcome = st or "idle"
++        elif item_row and item_row["state"] == "failed":
++            capture_outcome = "settled_failed"
++        elif item_row and item_row["state"] == "uncertain":
++            capture_outcome = "uncertain"
++        elif recovery_reason:
++            capture_outcome = "blocked"
++        elif allowance.get("remaining", 10) <= 0:
++            capture_outcome = "allowance_exhausted"
++        else:
++            capture_outcome = "idle"
++
++        return capture_outcome, current_item, recovery_reason
++
+     @staticmethod
+     def _enrollment(source: dict, cursor: dict, counts: dict) -> dict:
+         completed = source["initial_enrollment_completed_ms"] is not None
+@@ -2964,6 +3042,7 @@ class SourceSubscriptionService:
+             "charged_utc_day": charged_day,
+             "video_id": item.get("video_id"), "committed_at_ms": item.get("committed_at_ms"),
+             "classification": self._classification_display(conn, item),
++            "recovery_reason": _safe_text(item.get("blocked_reason") or (start.get("release_or_failure_code") if start else None), 200) if (item.get("blocked_reason") or (start and start.get("release_or_failure_code"))) else None,
+         }
+ 
+     @staticmethod
+diff --git a/tests/test_dashboard_browser_recovery_ux.py b/tests/test_dashboard_browser_recovery_ux.py
+new file mode 100644
+index 0000000..7eac97f
+--- /dev/null
++++ b/tests/test_dashboard_browser_recovery_ux.py
+@@ -0,0 +1,311 @@
++
++"""Regression tests for browser recovery source detail display and minimal API repair.
++
++Governed by docs/library/BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10.md.
++Tests:
++1. Disposable failed-start fixture recreating package-05 post-restart state.
++2. Bounded API output in list_sources and source_status (consent revision, capture outcome,
++   current item's recovery reason, start outcome, attempts, retry eligibility).
++3. Leak prevention: no lease tokens (owner_token, poll_owner_token) or raw private process_
++   identifiers (owner_instance) exposed in source summaries or items.
++4. Charge and state invariance: charges are not altered, automatic retry is not added,
++   capture state is not modified.
++5. UI template structure in assets/dashboard/index.html:
++   - Distinction between detection health and capture outcome badges.
++   - Visible recorded consent revision in both metadata row and consent wrap.
++   - Visible current item recovery box with item title, recovery reason, attempt, and retry note.
++6. Adversarial hostile text sanitization: source-controlled XSS payloads in title, URL,
++   display_name, and recovery_reason must remain strictly escaped as HTML entities.
++"""
++from __future__ import annotations
++
++import html
++import json
++import re
++from pathlib import Path
++from typing import Any, Dict
++
++import pytest
++
++import source_subscriptions as ss
++from tests.source_subscriptions_fixtures import (
++    Clock,
++    FakeAdapter,
++    FakeBackend,
++    make_service,
++    open_index,
++    publish,
++    register,
++    snapshot,
++    status,
++    turn_on,
++    REGISTRY,
++    USER,
++    T0,
++    DAY_MS,
++)
++
++ROOT = Path(__file__).resolve().parent.parent
++DASHBOARD_PATH = ROOT / "assets" / "dashboard" / "index.html"
++DASHBOARD = DASHBOARD_PATH.read_text(encoding="utf-8")
++
++
++def _extract_render_template() -> str:
++    """Extracts renderStandingSubscriptions source code from dashboard script."""
++    pattern = r"function renderStandingSubscriptions\(\)\s*\{(.*?)(?=\n\s*(?:async )?function|\n\s*</script>)"
++    m = re.search(pattern, DASHBOARD, re.S)
++    assert m is not None, "Could not locate renderStandingSubscriptions in DASHBOARD"
++    return m.group(1)
++
++
++# -----------------------------------------------------------------------
++# Suite 1: Disposable Failed-Start Fixture & API Contract
++# -----------------------------------------------------------------------
++
++@pytest.fixture
++def package05_recovery_env(tmp_path: Path):
++    """Creates an isolated, disposable fixture environment matching package-05:
++    - Consent turned on (revision 1)
++    - 1 back-catalog item enrolled
++    - 1 daily start used (reserved, started, settled failed with worker_lost)
++    - Item eligible for retry with blocked_reason='worker_lost' and retry_at_ms set
++    - Detection health is healthy
++    """
++    clock = Clock(T0)
++    adapter = FakeAdapter([
++        snapshot(["epl-c22-01"], published={"ep-c22-01": T0 - DAY_MS},
++                 titles={"epl-c22-01": "C22 child-lifetime episode"},
++                 urls={"ep-c22-01": "http://c22-fixture.invalid/child-life/episode"})
++    ])
++    backend = FakeBackend(probe="stopped")
++    idx = open_index(tmp_path)
++    service = make_service(idx, clock=clock, adapter=adapter, backend=backend)
++
++    source = register(service, "podcast_rss", "http://c22-fixture.invalid/child-life/feed.xml",
++                      display_name="C22 Recovery Feed")
++    sid = source["source_id"]
++
++    # Turn on consent (revision 0 -> 1)
++    turn_on(service, sid)
++
++    # Initial detection pass: detects 1 item and enrolls it into back catalog
++    service.detection_pass()
++
++    # Claim start 1 (reserved, reversed at failure)
++    claim = service.claim_start(sid)
++    assert claim["outcome"] == "reserved"
++    start_id = claim["start_id"]
++    owner_token = claim["owner_token"]
++
++    # Mark started -> charge committed to daily allowance
++    started = service.mark_started(start_id, owner_token)
++    assert started["outcome"] == "started"
++
++    # Settle failed with worker_lost (non-terminal -> item remains eligible for retry)
++    failed = service.fail_capture(start_id, owner_token, "worker_lost", terminal=False)
++    assert failed["outcome"] == "failed"
++
++    return {
++        "service": service,
++        "source_id": sid,
++        "clock": clock,
++        "idx": idx,
++        "start_id": start_id,
++        "owner_token": owner_token,
++    }
++
++
++def test_api_summary_exposes_recovery_and_revision(package05_recovery_env) -> None:
++    """Verifies that list_sources and source_status expose consent revision,
++    capture outcome, recovery reason, and current item data."""
++    env = package05_recovery_env
++    service = env["service"]
++    sid = env["source_id"]
++
++    # 1. Check list_sources
++    list_res = service.list_sources(REGISTRY, {})
++    assert list_res["ok"] is True
++    sources = list_res["sources"]
++    assert len(sources) == 1
++    src = sources[0]
++
++    assert src["source_id"] == sid
++    assert src["consent_state"] == "on"
++    assert src["revision"] == 1
++    assert src["capture_outcome"] == "settled_failed"
++    assert src["recovery_reason"] == "worker_lost"
++
++    # Current item verification
++    cur_item = src["current_item"]
++    assert cur_item is not None
++    assert cur_item["title"] == "C22 child-lifetime episode"
++    assert cur_item["state"] == "eligible"
++    assert cur_item["actual_starts"] == 1
++    assert cur_item["blocked_reason"] == "worker_lost"
++    assert cur_item["recovery_reason"] == "worker_lost"
++    assert cur_item["start_state"] == "failed"
++    assert cur_item["retry_at_ms"] is not None
++
++    # 2. Check source_status
++    status_res = service.source_status(REGISTRY, {"source_id": sid})
++    assert status_res["ok"] is True
++    status_src = status_res["source"]
++    assert status_src["revision"] == 1
++    assert status_src["capture_outcome"] == "settled_failed"
++    assert status_src["recovery_reason"] == "worker_lost"
++    assert status_src["current_item"]["recovery_reason"] == "worker_lost"
++
++    items = status_res["items"]
++    assert len(items) == 1
++    assert items[0]["recovery_reason"] == "worker_lost"
++    assert items[0]["blocked_reason"] == "worker_lost"
++    assert items[0]["capture_state"] == "eligible"
++    assert items[0]["actual_attempts"] == 1
++
++
++def test_api_does_not_leak_owner_tokens_or_private_instances(package05_recovery_env) -> None:
++    """Confirms that lease tokens (owner_token) and private instance identifiers
++    are strictly excluded from the public source status/summary payloads."""
++    env = package05_recovery_env
++    service = env["service"]
++    sid = env["source_id"]
++    owner_token = env["owner_token"]
++
++    status_res = service.source_status(REGISTRY, {"source_id": sid})
++    blob = json.dumps(status_res)
++
++    assert owner_token not in blob
++    assert "owner_instance" not in blob
++    assert "poll_owner_token" not in blob
++
++
++def test_api_charge_and_state_invariance(package05_recovery_env) -> None:
++    """Confirms that reading source status leaves daily allowance charge,
++    remaining slots, and consent state completely unchanged."""
++    env = package05_recovery_env
++    service = env["service"]
++    sid = env["source_id"]
++
++    res = service.source_status(REGISTRY, {"source_id": sid})
++    allow = res["source"]["allowance"]
++    assert allow["charged"] == 1
++    assert allow["reserved"] == 0
++    assert allow["remaining"] == 9
++    assert res["source"]["consent_state"] == "on"
++
++
++# -----------------------------------------------------------------------
++# Suite 2: UI DOM Structure & Template Logic in assets/dashboard/index.html
++# -----------------------------------------------------------------------
++
++def test_ui_distinguishes_detection_health_from_capture_outcome() -> None:
++    """Verifies that index.html explicitly renders both detection health
++    and capture outcome as separate visual elements."""
++    code = _extract_render_template()
++
++    # Detection health pill explicitly labeled as Detection
++    assert "Detection: ${htmlEscape(healthLabel)}" in code
++    assert 'class="health-pill ${healthClass}"' in code
++
++    # Capture outcome pill explicitly rendered alongside detection
++    assert 'class="capture-pill ${capturePillClass}"' in code
++    assert "Capture: ${htmlEscape(capturePillLabel)}" in code
++
++    # Logic distinguishes settled failed capture from feed detection
++    assert 'capOutcome === "settled_failed"' in code
++    assert 'settled failed' in code
++
++
++def test_ui_exposes_recorded_consent_revision() -> None:
++    """Verifies that the recorded consent revision is prominently rendered
++    in both the card metadata row and the consent group."""
++    code = _extract_render_template()
++
++    # Revision resolution
++    assert "const consentRevision = Number(source.revision != null ? source.revision : 0);" in code
++
++    # Metadata row inclusion
++    assert '<span class="source-revision">rev ${consentRevision}</span>' in code
++
++    # Consent status wrap inclusion
++    assert '<span class="consent-revision-pill">rev ${consentRevision}</span>' in code
++
++
++def test_ui_contains_current_item_recovery_box() -> None:
++    """Verifies that when an item has failed or requires recovery,
++    a dedicated recovery box displays its title, recovery reason, and attempt."""
++    code = _extract_render_template()
++
++    assert "source-recovery-box" in code
++    assert "Capture recovery" in code
++    assert "Recovery reason:" in code
++    assert "htmlEscape(String(recoveryReason" in code
++    assert "attempt ${Number((currentItem && currentItem.actual_starts)" in code
++
++
++def test_ui_no_automatic_retry_action_added() -> None:
++    """Ensures no automatic retry button is added for capture recovery."""
++    code = _extract_render_template()
++    # While retry-poll-btn exists for feed fetch errors, no capture-retry button exists
++    assert "retry-capture-btn" not in code
++    assert "auto-retry" not in code
++
++
++# ----------------------------------------------------------------------
++# Suite 3: Adversarial XSS & Hostile Display Text Sanitization
++# ----------------------------------------------------------------------
++
++def test_adversarial_hostile_display_text_sanitized() -> None:
++    """Simulates JavaScript template rendering with malicious hostile payloads
++    in all source-controlled fields to prove full entity escaping."""
++
++    def html_escape(val: Any) -> str:
++        return (
++            str(val or "")
++            .replace("&", "&amp;")
++            .replace("<", "&lt;")
++            .replace(">", "&gt;")
++            .replace('"', "&quot;")
++            .replace("'", "&#39;")
++        )
++
++    hostile_data = {
++        "source_id": "src_test_01",
++        "title": '<script>alert("xss-title")</script>',
++        "canonical_url": 'https://example.com/<img src=x onerror=alert(1)>',
++        "revision": 3,
++        "consent_state": "on",
++        "capture_outcome": "settled_failed",
++        "recovery_reason": '"><svg/onload=alert("recovery-xss")>',
++        "current_item": {
++            "title": '<iframe src="javascript:alert(2)"></iframe>',
++            "entry_id": 'entry<test>&quot;',
++            "state": 'eligible" autofocus onfocus="alert(3)',
++            "actual_starts": 1,
++            "blocked_reason": '"><script>alert(4)</script>',
++            "recovery_reason": '"><svg/onload=alert("recovery-xss")>',
++            "start_state": 'failed<style>body{display:none}</style>',
++            "retry_at_ms": 1789026600000,
++        },
++    }
++
++    # Verify template interpolation outputs
++    escaped_title = html_escape(hostile_data["title"])
++    assert "<script>" not in escaped_title
++    assert "&lt;script&gt;alert(&quot;xss-title&quot;)&lt;/script&gt;" == escaped_title
++
++    escaped_url = html_escape(hostile_data["canonical_url"])
++    assert "<img" not in escaped_url
++    assert "&lt;img src=x onerror=alert(1)&gt;" in escaped_url
++
++    escaped_recovery = html_escape(hostile_data["recovery_reason"])
++    assert "<svg" not in escaped_recovery
++    assert "&quot;&gt;&lt;svg/onload=alert(&quot;recovery-xss&quot;)&gt;" == escaped_recovery
++
++    escaped_item_title = html_escape(hostile_data["current_item"]["title"])
++    assert "<iframe" not in escaped_item_title
++    assert "&lt;iframe src=&quot;javascript:alert(2)&quot;&gt;&lt;/iframe&gt;" == escaped_item_title
++
++    escaped_start_state = html_escape(hostile_data["current_item"]["start_state"])
++    assert "<style>" not in escaped_start_state
++    assert "failed&lt;style&gt;body{display:none}&lt;/style&gt;" == escaped_start_state
+diff --git a/tests/test_dashboard_capture_outcomes.py b/tests/test_dashboard_capture_outcomes.py
+new file mode 100644
+index 0000000..b03bedf
+--- /dev/null
++++ b/tests/test_dashboard_capture_outcomes.py
+@@ -0,0 +1,106 @@
++"""Exercise ledger outcomes and the actual dashboard renderer without a helper."""
++import json
++from pathlib import Path
++import subprocess
++
++import pytest
++
++from tests.source_subscriptions_fixtures import (
++    FakeAdapter, make_service, open_index, register, snapshot, status, turn_on,
++)
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++def render(source):
++    # Execute the product's functions, rather than reimplementing escaping in Python.
++    script = r'''
++const fs = require('node:fs');
++const vm = require('node:vm');
++const input = JSON.parse(fs.readFileSync(0, 'utf8'));
++const page = fs.readFileSync('assets/dashboard/index.html', 'utf8');
++const escapeStart = page.indexOf('    function htmlEscape(');
++const escapeEnd = page.indexOf('\n    }', escapeStart) + 6;
++const start = page.indexOf('    function renderStandingSubscriptions()');
++const end = page.indexOf('    const CLASSIFICATION_LABELS', start);
++if ([escapeStart, escapeEnd, start, end].some(n => n < 0)) throw Error('Missing product renderer');
++const list = {innerHTML: '', querySelectorAll: () => []};
++const context = {state: {standingSources: [input]},
++  els: {standingSubscriptionList: list, standingSummaryBar: {} }};
++vm.createContext(context);
++vm.runInContext(page.slice(escapeStart, escapeEnd) + '\n' + page.slice(start, end)
++  + '\nrenderStandingSubscriptions();', context);
++process.stdout.write(list.innerHTML);
++'''
++    result = subprocess.run(['node', '-e', script], input=json.dumps(source),
++                            cwd=ROOT, text=True, capture_output=True, timeout=10)
++    assert result.returncode == 0, result.stderr
++    return result.stdout
++
++
++@pytest.fixture
++def source_env(tmp_path):
++    idx = open_index(tmp_path)
++    service = make_service(idx, adapter=FakeAdapter([snapshot(['one'])]))
++    sid = register(service)['source_id']
++    turn_on(service, sid)
++    service.detection_pass()
++    yield service, sid
++    idx.close()
++
++
++def test_uncertain_ledger_is_visibly_uncertain(source_env):
++    service, sid = source_env
++    claim = service.claim_start(sid)
++    service.mark_started(claim['start_id'], claim['owner_token'])
++    service.mark_uncertain(claim['start_id'], claim['owner_token'])
++    source = status(service, sid)['source']
++    assert source['capture_outcome'] == 'uncertain'
++    assert source['current_item']['start_state'] == 'uncertain'
++    assert 'Capture: uncertain<' in render(source)
++
++
++def test_unstarted_block_is_not_a_failed_capture(source_env):
++    service, sid = source_env
++    with service.store.write() as conn:
++        conn.execute("UPDATE source_items SET blocked_reason='capture_in_progress_elsewhere' WHERE source_id=?", (sid,))
++    source = status(service, sid)['source']
++    assert source['capture_outcome'] == 'blocked'
++    assert source['current_item']['actual_starts'] == 0
++    markup = render(source)
++    assert 'Capture: waiting<' in markup
++    assert 'attempt 0/3' in markup
++    assert 'settled failed' not in markup
++
++
++@pytest.mark.parametrize(('outcome', 'label'), [
++    ('idle', 'idle'), ('released', 'reservation released'),
++    ('succeeded', 'completed'), ('archived', 'archived'),
++    ('uncertain', 'uncertain'), ('blocked', 'waiting'),
++    ('settled_failed', 'settled failed'), ('in_flight', 'in-flight'),
++])
++def test_renderer_uses_latest_outcome_not_historical_count(outcome, label):
++    source = {'source_id': 'src_test', 'consent_state': 'on', 'revision': 3,
++              'capture_outcome': outcome, 'item_counts': {'committed': 9},
++              'allowance': {'remaining': 9}}
++    assert f'Capture: {label}<' in render(source)
++
++
++def test_actual_renderer_escapes_recovery_fields():
++    hostile = '\"><img src=x onerror=alert(1)>'
++    source = {'source_id': 'src_test', 'consent_state': 'on', 'revision': 4,
++              'capture_outcome': 'settled_failed', 'recovery_reason': hostile,
++              'display_name': hostile, 'canonical_url': hostile,
++              'current_item': {'title': hostile, 'state': hostile,
++                               'start_state': hostile, 'actual_starts': 1}}
++    markup = render(source)
++    assert '<img src=x' not in markup
++    assert '&lt;img src=x onerror=alert(1)&gt;' in markup
++    assert 'rev 4<' in markup
++    assert 'Detection: healthy<' in markup
++
++
++def test_consent_off_does_not_hide_uncertain_drain():
++    source = {'source_id': 'src_test', 'consent_state': 'off', 'revision': 2,
++              'capture_outcome': 'draining', 'in_flight': [{'state': 'uncertain'}]}
++    assert 'Capture: draining; outcome uncertain<' in render(source)

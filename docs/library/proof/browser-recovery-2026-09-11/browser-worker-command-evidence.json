@@ -1,0 +1,235 @@
+[
+  {
+    "time": "2026-09-11T17:09:09.296Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 90,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "powershell -NoProfile -Command \"\n$env:IG_FORBIDDEN_LIVE = Join-Path $env:LOCALAPPDATA 'Uoink\\index.db'\n& 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe' 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py' --root 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ac33fef6-703\\gemini' --label 'test-probe-01' tests/test_dashboard_sources_ui.py tests/test_dashboard_sources_api.py\n\""
+      },
+      "output": "= : The term '=' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the \r\nspelling of the name, or if a path was included, verify that the path is correct and try again.\r\nAt line:2 char:2\r\n+  = Join-Path C:\\Users\\hello\\AppData\\Local 'Uoink\\index.db'\r\n+  ~\r\n    + CategoryInfo          : ObjectNotFound: (=:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\nFailed checking if argv[0] is an import path entry\r\nTraceback (most recent call last):\r\n  File \"<frozen zipimport>\", line 95, in __init__\r\n  File \"<frozen zipimport>\", line 348, in _read_directory\r\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-full-as9\\guard\\sitecustomize.py\", line 7, in audit\r\n  File \"<frozen os>\", line 709, in __getitem__\r\nKeyError: 'IG_FORBIDDEN_LIVE'\r\nE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe: can't open file 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\integrator_verify.py': [Errno 0] No error\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:09:14.263Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 92,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 1.2481431,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n& 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe' 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py' --root $PWD --label 'test-probe-02' tests/test_dashboard_sources_ui.py tests/test_dashboard_sources_api.py"
+      },
+      "output": "START tests\r\ntests exit 0 \r\n...............................                                          [100%]\r\n31 passed in 0.35s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:09:21.844Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 94,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.4793819,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Remove-Item -Recurse -Force _scratch"
+      }
+    }
+  },
+  {
+    "time": "2026-09-11T17:09:31.993Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 98,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 4.0539995,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n& 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe' 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py' --root $PWD --label 'test-probe-at6' tests/library_work_astra/test_phase3_acceptance6.py"
+      },
+      "output": "START tests\r\ntests exit 0 \r\n.........                                                                [100%]\r\n9 passed in 3.20s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:09:43.981Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 106,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.3104507,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Remove-Item -Recurse -Force _scratch"
+      }
+    }
+  },
+  {
+    "time": "2026-09-11T17:15:00.194Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 208,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 1.2441288,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n& 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe' 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py' --root $PWD --label 'test-verify-edit-01' tests/test_dashboard_sources_ui.py tests/test_dashboard_sources_api.py"
+      },
+      "output": "START tests\r\ntests exit 0 \r\n...............................                                          [100%]\r\n31 passed in 0.36s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:15:06.437Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 210,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.3448872,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Remove-Item -Recurse -Force _scratch"
+      }
+    }
+  },
+  {
+    "time": "2026-09-11T17:16:29.381Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 219,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 2.7020654,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "pwsh -NoProfile -Command \"\nRemove-Item -Recurse -Force -ErrorAction SilentlyContinue '_scratch/browser-recovery-worker-01'\n$env:IG_FORBIDDEN_LIVE = \\\"$env:LOCALAPPDATA\\Uoink\\index.db\\\"\n$phase3 = (Get-ChildItem tests/library_work_astra/test_phase3_*.py | Where-Object { $_.Name -ne 'test_phase3_s21.py' } | ForEach-Object { $_.FullName })\n& 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe' 'E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py' --root $PW…"
+      },
+      "output": "=: \r\nLine |\r\n   3 |   = \\ C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db\\\r\n     |   ~\r\n     | The term '=' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n.Name: \r\nLine |\r\n   4 |  . ts/library_work_astra/test_phase3_*.py | Where-Object { .Name -ne 'te .\r\n     |                                                            ~~~~~\r\n     | The term '.Name' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n=: \r\nLine |\r\n   4 |   = (Get-ChildItem tests/library_work_astra/test_phase3_*.py | Where-O .\r\n     |   ~\r\n     | The term '=' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\nFailed checking if argv[0] is an import path entry\r\nTraceback (most recent call last):\r\n  File \"<frozen zipimport>\", line 95, in __init__\r\n  File \"<frozen zipimport>\", line 348, in _read_directory\r\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-full-as9\\guard\\sitecustomize.py\", line 7, in audit\r\n  File \"<frozen os>\", line 709, in __getitem__\r\nKeyError: 'IG_FORBIDDEN_LIVE'\r\nE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe: can't open file 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\integrator_verify.py': [Errno 0] No error\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:16:31.913Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 221,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.5709931,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n$python = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe\"\n$script = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py\"\n& $python -c \"import os; print('IG_FORBIDDEN_LIVE:', os.environ.get('IG_FORBIDDEN_LIVE'))\"\n"
+      },
+      "output": "IG_FORBIDDEN_LIVE: C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:16:46.403Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 233,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n$python = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe\"\n$script = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py\"\n$phase3 = (Get-ChildItem tests/library_work_astra/test_phase3_*.py | Where-Object { $_.Name -ne 'test_phase3_s21.py' } | ForEach-Object { \"tests/library_work_astra/\" + $_.Name })\n& $python $script --root $PWD --label \"browser-recovery-worker-01\" tests/test_dashboard_sou…"
+      },
+      "output": "START tests\r\ntests exit 2 \r\n<frozen importlib._bootstrap>:938: in _load_unlocked\r\n    ???\r\n..\\..\\..\\..\\..\\..\\Roaming\\Python\\Python314\\site-packages\\_pytest\\assertion\\rewrite.py:179: in exec_module\r\n    source_stat, co = _rewrite_test(fn, self.config)\r\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n..\\..\\..\\..\\..\\..\\Roaming\\Python\\Python314\\site-packages\\_pytest\\assertion\\rewrite.py:348: in _rewrite_test\r\n    tree = ast.parse(source, filename=strfn)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nC:\\Python314\\Lib\\ast.py:46: in parse\r\n    return compile(source, filename, mode, flags,\r\nE     File \"C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ac33fef6-703\\gemini\\tests\\test_dashboard_browser_recovery_ux.py\", line 55\r\nE       pattern = r\\\"function renderStandingSubscriptions\\\\(\\\\)\\\\s*\\\\{(.*?)(?=\\\\n\\\\s*(?:async )?function|\\\\n\\\\s*</script>)\\\"\r\nE                   ^\r\nE   SyntaxError: unexpected character after line continuation character\r\n=========================== short test summary info ===========================\r\nERROR tests/test_dashboard_browser_recovery_ux.py\r\n!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\r\n1 error in 1.60s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:17:01.206Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 249,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.4864648,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Get-ChildItem -Path _scratch -Filter \"browser-recovery-worker-01*\" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force"
+      }
+    }
+  },
+  {
+    "time": "2026-09-11T17:17:06.611Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 251,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 1.408997,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n$python = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe\"\n$script = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py\"\n& $python $script --root $PWD --label \"test-new-suite-check\" tests/test_dashboard_browser_recovery_ux.py\n"
+      },
+      "output": "START tests\r\ntests exit 1 \r\n.......F                                                                 [100%]\r\n================================== FAILURES ===================================\r\n_______________ test_adversarial_hostile_display_text_sanitized _______________\r\ntests\\test_dashboard_browser_recovery_ux.py:305: in test_adversarial_hostile_display_text_sanitized\r\n    escaped_item_title = html_escape(hostile_data[\"surrent_item\"][\"title\"])\r\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nE   KeyError: 'surrent_item'\r\n=========================== short test summary info ===========================\r\nFAILED tests/test_dashboard_browser_recovery_ux.py::test_adversarial_hostile_display_text_sanitized\r\n1 failed, 7 passed in 0.50s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:17:20.584Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 259,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 1.3908864,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Get-ChildItem -Path _scratch -Filter \"test-new-suite-check*\" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force\n$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n$python = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe\"\n$script = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py\"\n& $python $script --root $PWD --label \"test-new-suite-check\" tests/test_dashboard_browser_recovery_ux.py\n"
+      },
+      "output": "START tests\r\ntests exit 0 \r\n........                                                                 [100%]\r\n8 passed in 0.44s\r\n"
+    }
+  },
+  {
+    "time": "2026-09-11T17:17:22.204Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 261,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 0.47757,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Get-ChildItem -Path _scratch -Filter \"test-new-suite-check*\" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force"
+      }
+    }
+  },
+  {
+    "time": "2026-09-11T17:18:05.865Z",
+    "conversation_id": "e5e84b60-da5c-4671-84e2-68c860561642",
+    "step_index": 263,
+    "state": "DONE",
+    "step_type": "tool",
+    "tool_name": "run_command",
+    "duration_seconds": 40.507432,
+    "tool_info": {
+      "name": "run_command",
+      "parameters": {
+        "CommandLine": "Get-ChildItem -Path _scratch -Filter \"browser-recovery-worker-01*\" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force\n$env:IG_FORBIDDEN_LIVE = \"$env:LOCALAPPDATA\\Uoink\\index.db\"\n$python = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe\"\n$script = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py\"\n$phase3 = (Get-ChildItem tests/library_work_astra/test_phase3_*.py | Where-Object { $_.Name -ne 'test_phase3_s21.py' } | ForEach-Object { \"test…"
+      },
+      "output": "START tests\r\ntests exit 1 \r\ntests\\library_work_astra\\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status\r\n    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (\r\nE   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})\r\nE   assert ({})\r\n============================== warnings summary ===============================\r\ntests/library_work_astra/test_phase3_acceptance4.py::test_as4_s16_local_recovery_uses_capture_lock_without_execution_claim\r\ntests/library_work_astra/test_phase3_publication.py::test_s16_real_podcast_upsert_crash_does_not_enqueue\r\ntests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert\r\ntests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert\r\ntests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link\r\ntests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link\r\n  C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ac33fef6-703\\gemini\\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\r\n    return datetime.utcnow().replace(microsecond=0).isoformat() + \"Z\"\r\n\r\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\r\n=========================== short test summary info ===========================\r\nFAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status\r\n1 failed, 220 passed, 6 warnings in 39.54s\r\n"
+    }
+  }
+]

@@ -2842,6 +2842,8 @@ class SourceSubscriptionService:
             counts[state] = int(count)
         in_flight = self._in_flight(conn, source["source_id"])
         allowance = self._allowance(conn, source, now)
+        capture_outcome, current_item, recovery_reason = self._capture_outcome_and_current_item(
+            conn, source, allowance, in_flight)
         return {
             "source_id": source["source_id"], "kind": source["kind"],
             "canonical_url": source["canonical_url"],
@@ -2860,11 +2862,87 @@ class SourceSubscriptionService:
             "in_flight": [{"start_id": r["start_id"], "item_id": r["item_id"], "state": r["state"]}
                           for r in in_flight],
             "capture_status": self._capture_status(source, allowance, in_flight, now),
+            "capture_outcome": capture_outcome,
+            "recovery_reason": recovery_reason,
+            "current_item": current_item,
             "legacy": {"feed_id": source.get("legacy_feed_id"),
                        "playlist_id": source.get("legacy_playlist_id")},
             "created_at_ms": int(source["created_at_ms"]),
             "updated_at_ms": int(source["updated_at_ms"]),
         }
+
+    @staticmethod
+    def _capture_outcome_and_current_item(conn, source: dict, allowance: dict,
+                                         in_flight: list) -> tuple[str, dict | None, str | None]:
+        start_row = _row(conn.execute(
+            "SELECT start_id, item_id, state, release_or_failure_code, started_at_ms, finished_at_ms "
+            "FROM source_capture_starts WHERE source_id=? "
+            "ORDER BY CASE WHEN state IN ('reserved','started','uncertain') THEN 0 ELSE 1 END, "
+            "reserved_at_ms DESC, start_id DESC LIMIT 1",
+            (source["source_id"],)).fetchone())
+
+        item_row = None
+        if start_row and start_row.get("item_id"):
+            item_row = _row(conn.execute(
+                "SELECT * FROM source_items WHERE item_id=?",
+                (start_row["item_id"],)).fetchone())
+
+        if item_row is None:
+            # Never attach an absent start's outcome to a different item.
+            start_row = None
+            item_row = _row(conn.execute(
+                "SELECT * FROM source_items WHERE source_id=? AND "
+                "(blocked_reason IS NOT NULL OR state IN ('eligible','failed','uncertain','started')) "
+                "ORDER BY last_seen_ms DESC, item_id DESC LIMIT 1",
+                (source["source_id"],)).fetchone())
+
+        current_item = None
+        recovery_reason = None
+        if item_row:
+            rec_code = item_row.get("blocked_reason") or (start_row.get("release_or_failure_code") if start_row else None)
+            recovery_reason = _safe_text(rec_code, 200) if rec_code else None
+            current_item = {
+                "item_id": item_row["item_id"],
+                "entry_id": item_row["entry_id"],
+                "title": _safe_text(item_row.get("title")),
+                "state": item_row["state"],
+                "actual_starts": int(item_row.get("actual_starts", 0)),
+                "blocked_reason": _safe_text(item_row.get("blocked_reason"), 200),
+                "recovery_reason": recovery_reason,
+                "retry_at_ms": item_row.get("retry_at_ms"),
+                "start_state": start_row.get("state") if start_row else None,
+            }
+
+        if source["archived"]:
+            capture_outcome = "archived"
+        elif source["consent_state"] != "on":
+            capture_outcome = "draining" if in_flight else "off"
+        elif any(row["state"] == "uncertain" for row in in_flight):
+            capture_outcome = "uncertain"
+        elif in_flight:
+            capture_outcome = "in_flight"
+        elif start_row:
+            st = start_row.get("state")
+            if st == "failed":
+                capture_outcome = "settled_failed"
+            elif st == "uncertain":
+                capture_outcome = "uncertain"
+            elif st == "succeeded":
+                capture_outcome = "succeeded"
+            else:
+                capture_outcome = st or "idle"
+        elif item_row and item_row["state"] == "failed":
+            capture_outcome = "settled_failed"
+        elif item_row and item_row["state"] == "uncertain":
+            capture_outcome = "uncertain"
+        elif recovery_reason:
+            capture_outcome = "blocked"
+        elif allowance.get("remaining", 10) <= 0:
+            capture_outcome = "allowance_exhausted"
+        else:
+            capture_outcome = "idle"
+
+        return capture_outcome, current_item, recovery_reason
 
     @staticmethod
     def _enrollment(source: dict, cursor: dict, counts: dict) -> dict:
@@ -2964,6 +3042,7 @@ class SourceSubscriptionService:
             "charged_utc_day": charged_day,
             "video_id": item.get("video_id"), "committed_at_ms": item.get("committed_at_ms"),
             "classification": self._classification_display(conn, item),
+            "recovery_reason": _safe_text(item.get("blocked_reason") or (start.get("release_or_failure_code") if start else None), 200) if (item.get("blocked_reason") or (start and start.get("release_or_failure_code"))) else None,
         }
 
     @staticmethod

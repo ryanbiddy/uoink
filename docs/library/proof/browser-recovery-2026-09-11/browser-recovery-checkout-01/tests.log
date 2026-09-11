@@ -1,0 +1,25 @@
+........................................................................ [ 22%]
+........................................................................ [ 45%]
+.......................................F................................ [ 68%]
+........................................................................ [ 90%]
+.............................                                            [100%]
+================================== FAILURES ===================================
+____________ test_as7_c21_at6_receipt_records_process_exit_status _____________
+tests\library_work_astra\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status
+    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (
+E   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
+E   assert ({})
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase3_acceptance4.py::test_as4_s16_local_recovery_uses_capture_lock_without_execution_claim
+tests/library_work_astra/test_phase3_publication.py::test_s16_real_podcast_upsert_crash_does_not_enqueue
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link
+tests/library_work_astra/test_phase3_repairs.py::test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
+1 failed, 316 passed, 6 warnings in 49.46s

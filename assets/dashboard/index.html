@@ -3531,6 +3531,55 @@
       color: var(--vermillion);
       border: 1px solid rgba(255, 61, 0, 0.3);
     }
+    .capture-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .capture-pill.ready,
+    .capture-pill.idle {
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+    .capture-pill.in-flight {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .capture-pill.draining,
+    .capture-pill.uncertain,
+    .capture-pill.exhausted {
+      background: rgba(255, 210, 63, 0.15);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.3);
+    }
+    .capture-pill.failed {
+      background: rgba(255, 61, 0, 0.15);
+      color: var(--vermillion);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+    }
+    .capture-pill.off {
+      background: rgba(143, 123, 110, 0.16);
+      color: var(--muted);
+      border: 1px solid rgba(143, 123, 110, 0.3);
+    }
+    .consent-revision-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--pill-radius);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255, 244, 236, 0.06);
+      border: 1px solid rgba(255, 244, 236, 0.14);
+    }
     .subscription-consent-group {
       display: flex;
       align-items: center;
@@ -3702,6 +3751,44 @@
       border: 1px solid var(--danger-border);
       border-radius: var(--control-radius);
       font-size: 12px;
+      color: #fca5a5;
+    }
+    .source-recovery-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(58, 31, 31, 0.4);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+      border-radius: var(--control-radius);
+    }
+    .source-recovery-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fca5a5;
+    }
+    .source-recovery-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .source-recovery-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .source-recovery-reason {
+      font-family: var(--font-mono);
+      font-size: 11px;
       color: #fca5a5;
     }
     .standing-empty-state {
@@ -8120,6 +8207,64 @@
           consentPillLabel = "Draining in-flight work";
         }
 
+        // Recorded consent revision
+        const consentRevision = Number(source.revision != null ? source.revision : 0);
+
+        // Daily Allowance
+        const allow = source.allowance || {};
+        const cap = Number(allow.cap || 10);
+        const charged = Number(allow.charged || 0);
+        const reserved = Number(allow.reserved || 0);
+        const used = charged + reserved;
+        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
+        const isExhausted = remaining === 0 || used >= cap;
+        const percent = Math.min(100, Math.round((used / cap) * 100));
+
+        // Capture outcome & current item recovery (repair brief 2026-09-10)
+        const capOutcome = source.capture_outcome || source.capture_status || "unknown";
+        const currentItem = source.current_item || null;
+        const recoveryReason = source.recovery_reason || (currentItem && currentItem.recovery_reason) || null;
+        let capturePillClass = "idle";
+        let capturePillLabel = "idle";
+
+        if (capOutcome === "archived") {
+          capturePillClass = "off";
+          capturePillLabel = "archived";
+        } else if (source.consent_state === "off") {
+          capturePillClass = inFlight.length ? "draining" : "off";
+          capturePillLabel = inFlight.some((item) => item.state === "uncertain")
+            ? "draining; outcome uncertain" : (inFlight.length ? "draining" : "off");
+        } else if (capOutcome === "uncertain") {
+          capturePillClass = "uncertain";
+          capturePillLabel = "uncertain";
+        } else if (capOutcome === "in_flight") {
+          capturePillClass = "in-flight";
+          capturePillLabel = "in-flight";
+        } else if (capOutcome === "settled_failed") {
+          capturePillClass = "failed";
+          capturePillLabel = recoveryReason ? `settled failed (${recoveryReason})` : "settled failed";
+        } else if (capOutcome === "succeeded") {
+          capturePillClass = "ready";
+          capturePillLabel = "completed";
+        } else if (capOutcome === "blocked") {
+          capturePillClass = "uncertain";
+          capturePillLabel = "waiting";
+        } else if (capOutcome === "allowance_exhausted" || isExhausted) {
+          capturePillClass = "exhausted";
+          capturePillLabel = "allowance reached";
+        } else if (capOutcome === "released") {
+          capturePillLabel = "reservation released";
+        } else if (capOutcome === "ready") {
+          capturePillClass = "ready";
+          capturePillLabel = "ready";
+        } else if (capOutcome !== "idle") {
+          capturePillLabel = "waiting";
+        }
+
+        const showRecovery = Boolean(
+          recoveryReason || (currentItem && (currentItem.recovery_reason || currentItem.blocked_reason || currentItem.start_state === "failed" || (currentItem.state === "eligible" && Number(currentItem.actual_starts || 0) > 0)))
+        );
+
         // Back catalog enrollment
         const enroll = source.enrollment || {};
         let enrollmentCopy = "";
@@ -8133,16 +8278,6 @@
           const excluded = candidateCount > enrolledCount ? `${candidateCount - enrolledCount} older items excluded by cap.` : "";
           enrollmentCopy = `Back catalog: ${enrolledCount} / 25 items enrolled. ${excluded}`.trim();
         }
-
-        // Daily Allowance
-        const allow = source.allowance || {};
-        const cap = Number(allow.cap || 10);
-        const charged = Number(allow.charged || 0);
-        const reserved = Number(allow.reserved || 0);
-        const used = charged + reserved;
-        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
-        const isExhausted = remaining === 0 || used >= cap;
-        const percent = Math.min(100, Math.round((used / cap) * 100));
 
         let resetCopy = "Resets at 00:00 UTC";
         if (allow.resets_at_ms) {
@@ -8162,6 +8297,8 @@
                 <div class="subscription-meta-row">
                   <span class="source-url" title="${htmlEscape(source.canonical_url || "")}">${htmlEscape(source.canonical_url || "")}</span>
                   <span>&bull;</span>
+                  <span class="source-revision">rev ${consentRevision}</span>
+                  <span>&bull;</span>
                   <span>poll every ${Number(source.poll_interval_min || 60)}m</span>
                   <span>&bull;</span>
                   <span>last poll: ${htmlEscape(lastPollStr)}</span>
@@ -8171,13 +8308,15 @@
               </div>
               <div class="subscription-badges">
                 <span class="source-kind-badge">${htmlEscape(kindLabel)}</span>
-                <span class="health-pill ${healthClass}">${htmlEscape(healthLabel)}</span>
+                <span class="health-pill ${healthClass}" title="Feed detection health">Detection: ${htmlEscape(healthLabel)}</span>
+                <span class="capture-pill ${capturePillClass}" title="Capture outcome">Capture: ${htmlEscape(capturePillLabel)}</span>
               </div>
             </div>
 
             <div class="subscription-consent-group">
               <div class="consent-status-wrap">
                 <span class="consent-pill ${consentPillClass}">${htmlEscape(consentPillLabel)}</span>
+                <span class="consent-revision-pill">rev ${consentRevision}</span>
                 <span class="consent-desc">
                   ${source.consent_state === "on"
                     ? "Automatic capture active up to allowance limits."
@@ -8247,6 +8386,24 @@
                   <button class="button ghost captured-items-btn" type="button" data-source-id="${htmlEscape(id)}">${itemsView && itemsView.open ? "Hide" : "Show classification state"}</button>
                 </div>
                 ${itemsView && itemsView.open ? renderCapturedItems(itemsView) : ""}
+              </div>
+            ` : ""}
+
+            ${showRecovery ? `
+              <div class="source-recovery-box">
+                <div class="source-recovery-head">
+                  <span>Capture recovery</span>
+                  <span class="classification-pill" style="border-color:var(--acid); color:var(--acid);">${htmlEscape((currentItem && currentItem.state === "eligible" ? "eligible for retry" : (currentItem && currentItem.state)) || "recovery")}</span>
+                </div>
+                <div class="source-recovery-item">
+                  <span style="font-weight:500;">${htmlEscape((currentItem && (currentItem.title || currentItem.entry_id)) || "Current item")}</span>
+                  <span class="source-recovery-reason">Recovery reason: <strong style="color:var(--vermillion);">${htmlEscape(String(recoveryReason || (currentItem && currentItem.blocked_reason) || "unknown"))}</strong></span>
+                </div>
+                <div class="source-recovery-meta">
+                  <span>attempt ${Number((currentItem && currentItem.actual_starts) || 0)}/3</span>
+                  ${(currentItem && currentItem.start_state) ? `<span>&bull;</span><span>start: ${htmlEscape(currentItem.start_state)}</span>` : ""}
+                  ${(currentItem && currentItem.retry_at_ms) ? `<span>&bull;</span><span>retry scheduled</span>` : ""}
+                </div>
               </div>
             ` : ""}
 

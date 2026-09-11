@@ -1,0 +1,18 @@
+{
+  "worker_run": "ac33fef6-7032-4d54-858a-d5af5b3dc22f",
+  "base": "e2349e0",
+  "worktree_final": {
+    "passed": 316,
+    "failed": 1,
+    "seconds": 47.6
+  },
+  "checkout": {
+    "passed": 316,
+    "failed": 1,
+    "seconds": 49.46
+  },
+  "only_failure": "test_as7_c21_at6_receipt_records_process_exit_status",
+  "new_renderer_cases": 12,
+  "old_acceptance_tests_modified": false,
+  "deleted_worker_attempts": "Full logs unavailable; surviving Control Room DONE-command events retained. Not reconstructed."
+}
