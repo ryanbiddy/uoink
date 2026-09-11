@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | New source repairs 41c0d1d, 15e3f7e, 63f7de9 await combined tree/package. Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
+| Integration | Source repairs 41c0d1d, 15e3f7e, 63f7de9, 9ea755b await combined tree/package; expected 140 runtime pins. Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -197,8 +197,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    upstream compatibility review. Report 122dbb53 is integrated at 724f0cf with
    Astra's corrections to its incorrect wheel hashes and overbroad safety claims.
    Lightning pins are integrated at 63f7de9 with 16 passes in each root.
-   Follow SETUPTOOLS-RUNTIME-REPAIR-BRIEF-2026-09-11.md for the discovered
-   preexisting missing runtime dependency before freezing the final tree.
+   Setuptools repair is integrated at 9ea755b with 19 passes in each root.
+   Follow REPAIRED-CANDIDATE-VERIFICATION-BRIEF-2026-09-11.md for the
+   frozen complete tree, replacement package and fresh installation receipts.
    Integrate verified product repairs before the
    next complete tree and replacement package; no completed gate is inferred.
 7. That repair changes packaged source: complete its new tree, rebuild/reseal and
@@ -2689,3 +2690,18 @@ is not cleared by the source fix. Full graph traversal identifies two baseline
 missing setuptools edges despite all changed Lightning constraints passing.
 Follow SETUPTOOLS-RUNTIME-REPAIR-BRIEF-2026-09-11.md before final verification.
 The State table's last packaged inventory remains 139 pins until a fresh build.
+
+### 2026-09-11 — runtime repair integrated; combined verification begins
+
+9ea755b retains setuptools 83.0.0 and its startup support. Nineteen checks pass
+in each root (0.89 s each), including three new packaging/notice regressions.
+The first incomplete edit result (17/2) remains in the proof. The generator
+includes required system packages and filters the final exact lock; a missing
+runtime notice now fails instead of silently disappearing. The expected runtime
+set grows to 140. Its fresh OSV query returned no entries for setuptools alone.
+
+The combined source is ready for the new frozen complete tree under
+REPAIRED-CANDIDATE-VERIFICATION-BRIEF-2026-09-11.md. Use --runxfail with the
+unchanged SEC-06 assertions and preserve the old strict-XPASS/historical results.
+Forty-one new cases should join the previous 2497-case membership. Package-05
+remains the old installer until source verification and a new sealed build.
