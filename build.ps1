@@ -446,17 +446,11 @@ Write-Step 'Generating uoink.ico'
 & $embedPython (Join-Path $InstallerDir 'generate_icon.py')
 if ($LASTEXITCODE -ne 0) { throw 'uoink.ico generation failed' }
 
-# 2e. Trim dev-only and build-time files we don't need at runtime.
-# distutils-precedence.pth is dropped by setuptools and tries to import
-# `_distutils_hack` at every Python startup. We strip setuptools above, so
-# the .pth file would print a noisy ModuleNotFoundError warning on every
-# server launch -- delete it too.
+# 2e. Trim build-only tools. Torch and CTranslate2 require setuptools at runtime.
+# Keep its package, metadata, distutils shim and startup .pth together.
 Write-Host '    trimming embeddable...'
 $stripGlobs = @(
     "$StagingDir\python\Lib\site-packages\pip*",
-    "$StagingDir\python\Lib\site-packages\setuptools*",
-    "$StagingDir\python\Lib\site-packages\_distutils*",
-    "$StagingDir\python\Lib\site-packages\distutils-precedence.pth",
     "$StagingDir\python\Lib\site-packages\wheel*",
     "$StagingDir\python\Lib\site-packages\__pycache__"
 )

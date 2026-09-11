@@ -1,0 +1,67 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "osv.json",
+    "bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "path": "pypi.json",
+    "bytes": 8163,
+    "sha256": "ec6fb3ae8cd5054d89efca6fce7d2e88f58c8b61236bee0bac429fcb79de38fe"
+  },
+  {
+    "path": "setuptools-checkout-01/results.json",
+    "bytes": 924,
+    "sha256": "0ee8b97b036aded0c08c266c497e6f3c49a3dad1fd86ec6a112c19ec79a97b18"
+  },
+  {
+    "path": "setuptools-checkout-01/tests.log",
+    "bytes": 101,
+    "sha256": "da77f940300e4dd8370c423460fe9f9bd9622261f6af58e0ab640d0309c326fd"
+  },
+  {
+    "path": "setuptools-checkout-01/tests.xml",
+    "bytes": 2804,
+    "sha256": "a7175885a5b64d323819cd0c3c0ae221d9a8b789c30b6034f85ab9af2a1807da"
+  },
+  {
+    "path": "setuptools-worker-01/results.json",
+    "bytes": 984,
+    "sha256": "3a99a60d914b664fa6149f07167763ea348b1a2cdd92d7b94a6177be068eaf4c"
+  },
+  {
+    "path": "setuptools-worker-01/tests.log",
+    "bytes": 3607,
+    "sha256": "81a050cd6ea9bcd182af1b60c18c983cddf25a6d369075e5a00146907b5d519c"
+  },
+  {
+    "path": "setuptools-worker-01/tests.xml",
+    "bytes": 7830,
+    "sha256": "b6fff2032aa1a73e493d4ec22ba75799d642e9a5ec78a1dbaee1979be0499bb1"
+  },
+  {
+    "path": "setuptools-worker-02/results.json",
+    "bytes": 984,
+    "sha256": "6179c411af5acf1e75c35d03f18021e063a162fd0679fbaf9a2a50a95da169b8"
+  },
+  {
+    "path": "setuptools-worker-02/tests.log",
+    "bytes": 101,
+    "sha256": "da77f940300e4dd8370c423460fe9f9bd9622261f6af58e0ab640d0309c326fd"
+  },
+  {
+    "path": "setuptools-worker-02/tests.xml",
+    "bytes": 2804,
+    "sha256": "e946b0a040b53d7d31edeebad23edce30d7b7f1e9ffe5b5c64fccbb9848eb814"
+  },
+  {
+    "path": "worker.patch",
+    "bytes": 11108,
+    "sha256": "54e4fbf67dc6e672f78b0c8e24b0ed48a03038ce65d52986a53010eb1d244a1a"
+  }
+]

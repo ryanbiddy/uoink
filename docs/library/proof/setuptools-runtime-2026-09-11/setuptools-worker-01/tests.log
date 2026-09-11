@@ -1,0 +1,19 @@
+................FF.                                                      [100%]
+================================== FAILURES ===================================
+_ test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools _
+tests\test_runtime_setuptools_notices.py:28: in test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools
+    assert '| setuptools | 83.0.0 |' in text
+E   AssertionError: assert '| setuptools | 83.0.0 |' in '# Third-Party Notices\n\nUoink is MIT-licensed. It bundles the third-party components below.\nThis file is generated ... not statically link them into its own code.\n- LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html\n\n'
+---------------------------- Captured stdout call -----------------------------
+wrote E:\AI\projects\uoink\checkouts\Astra-runtime-dependency-2026-09-11\_scratch\setuptools-worker-01-0\t5\notices.md (139 python packages, source: pip-licenses)
+______________ test_missing_runtime_notice_fails_before_writing _______________
+tests\test_runtime_setuptools_notices.py:38: in test_missing_runtime_notice_fails_before_writing
+    with pytest.raises(RuntimeError, match='Missing runtime notices:.*setuptools'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'Missing runtime notices:.*setuptools'
+E     Actual message: 'Missing runtime notices: aiohappyeyeballs, aiohttp, aiosignal, alembic, annotated-types, antlr4-python3-runtime, anyio, asteroid-filterbanks, attrs, av, bottle, certifi, cffi, charset-normalizer, click, clr-loader, colorama, colorlog, contourpy, cryptography, ctranslate2, cycler, defusedxml, einops, faster-whisper, filelock, flatbuffers, fonttools, frozenlist, fsspec, googleapis-common-protos, greenlet, grpcio, h11, httpcore, httpx, httpx-sse, huggingface-hub, idna, jaraco-classes, jaraco-context, jaraco-functools, jinja2, joblib, jsonschema, jsonschema-specifications, julius, keyring, kiwisolver, lightning, lightning-utilities, mako, markdown-it-py, markupsafe, matplotlib, mcp, mdurl, more-itertools, mpmath, multidict, narwhals, networkx, nltk, numpy, omegaconf, onnxruntime, opentelemetry-api, opentelemetry-exporter-otlp, opentelemetry-exporter-otlp-proto-common, opentelemetry-exporter-otlp-proto-grpc, opentelemetry-exporter-otlp-proto-http, opentelemetry-proto, opentelemetry-sdk, opentelemetry-semantic-conventions, optuna, packaging, pandas, pillow, primepy, propcache, protobuf, proxy-tools, pyannote-audio, pyannote-core, pyannote-database, pyannote-metrics, pyannote-pipeline, pyannoteai-sdk, pycparser, pydantic, pydantic-core, pydantic-settings, pygments, pyjwt, pyparsing, pystray, python-dateutil, python-dotenv, python-multipart, pythonnet, pytorch-lightning, pytorch-metric-learning, pywebview, pywin32, pywin32-ctypes, pyyaml, referencing, regex, requests, rich, rpds-py, safetensors, scikit-learn, scipy, six, sortedcontainers, sqlalchemy, sse-starlette, starlette, sympy, threadpoolctl, tokenizers, torch-audiomentations, torch-pitch-shift, torchaudio, torchcodec, torchmetrics, torchvision, tqdm, transformers, typing-extensions, typing-inspection, tzdata, urllib3, uvicorn, whisperx, yarl, yt-dlp'
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_setuptools_notices.py::test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools
+FAILED tests/test_runtime_setuptools_notices.py::test_missing_runtime_notice_fails_before_writing
+2 failed, 17 passed in 2.92s

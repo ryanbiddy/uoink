@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -45,7 +46,7 @@ def _from_pip_licenses() -> list[dict] | None:
     try:
         out = subprocess.check_output(
             [sys.executable, "-m", "piplicenses", "--format=json",
-             "--with-urls", "--with-license-file", "--no-license-path"],
+             "--with-system", "--with-urls", "--with-license-file", "--no-license-path"],
             text=True, stderr=subprocess.DEVNULL)
         return json.loads(out)
     except Exception:
@@ -53,7 +54,7 @@ def _from_pip_licenses() -> list[dict] | None:
     try:
         out = subprocess.check_output(
             [sys.executable, "-m", "pip_licenses", "--format=json",
-             "--with-urls"], text=True, stderr=subprocess.DEVNULL)
+             "--with-system", "--with-urls"], text=True, stderr=subprocess.DEVNULL)
         return json.loads(out)
     except Exception:
         return None
@@ -92,6 +93,20 @@ def _dedupe(rows: list[dict]) -> list[dict]:
     return sorted(seen.values(), key=lambda r: (r.get("Name") or "").lower())
 
 
+def _runtime_rows(rows: list[dict]) -> list[dict]:
+    """Include required system packages while omitting build-only tooling."""
+    lock = Path(__file__).resolve().parents[1] / "requirements-installer-lock.txt"
+    normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+    required = {normalize(line.split("==", 1)[0]) for line in
+                lock.read_text(encoding="utf8").splitlines()
+                if line.strip() and not line.lstrip().startswith("#")}
+    runtime = [row for row in rows if normalize(row.get("Name") or "") in required]
+    missing = required - {normalize(row["Name"]) for row in runtime}
+    if missing:
+        raise RuntimeError("Missing runtime notices: " + ", ".join(sorted(missing)))
+    return runtime
+
+
 def _stamp_date() -> str:
     """The generation date, source-bound when SOURCE_DATE_EPOCH is set.
 
@@ -115,7 +130,7 @@ def main() -> int:
     if rows is None:
         rows = _from_importlib()
         source = "importlib.metadata (pip-licenses unavailable)"
-    rows = _dedupe(rows)
+    rows = _dedupe(_runtime_rows(rows))
 
     stamp = _stamp_date()
     lines = [

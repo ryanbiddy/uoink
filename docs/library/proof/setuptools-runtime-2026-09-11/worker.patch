@@ -1,0 +1,217 @@
+diff --git a/THIRD-PARTY-NOTICES.md b/THIRD-PARTY-NOTICES.md
+index 8169547..53e382e 100644
+--- a/THIRD-PARTY-NOTICES.md
++++ b/THIRD-PARTY-NOTICES.md
+@@ -1,7 +1,11 @@
+ # Third-Party Notices
+ 
+ Uoink is MIT-licensed. It bundles the third-party components below.
+-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-10; regenerate with `python scripts/gen_third_party_notices.py`.
++The baseline inventory was generated from the installed dependency tree on
++2026-09-10. The September 11 source repair adds the verified setuptools 83.0.0
++wheel metadata and updates both Lightning versions to 2.6.6. The final build
++will regenerate this file from the actual packaged inventory with
++`python scripts/gen_third_party_notices.py`.
+ 
+ Pillow's license below is taken from the bundled wheel's `License-Expression`
+ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+@@ -57,7 +61,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | julius | 0.2.8 | MIT License | https://github.com/adefossez/julius |
+ | keyring | 25.7.0 | UNKNOWN | https://github.com/jaraco/keyring |
+ | kiwisolver | 1.5.0 | BSD License | https://github.com/nucleic/kiwi |
+-| lightning | 2.6.5 | Apache Software License | https://github.com/Lightning-AI/lightning |
++| lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
+ | lightning-utilities | 0.15.3 | Apache-2.0 | https://github.com/Lightning-AI/utilities |
+ | Mako | 1.3.12 | MIT License | https://www.makotemplates.org/ |
+ | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
+@@ -108,7 +112,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | python-dotenv | 1.2.2 | BSD-3-Clause | https://github.com/theskumar/python-dotenv |
+ | python-multipart | 0.0.32 | Apache Software License | https://github.com/Kludex/python-multipart |
+ | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
+-| pytorch-lightning | 2.6.5 | Apache Software License | https://github.com/Lightning-AI/lightning |
++| pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
+ | pytorch-metric-learning | 2.9.0 | MIT License | https://github.com/KevinMusgrave/pytorch-metric-learning |
+ | pywebview | 5.4 | BSD License | https://pywebview.flowrl.com/ |
+ | pywin32 | 312 | Python Software Foundation License | https://github.com/mhammond/pywin32 |
+@@ -122,6 +126,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
+ | safetensors | 0.8.0 | Apache Software License | https://github.com/huggingface/safetensors |
+ | scikit-learn | 1.9.0 | UNKNOWN | https://scikit-learn.org |
+ | scipy | 1.17.1 | BSD License | https://scipy.org/ |
++| setuptools | 83.0.0 | MIT | https://github.com/pypa/setuptools |
+ | six | 1.17.0 | MIT License | https://github.com/benjaminp/six |
+ | sortedcontainers | 2.4.0 | Apache Software License | http://www.grantjenks.com/docs/sortedcontainers/ |
+ | SQLAlchemy | 2.0.51 | MIT | https://www.sqlalchemy.org |
+diff --git a/build.ps1 b/build.ps1
+index 658cbcc..7cb49be 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -446,17 +446,11 @@ Write-Step 'Generating uoink.ico'
+ & $embedPython (Join-Path $InstallerDir 'generate_icon.py')
+ if ($LASTEXITCODE -ne 0) { throw 'uoink.ico generation failed' }
+ 
+-# 2e. Trim dev-only and build-time files we don't need at runtime.
+-# distutils-precedence.pth is dropped by setuptools and tries to import
+-# `_distutils_hack` at every Python startup. We strip setuptools above, so
+-# the .pth file would print a noisy ModuleNotFoundError warning on every
+-# server launch -- delete it too.
++# 2e. Trim build-only tools. Torch and CTranslate2 require setuptools at runtime.
++# Keep its package, metadata, distutils shim and startup .pth together.
+ Write-Host '    trimming embeddable...'
+ $stripGlobs = @(
+     "$StagingDir\python\Lib\site-packages\pip*",
+-    "$StagingDir\python\Lib\site-packages\setuptools*",
+-    "$StagingDir\python\Lib\site-packages\_distutils*",
+-    "$StagingDir\python\Lib\site-packages\distutils-precedence.pth",
+     "$StagingDir\python\Lib\site-packages\wheel*",
+     "$StagingDir\python\Lib\site-packages\__pycache__"
+ )
+diff --git a/docs/library/SETUPTOOLS-RUNTIME-REPAIR-REVIEW-2026-09-11.md b/docs/library/SETUPTOOLS-RUNTIME-REPAIR-REVIEW-2026-09-11.md
+new file mode 100644
+index 0000000..47516d6
+--- /dev/null
++++ b/docs/library/SETUPTOOLS-RUNTIME-REPAIR-REVIEW-2026-09-11.md
+@@ -0,0 +1,14 @@
++# Runtime dependency repair review
++
++The first edit script used an absent shellingham insertion anchor, so it did
++not add the new lock row and stopped before changing notices. The subsequent
++worker-01 run has 17 passes and two failures in the new notice regressions.
++This is an incomplete product edit, not a fixture problem. Preserve that result.
++Repair: insert setuptools before the existing six row in lock/notices and
++verify the insertion. No assertion changes. Rerun as setuptools-worker-02.
++
++The notice generator also needs --with-system: pip-licenses 5.0.0 otherwise
++excludes setuptools. It now includes system packages then selects exact runtime
++lock names, rejecting missing rows before writing. This prevents build-tool
++licenses from being presented as shipped runtime components. The three new
++checks cover generated output, missing-row refusal and actual trim patterns.
+diff --git a/requirements-installer-lock.txt b/requirements-installer-lock.txt
+index 47e1f4a..73b9eb1 100644
+--- a/requirements-installer-lock.txt
++++ b/requirements-installer-lock.txt
+@@ -127,6 +127,7 @@ rpds-py==2026.6.3
+ safetensors==0.8.0
+ scikit-learn==1.9.0
+ scipy==1.17.1
++setuptools==83.0.0
+ six==1.17.0
+ sortedcontainers==2.4.0
+ SQLAlchemy==2.0.51
+diff --git a/scripts/gen_third_party_notices.py b/scripts/gen_third_party_notices.py
+index b89ba5f..74917de 100644
+--- a/scripts/gen_third_party_notices.py
++++ b/scripts/gen_third_party_notices.py
+@@ -15,6 +15,7 @@ from __future__ import annotations
+ 
+ import json
+ import os
++import re
+ import subprocess
+ import sys
+ from datetime import datetime, timezone
+@@ -45,7 +46,7 @@ def _from_pip_licenses() -> list[dict] | None:
+     try:
+         out = subprocess.check_output(
+             [sys.executable, "-m", "piplicenses", "--format=json",
+-             "--with-urls", "--with-license-file", "--no-license-path"],
++             "--with-system", "--with-urls", "--with-license-file", "--no-license-path"],
+             text=True, stderr=subprocess.DEVNULL)
+         return json.loads(out)
+     except Exception:
+@@ -53,7 +54,7 @@ def _from_pip_licenses() -> list[dict] | None:
+     try:
+         out = subprocess.check_output(
+             [sys.executable, "-m", "pip_licenses", "--format=json",
+-             "--with-urls"], text=True, stderr=subprocess.DEVNULL)
++             "--with-system", "--with-urls"], text=True, stderr=subprocess.DEVNULL)
+         return json.loads(out)
+     except Exception:
+         return None
+@@ -92,6 +93,20 @@ def _dedupe(rows: list[dict]) -> list[dict]:
+     return sorted(seen.values(), key=lambda r: (r.get("Name") or "").lower())
+ 
+ 
++def _runtime_rows(rows: list[dict]) -> list[dict]:
++    """Include required system packages while omitting build-only tooling."""
++    lock = Path(__file__).resolve().parents[1] / "requirements-installer-lock.txt"
++    normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
++    required = {normalize(line.split("==", 1)[0]) for line in
++                lock.read_text(encoding="utf8").splitlines()
++                if line.strip() and not line.lstrip().startswith("#")}
++    runtime = [row for row in rows if normalize(row.get("Name") or "") in required]
++    missing = required - {normalize(row["Name"]) for row in runtime}
++    if missing:
++        raise RuntimeError("Missing runtime notices: " + ", ".join(sorted(missing)))
++    return runtime
++
++
+ def _stamp_date() -> str:
+     """The generation date, source-bound when SOURCE_DATE_EPOCH is set.
+ 
+@@ -115,7 +130,7 @@ def main() -> int:
+     if rows is None:
+         rows = _from_importlib()
+         source = "importlib.metadata (pip-licenses unavailable)"
+-    rows = _dedupe(rows)
++    rows = _dedupe(_runtime_rows(rows))
+ 
+     stamp = _stamp_date()
+     lines = [
+diff --git a/tests/test_runtime_setuptools_notices.py b/tests/test_runtime_setuptools_notices.py
+new file mode 100644
+index 0000000..0b36d5f
+--- /dev/null
++++ b/tests/test_runtime_setuptools_notices.py
+@@ -0,0 +1,52 @@
++"""Packaging and notices must retain a declared runtime system package."""
++import importlib.util
++import json
++from pathlib import Path
++import re
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++spec = importlib.util.spec_from_file_location('runtime_notice_probe', ROOT / 'scripts/gen_third_party_notices.py')
++notices = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(notices)
++
++
++def test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools(tmp_path, monkeypatch):
++    rows = [{'Name': line.split('==')[0], 'Version': line.split('==')[1], 'License': 'fixture'}
++            for line in (ROOT / 'requirements-installer-lock.txt').read_text().splitlines()
++            if line and not line.startswith('#')]
++    rows += [{'Name': name, 'Version': 'fixture'} for name in ('pip', 'wheel', 'pip-licenses', 'prettytable')]
++    def collect(command, **kwargs):
++        assert '--with-system' in command, 'pip-licenses otherwise omits setuptools'
++        return json.dumps(rows)
++    monkeypatch.setattr(notices.subprocess, 'check_output', collect)
++    output = tmp_path / 'notices.md'
++    monkeypatch.setattr(notices.sys, 'argv', ['notices', str(output)])
++    assert notices.main() == 0
++    text = output.read_text(encoding='utf8')
++    assert '| setuptools | 83.0.0 |' in text
++    assert '| torch | 2.8.0 |' in text
++    for name in ('pip', 'wheel', 'pip-licenses', 'prettytable'):
++        assert f'| {name} |' not in text
++
++
++def test_missing_runtime_notice_fails_before_writing(tmp_path, monkeypatch):
++    monkeypatch.setattr(notices, '_from_pip_licenses', lambda: [{'Name': 'torch'}])
++    output = tmp_path / 'notices.md'
++    monkeypatch.setattr(notices.sys, 'argv', ['notices', str(output)])
++    with pytest.raises(RuntimeError, match='Missing runtime notices:.*setuptools'):
++        notices.main()
++    assert not output.exists()
++
++
++def test_actual_trim_patterns_keep_setuptools_startup_support():
++    build = (ROOT / 'build.ps1').read_text(encoding='utf8')
++    block = build.split('$stripGlobs = @(', 1)[1].split('\n)', 1)[0]
++    patterns = re.findall(r'"\$StagingDir\\python\\Lib\\site-packages\\([^"\\]+)"', block)
++    assert patterns
++    from fnmatch import fnmatchcase
++    for entry in ('setuptools', 'setuptools-83.0.0.dist-info', '_distutils_hack', 'distutils-precedence.pth'):
++        assert not any(fnmatchcase(entry, pattern) for pattern in patterns), entry
++    for entry in ('pip', 'pip-26.1.2.dist-info', 'wheel', '__pycache__'):
++        assert any(fnmatchcase(entry, pattern) for pattern in patterns), entry

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_installer_files_complete.py",
+      "tests/test_installer_download_accuracy.py",
+      "tests/test_packaged_decoder_loader.py",
+      "tests/test_runtime_setuptools_notices.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Astra-runtime-dependency-2026-09-11\\_scratch\\setuptools-worker-02-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Astra-runtime-dependency-2026-09-11\\_scratch\\setuptools-worker-02\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Astra-runtime-dependency-2026-09-11\\_scratch\\setuptools-worker-02\\tests.log"
+  }
+]

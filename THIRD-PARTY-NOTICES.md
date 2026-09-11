@@ -1,7 +1,11 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-10; regenerate with `python scripts/gen_third_party_notices.py`.
+The baseline inventory was generated from the installed dependency tree on
+2026-09-10. The September 11 source repair adds the verified setuptools 83.0.0
+wheel metadata and updates both Lightning versions to 2.6.6. The final build
+will regenerate this file from the actual packaged inventory with
+`python scripts/gen_third_party_notices.py`.
 
 Pillow's license below is taken from the bundled wheel's `License-Expression`
 metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
@@ -57,7 +61,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | julius | 0.2.8 | MIT License | https://github.com/adefossez/julius |
 | keyring | 25.7.0 | UNKNOWN | https://github.com/jaraco/keyring |
 | kiwisolver | 1.5.0 | BSD License | https://github.com/nucleic/kiwi |
-| lightning | 2.6.5 | Apache Software License | https://github.com/Lightning-AI/lightning |
+| lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | lightning-utilities | 0.15.3 | Apache-2.0 | https://github.com/Lightning-AI/utilities |
 | Mako | 1.3.12 | MIT License | https://www.makotemplates.org/ |
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
@@ -108,7 +112,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | python-dotenv | 1.2.2 | BSD-3-Clause | https://github.com/theskumar/python-dotenv |
 | python-multipart | 0.0.32 | Apache Software License | https://github.com/Kludex/python-multipart |
 | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
-| pytorch-lightning | 2.6.5 | Apache Software License | https://github.com/Lightning-AI/lightning |
+| pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | pytorch-metric-learning | 2.9.0 | MIT License | https://github.com/KevinMusgrave/pytorch-metric-learning |
 | pywebview | 5.4 | BSD License | https://pywebview.flowrl.com/ |
 | pywin32 | 312 | Python Software Foundation License | https://github.com/mhammond/pywin32 |
@@ -122,6 +126,7 @@ metadata (`MIT-CMU`); the generator returned `UNKNOWN` for that field.
 | safetensors | 0.8.0 | Apache Software License | https://github.com/huggingface/safetensors |
 | scikit-learn | 1.9.0 | UNKNOWN | https://scikit-learn.org |
 | scipy | 1.17.1 | BSD License | https://scipy.org/ |
+| setuptools | 83.0.0 | MIT | https://github.com/pypa/setuptools |
 | six | 1.17.0 | MIT License | https://github.com/benjaminp/six |
 | sortedcontainers | 2.4.0 | Apache Software License | http://www.grantjenks.com/docs/sortedcontainers/ |
 | SQLAlchemy | 2.0.51 | MIT | https://www.sqlalchemy.org |
