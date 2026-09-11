@@ -2774,3 +2774,12 @@ INPUT-REPAIR-2026-09-11.md, the unchanged serializer accepted the absolute owned
 summary path and sealed 300 payloads, excluding databases and authentication
 stores. No product test or install was rerun. Notes and runbook now bind
 package-06; all nine runbook PowerShell blocks parse, a syntax-only result.
+
+### 2026-09-11 — force-add the ignored fixture mirror manifest
+
+The post-commit installed-proof check at e9e69aa found one missing Git object:
+p4/vault/Uoink/.uoink-mirror/manifest.json under the package-06 installed proof.
+The repository Uoink/ ignore rule excluded it. Disk bytes still match the seal;
+the ZIP builder did not run. PACKAGE-06-PROOF-TRANSPORT-REPAIR-2026-09-11.md
+authorizes only that exact force-add and a complete committed-object check.
+Keep the ignore rule and original receipt bytes. No product/test/install rerun.

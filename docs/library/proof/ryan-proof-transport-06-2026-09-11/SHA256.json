@@ -1,0 +1,13 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "first-check.json": {
+      "bytes": 436,
+      "sha256": "488bfcb493c4b51814e50d3804d717d50719e1b4714ccdfc02bf8f4a77778388"
+    }
+  }
+}
