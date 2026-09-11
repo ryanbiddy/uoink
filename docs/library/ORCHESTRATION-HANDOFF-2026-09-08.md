@@ -188,6 +188,11 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    revision and the recorded recovery outcome using bounded existing source data.
    Do not hide this fix inside the larger proposed redesign. Use a worktree,
    raw diff/three-way apply and both-root verification. No acceptance test edits.
+   Ryan requested the remaining fixes again on 2026-09-11. Browser repair is
+   dispatched to Gemini. In parallel Astra owns UNICODE-SEARCH-REPAIR-BRIEF-
+   2026-09-11.md; DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
+   upstream compatibility review. Integrate verified product repairs before the
+   next complete tree and replacement package; no completed gate is inferred.
 7. That repair changes packaged source: complete its new tree, rebuild/reseal and
    observe a fresh installed browser/state pair. Preserve package-05 and its kit.
    Fresh Phase 4 client/visual observation also needs a new prepared profile:
@@ -2600,3 +2605,14 @@ Queue 6, then a new complete tree and package only after that packaged UI repair
 Back up this documentary commit only through origin/cc/living-library; no main
 merge or candidate-branch push. Keep the final transport receipt outside Git to
 avoid a self-referential commit/hash loop.
+
+### 2026-09-11 - Remaining repair work resumed
+
+Ryan asked to make the fixes listed in the status update. The starting tree is
+clean at e2349e0; origin/cc/living-library matches that commit. The first new
+Control Room run follows the existing browser recovery brief with Gemini.
+Independent Unicode search repair and a report-only dependency compatibility
+review are briefed. SEC-06's strict xfail marker stays unchanged; retain its
+ordinary result and explicitly use --runxfail for a fresh assertion observation
+after repair. No historical failed measurement or acceptance assertion changes.
+Packaged source is not yet changed at this entry; package-05 stays preserved.
