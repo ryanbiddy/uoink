@@ -86,10 +86,11 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-10; package source `6b5aed8`, complete receipt tree `393010f`)
+## State at handoff (updated 2026-09-11; retained package source `6b5aed8`, latest complete tree `393010f`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in worktree and checkout with original assertions and --runxfail; ordinary strict-XPASS result retained | New complete tree and replacement package owed |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Package-05 actual C22: 11 passed / zero failed / three original manual placeholders; browser partial (visible revision and recovery reason absent); same account recorded |
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
@@ -189,8 +190,8 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Do not hide this fix inside the larger proposed redesign. Use a worktree,
    raw diff/three-way apply and both-root verification. No acceptance test edits.
    Ryan requested the remaining fixes again on 2026-09-11. Browser repair is
-   dispatched to Gemini. In parallel Astra owns UNICODE-SEARCH-REPAIR-BRIEF-
-   2026-09-11.md; DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
+   dispatched to Gemini as ac33fef6. Unicode search is integrated at 41c0d1d,
+   with 137 passes in both roots. DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
    upstream compatibility review. Integrate verified product repairs before the
    next complete tree and replacement package; no completed gate is inferred.
 7. That repair changes packaged source: complete its new tree, rebuild/reseal and
@@ -2616,3 +2617,23 @@ review are briefed. SEC-06's strict xfail marker stays unchanged; retain its
 ordinary result and explicitly use --runxfail for a fresh assertion observation
 after repair. No historical failed measurement or acceptance assertion changes.
 Packaged source is not yet changed at this entry; package-05 stays preserved.
+
+### 2026-09-11 - Unicode search integrated
+
+41c0d1d replaces ASCII-only query extraction with normalized Unicode words and
+attached combining marks. The quoted FTS grammar, schema and every existing
+test remain unchanged. Eighteen new regressions cover actual item/clip retrieval,
+canonical forms, prefix queries, literal operators and empty punctuation input.
+Worker and checkout each pass 137 cases with --runxfail (3.06 / 3.28 seconds).
+The ordinary run is retained as 136 passed / one strict XPASS: the original
+SEC-06 assertions succeed, but their untouched expected-failure marker causes
+that run to exit one. Two earlier new-fixture setup failures remain archived.
+Proof: proof/unicode-search-2026-09-11/SHA256.json.
+
+Gemini browser worker ac33fef6 and dependency reviewer 122dbb53 remain active.
+The latter may read public upstream metadata only. No acceptance or current clean
+security claim follows from dispatch. Packaged source now differs from package-05;
+finish the display repair/review, committed complete tree, replacement package,
+and fresh installed observations. The new partition runner is prepared but has
+not run. Its only expectation-policy change is explicit --runxfail; no original
+test or P4 guard was edited.
