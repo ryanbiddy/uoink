@@ -1,0 +1,33 @@
+[
+  {
+    "name": "lightning.pytorch patched instantiation",
+    "status": "passed",
+    "detail": {
+      "version": "2.6.6",
+      "benign_data_module": true,
+      "untrusted_instantiator_refused": true,
+      "unimported_class_refused": true,
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\lightning266-runtime-01\\overlay\\lightning\\pytorch\\__init__.py"
+    }
+  },
+  {
+    "name": "pytorch_lightning patched instantiation",
+    "status": "passed",
+    "detail": {
+      "version": "2.6.6",
+      "benign_data_module": true,
+      "untrusted_instantiator_refused": true,
+      "unimported_class_refused": true,
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\lightning266-runtime-01\\overlay\\pytorch_lightning\\__init__.py"
+    }
+  },
+  {
+    "name": "WhisperX and PyAnnote imports",
+    "status": "passed",
+    "detail": {
+      "whisperx": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\whisperx\\__init__.py",
+      "checkpoint_loaded": false,
+      "decoder_directory_registered": true
+    }
+  }
+]

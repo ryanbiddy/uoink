@@ -1,0 +1,12 @@
+{
+  "python": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+  "passed": 3,
+  "failed": 0,
+  "network_or_subprocess_guard_events": [
+    "socket.bind"
+  ],
+  "checkpoint_loaded": false,
+  "model_inference": false,
+  "finished_utc": "2026-09-11T17:35:10.016695+00:00"
+}

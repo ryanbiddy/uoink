@@ -1,0 +1,234 @@
+diff --git a/docs/library/LIGHTNING-266-WORKER-2026-09-11.md b/docs/library/LIGHTNING-266-WORKER-2026-09-11.md
+new file mode 100644
+index 0000000..7906ef0
+--- /dev/null
++++ b/docs/library/LIGHTNING-266-WORKER-2026-09-11.md
+@@ -0,0 +1,206 @@
++# Lightning 2.6.6 Qualification Report
++
++**Date:** 2026-09-11  
++**Worker:** gemini  
++**Project:** uoink-library  
++**Worktree:** `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b9ce127d-a8f\gemini`  
++**Status:** Qualified. Installer lock updated for `lightning` and `pytorch-lightning` from `2.6.5` to `2.6.6`. Test suites passing.
++
++---
++
++## 1. Summary of Changes and Actions
++
++Under `LIGHTNING-266-REPAIR-BRIEF-2026-09-11.md` and following `ASTRA-DEPENDENCY-CLOSURE-REVIEW-2026-09-11.md`:
++
++1. **Installer Lockfile Updated:** Changed only the two exact pins `lightning` and `pytorch-lightning` from `2.6.5` to `2.6.6` in `requirements-installer-lock.txt`. All other 137 locked distributions remain unchanged.
++2. **Build Script Inspected:** Inspected `build.ps1` for duplicate version pins. Neither `lightning` nor `pytorch-lightning` is pinned in `build.ps1` (only top-level tools and direct installer targets like `yt-dlp`, `pillow`, `mcp`, and `whisperx` are pinned there). No edits to `build.ps1` were needed.
++3. **Notices Preserved:** Left `THIRD-PARTY-NOTICES.md` untouched. The final installer build owns notice generation.
++4. **Shared Runner & Tooling:** Invoked the external verification runner `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py` via `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`.
++5. **No Prohibited Actions:** No package installations, builds, model loads, inference runs, media fetches, paid API calls, commits, or pushes were performed in this worktree. No subagents were invoked.
++
++---
++
++## 2. Artifact Verification and Primary Metadata
++
++Primary wheel artifacts and upstream metadata retained in Astra's main checkout directory (`E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/dependency-closure-astra-01`) were inspected and hashed:
++
++| Distribution | Wheel Archive | Byte Size | SHA-256 Digest | Python ABI |
++|---|---|---:|---|---|
++| `lightning` | `lightning-2.6.6-py3-none-any.whl` | 849,265 | `2bcbd6ee840071cd076c7dc9953d7ac1040df92f1c5fa76583aae644f037ab85` | Pure Python, `>=3.10` |
++| `pytorch-lightning` | `pytorch_lightning-2.6.6-py3-none-any.whl` | 853,045 | `71f95c7b22f25c4f91cc659e1734bcdc6c69c8b66543f2ed2d78dbe29ce2f167` | Pure Python, `>=3.10` |
++
++*Correction note:* These measurements correct the mistaken hash and byte table from the earlier exploratory report. Both wheels match Astra's observed values in `ASTRA-DEPENDENCY-CLOSURE-REVIEW-2026-09-11.md`.
++
++### Upstream Code Inspection
++
++Both ZIP archives were inspected without importing. In `lightning/pytorch/core/saving.py` and `pytorch_lightning/core/saving.py`, lines 164–172 and 233 implement:
++- PR #21832: Checkpoint `_instantiator` deserialization is checked against an explicit allowlist of trusted instantiators.
++- PR #21914: Checkpoint `_class_path` validation requires the target class to be an already imported subclass of the expected model (`issubclass(target, cls)`).
++
++---
++
++## 3. Dependency Closure and Constraint Parity
++
++All base requirements from each wheel's `METADATA` were compared against the 139 exact pins in `requirements-installer-lock.txt` for Windows Python 3.13.
++
++### 3.1 Lightning 2.6.6 Base Requirements (9 total)
++
++| Requirement | Locked Version | Status |
++|---|---|---|
++| `PyYAML<8.0,>5.4` | `PyYAML==6.0.3` | Satisfied |
++| `fsspec[http]<2028.0,>=2022.5.0` | `fsspec==2026.6.0` | Satisfied (activates `aiohttp==3.14.3`) |
++| `lightning-utilities<2.0,>=0.10.0` | `lightning-utilities==0.15.3` | Satisfied |
++| `packaging<27.0,>=23.0` | `packaging==26.2` | Satisfied |
++| `torch<4.0,>=2.1.0` | `torch==2.8.0` | Satisfied |
++| `torchmetrics<3.0,>0.7.0` | `torchmetrics==1.9.0` | Satisfied |
++| `tqdm<6.0,>=4.57.0` | `tqdm==4.69.0` | Satisfied |
++| `typing-extensions<6.0,>4.5.0` | `typing_extensions==4.16.0` | Satisfied |
++| `pytorch-lightning` | `pytorch-lightning==2.6.6` | Satisfied |
++
++### 3.2 PyTorch-Lightning 2.6.6 Base Requirements (8 total)
++
++| Requirement | Locked Version | Status |
++|---|---|---|
++| `torch>=2.1.0` | `torch==2.8.0` | Satisfied |
++| `tqdm>=4.57.0` | `tqdm==4.69.0` | Satisfied |
++| `PyYAML>5.4` | `PyYAML==6.0.3` | Satisfied |
++| `fsspec[http]>=2022.5.0` | `fsspec==2026.6.0` | Satisfied (activates `aiohttp==3.14.3`) |
++| `torchmetrics>0.7.0` | `torchmetrics==1.9.0` | Satisfied |
++| `packaging>=23.0` | `packaging==26.2` | Satisfied |
++| `typing-extensions>4.5.0` | `typing_extensions==4.16.0` | Satisfied |
++| `lightning-utilities>=0.10.0` | `lightning-utilities==0.15.3` | Satisfied |
++
++### 3.3 Activated Dependency Extras
++
++The base requirements of both wheels activate the `[http]` extra of `fsspec`. In `fsspec==2026.6.0`, the `http` extra specifies:
++- `aiohttp!=4.0.0a0,!=4.0.0a1; extra == "http"`: Satisfied by locked `aiohttp==3.14.3` and paired with `requests==2.34.2`.
++
++No other optional extras (`extra == "dev"`, `extra == "test"`, `extra == "strategies"`, `extra == "all"`) are activated by the runtime graph.
++
++### 3.4 Reverse Constraints
++
++All 139 locked distributions were audited for dependencies referencing `lightning` or `pytorch-lightning`:
++- `pyannote-audio==4.0.7` specifies `lightning>=2.4`. Pinned version `2.6.6` satisfies this constraint.
++- `lightning==2.6.6` specifies `pytorch-lightning`. Pinned version `2.6.6` satisfies this constraint.
++- No other package in the runtime lockfile constrains `lightning` or `pytorch-lightning`.
++
++---
++
++## 4. Honest Accounting of Unresolved Constraints
++
++1. **Metadata Parity vs. Runtime Smoke:** Static requirement satisfaction confirms the dependency graph is mathematically closed without version conflicts. It does not certify that model loading or audio transcription succeeds at runtime in the packaged embeddable environment. Runtime qualification belongs to Astra's candidate build pipeline.
++2. **OSV Advisory Scanner Findings:** In `GHSA-qqmf-gpg7-g8gw.json`, the upstream advisory database retains an invalid fixed version event of `2022.6.15` (a legacy date-string issue). The listed vulnerable versions end at `2.6.5`. Because the database fixed event is unchanged, automated vulnerability scanners that evaluate range expressions literally will continue reporting the entry until OSV publishes a schema correction. Scanner output and inspected upstream release evidence must be reported as distinct items.
++3. **Checkpoint Deserialization Boundaries:** WhisperX loads PyAnnote's bundled VAD model via `LightningModule.load_from_checkpoint(..., weights_only=False)` during audio transcription. Integrity checks on the checkpoint file prevent accidental corruption or disk mismatches, but do not defend against malicious modification by a process running under the same user account.
++4. **Remaining Retained Advisories:** Upgrading to Lightning 2.6.6 addresses the code execution vulnerability in Lightning checkpoint loading. The remaining 14 distinct advisory issues across three packages remain unpatched or locked:
++   - `nltk==3.10.3`: 1 issue (`GHSA-8mgp-746c-j5xp`), unpatched on PyPI.
++   - `torch==2.8.0`: 8 issues, blocked by `whisperx 3.8.6 -> torch~=2.8.0`.
++   - `transformers==4.57.6`: 5 issues, blocked by `whisperx 3.8.6 -> huggingface-hub<1.0.0`.
++
++---
++
++## 5. Execution History and Guard Diagnostic Repair
++
++All raw command attempts and diagnostic logs were preserved in accordance with instructions.
++
++### Attempt 1: Guard Environment Diagnostic
++- **Command:** Executed test invocation without setting `IG_FORBIDDEN_LIVE` in the outer PowerShell process.
++- **Result:** Failed immediately with `KeyError: 'IG_FORBIDDEN_LIVE'` inside `sitecustomize.py` (audit hook initialization).
++- **Reason:** The integrator test guard audits file accesses and requires `os.environ['IG_FORBIDDEN_LIVE']` to be set to the local index path before Python initializes.
++- **Repair:** Defined `$env:IG_FORBIDDEN_LIVE = "C:\Users\hello\AppData\Local\Uoink\index.db"` and cleared `$env:ANTHROPIC_API_KEY` in the outer PowerShell process before calling Python.
++
++### Attempt 2: Isolated Verification Suite (Label: `gemini-lightning266-01`)
++- **Command:**
++  ```powershell
++  $env:IG_FORBIDDEN_LIVE = "C:\Users\hello\AppData\Local\Uoink\index.db"
++  $env:ANTHROPIC_API_KEY = $null
++  & "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe" `
++      "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py" `
++      --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b9ce127d-a8f\gemini" `
++      --label "gemini-lightning266-01" `
++      tests/test_installer_dependency_lock.py `
++      tests/test_installer_files_complete.py `
++      tests/test_installer_download_accuracy.py `
++      tests/test_packaged_decoder_loader.py
++  ```
++- **Exit Code:** `0`
++- **Output:**
++  ```text
++  START tests
++  tests exit 0 
++  ................                                                         [100%]
++  16 passed in 1.31s
++  ```
++- **Preserved Artifacts in `_scratch/gemini-lightning266-01/`:**
++  - `tests.log`: Raw pytest output (16 passed in 1.31s).
++  - `tests.xml`: JUnit XML test execution breakdown.
++  - `results.json`: Execution metadata with exit code 0.
++
++### Attempt 3: Post-Report Full Re-Verification (Label: `gemini-lightning266-02`)
++- **Command:**
++  ```powershell
++  $env:IG_FORBIDDEN_LIVE = "C:\Users\hello\AppData\Local\Uoink\index.db"
++  $env:ANTHROPIC_API_KEY = $null
++  & "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe" `
++      "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py" `
++      --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\b9ce127d-a8f\gemini" `
++      --label "gemini-lightning266-02" `
++      tests/test_installer_dependency_lock.py `
++      tests/test_installer_files_complete.py `
++      tests/test_installer_download_accuracy.py `
++      tests/test_packaged_decoder_loader.py
++  ```
++- **Exit Code:** `0`
++- **Output:**
++  ```text
++  START tests
++  tests exit 0 
++  ................                                                         [100%]
++  16 passed in 1.24s
++  ```
++- **Preserved Artifacts in `_scratch/gemini-lightning266-02/`:**
++  - `tests.log`: Raw pytest output (16 passed in 1.24s).
++  - `tests.xml`: JUnit XML test execution breakdown.
++  - `results.json`: Execution metadata with exit code 0.
++
++### Suite Counts Breakdown
++
++| Test File | Tests Run | Passed | Failed | Skipped |
++|---|---:|---:|---:|---:|
++| `tests/test_installer_dependency_lock.py` | 5 | 5 | 0 | 0 |
++| `tests/test_installer_files_complete.py` | 3 | 3 | 0 | 0 |
++| `tests/test_installer_download_accuracy.py` | 5 | 5 | 0 | 0 |
++| `tests/test_packaged_decoder_loader.py` | 3 | 3 | 0 | 0 |
++| **Total** | **16** | **16** | **0** | **0** |
++
++---
++
++## 6. Repository Diff Summary
++
++Only one repository file changed:
++
++```diff
++diff --git a/requirements-installer-lock.txt b/requirements-installer-lock.txt
++index 9971fad..47e1f4a 100644
++--- a/requirements-installer-lock.txt
+++++ b/requirements-installer-lock.txt
++@@ -63,7 +63,7 @@ julius==0.2.8
++ keyring==25.7.0
++ kiwisolver==1.5.0
++ lightning-utilities==0.15.3
++-lightning==2.6.5
+++lightning==2.6.6
++ Mako==1.3.12
++ markdown-it-py==4.2.0
++ MarkupSafe==3.0.3
++@@ -113,7 +113,7 @@ python-dateutil==2.9.0.post0
++ python-dotenv==1.2.2
++ python-multipart==0.0.32
++ pythonnet==3.0.5
++-pytorch-lightning==2.6.5
+++pytorch-lightning==2.6.6
++ pytorch-metric-learning==2.9.0
++ pywebview==5.4
++ pywin32-ctypes==0.2.3
++```
++
++Zero other files in the worktree were modified.
+diff --git a/requirements-installer-lock.txt b/requirements-installer-lock.txt
+index 9971fad..47e1f4a 100644
+--- a/requirements-installer-lock.txt
++++ b/requirements-installer-lock.txt
+@@ -63,7 +63,7 @@ julius==0.2.8
+ keyring==25.7.0
+ kiwisolver==1.5.0
+ lightning-utilities==0.15.3
+-lightning==2.6.5
++lightning==2.6.6
+ Mako==1.3.12
+ markdown-it-py==4.2.0
+ MarkupSafe==3.0.3
+@@ -113,7 +113,7 @@ python-dateutil==2.9.0.post0
+ python-dotenv==1.2.2
+ python-multipart==0.0.32
+ pythonnet==3.0.5
+-pytorch-lightning==2.6.5
++pytorch-lightning==2.6.6
+ pytorch-metric-learning==2.9.0
+ pywebview==5.4
+ pywin32-ctypes==0.2.3
