@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile prepared and checked, not collected. User subscription sign-in/extra-usage confirmation and client/visual observations remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match; 300 installed proof payloads sealed. 140 runtime pins, 283 requirements and 983 repair-wheel files match. Defender no threats; unsigned, raw OSV 19/15 retained | Finish review ZIP and authorized backup; remaining client and release decisions belong to Ryan. No ordinary upgrade or main merge |
+| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match; 300 installed proof payloads sealed. 140 runtime pins, 283 requirements and 983 repair-wheel files match. Defender no threats; unsigned, raw OSV 19/15 retained | Review ZIP verified; backup completion requires the external transport receipt described in Queue 7. Remaining client and release decisions belong to Ryan. No ordinary upgrade or main merge |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -218,6 +218,12 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    verified. Read RELEASE-DELIVERY-06-2026-09-11.md. Only the final authorized
    cc/living-library backup and its external transport receipt remain for this
    documentary checkpoint; client work waits for the account confirmation.
+   The first push exited 1 after its owned authentication helper stalled;
+   PACKAGE-06-BACKUP-AUTH-REPAIR-2026-09-11.md documents the bounded retry.
+   Completion requires verified=true and identical source/after_local/
+   after_remote in build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.backup.json.
+   Keep that final transport receipt outside Git to avoid another commit/push
+   solely to record the previous push. Do not repeat a verified transport.
 8. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
@@ -2805,3 +2811,19 @@ Keep original historical AT6 and advisory dispositions open. No further build
 or installation is owed for these documentation updates. Final backup only
 through origin/cc/living-library; keep its verified transport receipt outside
 Git beside the ZIP. No main merge, ordinary upgrade or publication.
+
+### 2026-09-11 — repair the backup credential-helper invocation
+
+The push of 36f29c4 stalled in its owned Git Credential Manager descendant.
+After parent, command and creation checks, only that push tree was stopped.
+The original runner recorded exit 1 with empty stdout/stderr at 19:03:03 UTC;
+its verified=false receipt is preserved beside the ZIP as backup-attempt01.json.
+A fresh remote check still reports e2349e0. The local backup ref at 36f29c4
+does not establish remote delivery. Read-only GitHub CLI status confirms the
+existing ryanbiddy keyring account and repository scope without exposing a token.
+
+PACKAGE-06-BACKUP-AUTH-REPAIR-2026-09-11.md permits the same branch-only push
+with process-local credential-helper overrides and prompts disabled. Preserve
+the original attempt and record actual exit plus independently checked remote
+equality in the final external receipt. This is a transport correction; no
+product test, installer, sealed ZIP or installed observation is repeated.
