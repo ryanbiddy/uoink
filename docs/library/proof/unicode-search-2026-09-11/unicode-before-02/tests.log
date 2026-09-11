@@ -1,0 +1,106 @@
+FFFFFFFFFFFF......                                                       [100%]
+================================== FAILURES ===================================
+_ test_unicode_terms_remain_intact_and_find_their_content[\u65e5\u672c\u8a9e] _
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"日本語"*'
+E     
+E     - "日本語"*
+_____ test_unicode_terms_remain_intact_and_find_their_content[canci\xf3n] _____
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '"canci" "n"*' == '"canción"*'
+E     
+E     - "canción"*
+E     ?       ^
+E     + "canci" "n"*
+E     ?       ^^^
+_ test_unicode_terms_remain_intact_and_find_their_content[\u041f\u0440\u0438\u0432\u0435\u0442] _
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"Привет"*'
+E     
+E     - "Привет"*
+_ test_unicode_terms_remain_intact_and_find_their_content[\u0645\u0631\u062d\u0628\u0627] _
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"مرحبا"*'
+E     
+E     - "مرحبا"*
+_ test_unicode_terms_remain_intact_and_find_their_content[\u0928\u092e\u0938\u094d\u0924\u0947] _
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"नमस्ते"*'
+E     
+E     - "नमस्ते"*
+___ test_unicode_terms_remain_intact_and_find_their_content[cancio\u0301n] ____
+tests\test_unicode_search_repair.py:18: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '"cancio" "n"*' == '"canción"*'
+E     
+E     - "canción"*
+E     ?       ^
+E     + "cancio" "n"*
+E     ?       ^^^^
+_ test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3n] _
+tests\test_unicode_search_repair.py:28: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+_ test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301n] _
+tests\test_unicode_search_repair.py:28: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+_ test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3] _
+tests\test_unicode_search_repair.py:28: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+_ test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301] _
+tests\test_unicode_search_repair.py:28: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+_______ test_unicode_clips_are_retrievable_with_the_existing_clip_index _______
+tests\test_unicode_search_repair.py:34: in test_unicode_clips_are_retrievable_with_the_existing_clip_index
+    seed(db, "wanted", "日本語")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+_____ test_boolean_keywords_remain_literal_words_in_mixed_language_search _____
+tests\test_unicode_search_repair.py:42: in test_boolean_keywords_remain_literal_words_in_mixed_language_search
+    seed(db, "wanted", "日本語 OR canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.corpus_path
+=========================== short test summary info ===========================
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[\u65e5\u672c\u8a9e]
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[canci\xf3n]
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[\u041f\u0440\u0438\u0432\u0435\u0442]
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[\u0645\u0631\u062d\u0628\u0627]
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[\u0928\u092e\u0938\u094d\u0924\u0947]
+FAILED tests/test_unicode_search_repair.py::test_unicode_terms_remain_intact_and_find_their_content[cancio\u0301n]
+FAILED tests/test_unicode_search_repair.py::test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3n]
+FAILED tests/test_unicode_search_repair.py::test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301n]
+FAILED tests/test_unicode_search_repair.py::test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3]
+FAILED tests/test_unicode_search_repair.py::test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301]
+FAILED tests/test_unicode_search_repair.py::test_unicode_clips_are_retrievable_with_the_existing_clip_index
+FAILED tests/test_unicode_search_repair.py::test_boolean_keywords_remain_literal_words_in_mixed_language_search
+12 failed, 6 passed in 0.70s

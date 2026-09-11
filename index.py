@@ -31,6 +31,7 @@ import re
 import sqlite3
 import threading
 import time
+import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -330,7 +331,21 @@ def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) -> 
 # --------------------------------------------------------------------------
 # FTS query sanitisation
 # --------------------------------------------------------------------------
-_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
+def _fts_terms(raw: str) -> list[str]:
+    """Keep Unicode words intact while excluding the FTS operator grammar."""
+    terms: list[str] = []
+    word: list[str] = []
+    for char in unicodedata.normalize("NFC", raw or ""):
+        # Combining marks belong to the preceding word, including scripts
+        # where NFC cannot compose them. Bare marks are not search terms.
+        if char.isalnum() or char == "_" or (word and unicodedata.category(char).startswith("M")):
+            word.append(char)
+        elif word:
+            terms.append("".join(word))
+            word = []
+    if word:
+        terms.append("".join(word))
+    return terms
 
 
 def _like_escape(value: str) -> str:
@@ -347,7 +362,7 @@ def _fts_query(raw: str) -> str:
     and a raw user string can be a syntax error. We extract bare word
     tokens, quote each one, and AND them together. A trailing ``*`` is kept
     on the last token for prefix matching so partial words still hit."""
-    terms = _FTS_TERM_RE.findall(raw or "")
+    terms = _fts_terms(raw)
     if not terms:
         return ""
     quoted = [f'"{t}"' for t in terms]

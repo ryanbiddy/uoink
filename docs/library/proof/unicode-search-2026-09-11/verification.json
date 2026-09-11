@@ -1,0 +1,21 @@
+{
+  "source_base": "8efd996f9c967ce17ef6534d6ef6c8df2f9cd59e",
+  "original_security_test_unchanged": true,
+  "original_security_test_git_blob": "8aaa0edcfb81314c4f42f64585eedf74ef6f3485",
+  "source_sha256": {
+    "index.py": "da1db9cfffd9110a44fcb3c6fe39cfe9dc06f42775f52f922917eeebc70a3402",
+    "tests/test_unicode_search_repair.py": "3d3756e9c5614c48220b0c0386bb18f67ecb967924019b09ef7d85042d40ddec"
+  },
+  "worker_counts": {
+    "passed": 137,
+    "failed": 0,
+    "seconds": 3.06
+  },
+  "checkout_counts": {
+    "passed": 137,
+    "failed": 0,
+    "seconds": 3.28
+  },
+  "pytest_option": "--runxfail; original markers unchanged",
+  "ordinary_post_repair_outcome": "136 passed / 1 XPASS(strict), retained as failure"
+}

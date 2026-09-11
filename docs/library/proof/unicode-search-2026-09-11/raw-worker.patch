@@ -1,0 +1,141 @@
+diff --git a/docs/library/UNICODE-SEARCH-REPAIR-REVIEW-2026-09-11.md b/docs/library/UNICODE-SEARCH-REPAIR-REVIEW-2026-09-11.md
+new file mode 100644
+index 0000000..6273a90
+--- /dev/null
++++ b/docs/library/UNICODE-SEARCH-REPAIR-REVIEW-2026-09-11.md
+@@ -0,0 +1,28 @@
++# Unicode search repair observations
++
++The first new regression run, unicode-before-01, reports 12 failed / 6 passed.
++Six failures demonstrate the original ASCII-only query behavior. Six retrieval
++cases stop on the new helper's missing required yoinked_at field; they are not
++observations of retrieval behavior. Before rerunning, the new seed helper adds
++an explicit fixture timestamp. No assertion or existing test changes. The first
++log stays retained. This review will record the repaired product and both-root
++verification when those observations finish.
++
++unicode-before-02 also reports 12 failed / 6 passed. The timestamp alone was an
++incomplete seed repair: corpus_path and sidecar_path are required too. The seed
++now supplies both paths inside its disposable directory, without creating or
++reading those files. Assertions remain unchanged. Both setup failures are
++retained; no retrieval pass is inferred from them.
++
++The product now normalizes query text to NFC and retains Unicode letters,
++numbers, underscores and attached combining marks. Punctuation remains a
++separator, and every term stays quoted with only the final prefix operator.
++No schema, indexed content or existing test changes. SQLite still applies its
++existing tokenization rules; this adds no language-specific segmentation.
++Reference: https://www.sqlite.org/fts5.html#unicode61_tokenizer (read 2026-09-11).
++
++unicode-repaired-01: 136 passed / one failed in 3.55 seconds. All 18 new cases
++pass. The sole failure is the original SEC-06 XPASS(strict): its unchanged
++assertions now succeed. Preserve that ordinary result. The brief's next run
++uses --runxfail to execute those same assertions as an ordinary test, rather
++than deleting or changing its marker.
+diff --git a/index.py b/index.py
+index 1aff0d5..3227fad 100644
+--- a/index.py
++++ b/index.py
+@@ -31,6 +31,7 @@ import re
+ import sqlite3
+ import threading
+ import time
++import unicodedata
+ from contextlib import contextmanager
+ from datetime import datetime, timedelta
+ from pathlib import Path
+@@ -330,7 +331,21 @@ def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) ->
+ # --------------------------------------------------------------------------
+ # FTS query sanitisation
+ # --------------------------------------------------------------------------
+-_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
++def _fts_terms(raw: str) -> list[str]:
++    """Keep Unicode words intact while excluding the FTS operator grammar."""
++    terms: list[str] = []
++    word: list[str] = []
++    for char in unicodedata.normalize("NFC", raw or ""):
++        # Combining marks belong to the preceding word, including scripts
++        # where NFC cannot compose them. Bare marks are not search terms.
++        if char.isalnum() or char == "_" or (word and unicodedata.category(char).startswith("M")):
++            word.append(char)
++        elif word:
++            terms.append("".join(word))
++            word = []
++    if word:
++        terms.append("".join(word))
++    return terms
+ 
+ 
+ def _like_escape(value: str) -> str:
+@@ -347,7 +362,7 @@ def _fts_query(raw: str) -> str:
+     and a raw user string can be a syntax error. We extract bare word
+     tokens, quote each one, and AND them together. A trailing ``*`` is kept
+     on the last token for prefix matching so partial words still hit."""
+-    terms = _FTS_TERM_RE.findall(raw or "")
++    terms = _fts_terms(raw)
+     if not terms:
+         return ""
+     quoted = [f'"{t}"' for t in terms]
+diff --git a/tests/test_unicode_search_repair.py b/tests/test_unicode_search_repair.py
+new file mode 100644
+index 0000000..0f7a15c
+--- /dev/null
++++ b/tests/test_unicode_search_repair.py
+@@ -0,0 +1,57 @@
++"""Exercise Unicode retrieval through disposable indexes and the real FTS engine."""
++
++import unicodedata
++
++import pytest
++
++import index
++
++
++def seed(db, video_id, content):
++    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
++                     "channel": "fixture", "source_type": "text",
++                     "corpus_path": str(db._path.parent / (video_id + ".md")),
++                     "sidecar_path": str(db._path.parent / (video_id + ".json")),
++                     "yoinked_at": "2026-09-11T12:00:00"}, content=content)
++
++
++@pytest.mark.parametrize("term", ["日本語", "canción", "Привет", "مرحبا", "नमस्ते", "cancio\u0301n"])
++def test_unicode_terms_remain_intact_and_find_their_content(tmp_path, term):
++    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
++    with index.Index.open(tmp_path / "index.db") as db:
++        seed(db, "wanted", term + " language lesson")
++        seed(db, "unrelated", "different vocabulary")
++        assert [row["video_id"] for row in db.search(term)] == ["wanted"]
++
++
++@pytest.mark.parametrize("query", ["canción", "cancio\u0301n", "canció", "cancio\u0301"])
++def test_composed_decomposed_and_prefix_queries_find_existing_accented_text(tmp_path, query):
++    with index.Index.open(tmp_path / "index.db") as db:
++        seed(db, "wanted", "canción")
++        assert [row["video_id"] for row in db.search(query)] == ["wanted"]
++
++
++def test_unicode_clips_are_retrievable_with_the_existing_clip_index(tmp_path):
++    with index.Index.open(tmp_path / "index.db") as db:
++        seed(db, "wanted", "日本語")
++        db.insert_citations("wanted", [{"kind": "transcript_chunk", "seq": 0,
++            "timestamp_start": 0, "timestamp_end": 12, "text": "日本語 lesson"}])
++        assert [row["video_id"] for row in db.search_clips("日本語")] == ["wanted"]
++
++
++def test_boolean_keywords_remain_literal_words_in_mixed_language_search(tmp_path):
++    with index.Index.open(tmp_path / "index.db") as db:
++        seed(db, "wanted", "日本語 OR canción")
++        seed(db, "japanese-only", "日本語")
++        seed(db, "spanish-only", "canción")
++        assert [row["video_id"] for row in db.search('日本語 OR "canción"')] == ["wanted"]
++        assert index._fts_query('title:日本語 NOT canción*') == '"title" "日本語" "NOT" "canción"*'
++
++
++@pytest.mark.parametrize("query", ["", '"*():{}[]', "\u0301\u0308", "\x00\n\t", "🙂"])
++def test_separator_only_queries_stay_empty(query):
++    assert index._fts_query(query) == ""
++
++
++def test_existing_ascii_and_numeric_query_behavior_is_preserved():
++    assert index._fts_query('foo_bar 123 hooks') == '"foo_bar" "123" "hooks"*'

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_unicode_search_repair.py",
+      "tests/security/test_security_findings.py",
+      "tests/test_clips.py",
+      "tests/test_library_adapters.py",
+      "tests/test_stdio_clip_tools.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Astra-search-2026-09-11\\_scratch\\unicode-repaired-01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Astra-search-2026-09-11\\_scratch\\unicode-repaired-01\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Astra-search-2026-09-11\\_scratch\\unicode-repaired-01\\tests.log"
+  }
+]

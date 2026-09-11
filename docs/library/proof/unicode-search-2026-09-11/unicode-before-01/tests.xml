@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="18" time="0.763" timestamp="2026-09-11T10:07:54.634647-07:00" hostname="Ryan-PC"><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[\u65e5\u672c\u8a9e]" time="0.003"><failure message="assert '' == '&quot;日本語&quot;*'&#10;  &#10;  - &quot;日本語&quot;*">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"日本語"*'
+E     
+E     - "日本語"*</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[canci\xf3n]" time="0.001"><failure message="assert '&quot;canci&quot; &quot;n&quot;*' == '&quot;canción&quot;*'&#10;  &#10;  - &quot;canción&quot;*&#10;  ?       ^&#10;  + &quot;canci&quot; &quot;n&quot;*&#10;  ?       ^^^">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '"canci" "n"*' == '"canción"*'
+E     
+E     - "canción"*
+E     ?       ^
+E     + "canci" "n"*
+E     ?       ^^^</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[\u041f\u0440\u0438\u0432\u0435\u0442]" time="0.001"><failure message="assert '' == '&quot;Привет&quot;*'&#10;  &#10;  - &quot;Привет&quot;*">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"Привет"*'
+E     
+E     - "Привет"*</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[\u0645\u0631\u062d\u0628\u0627]" time="0.001"><failure message="assert '' == '&quot;مرحبا&quot;*'&#10;  &#10;  - &quot;مرحبا&quot;*">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"مرحبا"*'
+E     
+E     - "مرحبا"*</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[\u0928\u092e\u0938\u094d\u0924\u0947]" time="0.001"><failure message="assert '' == '&quot;नमस्ते&quot;*'&#10;  &#10;  - &quot;नमस्ते&quot;*">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '' == '"नमस्ते"*'
+E     
+E     - "नमस्ते"*</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_terms_remain_intact_and_find_their_content[cancio\u0301n]" time="0.002"><failure message="assert '&quot;cancio&quot; &quot;n&quot;*' == '&quot;canción&quot;*'&#10;  &#10;  - &quot;canción&quot;*&#10;  ?       ^&#10;  + &quot;cancio&quot; &quot;n&quot;*&#10;  ?       ^^^^">tests\test_unicode_search_repair.py:17: in test_unicode_terms_remain_intact_and_find_their_content
+    assert index._fts_query(term) == '"' + unicodedata.normalize("NFC", term) + '"*'
+E   assert '"cancio" "n"*' == '"canción"*'
+E     
+E     - "canción"*
+E     ?       ^
+E     + "cancio" "n"*
+E     ?       ^^^^</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3n]" time="0.163"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:27: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301n]" time="0.075"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:27: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_composed_decomposed_and_prefix_queries_find_existing_accented_text[canci\xf3]" time="0.075"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:27: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_composed_decomposed_and_prefix_queries_find_existing_accented_text[cancio\u0301]" time="0.076"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:27: in test_composed_decomposed_and_prefix_queries_find_existing_accented_text
+    seed(db, "wanted", "canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_unicode_clips_are_retrievable_with_the_existing_clip_index" time="0.074"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:33: in test_unicode_clips_are_retrievable_with_the_existing_clip_index
+    seed(db, "wanted", "日本語")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_boolean_keywords_remain_literal_words_in_mixed_language_search" time="0.074"><failure message="sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at">tests\test_unicode_search_repair.py:41: in test_boolean_keywords_remain_literal_words_in_mixed_language_search
+    seed(db, "wanted", "日本語 OR canción")
+tests\test_unicode_search_repair.py:11: in seed
+    db.upsert_yoink({"video_id": video_id, "slug": video_id, "title": video_id,
+index.py:676: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</failure></testcase><testcase classname="tests.test_unicode_search_repair" name="test_separator_only_queries_stay_empty[]" time="0.000" /><testcase classname="tests.test_unicode_search_repair" name="test_separator_only_queries_stay_empty[&quot;*():{}[]]" time="0.000" /><testcase classname="tests.test_unicode_search_repair" name="test_separator_only_queries_stay_empty[\u0301\u0308]" time="0.000" /><testcase classname="tests.test_unicode_search_repair" name="test_separator_only_queries_stay_empty[\x00\n\t]" time="0.000" /><testcase classname="tests.test_unicode_search_repair" name="test_separator_only_queries_stay_empty[\U0001f642]" time="0.000" /><testcase classname="tests.test_unicode_search_repair" name="test_existing_ascii_and_numeric_query_behavior_is_preserved" time="0.000" /></testsuite></testsuites>
