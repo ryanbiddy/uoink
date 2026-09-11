@@ -15,8 +15,10 @@ Record unresolved constraints honestly; metadata parity is not a runtime smoke.
 Add a separate regression only if it validates a real installer contract. Run
 tests/test_installer_dependency_lock.py, tests/test_installer_files_complete.py,
 tests/test_installer_download_accuracy.py and tests/test_packaged_decoder_loader.py
-through the main checkout's _scratch/integrator_verify.py and
-_scratch/ig-native/Scripts/python.exe. Set IG_FORBIDDEN_LIVE to the literal ordinary
+through E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py and
+E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe.
+These are external shared verification tools, not worker repository inputs.
+Set IG_FORBIDDEN_LIVE to the literal ordinary
 index path before invoking Python. Unset ANTHROPIC_API_KEY. No existing test,
 fixture or marker edits. Astra will rerun these checks and qualify the built runtime.
 
@@ -30,3 +32,8 @@ ordinary index access, port 5179, commits or pushes in this worker. No subagents
 Keep all other dependency pins unchanged. This worker may inspect metadata and
 code in ZIP archives without importing them. Report the diff and named suite
 counts. Astra owns integration, source freeze, final tree, packaging and receipts.
+
+Dispatch repair: the first preflight stopped before a worker ran because the
+relative shared-runner path was treated as an uncommitted repository input.
+The paths above now identify the external main-checkout tools explicitly. No
+tool, guard or product changed; retry from this committed brief.
