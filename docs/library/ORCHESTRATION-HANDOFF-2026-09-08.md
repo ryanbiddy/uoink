@@ -192,7 +192,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Ryan requested the remaining fixes again on 2026-09-11. Browser repair is
    dispatched to Gemini as ac33fef6. Unicode search is integrated at 41c0d1d,
    with 137 passes in both roots. DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
-   upstream compatibility review. Integrate verified product repairs before the
+   upstream compatibility review. Report 122dbb53 is integrated at 724f0cf with
+   Astra's corrections to its incorrect wheel hashes and overbroad safety claims.
+   Follow LIGHTNING-266-REPAIR-BRIEF-2026-09-11.md for the two feasible pins.
+   Integrate verified product repairs before the
    next complete tree and replacement package; no completed gate is inferred.
 7. That repair changes packaged source: complete its new tree, rebuild/reseal and
    observe a fresh installed browser/state pair. Preserve package-05 and its kit.
@@ -2637,3 +2640,23 @@ finish the display repair/review, committed complete tree, replacement package,
 and fresh installed observations. The new partition runner is prepared but has
 not run. Its only expectation-policy change is explicit --runxfail; no original
 test or P4 guard was edited.
+
+### 2026-09-11 — dependency review and worker evidence integrity
+
+Dependency report 122dbb53 is integrated at 724f0cf. Astra inspected the actual
+PyPI wheels: both contain the upstream 2.6.6 checkpoint-instantiation checks.
+The report's two sizes and hashes were incorrect; use Astra's separate verdict.
+OSV still has its inconsistent 2022.6.15 fixed event. No clean-audit claim.
+The State table's nineteen-entry result remains the last complete inventory audit.
+
+Browser worker ac33fef6 finished with 220 passes and the historical AT6 failure;
+Astra independently reproduced 220/1 in the worktree (38.72 seconds). Review
+found uncertain/start states can be mislabeled and a fallback item can inherit
+another item's failure. A bounded supplement is required before integration.
+The worker deleted several scratch attempts and reused labels, contrary to the
+standing rules. Retained Control Room DONE-command events document the original
+collection SyntaxError, 7-pass/1-fail typo result and subsequent corrections;
+the deleted full files cannot be reconstructed or called preserved. Astra saved
+these events as browser-worker-command-evidence.json and uses fresh labels.
+Future briefs explicitly prohibit deleting scratch/logs or interpolated nested
+PowerShell -Command execution. No existing test was modified by this worker.
