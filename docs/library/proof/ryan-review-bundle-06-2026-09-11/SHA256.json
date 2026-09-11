@@ -1,0 +1,65 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "build_release_bundle06.py": {
+      "bytes": 10754,
+      "sha256": "60f129406454c102dd9cce01e7a2edfa5e11a7581c34b501ff58d53a86991cb3"
+    },
+    "BUNDLE-SHA256.json": {
+      "bytes": 342513,
+      "sha256": "53d439e5f159425f3d671c5feb9f4a0ff033c3f521091fcd033a771ff2e183fd"
+    },
+    "check_runbook06.ps1": {
+      "bytes": 980,
+      "sha256": "0f105459895f6a269d8cac8ea8acd7e71fc8f4ad09099b0c578a4ebcf8436ed4"
+    },
+    "delivery.json": {
+      "bytes": 696,
+      "sha256": "11a85e88047a82d6f157dfa60f3a72dc10508e8c276cdfd931093211c951fa1c"
+    },
+    "historical-data-omissions.json": {
+      "bytes": 240,
+      "sha256": "ae84e8d5109853dad99f84a548021cc4ebcedafe5a7216b9102f7098d7d022e8"
+    },
+    "package06-git-proof-check02.json": {
+      "bytes": 448,
+      "sha256": "c8e2cb5d1c1f3e9bbbb2d796ce2a0357cb8ae10880eab411e4c786eb3afab475"
+    },
+    "release-state.json": {
+      "bytes": 4628,
+      "sha256": "ff6657ef9a5114699278fc37f199f86fddde1fa8815392a4bfe417868e74d717"
+    },
+    "review-bundle06-build.log": {
+      "bytes": 712,
+      "sha256": "3cde4d542056157b5124c9b00f95b6f7a4678071fdbdfa596bad6e89696e378c"
+    },
+    "review-bundle06-inspection.json": {
+      "bytes": 443,
+      "sha256": "974a6b334ed8ae4ac5ea02d46e7cf28a13a7426ed0db3367e39af9a770bbdb64"
+    },
+    "review_bundle06.py": {
+      "bytes": 2659,
+      "sha256": "34f67228f4cd63c243cf73ae7f1a8cd5a8069f99deea3998de9f10bb96aa3806"
+    },
+    "runbook06-syntax.json": {
+      "bytes": 593,
+      "sha256": "9c57047ca71576e4cfd711d899c7665333eabb613bcb6bc8cd8a22acd9cd14ce"
+    },
+    "seal_review_bundle06.py": {
+      "bytes": 1440,
+      "sha256": "5181c15abf5d8c57a6ef01c052cd8bf1b025039c5aff719fe40049e692c0b09f"
+    },
+    "START-HERE.md": {
+      "bytes": 1166,
+      "sha256": "0ef71e25697ada510d390b4e55cffe2faa24bb676fc888e76430d6acff609e15"
+    },
+    "verify_committed_package06_proofs.py": {
+      "bytes": 1373,
+      "sha256": "5e77e726648b360a473ba97e62db0387a7f79213f3a1940b26ea677e440b0ff7"
+    }
+  }
+}

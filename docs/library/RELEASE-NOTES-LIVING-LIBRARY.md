@@ -247,6 +247,10 @@ failed/partial observation and remaining action.
 ## Current review kit
 
 Review kit filename: `build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.zip`.
+It is 417,747,018 bytes, SHA-256
+`f1e14fcbeab1109f5708082fb404c1a94fdf4eb2a0dff371b8077da0443c8837`.
+All 1,715 ZIP and extracted payload hashes match. Review source `8ea633c`
+binds installer and validation source `6697dff`; see [the delivery record](RELEASE-DELIVERY-06-2026-09-11.md).
 The accompanying `.receipt.json` records the ZIP hash, byte count and source
 commits; `BUNDLE-SHA256.json` records every payload. It pairs package-06 with
 the matching receipt tools, notices, notes and evidence, with release_ready=false.

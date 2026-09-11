@@ -1,0 +1,13 @@
+{
+  "source": "8ea633cc584f4f37062ec5da533c11dc94fc46fa",
+  "result": "PASS",
+  "payloads": 457,
+  "proofs": {
+    "ryan-final-partitioned-03-2026-09-11": 44,
+    "candidate-package-06-2026-09-11": 76,
+    "repaired-lock-audit-2026-09-11": 35,
+    "ryan-agent-installed-06-2026-09-11": 300,
+    "ryan-proof-transport-06-2026-09-11": 2
+  },
+  "scope": "Git blob bytes, not only working-tree files. First ignored-file failure retained separately."
+}

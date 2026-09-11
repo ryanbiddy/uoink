@@ -90,7 +90,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; closing delivery follows |
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; review kit verified |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
 | 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile prepared and checked, not collected. User subscription sign-in/extra-usage confirmation and client/visual observations remain |
@@ -214,8 +214,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    before client/visual observations. INSTALLED-CLIENT-SIGNIN-2026-09-11.md
    gives the exact user step. Fresh authentication and extra-usage-off
    confirmation remain pending; no ordinary credentials or model invoked.
-   Complete the package-06 review ZIP, verify its contents, then push only the
-   authorized cc/living-library backup and retain its transport receipt.
+   Package-06 review ZIP is complete: 1,715 payloads, all ZIP/extracted hashes
+   verified. Read RELEASE-DELIVERY-06-2026-09-11.md. Only the final authorized
+   cc/living-library backup and its external transport receipt remain for this
+   documentary checkpoint; client work waits for the account confirmation.
 8. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
@@ -2783,3 +2785,23 @@ The repository Uoink/ ignore rule excluded it. Disk bytes still match the seal;
 the ZIP builder did not run. PACKAGE-06-PROOF-TRANSPORT-REPAIR-2026-09-11.md
 authorizes only that exact force-add and a complete committed-object check.
 Keep the ignore rule and original receipt bytes. No product/test/install rerun.
+
+### 2026-09-11 — package-06 review kit complete
+
+Review source 8ea633c binds validation/build source 6697dff. The new kit has
+1,715 payloads with every ZIP and extracted hash verified, safe unique paths,
+no nested archive or database/authentication file. All 457 current proof
+payloads match Git blobs after the exact ignored-file transport correction.
+The final delivery seal has 15 documentary payloads. Nine runbook PowerShell
+blocks parse; portable entry-point paths are inspected, not separately executed.
+
+Local ZIP: build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.zip,
+417,747,018 bytes, SHA256
+f1e14fcbeab1109f5708082fb404c1a94fdf4eb2a0dff371b8077da0443c8837.
+Its release_ready=false remains deliberate. Current source fixes, install and
+browser review are complete. The intact p4-client/profile waits for user
+subscription authentication/extra-usage confirmation; no client model was run.
+Keep original historical AT6 and advisory dispositions open. No further build
+or installation is owed for these documentation updates. Final backup only
+through origin/cc/living-library; keep its verified transport receipt outside
+Git beside the ZIP. No main merge, ordinary upgrade or publication.
