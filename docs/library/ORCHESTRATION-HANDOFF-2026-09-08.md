@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
+| Integration | New source repairs 41c0d1d, 15e3f7e, 63f7de9 await combined tree/package. Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -196,7 +196,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    with 137 passes in both roots. DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
    upstream compatibility review. Report 122dbb53 is integrated at 724f0cf with
    Astra's corrections to its incorrect wheel hashes and overbroad safety claims.
-   Follow LIGHTNING-266-REPAIR-BRIEF-2026-09-11.md for the two feasible pins.
+   Lightning pins are integrated at 63f7de9 with 16 passes in each root.
+   Follow SETUPTOOLS-RUNTIME-REPAIR-BRIEF-2026-09-11.md for the discovered
+   preexisting missing runtime dependency before freezing the final tree.
    Integrate verified product repairs before the
    next complete tree and replacement package; no completed gate is inferred.
 7. That repair changes packaged source: complete its new tree, rebuild/reseal and
@@ -2678,3 +2680,12 @@ No worker started in the refused dispatch. The native overlay probe has three
 passes, no checkpoint/inference, and one denied socket.bind attempt during
 imports; its guard did not permit the bind. Do not describe that probe as having
 zero attempted network activity or as actual checkpoint-loading qualification.
+
+### 2026-09-11 — Lightning integrated; runtime dependency repair follows
+
+63f7de9 updates lightning and pytorch-lightning to 2.6.6: 16 independent passes
+in both roots, with three separate native overlay checks. Raw scanner status
+is not cleared by the source fix. Full graph traversal identifies two baseline
+missing setuptools edges despite all changed Lightning constraints passing.
+Follow SETUPTOOLS-RUNTIME-REPAIR-BRIEF-2026-09-11.md before final verification.
+The State table's last packaged inventory remains 139 pins until a fresh build.
