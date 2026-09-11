@@ -1,0 +1,47 @@
+{
+  "status": "prepared_before_install",
+  "inputs": {
+    "schema": "c22-runner-inputs-v1",
+    "created_utc": "2026-09-11T18:21:33.776542+00:00",
+    "synthetic": false,
+    "prepare_before_install": true,
+    "userprofile": "C:\\Users\\hello",
+    "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "installed_app": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app",
+      "server_py": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\server.py",
+      "interpreter": null,
+      "has_space": true,
+      "bundled_python": false,
+      "present": false,
+      "intended_before_install": true
+    },
+    "package": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+      "bytes": 389568844,
+      "sha256": "91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb",
+      "matched_supplied_digest": true
+    },
+    "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\empty",
+    "isolated_port": 18081,
+    "mode": "installed",
+    "profile_dirs_prepared": true,
+    "candidate_package_02": {
+      "installer_source_sha": "6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d",
+      "package_sha256": "91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb",
+      "package_bytes": 389568844,
+      "invented": false
+    },
+    "manifest": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22-operator-manifest.json",
+      "sealed_by": "Astra",
+      "expected_package_sha256": "91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb",
+      "candidate_sha": "d0915eea286170583baf246cb89dd97a45f4872a",
+      "installer_source_sha": "6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d"
+    }
+  },
+  "updated_utc": "2026-09-11T18:21:33.777110+00:00",
+  "receipt_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22"
+}

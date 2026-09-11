@@ -1,0 +1,51 @@
+- complementary "Dashboard navigation"
+  - StaticText "OINK"
+  - navigation "Sections" [ref=e1]
+    - button "Library, 0 saved sources" [ref=e3]
+      - StaticText "Library"
+    - button "Sources, 4 capture-ready source types" [ref=e4]
+      - StaticText "Sources"
+      - StaticText "4"
+    - button "For You, 0 suggestions" [ref=e5]
+      - StaticText "For You"
+      - StaticText "0"
+    - button "Generate, 5 style anchors" [ref=e6]
+      - StaticText "Generate"
+      - StaticText "5"
+    - button "Settings" [ref=e7]
+  - generic
+    - StaticText "Ready on this device"
+  - StaticText "Private local app"
+  - button "Activity, 0 active jobs" [ref=e2]
+    - StaticText "Activity "
+    - StaticText "0"
+  - group
+    - button "About Uoink" [ref=e8]
+    - button "⭐ Star on GitHub" [ref=e9]
+    - button "Stop Uoink" [ref=e10]
+- main
+  - generic
+    - StaticText "ACTIVITY"
+    - heading "Nothing uoinking right now." [level=1, ref=e11]
+      - StaticText "Nothing uoinking "
+      - emphasis
+        - StaticText "right now."
+    - paragraph
+      - StaticText "Live work, queue retries, today's completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write."
+    - button "Refresh" [ref=e12]
+    - button "Cancel all" [disabled, ref=e13]
+    - generic "Activity walkthrough links"
+      - link "Learn: Playlist Mode" [ref=e14]
+      - link "Learn: Mobile Bridge" [ref=e15]
+    - StaticText "Saves queued from your phone carry this tag:"
+    - StaticText "from mobile playlist"
+    - StaticText "Queue"
+    - StaticText "0 running | 0 queued"
+    - StaticText "Nothing running right now."
+    - StaticText "New uoinks and rate-limit retries will appear here. Mobile saves use this label:"
+    - StaticText "from mobile playlist"
+    - StaticText "Completed today"
+    - StaticText "0"
+    - StaticText "No completed uoinks loaded yet."
+    - StaticText "The Library tab will populate this list."
+- status

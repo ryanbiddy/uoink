@@ -1,6 +1,8 @@
 # Living Library: one installed receipt session
 
-Ryan delegated the current installation check to Astra. Astra observed actual same-account Setup/reinstall, 32,054 matching installed files, 11 C22 passes and 15 Phase 4 collection passes. C22 visual evidence is partial and eight Phase 4 checkpoints remain unobserved. This does not approve an ordinary upgrade. See the release notes for the exact limits.
+Ryan delegated the installation check to Astra. Package-06 now has actual same-account Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful independent browser/state review. Phase 4 collection records 15 passes, one blocked link and seven unobserved client/visual checkpoints. This does not approve an ordinary upgrade.
+
+The separate Agent Install 06/p4-client/profile is prepared and intact. To finish that existing client session, use [the sign-in instructions](INSTALLED-CLIENT-SIGNIN-2026-09-11.md); do not repeat Setup or collect that fixture before the client observations. The procedure below remains available for a separate fresh-account receipt.
 
 The steps below are the reproducible procedure for one separate, fresh Windows
 account session on this machine. Do not repeat a completed agent stage in its
@@ -11,10 +13,10 @@ not elevate or change directory permissions.
 It does not approve a main merge or publication. The release notes and
 `release-state.json` identify the tested source and remaining failures.
 
-The installer is **Uoink-Setup-3.8.0.exe**, 388,987,465 bytes, SHA-256
-`95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49`, built from
-`6b5aed8cb60be3e826af5f308015393a72c60b0d`. Use this package and the accompanying
-tools together. Earlier d024baf5 and 9defc2a installers are retained historical packages.
+The installer is **Uoink-Setup-3.8.0.exe**, 389,568,844 bytes, SHA-256
+`91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb`, built from
+`6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d`. Use this package and the accompanying
+tools together. Earlier packages, including package-05 (95123073), remain retained historical artifacts.
 
 ## Before you begin
 
@@ -43,14 +45,14 @@ $opPython = 'C:\Python314\python.exe'
 if (-not (Test-Path -LiteralPath $opPython -PathType Leaf)) { throw 'The required system Python is unavailable.' }
 $opKit = Join-Path $opBundle 'scripts\install_receipt'
 $opPackage = Join-Path $opBundle 'Uoink-Setup-3.8.0.exe'
-$opHash = '95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49'
+$opHash = '91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb'
 $opManifest = Join-Path $opBundle 'c22-operator-manifest.json'
 $opBindings = Join-Path $opBundle 'source-bindings.json'
-$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-09'
+$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-11'
 $opC22 = Join-Path $opRoot 'c22'
 $opEmpty = Join-Path $opC22 'profiles\empty'
 $opApp = Join-Path $opRoot 'app'
-$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-05-2026-09-09'
+$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-06-2026-09-11'
 $opBoundCli = Join-Path $opBundle 'run_bound_c22.py'
 if (Test-Path -LiteralPath $opRoot) { throw 'Preserve the existing receipt; do not overwrite it.' }
 if (Test-Path -LiteralPath $opApp) { throw 'This session requires a fresh application directory.' }
@@ -85,7 +87,7 @@ Start-Transcript -LiteralPath (Join-Path $opRoot 'operator-transcript.txt')
 [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); user=[Security.Principal.WindowsIdentity]::GetCurrent().Name;
     sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; profile=$env:USERPROFILE;
     package_sha256=$opHash; validation_source=$opSeal.validation_source; bundle_source=$opSeal.bundle_source;
-    installer_source='6b5aed8cb60be3e826af5f308015393a72c60b0d'; install_started=$false
+    installer_source='6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d'; install_started=$false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $opRoot 'operator-preflight.json') -Encoding utf8
 ```
 
@@ -303,7 +305,7 @@ credentials. Astra collects a scoped copy that excludes
 | AS-7 requirement | Evidence collected and independently checked |
 |---|---|
 | Actual install/reinstall | Package and validation-source hashes, exact argv, UTC and real exits; Inno/preparation logs, app paths, isolated marker, registry and shortcut effects. Same-version reinstall stays labeled. |
-| Bundled provenance | Python/MCP versions, actual executable/module paths, all 142 compiler bindings with the one setup-only script separate, all 32,054 installed destination hashes, migration 0028 and schema 30; no checkout/user-site fallback. |
+| Bundled provenance | Python/MCP versions, actual executable/module paths, all 142 compiler bindings with the one setup-only script separate, all 32,497 installed destination hashes, migration 0028 and schema 30; no checkout/user-site fallback. |
 | Empty/legacy replay | Frozen original fixture, migration history, integrity/foreign-key results and before/after retained identities/counts. |
 | Three capture orderings | Consent/revision/epoch, source/episode/item identities, complete starts/charges/publications and deduplication, with synthetic acquisition/transcript scope explicit. |
 | Process recovery | Exact helper/child identities, live/dead observations, incarnation/claim/lock files, retained charge and no duplicate start; registered-child settlement/release after proven death. Unresolved launch/registration cases must retain exclusion until terminal ownership is established. |

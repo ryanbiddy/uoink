@@ -1,0 +1,20 @@
+{
+  "utc_start": "2026-09-11T18:10:31.1015309+00:00",
+  "app": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\app",
+  "profile_preserved": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\c22\\profiles\\empty",
+  "scope": "Only package05 isolated test installation; ordinary index and port 5179 prohibited",
+  "arguments": [
+    "/VERYSILENT",
+    "/SUPPRESSMSGBOXES",
+    "/NORESTART",
+    "/LOG=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 05\\uninstall-before-package06-2026-09-11\\uninstall.inno.log\""
+  ],
+  "exit": 0,
+  "verified_generated_files": {
+    "unins000.exe": "f93db03c7a52c5ad336c086be7f2573f6578e9fb21262b039aa0d2337a30fbe0",
+    "unins000.dat": "4d6f6574b17d6dd23ff5b2fb740914caea5f5a76d3f74bed1ff516e5a838f755",
+    "isolated-install.json": "a311f5c131e0149d2abca682c73302f572aa09aea8179a935b480d120d49c89a"
+  },
+  "process_id": 33216,
+  "utc_end": "2026-09-11T18:10:36.1907791+00:00"
+}

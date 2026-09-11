@@ -1,0 +1,240 @@
+- complementary "Dashboard navigation"
+  - StaticText "OINK"
+  - navigation "Sections" [ref=e1]
+    - button "Library, 0 saved sources" [ref=e3]
+      - StaticText "Library"
+    - button "Sources, 4 capture-ready source types" [ref=e4]
+      - StaticText "Sources"
+      - StaticText "4"
+    - button "For You, 0 suggestions" [ref=e5]
+      - StaticText "For You"
+      - StaticText "0"
+    - button "Generate, 5 style anchors" [ref=e6]
+      - StaticText "Generate"
+      - StaticText "5"
+    - button "Settings" [ref=e7]
+  - generic
+    - StaticText "Ready on this device"
+  - StaticText "Private local app"
+  - button "Activity, 0 active jobs" [ref=e2]
+    - StaticText "Activity "
+    - StaticText "0"
+  - group
+    - button "About Uoink" [ref=e8]
+    - button "⭐ Star on GitHub" [ref=e9]
+    - button "Stop Uoink" [ref=e10]
+- main
+  - generic
+    - generic
+      - StaticText "SOURCES"
+      - heading "What Uoink can read next." [level=1, ref=e11]
+        - StaticText "What Uoink can "
+        - emphasis
+          - StaticText "read next."
+      - paragraph
+        - StaticText "A plain map of capture surfaces, what lands locally, and where each source shows up next."
+      - button "Open YouTube" [ref=e12]
+      - generic "Sources walkthrough links"
+        - link "Learn: Universal Page Uoink" [ref=e15]
+        - link "Learn: X Video" [ref=e16]
+        - link "Learn: Podcast Feeds" [ref=e17]
+      - region "Standing subscriptions" [ref=e13]
+        - StaticText "STANDING CAPTURE"
+        - heading "Standing subscriptions" [level=2, ref=e18]
+        - paragraph
+          - StaticText "Watch podcast RSS feeds and YouTube channels/playlists. Detection is independent from capture: sources stay off by default until you explicitly opt in, capped at 25 back-catalog items and 10 starts per UTC day."
+        - generic
+          - StaticText "1"
+          - StaticText "TOTAL SOURCES"
+          - StaticText "1"
+          - StaticText "CAPTURE ACTIVE"
+          - StaticText "1 / 10"
+          - StaticText "DAILY STARTS USED TODAY (UTC)"
+          - StaticText "30s"
+          - StaticText "NEXT SCHEDULER TICK"
+          - button "Refresh" [ref=e37]
+        - combobox "Source kind" [expanded=false, ref=e38]: Podcast RSS
+          - MenuListPopup
+            - option "Podcast RSS" [selected, ref=e48]
+            - option "YouTube Channel" [ref=e49]
+            - option "YouTube Playlist" [ref=e50]
+        - textbox "New source URL" [ref=e39]
+        - textbox "Display name (optional)" [ref=e40]
+        - button "Subscribe" [ref=e41]
+        - list "Subscribed sources"
+          - article
+            - heading "http://c22-fixture.invalid/child-life/feed.xml" [level=3, ref=e46]
+            - StaticText "http://c22-fixture.invalid/child-life/feed.xml"
+            - StaticText "•"
+            - StaticText "rev 1"
+            - StaticText "•"
+            - StaticText "poll every 60m"
+            - StaticText "•"
+            - StaticText "last poll: 11:26:35 AM"
+            - StaticText "•"
+            - StaticText "observed: 1"
+            - StaticText "Podcast RSS"
+            - StaticText "Detection: healthy"
+            - StaticText "Capture: settled failed (worker_lost)"
+            - StaticText "On (Standing capture)"
+            - StaticText "rev 1"
+            - StaticText "Automatic capture active up to allowance limits."
+            - button "Turn Off Standing Capture" [ref=e47]
+            - StaticText "Back-Catalog Enrollment"
+            - StaticText "1 / 25 max"
+            - StaticText "Back catalog: 1 / 25 items enrolled."
+            - StaticText "Daily Ingest Allowance"
+            - StaticText "1 / 10 starts used"
+            - StaticText "9 starts remaining today. Resets at 00:00 UTC (in 5h 29m)"
+            - StaticText "Capture recovery"
+            - StaticText "eligible for retry"
+            - StaticText "C22 child-lifetime episode"
+            - StaticText "Recovery reason: "
+            - strong
+              - StaticText "worker_lost"
+            - StaticText "attempt 1/3"
+            - StaticText "•"
+            - StaticText "start: failed"
+            - StaticText "•"
+            - StaticText "retry scheduled"
+      - generic
+        - StaticText "PASTE A URL"
+        - heading "Uoink anything" [level=2, ref=e19]
+        - paragraph
+          - StaticText "Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages."
+        - textbox "Paste any URL to uoink" [ref=e20]
+        - status
+          - StaticText "PASTE A LINK"
+        - button "Uoink it" [disabled, ref=e21]
+        - paragraph
+          - StaticText "Detection runs as you paste. Nothing gets captured until you click Uoink it."
+      - generic
+        - StaticText "YOUR OWN WORDS"
+        - heading "Jot a note" [level=2, ref=e22]
+        - paragraph
+          - StaticText "Write a thought, a musing, a reminder to yourself. It lands in your corpus like anything else, authored by You, queryable by you and your AI. Markdown works."
+        - textbox "Note title" [ref=e23]
+        - textbox "Note text" [ref=e24]
+        - button "Save note" [disabled, ref=e25]
+        - paragraph
+          - StaticText "Saves as a note by You. It shows up in your Library right away."
+      - generic
+        - StaticText "A PICTURE WORTH KEEPING"
+        - heading "Save an image" [level=2, ref=e26]
+        - paragraph
+          - StaticText "Drop, paste, or pick a meme, a screenshot, a diagram. It lands in your corpus like anything else, with a preview in your Library. Your AI can read the image itself when you ask about it. PNG, JPEG, or WebP."
+        - button "Drop, paste, or click to pick an image" [ref=e27]
+          - StaticText "Drop an image here, paste with Ctrl/Cmd+V, or click to pick a file."
+        - textbox "Image caption" [ref=e28]
+        - button "Save image" [disabled, ref=e29]
+        - button "Clear" [ref=e30]
+        - paragraph
+          - StaticText "Saved by You under your output folder. It shows up in your Library right away."
+      - generic
+        - StaticText "BROWSER BUTTON"
+        - heading "Get the extension" [level=2, ref=e31]
+        - paragraph
+          - StaticText "The Uoink button lives in a browser extension you load once. It's already on this machine at "
+          - code
+            - StaticText "%LOCALAPPDATA%\\Uoink\\extension"
+          - StaticText "."
+        - button "Open extension folder" [ref=e32]
+        - list
+          - listitem [level=1]
+            - ListMarker "1. "
+            - StaticText "Open your extensions page: "
+            - code
+              - StaticText "chrome://extensions"
+            - StaticText " (Chrome), "
+            - code
+              - StaticText "edge://extensions"
+            - StaticText " (Edge), or "
+            - code
+              - StaticText "brave://extensions"
+            - StaticText " (Brave)."
+          - listitem [level=1]
+            - ListMarker "2. "
+            - StaticText "Turn on "
+            - strong
+              - StaticText "Developer mode"
+            - StaticText " in the top right."
+          - listitem [level=1]
+            - ListMarker "3. "
+            - StaticText "Click "
+            - strong
+              - StaticText "Load unpacked"
+            - StaticText " and pick the "
+            - code
+              - StaticText "extension"
+            - StaticText " folder that just opened."
+        - paragraph
+          - StaticText "Chrome Web Store review is still pending, so you load it unpacked for now."
+      - heading "Capture now" [level=2, ref=e14]
+      - StaticText "Sources this version can save"
+      - list "Supported source types"
+        - listitem "YouTube video" [level=1, ref=e33]
+          - heading "YouTube video" [level=2, ref=e42]
+          - StaticText "READY"
+          - paragraph
+            - strong
+              - StaticText "Capture:"
+            - StaticText " In-page button, right-click link, playlist bridge"
+          - paragraph
+            - strong
+              - StaticText "Corpus:"
+            - StaticText " Transcript, screenshots, comments, facets, hooks"
+          - paragraph
+            - strong
+              - StaticText "Output:"
+            - StaticText " Library cards, drafts, scripts, and evidence notes"
+        - listitem "X video" [level=1, ref=e34]
+          - heading "X video" [level=2, ref=e43]
+          - StaticText "READY"
+          - paragraph
+            - strong
+              - StaticText "Capture:"
+            - StaticText " Right-click or paste supported X links"
+          - paragraph
+            - strong
+              - StaticText "Corpus:"
+            - StaticText " Creator handle, media metadata, transcript when available"
+          - paragraph
+            - strong
+              - StaticText "Output:"
+            - StaticText " Writing attribution, Library search, source credit in exports"
+        - listitem "Podcasts / RSS" [level=1, ref=e35]
+          - heading "Podcasts / RSS" [level=2, ref=e44]
+          - StaticText "READY"
+          - paragraph
+            - strong
+              - StaticText "Capture:"
+            - StaticText " Saved RSS feed with automatic metadata polling; optional per-feed Auto-ingest"
+          - paragraph
+            - strong
+              - StaticText "Corpus:"
+            - StaticText " Local transcript, speakers, waveform preview, episode facts"
+          - paragraph
+            - strong
+              - StaticText "Output:"
+            - StaticText " Cited Library item, research packets, scripts, and long-form source memory"
+        - listitem "Reddit threads" [level=1, ref=e36]
+          - heading "Reddit threads" [level=2, ref=e45]
+          - StaticText "READY"
+          - paragraph
+            - strong
+              - StaticText "Capture:"
+            - StaticText " Paste or right-click a Reddit thread URL"
+          - paragraph
+            - strong
+              - StaticText "Corpus:"
+            - StaticText " Post, top comments, community, score signals"
+          - paragraph
+            - strong
+              - StaticText "Output:"
+            - StaticText " Audience questions and research objections"
+      - group
+        - DisclosureTriangle "Planned sources 7 +" [expanded=false]
+          - StaticText "Planned sources"
+          - StaticText "7"
+          - StaticText "+"
+- status

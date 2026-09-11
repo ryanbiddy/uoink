@@ -1,0 +1,39 @@
+2026-09-11 11:29:12,430 INFO install migration: skipped_isolated_install
+2026-09-11 11:29:12,447 INFO Restored 0 job record(s) from the library index
+2026-09-11 11:29:12,449 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-11 11:29:12,719 INFO tray: started (daemon thread)
+2026-09-11 11:29:12,735 INFO splash: spawned (version 3.8.0)
+2026-09-11 11:29:12,735 INFO Uoink server v3.8.0 running on http://127.0.0.1:18081
+2026-09-11 11:29:12,736 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-11 11:29:12,736 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 06\c22\profiles\child-life\output
+2026-09-11 11:29:12,738 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 06\c22\profiles\child-life\server.log
+2026-09-11 11:29:12,739 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-11 11:29:12,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:29:33,525 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:29:33,584 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-11 11:29:43,699 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:29:53,702 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:03,702 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:13,702 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:23,700 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:33,698 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:43,700 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:30:53,702 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:03,701 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:13,702 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:23,696 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:33,696 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:43,696 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:31:53,696 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:03,696 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:13,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:23,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:33,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:43,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:32:53,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:03,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:13,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:23,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:33,697 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:43,698 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:33:53,697 INFO GET /health from 127.0.0.1 -> ok

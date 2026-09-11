@@ -1,0 +1,33 @@
+--- agent_receipt_observe06.py
+
++++ agent_receipt_observe06_client.py
+
+@@ -4,6 +4,7 @@
+
+ p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','c22','browser','p4-prepare','p4-check','p4-prepare-client','p4-collect'])
+ p.add_argument('--root',required=True,type=Path);p.add_argument('--seal',required=True,type=Path);p.add_argument('--package',required=True,type=Path)
+ a=p.parse_args();r=Path(__file__).resolve().parents[1]
++assert a.stage in ('p4-prepare','p4-check','p4-prepare-client'), 'Fresh client fixture must remain uncollected'
+ assert sys.flags.isolated and sys.flags.no_site
+ root=a.root.resolve();seal=a.seal.resolve();exe=a.package.resolve()
+ assert root.is_relative_to(Path(r'E:\AI\projects\uoink\installation-receipts')) and ' ' in str(root)
+@@ -32,7 +33,7 @@
+
+ for key in ('LOCALAPPDATA','APPDATA','TEMP','TMP'):
+  q=root/'environment'/key;q.mkdir(parents=True,exist_ok=True);os.environ[key]=str(q)
+ app=root/'app';c22=root/'c22';profile=c22/'profiles/empty';port=18081
+-record_path=root/(a.stage+'-observation.json');assert not record_path.exists()
++record_path=root/('fresh-client-'+a.stage+'-observation.json');assert not record_path.exists()
+ record={'stage':a.stage,'utc_start':dt.datetime.now(dt.timezone.utc).isoformat(),'actual_userprofile':os.environ.get('USERPROFILE'),'account_isolation':'same account, separate app/data/credential namespace; not OS-wide containment','throwaway_account':False,'package_sha256':sha(exe),'package_source':package['build_source'],'active_package_seal':str(seal),'source_bindings':len(package['files']),'installed_credit':False}
+ sys.path.insert(0,str(r/'scripts'))
+ import install_receipt.manifest as manifest
+@@ -84,7 +85,7 @@
+
+      raise TimeoutError('Browser observation deadline; preserve missing evidence')
+     record['browser']=run_checkpoint(runner,profile_name='child-life',observe=observe)
+   else:
+-   stage=a.stage.removeprefix('p4-');p4=root/'p4';p4.mkdir(exist_ok=True)
++   stage=a.stage.removeprefix('p4-');p4=root/'p4-client';p4.mkdir(exist_ok=True)
+    command=[sys.executable,'-I','-S','-B',str(r/'scripts/install_receipt/p4_operator.py'),stage,
+     '--isolated-profile',str(p4/'profile'),'--isolated-port','18282','--installed-app',str(app),'--installed-interpreter',str(app/'python/python.exe'),
+     '--package-manifest',str(seal/'package-manifest.json'),'--receipt-root',str(p4),'--package-path',str(exe),'--source-bindings',str(seal/'source-bindings.json'),

@@ -1,0 +1,21 @@
+{
+  "id": "upgrade_operator_step",
+  "status": "unexecuted",
+  "reason": "real installed upgrade/reinstall is Ryan's operator step",
+  "planned_argv": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "/VERYSILENT",
+    "/NORESTART",
+    "/SUPPRESSMSGBOXES",
+    "/DIR=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\"",
+    "/ISOLATED=1",
+    "/PROFILE=E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\empty",
+    "/PORT=18081",
+    "/NOCLOSEAPPLICATIONS",
+    "/NORESTARTAPPLICATIONS"
+  ],
+  "unspecified_kind": "unspecified_pending_inventory",
+  "same_version_label": "same_version_reinstall",
+  "agreed_inno_shape": true,
+  "mislabel_guard": "same-version reinstall is not a cross-version upgrade"
+}

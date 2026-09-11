@@ -1,0 +1,7 @@
+{
+  "source_sha256": "71d5f45e8800e9217545a2b7f6584f586c8274d7a8e374d2308360847011fd19",
+  "variant_sha256": "ee1527c21561e1657b63e5e137336b4d5c57494506f732cc96a01abe3b0f7a0a",
+  "syntax": "AST parse passed",
+  "scope": "P4 fixture directory, outer receipt/stdout/stderr prefixes and stage restriction only. Guards and child commands unchanged.",
+  "preexecution_review": "Initial unexecuted draft failed to prefix outer stdout/stderr; corrected before any fresh-client stage was launched. Draft and initial review retained."
+}

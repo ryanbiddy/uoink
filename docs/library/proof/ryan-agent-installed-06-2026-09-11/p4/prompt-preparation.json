@@ -1,0 +1,192 @@
+{
+  "prepared_at": "2026-09-11T18:34:37.021219+00:00",
+  "status": "prompt fixture prepared; client not run",
+  "apply_enabled": false,
+  "preview": {
+    "preview_id": "Jpoa9GPdesiwI64_yOKaA5w-4Dy8SRKU",
+    "expires_ms": 1789152576928,
+    "can_apply": false,
+    "apply_enabled": false,
+    "before_setup": {
+      "clips": {
+        "rows": 1,
+        "sha256": "1345ee59c851ab3d8ac7a47232aae5acd57670e853b9f5540cc8a6021259fad8"
+      },
+      "item_shelves": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_applies": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_attempts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_item_policy": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_manifest": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_meta": {
+        "rows": 1,
+        "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+      },
+      "library_operation_receipts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_previews": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_proposals": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_runs": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_submissions": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_user_intents": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_work": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "shelf_nodes": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "shelf_versions": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "yoinks": {
+        "rows": 3,
+        "sha256": "ce888d0830611323e4df2660f07224ed13cb8a5b346edf0fc536199b83359596"
+      },
+      "settings": {
+        "sha256": "7548d45b72734550775feb254d7aad80575adbdd810fcc6d351392573d6abd0b"
+      }
+    },
+    "before_client": {
+      "clips": {
+        "rows": 1,
+        "sha256": "1345ee59c851ab3d8ac7a47232aae5acd57670e853b9f5540cc8a6021259fad8"
+      },
+      "item_shelves": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_applies": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_attempts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_item_policy": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_manifest": {
+        "rows": 3,
+        "sha256": "88b42d5ed0093b8d066a01e786fa052aac80aa5b1132696a594eaa046f3cd166"
+      },
+      "library_meta": {
+        "rows": 1,
+        "sha256": "0ac6d8d68d710b27f159d4ac870a2e15cd15ef6c58af6b49156ce3d0987ea0b9"
+      },
+      "library_operation_receipts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_previews": {
+        "rows": 1,
+        "sha256": "ad56dbba771a1fc33b50bf38b3436343d9f2eda56304d7c0853f0b6dc63073a2"
+      },
+      "library_proposals": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_runs": {
+        "rows": 1,
+        "sha256": "972a1002e42e6697a12cb8ac084b92ab06223f369ed1780a48f2821f4c623798"
+      },
+      "library_submissions": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_user_intents": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "library_work": {
+        "rows": 3,
+        "sha256": "816bedf3bde9d6622ed021e066918caeaf866ba4c29ba89389becc0e73a600fc"
+      },
+      "shelf_nodes": {
+        "rows": 1,
+        "sha256": "2b4f0cfc7762b24253648adaeb5aa157b50b8ae314aebf387f9ba166f8abac64"
+      },
+      "shelf_versions": {
+        "rows": 1,
+        "sha256": "034562820981787b07a9f020b0471ed3ca92eff17b36239bb34a7f3ba80a8c94"
+      },
+      "yoinks": {
+        "rows": 3,
+        "sha256": "ce888d0830611323e4df2660f07224ed13cb8a5b346edf0fc536199b83359596"
+      },
+      "settings": {
+        "sha256": "7548d45b72734550775feb254d7aad80575adbdd810fcc6d351392573d6abd0b"
+      }
+    },
+    "scope": "Real service with synthetic excluded run; no model classifications or apply",
+    "store_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library",
+    "store_root_is_product_default": true,
+    "fixture_generator_version": "p4-evidence-completeness-v2-2026-09-09",
+    "diagnosis": {
+      "service_store_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library",
+      "product_default_store_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library",
+      "used_nondefault_store": false,
+      "taxonomy_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library\\taxonomies",
+      "default_taxonomy_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library\\taxonomies",
+      "taxonomy_files_at_service_store": [
+        "6aea2ab70783456615ed15b559730de95ff70a007694d6932d1d0b3d15e7f844.json"
+      ],
+      "taxonomy_files_at_default_store": [
+        "6aea2ab70783456615ed15b559730de95ff70a007694d6932d1d0b3d15e7f844.json"
+      ],
+      "preview_id": "Jpoa9GPdesiwI64_yOKaA5w-4Dy8SRKU",
+      "expires_ms": 1789152576928,
+      "pure_reader_recheck": {
+        "ok": true,
+        "blocking_reasons": []
+      },
+      "stored_preview_unmodified": true,
+      "fixture_generator_version": "p4-evidence-completeness-v2-2026-09-09",
+      "current_projection_revision": 0,
+      "preview_expected_projection_revision": 0,
+      "projection_matches": true,
+      "delta_hash": "6fd73f0b146d3b5013d388192a0643dac72335dc0aa3fc45b19a63bdf6686317",
+      "pure_reader_store_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\library"
+    }
+  },
+  "entry_sha256": "b36ec8c7ba4b4919cf9570d7e303b129d7b3283bd05e23163a6de3d692912ba9",
+  "config_sha256": "c727083c68d700bdb401156cec98466312d64316679abd454859aa8838a654a1",
+  "default_entry": "mcp.json retains original installed uoink_mcp.py; fixture-attached is a labeled extra and is not original-route or valid-preview credit",
+  "fixture_generator_version": "p4-evidence-completeness-v2-2026-09-09",
+  "candidate": "6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d"
+}

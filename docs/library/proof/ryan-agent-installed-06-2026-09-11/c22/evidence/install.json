@@ -1,0 +1,26 @@
+{
+  "id": "install",
+  "status": "unexecuted",
+  "reason": "Inno is Ryan's throwaway-operator step",
+  "plan": {
+    "argv": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+      "/VERYSILENT",
+      "/NORESTART",
+      "/SUPPRESSMSGBOXES",
+      "/DIR=\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\"",
+      "/ISOLATED=1",
+      "/PROFILE=E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\empty",
+      "/PORT=18081",
+      "/NOCLOSEAPPLICATIONS",
+      "/NORESTARTAPPLICATIONS"
+    ],
+    "execute": false,
+    "reason": "Inno is an operator step; this kit does not auto-run it",
+    "required_close_switches": [
+      "/NOCLOSEAPPLICATIONS",
+      "/NORESTARTAPPLICATIONS"
+    ]
+  },
+  "agreed_inno_shape": true
+}

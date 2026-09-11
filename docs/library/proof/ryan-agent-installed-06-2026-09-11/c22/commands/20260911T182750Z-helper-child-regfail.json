@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-regfail",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app",
+  "started_utc": "2026-09-11T18:27:50Z",
+  "child": {
+    "pid": 39996,
+    "created_ms": 1789151270514,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "observed_ms": 1789151270519,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 39996,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\commands\\20260911T182750Z-helper-child-regfail.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\commands\\20260911T182750Z-helper-child-regfail.stderr.log",
+  "synthetic": false
+}

@@ -1,0 +1,5 @@
+﻿2026-09-11T11:22:43  ==== install verification start ====
+2026-09-11T11:22:43  expected version=3.8.0
+2026-09-11T11:22:43  VERSION file=3.8.0
+2026-09-11T11:22:43  bundled files present: source_manifest.py, openapi_bridge.py, reddit_extractor.py, x_extractor.py, x_article_extractor.py, notes.py, images.py, taste_scoring.py, defaults\style_anchors.json
+2026-09-11T11:22:43  files-only install verification OK; live health probe skipped

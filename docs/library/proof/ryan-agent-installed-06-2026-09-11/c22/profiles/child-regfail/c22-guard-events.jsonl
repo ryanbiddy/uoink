@@ -1,0 +1,87 @@
+{"event": "guard_loaded", "pid": 39996, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\""}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "guard_loaded", "pid": 11448, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18080)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18080)"}
+{"event": "guard_loaded", "pid": 31568, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 31568, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 31568, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 33764, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 33764, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 33764, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 21432, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 21432, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 21432, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 18652, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 18652, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 18652, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 17820, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 17820, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 17820, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 19292, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 19292, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 19292, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 39996, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39996, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39996, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -B -c \"import time; time.sleep(8)\""}
+{"event": "guard_loaded", "pid": 31968, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "guard_loaded", "pid": 17800, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 17800, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\""}
+{"event": "guard_loaded", "pid": 25820, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 17800, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 34776, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\profiles\\child-regfail", "injection": "registration_failure"}
+{"event": "network_attempt", "pid": 34776, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 34776, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "subprocess_attempt", "pid": 17800, "command": "ffmpeg -version"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 17800, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}

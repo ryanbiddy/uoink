@@ -1,0 +1,50 @@
+{
+  "registry": {
+    "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1": {
+      "present": true,
+      "sha256": "716229d4917b2db40efbe1ce096062c2cc9cadd2ce7d5084936b323aeb019315"
+    },
+    "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKCU:\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKCU:\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKLM:\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "HKLM:\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1": {
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    }
+  },
+  "ordinary_autorun_hash": "5e40b3d136017c91704792bdfe7c1fd69e5a054ecb3dc687a8a9066dc125e155",
+  "ordinary_shortcut_hashes": {
+    "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink\\Open Uoink folder.lnk": "78a5d3017f517c2083a363e2c02a996ded03a2ef1c30c29891090f73a76a76bc",
+    "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink\\Stop Uoink.lnk": "0075191e303da550c9f713dbb2c96e48c04a12401234b0e373406371cd1c5c31",
+    "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink\\Uninstall Uoink.lnk": "3645460495851b27cd17285aa63e0e69594a89e10e1a511d4cb8296e84cf7467",
+    "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink\\Uoink.lnk": "1c18bb8eefbe626e77a9516dc45cee35c39f3f9b201beab970b1fdc48fa13944"
+  },
+  "untraversed_desktop": {
+    "C:\\Users\\hello\\OneDrive\\Desktop": {
+      "metadata_sha256": "bb778ab550af32017aba8b3782344b7d89b95c7ee959edc54fbf45ddb7e88ee4",
+      "contents_observed": false,
+      "reason": "Ordinary reparse Desktop not traversed; selected tasks must exclude desktopicon"
+    }
+  }
+}

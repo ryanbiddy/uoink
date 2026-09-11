@@ -1,0 +1,13 @@
+{
+  "synthetic_fixture": true,
+  "url": "https://x.com/NASAAdmin/status/2020984085754282078",
+  "blocked_link": {
+    "status": "blocked_link",
+    "url": "https://x.com/NASAAdmin/status/2020984085754282078",
+    "prior_condition": "HTTP 403 / net::ERR_HTTP_RESPONSE_CODE_FAILURE",
+    "no_retry": true,
+    "no_new_fetch": true,
+    "not_a_successful_click": true
+  },
+  "not_a_quotation_of_x": true
+}

@@ -1,0 +1,132 @@
+{
+  "utc": "2026-09-11T18:36:47.586722+00:00",
+  "stage": "collect",
+  "runtime_mode": "installed",
+  "command": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\install_receipt\\p4_collect_evidence.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile",
+    "--isolated-port",
+    "18282",
+    "--installed-app",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app",
+    "--installed-interpreter",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "--package-manifest",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-06-2026-09-11\\package-manifest.json",
+    "--receipt-root",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4",
+    "--forbid-checkout",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+    "--package-path",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "--source-bindings",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-06-2026-09-11\\source-bindings.json",
+    "--runtime-mode",
+    "installed",
+    "--operator-json",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\operator.json"
+  ],
+  "installed_credit": false,
+  "apply_enabled": false,
+  "exit_code": 0,
+  "cleanup": {
+    "pid": 19580,
+    "label": "p4-operator-collect",
+    "job_assigned": true,
+    "already_exited": true,
+    "exit_code": 0,
+    "assignment_error": null,
+    "descendants_before": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        19580
+      ],
+      "parent_pid": 19580,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_after": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        19580
+      ],
+      "parent_pid": 19580,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_remaining": [],
+    "descendants_exited": true,
+    "job_query_ok": true,
+    "job_empty_affirmed": true,
+    "identity_uncertain": false,
+    "job_query_error": null,
+    "parent_exited": true,
+    "cleaned": true
+  },
+  "guard_install": {
+    "interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "bundled": true,
+    "mutations": [
+      {
+        "action": "created",
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "sha256": "fea3f098ec136638d037dc3cbf47034ea1a614c2b5d6a66601270c101c4445a9",
+        "bytes": 2273,
+        "payload_b64": "IyBQNCByZWNlaXB0IGd1YXJkLiBSZWZ1c2UgbGl2ZSBpbmRleCwgcG9ydCA1MTc5LCBtb2RlbC9jbGllbnQvZmV0Y2guCmltcG9ydCBvcywgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApmcm9tIHVybGxpYi5wYXJzZSBpbXBvcnQgdXJsc3BsaXQsIHVucXVvdGUKCmRlZiBkYXRhYmFzZV9wYXRoKHZhbHVlKToKICAgIGlmIHZhbHVlLnN0YXJ0c3dpdGgoJ2ZpbGU6Jyk6CiAgICAgICAgdXJpID0gdXJsc3BsaXQodmFsdWUpCiAgICAgICAgaWYgdXJpLm5ldGxvYy5sb3dlcigpIG5vdCBpbiAoJycsICdsb2NhbGhvc3QnKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCByZW1vdGUgZGF0YWJhc2UgYXV0aG9yaXR5IGZvcmJpZGRlbicpCiAgICAgICAgdmFsdWUgPSB1bnF1b3RlKHVyaS5wYXRoKQogICAgICAgIGlmIG9zLm5hbWUgPT0gJ250JyBhbmQgbGVuKHZhbHVlKSA+IDIgYW5kIHZhbHVlWzBdID09ICcvJyBhbmQgdmFsdWVbMl0gPT0gJzonOgogICAgICAgICAgICB2YWx1ZSA9IHZhbHVlWzE6XQogICAgcmV0dXJuIFBhdGgodmFsdWUpLnJlc29sdmUoKQoKZGVmIGF1ZGl0KGV2ZW50LCBhcmdzKToKICAgIGZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdQNF9GT1JCSURERU5fSU5ERVgnLCAnJykKICAgIGFic29sdXRlX2ZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdJR19GT1JCSURERU5fTElWRScsICcnKQogICAgcm9vdCA9IG9zLmVudmlyb24uZ2V0KCdQNF9JU09MQVRFRF9QUk9GSUxFJykgb3Igb3MuZW52aXJvbi5nZXQoJ1A0X0ZJWFRVUkVfUk9PVCcpCiAgICBpZiBldmVudCBpbiAoJ29wZW4nLCAnc3FsaXRlMy5jb25uZWN0JykgYW5kIGlzaW5zdGFuY2UoYXJnc1swXSwgKHN0ciwgYnl0ZXMsIG9zLlBhdGhMaWtlKSk6CiAgICAgICAgdmFsdWUgPSBvcy5mc2RlY29kZShhcmdzWzBdKS5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKQogICAgICAgIGlmIGZvcmJpZGRlbiBhbmQgZm9yYmlkZGVuLnJlcGxhY2UoJ1xcJywgJy8nKS5sb3dlcigpIGluIHZhbHVlOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgICAgICBpZiBhYnNvbHV0ZV9mb3JiaWRkZW4gYW5kIGFic29sdXRlX2ZvcmJpZGRlbi5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKSBpbiB2YWx1ZToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBpbnRlZ3JhdG9yIGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzcWxpdGUzLmNvbm5lY3QnIGFuZCBpc2luc3RhbmNlKGFyZ3NbMF0sIHN0cikgYW5kIGFyZ3NbMF0gIT0gJzptZW1vcnk6JyBhbmQgcm9vdDoKICAgICAgICBpZiBub3QgZGF0YWJhc2VfcGF0aChhcmdzWzBdKS5pc19yZWxhdGl2ZV90byhQYXRoKHJvb3QpLnJlc29sdmUoKSk6CiAgICAgICAgICAgIHJhaXNlIFBlcm1pc3Npb25FcnJvcignUDQgZGF0YWJhc2Ugb3V0c2lkZSBpc29sYXRlZCBwcm9maWxlJykKICAgIGlmIGV2ZW50IGluICgnc29ja2V0LmNvbm5lY3QnLCAnc29ja2V0LmJpbmQnLCAnc29ja2V0LnNlbmR0bycsICdzb2NrZXQuZ2V0YWRkcmluZm8nKToKICAgICAgICBhZGRyZXNzID0gYXJnc1s6Ml0gaWYgZXZlbnQgPT0gJ3NvY2tldC5nZXRhZGRyaW5mbycgZWxzZSBhcmdzWzFdCiAgICAgICAgaWYgaXNpbnN0YW5jZShhZGRyZXNzLCB0dXBsZSkgYW5kICgKICAgICAgICAgICAgc3RyKGFkZHJlc3NbMV0pID09ICc1MTc5JyBvciBhZGRyZXNzWzBdIG5vdCBpbiAoJzEyNy4wLjAuMScsICc6OjEnLCAnbG9jYWxob3N0JywgJycpCiAgICAgICAgKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBleHRlcm5hbCBuZXR3b3JrIG9yIHJlc2lkZW50IHBvcnQgZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzdWJwcm9jZXNzLlBvcGVuJzoKICAgICAgICBjb21tYW5kID0gYXJnc1sxXQogICAgICAgIGZpcnN0ID0gY29tbWFuZFswXSBpZiBpc2luc3RhbmNlKGNvbW1hbmQsICh0dXBsZSwgbGlzdCkpIGVsc2Ugc3RyKGNvbW1hbmQpLnNwbGl0KClbMF0KICAgICAgICBuYW1lID0gUGF0aChzdHIoZmlyc3QpKS5zdGVtLmxvd2VyKCkKICAgICAgICBpZiBuYW1lIGluICgnY2xhdWRlJywgJ2NvZGV4JywgJ2dyb2snLCAnZ2VtaW5pJywgJ3l0LWRscCcsICdmZm1wZWcnLCAnY3VybCcpOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGV4ZWN1dGlvbi9mZXRjaCBzZW50aW5lbCcpCgpzeXMuYWRkYXVkaXRob29rKGF1ZGl0KQo="
+      }
+    ],
+    "already_present": false,
+    "mechanism": "bundled_site_packages",
+    "pth_active_import_site": true,
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+    "pth_commented_import_site_ignored": false,
+    "pth_already_imports_site": true,
+    "restorable": true
+  },
+  "guard_canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4\\profile\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "pid": 19580,
+  "guard_restore": {
+    "restored": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "action": "removed",
+        "exact_receipt_bytes": true
+      }
+    ],
+    "ok": true,
+    "failures": []
+  },
+  "outputs": {
+    "operator-collect.stdout": {
+      "sha256": "83fd8ab06cd854c8ffaa1eec844096ec7ab06338f0e4419464652a9b4290cadc",
+      "bytes": 273
+    },
+    "operator-collect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "status": "completed_pending_review"
+}

@@ -1,0 +1,6 @@
+{
+  "source_sha256": "71d5f45e8800e9217545a2b7f6584f586c8274d7a8e374d2308360847011fd19",
+  "variant_sha256": "c1d6518117d44b78d67c3edef13a5086963da13a125d987a4ecabe4088c63f9a",
+  "syntax": "AST parse passed",
+  "scope": "Two path/name substitutions and one stage restriction only; no product source change"
+}

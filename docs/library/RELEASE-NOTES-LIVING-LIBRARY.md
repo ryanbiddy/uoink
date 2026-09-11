@@ -1,6 +1,6 @@
 # Living Library 3.8.0 release candidate
 
-Updated 2026-09-10. Candidate retained for review; not approved for ordinary upgrade or public release.
+Updated 2026-09-11. Candidate retained for review; not approved for ordinary upgrade or public release.
 
 The library now supports bounded evidence retrieval, reviewable shelf proposals,
 consented standing capture, native resources and prompts, an optional file mirror,
@@ -11,33 +11,37 @@ public release has occurred. Installation is not a security certification.
 
 | Item | Recorded value |
 |---|---|
-| Installer | Uoink-Setup-3.8.0.exe |
-| Build source | `6b5aed8cb60be3e826af5f308015393a72c60b0d` |
-| Bytes | 388,987,465 |
-| SHA-256 | `95123073516bf880858218ff8ca426206b15cafc12e2d07bc9f125e1ccc30e49` |
+| Installer | Uoink-Setup-3.8.0.exe, package-06 |
+| Build and complete-tree source | `6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d` |
+| Bytes | 389,568,844 |
+| SHA-256 | `91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb` |
 | Bundled runtime | Python 3.13.15, MCP 1.28.1, schema 30 |
-| Build interval, UTC | 2026-09-10T05:55:50.0277909+00:00 to 2026-09-10T06:02:37.8930199+00:00; 407.867 seconds |
-| Complete-tree source | `393010f80c53a95a6fa3c853a98b77924efa0250` |
-| Complete-tree result | 2,493 passed, 1 failed, 2 skipped and 1 xfailed |
-| Actual installation | Actual isolated install/reinstall observed; client and browser gate incomplete |
+| Build interval, UTC | 2026-09-11T18:10:15.1189075Z to 18:17:10.6256317Z; 415.509 seconds |
+| Complete-tree result | 2,535 passed, 1 historical failure, 2 skipped; 2,538 cases |
+| Actual installation | Isolated Setup/reinstall, C22 and repaired browser review complete; real-client gate remains open |
 
-[Package-05's seal](proof/candidate-package-05-2026-09-09/SHA256.json) records
-32,063 compiler inputs: 32,054 installed file destinations, eight wizard images
-and one setup-only script. Its 142 source bindings comprise 141 installed source
-files and the separate `dontcopy` script. Compiling a file is not evidence that
-Setup installed it; the installed comparison is recorded separately below.
+The [package-06 seal](proof/candidate-package-06-2026-09-11/SHA256.json)
+records 32,506 compiler inputs: 32,497 installed destinations, eight wizard
+images and one setup-only script. All 142 source bindings match. Actual Setup
+and installed-file comparisons are recorded separately below.
 
-All 139 runtime pins match the actual build metadata, with no extra distributions.
-The generated notices were reviewed at `45cd6f7`; they are outside the installer
-payload. Later evidence and documentation commits do not change packaged source.
-The earlier packages and receipt ZIP remain retained historical artifacts.
-Use the new package and its matching [runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md).
+All 140 runtime pins match staging and all 283 declared active requirements
+are satisfied. All 983 compared payload files from the two Lightning repair
+wheels and setuptools match the independently verified downloads; installation-
+rewritten RECORD files are explicitly excluded. See [the package verdict](ASTRA-PACKAGE-06-VERDICT-2026-09-11.md).
+
+Notices-only commit `d363c04` follows the frozen source. Its 50 corrected license
+fields use exact packaged License-Expression metadata; seven missing declarations
+remain unknown. Raw generator output and source metadata are retained. Notices
+are outside the installer payload; no packaged source changed after validation.
+Earlier installers and ZIPs remain preserved. Use this package with its matching
+[runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md).
 
 ## What the phases deliver
 
 | Phase | Delivered behavior | Scope and limits |
 |---|---|---|
-| 0–1: capture and evidence | Health/doctor reporting, capture registry and CLI repairs, clip retrieval, canonical evidence cards, source/timing provenance and opt-in Recall context | Historical foundation acceptance retains its recorded exceptions; the watchdog still requires an owner action |
+| 0–1: capture and evidence | Health/doctor reporting, capture registry and CLI repairs, Unicode search, clip retrieval, canonical evidence cards, source/timing provenance and opt-in Recall context | Historical foundation acceptance retains its recorded exceptions; the watchdog still requires an owner action |
 | 2: Librarian shelves | Work queue, leases, validated previews, reviewed assignments, pins, apply/undo and recovery | Proposals ship as reviewable suggestions; autonomous filing retains 0.90 and `librarian_apply_enabled=false` |
 | 3: standing capture | Durable source consent, separate discovery/enrollment, atomic start reservation, deduplication and recovery | Capture starts off; up to 25 back-catalog items and 10 starts per source per UTC day; source opt-in does not permit model downloads or label application |
 | 4: bounded access and mirror | Five resource templates, four prompts, bounded card/excerpt/corpus/shelf/brief reads, revision-bound citations and separately consented mirror export | Tools and resources share representations; user edits and ownership survive conflicts and deletion recovery; X remains blocked with HTTP 403 |
@@ -91,15 +95,23 @@ or complete safety are not adopted.
 | Receipt setup corrections | `9ea7d08` | 172 passes in each root; all 17 original scenario assertions preserved |
 | Python 3.13.15 and FFmpeg updates | `9ce27a2`, `e1d81bc`, `6b5aed8` | 139 exact runtime packages; static LGPL 8.1.2 plus shared LGPL 7.1.5; 42 repair checks pass in both roots and product-loader WAV decoding passes |
 | Setup-only payload classification | `86bfede` | 35 passes in each root; 34 new regressions reject missing/changed app files, traversal and improper exemptions |
+| Unicode search | `41c0d1d` | 137 passes in each root with original assertions and explicit --runxfail; 18 new retrieval regressions |
+| Capture revision and recovery display | `15e3f7e` | 316 passes / one historical AT6 failure in each root; real JavaScript renderer and new installed browser review |
+| Lightning 2.6.6 | `63f7de9` | 16 passes in each root; three native overlay checks; both verified wheel payloads match staging |
+| Required setuptools runtime and notices | `9ea755b` | 19 passes in each root; final 140-pin / 283-requirement graph has no missing edge |
 
 Pillow is now 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
-The revised-lock OSV observation reports **19 advisory entries / 15 distinct
-alias-connected issues across four packages**, down from 95 entries / 55 issues
-across seven. This audit is not clean.
+The September 11 exact-version OSV observation of all 140 top-level pins retains
+**19 advisory entries / 15 alias-connected issues across four packages**. The
+earlier baseline had 95 entries / 55 issues across seven. The new raw scan is
+not clean; Lightning's verified code repair is documented separately from its
+inconsistent advisory record. A separate query of the 12 distributions vendored
+inside setuptools returns zero entries. This does not cover every native or
+embedded library. See [the fresh audit and graph](proof/repaired-lock-audit-2026-09-11/SHA256.json).
 
 | Retained package | Distinct issues | Applicability and repair limit |
 |---|---:|---|
-| Lightning 2.6.5 | 1 | Affected checkpoint loading; no available upstream release contains the reported repair |
+| Lightning 2.6.6 | 1 raw scanner group | Both namespaces contain the verified upstream instantiation checks; OSV still reports an inconsistent 2022.6.15 fixed event. Raw findings are retained, without a clean-scan claim |
 | NLTK 3.10.3 | 1 | Model-artifact path APIs remain affected; the observed Uoink/WhisperX sentence-tokenization call path does not expose those APIs |
 | Torch 2.8.0 | 8 | WhisperX's published dependency constraint prevents a direct move to the patched newer line |
 | Transformers 4.57.6 | 5 | Patched 5.x needs a Hugging Face Hub version incompatible with the current WhisperX constraint; affected model/training/export APIs are not first-party Uoink call sites |
@@ -108,10 +120,13 @@ Ordinary transcription uses PyAnnote voice detection and loads a checkpoint
 packaged with WhisperX. Disabling speaker attribution does not bypass every
 checkpoint loader. The new package contains the same 17,719,103-byte checkpoint,
 SHA-256 `0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea`.
-No model download or diarization was run for this verification. Retained
-checkpoint-loader advisories require a release decision; consent or a local file
-path does not repair unsafe deserialization. See
-[Astra's dependency verdict](ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md).
+No model download, checkpoint inference or diarization was run for this
+verification. The Lightning overlay checked refusal behavior and imports,
+not actual checkpoint compatibility; it retains one denied socket.bind attempt.
+Remaining model-loader advisories require a release decision. See the
+[current Lightning verdict](ASTRA-LIGHTNING-266-VERDICT-2026-09-11.md),
+[corrected Gemini review](ASTRA-DEPENDENCY-CLOSURE-REVIEW-2026-09-11.md) and
+[earlier reachability analysis](ASTRA-DEPENDENCY-SECURITY-VERDICT-2026-09-09.md).
 
 Defender's custom scan of this exact new EXE exits zero and reports no threats;
 its before/after hashes match. The EXE is unsigned. Antivirus, firewall and
@@ -127,53 +142,59 @@ used. Actual receipts retain the real account identity and effects.
 
 ## Actual installed observations
 
-Actual Setup and same-version reinstall each exit zero in Agent Install 05,
-outside the checkout under the same non-elevated Windows account. All 32,054
-installed file hashes match. The original installer observer refused the
-OneDrive-redirected Desktop before Setup; the reviewed supplement records its
-metadata without traversing contents, verifies actual empty Tasks settings and
-checks the actual Inno/shortcut/registry effects. Ordinary Uoink was not replaced.
+Actual Setup and same-version reinstall each exit zero in **Agent Install 06**,
+outside the checkout under the same non-elevated Windows account. All 32,497
+installed file hashes match. The only three extras are Inno's uninstaller/data
+and the isolation marker. Actual shortcut targets, separate uninstall entry and
+empty Tasks settings match the reviewed installer. Ordinary observed settings
+are unchanged. The OneDrive-redirected Desktop is recorded by metadata without
+traversing its contents; no desktopicon task was selected.
 
 Installed C22 records **11 passed / zero failed / three unexecuted manual
-placeholders**. Four actual browser images are paired with the same persisted
-state before, after and after stop. Only labels/timestamps change. The visible
-source/allowance/idle state agrees; consent revision and the worker_lost outcome
-are not shown, so the visual receipt remains **partial**. The helper exits zero,
-its port is freed, and guard/interpreter bytes are restored. See the bounded
-[browser repair brief](BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10.md).
+placeholders**. Every owned child is confirmed dead. No unexpected helper errors
+remain, and guard/interpreter bytes are restored. The raw placeholders are not
+rewritten by the separate Setup and visual observations.
 
-Installed image/encryption and product-loader WAV observations pass using
-temporary no-site instrumentation, with byte-exact interpreter restoration.
-They establish instrumented decoder compatibility. The original launcher and
-startup-flag failures are retained; no model download or inference occurred.
+The independent browser review **passes**. Actual PNGs show consent on at rev 1,
+enrollment 1/25, one charged start out of ten, the settled worker_lost failure
+and eligible retry at attempt 1/3. Activity shows zero running or queued jobs.
+The same persisted state is unchanged before viewing, after viewing and after
+stop; only labels and timestamps differ. Original images and UTC records are
+retained. The helper exits zero, frees its port and restores its startup bytes.
+The old package-05 partial visual receipt remains partial in its own archive.
 
-After receipt repair `393010f`, the original installed Phase 4 route observes
-32 tools, five resource templates and four prompts. Its collector records
-**15 passed / zero failed / eight unobserved**, with zero product findings.
-Native packets/prompts, reconnect, storage refusal, Recall silence, protected
-bytes and mirror/deletion checks have separate evidence. The raw collector's
-overall installed_credit remains false; it is not a completed client gate.
-Owned transport termination retains exit one and is not described as a graceful
-client exit. The first prepare import failure and missing-input collection
-refusal remain recorded.
+Installed image/encryption and product-loader WAV observations pass with
+temporary no-site instrumentation and byte-exact restoration. These establish
+instrumented decoder compatibility. No model or checkpoint inference occurred.
 
-See [the installed evidence seal](proof/ryan-agent-installed-05-2026-09-09/SHA256.json)
-and [Astra's installed verdict](ASTRA-INSTALLED-CANDIDATE-VERDICT-2026-09-10.md).
+The actual installed Phase 4 route observes 32 tools, five resource templates
+and four prompts. Collection records **15 passed / zero failed / one blocked /
+seven unobserved**, with zero product findings. Native packets/prompts,
+reconnect, storage refusal, Recall silence, protected bytes and mirror/deletion
+checks have separate executable evidence. The blocked row carries X's prior
+403 disposition without a new fetch. The collector's overall installed_credit
+stays false because client acceptance is incomplete. Terminated transport exit
+one remains recorded; no graceful client exit is claimed.
 
-The isolated same-version reinstall exercises replacement by the same version.
-It deliberately skips the ordinary upgrade-preparation script and does not
-establish a cross-version binary upgrade. Legacy-data migration is a separate
-C22 observation. Synthetic acquisition/transcripts and prepared P4 evidence stay
-labeled as fixtures; they do not become live-source quotations.
+A separate **p4-client/profile** has been prepared and independently checked,
+and remains uncollected for the user-controlled client session. No ordinary
+credentials were read or copied and Astra has not invoked a client model.
+Fresh subscription sign-in and extra-usage-off confirmation remain required;
+use [the prepared sign-in instructions](INSTALLED-CLIENT-SIGNIN-2026-09-11.md).
+The seven unobserved rows are local citation, brief and chapter visuals, optional
+external player navigation, hostile client actions and ordinary/Recall client
+streams. They are not seven newly failing product features. The prior BD-27
+player observation remains historical; no external source was fetched again.
 
-Fresh isolated client configuration is prepared, empty and unsigned-in.
-No ordinary credentials were read or copied, and no client/model was invoked.
-Fresh subscription sign-in and confirmation that extra paid usage is off remain
-user-controlled prerequisites. Actual ordinary/Recall client streams, hostile
-client actions, and visual citation/brief/chapter flows remain unobserved. X's
-historical HTTP 403 and BD-27's earlier player observation retain their separate
-scope; neither was fetched again. The eight unobserved collector rows include
-the optional player row and are not eight newly failing product features.
+See [the 300-payload installed seal](proof/ryan-agent-installed-06-2026-09-11/SHA256.json)
+and [Astra's installed verdict](ASTRA-INSTALLED-PACKAGE-06-VERDICT-2026-09-11.md).
+The export's first relative-path refusal and all earlier package-05 failed or
+partial attempts remain retained. The corrected export reran no product test.
+
+Same-version reinstall does not establish an ordinary or cross-version binary
+upgrade. The isolated route skips the ordinary upgrade-preparation script;
+legacy-data migration is a separate C22 observation. Synthetic acquisition,
+transcripts and prepared P4 evidence stay labeled as fixtures.
 
 ## Full-tree results and retained history
 
@@ -187,6 +208,7 @@ Installed Python 3.13.15 observations are separate.
 
 | Source | Passed | Failed | Skipped | Xfailed | Seconds |
 |---|---:|---:|---:|---:|---:|
+| `6697dff` (explicit --runxfail) | 2,535 | 1 | 2 | 0 | 1452.312 |
 | `393010f` | 2,493 | 1 | 2 | 1 | 1451.129 |
 | `9a62e84` | 2,489 | 1 | 2 | 1 | 1464.698 |
 | `7109182` (monolithic) | 2,484 | 3 | 2 | 1 | 1568.94 |
@@ -195,20 +217,22 @@ Installed Python 3.13.15 observations are separate.
 | `8fc6a40` | 2,254 | 10 | 3 | 1 | 573.49 |
 | `263b7e4` | 2,193 | 9 | 3 | 1 | 728.37 |
 
-All 2,497 cases are accounted for once. Four new embedded-probe regressions were added after `9a62e84`, with no prior case missing. The aggregate remains FAIL; the historical AT6 exit assertion is still failed. No existing test or fixture guard changed. See [the complete-tree seal](proof/ryan-final-partitioned-02-2026-09-10/SHA256.json).
+All 2,538 cases are accounted for once: the previous 2,497 plus 41 new regressions, with no prior case missing. The aggregate remains FAIL because the historical AT6 exit assertion remains failed. No existing test or fixture guard changed. See [the current complete-tree verdict](REPAIRED-CANDIDATE-VERIFICATION-2026-09-11.md) and [its seal](proof/ryan-final-partitioned-03-2026-09-11/SHA256.json).
 
 The original AT6 shell wrapper discarded the child exit status. Recovered
 artifacts and a successful replacement AT7 cannot recreate that old status;
-the original audit assertion remains failed. SEC-06 is the existing strict
-expected failure for non-ASCII search queries; it is an unresolved functional
-limitation, not a security repair. Platform-specific skips remain disclosed.
+the original audit assertion remains failed. SEC-06's original Unicode assertions now pass. Its strict expected-failure
+marker was not edited: the earlier normal focused run therefore retains a
+strict XPASS failure. The new complete run explicitly uses --runxfail to execute
+the unchanged assertion bodies. This is a new measurement, not a rewrite of
+the old xfail. Platform-specific skips remain disclosed.
 See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 ## Open release decisions and limits
 
 - Ryan's disposition of the missing historical AT6 exit and retained dependency
   advisories; neither is presented as a pass or clean security clearance.
-- Complete the bounded browser recovery/revision display repair and fresh installed visual pair. Real-client authentication, client streams and citation/brief/chapter observations remain open; no release approval is inferred.
+- Fresh isolated client authentication, real-client streams and citation/brief/chapter observations remain open. The capture display repair and its installed browser/state pair are complete; they do not supply the missing client evidence.
 - No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
   is deferred. The failed shelf-quality and dashboard-size measurements remain.
 - Main merge and publication require Ryan's decision. Only the authorized
@@ -222,12 +246,9 @@ failed/partial observation and remaining action.
 
 ## Current review kit
 
-The local review kit is
-`build/Uoink-Living-Library-3-8-0-Review-Kit-05-2026-09-10.zip`:
-415,554,388 bytes, SHA-256
-`b6b49a87622af82421c99f09307c6dcb707c005c2b1058a668d0a47672c9ac3b`.
-It binds review source `7a7b9aa`, validation `393010f` and installer `6b5aed8`.
-All 1,485 ZIP and extracted payload hashes match. It contains the matching
-installer, receipt tools and notes, with release_ready=false. Preserve it as
-review evidence; the browser repair will require a later package. See the
-[delivery seal](proof/ryan-review-bundle-05-2026-09-10/SHA256.json).
+Review kit filename: `build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.zip`.
+The accompanying `.receipt.json` records the ZIP hash, byte count and source
+commits; `BUNDLE-SHA256.json` records every payload. It pairs package-06 with
+the matching receipt tools, notices, notes and evidence, with release_ready=false.
+The earlier package-05 EXE and review ZIP remain preserved. No ordinary upgrade,
+main merge or publication is included in delivery.

@@ -1,0 +1,12 @@
+{
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_installed_decoders06.py",
+  "portable": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_installed_decoders06_portable.py",
+  "changes": [
+    "Resolve bundle root from script parent",
+    "Resolve decoder probes beside portable launcher"
+  ],
+  "source_sha256": "51d70b28391a427c21a53480bdfdd970a95ccec63cdc327d6c2c09eb1b1ae34e",
+  "portable_sha256": "20e3fae02dc066f206b9254b8e3fca9c329762c5080e19a96728aa5fcd821d57",
+  "product_files_changed": false,
+  "validation": "Python AST parse; exact two path substitutions only. Local installed observations will use the source form. Portable form is not independently executed."
+}

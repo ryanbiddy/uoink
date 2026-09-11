@@ -90,13 +90,13 @@ establish safe installation isolation, and verify/correct resulting findings.
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in worktree and checkout with original assertions and --runxfail; ordinary strict-XPASS result retained | Complete tree and package-06 recorded; installed observation follows |
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; closing delivery follows |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Capture display repaired at 15e3f7e; original AT6 exit gap remains | 316 passes / one historical AT6 failure in each root; real JavaScript renderer exercised | New installed browser/state pair owed; package-05 partial receipt stays partial |
-| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Package-05 collection: 15 passed / zero failed / eight unobserved. Fresh package-06 client/visual receipts remain |
+| 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
+| 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile prepared and checked, not collected. User subscription sign-in/extra-usage confirmation and client/visual observations remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | 140 exact runtime pins and 283 requirements match; 983 repair-wheel payloads match. Defender exits zero with no threats; unsigned. Raw OSV 19 entries / 15 issues retained | Fresh isolated Setup/reinstall, C22/browser and P4 observations next. Package-05 EXE/kit/receipts preserved; old owned test app removed safely |
+| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match; 300 installed proof payloads sealed. 140 runtime pins, 283 requirements and 983 repair-wheel files match. Defender no threats; unsigned, raw OSV 19/15 retained | Finish review ZIP and authorized backup; remaining client and release decisions belong to Ryan. No ordinary upgrade or main merge |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -203,14 +203,19 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Source 6697dff now records 2,535 passes / one historical AT6 failure / two
    skips, all 2,538 cases accounted for. Package-06 is built, sealed and scanned.
    See ASTRA-PACKAGE-06-VERDICT-2026-09-11.md; no new product failure appeared.
-7. Observe package-06 in fresh Agent Install 06 paths, including actual Setup/
-   reinstall, every installed hash and the repaired browser/state pair. The
-   source tree and package are sealed; do not rerun them without a repair.
-   Package-05 and its kit are preserved; only its owned isolated app was removed.
-   Fresh Phase 4 client/visual observation also needs a new prepared profile:
-   p4-02 has already run collection's declared fixture deletion checks. Never
-   reuse it as a pristine client fixture. User-controlled fresh authentication
-   and confirmation of subscription/extra-usage settings remain required.
+7. Package-06 actual Setup/reinstall, all installed hashes, C22/browser and
+   independent P4 collection are complete. Read ASTRA-INSTALLED-PACKAGE-06-
+   VERDICT-2026-09-11.md. No product test, package or install rerun is owed.
+   The first seal-input export failure is retained; its unchanged serializer
+   succeeded with the documented absolute-path invocation.
+   Agent Install 06/p4/profile has completed fixture deletion checks. Use the
+   separate intact Agent Install 06/p4-client/profile for the real client;
+   prepare/check/prepare-client already succeeded there. Do not collect it
+   before client/visual observations. INSTALLED-CLIENT-SIGNIN-2026-09-11.md
+   gives the exact user step. Fresh authentication and extra-usage-off
+   confirmation remain pending; no ordinary credentials or model invoked.
+   Complete the package-06 review ZIP, verify its contents, then push only the
+   authorized cc/living-library backup and retain its transport receipt.
 8. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
@@ -436,6 +441,10 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
+- Fresh subscription sign-in and confirmation that extra paid usage is off
+  for Agent Install 06/p4-client/profile. It is prepared, route-checked and
+  uncollected. Client streams and citation/brief/chapter visuals remain open;
+  see INSTALLED-CLIENT-SIGNIN-2026-09-11.md. Do not copy ordinary credentials.
 - The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
   failed; any release disposition of missing evidence belongs to Ryan.
 - The revised dependency audit retains 19 entries / 15 distinct issues in four
@@ -2735,3 +2744,33 @@ changed after the complete tree; no further rebuild is needed for notices.
 Package-05's EXE and ZIP are retained. The owned isolated test app uninstalled
 with exit zero and observed ordinary effects unchanged; its receipt profiles
 remain. Next is Agent Install 06, never an ordinary profile or 5179.
+
+### 2026-09-11 — installed package-06 observed and sealed
+
+Actual Setup/reinstall both exit zero; all 32,497 installed files match, with
+only the three expected generated files. C22 has 11 passed / zero failed /
+three raw manual placeholders. All owned children are dead, unexpected helper
+errors are absent, and interpreter/guard bytes restore exactly. Independent
+visual review passes: rev 1, 1/25 enrollment, 1/10 charged start and the
+worker_lost recovery at attempt 1/3 are visible and match unchanged before/
+after/stop snapshots. Six original PNGs remain, including intermediate captures.
+The Sources pane uses an inner scrolling container; native DOM scrolling
+exposed the full card when the browser CLI's generic scroll did not move it.
+No CSS, UI text or screenshot bytes were altered. A rejected combined shell
+save was replaced with separate error collection and a bounded serializer.
+
+P4 collection has 15 passed / zero failed / one blocked / seven unobserved,
+zero product findings and incomplete client credit. X is a prior blocked-link
+disposition, not a new response. The collector fixture is consumed. A separate
+p4-client/profile is prepared and checked, then left intact for sign-in. The
+observer variant changes only directory/outer log names and restricts stages.
+Pre-execution review caught missing stdout/stderr prefixes before any stage ran.
+The actual client has not been invoked; fresh account confirmation is pending.
+
+The first installed export failed on its relative summary argument after
+298 payload copies. That partial export remains at _scratch/installed06-seal-
+failed01 with hashes and the tool-returned diagnostic. Under INSTALLED-06-SEAL-
+INPUT-REPAIR-2026-09-11.md, the unchanged serializer accepted the absolute owned
+summary path and sealed 300 payloads, excluding databases and authentication
+stores. No product test or install was rerun. Notes and runbook now bind
+package-06; all nine runbook PowerShell blocks parse, a syntax-only result.

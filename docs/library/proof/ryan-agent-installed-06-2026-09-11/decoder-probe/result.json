@@ -1,0 +1,62 @@
+{
+  "utc": "2026-09-11T18:25:00.353286+00:00",
+  "versions": {
+    "Pillow": "12.3.0",
+    "cryptography": "50.0.1",
+    "mcp": "1.28.1",
+    "nltk": "3.10.3"
+  },
+  "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+  "image_module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\images.py",
+  "checks": [
+    {
+      "format": "PNG",
+      "source_sha256": "fdf762e15ab913cd9d7a560709b7ff61d4192dbce998d0ca069954fa7b97f990",
+      "dimensions": [
+        48,
+        32
+      ],
+      "thumbnail_sha256": "8309012816832201917363699d99056b2007dcf51a268fa735fa03b0361d2936",
+      "passed": true
+    },
+    {
+      "format": "JPEG",
+      "source_sha256": "a9805e5025ccc69310261a7352143d5873ea6690289a8defed174d8095baf8de",
+      "dimensions": [
+        48,
+        32
+      ],
+      "thumbnail_sha256": "8309012816832201917363699d99056b2007dcf51a268fa735fa03b0361d2936",
+      "passed": true
+    },
+    {
+      "format": "WEBP",
+      "source_sha256": "e10b42907ed08e2b9f0c366973c8bb0fc6836e599511b829f2133e655ac79b09",
+      "dimensions": [
+        48,
+        32
+      ],
+      "thumbnail_sha256": "8309012816832201917363699d99056b2007dcf51a268fa735fa03b0361d2936",
+      "passed": true
+    },
+    {
+      "rejection": "empty",
+      "passed": true
+    },
+    {
+      "rejection": "unsupported",
+      "passed": true
+    },
+    {
+      "rejection": "too_large",
+      "passed": true
+    },
+    {
+      "crypto": "Fernet ephemeral in-memory round trip; no saved credential",
+      "passed": true
+    }
+  ],
+  "passed": 7,
+  "scope": "Bounded compatibility observation, not a malformed-image fuzzing or security certification",
+  "network_or_model_run": false
+}

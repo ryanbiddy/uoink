@@ -1,0 +1,70 @@
+2026-09-11 11:27:17,207 INFO install migration: skipped_isolated_install
+2026-09-11 11:27:17,219 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-11 11:27:17,224 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-11 11:27:17,225 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-11 11:27:17,227 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-11 11:27:17,228 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-11 11:27:17,231 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-11 11:27:17,233 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-11 11:27:17,234 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-11 11:27:17,236 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-11 11:27:17,238 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-11 11:27:17,240 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-11 11:27:17,242 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-11 11:27:17,244 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-11 11:27:17,246 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-11 11:27:17,248 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-11 11:27:17,250 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-11 11:27:17,251 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-11 11:27:17,254 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-11 11:27:17,255 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-11 11:27:17,257 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-11 11:27:17,259 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-11 11:27:17,261 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-11 11:27:17,264 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-11 11:27:17,266 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-11 11:27:17,267 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-11 11:27:17,270 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-11 11:27:17,271 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-11 11:27:17,274 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-11 11:27:17,276 INFO applying index migration 0030 (0030_media_depth.sql)
+2026-09-11 11:27:17,288 INFO Migrated 0 taxonomy record(s) into the index
+2026-09-11 11:27:17,289 INFO seeded 5 default style anchors
+2026-09-11 11:27:17,289 INFO default style anchors: seeded 5 on first run
+2026-09-11 11:27:17,289 INFO Restored 0 job record(s) from the library index
+2026-09-11 11:27:17,291 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-11 11:27:17,300 INFO phase 2 author backfill: {'total': 0, 'scanned': 0, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 0, 'missing_sidecar': 0}
+2026-09-11 11:27:17,562 INFO tray: started (daemon thread)
+2026-09-11 11:27:17,585 INFO splash: spawned (version 3.8.0)
+2026-09-11 11:27:17,585 INFO Uoink server v3.8.0 running on http://127.0.0.1:18081
+2026-09-11 11:27:17,585 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-11 11:27:17,585 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 06\c22\profiles\child-interrupt\output
+2026-09-11 11:27:17,585 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 06\c22\profiles\child-interrupt\server.log
+2026-09-11 11:27:17,585 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-11 11:27:17,694 INFO GET /health from 127.0.0.1 -> ok
+2026-09-11 11:27:47,330 ERROR capture backend raised for st_e48063afacb22e62119d0802b63613ff
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\source_subscriptions.py", line 3921, in execute_started
+    outcome = self.backend.run(dict(start), dict(item), dict(source))
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\server.py", line 8402, in run
+    outcome = self._run_podcast(start, item, source)
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\server.py", line 8428, in _run_podcast
+    downloaded = podcasts.download_episode_audio(
+        _get_index(), episode_id, data_root=DATA_ROOT)
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\python\Lib\site-packages\sitecustomize.py", line 294, in download
+    _drive_original_run_subprocess()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\python\Lib\site-packages\sitecustomize.py", line 259, in _drive_original_run_subprocess
+    return run(
+        [sys.executable, "-B", "-c", "print('c22-capture-child')"],
+        timeout=20, check=False,
+    )
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\server.py", line 3411, in _run_subprocess
+    proc = subprocess.Popen(
+        cmd,
+    ...<5 lines>...
+        **SUBPROCESS_KW,
+    )
+  File "E:\AI\projects\uoink\installation-receipts\Agent Install 06\app\python\Lib\site-packages\sitecustomize.py", line 339, in __init__
+    raise OSError("C22 declared launch interruption after launch intent")
+OSError: C22 declared launch interruption after launch intent

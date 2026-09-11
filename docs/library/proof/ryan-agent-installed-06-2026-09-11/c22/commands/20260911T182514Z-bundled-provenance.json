@@ -1,0 +1,25 @@
+{
+  "name": "bundled-provenance",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "-c",
+    "import pathlib, sys\nsys.path.insert(0, str(pathlib.Path(sys.argv[1]).resolve(strict=True)))\nimport hashlib, importlib, importlib.metadata, json, pathlib, sys, sysconfig\nrequired = ('server','source_subscriptions','index','uoink_mcp','source_manifest','podcasts','library_work')\nmodules = {}\nerrors = []\nfor name in required:\n    try:\n        mod = importlib.import_module(name)\n        path = pathlib.Path(getattr(mod, '__file__', '') or '')\n        resolved = str(path.resolve()) if path else None\n        digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None\n        modules[name] = {'ok': True, 'file': resolved, 'sha256': digest}\n    except Exception as exc:\n        errors.append({'module': name, 'type': type(exc).__name__, 'message': str(exc)})\n        modules[name] = {'ok': False, 'error': type(exc).__name__}\nmcp_version = None\ntry:\n    import mcp\n    mcp_version = importlib.metadata.version('mcp')\nexcept Exception as exc:\n    errors.append({'module': 'mcp', 'type': type(exc).__name__, 'message': str(exc)})\nusersite = ''\ntry:\n    usersite = sysconfig.get_path('purelib', scheme='nt_user') if sys.platform=='win32' else ''\nexcept Exception:\n    usersite = ''\nreport = {\n    'schema': 'c22-provenance-v1',\n    'executable': str(pathlib.Path(sys.executable).resolve()),\n    'version': sys.version.split()[0],\n    'nousersite': bool(sys.flags.no_user_site),\n    'prefix': sys.prefix,\n    'path': [str(p) for p in sys.path],\n    'usersite_scheme': usersite,\n    'usersite_on_path': bool(usersite and any(str(p).lower().startswith(str(usersite).lower()) for p in sys.path)),\n    'modules': modules,\n    'mcp_version': mcp_version,\n    'import_errors': errors,\n}\nprint(json.dumps(report))\nraise SystemExit(0 if not errors else 2)\n",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app",
+  "started_utc": "2026-09-11T18:25:14Z",
+  "child": {
+    "pid": 27316,
+    "created_ms": 1789151114985,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "observed_ms": 1789151114996,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 27316,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\commands\\20260911T182514Z-bundled-provenance.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\c22\\commands\\20260911T182514Z-bundled-provenance.stderr.log",
+  "synthetic": false
+}
