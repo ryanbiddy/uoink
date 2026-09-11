@@ -92,7 +92,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in worktree and checkout with original assertions and --runxfail; ordinary strict-XPASS result retained | New complete tree and replacement package owed |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | AS9 historically accepted subject to C22; original AT6 exit gap remains | Historical bundled C22 11 passed / zero failed / three unexecuted; receipt correction has 172 passes in both roots | Package-05 actual C22: 11 passed / zero failed / three original manual placeholders; browser partial (visible revision and recovery reason absent); same account recorded |
+| 3 | Capture display repaired at 15e3f7e; original AT6 exit gap remains | 316 passes / one historical AT6 failure in each root; real JavaScript renderer exercised | New installed browser/state pair owed; package-05 partial receipt stays partial |
 | 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
@@ -190,7 +190,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Do not hide this fix inside the larger proposed redesign. Use a worktree,
    raw diff/three-way apply and both-root verification. No acceptance test edits.
    Ryan requested the remaining fixes again on 2026-09-11. Browser repair is
-   dispatched to Gemini as ac33fef6. Unicode search is integrated at 41c0d1d,
+   completed by Gemini ac33fef6 and Astra's bounded supplement, integrated at
+   15e3f7e with 316 passes / one historical AT6 failure in each root.
+   Unicode search is integrated at 41c0d1d,
    with 137 passes in both roots. DEPENDENCY-CLOSURE-REVIEW-BRIEF-2026-09-11.md bounds a fresh
    upstream compatibility review. Report 122dbb53 is integrated at 724f0cf with
    Astra's corrections to its incorrect wheel hashes and overbroad safety claims.
@@ -2660,3 +2662,19 @@ the deleted full files cannot be reconstructed or called preserved. Astra saved
 these events as browser-worker-command-evidence.json and uses fresh labels.
 Future briefs explicitly prohibit deleting scratch/logs or interpolated nested
 PowerShell -Command execution. No existing test was modified by this worker.
+
+### 2026-09-11 — capture display integrated
+
+Commit 15e3f7e integrates the reviewed recovery display. Worktree 316 passed /
+one historical AT6 failure (47.60 s); checkout 316/1 (49.46 s). Twelve added
+cases execute the product JavaScript renderer; the earlier static suite missed
+an isExhausted declaration-order error. The supplement repairs it and false
+failure/completion labels. Twenty-three proof payload hashes match Git blobs.
+Keep the worker's deleted-attempt gap and all retained failed measurements.
+
+Lightning qualification b9ce127d followed a documented preflight repair:
+external shared verification paths are explicit in committed brief 1d1a032.
+No worker started in the refused dispatch. The native overlay probe has three
+passes, no checkpoint/inference, and one denied socket.bind attempt during
+imports; its guard did not permit the bind. Do not describe that probe as having
+zero attempted network activity or as actual checkpoint-loading qualification.
