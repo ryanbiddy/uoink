@@ -86,17 +86,17 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-11; retained package source `6b5aed8`, latest complete tree `393010f`)
+## State at handoff (updated 2026-09-11; package-06 and complete tree source `6697dff`)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in worktree and checkout with original assertions and --runxfail; ordinary strict-XPASS result retained | New complete tree and replacement package owed |
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in worktree and checkout with original assertions and --runxfail; ordinary strict-XPASS result retained | Complete tree and package-06 recorded; installed observation follows |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; original AT6 exit gap remains | 316 passes / one historical AT6 failure in each root; real JavaScript renderer exercised | New installed browser/state pair owed; package-05 partial receipt stays partial |
-| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Actual installed collection: 15 passed / zero failed / eight unobserved. Fresh client/visual receipts remain |
+| 4 | Historical client acceptance retains installed conditions; approved mirror corrections now pass all 180 focused checks | P4 plus operator/collection supplements integrated; both original prompts succeed. X HTTP 403 stays blocked | Embedded probe fixed at 393010f: 63 passes in each root. Package-05 collection: 15 passed / zero failed / eight unobserved. Fresh package-06 client/visual receipts remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Source repairs 41c0d1d, 15e3f7e, 63f7de9, 9ea755b await combined tree/package; expected 140 runtime pins. Package-05 built from `6b5aed8`, sealed and scanned; unsigned. Complete partitioned `393010f` tree: 2,493 passed / one failed / two skipped / one xfailed | All 2,497 cases accounted for once; no prior case missing; only AT6's historical exit assertion fails. All 139 runtime pins match staging | Setup/reinstall both exit zero; 32,054 installed hashes match. Complete 393010f tree: 2,493 passed / 1 failed / 2 skipped / 1 xfailed. Browser repair and client evidence remain; nineteen advisory entries retained |
+| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | 140 exact runtime pins and 283 requirements match; 983 repair-wheel payloads match. Defender exits zero with no threats; unsigned. Raw OSV 19 entries / 15 issues retained | Fresh isolated Setup/reinstall, C22/browser and P4 observations next. Package-05 EXE/kit/receipts preserved; old owned test app removed safely |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -200,10 +200,13 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Setuptools repair is integrated at 9ea755b with 19 passes in each root.
    Follow REPAIRED-CANDIDATE-VERIFICATION-BRIEF-2026-09-11.md for the
    frozen complete tree, replacement package and fresh installation receipts.
-   Integrate verified product repairs before the
-   next complete tree and replacement package; no completed gate is inferred.
-7. That repair changes packaged source: complete its new tree, rebuild/reseal and
-   observe a fresh installed browser/state pair. Preserve package-05 and its kit.
+   Source 6697dff now records 2,535 passes / one historical AT6 failure / two
+   skips, all 2,538 cases accounted for. Package-06 is built, sealed and scanned.
+   See ASTRA-PACKAGE-06-VERDICT-2026-09-11.md; no new product failure appeared.
+7. Observe package-06 in fresh Agent Install 06 paths, including actual Setup/
+   reinstall, every installed hash and the repaired browser/state pair. The
+   source tree and package are sealed; do not rerun them without a repair.
+   Package-05 and its kit are preserved; only its owned isolated app was removed.
    Fresh Phase 4 client/visual observation also needs a new prepared profile:
    p4-02 has already run collection's declared fixture deletion checks. Never
    reuse it as a pristine client fixture. User-controlled fresh authentication
@@ -2705,3 +2708,30 @@ REPAIRED-CANDIDATE-VERIFICATION-BRIEF-2026-09-11.md. Use --runxfail with the
 unchanged SEC-06 assertions and preserve the old strict-XPASS/historical results.
 Forty-one new cases should join the previous 2497-case membership. Package-05
 remains the old installer until source verification and a new sealed build.
+
+### 2026-09-11 — combined tree and package-06 sealed
+
+6697dff records 2,535 passed / one failed / two skipped across 2,538 cases.
+All 2,497 prior cases and 41 new cases are accounted for once. Explicit
+--runxfail executes unchanged SEC-06 assertions successfully; the original
+strict-XPASS measurement remains. Only the unavailable historical AT6 exit
+fails. No existing test or P4 guard changed. Test-process time: 1452.312 s.
+
+Package-06 built from that same source in 415.509 s: 389,568,844 bytes, SHA256
+91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb.
+Its 32,506 compiler inputs include 32,497 installed destinations; all 142
+source bindings match. All 140 runtime pins and 283 dependency requirements
+are satisfied. Both Lightning wheels and setuptools match across 983 payloads;
+installation-rewritten RECORD files are explicitly excluded. The pre-existing
+WhisperX checkpoint is unchanged. Fresh raw OSV remains 19 entries / 15 groups;
+Lightning's verified code repair is separate from its inconsistent scan record.
+Twelve setuptools-vendored distributions have zero returned OSV entries.
+Defender exits zero with no threats; the EXE remains unsigned.
+
+Notices-only commit d363c04 fills 50 UNKNOWN fields from exact staged SPDX
+metadata, preserving the generator output and seven missing declarations.
+Repeat that documentary review after future generation. No compiler input
+changed after the complete tree; no further rebuild is needed for notices.
+Package-05's EXE and ZIP are retained. The owned isolated test app uninstalled
+with exit zero and observed ordinary effects unchanged; its receipt profiles
+remain. Next is Agent Install 06, never an ordinary profile or 5179.

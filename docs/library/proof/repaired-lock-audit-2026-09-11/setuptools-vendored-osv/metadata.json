@@ -1,0 +1,74 @@
+[
+  {
+    "name": "autocommand",
+    "version": "2.2.2",
+    "path": "setuptools/_vendor/autocommand-2.2.2.dist-info/METADATA",
+    "sha256": "3800d9b91dceea2065a6ed6279383362e97ac38b8e56b9343f404ee531860099"
+  },
+  {
+    "name": "backports.tarfile",
+    "version": "1.2.0",
+    "path": "setuptools/_vendor/backports.tarfile-1.2.0.dist-info/METADATA",
+    "sha256": "8215c54ead77d9dc5a108a25c6bdc72b5999aa6f62c9499a440359412afa5a51"
+  },
+  {
+    "name": "importlib_metadata",
+    "version": "8.7.1",
+    "path": "setuptools/_vendor/importlib_metadata-8.7.1.dist-info/METADATA",
+    "sha256": "a3e38b9ee4326289d4864704f30e299ee769e2309ce9f4a75f0de1a50ad0a356"
+  },
+  {
+    "name": "jaraco.text",
+    "version": "4.0.0",
+    "path": "setuptools/_vendor/jaraco.text-4.0.0.dist-info/METADATA",
+    "sha256": "5c2fd09012c954f139b10624978d5335a654c34014cd06f6f466ca683dbc9c56"
+  },
+  {
+    "name": "jaraco.context",
+    "version": "6.1.0",
+    "path": "setuptools/_vendor/jaraco_context-6.1.0.dist-info/METADATA",
+    "sha256": "0435ebfc52055c5a9974ed20c171b6454383eaf9dbb1508814ba7ad97c59d712"
+  },
+  {
+    "name": "jaraco.functools",
+    "version": "4.4.0",
+    "path": "setuptools/_vendor/jaraco_functools-4.4.0.dist-info/METADATA",
+    "sha256": "2e79da8dc3469924abe3ac8b22a3feb5692a79bf9f47bbc86b6535d618641849"
+  },
+  {
+    "name": "more-itertools",
+    "version": "10.8.0",
+    "path": "setuptools/_vendor/more_itertools-10.8.0.dist-info/METADATA",
+    "sha256": "6ab3515145abe58b067f087c867631cf4cf5d653fed81b9642ee12086c3904b8"
+  },
+  {
+    "name": "packaging",
+    "version": "26.0",
+    "path": "setuptools/_vendor/packaging-26.0.dist-info/METADATA",
+    "sha256": "3362bb7d6a26da2962ba8daaa4785cd0bacac21aba908a1195cc8f59580a265a"
+  },
+  {
+    "name": "platformdirs",
+    "version": "4.4.0",
+    "path": "setuptools/_vendor/platformdirs-4.4.0.dist-info/METADATA",
+    "sha256": "bbc5216d5f4c77bfbc57227264d52e66bccde71ccf79e75e1a6046d029d30223"
+  },
+  {
+    "name": "tomli",
+    "version": "2.4.0",
+    "path": "setuptools/_vendor/tomli-2.4.0.dist-info/METADATA",
+    "sha256": "f5ac0a1f8fba908b4646cd655309e91aad969b6787616ac571ca462a3832ffce"
+  },
+  {
+    "name": "wheel",
+    "version": "0.46.3",
+    "path": "setuptools/_vendor/wheel-0.46.3.dist-info/METADATA",
+    "sha256": "22910aa97ca89cbcc20a019e27fe31360b7929a4bd66ca0d310f99a44f6ccd35"
+  },
+  {
+    "name": "zipp",
+    "version": "3.23.0",
+    "path": "setuptools/_vendor/zipp-3.23.0.dist-info/METADATA",
+    "sha256": "bdd67d4d16cf0bf3b893e7d18cd3d2d774adb82f37ed985bc7770c607226b35b"
+  }
+]

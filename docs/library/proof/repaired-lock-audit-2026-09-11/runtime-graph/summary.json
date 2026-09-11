@@ -1,0 +1,1715 @@
+{
+  "pins": 140,
+  "dependency_edges": 283,
+  "failed_edges": [],
+  "activated_extras": {
+    "fsspec": [
+      "http"
+    ],
+    "pyjwt": [
+      "crypto"
+    ]
+  },
+  "lock_sha256": "8c45bc8aeb5c008dadc6bd8bc58900ce5f8f48ea640a105a301021754c93c8ec",
+  "scope": "All top-level installed distribution metadata, evaluated for Windows Python 3.13.15; no inference",
+  "rows": [
+    {
+      "source": "aiohttp",
+      "requirement": "aiohappyeyeballs>=2.5.0",
+      "version": "2.7.1",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "aiosignal>=1.4.0",
+      "version": "1.4.0",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "attrs>=17.3.0",
+      "version": "26.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "frozenlist>=1.1.1",
+      "version": "1.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "multidict<7.0,>=4.5",
+      "version": "6.7.1",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "propcache>=0.2.0",
+      "version": "0.5.2",
+      "satisfied": true
+    },
+    {
+      "source": "aiohttp",
+      "requirement": "yarl<2.0,>=1.17.0",
+      "version": "1.24.5",
+      "satisfied": true
+    },
+    {
+      "source": "aiosignal",
+      "requirement": "frozenlist>=1.1.0",
+      "version": "1.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "alembic",
+      "requirement": "SQLAlchemy>=1.4.23",
+      "version": "2.0.51",
+      "satisfied": true
+    },
+    {
+      "source": "alembic",
+      "requirement": "Mako",
+      "version": "1.3.12",
+      "satisfied": true
+    },
+    {
+      "source": "alembic",
+      "requirement": "typing-extensions>=4.12",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "anyio",
+      "requirement": "idna>=2.8",
+      "version": "3.18",
+      "satisfied": true
+    },
+    {
+      "source": "asteroid-filterbanks",
+      "requirement": "numpy",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "asteroid-filterbanks",
+      "requirement": "torch (>=1.8.0)",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "asteroid-filterbanks",
+      "requirement": "typing-extensions",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "cffi",
+      "requirement": "pycparser; implementation_name != \"PyPy\"",
+      "version": "3.0",
+      "satisfied": true
+    },
+    {
+      "source": "click",
+      "requirement": "colorama; platform_system == 'Windows'",
+      "version": "0.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "clr-loader",
+      "requirement": "cffi>=1.17; python_version >= \"3.8\"",
+      "version": "2.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "colorlog",
+      "requirement": "colorama; sys_platform == \"win32\"",
+      "version": "0.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "contourpy",
+      "requirement": "numpy>=1.25",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "cryptography",
+      "requirement": "cffi>=2.0.0 ; platform_python_implementation != 'PyPy'",
+      "version": "2.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "ctranslate2",
+      "requirement": "setuptools",
+      "version": "83.0.0",
+      "satisfied": true
+    },
+    {
+      "source": "ctranslate2",
+      "requirement": "numpy",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "ctranslate2",
+      "requirement": "pyyaml<7,>=5.3",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "ctranslate2<5,>=4.0",
+      "version": "4.8.1",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "huggingface-hub>=0.21",
+      "version": "0.36.2",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "tokenizers<1,>=0.13",
+      "version": "0.22.2",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "onnxruntime<2,>=1.14",
+      "version": "1.27.0",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "av>=11",
+      "version": "18.0.0",
+      "satisfied": true
+    },
+    {
+      "source": "faster-whisper",
+      "requirement": "tqdm",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "googleapis-common-protos",
+      "requirement": "protobuf<8.0.0,>=4.25.8",
+      "version": "7.35.1",
+      "satisfied": true
+    },
+    {
+      "source": "grpcio",
+      "requirement": "typing-extensions~=4.12",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "httpcore",
+      "requirement": "certifi",
+      "version": "2026.7.22",
+      "satisfied": true
+    },
+    {
+      "source": "httpcore",
+      "requirement": "h11>=0.16",
+      "version": "0.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "httpx",
+      "requirement": "anyio",
+      "version": "4.14.2",
+      "satisfied": true
+    },
+    {
+      "source": "httpx",
+      "requirement": "certifi",
+      "version": "2026.7.22",
+      "satisfied": true
+    },
+    {
+      "source": "httpx",
+      "requirement": "httpcore==1.*",
+      "version": "1.0.9",
+      "satisfied": true
+    },
+    {
+      "source": "httpx",
+      "requirement": "idna",
+      "version": "3.18",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "filelock",
+      "version": "3.32.0",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "fsspec>=2023.5.0",
+      "version": "2026.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "packaging>=20.9",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "pyyaml>=5.1",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "requests",
+      "version": "2.34.2",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "tqdm>=4.42.1",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "huggingface-hub",
+      "requirement": "typing-extensions>=3.7.4.3",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "jaraco-classes",
+      "requirement": "more-itertools",
+      "version": "11.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "jaraco-functools",
+      "requirement": "more_itertools",
+      "version": "11.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "jinja2",
+      "requirement": "MarkupSafe>=2.0",
+      "version": "3.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "jsonschema",
+      "requirement": "attrs>=22.2.0",
+      "version": "26.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "jsonschema",
+      "requirement": "jsonschema-specifications>=2023.03.6",
+      "version": "2025.9.1",
+      "satisfied": true
+    },
+    {
+      "source": "jsonschema",
+      "requirement": "referencing>=0.28.4",
+      "version": "0.37.0",
+      "satisfied": true
+    },
+    {
+      "source": "jsonschema",
+      "requirement": "rpds-py>=0.25.0",
+      "version": "2026.6.3",
+      "satisfied": true
+    },
+    {
+      "source": "jsonschema-specifications",
+      "requirement": "referencing>=0.31.0",
+      "version": "0.37.0",
+      "satisfied": true
+    },
+    {
+      "source": "julius",
+      "requirement": "torch>=1.13.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "keyring",
+      "requirement": "pywin32-ctypes>=0.2.0; sys_platform == \"win32\"",
+      "version": "0.2.3",
+      "satisfied": true
+    },
+    {
+      "source": "keyring",
+      "requirement": "jaraco.classes",
+      "version": "3.4.0",
+      "satisfied": true
+    },
+    {
+      "source": "keyring",
+      "requirement": "jaraco.functools",
+      "version": "4.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "keyring",
+      "requirement": "jaraco.context",
+      "version": "6.1.2",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "PyYAML<8.0,>5.4",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "fsspec[http]<2028.0,>=2022.5.0",
+      "version": "2026.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "lightning-utilities<2.0,>=0.10.0",
+      "version": "0.15.3",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "packaging<27.0,>=23.0",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "torch<4.0,>=2.1.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "torchmetrics<3.0,>0.7.0",
+      "version": "1.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "tqdm<6.0,>=4.57.0",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "typing-extensions<6.0,>4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "lightning",
+      "requirement": "pytorch-lightning",
+      "version": "2.6.6",
+      "satisfied": true
+    },
+    {
+      "source": "lightning-utilities",
+      "requirement": "packaging>=22",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "lightning-utilities",
+      "requirement": "typing_extensions",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "mako",
+      "requirement": "MarkupSafe>=0.9.2",
+      "version": "3.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "markdown-it-py",
+      "requirement": "mdurl~=0.1",
+      "version": "0.1.2",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "contourpy>=1.0.1",
+      "version": "1.3.3",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "cycler>=0.10",
+      "version": "0.12.1",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "fonttools>=4.28.2",
+      "version": "4.63.0",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "kiwisolver>=1.3.1",
+      "version": "1.5.0",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "numpy>=1.25",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "packaging>=20.0",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "pillow>=9",
+      "version": "12.3.0",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "pyparsing>=3",
+      "version": "3.3.2",
+      "satisfied": true
+    },
+    {
+      "source": "matplotlib",
+      "requirement": "python-dateutil>=2.7",
+      "version": "2.9.0.post0",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "anyio>=4.5",
+      "version": "4.14.2",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "httpx-sse>=0.4",
+      "version": "0.4.3",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "httpx<1.0.0,>=0.27.1",
+      "version": "0.28.1",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "jsonschema>=4.20.0",
+      "version": "4.26.0",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "pydantic-settings>=2.5.2",
+      "version": "2.14.2",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "pydantic<3.0.0,>=2.11.0; python_version < '3.14'",
+      "version": "2.13.4",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "pyjwt[crypto]>=2.10.1",
+      "version": "2.13.0",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "python-multipart>=0.0.9",
+      "version": "0.0.32",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "pywin32>=310; sys_platform == 'win32' and python_version < '3.14'",
+      "version": "312",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "sse-starlette>=1.6.1",
+      "version": "3.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "starlette>=0.27; python_version < '3.14'",
+      "version": "1.3.1",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "typing-extensions>=4.9.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "typing-inspection>=0.4.1",
+      "version": "0.4.2",
+      "satisfied": true
+    },
+    {
+      "source": "mcp",
+      "requirement": "uvicorn>=0.31.1; sys_platform != 'emscripten'",
+      "version": "0.51.0",
+      "satisfied": true
+    },
+    {
+      "source": "nltk",
+      "requirement": "defusedxml",
+      "version": "0.7.1",
+      "satisfied": true
+    },
+    {
+      "source": "nltk",
+      "requirement": "click",
+      "version": "8.4.2",
+      "satisfied": true
+    },
+    {
+      "source": "nltk",
+      "requirement": "joblib",
+      "version": "1.5.3",
+      "satisfied": true
+    },
+    {
+      "source": "nltk",
+      "requirement": "regex>=2021.8.3",
+      "version": "2026.7.19",
+      "satisfied": true
+    },
+    {
+      "source": "nltk",
+      "requirement": "tqdm",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "omegaconf",
+      "requirement": "antlr4-python3-runtime==4.9.*",
+      "version": "4.9.3",
+      "satisfied": true
+    },
+    {
+      "source": "omegaconf",
+      "requirement": "PyYAML>=5.1.0",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "onnxruntime",
+      "requirement": "flatbuffers",
+      "version": "25.12.19",
+      "satisfied": true
+    },
+    {
+      "source": "onnxruntime",
+      "requirement": "numpy>=1.21.6",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "onnxruntime",
+      "requirement": "packaging",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "onnxruntime",
+      "requirement": "protobuf>=4.25.8",
+      "version": "7.35.1",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-api",
+      "requirement": "typing-extensions>=4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp",
+      "requirement": "opentelemetry-exporter-otlp-proto-grpc==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp",
+      "requirement": "opentelemetry-exporter-otlp-proto-http==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-common",
+      "requirement": "opentelemetry-proto==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "googleapis-common-protos~=1.57",
+      "version": "1.75.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "grpcio<2.0.0,>=1.66.2; python_version == '3.13'",
+      "version": "1.82.1",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "opentelemetry-api~=1.15",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "opentelemetry-exporter-otlp-proto-common==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "opentelemetry-proto==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "opentelemetry-sdk~=1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-grpc",
+      "requirement": "typing-extensions>=4.6.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "googleapis-common-protos~=1.52",
+      "version": "1.75.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "opentelemetry-api~=1.15",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "opentelemetry-exporter-otlp-proto-common==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "opentelemetry-proto==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "opentelemetry-sdk~=1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "requests~=2.7",
+      "version": "2.34.2",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-exporter-otlp-proto-http",
+      "requirement": "typing-extensions>=4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-proto",
+      "requirement": "protobuf<8.0,>=5.0",
+      "version": "7.35.1",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-sdk",
+      "requirement": "opentelemetry-api==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-sdk",
+      "requirement": "opentelemetry-semantic-conventions==0.65b0",
+      "version": "0.65b0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-sdk",
+      "requirement": "typing-extensions>=4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-semantic-conventions",
+      "requirement": "opentelemetry-api==1.44.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "opentelemetry-semantic-conventions",
+      "requirement": "typing-extensions>=4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "alembic>=1.5.0",
+      "version": "1.18.5",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "colorlog",
+      "version": "6.11.0",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "numpy",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "packaging>=20.0",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "sqlalchemy>=1.4.2",
+      "version": "2.0.51",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "tqdm",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "optuna",
+      "requirement": "PyYAML",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "pandas",
+      "requirement": "numpy>=1.26.0; python_version < \"3.14\"",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "pandas",
+      "requirement": "python-dateutil>=2.8.2",
+      "version": "2.9.0.post0",
+      "satisfied": true
+    },
+    {
+      "source": "pandas",
+      "requirement": "tzdata; sys_platform == \"win32\"",
+      "version": "2026.3",
+      "satisfied": true
+    },
+    {
+      "source": "pyannoteai-sdk",
+      "requirement": "requests>=2.32.3",
+      "version": "2.34.2",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "asteroid-filterbanks>=0.4.0",
+      "version": "0.4.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "einops>=0.8.1",
+      "version": "0.8.2",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "huggingface-hub>=0.28.1",
+      "version": "0.36.2",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "lightning>=2.4",
+      "version": "2.6.6",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "matplotlib>=3.10.0",
+      "version": "3.11.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "opentelemetry-api>=1.34.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "opentelemetry-exporter-otlp>=1.34.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "opentelemetry-sdk>=1.34.0",
+      "version": "1.44.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pyannote-core>=6.0.1",
+      "version": "6.0.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pyannote-database>=6.1.1",
+      "version": "6.1.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pyannote-metrics>=4.0.0",
+      "version": "4.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pyannote-pipeline>=4.0.0",
+      "version": "4.0.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pyannoteai-sdk>=0.3.0",
+      "version": "0.4.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "pytorch-metric-learning>=2.8.1",
+      "version": "2.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "rich>=13.9.4",
+      "version": "15.0.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "safetensors>=0.5.2",
+      "version": "0.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "torch-audiomentations>=0.12.0",
+      "version": "0.12.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "torch>=2.8.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "torchaudio>=2.8.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "torchcodec>=0.7.0",
+      "version": "0.7.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-audio",
+      "requirement": "torchmetrics>=1.6.1",
+      "version": "1.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-core",
+      "requirement": "numpy>=2.0",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-core",
+      "requirement": "pandas>=2.2.3",
+      "version": "3.0.5",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-core",
+      "requirement": "sortedcontainers>=2.4.0",
+      "version": "2.4.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-database",
+      "requirement": "pandas>=2.2.3",
+      "version": "3.0.5",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-database",
+      "requirement": "pyannote-core>=6.0.0",
+      "version": "6.0.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-database",
+      "requirement": "pyyaml>=6.0.2",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "numpy>=2.2.2",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "pandas>=2.2.3",
+      "version": "3.0.5",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "pyannote-core>=6.0.0",
+      "version": "6.0.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "pyannote-database>=6.0.0",
+      "version": "6.1.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "scikit-learn>=1.6.1",
+      "version": "1.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-metrics",
+      "requirement": "scipy>=1.15.1",
+      "version": "1.17.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "filelock>=3.17.0",
+      "version": "3.32.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "optuna>=4.2.0",
+      "version": "4.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "pyannote-core>=6.0.0",
+      "version": "6.0.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "pyannote-database>=6.0.0",
+      "version": "6.1.1",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "pyyaml>=6.0.2",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "pyannote-pipeline",
+      "requirement": "tqdm>=4.67.1",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic",
+      "requirement": "annotated-types>=0.6.0",
+      "version": "0.7.0",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic",
+      "requirement": "pydantic-core==2.46.4",
+      "version": "2.46.4",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic",
+      "requirement": "typing-extensions>=4.14.1",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic",
+      "requirement": "typing-inspection>=0.4.2",
+      "version": "0.4.2",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic-core",
+      "requirement": "typing-extensions>=4.14.1",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic-settings",
+      "requirement": "pydantic>=2.7.0",
+      "version": "2.13.4",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic-settings",
+      "requirement": "python-dotenv>=0.21.0",
+      "version": "1.2.2",
+      "satisfied": true
+    },
+    {
+      "source": "pydantic-settings",
+      "requirement": "typing-inspection>=0.4.0",
+      "version": "0.4.2",
+      "satisfied": true
+    },
+    {
+      "source": "pyjwt",
+      "requirement": "cryptography>=3.4.0; extra == \"crypto\"",
+      "version": "50.0.1",
+      "satisfied": true
+    },
+    {
+      "source": "pystray",
+      "requirement": "Pillow",
+      "version": "12.3.0",
+      "satisfied": true
+    },
+    {
+      "source": "pystray",
+      "requirement": "six",
+      "version": "1.17.0",
+      "satisfied": true
+    },
+    {
+      "source": "pythonnet",
+      "requirement": "clr_loader<0.3.0,>=0.2.7",
+      "version": "0.2.10",
+      "satisfied": true
+    },
+    {
+      "source": "python-dateutil",
+      "requirement": "six >=1.5",
+      "version": "1.17.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "torch>=2.1.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "tqdm>=4.57.0",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "PyYAML>5.4",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "fsspec[http]>=2022.5.0",
+      "version": "2026.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "torchmetrics>0.7.0",
+      "version": "1.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "packaging>=23.0",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "typing-extensions>4.5.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-lightning",
+      "requirement": "lightning-utilities>=0.10.0",
+      "version": "0.15.3",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-metric-learning",
+      "requirement": "numpy",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-metric-learning",
+      "requirement": "scikit-learn",
+      "version": "1.9.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-metric-learning",
+      "requirement": "torch (>=1.6.0)",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "pytorch-metric-learning",
+      "requirement": "tqdm",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "pywebview",
+      "requirement": "pythonnet; sys_platform == \"win32\"",
+      "version": "3.0.5",
+      "satisfied": true
+    },
+    {
+      "source": "pywebview",
+      "requirement": "proxy_tools",
+      "version": "0.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "pywebview",
+      "requirement": "bottle",
+      "version": "0.13.4",
+      "satisfied": true
+    },
+    {
+      "source": "pywebview",
+      "requirement": "typing_extensions",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "referencing",
+      "requirement": "attrs>=22.2.0",
+      "version": "26.1.0",
+      "satisfied": true
+    },
+    {
+      "source": "referencing",
+      "requirement": "rpds-py>=0.7.0",
+      "version": "2026.6.3",
+      "satisfied": true
+    },
+    {
+      "source": "requests",
+      "requirement": "charset_normalizer<4,>=2",
+      "version": "3.4.9",
+      "satisfied": true
+    },
+    {
+      "source": "requests",
+      "requirement": "idna<4,>=2.5",
+      "version": "3.18",
+      "satisfied": true
+    },
+    {
+      "source": "requests",
+      "requirement": "urllib3<3,>=1.26",
+      "version": "2.7.0",
+      "satisfied": true
+    },
+    {
+      "source": "requests",
+      "requirement": "certifi>=2023.5.7",
+      "version": "2026.7.22",
+      "satisfied": true
+    },
+    {
+      "source": "rich",
+      "requirement": "markdown-it-py (>=2.2.0)",
+      "version": "4.2.0",
+      "satisfied": true
+    },
+    {
+      "source": "rich",
+      "requirement": "pygments (>=2.13.0,<3.0.0)",
+      "version": "2.20.0",
+      "satisfied": true
+    },
+    {
+      "source": "scikit-learn",
+      "requirement": "numpy>=1.24.1",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "scikit-learn",
+      "requirement": "scipy>=1.10.0",
+      "version": "1.17.1",
+      "satisfied": true
+    },
+    {
+      "source": "scikit-learn",
+      "requirement": "joblib>=1.4.0",
+      "version": "1.5.3",
+      "satisfied": true
+    },
+    {
+      "source": "scikit-learn",
+      "requirement": "narwhals>=2.0.1",
+      "version": "2.24.0",
+      "satisfied": true
+    },
+    {
+      "source": "scikit-learn",
+      "requirement": "threadpoolctl>=3.5.0",
+      "version": "3.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "scipy",
+      "requirement": "numpy<2.7,>=1.26.4",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "sqlalchemy",
+      "requirement": "greenlet>=1; platform_machine == \"aarch64\" or (platform_machine == \"ppc64le\" or (platform_machine == \"x86_64\" or (platform_machine == \"amd64\" or (platform_machine == \"AMD64\" or (platform_machine == \"win32\" or platform_machine == \"WIN32\")))))",
+      "version": "3.5.4",
+      "satisfied": true
+    },
+    {
+      "source": "sqlalchemy",
+      "requirement": "typing-extensions>=4.6.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "sse-starlette",
+      "requirement": "starlette>=0.49.1",
+      "version": "1.3.1",
+      "satisfied": true
+    },
+    {
+      "source": "sse-starlette",
+      "requirement": "anyio>=4.7.0",
+      "version": "4.14.2",
+      "satisfied": true
+    },
+    {
+      "source": "starlette",
+      "requirement": "anyio<5,>=3.6.2",
+      "version": "4.14.2",
+      "satisfied": true
+    },
+    {
+      "source": "sympy",
+      "requirement": "mpmath<1.4,>=1.1.0",
+      "version": "1.3.0",
+      "satisfied": true
+    },
+    {
+      "source": "tokenizers",
+      "requirement": "huggingface-hub>=0.16.4,<2.0",
+      "version": "0.36.2",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "filelock",
+      "version": "3.32.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "typing-extensions >=4.10.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "sympy >=1.13.3",
+      "version": "1.14.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "networkx",
+      "version": "3.6.1",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "jinja2",
+      "version": "3.1.6",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "fsspec",
+      "version": "2026.6.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch",
+      "requirement": "setuptools ; python_version >= \"3.12\"",
+      "version": "83.0.0",
+      "satisfied": true
+    },
+    {
+      "source": "torchaudio",
+      "requirement": "torch==2.8.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torchmetrics",
+      "requirement": "numpy>1.20.0",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "torchmetrics",
+      "requirement": "packaging>17.1",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "torchmetrics",
+      "requirement": "torch>=2.0.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torchmetrics",
+      "requirement": "lightning-utilities>=0.15.3",
+      "version": "0.15.3",
+      "satisfied": true
+    },
+    {
+      "source": "torchvision",
+      "requirement": "numpy",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "torchvision",
+      "requirement": "torch (==2.8.0)",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torchvision",
+      "requirement": "pillow (!=8.3.*,>=5.3.0)",
+      "version": "12.3.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch-audiomentations",
+      "requirement": "julius <0.3,>=0.2.3",
+      "version": "0.2.8",
+      "satisfied": true
+    },
+    {
+      "source": "torch-audiomentations",
+      "requirement": "torch >=1.7.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch-audiomentations",
+      "requirement": "torchaudio >=0.9.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch-audiomentations",
+      "requirement": "torch-pitch-shift >=1.2.2",
+      "version": "1.2.5",
+      "satisfied": true
+    },
+    {
+      "source": "torch-pitch-shift",
+      "requirement": "torch>=1.7.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch-pitch-shift",
+      "requirement": "torchaudio>=0.7.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "torch-pitch-shift",
+      "requirement": "primePy>=1.3",
+      "version": "1.3",
+      "satisfied": true
+    },
+    {
+      "source": "torch-pitch-shift",
+      "requirement": "packaging>=21.3",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "tqdm",
+      "requirement": "colorama; platform_system == \"Windows\"",
+      "version": "0.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "filelock",
+      "version": "3.32.0",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "huggingface-hub<1.0,>=0.34.0",
+      "version": "0.36.2",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "numpy>=1.17",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "packaging>=20.0",
+      "version": "26.2",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "pyyaml>=5.1",
+      "version": "6.0.3",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "regex!=2019.12.17",
+      "version": "2026.7.19",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "requests",
+      "version": "2.34.2",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "tokenizers<=0.23.0,>=0.22.0",
+      "version": "0.22.2",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "safetensors>=0.4.3",
+      "version": "0.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "transformers",
+      "requirement": "tqdm>=4.27",
+      "version": "4.69.0",
+      "satisfied": true
+    },
+    {
+      "source": "typing-inspection",
+      "requirement": "typing-extensions>=4.12.0",
+      "version": "4.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "uvicorn",
+      "requirement": "click>=7.0",
+      "version": "8.4.2",
+      "satisfied": true
+    },
+    {
+      "source": "uvicorn",
+      "requirement": "h11>=0.8",
+      "version": "0.16.0",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "ctranslate2>=4.5.0",
+      "version": "4.8.1",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "faster-whisper>=1.2.0",
+      "version": "1.2.1",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "nltk>=3.9.1",
+      "version": "3.10.3",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "numpy>=2.1.0",
+      "version": "2.4.6",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "omegaconf>=2.3.0",
+      "version": "2.3.1",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "pandas>=2.2.3",
+      "version": "3.0.5",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "pyannote-audio>=4.0.0",
+      "version": "4.0.7",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "huggingface-hub<1.0.0",
+      "version": "0.36.2",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "torch~=2.8.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "torchaudio~=2.8.0",
+      "version": "2.8.0",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "torchvision~=0.23.0",
+      "version": "0.23.0",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "torchcodec<0.8.0,>=0.6.0; (sys_platform == \"linux\" and platform_machine == \"x86_64\") or sys_platform == \"darwin\" or sys_platform == \"win32\"",
+      "version": "0.7.0",
+      "satisfied": true
+    },
+    {
+      "source": "whisperx",
+      "requirement": "transformers>=4.48.0",
+      "version": "4.57.6",
+      "satisfied": true
+    },
+    {
+      "source": "yarl",
+      "requirement": "idna>=2.0",
+      "version": "3.18",
+      "satisfied": true
+    },
+    {
+      "source": "yarl",
+      "requirement": "multidict>=4.0",
+      "version": "6.7.1",
+      "satisfied": true
+    },
+    {
+      "source": "yarl",
+      "requirement": "propcache>=0.2.1",
+      "version": "0.5.2",
+      "satisfied": true
+    },
+    {
+      "source": "fsspec",
+      "requirement": "aiohttp!=4.0.0a0,!=4.0.0a1; extra == 'http'",
+      "version": "3.14.3",
+      "satisfied": true
+    }
+  ]
+}

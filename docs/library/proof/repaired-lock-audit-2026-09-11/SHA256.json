@@ -1,0 +1,145 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "audit_repaired_lock.py": {
+      "bytes": 3084,
+      "sha256": "dc9dd98af928f923f446bebf362a4ad9f1b17af8d0dfabfb9521868a75f1f3fd"
+    },
+    "audit_setuptools_vendor06.py": {
+      "bytes": 3577,
+      "sha256": "4bed2645c960be746a45b7f43c1f4fb324a64f785033748078c57dd6e3b4d7f3"
+    },
+    "binding.json": {
+      "bytes": 54683,
+      "sha256": "de2df1e07d3f753535da77836bdd6c65d06695ab074ae63554607f3acf7b728f"
+    },
+    "osv/advisories/GHSA-29pf-2h5f-8g72.json": {
+      "bytes": 4101,
+      "sha256": "384e73b8dd93f7b3c7fef64ef2d328569b57247d6b3e6d6bb97c3416a0fc0ddf"
+    },
+    "osv/advisories/GHSA-69w3-r845-3855.json": {
+      "bytes": 3864,
+      "sha256": "275a8d5a753f419f75928f89e199b30058bb2393c7b7bc48cf0bf94f8a8864d5"
+    },
+    "osv/advisories/GHSA-8mgp-746c-j5xp.json": {
+      "bytes": 4877,
+      "sha256": "c489d359f203d5ecd90148e59601c63f4b057fe838604b68e607a3e3f1026a10"
+    },
+    "osv/advisories/GHSA-fgcw-684q-jj6r.json": {
+      "bytes": 4790,
+      "sha256": "bc011417c43f1c719a80ad5680cd59a552c9ec5acbd8609e215430941773bf1e"
+    },
+    "osv/advisories/GHSA-qfhq-4f3w-5fph.json": {
+      "bytes": 2462,
+      "sha256": "126bc9b52d3c8334a8dc679f1411636965d25d89256b3382745534cbe6b11a76"
+    },
+    "osv/advisories/GHSA-qqmf-gpg7-g8gw.json": {
+      "bytes": 4790,
+      "sha256": "7a37627aea9c9e8b2475e0f947dd3728ea2745399819219eb6510f311f835757"
+    },
+    "osv/advisories/GHSA-rrmf-rvhw-rf47.json": {
+      "bytes": 2422,
+      "sha256": "2130dee6549758cbb46135cf20a34526e845d4fad60c2be5d03b6725e890256e"
+    },
+    "osv/advisories/GHSA-vgrw-7cvw-pwgx.json": {
+      "bytes": 2473,
+      "sha256": "e1b6f6156c97e02729c1a5fc4cbadc97e1a60b86793d8a1c3a7578cae8fb0365"
+    },
+    "osv/advisories/GHSA-xrqw-3rrv-vx5w.json": {
+      "bytes": 4143,
+      "sha256": "406cb479cf50f93b8e4bd52655eaf27647ccc636a151e14d1932a27bbe820dd6"
+    },
+    "osv/advisories/PYSEC-2025-203.json": {
+      "bytes": 1254,
+      "sha256": "c2c7beb412daab91f878c04e3bcbb63a08c1cc829aa4db9b7d70629d98b043e8"
+    },
+    "osv/advisories/PYSEC-2025-204.json": {
+      "bytes": 1240,
+      "sha256": "81e009c02ea5d5cc5452419b5a8058c0da4cc3a2fd9b33adf539f3d04d5013f0"
+    },
+    "osv/advisories/PYSEC-2025-206.json": {
+      "bytes": 1211,
+      "sha256": "64f672cb98dbb7b9ef047f28dda45ac9a6c4336c8329dbf77b62dfbb172c4595"
+    },
+    "osv/advisories/PYSEC-2025-217.json": {
+      "bytes": 3213,
+      "sha256": "3adf5df151de0a18f3feadfd2650ba305d3f237118ed1b132f2e842257b1e49d"
+    },
+    "osv/advisories/PYSEC-2026-139.json": {
+      "bytes": 1680,
+      "sha256": "e67ea61edf63c4185e0bd1bbd16bfe0962a7c9197a538d5cb30a3c1a5513b194"
+    },
+    "osv/advisories/PYSEC-2026-2286.json": {
+      "bytes": 2096,
+      "sha256": "eddb11764d6ae93d0b301e8386b2d41616e7a2b999d5d1779ac8fba8526a591b"
+    },
+    "osv/advisories/PYSEC-2026-2288.json": {
+      "bytes": 3434,
+      "sha256": "0bd5fbb352408d200b6c825b238bebc01f9343eb5248b26d1b1f586f18304d0f"
+    },
+    "osv/advisories/PYSEC-2026-2289.json": {
+      "bytes": 3769,
+      "sha256": "eae41fcaa0e12808b9c66dd26291e5f09b6d87fbfb92f5741cc79d5afeef5c0c"
+    },
+    "osv/advisories/PYSEC-2026-2290.json": {
+      "bytes": 4233,
+      "sha256": "4f31cb8878a67adbdbac2e70b5820ec7e77e39847ba89069dd050f40e28ce260"
+    },
+    "osv/advisories/PYSEC-2026-3929.json": {
+      "bytes": 4081,
+      "sha256": "f26041b6f2fa23a42b5fe0c07f5275fc50c17259af4579a1af845736bd6197bb"
+    },
+    "osv/request.json": {
+      "bytes": 18588,
+      "sha256": "5175521898cc3ee91b7f84668f97bb91376f9153d9a297b6ee4e3107b29c025d"
+    },
+    "osv/response.json": {
+      "bytes": 1754,
+      "sha256": "8ff6606878546a84a6098bd24db3c03ef10e93e3bf58aa10c97d180d0e0c8480"
+    },
+    "osv/summary.json": {
+      "bytes": 4654,
+      "sha256": "f6107a599c0b7d12bada68b49c83c6587ec7077726ea52af943da49e9d4313c7"
+    },
+    "requirements-installer-lock.txt": {
+      "bytes": 3703,
+      "sha256": "8c45bc8aeb5c008dadc6bd8bc58900ce5f8f48ea640a105a301021754c93c8ec"
+    },
+    "runtime-graph/inventory.json": {
+      "bytes": 3867,
+      "sha256": "42f9196681976b2f4bd95b5364fbfcc963504bee1dd4f0ff1e423a24c4b74b12"
+    },
+    "runtime-graph/summary.json": {
+      "bytes": 42058,
+      "sha256": "80990b169f96b84fee4949375f93d891131cd82068b9e069a999072b6e600863"
+    },
+    "seal_repaired_lock_audit06.py": {
+      "bytes": 2900,
+      "sha256": "bc01914e7f80e424c21d28bdcd49e93a7923eebff6157d4a6f11671b23ad23e3"
+    },
+    "setuptools-vendored-osv/metadata.json": {
+      "bytes": 2633,
+      "sha256": "cc26d1fd5e529da83017cabb1679208d812daa6290d835468e6787628ec9f944"
+    },
+    "setuptools-vendored-osv/request.json": {
+      "bytes": 1616,
+      "sha256": "d815aae0d458ffc6ac9dc5a964f592610fe4f0fdaafdbf61ef601fb7268e9f33"
+    },
+    "setuptools-vendored-osv/response.json": {
+      "bytes": 49,
+      "sha256": "598d3cbbfac6a9785b0c999ef31f9f0ecd6f8463db729f4464d9e514f366fb9d"
+    },
+    "setuptools-vendored-osv/summary.json": {
+      "bytes": 586,
+      "sha256": "5c9f8fa265edea7daf8c78654c3c38617dbfd225e86a11c7ce4b57313d474290"
+    },
+    "verify_package06_graph.py": {
+      "bytes": 2998,
+      "sha256": "ac238af132344b83fbd173b4be5e980f7bd70bf12eb62bf7fd5f3bca77fa2687"
+    }
+  }
+}
