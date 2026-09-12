@@ -3,8 +3,9 @@
 Updated 2026-09-12. Candidate retained for review; not approved for ordinary upgrade or public release.
 
 Actual package-06 client testing found a SQLite timeout-cleanup defect that
-interrupts later cited-range exports. Repair and fresh qualification are in
-progress. The same observation established 20/20 paired reads and both native
+interrupts later cited-range exports. The fix is integrated at d812785 with
+97 affected tests passing in each root; full replacement qualification remains.
+The same observation established 20/20 paired reads and both native
 prompts in separate sessions; it does not clear combined client/visual acceptance.
 See [the client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md).
 The package and full-tree figures below remain the frozen package-06 record.

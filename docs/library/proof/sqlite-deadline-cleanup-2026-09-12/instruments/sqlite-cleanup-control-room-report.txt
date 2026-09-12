@@ -1,0 +1,211 @@
+c52710a3-21ee-4350-9d58-ef1233f3f269
+uoink-library
+completed · work/parallel · lead gemini
+Elapsed: 14m 28s · Last activity: 43s ago
+Owner PID: 25456 · Heartbeat: 43s ago
+
+Goal
+Open E:\AI\projects\uoink\checkouts\Yoink-library\docs\library\SQLITE-DEADLINE-CLEANUP-REPAIR-BRIEF-2026-09-12.md first and perform its bounded repair. No subagents, no commits, write early. Preserve all original acceptance tests and fixtures. Subscription only; no paid API.
+
+--- gemini · parallel · completed ---
+Elapsed: 14m 28s · Last activity: 43s ago
+Worktree: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\c52710a3-21e\gemini
+Session: 6e4dca3d-7975-479f-b0e4-728deae1e78d
+I have launched `test_phase4_stdio.py` and am waiting for the suite to complete.
+Waiting for `test_phase4_stdio.py` execution to finish.
+Waiting for background tasks to finish.
+Running `test_phase6_bc2.py` in the background; awaiting completion.
+Waiting for `test_phase6_bc2.py` background execution to finish.
+Running `test_phase6_bc3e.py` in the background; awaiting completion.
+Running `test_phase6_bc3f.py` in the background; awaiting completion.
+Running `test_phase4_stdio.py` in the background; awaiting completion.
+Running `test_phase6_bc2.py` in the background; awaiting completion.
+Running `test_phase6_bc3e.py` in the background; awaiting completion.
+Running `test_phase6_bc3f.py` in the background; awaiting completion.
+### Review of Bounded Repair
+
+#### Root Cause Analysis
+During reader operation cleanup in [`library_resources.LibraryReader._disarm_sqlite_deadline`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1216-L1239), the disarm routine invoked:
+```python
+conn.set_progress_handler(None)
+```
+In Python's `sqlite3` module (CPython `_sqlite3`), `set_progress_handler` requires two arguments `(progress_handler, n)`. Calling it with a single argument raises `TypeError: set_progress_handler() missing required argument 'n' (pos 2)`. Because the call was wrapped in:
+```python
+except (AttributeError, sqlite3.Error, TypeError):
+    pass
+```
+this `TypeError` was silently suppressed, leaving the armed deadline progress callback attached to the shared SQLite connection. When a subsequent operation (such as Phase 6 `export_cited_range`) executed queries on that same connection after the reader's former deadline had elapsed (e.g. 2.1 seconds later), the lingering `progress` handler returned `1`, causing SQLite to raise `SQLITE_INTERRUPT (9)` (`sqlite3.OperationalError: interrupted`), which mapped to `library_unavailable` with `details.reason: storage_error`.
+
+#### Product Fix
+In [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1228), the disarm call was updated to the supported callback-removal signature:
+```python
+conn.set_progress_handler(None, 0)
+```
+This cleanly removes the callback from the SQLite connection without raising `TypeError`, ensuring that both normal and exceptional reader completions disarm the deadline handler.
+
+---
+
+### Narrow Product Diff
+
+```diff
+diff --git a/library_resources.py b/library_resources.py
+index aaf4d3c..ec51a58 100644
+--- a/library_resources.py
++++ b/library_resources.py
+@@ -1225,7 +1225,7 @@ class LibraryReader:
+             self._sqlite_busy_previous = None
+             return
+         try:
+-            conn.set_progress_handler(None)
++            conn.set_progress_handler(None, 0)
+         except (AttributeError, sqlite3.Error, TypeError):
+             pass
+         previous = self._sqlite_busy_previous
+```
+
+---
+
+### Test Suites & Verification
+
+All suites were executed with `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=.`, and `PHASE3_REQUIRE_IMPLEMENTATION=1` without API keys.
+
+1. **[`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py)** (New behavioral regressions):
+   - `test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds`: **PASSED**
+   - `test_exceptional_exit_clears_sqlite_progress_handler`: **PASSED**
+   - `test_active_request_interrupts_work_after_deadline`: **PASSED**
+   - `test_active_reader_storage_maps_interrupt_to_deadline_exceeded`: **PASSED**
+   - `test_cross_consumer_media_export_regression`: **PASSED**
+   - **Count: 5 passed in 0.67s (Exit 0)**
+   - *Verification on old code*: Demonstrates 4 failures (completed reader interrupts subsequent SQL with `OperationalError: interrupted`, exceptional exit leaves callback and interrupts subsequent SQL, active lock disarm fails and leaves callback on exit, and cross-consumer media export returns `library_unavailable` with `reason: storage_error`).
+2. **`tests/test_phase4_resources.py`**:
+   - **Absent from repo**. As instructed by the brief, reported and replaced by matching existing resource suite [`tests/test_library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_library_resources.py).
+   - **Count: 50 passed in 2.82s (Exit 0)**
+3. **[`tests/test_phase4_stdio.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase4_stdio.py)**:
+   - **Count: 9 passed in 18.92s (Exit 0)**
+4. **[`tests/test_phase6_bc2.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc2.py)**:
+   - **Count: 14 passed, 4 deprecation warnings in 46.84s (Exit 0)**
+5. **[`tests/test_phase6_bc3a3.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3a3.py)**:
+   - **Count: 5 passed in 1.80s (Exit 0)**
+6. **[`tests/test_phase6_bc3e.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3e.py)**:
+   - **Count: 8 passed in 93.49s (Exit 0)**
+7. **[`tests/test_phase6_bc3f.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3f.py)**:
+   - **Count: 6 passed, 4 deprecation warnings in 27.16s (Exit 0)**
+
+---
+
+### Compact Handoff
+
+- **Status**: Complete. Ready for integrator verification and three-way Git apply.
+- **Work Completed**:
+  - Repaired `LibraryReader._disarm_sqlite_deadline` callback removal in [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1228) by using `conn.set_progress_handler(None, 0)`.
+  - Added new regression suite in [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py) covering normal completion cleanup, exceptional exit cleanup, active request deadline enforcement, reader error mapping, and cross-consumer Phase 6 `export_cited_range` sequencing.
+  - Verified regression failure on unpatched code and success on patched code.
+  - Retained all original acceptance tests and fixtures unchanged.
+- **Evidence**:
+  - All 5 tests in [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py) passed (0.67s, exit 0).
+  - All Phase 4 and Phase 6 suites passed without regression (50 passed in `test_library_resources.py`, 9 passed in `test_phase4_stdio.py`, 14 passed in `test_phase6_bc2.py`, 5 passed in `test_phase6_bc3a3.py`, 8 passed in `test_phase6_bc3e.py`, 6 passed in `test_phase6_bc3f.py`).
+- **Files Changed**:
+  - Modified: [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py)
+  - Created: [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py)
+- **Open Questions**: None. No commits made per worktree instructions.
+
+
+--- SHARED SUMMARY ---
+gemini: I have launched `test_phase4_stdio.py` and am waiting for the suite to complete.
+Waiting for `test_phase4_stdio.py` execution to finish.
+Waiting for background tasks to finish.
+Running `test_phase6_bc2.py` in the background; awaiting completion.
+Waiting for `test_phase6_bc2.py` background execution to finish.
+Running `test_phase6_bc3e.py` in the background; awaiting completion.
+Running `test_phase6_bc3f.py` in the background; awaiting completion.
+Running `test_phase4_stdio.py` in the background; awaiting completion.
+Running `test_phase6_bc2.py` in the background; awaiting completion.
+Running `test_phase6_bc3e.py` in the background; awaiting completion.
+Running `test_phase6_bc3f.py` in the background; awaiting completion.
+### Review of Bounded Repair
+
+#### Root Cause Analysis
+During reader operation cleanup in [`library_resources.LibraryReader._disarm_sqlite_deadline`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1216-L1239), the disarm routine invoked:
+```python
+conn.set_progress_handler(None)
+```
+In Python's `sqlite3` module (CPython `_sqlite3`), `set_progress_handler` requires two arguments `(progress_handler, n)`. Calling it with a single argument raises `TypeError: set_progress_handler() missing required argument 'n' (pos 2)`. Because the call was wrapped in:
+```python
+except (AttributeError, sqlite3.Error, TypeError):
+    pass
+```
+this `TypeError` was silently suppressed, leaving the armed deadline progress callback attached to the shared SQLite connection. When a subsequent operation (such as Phase 6 `export_cited_range`) executed queries on that same connection after the reader's former deadline had elapsed (e.g. 2.1 seconds later), the lingering `progress` handler returned `1`, causing SQLite to raise `SQLITE_INTERRUPT (9)` (`sqlite3.OperationalError: interrupted`), which mapped to `library_unavailable` with `details.reason: storage_error`.
+
+#### Product Fix
+In [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1228), the disarm call was updated to the supported callback-removal signature:
+```python
+conn.set_progress_handler(None, 0)
+```
+This cleanly removes the callback from the SQLite connection without raising `TypeError`, ensuring that both normal and exceptional reader completions disarm the deadline handler.
+
+---
+
+### Narrow Product Diff
+
+```diff
+diff --git a/library_resources.py b/library_resources.py
+index aaf4d3c..ec51a58 100644
+--- a/library_resources.py
++++ b/library_resources.py
+@@ -1225,7 +1225,7 @@ class LibraryReader:
+             self._sqlite_busy_previous = None
+             return
+         try:
+-            conn.set_progress_handler(None)
++            conn.set_progress_handler(None, 0)
+         except (AttributeError, sqlite3.Error, TypeError):
+             pass
+         previous = self._sqlite_busy_previous
+```
+
+---
+
+### Test Suites & Verification
+
+All suites were executed with `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=.`, and `PHASE3_REQUIRE_IMPLEMENTATION=1` without API keys.
+
+1. **[`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py)** (New behavioral regressions):
+   - `test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds`: **PASSED**
+   - `test_exceptional_exit_clears_sqlite_progress_handler`: **PASSED**
+   - `test_active_request_interrupts_work_after_deadline`: **PASSED**
+   - `test_active_reader_storage_maps_interrupt_to_deadline_exceeded`: **PASSED**
+   - `test_cross_consumer_media_export_regression`: **PASSED**
+   - **Count: 5 passed in 0.67s (Exit 0)**
+   - *Verification on old code*: Demonstrates 4 failures (completed reader interrupts subsequent SQL with `OperationalError: interrupted`, exceptional exit leaves callback and interrupts subsequent SQL, active lock disarm fails and leaves callback on exit, and cross-consumer media export returns `library_unavailable` with `reason: storage_error`).
+2. **`tests/test_phase4_resources.py`**:
+   - **Absent from repo**. As instructed by the brief, reported and replaced by matching existing resource suite [`tests/test_library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_library_resources.py).
+   - **Count: 50 passed in 2.82s (Exit 0)**
+3. **[`tests/test_phase4_stdio.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase4_stdio.py)**:
+   - **Count: 9 passed in 18.92s (Exit 0)**
+4. **[`tests/test_phase6_bc2.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc2.py)**:
+   - **Count: 14 passed, 4 deprecation warnings in 46.84s (Exit 0)**
+5. **[`tests/test_phase6_bc3a3.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3a3.py)**:
+   - **Count: 5 passed in 1.80s (Exit 0)**
+6. **[`tests/test_phase6_bc3e.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3e.py)**:
+   - **Count: 8 passed in 93.49s (Exit 0)**
+7. **[`tests/test_phase6_bc3f.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_phase6_bc3f.py)**:
+   - **Count: 6 passed, 4 deprecation warnings in 27.16s (Exit 0)**
+
+---
+
+### Compact Handoff
+
+- **Status**: Complete. Ready for integrator verification and three-way Git apply.
+- **Work Completed**:
+  - Repaired `LibraryReader._disarm_sqlite_deadline` callback removal in [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py#L1228) by using `conn.set_progress_handler(None, 0)`.
+  - Added new regression suite in [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py) covering normal completion cleanup, exceptional exit cleanup, active request deadline enforcement, reader error mapping, and cross-consumer Phase 6 `export_cited_range` sequencing.
+  - Verified regression failure on unpatched code and success on patched code.
+  - Retained all original acceptance tests and fixtures unchanged.
+- **Evidence**:
+  - All 5 tests in [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py) passed (0.67s, exit 0).
+  - All Phase 4 and Phase 6 suites passed without regression (50 passed in `test_library_resources.py`, 9 passed in `test_phase4_stdio.py`, 14 passed in `test_phase6_bc2.py`, 5 passed in `test_phase6_bc3a3.py`, 8 passed in `test_phase6_bc3e.py`, 6 passed in `test_phase6_bc3f.py`).
+- **Files Changed**:
+  - Modified: [`library_resources.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/library_resources.py)
+  - Created: [`tests/test_sqlite_deadline_cleanup.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/c52710a3-21e/gemini/tests/test_sqlite_deadline_cleanup.py)
+- **Open Questions**: None. No commits made per worktree instructions.
+

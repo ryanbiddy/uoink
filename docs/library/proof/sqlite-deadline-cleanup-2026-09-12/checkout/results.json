@@ -1,0 +1,29 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_sqlite_deadline_cleanup.py",
+      "tests/test_library_resources.py",
+      "tests/test_phase4_stdio.py",
+      "tests/test_phase6_bc2.py",
+      "tests/test_phase6_bc3a3.py",
+      "tests/test_phase6_bc3e.py",
+      "tests/test_phase6_bc3f.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\sqlite-cleanup-checkout01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\sqlite-cleanup-checkout01\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\sqlite-cleanup-checkout01\\tests.log"
+  }
+]

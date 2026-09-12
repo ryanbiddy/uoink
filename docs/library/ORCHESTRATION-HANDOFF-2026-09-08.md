@@ -86,16 +86,16 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package-06 source `6697dff`, new reader defect open)
+## State at handoff (updated 2026-09-12; reader repair `d812785`, package-07 qualification next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; review kit verified |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
-| 4 | Package-06 client supplements have 20/20 paired reads and both native prompts; combined gate remains open | 48 tool invocations: 45 success / 3 failure events, no sentinel calls. Finished reader leaves an expired SQLite callback; actual media failure reproduced | Gemini repairs callback cleanup under the 2026-09-12 brief; Astra verifies/integrates. Sign-in and extra-usage-off confirmation are complete |
+| 4 | SQLite callback repair integrated at d812785, 97 passes in each root | Package-06 client supplements: 20/20 pairs, both native prompts separately; 45 successful / 3 failed tool events, no sentinel calls. Raw combined gate remains open | Freeze new complete tree, build/reseal and installed qualification. Sign-in and extra-usage-off confirmation are complete |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
-| 6 | Package-06 actual client range export failed twice with storage_error | Installed diagnosis proves stale Phase 4 callback; a separate diagnosis finds incomplete chapter sidecar in the original P4 seed. Both results retained | Repair callback; observe a separately published synthetic media source without editing old fixtures. Speakers stay blocked |
+| 6 | Package-06 actual range export failed twice; callback fix is integrated with cross-consumer regression passing | Original P4 seed has incomplete chapter sidecar and remains untouched; both diagnoses retained | Qualify package-07 using the separate installed production-publication scenario. Speakers stay blocked |
 | Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match. New client proof has 251 payloads and a reproduced product defect; old measurements remain unchanged | New product repair requires complete tree, rebuild and fresh installed qualification. Remaining repair/evidence work belongs to Astra; release dispositions belong to Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -226,12 +226,16 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    after_remote in build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.backup.json.
    Keep that final transport receipt outside Git to avoid another commit/push
    solely to record the previous push. Do not repeat a verified transport.
-8. Repair the reproduced SQLite callback leak under SQLITE-DEADLINE-CLEANUP-
+8. The reproduced SQLite callback leak is repaired under SQLITE-DEADLINE-CLEANUP-
    REPAIR-BRIEF-2026-09-12.md. Gemini's run started from 5b69037; the brief was
    read by absolute checkout path and committed at 284334e. Use the existing
-   tests/test_library_resources.py for the brief's resource suite. Verify old
-   failure/new success, worker and checkout suites, raw diff/three-way apply.
-   Then freeze the complete tree, rebuild/reseal and requalify installation.
+   tests/test_library_resources.py for the brief's resource suite. Astra verified
+   97 passes in both roots and four old-code failures / one pass. Raw diff and
+   three-way apply are complete; d812785 is the product integration. Read
+   ASTRA-SQLITE-DEADLINE-INTEGRATION-2026-09-12.md, then follow SQLITE-REPAIRED-
+   CANDIDATE-QUALIFICATION-2026-09-12.md: freeze the complete tree, rebuild/reseal
+   and requalify installation. The positive chapter observation has the separate
+   INSTALLED-PUBLISHED-CHAPTER-SCENARIO-2026-09-12.md; no old fixture is edited.
    Preserve package-06's two failed media calls, incomplete chapter seed and
    all partial client coverage. No original fixture edits. Authentication and
    extra-paid-usage-off confirmation are resolved; reuse the isolated namespace
@@ -2896,3 +2900,15 @@ output or altering observations: account for terminal failure hooks, and avoid
 matching a credential screen's own bare source literal. Both versions and the
 review are retained. Sign-in and account-setting confirmation are no longer
 Ryan blockers. The newly discovered defect is product repair work.
+
+### 2026-09-12 - SQLite repair integrated; full candidate qualification follows
+
+Gemini c52710a3 completed the one-line callback removal and five new real-SQLite
+regressions. Astra reproduced four failures / one pass on original source,
+then independently recorded 97 passes in the worker root and 97 in the checkout
+after raw diff/three-way apply. Product commit d812785 and the 21-file proof
+retain all results. Original tests and P4 setup remain unchanged. Package-06
+is archived byte-identically at _scratch/Uoink-Setup-3.8.0-package06-91120b4a.exe.
+The 251-file client proof and earlier qualification plan are remotely verified
+at cf5fa70 via build/installed-client06-proof-2026-09-12.backup.json. Later commits
+still need the next authorized backup. No worker remains active.

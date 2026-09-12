@@ -1,0 +1,27 @@
+{
+  "counts": {
+    "old": {
+      "passed": 1,
+      "failed": 4,
+      "errors": 0,
+      "cases": 5
+    },
+    "worker": {
+      "passed": 97,
+      "failed": 0,
+      "errors": 0,
+      "cases": 97
+    },
+    "checkout": {
+      "passed": 97,
+      "failed": 0,
+      "errors": 0,
+      "cases": 97
+    }
+  },
+  "worker": "c52710a3",
+  "old_source": "a6bb66c76c75c9b451d0b203636b83ee0d597bad",
+  "production_sha256": "d5ae6e8e292f24c742ad0e603db15a8d5c40596f961dceab4d0b12878e8b5333",
+  "scope": "One-line production repair; five new regressions. Original tests/fixtures unchanged. Old-code result retained; both-root union verified.",
+  "prelaunch_refusal": "First old-code launch omitted IG_FORBIDDEN_LIVE; startup guard raised KeyError before runner/collection. Explicit path environment repaired the invocation."
+}

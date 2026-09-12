@@ -1,0 +1,16 @@
+........................................................................ [ 74%]
+.........................                                                [100%]
+============================== warnings summary ===============================
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc2.py::test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_seek
+tests/test_phase6_bc3f.py::test_bc3f_podcast_publisher_entry_preserves_changed_transcript_file
+tests/test_phase6_bc3f.py::test_bc3f_podcast_publisher_entry_preserves_changed_transcript_file
+tests/test_phase6_bc3f.py::test_bc3f_podcast_publisher_entry_preserves_changed_transcript_file
+tests/test_phase6_bc3f.py::test_bc3f_podcast_publisher_entry_preserves_changed_transcript_file
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+97 passed, 8 warnings in 160.16s (0:02:40)

@@ -1,0 +1,27 @@
+FFF.F                                                                    [100%]
+================================== FAILURES ===================================
+____ test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds ____
+_scratch\sqlite-cleanup-old-input01\test_sqlite_deadline_cleanup.py:75: in test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds
+    rows = idx._conn.execute(
+E   sqlite3.OperationalError: interrupted
+____________ test_exceptional_exit_clears_sqlite_progress_handler _____________
+_scratch\sqlite-cleanup-old-input01\test_sqlite_deadline_cleanup.py:105: in test_exceptional_exit_clears_sqlite_progress_handler
+    rows = idx._conn.execute(
+E   sqlite3.OperationalError: interrupted
+_____________ test_active_request_interrupts_work_after_deadline ______________
+_scratch\sqlite-cleanup-old-input01\test_sqlite_deadline_cleanup.py:138: in test_active_request_interrupts_work_after_deadline
+    rows = idx._conn.execute(
+E   sqlite3.OperationalError: interrupted
+_________________ test_cross_consumer_media_export_regression _________________
+_scratch\sqlite-cleanup-old-input01\test_sqlite_deadline_cleanup.py:210: in test_cross_consumer_media_export_regression
+    _success(exported)
+tests\test_phase6_evaluation.py:469: in _success
+    assert result["ok"] is True, result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase6-v1', 'error': {'code': 'library_unavailable', 'message': 'The library storage is unavailable.', 'retryable': True, 'details': {'reason': 'storage_error'}}}
+E   assert False is True
+=========================== short test summary info ===========================
+FAILED _scratch/sqlite-cleanup-old-input01/test_sqlite_deadline_cleanup.py::test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds
+FAILED _scratch/sqlite-cleanup-old-input01/test_sqlite_deadline_cleanup.py::test_exceptional_exit_clears_sqlite_progress_handler
+FAILED _scratch/sqlite-cleanup-old-input01/test_sqlite_deadline_cleanup.py::test_active_request_interrupts_work_after_deadline
+FAILED _scratch/sqlite-cleanup-old-input01/test_sqlite_deadline_cleanup.py::test_cross_consumer_media_export_regression
+4 failed, 1 passed in 1.16s
