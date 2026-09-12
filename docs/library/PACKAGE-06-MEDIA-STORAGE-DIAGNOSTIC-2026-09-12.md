@@ -27,3 +27,12 @@ Astra review: the proposed read cannot change synthetic library rows, and the
 original runtime guard retains the live-index, external-network and 5179
 prohibitions. A captured exception narrows the repair without changing a failed
 measurement. No acceptance assertion or original fixture will be edited.
+
+The first internal read found a different, precise refusal:
+`revision_unavailable / sidecar_snapshot_mismatch`. The prepared chapter rows
+exist, but the fixture's sidecar lacks the corresponding published snapshot;
+`store_snapshot` explicitly expects its caller to publish that file first.
+The isolated database SHA-256 stayed unchanged. Preserve that diagnosis too.
+Next, trace exceptions through the actual installed registry/backend binding
+in a fresh diagnostic process, without replacing its functions. This determines
+why the client received a SQLite storage refusal before that source-data check.
