@@ -1,0 +1,105 @@
+{
+  "video_id": "p6fx-range-01",
+  "request": {
+    "video_id": "p6fx-range-01",
+    "start": 34,
+    "end": 46
+  },
+  "export": {
+    "ok": true,
+    "schema_version": 1,
+    "contract_version": "phase6-v1",
+    "item": {
+      "video_id": "p6fx-range-01",
+      "title": "SYNTHETIC FIXTURE published media item",
+      "platform": "youtube",
+      "source_type": "video",
+      "source_url": "https://example.invalid/p4-synth-timed",
+      "source_revision": "f41cd9037fbf2d76e8604cdc3812e7086ec3676bb3c280e8e742a0e87d0fd3e9",
+      "media_revision": "0e7f23de1a65e494cca3d9b0cd980d3660507a051f4741f884187ad221f9d9cd"
+    },
+    "selection": {
+      "mode": "range",
+      "requested_start": 34.0,
+      "requested_end": 46.0,
+      "excerpt_id": null
+    },
+    "citation": {
+      "evidence_kind": "transcript_range",
+      "timing": "source_cues",
+      "start": 34.0,
+      "end": 46.0,
+      "verbatim_text": "SYNTHETIC FIXTURE: the stored navigation value is AMBER. Not a source quotation.",
+      "text_basis": "stored_cues",
+      "separator": "\n",
+      "source_deep_link": "https://example.invalid/p4-synth-timed#t=34",
+      "seek_link": null,
+      "player_seek_seconds": null,
+      "truncated": false
+    },
+    "units": [
+      {
+        "cue_seq": 0,
+        "cue_hash": "7e9376e7f046ec75db235944b1e50d6c18ba259730b9b6153270683435bc108f",
+        "start": 34.0,
+        "end": 46.0,
+        "text": "SYNTHETIC FIXTURE: the stored navigation value is AMBER. Not a source quotation.",
+        "speaker": null,
+        "speaker_provenance": null
+      }
+    ],
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 34.0,
+        "end": 90.0,
+        "title": "SYNTHETIC FIXTURE CHAPTER: Why computer use (not a source quotation)",
+        "provenance": {
+          "artifact_sha256": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-09-12T00:00:00Z"
+        },
+        "video_id": "p6fx-range-01",
+        "source_revision": "f41cd9037fbf2d76e8604cdc3812e7086ec3676bb3c280e8e742a0e87d0fd3e9"
+      }
+    ],
+    "attribution": {
+      "speaker_state": "absent",
+      "diarization_state": "not_requested",
+      "diarization_ran": false,
+      "labels": [],
+      "runs": [],
+      "chapter_state": "present",
+      "absence_reason": {
+        "chapters": null,
+        "speakers": "diarization_off"
+      }
+    },
+    "provenance": {
+      "cue_revision": "890962f05117e4b6ce1eb513358cd007c26888911072026a1c03192ac35ad067",
+      "transcript_source": {
+        "artifact_sha256": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+        "kind": "captions",
+        "language": null,
+        "model": null,
+        "provider": "supplied_metadata"
+      },
+      "evidence_refs": [
+        {
+          "source_revision": "f41cd9037fbf2d76e8604cdc3812e7086ec3676bb3c280e8e742a0e87d0fd3e9",
+          "excerpt_id": "7d55486035ef94c339e7f28f8dd4795d13150879bed82effe6228a22625b6d84"
+        }
+      ],
+      "render_version": "media-markdown-v1"
+    }
+  },
+  "producer": "server._publish_capture_media -> Index.publish_media_snapshot",
+  "source_sha256": "d5ae6e8e292f24c742ad0e603db15a8d5c40596f961dceab4d0b12878e8b5333",
+  "synthetic": true,
+  "published_sidecar_sha256": "a5b209afa7e2620c60f2f261d66e2a387b6263d1b514ce35e0a376dfdae498bd"
+}

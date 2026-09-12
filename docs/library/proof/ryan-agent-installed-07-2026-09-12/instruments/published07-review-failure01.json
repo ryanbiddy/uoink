@@ -1,0 +1,8 @@
+{
+  "exit_code": 1,
+  "stage": "independent evidence review, not product observation",
+  "retained_tool_diagnostic": "review_published07.py line 25: assert len(records)==1; AssertionError: []",
+  "source": "Tool-returned diagnostic, retained as structured transcription",
+  "diagnosis": "Tap uses records/stdio-39880, not records/stdio/*",
+  "product_observations_rerun": false
+}

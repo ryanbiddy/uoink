@@ -86,17 +86,17 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package-07 built from tested `6a89189`, fresh installation next)
+## State at handoff (updated 2026-09-12; package-07 installed and reviewed from tested `6a89189`, delivery next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; review kit verified |
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 installed and source-bound; documentary delivery next |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
-| 4 | SQLite callback repair integrated at d812785, 97 passes in each root | Package-06 client supplements: 20/20 pairs, both native prompts separately; 45 successful / 3 failed tool events, no sentinel calls. Raw combined gate remains open | Freeze new complete tree, build/reseal and installed qualification. Sign-in and extra-usage-off confirmation are complete |
+| 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Original historical AT6 exit disposition remains Ryan's; older partial receipts stay partial |
+| 4 | Package-07 installed protocol and actual client observations reviewed | P4 15 pass / 0 fail / 1 blocked / 5 unobserved / 2 pending raw rows; actual ordinary and Recall each 20/20 pairs; native prompts pass separately | Preserve false combined flags, negative-only Recall and absent native-client GUI acceptance in release review |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
-| 6 | Package-06 actual range export failed twice; callback fix is integrated with cross-consumer regression passing | Original P4 seed has incomplete chapter sidecar and remains untouched; both diagnoses retained | Qualify package-07 using the separate installed production-publication scenario. Speakers stay blocked |
-| Integration | Package-07 built/sealed from 6a89189; complete tree 2,540 passed / 1 historical failure / 2 skipped, all 2,543 cases accounted for | 32,506 compiler inputs and 142 source bindings match; 140 pins / 283 requirements / 983 repair-wheel files verified; Defender reports no threats, EXE unsigned | Fresh Agent Install 07 Setup/reinstall, C22/browser and client observations remain Astra's work; release dispositions belong to Ryan |
+| 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
+| Integration | Package-07 built/installed from 6a89189; full tree 2,540 pass / 1 historical failure / 2 skips | 32,497 installed hashes match; Setup/reinstall exit 0; 480-file installed seal, five actual client sessions / 44 successful terminal hooks / zero sentinel calls | Update/review current runbook, notes and kit; backup only origin/cc/living-library. Historical/security/GUI release scope remains Ryan's decision |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -242,6 +242,14 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    all partial client coverage. No original fixture edits. Authentication and
    extra-paid-usage-off confirmation are resolved; reuse the isolated namespace
    by reference without copying credentials. Collect only after observations.
+   Package-07 Setup/reinstall, C22/browser, decoder, P4 and separate published
+   chapter observations are now reviewed. Read ASTRA-INSTALLED-PACKAGE-07-
+   VERDICT-2026-09-12.md and the 480-file installed seal. The P4 fixture has
+   been collected after all client observations; do not reuse/renew it.
+   Native prompts succeed separately; five actual sessions have 44 successful
+   terminal hooks and zero sentinel calls. Keep absent native GUI, negative-only
+   Recall, false combined flags and the historical/security release decisions.
+   Finish documentary review kit 07 and its branch-only backup; no rebuild owed.
 9. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
@@ -474,6 +482,10 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   notes. Their release disposition cannot be described as a clean security audit.
 - Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
   diarization runs; chapters and cited ranges are the release scope.
+- Native-client citation/brief/chapter GUI acceptance remains unobserved; the
+  available automation exposes browser dashboards but no native client surface.
+  Ryan's release decision must preserve that limit or require a later visible
+  client receipt. Headless reads and historical BD-27 images cannot replace it.
 - Main merge/publication and new fetch scope remain unauthorized. Phase 5 Part B
   is deferred. Standing program decisions: ORCHESTRATION-V1 signature, watchdog
   installation, PR strategy and adapter allow-list.
@@ -2939,3 +2951,46 @@ build/sqlite-cleanup-qualified-checkpoint-2026-09-12.backup.json; that receipt
 establishes transport equality, not a passed full-tree aggregate. Later docs
 still need the next backup. Agent Install 07 is the next fresh app/data root;
 keep Agent Install 06 profiles and authenticated Claude namespace intact.
+
+### 2026-09-12 — repaired package installed and actual clients reviewed
+
+Agent Install 07 Setup/reinstall each exit zero; all 32,497 files match, with
+three expected generated files. C22 has 11 passes / zero failures / three raw
+manual placeholders. Four original dashboard images match unchanged consent,
+charges and worker_lost state. Owned helper/children stop and runtime guards
+restore exactly. The prior isolated app uninstalled while its profiles/auth
+namespace remain. Ordinary observed effects are unchanged; no ordinary upgrade.
+
+Two actual client sessions each have 20/20 exact pairs, zero missing packets and
+zero frame faults. Both native prompts succeed separately while the unchanged
+preview is valid. Recall is silent in 93.5668 ms, not positive injection. The
+separate production publication exports its synthetic cue/chapter exactly after
+2.100142 seconds in original stdio; the actual client's first export succeeds
+after 1.985696 seconds, a separate timing observation. No speaker/seek invention.
+Five actual sessions total 44 successful terminal hooks and zero sentinel calls.
+
+The original collector retains 15 passed / zero failed / one blocked / five
+unobserved / two pending-review rows. Native GUI acceptance remains absent.
+The 480-file seal preserves raw results and separate independent reviews without
+credentials/databases. One reviewer glob matched no frames; the documented
+reader-only path correction succeeded without repeating a product observation.
+Recorded P6 main-database/config/item bytes match; WAL/SHM were not separately
+frozen. Never broaden this into complete filesystem immutability.
+
+The current remote backup matches ed00b8b, as verified in
+build/package07-build-proof-2026-09-12.backup.json. Later documentary work needs
+the next branch-only backup. No product source changed after the 6a89189 tree
+and package. Finish notes/runbook/kit and preserve release_ready=false until
+Ryan disposes of the historical/security and remaining acceptance limits.
+
+### 2026-09-12 — package-07 documentary preflight
+
+All 480 installed-proof payloads match staged Git blobs. Five exact paths were
+force-added under existing ignore rules: the mirror manifest, three mirror
+Markdown files and the synthetic publication server log. The first staging
+reader refused Git's quoted paths; its NUL-delimited replacement preserves the
+same path allowlist and byte comparisons. The delivery adapter also retained
+one substring-replacement refusal before writing its final sealer; only that
+missing output was generated. Both diagnostics and bounded corrections remain.
+No product observation or ZIP build ran in those preparation steps. All nine
+current runbook PowerShell blocks parse, a syntax-only result.

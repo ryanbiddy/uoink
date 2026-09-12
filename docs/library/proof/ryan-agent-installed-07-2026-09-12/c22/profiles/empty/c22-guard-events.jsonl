@@ -1,0 +1,36 @@
+{"event": "guard_loaded", "pid": 34228, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "guard_loaded", "pid": 23852, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 23852, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 23852, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 23852, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 23852, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\""}
+{"event": "guard_loaded", "pid": 20648, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 23852, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 23852, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20648, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20648, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "guard_loaded", "pid": 20504, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 20504, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\""}
+{"event": "guard_loaded", "pid": 32812, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 20504, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 32812, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 32812, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "guard_loaded", "pid": 39428, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 39428, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39428, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39428, "operation": "socket.bind", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39428, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\""}
+{"event": "guard_loaded", "pid": 39624, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 39428, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39428, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}
+{"event": "subprocess_attempt", "pid": 39428, "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"}
+{"event": "guard_loaded", "pid": 14644, "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty", "injection": ""}
+{"event": "network_attempt", "pid": 14644, "operation": "socket.bind", "address": "('::1', 0)"}
+{"event": "blocked_capability_probe", "pid": 14644, "operation": "socket.bind", "address": "('::1', 0)", "dependency": "urllib3.util.connection._has_ipv6", "bound": false}
+{"event": "network_attempt", "pid": 39624, "operation": "socket.getaddrinfo", "address": "('127.0.0.1', 18081)"}
+{"event": "network_attempt", "pid": 39624, "operation": "socket.connect", "address": "('127.0.0.1', 18081)"}

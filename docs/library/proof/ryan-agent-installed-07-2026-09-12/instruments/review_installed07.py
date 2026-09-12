@@ -1,0 +1,60 @@
+"""Aggregate separately reviewed installed receipts without changing raw statuses."""
+from pathlib import Path
+import datetime as dt,json
+r=Path(__file__).resolve().parents[1]
+root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07')
+read=lambda name:json.loads((root/name).read_text(encoding='utf8'))
+package=json.loads((r/'docs/library/proof/candidate-package-07-2026-09-12/package-manifest.json').read_text())
+for stage in ('install','same-version-reinstall'):
+    row=read(stage+'.json');assert row['exit']==0 and row['package_sha256']==package['package_sha256']
+    assert len(read(stage+'.shortcuts.json'))==4
+comparison=read('installed-file-comparison.json');extras=read('installed-generated-files.json')
+assert comparison['compared']==comparison['expected_installed']==32497 and not comparison['failures']
+assert not extras['missing_expected'] and not extras['unrecognized_extra_files'] and len(extras['extra_files'])==3
+c22=read('c22-observation.json')
+assert c22['verdict']['counts']=={'pass':11,'fail':0,'unexecuted':3,'executed':11}
+assert c22['source_bindings_after'] and c22['guard_absent_after'] and c22['pth_before']==c22['pth_after']
+assert not c22['unexpected_runtime_errors'] and all(x['observed']=='dead' for x in c22['owned_command_liveness'])
+browser=read('browser07-independent-review.json')
+assert browser['status']=='passed_independent_visual_and_state_review'
+p4=read('p4/profile/collection.json')
+assert p4['counts']=={'passed':15,'failed':0,'blocked':1,'unobserved':5,'pending_review':2},p4['counts']
+assert not p4['product_findings'] and not p4['isolation']['instrument_only']
+stdio=read('p4/profile/stdio-check-original-installed.json')
+assert stdio['installed_credit'] and not stdio['fake_child_used'] and not stdio['product_findings']
+assert stdio['inspection']['packet_and_prompt_subset_complete'] and stdio['reconnect']['distinct']
+assert stdio['unavailable_storage']['expected_refusal'] and not stdio['unavailable_storage']['replacement_index_created']
+assert stdio['guard_restore']['children_confirmed_gone']
+for stage in ('prepare','check','prepare-client','collect'):
+    row=read('p4/profile/operator-'+stage+'.json');assert row['exit_code']==0 and row['cleanup']['cleaned']
+    row=read('p4-'+stage+'-observation.json')
+    assert row['status']=='completed_pending_independent_review' and row['source_bindings_after']
+    assert row['guard_absent_after'] and row['pth_before']==row['pth_after']
+decoder=read('decoder-commands-02.json');assert decoder['status']=='passed' and decoder['startup_restored']
+clients=read('client07-independent-review.json');native=read('native07-independent-review.json');published=read('published07-independent-review.json')
+assert all(x['comparisons']=={'equal':20} and x['missing_fields']==x['frame_faults']==0 for x in clients['sessions'])
+assert all(x['status']=='passed_native_prompt_observation' for x in native['sessions'])
+assert published['status']=='passed_bounded_installed_publication_and_export'
+summary={'utc':dt.datetime.now(dt.timezone.utc).isoformat(),'package_sha256':package['package_sha256'],
+    'build_source':package['build_source'],'setup_observed':True,'same_version_reinstall_observed':True,'setup_exits':[0,0],
+    'throwaway_account':False,'ordinary_installation_replaced':False,
+    'account_scope':'Same non-elevated account; separate app/data/credential namespace, uninstall entry and Start Menu group. Not OS-wide containment.',
+    'installed_files_compared':32497,'installed_files_failed':0,'recognized_generated_files':3,
+    'c22_raw_counts':c22['verdict']['counts'],'unexpected_runtime_errors':[],'all_owned_children_dead':True,'browser':browser,
+    'p4_raw_counts':p4['counts'],'p4_route_installed_credit':stdio['installed_credit'],
+    'p4_collection_installed_credit':p4['isolation']['installed_credit'],'p4_product_findings':[],
+    'p4_unobserved':[x['name'] for x in p4['checkpoints'] if x['status']=='unobserved'],
+    'p4_pending_review':[x['name'] for x in p4['checkpoints'] if x['status']=='pending_review'],
+    'p4_review':'Two actual clients independently have 20/20 exact comparisons. Native prompts pass separately. Original combined flags and raw pending/unobserved rows remain unchanged.',
+    'client_sessions':5,'actual_client_tool_calls':44,'successful_terminal_hooks':44,'failed_terminal_hooks':0,
+    'actual_sentinel_calls':0,'sentinel_discovery_requests':15,
+    'recall':'Hook exits zero with empty output in 93.5668 ms. Negative silence only; no positive injected retrieval credit.',
+    'published_chapter':{k:v for k,v in published.items() if k not in ('expected_export','final_client_response')},
+    'decoders':'Installed synthetic image/encryption and product-loader WAV checks passed with temporary no-site instrumentation and exact restoration; no model/checkpoint inference.',
+    'release_ready':False,'main_merged':False,'published':False,
+    'open':['Native-client citation/brief/chapter GUI interactions and positive Recall injection remain unobserved; no native UI automation surface is available in this session.',
+            'Historical AT6 exit disposition','Retained dependency findings and unsigned package','Ryan main/public release decision'],
+    'history':'All old partials and two package-06 failed exports retained. One new independent-review glob error retained with the unchanged observation records and corrected reader.'}
+out=r/'_scratch/installed07-reviewed-summary.json'
+with out.open('x',encoding='utf8',newline='\n') as f:f.write(json.dumps(summary,indent=2)+'\n')
+print(json.dumps({k:summary[k] for k in ('setup_exits','c22_raw_counts','p4_raw_counts','actual_client_tool_calls','release_ready')},indent=2))

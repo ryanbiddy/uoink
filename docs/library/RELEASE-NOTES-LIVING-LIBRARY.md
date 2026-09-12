@@ -3,12 +3,12 @@
 Updated 2026-09-12. Candidate retained for review; not approved for ordinary upgrade or public release.
 
 Package-07 contains the SQLite timeout-cleanup fix at d812785. The complete
-tree at 6a89189 records 2,540 passes, one historical AT6 failure and two skips;
-fresh installed qualification is next. Package-06 client observations remain
-retained: 20/20 paired reads and both native prompts in separate sessions,
-alongside two failed range exports and incomplete combined client/visual
-acceptance. See [the package verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md)
-and [the earlier client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md).
+tree at 6a89189 records 2,540 passes, one historical AT6 failure and two skips.
+Actual Setup/reinstall, C22/browser, paired client retrieval and the separately
+published chapter export are now observed. Native-client GUI acceptance remains
+unobserved, alongside the retained historical/security release decisions.
+See [the installed verdict](ASTRA-INSTALLED-PACKAGE-07-VERDICT-2026-09-12.md).
+Package-06's failed exports and partial client results remain historical evidence.
 
 The library now supports bounded evidence retrieval, reviewable shelf proposals,
 consented standing capture, native resources and prompts, an optional file mirror,
@@ -26,12 +26,12 @@ public release has occurred. Installation is not a security certification.
 | Bundled runtime | Python 3.13.15, MCP 1.28.1, schema 30 |
 | Build interval, UTC | 2026-09-12T08:02:41.3666423Z to 08:10:09.7391286Z; 448.374 seconds |
 | Complete-tree result | 2,540 passed, 1 historical failure, 2 skipped; 2,543 cases |
-| Actual installation | Fresh package-07 qualification pending; historical package-06 receipts retained below |
+| Actual installation | Same-account Agent Install 07: Setup/reinstall exit 0; all 32,497 files match |
 
 The [package-07 seal](proof/candidate-package-07-2026-09-12/SHA256.json)
 records 32,506 compiler inputs: 32,497 installed destinations, eight wizard
-images and one setup-only script. All 142 source bindings match. Fresh Setup
-and installed-file comparisons remain separate required observations.
+images and one setup-only script. All 142 source bindings match. Actual installed comparison also matches all
+32,497 destinations, with only the three expected generated files.
 
 All 140 runtime pins match staging and all 283 declared active requirements
 are satisfied. All 983 compared payload files from the two Lightning repair
@@ -43,8 +43,8 @@ fields use exact packaged License-Expression metadata; seven missing declaration
 remain unknown. Raw generator output and source metadata are retained. Notices
 are outside the installer payload; no packaged source changed after validation.
 Earlier installers and ZIPs remain preserved. The
-[runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md) currently retains the historical
-package-06 procedure; its package-07 update follows fresh installed qualification.
+[runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md) binds package-07 and gives a
+separate fresh-account procedure. The completed agent stages must not be repeated.
 
 ## What the phases deliver
 
@@ -150,6 +150,44 @@ Start Menu group. It does not sandbox same-user malware. This host has no Window
 Sandbox; no elevation, system-feature installation or protection downgrade was
 used. Actual receipts retain the real account identity and effects.
 
+## Current package-07 installed observations
+
+Setup and same-version reinstall each exit zero. All 32,497 installed files
+match; ordinary observed registry/shortcut state is unchanged. This is a separate
+app/data/credential namespace in the same Windows account, not an ordinary upgrade.
+C22 records 11 passed, zero failed and three raw manual placeholders. Separate
+Setup and four original dashboard images support the independent installation/
+visual verdict. Consent revision, charges and worker_lost recovery match unchanged
+before/after/stop state. Owned children are gone and runtime guards restore exactly.
+
+The original Phase 4 collector records 15 passed, zero failed, one blocked,
+five unobserved and two pending-review rows. Independent review of the two actual
+client sessions finds 20/20 exact packet comparisons each, no missing fields
+and no frame faults. Both native prompts pass separately. The raw combined
+client flags remain false; client template discovery and GUI citation/brief/
+chapter interactions are not established. Recall's 93.5668 ms silent result is
+a negative unavailable-storage observation, not positive context injection.
+
+The separate production-publication scenario exports its stored synthetic cue,
+chapter and current revisions successfully after a measured 2.100142-second
+protocol delay. The actual client's first export also succeeds; its own delay
+was 1.985696 seconds and is not counted as the greater-than-two-second probe.
+Speaker labels and unsupported seek fields remain absent/null. Recorded main-
+database, item and configuration hashes match; WAL/SHM files were not separately
+frozen. No source fetch, inference or original P4 fixture edit occurred.
+
+Five actual subscription sessions have 44 tool calls and 44 successful terminal
+hooks, with no sentinel call. Fifteen sentinel discovery requests and three
+synthetic permission probes are separate. Prepared configuration/sentinel hashes
+match and all owned runtimes restore. This is bounded hostile-input evidence,
+not a universal security guarantee. Raw model cost fields are list-price estimates,
+not billing receipts. Authentication and extra-paid-usage-off are already resolved.
+
+The [installed verdict](ASTRA-INSTALLED-PACKAGE-07-VERDICT-2026-09-12.md) and
+[480-payload proof](proof/ryan-agent-installed-07-2026-09-12/SHA256.json) retain
+the raw statuses, actual frames, images, independent review and one corrected
+evidence-reader path error. No product observation was rerun for that correction.
+
 ## Historical package-06 installed observations
 
 Actual Setup and same-version reinstall each exit zero in **Agent Install 06**,
@@ -243,7 +281,7 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 - Ryan's disposition of the missing historical AT6 exit and retained dependency
   advisories; neither is presented as a pass or clean security clearance.
-- Fresh package-07 installation, client and citation/brief/chapter observations remain Astra's work. Isolated authentication and extra-usage-off confirmation are complete. The historical package-06 observations do not establish replacement-package behavior.
+- Package-07 installation and bounded CLI observations are complete. Native-client GUI citation/brief/chapter acceptance remains unobserved; the current agent has no native client UI surface. Positive Recall injection and per-session combined prompt/template completeness are not claimed. Release scope must preserve these limits.
 - No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
   is deferred. The failed shelf-quality and dashboard-size measurements remain.
 - Main merge and publication require Ryan's decision. Only the authorized

@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-interrupt",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\child-interrupt",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+  "started_utc": "2026-09-12T08:24:55Z",
+  "child": {
+    "pid": 16976,
+    "created_ms": 1789201495303,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "observed_ms": 1789201495308,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 16976,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082455Z-helper-child-interrupt.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082455Z-helper-child-interrupt.stderr.log",
+  "synthetic": false
+}

@@ -1,0 +1,87 @@
+{
+  "name": "helper-relaunch-2",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\relaunch",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+  "started_utc": "2026-09-12T08:24:09Z",
+  "child": {
+    "pid": 13044,
+    "created_ms": 1789201449455,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "observed_ms": 1789201449457,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 13044,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082409Z-helper-relaunch-2.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082409Z-helper-relaunch-2.stderr.log",
+  "synthetic": false,
+  "health": {
+    "ok": true,
+    "status": 200,
+    "url": "http://127.0.0.1:18081/health",
+    "body": "{\"ok\": true, \"version\": \"3.8.0\", \"migration_version\": 30, \"migration_pending\": false, \"last_successful_tick_at\": \"2026-09-12T08:24:10Z\", \"heartbeat\": {\"last_tick_completed_at\": \"2026-09-12T08:24:10Z\", \"last_successful_tick_at\": \"2026-09-12T08:24:10Z\", \"last_successful_poll_at\": null, \"last_failed_poll_at\": null, \"last_poll_error\": null, \"last_ingest_completed_at\": null, \"last_tick\": {\"ok\": true, \"polls\": 0, \"failed_polls\": 0}, \"counts\": {\"ticks\": 1, \"polls_ok\": 0, \"polls_failed\": 0, \"ingests\": 0}, \"tick_interval_sec\": 30, \"freshness\": {\"state\": \"fresh\", \"age_sec\": 0.0, \"stale_after_sec\": 300}}, \"whisperx_available\": true, \"whisper_model\": \"base\", \"whisperx_model_loaded\": true, \"index_recovering\": false, \"output_root_fallback\": false, \"path_integrity\": {\"ok\": true, \"checked\": 0, \"missing\": 0}, \"library\": {\"status\": \"idle\", \"waiting_for_client\": false, \"ready\": 0, \"leased\": 0, \"run_revision\": null, \"recovery_state\": \"ready\", \"error_code\": null, \"apply_enabled\": false, \"contract_version\": \"phase2-v1-2026-09-04\"}}"
+  },
+  "token_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\relaunch\\token.txt",
+  "live_index_before": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened": false,
+    "hashed": false,
+    "exists_probed": false,
+    "mtime_ns": null,
+    "sha256": null,
+    "bytes": null,
+    "note": "forbidden live index path recorded as a string only"
+  },
+  "canary_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\canary-localappdata",
+  "live_index_forbidden": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+    "opened": false,
+    "hashed": false,
+    "exists_probed": false,
+    "mtime_ns": null,
+    "sha256": null,
+    "bytes": null,
+    "note": "forbidden live index path recorded as a string only"
+  },
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "marker": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\isolated-install.json",
+    "unchanged": true,
+    "preserved_installer_ownership": true,
+    "cli_binding": true,
+    "marker_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\empty",
+    "requested_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\relaunch"
+  },
+  "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "canary_proof": {
+    "canary": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\guard-canary\\index.canary",
+    "rejected": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "automatic_sitecustomize": true,
+    "explicit_exec": false,
+    "interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "pth": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python313._pth",
+      "present": true,
+      "import_site_active": true,
+      "bytes": 79,
+      "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+      "commented_import_site": false,
+      "preserved_exact_bytes": true
+    },
+    "stdout": "CANARY_REJECTED\nC22 guard: live index forbidden\n"
+  },
+  "canary_used_as_data_root": false,
+  "declared_profile_is_data_root": true
+}

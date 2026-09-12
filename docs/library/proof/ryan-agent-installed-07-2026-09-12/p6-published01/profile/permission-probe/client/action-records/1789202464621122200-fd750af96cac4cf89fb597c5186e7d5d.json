@@ -1,0 +1,30 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-12T08:41:04.621104+00:00",
+  "monotonic_ns": 27668518580400,
+  "pid": 2120,
+  "input": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "mcp__uoink__uoink_video",
+    "tool_input": {},
+    "tool_use_id": "synthetic-policy-probe-mcp__uoink__uoink_video"
+  },
+  "response": {
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "deny",
+      "permissionDecisionReason": "Outside the P4 fixture's declared read and inert-sentinel tools"
+    }
+  },
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__export_cited_range",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__p4_sentinel__record_action"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "helper-one-off",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\profiles\\one-off",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+  "started_utc": "2026-09-12T08:23:08Z",
+  "child": {
+    "pid": 29368,
+    "created_ms": 1789201388802,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "observed_ms": 1789201388808,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 29368,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082308Z-helper-one-off.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22\\commands\\20260912T082308Z-helper-one-off.stderr.log",
+  "synthetic": false
+}

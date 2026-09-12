@@ -1,0 +1,95 @@
+{
+  "video_id": "p6fx-range-01",
+  "title": "SYNTHETIC FIXTURE published media item",
+  "channel": "Synthetic fixture",
+  "topic": "fixture",
+  "url": "https://example.invalid/p4-synth-timed",
+  "source_type": "video",
+  "duration_seconds": 120,
+  "yoinked_at": "2026-09-12T00:00:00Z",
+  "synthetic_fixture": true,
+  "transcript_source": "supplied_metadata",
+  "transcript": [
+    {
+      "start": 34.0,
+      "end": 46.0,
+      "text": "SYNTHETIC FIXTURE: the stored navigation value is AMBER. Not a source quotation.",
+      "source_url": "https://example.invalid/p4-synth-timed",
+      "source_deep_link": "https://example.invalid/p4-synth-timed#t=34"
+    }
+  ],
+  "source_chapters": [
+    {
+      "start_time": 34.0,
+      "end_time": 90.0,
+      "title": "SYNTHETIC FIXTURE CHAPTER: Why computer use (not a source quotation)"
+    }
+  ],
+  "media_depth": {
+    "schema_version": 1,
+    "contract_version": "phase6-v1",
+    "video_id": "p6fx-range-01",
+    "source_revision": "f41cd9037fbf2d76e8604cdc3812e7086ec3676bb3c280e8e742a0e87d0fd3e9",
+    "cue_revision": "890962f05117e4b6ce1eb513358cd007c26888911072026a1c03192ac35ad067",
+    "media_revision": "0e7f23de1a65e494cca3d9b0cd980d3660507a051f4741f884187ad221f9d9cd",
+    "chapter_state": "present",
+    "speaker_state": "absent",
+    "diarization_state": "not_requested",
+    "provenance": {
+      "chapter_source": {
+        "origin": "source_metadata",
+        "provider": "youtube_metadata",
+        "artifact_sha256": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+        "record_locator": [
+          "chapters"
+        ],
+        "recorded_at": "2026-09-12T00:00:00Z"
+      },
+      "transcript_source": {
+        "kind": "captions",
+        "artifact_sha256": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+        "provider": "supplied_metadata",
+        "model": null,
+        "language": null
+      },
+      "active_diarization_run_id": null,
+      "absence_reason": {
+        "chapters": null,
+        "speakers": "diarization_off"
+      },
+      "corpus_revision": "d5473266a683773c65b2a2a50df36518d7154ad57fcf897027c42c3be1403801"
+    },
+    "playback": {
+      "source_url": "https://example.invalid/p4-synth-timed",
+      "seek_url": null,
+      "seek_kind": "none"
+    },
+    "chapters": [
+      {
+        "seq": 0,
+        "start": 34.0,
+        "end": 90.0,
+        "title": "SYNTHETIC FIXTURE CHAPTER: Why computer use (not a source quotation)",
+        "provenance": {
+          "origin": "source_metadata",
+          "provider": "youtube_metadata",
+          "artifact_sha256": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+          "record_locator": [
+            "chapters",
+            0
+          ],
+          "recorded_at": "2026-09-12T00:00:00Z"
+        }
+      }
+    ],
+    "runs": [],
+    "cues": [
+      {
+        "seq": 0,
+        "cue_hash": "7e9376e7f046ec75db235944b1e50d6c18ba259730b9b6153270683435bc108f",
+        "speaker": null,
+        "speaker_provenance": null
+      }
+    ]
+  }
+}

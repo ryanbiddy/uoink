@@ -1,0 +1,12 @@
+2026-09-12 01:23:00,138 INFO install migration: skipped_isolated_install
+2026-09-12 01:23:00,153 INFO Restored 0 job record(s) from the library index
+2026-09-12 01:23:00,156 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-12 01:23:00,582 INFO tray: started (daemon thread)
+2026-09-12 01:23:00,609 INFO splash: spawned (version 3.8.0)
+2026-09-12 01:23:00,609 INFO Uoink server v3.8.0 running on http://127.0.0.1:18081
+2026-09-12 01:23:00,609 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-12 01:23:00,609 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 07\c22\profiles\empty\output
+2026-09-12 01:23:00,610 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 07\c22\profiles\empty\server.log
+2026-09-12 01:23:00,610 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-12 01:23:00,615 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 01:23:00,691 INFO GET /health from 127.0.0.1 -> ok

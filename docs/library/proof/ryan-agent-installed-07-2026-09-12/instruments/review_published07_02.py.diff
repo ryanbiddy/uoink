@@ -1,0 +1,11 @@
+--- review_published07.py
++++ review_published07_02.py
+@@ -19,7 +19,7 @@
+ assert protocol['delay_after_resources_s']>2 and protocol['exact_expected_export'] and protocol['cleanup']['cleaned']
+ assert tool_envelope(protocol['reply']['result'])==expected
+ records=[]
+-for path in (profile/'records/stdio').glob('*/events.jsonl'):
++for path in (profile/'records').glob('stdio-*/events.jsonl'):
+     lines=[json.loads(x) for x in path.read_text(encoding='utf8').splitlines()]
+     if stages['client']['started_utc']<=lines[0]['utc']<=stages['client']['finished_utc']:records.append((path,lines))
+ assert len(records)==1,[str(p) for p,_ in records]

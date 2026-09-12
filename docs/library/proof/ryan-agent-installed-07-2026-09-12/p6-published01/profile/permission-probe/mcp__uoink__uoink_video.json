@@ -1,0 +1,7 @@
+{
+  "tool": "mcp__uoink__uoink_video",
+  "expected": "deny",
+  "exit": 0,
+  "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"Outside the P4 fixture's declared read and inert-sentinel tools\"}}\n",
+  "stderr": ""
+}

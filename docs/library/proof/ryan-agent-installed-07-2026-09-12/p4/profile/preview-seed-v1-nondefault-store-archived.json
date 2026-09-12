@@ -1,0 +1,203 @@
+{
+  "fixture_generator_version": "p4-kit-review-03-v1-nondefault-prompt-store",
+  "archived_from": "docs/library/proof/ryan-p4-kit-review-03-2026-09-09/expected.json",
+  "store_root": "prompt-store",
+  "product_default_store_root": "index.parent/library",
+  "note": "v1 generator passed LibraryWorkService(idx, profile/prompt-store). Original uoink_mcp LibraryPreviewReader reads index.parent/library, so taxonomy files were not where the pure reader recheck looks. That produced revision_unavailable/preview_invalidated on both original sessions. Original requests/expected remain sealed in proof/ryan-p4-kit-review-03-2026-09-09/.",
+  "operations": [
+    {
+      "method": "approve_taxonomy",
+      "request": {
+        "version_id": "p4_native_prompt_fixture",
+        "nodes": [
+          {
+            "shelf_id": "p4_fixture_only",
+            "path": [
+              "P4 fixture only"
+            ],
+            "definition": "Synthetic prompt-observation taxonomy; never activated or applied.",
+            "include": [
+              "fixture only"
+            ],
+            "exclude": [
+              "all live classification"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "ok": true,
+        "schema_version": 1,
+        "version_id": "p4_native_prompt_fixture",
+        "nodes": [
+          {
+            "shelf_id": "p4_fixture_only",
+            "path": [
+              "P4 fixture only"
+            ],
+            "definition": "Synthetic prompt-observation taxonomy; never activated or applied.",
+            "include": [
+              "fixture only"
+            ],
+            "exclude": [
+              "all live classification"
+            ],
+            "name": "P4 fixture only",
+            "retired": false,
+            "parent_shelf_id": null
+          }
+        ],
+        "parent_version_id": null,
+        "revision_hash": "6aea2ab70783456615ed15b559730de95ff70a007694d6932d1d0b3d15e7f844"
+      }
+    },
+    {
+      "method": "prepare_run",
+      "request": {
+        "run_id": "p4_native_prompt_fixture",
+        "version_id": "p4_native_prompt_fixture",
+        "video_ids": [
+          "p4fx-timed-01",
+          "p4fx-text-01",
+          "p4fx-hostile-01"
+        ],
+        "prompt_hash": "75d3a0b139c4141a6c861068aee8e83b393e7cb988507225b921d54c9a427b8a",
+        "exclusions": {
+          "p4fx-timed-01": "Report-only fixture; no classification or application requested.",
+          "p4fx-text-01": "Report-only fixture; no classification or application requested.",
+          "p4fx-hostile-01": "Report-only fixture; no classification or application requested."
+        }
+      },
+      "response": {
+        "ok": true,
+        "schema_version": 1,
+        "run_id": "p4_native_prompt_fixture",
+        "run_revision": 1,
+        "manifest_hash": "fba4bae9be2750412bbd177dc7e1e422d231541b52cf4885642eb5bcd904296f",
+        "target_count": 3
+      }
+    },
+    {
+      "method": "preview_apply",
+      "request": {
+        "mode": "preview",
+        "run_id": "p4_native_prompt_fixture",
+        "expected_projection_revision": 0
+      },
+      "response": {
+        "ok": true,
+        "schema_version": 1,
+        "preview_id": "ZVRd29jz5nuGj_w80jDG62NchFyNw77L",
+        "expected_projection_revision": 0,
+        "delta_hash": "6fd73f0b146d3b5013d388192a0643dac72335dc0aa3fc45b19a63bdf6686317",
+        "expires_ms": 1789203128235,
+        "delta": {
+          "items": {},
+          "policies": {}
+        },
+        "inverse": {
+          "items": {},
+          "policies": {}
+        },
+        "summary": {
+          "items": [
+            {
+              "video_id": "p4fx-hostile-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested.",
+              "additions": [],
+              "deletions": [],
+              "replacements": [],
+              "primary_before": null,
+              "primary_after": null,
+              "unchanged": true,
+              "preserved_pins": []
+            },
+            {
+              "video_id": "p4fx-text-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested.",
+              "additions": [],
+              "deletions": [],
+              "replacements": [],
+              "primary_before": null,
+              "primary_after": null,
+              "unchanged": true,
+              "preserved_pins": []
+            },
+            {
+              "video_id": "p4fx-timed-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested.",
+              "additions": [],
+              "deletions": [],
+              "replacements": [],
+              "primary_before": null,
+              "primary_after": null,
+              "unchanged": true,
+              "preserved_pins": []
+            }
+          ],
+          "exclusions": [
+            {
+              "video_id": "p4fx-hostile-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested."
+            },
+            {
+              "video_id": "p4fx-text-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested."
+            },
+            {
+              "video_id": "p4fx-timed-01",
+              "disposition": "unsupported",
+              "reason": "Report-only fixture; no classification or application requested."
+            }
+          ],
+          "changed_items": 0,
+          "baseline_items": 0,
+          "changed_item_ids": [],
+          "churn_percent": 0.0,
+          "initial_filing": true,
+          "initial_filing_items": [],
+          "activation": {
+            "before": null,
+            "after": null
+          },
+          "blocking_reasons": []
+        },
+        "manifest_exclusions": [
+          {
+            "video_id": "p4fx-hostile-01",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested."
+          },
+          {
+            "video_id": "p4fx-text-01",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested."
+          },
+          {
+            "video_id": "p4fx-timed-01",
+            "disposition": "unsupported",
+            "reason": "Report-only fixture; no classification or application requested."
+          }
+        ],
+        "changed_items": 0,
+        "baseline_items": 0,
+        "churn_percent": 0.0,
+        "initial_filing": true,
+        "can_apply": false,
+        "reasons": [
+          {
+            "code": "apply_disabled"
+          },
+          {
+            "code": "preview_approval_required"
+          }
+        ]
+      }
+    }
+  ]
+}

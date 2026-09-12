@@ -1,0 +1,19 @@
+--- p4_operator_client07.py
++++ p4_operator_native_reshelve0107.py
+@@ -63,7 +63,7 @@
+         raise common.IsolationError("installed driver requires package bytes, source bindings and forbidden checkout")
+     profile = Path(binding["isolated_profile"])
+     common.ensure_profile_dirs(profile)
+-    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "")
++    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "") + "-native-reshelve01"
+     receipt_path = profile / ("operator-" + stage_name + ".json")
+     out_path = profile / ("operator-" + stage_name + ".stdout")
+     err_path = profile / ("operator-" + stage_name + ".stderr")
+@@ -99,6 +99,7 @@
+         if json.loads(overlay.read_text(encoding="utf8")) != expected:
+             raise common.IsolationError("Auth overlay differs beyond the declared isolated credential namespace")
+         launch["args"][launch["args"].index("--settings") + 1] = str(overlay)
++        launch["args"][launch["args"].index("--session-id") + 1] = 'b0eff6f0-d1de-4333-a676-1e37f88b04d4'
+         command = [str(args.client_exe), *launch["args"], "--print", "--verbose",
+                    "--output-format", "stream-json", "--include-hook-events"]
+         cwd = client

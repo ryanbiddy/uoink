@@ -1,0 +1,44 @@
+--- uninstall_retained_package05.ps1
++++ uninstall_retained_package06.ps1
+@@ -1,9 +1,9 @@
+-# Remove only the retained package-05 isolated test application; preserve receipts.
++# Remove only the retained package-06 isolated test application; preserve receipts.
+ $ErrorActionPreference='Stop'
+-$taskRoot='E:\AI\projects\uoink\installation-receipts\Agent Install 05'
++$taskRoot='E:\AI\projects\uoink\installation-receipts\Agent Install 06'
+ $taskApp=Join-Path $taskRoot 'app'
+ $taskProfile=Join-Path $taskRoot 'c22\profiles\empty'
+-$taskOut=Join-Path $taskRoot 'uninstall-before-package06-2026-09-11'
++$taskOut=Join-Path $taskRoot 'uninstall-before-package07-2026-09-12'
+ $taskIsoId='{8F3E1B27-9C6A-4E5D-A2B8-7D4C1E0F93A5}_is1'
+ $taskOrdinaryId='{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1'
+ $taskUninstallBase='Software\Microsoft\Windows\CurrentVersion\Uninstall'
+@@ -75,7 +75,7 @@
+ }
+ 
+ foreach($taskPath in @($taskRoot,$taskApp,$taskProfile,$taskOut)){Assert-PlainPath $taskPath}
+-if([IO.Path]::GetFullPath($taskApp) -ine 'E:\AI\projects\uoink\installation-receipts\Agent Install 05\app'){throw 'Unexpected deletion target'}
++if([IO.Path]::GetFullPath($taskApp) -ine 'E:\AI\projects\uoink\installation-receipts\Agent Install 06\app'){throw 'Unexpected deletion target'}
+ $taskLinks=@(Get-ChildItem -LiteralPath $taskApp -Recurse -Force -Attributes ReparsePoint)
+ if($taskLinks.Count){throw 'Reparse entry below isolated app; refuse uninstall'}
+ if(Test-Path -LiteralPath $taskOut){throw 'Preserve prior uninstall attempt'}
+@@ -85,8 +85,8 @@
+ if($taskLocation.TrimEnd('\') -ine $taskApp){throw 'Isolated uninstall entry mismatch'}
+ $taskExpected=@{
+  'unins000.exe'='f93db03c7a52c5ad336c086be7f2573f6578e9fb21262b039aa0d2337a30fbe0'
+- 'unins000.dat'='4d6f6574b17d6dd23ff5b2fb740914caea5f5a76d3f74bed1ff516e5a838f755'
+- 'isolated-install.json'='a311f5c131e0149d2abca682c73302f572aa09aea8179a935b480d120d49c89a'
++ 'unins000.dat'='3b213b96f87003b421802101e19927ca3e152210a07a30f0404137ca3143dbff'
++ 'isolated-install.json'='5fd9049eb9b08235981b4c18cd9811e51bee3e9218c1ad3dbaf752509628ff76'
+ }
+ foreach($taskName in $taskExpected.Keys){if((Get-FileHash -LiteralPath (Join-Path $taskApp $taskName) -Algorithm SHA256).Hash.ToLower() -ne $taskExpected[$taskName]){throw ('Retained installed artifact differs: '+$taskName)}}
+ New-Item -ItemType Directory -Path $taskOut | Out-Null
+@@ -96,7 +96,7 @@
+ Remove-Item Env:\ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
+ $env:PYTHONDONTWRITEBYTECODE='1';$env:HF_HUB_OFFLINE='1';$env:TRANSFORMERS_OFFLINE='1'
+ $taskArgs=@('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="'+(Join-Path $taskOut 'uninstall.inno.log')+'"'))
+-$taskRecord=[ordered]@{utc_start=[DateTimeOffset]::UtcNow.ToString('o');app=$taskApp;profile_preserved=$taskProfile;scope='Only package05 isolated test installation; ordinary index and port 5179 prohibited';arguments=$taskArgs;exit=$null;verified_generated_files=$taskExpected}
++$taskRecord=[ordered]@{utc_start=[DateTimeOffset]::UtcNow.ToString('o');app=$taskApp;profile_preserved=$taskProfile;scope='Only package06 isolated test installation; ordinary index and port 5179 prohibited';arguments=$taskArgs;exit=$null;verified_generated_files=$taskExpected}
+ try{
+  $taskProcess=Start-Process -FilePath (Join-Path $taskApp 'unins000.exe') -ArgumentList $taskArgs -WindowStyle Hidden -PassThru
+  $taskRecord.process_id=$taskProcess.Id;$taskProcess.WaitForExit();$taskProcess.Refresh();$taskRecord.exit=$taskProcess.ExitCode

@@ -1,0 +1,31 @@
+{
+  "utc": "2026-09-12T08:43:06.928799+00:00",
+  "native_prompt_observations": [
+    {
+      "label": "native-reshelve01",
+      "session": "b0eff6f0-d1de-4333-a676-1e37f88b04d4",
+      "request_sha256": "4c955d0aa47453775feff586a757f35066dc41207a8ae93e937b0a22996a9037",
+      "files": {
+        "p4_operator_native_reshelve0107.py": "bd44272693318cfe20b1a8529cb6ddfe521f1122687772842a4063e62bdb7ddb",
+        "run_native_reshelve0107.py": "bceb38f119fcc510f7caadab23646c3fd41908a7515d22fbf5e5486e45587e0a",
+        "p4_operator_native_reshelve0107.py.diff": "81e98f13e88699c0fb6c74f8f9a0de513743fa0ffde651067748f2f54710c67a",
+        "run_native_reshelve0107.py.diff": "20df4bc9545db3f35a3932780ef13f044132c1e99a36602f95a5ec2df92308b6"
+      }
+    },
+    {
+      "label": "native-consult01",
+      "session": "da92e6e4-7569-495a-8cb8-ce2f20935029",
+      "request_sha256": "4fce749d5cbfaa0d6761426a72a61c87caf3d09dc2a65425a19a73ef31ef0444",
+      "files": {
+        "p4_operator_native_consult0107.py": "a053bd676f0f92b1b2e5d655b464d8690bf4bdda1a066f1c393ec6135e231ffa",
+        "run_native_consult0107.py": "105a57b86ce631977236c119c0b983250cafd3f3442bc251e9b11447781d5494",
+        "p4_operator_native_consult0107.py.diff": "e48fe02d9ec3403bad99f46eee79213f5933af3f053186450ff96fa0653f0cc8",
+        "run_native_consult0107.py.diff": "155570970461b8282df23050881c3c7c8b678783ce72f9d6d19fdbc6bda10b98"
+      }
+    }
+  ],
+  "prepared_files_unchanged": 7,
+  "preview_expires_ms": 1789203128235,
+  "review": "Fresh names and session ids only; same guarded original package route, auth overlay and permissions. No original fixture edits or preview renewal.",
+  "model_started": false
+}

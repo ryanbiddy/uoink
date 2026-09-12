@@ -1,0 +1,11 @@
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58707)
+Traceback (most recent call last):
+  File "socketserver.py", line 697, in process_request_thread
+  File "socketserver.py", line 362, in finish_request
+  File "socketserver.py", line 766, in __init__
+  File "http\server.py", line 451, in handle
+  File "http\server.py", line 419, in handle_one_request
+  File "socket.py", line 723, in readinto
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+----------------------------------------

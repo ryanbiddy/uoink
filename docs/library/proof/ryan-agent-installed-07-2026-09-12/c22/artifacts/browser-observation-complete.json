@@ -1,0 +1,58 @@
+{
+  "utc": "2026-09-12T08:32:06.517434+00:00",
+  "observer": "Astra",
+  "tool": "agent-browser 0.37.1; dedicated uoink-install07 session",
+  "binary_sha256": "29a003139ff4eb96fa4d1ed341830b26eb3e082843bf776b4e88ad3443bb8fde",
+  "browser_config_sha256": "e3566b3a06430868d71e9287dfd6c6c520a3da027aabea01951d407ee131dc2f",
+  "url": "http://127.0.0.1:18081/dashboard",
+  "viewport": [
+    1440,
+    1100
+  ],
+  "images": [
+    {
+      "file": "browser-library.png",
+      "bytes": 162132,
+      "sha256": "d9cd8e58ec4aee0e0c484639b8492c5956c7c8c1d3f5128fd7f1628f8478cfd1",
+      "captured_file_mtime_utc": "2026-09-12T08:29:27.175469+00:00"
+    },
+    {
+      "file": "browser-sources-top.png",
+      "bytes": 195318,
+      "sha256": "9e5e82cc18c57bd1867954ca56c72005e50d7313267372add8df578be0f6e8b5",
+      "captured_file_mtime_utc": "2026-09-12T08:29:28.262864+00:00"
+    },
+    {
+      "file": "browser-checkpoint.png",
+      "bytes": 129739,
+      "sha256": "a9bf406dd205fbe1db3026ae5b327fac7981123219ae527e5323c09abb76ec77",
+      "captured_file_mtime_utc": "2026-09-12T08:30:21.686783+00:00"
+    },
+    {
+      "file": "browser-activity.png",
+      "bytes": 143456,
+      "sha256": "940508411f6bfcf4a38565d6221de70779e720f611064af33b2830af4021d944",
+      "captured_file_mtime_utc": "2026-09-12T08:30:52.669945+00:00"
+    }
+  ],
+  "browser_page_errors": "",
+  "browser_close_exit": 0,
+  "reviewed_visible_fields": {
+    "source": "http://c22-fixture.invalid/child-life/feed.xml",
+    "consent": "On (Standing capture), rev 1",
+    "detection": "healthy",
+    "capture": "settled failed (worker_lost)",
+    "enrollment": "1 / 25",
+    "starts": "1 / 10 used; 9 remaining",
+    "recovery": "eligible for retry; C22 child-lifetime episode; worker_lost; attempt 1/3; start failed; retry scheduled",
+    "activity": "0 running, 0 queued, 0 completed loaded"
+  },
+  "scope": "Actual installed UI. Four original PNGs inspected by Astra; no source fetch, capture, consent change or model run. UTC is paired here and visible in the Library snapshot.",
+  "navigation_observation": [
+    "Initial about:blank preflight exited 1: No hostname in URL. No product page was loaded by that command.",
+    "Kept the 127.0.0.1 domain restriction, registered an abort route for http://127.0.0.1:5179/**, then opened the declared dashboard once.",
+    "Observed div.content as the scrolling container and used its native scrollTo(0,640). No CSS, text or image bytes were edited.",
+    "Four views cover Library, Sources top, full recovery card and Activity. Earlier package-06 intermediate images remain separate."
+  ],
+  "visual_verdict": "Visible consent, charge, outcome and recovery fields match the fixture; persisted-state and helper cleanup review follows."
+}

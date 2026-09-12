@@ -1,0 +1,550 @@
+{
+  "route_label": "original-installed",
+  "installed_credit": true,
+  "runtime_mode": "installed",
+  "command": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "-P",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\kit\\p4_stdio_tap.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+    "--isolated-port",
+    "18282",
+    "--fixture-root",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+    "--record-dir",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\originalinstalleda",
+    "--cwd",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+    "--route-label",
+    "original-installed",
+    "--",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+    "-P",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_mcp.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+    "--isolated-port",
+    "18282"
+  ],
+  "elapsed_ms": 7087.2106,
+  "exit_code": 1,
+  "observed_inventory": {
+    "tools": [
+      "uoink_video",
+      "uoink_playlist",
+      "get_job_status",
+      "cancel_job",
+      "list_recent_uoinks",
+      "search_uoinks",
+      "search_clips",
+      "get_evidence_card",
+      "get_uoink_corpus",
+      "analyze_comments",
+      "classify_hook",
+      "get_taxonomy",
+      "get_citation_map",
+      "get_uoink_health",
+      "find_mentions",
+      "get_transcript_reliability",
+      "add_podcast_feed",
+      "list_podcast_feeds",
+      "remove_podcast_feed",
+      "poll_podcast_feed",
+      "list_podcast_episodes",
+      "download_podcast_episode",
+      "get_whisperx_status",
+      "transcribe_podcast_episode",
+      "episode_to_corpus",
+      "get_library_activity",
+      "search_library",
+      "get_library_item",
+      "read_library_resource",
+      "get_library_brief_input",
+      "publish_library_brief",
+      "export_cited_range"
+    ],
+    "templates": [
+      "library-card",
+      "library-excerpt",
+      "library-corpus-chunk",
+      "library-shelf-page",
+      "library-brief"
+    ],
+    "prompts": [
+      "consult-library",
+      "evidence-brief",
+      "whats-new",
+      "reshelve-review"
+    ]
+  },
+  "expected_tools": [
+    "uoink_video",
+    "uoink_playlist",
+    "get_job_status",
+    "cancel_job",
+    "list_recent_uoinks",
+    "search_uoinks",
+    "search_clips",
+    "get_evidence_card",
+    "get_uoink_corpus",
+    "analyze_comments",
+    "classify_hook",
+    "get_taxonomy",
+    "get_citation_map",
+    "get_uoink_health",
+    "find_mentions",
+    "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    "get_library_brief_input",
+    "publish_library_brief",
+    "export_cited_range"
+  ],
+  "expected_templates": [
+    "library-card",
+    "library-excerpt",
+    "library-corpus-chunk",
+    "library-shelf-page",
+    "library-brief"
+  ],
+  "expected_prompts": [
+    "consult-library",
+    "evidence-brief",
+    "whats-new",
+    "reshelve-review"
+  ],
+  "reconnect": {
+    "first_wrapper_pid": 39232,
+    "second_wrapper_pid": 33376,
+    "first_child_pid": 39732,
+    "second_child_pid": 9504,
+    "distinct": true,
+    "commands": [
+      [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--isolated-port",
+        "18282",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\originalinstalleda",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--isolated-port",
+        "18282"
+      ],
+      [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\kit\\p4_stdio_tap.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--isolated-port",
+        "18282",
+        "--fixture-root",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--record-dir",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\originalinstalledb",
+        "--cwd",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app",
+        "--route-label",
+        "original-installed",
+        "--",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\uoink_mcp.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+        "--isolated-port",
+        "18282"
+      ]
+    ],
+    "identity_source": "tap child_started events"
+  },
+  "unavailable_storage": {
+    "elapsed_ms": 1.5848,
+    "bound_ms": 2000.0,
+    "within_bound": true,
+    "replacement_index_created": false,
+    "replacement_preserved": null,
+    "held_original_restored": true,
+    "expected_refusal": true,
+    "reply": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "error": {
+        "code": -32603,
+        "message": "The library storage is unavailable.",
+        "data": {
+          "ok": false,
+          "schema_version": 1,
+          "contract_version": "phase4-v1-2026-09-08",
+          "error": {
+            "code": "library_unavailable",
+            "message": "The library storage is unavailable.",
+            "retryable": true,
+            "details": {
+              "storage": "FileNotFoundError"
+            }
+          }
+        }
+      }
+    },
+    "index_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\index.db"
+  },
+  "guard_canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "guard_restore": {
+    "restored": [],
+    "ok": true,
+    "failures": [],
+    "child_cleanup_receipts": [
+      {
+        "pid": 39232,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            39232,
+            27168,
+            39732,
+            38176
+          ],
+          "owned_pids": [
+            27168,
+            38176,
+            39232,
+            39732
+          ],
+          "parent_pid": 39232,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            27168,
+            38176,
+            39232,
+            39732
+          ],
+          "parent_pid": 39232,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-12 01:37:25,830 INFO Processing request of type ListToolsRequest\r\n2026-09-12 01:37:25,832 INFO Processing request of type ListResourceTemplatesRequest\r\n2026-09-12 01:37:25,833 INFO Processing request of type ListPromptsRequest\r\n2026-09-12 01:37:25,835 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,839 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,841 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,842 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,844 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,846 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,848 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,849 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,851 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,853 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,855 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,856 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,858 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,860 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,862 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,864 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,865 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,867 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,869 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:25,884 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:25,887 INFO Processing request of type GetPromptRequest\r\n2026-09-12 01:37:25,890 INFO Processing request of type GetPromptRequest\r\n",
+        "stderr_bytes": 1884,
+        "retained_events": 27,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\traffic\\originalinstalleda-39232",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 33376,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            33376,
+            34316,
+            9504,
+            34228
+          ],
+          "owned_pids": [
+            9504,
+            33376,
+            34228,
+            34316
+          ],
+          "parent_pid": 33376,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            9504,
+            33376,
+            34228,
+            34316
+          ],
+          "parent_pid": 33376,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-12 01:37:27,607 INFO Processing request of type ListToolsRequest\r\n2026-09-12 01:37:27,609 INFO Processing request of type ListResourceTemplatesRequest\r\n2026-09-12 01:37:27,610 INFO Processing request of type ListPromptsRequest\r\n2026-09-12 01:37:27,612 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,620 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,621 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,623 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,625 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,627 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,629 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,631 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,632 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,634 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,636 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,639 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,640 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,642 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,644 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,646 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,647 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,649 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,651 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:27,668 INFO Processing request of type CallToolRequest\r\n2026-09-12 01:37:27,671 INFO Processing request of type GetPromptRequest\r\n2026-09-12 01:37:27,673 INFO Processing request of type GetPromptRequest\r\n",
+        "stderr_bytes": 1884,
+        "retained_events": 27,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\traffic\\originalinstalledb-33376",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 30192,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            30192,
+            26856,
+            20204,
+            33588
+          ],
+          "owned_pids": [
+            20204,
+            26856,
+            30192,
+            33588
+          ],
+          "parent_pid": 30192,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            20204,
+            26856,
+            30192,
+            33588
+          ],
+          "parent_pid": 30192,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "2026-09-12 01:37:29,415 INFO Processing request of type ReadResourceRequest\r\n2026-09-12 01:37:29,416 WARNING library storage binding failed: FileNotFoundError\r\n",
+        "stderr_bytes": 160,
+        "retained_events": 3,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\traffic\\originalinstalledunavail-30192",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      },
+      {
+        "pid": 24584,
+        "label": "p4-original-installed",
+        "job_assigned": true,
+        "already_exited": false,
+        "exit_code": 1,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [
+            24584,
+            38916,
+            20640,
+            31668
+          ],
+          "owned_pids": [
+            20640,
+            24584,
+            31668,
+            38916
+          ],
+          "parent_pid": 24584,
+          "parent_exit": null,
+          "job_query_ok": true,
+          "job_empty_affirmed": false,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            20640,
+            24584,
+            31668,
+            38916
+          ],
+          "parent_pid": 24584,
+          "parent_exit": 1,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true,
+        "stderr_tail": "",
+        "stderr_bytes": 0,
+        "retained_events": 2,
+        "partial_stdout_bytes": 0,
+        "retain_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\traffic\\originalinstalledtransport-24584",
+        "stdout_drained": true,
+        "stderr_drained": true,
+        "writer_exited": true,
+        "writer_was_pending": false,
+        "drain_uncertain": false
+      }
+    ],
+    "children_confirmed_gone": true
+  },
+  "transport_failure": {
+    "elapsed_ms": 0.0,
+    "bound_ms": 15000.0,
+    "within_bound": true,
+    "exit_code": 1
+  },
+  "inspection": {
+    "packet_and_prompt_subset_complete": true,
+    "frame_faults": [],
+    "missing_required_native_prompts": [],
+    "inventory_differences": [],
+    "reconnect_identities": [
+      {
+        "record": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\originalinstalleda-39232\\events.jsonl",
+        "route_label": "original-installed",
+        "child_pids": [
+          39732
+        ],
+        "exit": []
+      },
+      {
+        "record": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile\\records\\originalinstalledb-33376\\events.jsonl",
+        "route_label": "original-installed",
+        "child_pids": [
+          9504
+        ],
+        "exit": []
+      }
+    ],
+    "reshelve_review_success": true,
+    "valid_preview_pair": true
+  },
+  "guard_install": {
+    "mechanism": "bundled_site_packages",
+    "bundled": true,
+    "already_present": true,
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\Lib\\site-packages\\sitecustomize.py"
+  },
+  "product_findings": [],
+  "hidden_by_special_route": false,
+  "fake_child_used": false,
+  "note": "Isolation flags were forwarded. If the original installed entry ignores them, that is a product finding, not a hidden special route. FAKE_CHILD is instrument-only and was not used on this route.",
+  "utc": "2026-09-12T08:37:31.195082+00:00",
+  "isolation": {
+    "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\p4\\profile",
+    "isolated_port": 18282,
+    "instrument_only": false
+  }
+}

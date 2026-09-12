@@ -1,0 +1,373 @@
+{
+  "stage": "c22",
+  "utc_start": "2026-09-12T08:22:54.195744+00:00",
+  "actual_userprofile": "C:\\Users\\hello",
+  "account_isolation": "same account, separate app/data/credential namespace; not OS-wide containment",
+  "throwaway_account": false,
+  "package_sha256": "308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b",
+  "package_source": "6a89189d601467eeff33d304c2c9b69cdd2e6d0b",
+  "active_package_seal": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-07-2026-09-12",
+  "source_bindings": 142,
+  "installed_credit": false,
+  "installed_binding_report_before": {
+    "ok": true,
+    "files_checked": 141,
+    "installed_files_checked": 141,
+    "compiler_bindings": 142,
+    "compiler_bindings_count": 142,
+    "compiler_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "installer_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "problems": []
+  },
+  "verdict": {
+    "schema": "c22-verdict-input-v1",
+    "utc": "2026-09-12T08:26:09.268197+00:00",
+    "receipt_root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\c22",
+    "synthetic_instrument": false,
+    "installed_pass_claimed": false,
+    "installed_pass_note": "No claimed installed pass until Ryan actually runs the sealed kit on the throwaway profile against the isolated installed helper.",
+    "scenarios": [
+      {
+        "id": "install",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "Inno is Ryan's throwaway-operator step"
+      },
+      {
+        "id": "installed_provenance",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "empty_migration_replay",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "populated_legacy_replay",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "one_off_capture",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "manual_first",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "standing_first",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "whole_helper_relaunch",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "registered_child_lifetime",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "launch_interruption",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "registration_failure",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "browser_state_checkpoint",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "browser protocol without an image is unexecuted in all modes"
+      },
+      {
+        "id": "protected_phase2_state",
+        "status": "pass",
+        "error": null,
+        "reason": null
+      },
+      {
+        "id": "upgrade_operator_step",
+        "status": "unexecuted",
+        "error": null,
+        "reason": "real installed upgrade/reinstall is Ryan's operator step"
+      }
+    ],
+    "counts": {
+      "pass": 11,
+      "fail": 0,
+      "unexecuted": 3,
+      "executed": 11
+    },
+    "astra_owns": [
+      "independent verification",
+      "final runbook/package seal",
+      "isolation mechanism integration",
+      "Phase 4 client/everyday receipt tooling"
+    ]
+  },
+  "installed_binding_report_after": {
+    "ok": true,
+    "files_checked": 141,
+    "installed_files_checked": 141,
+    "compiler_bindings": 142,
+    "compiler_bindings_count": 142,
+    "compiler_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "installer_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "problems": []
+  },
+  "source_bindings_after": true,
+  "status": "completed_pending_independent_review",
+  "pth_before": {
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "pth_after": {
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "guard_absent_after": true,
+  "owned_command_liveness": [
+    {
+      "identity": {
+        "pid": 34228,
+        "created_ms": 1789201374926,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201374938,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 23852,
+        "created_ms": 1789201376991,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201376998,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 20504,
+        "created_ms": 1789201379188,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201379192,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 39428,
+        "created_ms": 1789201381388,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201381391,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 15832,
+        "created_ms": 1789201384100,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201384106,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 18732,
+        "created_ms": 1789201386238,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201386241,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 29368,
+        "created_ms": 1789201388802,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201388808,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 37236,
+        "created_ms": 1789201391966,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201391972,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 33840,
+        "created_ms": 1789201415384,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201415390,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 31292,
+        "created_ms": 1789201447759,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201447765,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 13044,
+        "created_ms": 1789201449455,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201449457,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 3860,
+        "created_ms": 1789201452181,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201452186,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 28692,
+        "created_ms": 1789201483602,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201483605,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 36516,
+        "created_ms": 1789201492620,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201492624,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 16976,
+        "created_ms": 1789201495303,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201495308,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 27472,
+        "created_ms": 1789201526738,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201526741,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 3220,
+        "created_ms": 1789201529422,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201529427,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    },
+    {
+      "identity": {
+        "pid": 34348,
+        "created_ms": 1789201560913,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\python.exe",
+        "observed_ms": 1789201560916,
+        "from_popen": true,
+        "poll": null
+      },
+      "observed": "dead"
+    }
+  ],
+  "unexpected_runtime_errors": [],
+  "utc_end": "2026-09-12T08:26:09.478217+00:00"
+}

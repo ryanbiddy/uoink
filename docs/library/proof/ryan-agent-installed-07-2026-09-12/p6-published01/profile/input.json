@@ -1,0 +1,33 @@
+{
+  "sidecar": {
+    "video_id": "p6fx-range-01",
+    "title": "SYNTHETIC FIXTURE published media item",
+    "channel": "Synthetic fixture",
+    "topic": "fixture",
+    "url": "https://example.invalid/p4-synth-timed",
+    "source_type": "video",
+    "duration_seconds": 120,
+    "yoinked_at": "2026-09-12T00:00:00Z",
+    "synthetic_fixture": true,
+    "transcript_source": "supplied_metadata",
+    "transcript": [
+      {
+        "start": 34.0,
+        "end": 46.0,
+        "text": "SYNTHETIC FIXTURE: the stored navigation value is AMBER. Not a source quotation.",
+        "source_url": "https://example.invalid/p4-synth-timed",
+        "source_deep_link": "https://example.invalid/p4-synth-timed#t=34"
+      }
+    ],
+    "source_chapters": [
+      {
+        "start_time": 34.0,
+        "end_time": 90.0,
+        "title": "SYNTHETIC FIXTURE CHAPTER: Why computer use (not a source quotation)"
+      }
+    ]
+  },
+  "corpus_sha256": "d5473266a683773c65b2a2a50df36518d7154ad57fcf897027c42c3be1403801",
+  "sidecar_sha256": "af7909c3f5c9ab41b4695a029e5354726bc32b706f0df737c23fee308e80d021",
+  "scope": "Generated data only; no source fetch or transcript inference"
+}

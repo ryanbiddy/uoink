@@ -1,0 +1,12 @@
+{
+  "selected_tasks": [],
+  "saved_settings_sha256": "310598f2dfe425b5eba167feff70163e4f9a10835ca45448b3ae30b718046dea",
+  "untraversed_desktop": {
+    "C:\\Users\\hello\\OneDrive\\Desktop": {
+      "metadata_sha256": "bb778ab550af32017aba8b3782344b7d89b95c7ee959edc54fbf45ddb7e88ee4",
+      "contents_observed": false,
+      "reason": "Ordinary reparse Desktop not traversed; selected tasks must exclude desktopicon"
+    }
+  },
+  "claim": "No selected desktopicon task; reparse Desktop contents not inspected"
+}

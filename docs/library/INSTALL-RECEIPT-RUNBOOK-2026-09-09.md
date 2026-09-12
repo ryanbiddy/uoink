@@ -1,16 +1,23 @@
 # Living Library: one installed receipt session
 
-Ryan delegated the installation check to Astra. Package-06 now has actual same-account Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful independent browser/state review. Phase 4 collection records 15 passes, one blocked link and seven unobserved client/visual checkpoints. This does not approve an ordinary upgrade.
+Ryan delegated the installation check to Astra. Package-07 has actual same-account
+Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful
+independent browser/state review. The unchanged P4 collector has 15 passes,
+one blocked link, five unobserved and two pending-review rows. Independent
+client review finds 20/20 exact comparisons in each of two sessions; both native
+prompts and a separate published chapter export succeed. See
+[the installed verdict](ASTRA-INSTALLED-PACKAGE-07-VERDICT-2026-09-12.md).
 
-Agent Install 06 sign-in and extra-paid-usage-off confirmation are complete.
-The SQLite timeout-cleanup repair is integrated at d812785 and qualified in
-the complete 6a89189 tree (2,540 passed / one historical failure / two skipped).
-Package-07 is built and sealed; Astra owns its fresh installed observations.
-See [the package-07 verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md).
-Do not repeat sign-in
-or run these historical package-06 steps against the current receipt. The
-[client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md) records progress
-and remaining checks. The procedure below remains the frozen package-06 runbook.
+The completed sign-in and extra-paid-usage-off confirmation need no repetition.
+Agent Install 07's P4 fixture has now been collected; preserve it and do not
+reuse it as a fresh fixture. Native-client GUI flows remain unobserved. The
+current automated surface does not expose the native client. This runbook gives
+exact steps for a separate fresh Windows-account receipt if that acceptance is
+required; it is not a request to repeat completed installation work.
+
+The SQLite repair is d812785. The full tree and build share source 6a89189:
+2,540 passed / one historical failure / two skipped. No packaged source changed
+after that result. This procedure does not approve an ordinary upgrade.
 
 The steps below are the reproducible procedure for one separate, fresh Windows
 account session on this machine. Do not repeat a completed agent stage in its
@@ -21,9 +28,9 @@ not elevate or change directory permissions.
 It does not approve a main merge or publication. The release notes and
 `release-state.json` identify the tested source and remaining failures.
 
-The installer is **Uoink-Setup-3.8.0.exe**, 389,568,844 bytes, SHA-256
-`91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb`, built from
-`6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d`. Use this package and the accompanying
+The installer is **Uoink-Setup-3.8.0.exe**, 389,569,575 bytes, SHA-256
+`308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b`, built from
+`6a89189d601467eeff33d304c2c9b69cdd2e6d0b`. Use this package and the accompanying
 tools together. Earlier packages, including package-05 (95123073), remain retained historical artifacts.
 
 ## Before you begin
@@ -53,18 +60,19 @@ $opPython = 'C:\Python314\python.exe'
 if (-not (Test-Path -LiteralPath $opPython -PathType Leaf)) { throw 'The required system Python is unavailable.' }
 $opKit = Join-Path $opBundle 'scripts\install_receipt'
 $opPackage = Join-Path $opBundle 'Uoink-Setup-3.8.0.exe'
-$opHash = '91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb'
+$opHash = '308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b'
 $opManifest = Join-Path $opBundle 'c22-operator-manifest.json'
 $opBindings = Join-Path $opBundle 'source-bindings.json'
-$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-11'
+$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-12'
 $opC22 = Join-Path $opRoot 'c22'
 $opEmpty = Join-Path $opC22 'profiles\empty'
 $opApp = Join-Path $opRoot 'app'
-$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-06-2026-09-11'
+$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-07-2026-09-12'
 $opBoundCli = Join-Path $opBundle 'run_bound_c22.py'
 if (Test-Path -LiteralPath $opRoot) { throw 'Preserve the existing receipt; do not overwrite it.' }
 if (Test-Path -LiteralPath $opApp) { throw 'This session requires a fresh application directory.' }
 foreach ($opKey in 'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN','ANTHROPIC_BASE_URL',
+                  'CLAUDE_CODE_OAUTH_TOKEN','CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR','CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR',
                   'CLAUDE_CODE_USE_BEDROCK','CLAUDE_CODE_USE_VERTEX','CLAUDE_CODE_USE_FOUNDRY',
                   'OPENAI_API_KEY','XAI_API_KEY','GROK_API_KEY','GEMINI_API_KEY','GOOGLE_API_KEY') {
     Remove-Item -LiteralPath ('Env:' + $opKey) -ErrorAction SilentlyContinue
@@ -95,7 +103,7 @@ Start-Transcript -LiteralPath (Join-Path $opRoot 'operator-transcript.txt')
 [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); user=[Security.Principal.WindowsIdentity]::GetCurrent().Name;
     sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; profile=$env:USERPROFILE;
     package_sha256=$opHash; validation_source=$opSeal.validation_source; bundle_source=$opSeal.bundle_source;
-    installer_source='6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d'; install_started=$false
+    installer_source='6a89189d601467eeff33d304c2c9b69cdd2e6d0b'; install_started=$false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $opRoot 'operator-preflight.json') -Encoding utf8
 ```
 
