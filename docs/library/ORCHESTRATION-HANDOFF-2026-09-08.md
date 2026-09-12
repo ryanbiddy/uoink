@@ -96,8 +96,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Native note repair d2caac5 and saved-media repair 60d203f integrated | Final media union has 58 passes in both roots, including 23 new cases. Worker boundary and fabricated timing/label defects corrected | Final full tree, package-08 installation and native GUI confirmation next |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
-| Security | Fresh Gemini evidence independently reviewed at a6b9cf0 | 19 raw entries / 15 alias groups remain. 35 upstream payloads verified; 21 existing cases pass in both roots. Four proposed worker tests rejected | No verified compatible drop-in dependency repair. Keep the security hold; broader migration needs a separate qualified scope |
-| Integration | a25e3be complete tree sealed: 2,556 pass / one historical failure / two skips, 2,559 cases | 60d203f changes packaged media/dashboard source; its 58/58 focused checks do not replace complete qualification | Integrate the documentary second security review, freeze the final source, then package-08 tree/build/install/native/notes/kit/backup |
+| Security | Gemini evidence/backport reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; 35 metadata payloads and 13 source files verified. Worker unsupported reachability and proposed frozen-test edits rejected | Security hold remains; compatible runtime migration and model qualification need the exact Ryan scope below |
+| Integration | Final source includes native note d2caac5 and media 60d203f; security follow-up is documentary only | Latest prior complete tree a25e3be: 2,556 pass / one historical failure / two skips; final focused media union 58/58 | Freeze this commit for complete tree06, then package-08 build/install/native/notes/kit/authorized backup |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -163,8 +163,8 @@ This sequence supersedes the completed delivery instructions below.
    pass in each root. Original source has nine failures / three passes under
    the worker's twelve cases. Existing tests/fixtures remain unchanged. The
    a25e3be full tree is separately sealed in 44 payloads and remains FAIL.
-   Integrate documentary security run 940c7fc1 with Astra's corrected review,
-   then freeze the final source. Run ryan-final-partitioned-06 (23 new media
+   Documentary security run 940c7fc1 is integrated at 43b42bc with Astra's
+   corrected review. Freeze this handoff commit as the final source. Run ryan-final-partitioned-06 (23 new media
    cases, none removed), build package-08 and qualify its installed source plus
    actual native note/media flows. Update notes/runbook/kit and back up only
    cc/living-library. Prepared package-08 instruments still bind a25e3be;
@@ -526,10 +526,18 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   notes. Their release disposition cannot be described as a clean security audit.
 - Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
   diarization runs; chapters and cited ranges are the release scope.
-- Native-client citation/brief/chapter GUI acceptance remains unobserved; the
-  available automation exposes browser dashboards but no native client surface.
-  Ryan's release decision must preserve that limit or require a later visible
-  client receipt. Headless reads and historical BD-27 images cannot replace it.
+- Native-client citation/brief/chapter GUI acceptance remains unobserved. Sky
+  native automation works and the actual Uoink dashboard has been observed.
+  The isolated Claude Desktop attempt exposed no window and exited 0; its
+  startup needs a diagnosed repair before a fresh attempt. CLI tool calls do
+  not establish GUI acceptance. Astra owns that diagnosis and remaining safe
+  package-08/native checks; these are not pending installation permission.
+- A dependency migration conflicts with the immutable Torch 2.8.0 / WhisperX
+  3.8.6 assertions and requires checkpoint/model qualification prohibited by the
+  current scope. Ryan must authorize the exact compatibility-test update and
+  isolated model protocol before that migration can be qualified. Read
+  ASTRA-SECURITY-BACKPORT-REVIEW-2026-09-12.md; do not adopt the worker's
+  unverified version list, advisory suppression or unsafe loader claims.
 - Main merge/publication and new fetch scope remain unauthorized. Phase 5 Part B
   is deferred. Standing program decisions: ORCHESTRATION-V1 signature, watchdog
   installation, PR strategy and adapter allow-list.
@@ -3112,3 +3120,22 @@ The a25e3be full partitioned tree has 2,556 passes, one historical AT6 failure
 and two skips, with every one of 2,559 cases accounted for exactly once. The
 44-payload seal retains FAIL. The media source postdates that result, so no
 package is built from a25e3be. Package-07 remains historical and unchanged.
+
+### 2026-09-12 — security backport review and final media candidate freeze
+
+43b42bc integrates documentary Gemini 940c7fc1 with a 26-payload Astra seal.
+All 35 primary metadata payloads and 13 inspected source files match. The
+default VAD path does use weights_only=False before the diarization branch;
+that trace is not proof of every named advisory's exploit reachability. The
+worker's LSTMCell, Punkt pickle, corrupt-tokenizer fallback, absent-safetensors
+and claimed exception statements needed correction. No model was executed.
+No dependency or test changed. Raw advisory count remains 19 / 15; separating
+the verified Lightning patch gives 18 / 14 without suppressing any raw entry.
+
+Freeze this commit for the final complete partitioned tree. Compare its case
+set to the 2,559-case a25e3be observation: exactly 23 added media cases, none
+removed. Then rebuild and seal package-08 from this qualified source, adapt the
+prepared instruments' stale a25e3be bindings before execution, and perform fresh
+isolated install/client/native note and saved-video checks. Keep all earlier
+partial/failed observations. The historical exit and security hold do not
+excuse skipping the authorized final qualification and delivery work.
