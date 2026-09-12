@@ -1,0 +1,78 @@
+{
+  "sitecustomize": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\injection\\sitecustomize.py",
+    "sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+    "bytes": 16339
+  },
+  "bundled": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+    "sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+    "already_present": false,
+    "bytes": 16339,
+    "previous_sha256": null,
+    "previous_absent": true
+  },
+  "canary_proof": {
+    "canary": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\guard-canary\\index.canary",
+    "rejected": true,
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "automatic_sitecustomize": true,
+    "explicit_exec": false,
+    "interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "pth": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python313._pth",
+      "present": true,
+      "import_site_active": true,
+      "bytes": 79,
+      "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+      "commented_import_site": false,
+      "preserved_exact_bytes": true
+    },
+    "stdout": "CANARY_REJECTED\nC22 guard: live index forbidden\n"
+  },
+  "forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "guard_original": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+    "previous_absent": true,
+    "previous_sha256": null,
+    "previous_bytes": null,
+    "owned_sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+    "pth_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python313._pth",
+    "pth_sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "pth": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python313._pth",
+    "present": true,
+    "import_site_active": true,
+    "bytes": 79,
+    "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+    "commented_import_site": false,
+    "preserved_exact_bytes": true
+  },
+  "target_interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+  "env_keys": [
+    "C22_ALLOWED_PORTS",
+    "C22_EVENTS_PATH",
+    "C22_FORBIDDEN_LIVE",
+    "C22_INJECT",
+    "C22_ISOLATED_PROFILE",
+    "C22_SLEEPER_SECONDS",
+    "C22_SYNTHETIC_AUDIO_PATH",
+    "C22_SYNTHETIC_HOST",
+    "C22_SYNTHETIC_TRANSCRIPT_PATH",
+    "IG_FORBIDDEN_LIVE",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONNOUSERSITE",
+    "PYTHONPATH",
+    "PYTHONUTF8",
+    "librarian_apply_enabled"
+  ],
+  "allowed_ports": [
+    18081
+  ],
+  "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "c22_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+}

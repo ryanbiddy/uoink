@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\native_media08_seed.py", line 11, in <module>
+    import index as index_mod
+ModuleNotFoundError: No module named 'index'

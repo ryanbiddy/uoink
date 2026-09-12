@@ -1,0 +1,24 @@
+--- native_gui08_driver.py
++++ native_gui08_driver02.py
+@@ -4,7 +4,7 @@
+ from urllib.request import urlopen
+ assert sys.flags.isolated and sys.flags.no_site
+ repo=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02')
+ app=root.parent/'app'; profile=root/'p4/profile'; seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'
+ mode=sys.argv[1];assert mode == 'dashboard', 'Desktop override is not a verified isolation boundary'
+ run=root/mode; run.mkdir(exist_ok=False)
+@@ -40,10 +40,10 @@
+   def start(argv,label,child_env):
+    global safe
+    out=stack.enter_context((run/(label+'.stdout')).open('xb'));err=stack.enter_context((run/(label+'.stderr')).open('xb'))
+-   child=spawn_owned(argv,cwd=profile,env=child_env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,label='native-gui01-'+label)
++   child=spawn_owned(argv,cwd=profile,env=child_env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,label='native-gui02-'+label)
+    owned.append(child);safe=False;record['processes'].append({'label':label,'pid':child.pid,'argv':argv});return child
+   if mode=='dashboard':
+-   seed=start([str(app/'python/python.exe'),'-P','-B','-s',str(repo/'_scratch/native_media08_seed.py')],'seed',env)
++   seed=start([str(app/'python/python.exe'),'-P','-B','-s',str(repo/'_scratch/native_media08_seed02.py')],'seed',env)
+    assert seed.popen.wait(timeout=60)==0, 'Native media fixture preparation failed; preserve attempt'
+    assert seed.terminate_tree(timeout=5)['cleaned']
+    record['synthetic_media_seed']=json.loads((root/'media-seed.json').read_text(encoding='utf8'))

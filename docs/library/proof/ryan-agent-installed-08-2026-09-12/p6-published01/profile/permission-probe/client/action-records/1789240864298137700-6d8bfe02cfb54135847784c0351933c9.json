@@ -1,0 +1,30 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-12T19:21:04.298127+00:00",
+  "monotonic_ns": 66068195597400,
+  "pid": 26128,
+  "input": {
+    "hook_event_name": "PreToolUse",
+    "tool_name": "mcp__uoink__export_cited_range",
+    "tool_input": {},
+    "tool_use_id": "synthetic-policy-probe-mcp__uoink__export_cited_range"
+  },
+  "response": {
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "allow",
+      "permissionDecisionReason": "P4 fixture read or inert sentinel"
+    }
+  },
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__export_cited_range",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__p4_sentinel__record_action"
+  }
+}

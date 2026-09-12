@@ -1,0 +1,1692 @@
+{
+  "id": "protected_phase2_state",
+  "status": "pass",
+  "empty_compare": {
+    "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [
+      {
+        "table": "library_meta",
+        "before_count": 0,
+        "after_count": 1,
+        "new_row_identities": [
+          "singleton:1"
+        ],
+        "mutated_prior": [],
+        "allowed": [
+          {
+            "scenario": "empty",
+            "table": "library_meta",
+            "new_rows": [
+              {
+                "singleton": 1,
+                "projection_revision": 0,
+                "active_version_id": null,
+                "last_operation_sequence": 0,
+                "recovery_state": "ready"
+              }
+            ],
+            "reason": "one complete schema 0027 default singleton"
+          }
+        ]
+      }
+    ],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "populated_compare": {
+    "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+    "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+    "unchanged": false,
+    "accounted_enqueue_deltas": [],
+    "unaccounted_enqueue_deltas": [],
+    "ok": true
+  },
+  "extra_compares": {
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "one-off",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "manual-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "2b936a476446f3b4530cc841d2b409a1b5a13a258f8145922e70096a30d5ffd7",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        },
+        {
+          "table": "source_classification_outbox",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "capture_key:podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "source_classification_outbox",
+              "new_rows": [
+                {
+                  "capture_key": "podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2",
+                  "video_id": "episode_e112bb7e637",
+                  "committed_at_ms": 1789239102111,
+                  "state": "pending",
+                  "run_id": null,
+                  "version_id": null,
+                  "prompt_hash": null,
+                  "source_revision": null,
+                  "work_id": null,
+                  "last_error_code": null,
+                  "updated_at_ms": 1789239102111
+                }
+              ],
+              "reason": "declared standing fixture and successful persisted start"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-life",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-interrupt",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-regfail",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "relaunch",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "all_profile_compares": {
+    "empty": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "empty",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "populated": {
+      "before_hash": "f8d78ae94ec1f9ee7568563ac1c312ebc58521f7aa831d3bc04f09b7f4dbcecc",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "one-off": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "one-off",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "manual-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "manual-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "standing-first": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "2b936a476446f3b4530cc841d2b409a1b5a13a258f8145922e70096a30d5ffd7",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        },
+        {
+          "table": "source_classification_outbox",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "capture_key:podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "standing-first",
+              "table": "source_classification_outbox",
+              "new_rows": [
+                {
+                  "capture_key": "podcast:6d0f76c790fb8a1083630007cafcea614100d110c628a203356ea86b0f1b91a2",
+                  "video_id": "episode_e112bb7e637",
+                  "committed_at_ms": 1789239102111,
+                  "state": "pending",
+                  "run_id": null,
+                  "version_id": null,
+                  "prompt_hash": null,
+                  "source_revision": null,
+                  "work_id": null,
+                  "last_error_code": null,
+                  "updated_at_ms": 1789239102111
+                }
+              ],
+              "reason": "declared standing fixture and successful persisted start"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-life": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-life",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-interrupt": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-interrupt",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "child-regfail": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "child-regfail",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    },
+    "relaunch": {
+      "before_hash": "174344c884557252c9c4686697623f815704cc8a1c3e22cae60175b0b4a28de6",
+      "after_hash": "13bc1116ee5d9e8aee07b61ceae02742d66c46da6248790d1af1f6c51e793e18",
+      "unchanged": false,
+      "accounted_enqueue_deltas": [
+        {
+          "table": "library_meta",
+          "before_count": 0,
+          "after_count": 1,
+          "new_row_identities": [
+            "singleton:1"
+          ],
+          "mutated_prior": [],
+          "allowed": [
+            {
+              "scenario": "relaunch",
+              "table": "library_meta",
+              "new_rows": [
+                {
+                  "singleton": 1,
+                  "projection_revision": 0,
+                  "active_version_id": null,
+                  "last_operation_sequence": 0,
+                  "recovery_state": "ready"
+                }
+              ],
+              "reason": "one complete schema 0027 default singleton"
+            }
+          ]
+        }
+      ],
+      "unaccounted_enqueue_deltas": [],
+      "ok": true
+    }
+  },
+  "runtime_guard_events": {
+    "profiles": {
+      "empty": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty\\c22-guard-events.jsonl",
+        "sha256": "e968761086d662d0c88247e274f8584e0681be3557e8f852b38df24a1f14a043",
+        "event_count": 43,
+        "guard_loads": 10,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 17416,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 17416,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 30432,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 30432,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40284,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40284,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 38384,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 38384,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40452,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "populated": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\populated\\c22-guard-events.jsonl",
+        "sha256": "e4d29588f8ade3c6aee05ade55112cbe4cb72d1b88c26b891e8955af1fed78a2",
+        "event_count": 26,
+        "guard_loads": 6,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 40452,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\populated\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40452,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40452,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41176,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\populated\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41176,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41176,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41044,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41320,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "one-off": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\one-off\\c22-guard-events.jsonl",
+        "sha256": "7650a9cfc4af0a9b3c9ba5966f85b967564362815ed6c4d81d2ff15ce4c30f86",
+        "event_count": 19,
+        "guard_loads": 3,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41476,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\one-off\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41476,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41476,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41696,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "manual-first": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\manual-first\\c22-guard-events.jsonl",
+        "sha256": "a0dc34e7084a7dfa4ab0defed6ba1c45356fabf2bcd44b3d7b076718d8eb781e",
+        "event_count": 51,
+        "guard_loads": 6,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\manual-first\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41860,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41000,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41212,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 37460,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 17428,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "standing-first": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\standing-first\\c22-guard-events.jsonl",
+        "sha256": "b4936aeb3be123db1dc02122596696320967f77e7d1d5a64e2fe6e2346881e37",
+        "event_count": 72,
+        "guard_loads": 8,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\standing-first\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41348,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 22280,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40212,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 25180,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41292,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40372,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40680,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-life": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\c22-guard-events.jsonl",
+        "sha256": "fcb42e74349b25fa25017967a29b2d1051c9c3b42a3b0160578c91a6b235dce8",
+        "event_count": 116,
+        "guard_loads": 16,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41028,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -B -c \"import time; time.sleep(8)\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 14924,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 14924,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 14924,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 14924,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 14924,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40676,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40676,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40676,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 22236,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 6336,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 23836,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41308,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41140,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 3380,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41464,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 39768,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 22484,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-interrupt": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-interrupt\\c22-guard-events.jsonl",
+        "sha256": "00f2fc6931309ec741063b595b87a423ffe5616e961a2428032273230f4967cf",
+        "event_count": 85,
+        "guard_loads": 11,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-interrupt\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41144,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40352,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-interrupt\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40352,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 40352,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41616,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41152,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 18952,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 11800,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 32184,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41328,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40208,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "child-regfail": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-regfail\\c22-guard-events.jsonl",
+        "sha256": "64deac73e33fc3b8234337f6e05376449bd9186c70ce201abdeb2c0d4b5c43d2",
+        "event_count": 85,
+        "guard_loads": 12,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-regfail\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "ffmpeg -version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 8852,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -B -c \"import time; time.sleep(8)\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 13848,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-regfail\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 13848,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 13848,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 29780,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 32260,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 34332,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 32288,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 40580,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41708,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          },
+          {
+            "event": "blocked_capability_probe",
+            "pid": 32364,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      },
+      "relaunch": {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\relaunch\\c22-guard-events.jsonl",
+        "sha256": "38f7626acdb56a5bf98bf82dfbcd682126310294b895025e323a83587ce89926",
+        "event_count": 21,
+        "guard_loads": 5,
+        "subprocess_attempts": [
+          {
+            "event": "subprocess_attempt",
+            "pid": 41660,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\relaunch\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41772,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe\" \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_splash.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\relaunch\" --isolated-port 18081 --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\""
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41772,
+            "command": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe\" -m yt_dlp --extractor-args twitter:api=syndication --version"
+          },
+          {
+            "event": "subprocess_attempt",
+            "pid": 41772,
+            "command": "ffmpeg -version"
+          }
+        ],
+        "blocked_capability_probes": [
+          {
+            "event": "blocked_capability_probe",
+            "pid": 41980,
+            "operation": "socket.bind",
+            "address": "('::1', 0)",
+            "dependency": "urllib3.util.connection._has_ipv6",
+            "bound": false
+          }
+        ],
+        "forbidden_attempts": [],
+        "error": null,
+        "ok": true
+      }
+    },
+    "ok": true,
+    "scope": "guard load and recorded attempts; blocked attempts cannot count as zero attempts"
+  },
+  "settings_and_pins": {
+    "empty": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "populated": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "one-off": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "manual-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "standing-first": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-life": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-interrupt": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "child-regfail": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    },
+    "relaunch": {
+      "librarian_apply_enabled": false,
+      "apply_off": true,
+      "pins_unchanged": true,
+      "settings_unchanged": true,
+      "taxonomy_unchanged": true,
+      "taxonomy_migrated": true,
+      "ok": true
+    }
+  },
+  "compared_profiles": [
+    "empty",
+    "populated",
+    "one-off",
+    "manual-first",
+    "standing-first",
+    "child-life",
+    "child-interrupt",
+    "child-regfail",
+    "relaunch"
+  ],
+  "empty": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "populated": {
+    "library_meta": [
+      {
+        "singleton": 1,
+        "projection_revision": 0,
+        "active_version_id": null,
+        "last_operation_sequence": 0,
+        "recovery_state": "ready"
+      }
+    ],
+    "library_runs": [],
+    "library_manifest": [],
+    "library_work": [],
+    "library_attempts": [],
+    "shelves": [],
+    "shelf_versions": [],
+    "shelf_nodes": [],
+    "item_shelves": [],
+    "source_classification_policy": [],
+    "source_classification_outbox": []
+  },
+  "baseline_recorded_before_scenarios": true,
+  "librarian_apply_enabled": false,
+  "self_authorized_after_state": false
+}

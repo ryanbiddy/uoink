@@ -1,0 +1,149 @@
+{
+  "stage": "protocol",
+  "status": "completed_pending_independent_review",
+  "started_utc": "2026-09-12T19:21:10.954382+00:00",
+  "instrument_sha256": "e1185fd8b42c438b6f761dc0f753e6b02a5a5dcb8283197519a7155d18202387",
+  "inner_sha256": "4aedc37b41bf0bf3b4787cc4375de9136df37795c106ec6be5b9616ea3cc32e1",
+  "build_source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+  "bindings_before_ok": true,
+  "synthetic_data": true,
+  "installed_credit": false,
+  "ordinary_profile_used": false,
+  "throwaway_account": false,
+  "payloads_before": {
+    "index.db": "3cd8b1b61c1e83ecf73aa534edcbaefa1e7d8018890d810d98405f52dfc626fc",
+    "settings.json": "7548d45b72734550775feb254d7aad80575adbdd810fcc6d351392573d6abd0b",
+    "input.json": "cc03562017c6d2b42944a5639abb5afd7ce4c87033fb88f72be5064a2f12207c",
+    "expected.json": "f12e42fe41893dc9710e0d78d2c587a3a13a26130f439a3b51d5d1df1cdeb5d6",
+    "client/protected-sentinel.bin": "7625b95f641c6d603439a0cce4cd4cdcf60f1eb7a985acd28d7ece98bdc4c795",
+    "client/configuration-manifest.json": "9cb0f9cb73eddaf7d05cf651df0517e0c705f7661a2aecbdecb34f964843dcd6",
+    "items/p6fx-range-01/.media-inputs/7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4.json": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+    "items/p6fx-range-01/.media-inputs/publication.json": "e658671396f66cd9d7c2bc20eadac63dd286ccff2fa9a39f46622f18954876df",
+    "items/p6fx-range-01/corpus.json": "a5b209afa7e2620c60f2f261d66e2a387b6263d1b514ce35e0a376dfdae498bd",
+    "items/p6fx-range-01/corpus.md": "d5473266a683773c65b2a2a50df36518d7154ad57fcf897027c42c3be1403801",
+    "client/mcp-client.json": "d17b540b63e05c03df2ec8022de207f646633618290ab4b2e60d855e872423e1",
+    "client/settings.json": "f7a382a7d4e2ca6feb4746f6cbac4382624ae29e9ba77e0be25c980f03623348",
+    "client/launch.json": "897c660ce97378cb35e8a2c4cca9a48ae24a39f9cf65026712de8b766f9478c9",
+    "client/observe_media_actions.py": "b2b621949945e5e1b70c6096dcb9b4aa5efca36c119bcfe1fd26218c1ff6ebec"
+  },
+  "command": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "-P",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\published_chapter08.py",
+    "protocol"
+  ],
+  "guard_install": {
+    "interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "bundled": true,
+    "mutations": [
+      {
+        "action": "created",
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "sha256": "fea3f098ec136638d037dc3cbf47034ea1a614c2b5d6a66601270c101c4445a9",
+        "bytes": 2273,
+        "payload_b64": "IyBQNCByZWNlaXB0IGd1YXJkLiBSZWZ1c2UgbGl2ZSBpbmRleCwgcG9ydCA1MTc5LCBtb2RlbC9jbGllbnQvZmV0Y2guCmltcG9ydCBvcywgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApmcm9tIHVybGxpYi5wYXJzZSBpbXBvcnQgdXJsc3BsaXQsIHVucXVvdGUKCmRlZiBkYXRhYmFzZV9wYXRoKHZhbHVlKToKICAgIGlmIHZhbHVlLnN0YXJ0c3dpdGgoJ2ZpbGU6Jyk6CiAgICAgICAgdXJpID0gdXJsc3BsaXQodmFsdWUpCiAgICAgICAgaWYgdXJpLm5ldGxvYy5sb3dlcigpIG5vdCBpbiAoJycsICdsb2NhbGhvc3QnKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCByZW1vdGUgZGF0YWJhc2UgYXV0aG9yaXR5IGZvcmJpZGRlbicpCiAgICAgICAgdmFsdWUgPSB1bnF1b3RlKHVyaS5wYXRoKQogICAgICAgIGlmIG9zLm5hbWUgPT0gJ250JyBhbmQgbGVuKHZhbHVlKSA+IDIgYW5kIHZhbHVlWzBdID09ICcvJyBhbmQgdmFsdWVbMl0gPT0gJzonOgogICAgICAgICAgICB2YWx1ZSA9IHZhbHVlWzE6XQogICAgcmV0dXJuIFBhdGgodmFsdWUpLnJlc29sdmUoKQoKZGVmIGF1ZGl0KGV2ZW50LCBhcmdzKToKICAgIGZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdQNF9GT1JCSURERU5fSU5ERVgnLCAnJykKICAgIGFic29sdXRlX2ZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdJR19GT1JCSURERU5fTElWRScsICcnKQogICAgcm9vdCA9IG9zLmVudmlyb24uZ2V0KCdQNF9JU09MQVRFRF9QUk9GSUxFJykgb3Igb3MuZW52aXJvbi5nZXQoJ1A0X0ZJWFRVUkVfUk9PVCcpCiAgICBpZiBldmVudCBpbiAoJ29wZW4nLCAnc3FsaXRlMy5jb25uZWN0JykgYW5kIGlzaW5zdGFuY2UoYXJnc1swXSwgKHN0ciwgYnl0ZXMsIG9zLlBhdGhMaWtlKSk6CiAgICAgICAgdmFsdWUgPSBvcy5mc2RlY29kZShhcmdzWzBdKS5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKQogICAgICAgIGlmIGZvcmJpZGRlbiBhbmQgZm9yYmlkZGVuLnJlcGxhY2UoJ1xcJywgJy8nKS5sb3dlcigpIGluIHZhbHVlOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgICAgICBpZiBhYnNvbHV0ZV9mb3JiaWRkZW4gYW5kIGFic29sdXRlX2ZvcmJpZGRlbi5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKSBpbiB2YWx1ZToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBpbnRlZ3JhdG9yIGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzcWxpdGUzLmNvbm5lY3QnIGFuZCBpc2luc3RhbmNlKGFyZ3NbMF0sIHN0cikgYW5kIGFyZ3NbMF0gIT0gJzptZW1vcnk6JyBhbmQgcm9vdDoKICAgICAgICBpZiBub3QgZGF0YWJhc2VfcGF0aChhcmdzWzBdKS5pc19yZWxhdGl2ZV90byhQYXRoKHJvb3QpLnJlc29sdmUoKSk6CiAgICAgICAgICAgIHJhaXNlIFBlcm1pc3Npb25FcnJvcignUDQgZGF0YWJhc2Ugb3V0c2lkZSBpc29sYXRlZCBwcm9maWxlJykKICAgIGlmIGV2ZW50IGluICgnc29ja2V0LmNvbm5lY3QnLCAnc29ja2V0LmJpbmQnLCAnc29ja2V0LnNlbmR0bycsICdzb2NrZXQuZ2V0YWRkcmluZm8nKToKICAgICAgICBhZGRyZXNzID0gYXJnc1s6Ml0gaWYgZXZlbnQgPT0gJ3NvY2tldC5nZXRhZGRyaW5mbycgZWxzZSBhcmdzWzFdCiAgICAgICAgaWYgaXNpbnN0YW5jZShhZGRyZXNzLCB0dXBsZSkgYW5kICgKICAgICAgICAgICAgc3RyKGFkZHJlc3NbMV0pID09ICc1MTc5JyBvciBhZGRyZXNzWzBdIG5vdCBpbiAoJzEyNy4wLjAuMScsICc6OjEnLCAnbG9jYWxob3N0JywgJycpCiAgICAgICAgKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBleHRlcm5hbCBuZXR3b3JrIG9yIHJlc2lkZW50IHBvcnQgZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzdWJwcm9jZXNzLlBvcGVuJzoKICAgICAgICBjb21tYW5kID0gYXJnc1sxXQogICAgICAgIGZpcnN0ID0gY29tbWFuZFswXSBpZiBpc2luc3RhbmNlKGNvbW1hbmQsICh0dXBsZSwgbGlzdCkpIGVsc2Ugc3RyKGNvbW1hbmQpLnNwbGl0KClbMF0KICAgICAgICBuYW1lID0gUGF0aChzdHIoZmlyc3QpKS5zdGVtLmxvd2VyKCkKICAgICAgICBpZiBuYW1lIGluICgnY2xhdWRlJywgJ2NvZGV4JywgJ2dyb2snLCAnZ2VtaW5pJywgJ3l0LWRscCcsICdmZm1wZWcnLCAnY3VybCcpOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGV4ZWN1dGlvbi9mZXRjaCBzZW50aW5lbCcpCgpzeXMuYWRkYXVkaXRob29rKGF1ZGl0KQo="
+      }
+    ],
+    "already_present": false,
+    "mechanism": "bundled_site_packages",
+    "pth_active_import_site": true,
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+    "pth_commented_import_site_ignored": false,
+    "pth_already_imports_site": true,
+    "restorable": true
+  },
+  "guard_canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\p6-published01\\profile\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "pid": 32116,
+  "exit": 0,
+  "cleanup": {
+    "pid": 32116,
+    "label": "published08-protocol",
+    "job_assigned": true,
+    "already_exited": true,
+    "exit_code": 0,
+    "assignment_error": null,
+    "descendants_before": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        32116
+      ],
+      "parent_pid": 32116,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_after": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        32116
+      ],
+      "parent_pid": 32116,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_remaining": [],
+    "descendants_exited": true,
+    "job_query_ok": true,
+    "job_empty_affirmed": true,
+    "identity_uncertain": false,
+    "job_query_error": null,
+    "parent_exited": true,
+    "cleaned": true
+  },
+  "guard_restore": {
+    "restored": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "action": "removed",
+        "exact_receipt_bytes": true
+      }
+    ],
+    "ok": true,
+    "failures": []
+  },
+  "pth_before": {
+    "python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "pth_after": {
+    "python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "guard_absent_after": true,
+  "bindings_after_ok": true,
+  "payloads_after": {
+    "index.db": "3cd8b1b61c1e83ecf73aa534edcbaefa1e7d8018890d810d98405f52dfc626fc",
+    "settings.json": "7548d45b72734550775feb254d7aad80575adbdd810fcc6d351392573d6abd0b",
+    "input.json": "cc03562017c6d2b42944a5639abb5afd7ce4c87033fb88f72be5064a2f12207c",
+    "expected.json": "f12e42fe41893dc9710e0d78d2c587a3a13a26130f439a3b51d5d1df1cdeb5d6",
+    "client/protected-sentinel.bin": "7625b95f641c6d603439a0cce4cd4cdcf60f1eb7a985acd28d7ece98bdc4c795",
+    "client/configuration-manifest.json": "9cb0f9cb73eddaf7d05cf651df0517e0c705f7661a2aecbdecb34f964843dcd6",
+    "items/p6fx-range-01/.media-inputs/7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4.json": "7b5561456d223b264818a10e1e334a9adf8e363ed0b11c179cf6bf48541557e4",
+    "items/p6fx-range-01/.media-inputs/publication.json": "e658671396f66cd9d7c2bc20eadac63dd286ccff2fa9a39f46622f18954876df",
+    "items/p6fx-range-01/corpus.json": "a5b209afa7e2620c60f2f261d66e2a387b6263d1b514ce35e0a376dfdae498bd",
+    "items/p6fx-range-01/corpus.md": "d5473266a683773c65b2a2a50df36518d7154ad57fcf897027c42c3be1403801",
+    "client/mcp-client.json": "d17b540b63e05c03df2ec8022de207f646633618290ab4b2e60d855e872423e1",
+    "client/settings.json": "f7a382a7d4e2ca6feb4746f6cbac4382624ae29e9ba77e0be25c980f03623348",
+    "client/launch.json": "897c660ce97378cb35e8a2c4cca9a48ae24a39f9cf65026712de8b766f9478c9",
+    "client/observe_media_actions.py": "b2b621949945e5e1b70c6096dcb9b4aa5efca36c119bcfe1fd26218c1ff6ebec"
+  },
+  "finished_utc": "2026-09-12T19:21:17.040249+00:00"
+}

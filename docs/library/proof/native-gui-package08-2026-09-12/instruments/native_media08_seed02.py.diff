@@ -1,0 +1,18 @@
+--- native_media08_seed.py
++++ native_media08_seed02.py
+@@ -1,13 +1,14 @@
+ """New synthetic operator item, in a fresh native profile, using installed code."""
+ import datetime as dt,hashlib,json,os,sys
+ from pathlib import Path
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02')
+ profile=root/'p4/profile';app=root.parent/'app'
+ assert Path(sys.executable).resolve()==(app/'python/python.exe').resolve()
+ assert Path(os.environ['UOINK_INDEX_PATH']).absolute()==profile/'index.db'
+ assert Path(os.environ['UOINK_OUTPUT_DIR']).absolute()==profile/'output'
+ assert os.environ['IG_FORBIDDEN_LIVE']==r'C:\Users\hello\AppData\Local\Uoink\index.db'
+ assert (app/'python/Lib/site-packages/sitecustomize.py').is_file()
++sys.path.insert(0, str(app))  # Explicit verified installation, never caller cwd.
+ import index as index_mod
+ assert Path(index_mod.__file__).resolve()==(app/'index.py').resolve()
+ settings=json.loads((profile/'settings.json').read_text(encoding='utf8'))

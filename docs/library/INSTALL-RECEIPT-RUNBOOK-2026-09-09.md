@@ -1,37 +1,37 @@
 # Living Library: one installed receipt session
 
-Ryan delegated the installation check to Astra. Package-07 has actual same-account
-Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful
-independent browser/state review. The unchanged P4 collector has 15 passes,
-one blocked link, five unobserved and two pending-review rows. Independent
-client review finds 20/20 exact comparisons in each of two sessions; both native
-prompts and a separate published chapter export succeed. See
-[the installed verdict](ASTRA-INSTALLED-PACKAGE-07-VERDICT-2026-09-12.md).
+Ryan delegated the installation check to Astra. Package 08 has actual same-account
+Setup/reinstall, 32,497 matching installed files, 11 C22 passes and independent
+browser review. The original P4 collector retains 15 passed, one blocked,
+five unobserved and two pending-review rows. Independent CLI review has 20/20
+exact comparisons in each paired session; native prompts and a separately
+published chapter export have their own observations. Read
+[the installed verdict](ASTRA-INSTALLED-PACKAGE-08-VERDICT-2026-09-12.md) and
+[native Uoink verdict](NATIVE-GUI-PACKAGE-08-OBSERVATION-2026-09-12.md).
 
-The completed sign-in and extra-paid-usage-off confirmation need no repetition.
-Agent Install 07's P4 fixture has now been collected; preserve it and do not
-reuse it as a fresh fixture. Native-client GUI flows remain unobserved. The
-current automated surface does not expose the native client. This runbook gives
-exact steps for a separate fresh Windows-account receipt if that acceptance is
-required; it is not a request to repeat completed installation work.
+The completed isolated CLI sign-in and extra-paid-usage-off confirmation need
+no repetition. Preserve Agent Install 08 and its collected P4 fixture. The steps
+below are for one separate fresh Windows-account receipt if that scope is needed;
+they do not ask Ryan to repeat the completed agent installation.
 
-The SQLite repair is d812785. The full tree and build share source 6a89189:
-2,540 passed / one historical failure / two skipped. No packaged source changed
-after that result. This procedure does not approve an ordinary upgrade.
+Claude Desktop's earlier profile override failed and launched ordinary configured
+connectors. Its earlier live-index/5179 effects are unknown. Desktop GUI acceptance
+is blocked until configuration isolation is verified in a separate environment.
+Do not launch ordinary Desktop under CLAUDE_USER_DATA_DIR, copy credentials or
+try guessed flags. The CLI commands below are for Claude Code only. A future
+Desktop workflow needs its own supported setup and human sign-in before GUI checks.
+See [the incident](NATIVE-CLIENT-ISOLATION-INCIDENT-2026-09-12.md).
 
-The steps below are the reproducible procedure for one separate, fresh Windows
-account session on this machine. Do not repeat a completed agent stage in its
-existing directory. Each new observation gets fresh app and data paths.
-That account needs write access to the dedicated installation-receipts directory
-shown below. If preparation is refused, retain the refusal; this procedure does
-not elevate or change directory permissions.
-It does not approve a main merge or publication. The release notes and
-`release-state.json` identify the tested source and remaining failures.
+Build and complete-tree source are `b8e44fbc0a16950a22b29ead66951fcb80b2d6e8`: 2,579 passed,
+one historical failure and two skips. No packaged source changed afterward.
+This procedure does not approve an ordinary upgrade, main merge or publication.
+Every new observation gets fresh paths; the throwaway account needs existing
+write access to the receipt directory. A refusal is retained, not bypassed by
+elevation or permission changes.
 
-The installer is **Uoink-Setup-3.8.0.exe**, 389,569,575 bytes, SHA-256
-`308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b`, built from
-`6a89189d601467eeff33d304c2c9b69cdd2e6d0b`. Use this package and the accompanying
-tools together. Earlier packages, including package-05 (95123073), remain retained historical artifacts.
+Use **Uoink-Setup-3.8.0.exe**, 389,570,940 bytes, SHA-256
+`69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c`, with its accompanying package-08 tools and seal.
+Earlier packages and their failed or partial results remain historical artifacts.
 
 ## Before you begin
 
@@ -60,14 +60,14 @@ $opPython = 'C:\Python314\python.exe'
 if (-not (Test-Path -LiteralPath $opPython -PathType Leaf)) { throw 'The required system Python is unavailable.' }
 $opKit = Join-Path $opBundle 'scripts\install_receipt'
 $opPackage = Join-Path $opBundle 'Uoink-Setup-3.8.0.exe'
-$opHash = '308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b'
+$opHash = '69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c'
 $opManifest = Join-Path $opBundle 'c22-operator-manifest.json'
 $opBindings = Join-Path $opBundle 'source-bindings.json'
-$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt 2026-09-12'
+$opRoot = 'E:\AI\projects\uoink\installation-receipts\Ryan Receipt Package08 2026-09-12'
 $opC22 = Join-Path $opRoot 'c22'
 $opEmpty = Join-Path $opC22 'profiles\empty'
 $opApp = Join-Path $opRoot 'app'
-$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-07-2026-09-12'
+$opPackageSeal = Join-Path $opBundle 'docs\library\proof\candidate-package-08-2026-09-12'
 $opBoundCli = Join-Path $opBundle 'run_bound_c22.py'
 if (Test-Path -LiteralPath $opRoot) { throw 'Preserve the existing receipt; do not overwrite it.' }
 if (Test-Path -LiteralPath $opApp) { throw 'This session requires a fresh application directory.' }
@@ -103,7 +103,7 @@ Start-Transcript -LiteralPath (Join-Path $opRoot 'operator-transcript.txt')
 [ordered]@{ utc=[DateTimeOffset]::UtcNow.ToString('o'); user=[Security.Principal.WindowsIdentity]::GetCurrent().Name;
     sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; profile=$env:USERPROFILE;
     package_sha256=$opHash; validation_source=$opSeal.validation_source; bundle_source=$opSeal.bundle_source;
-    installer_source='6a89189d601467eeff33d304c2c9b69cdd2e6d0b'; install_started=$false
+    installer_source='b8e44fbc0a16950a22b29ead66951fcb80b2d6e8'; install_started=$false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $opRoot 'operator-preflight.json') -Encoding utf8
 ```
 
@@ -280,7 +280,7 @@ fixture mirror deletion/purge checks. Do not use a real vault or library.
 | Retrieve evidence | Actual client response plus full recorded card/excerpt/corpus packets. Compare complete text and revisions with `expected.json`; keep text-only timing null. |
 | Follow a citation | The prepared brief's actual returned citation URI, exact quote, source/revision and an image of the source opened through the client. Keep X's existing HTTP 403 blocked; do not retry it. |
 | Open a brief | Complete actual brief text and its displayed image, including the citation. This fixture was prepared through the publisher; it is not a client-authored publication claim. |
-| Jump to a chapter | Actual chapter title/start/range from the installed route and the observed navigation target. The only already-authorized external player example is `D_FCYsshMI4`, “Why computer use,” 0:34. Preserve any unavailable affordance. Do not substitute synthetic chapter text for a real source quotation or claim speaker accuracy. |
+| Jump to a chapter | Actual chapter title/start/range from the installed route and the observed navigation target. The historical BD-27 player receipt records `D_FCYsshMI4`, “Why computer use,” 0:34; no new external fetch is authorized here. Preserve unavailable affordances and keep the synthetic stored range distinct from a real source quotation. No speaker accuracy claim. |
 
 Save original images under `$opP4Profile\images`. Create
 `$opP4Profile\operator.json` with only observations you actually made. An empty

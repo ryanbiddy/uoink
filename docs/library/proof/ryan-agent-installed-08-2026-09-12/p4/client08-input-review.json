@@ -1,0 +1,35 @@
+{
+  "prepared_hashes_unchanged": true,
+  "prepared_hashes": {
+    "mcp-client.json": "2e70b40ae6aa005baa6b17742cbb6de5455844553fad7151976d2740c4767553",
+    "settings.json": "8a33e2f808fc3e30d1ce2af11219c05904a60712a9db46bc2f001578e0fb8d43",
+    "settings-recall.json": "087e1c783833bae28854bd89824b22e4bbf4182e5f9359d24abe54194658595a",
+    "launch.json": "2fe8a60ecb5d15d490de635ca786c24e8413b4dd413fa3186b2cf5b775a55667",
+    "launch-recall.json": "0d49a6007f449745fdaf24ccf625c22d5450ac0fa95dd6814d4b4d17a70ee651",
+    "launch-isolated.json": "2fe8a60ecb5d15d490de635ca786c24e8413b4dd413fa3186b2cf5b775a55667",
+    "observe_client_actions.py": "c1152aa72097860324bde48268448b0c49cf9bcb46f9699d9553644d2e647198"
+  },
+  "overlay_change": "Only env.CLAUDE_CONFIG_DIR points to the existing isolated namespace; no credentials copied",
+  "prompt_inputs": "Ten resource identifiers only; no expected text, values or revisions supplied",
+  "expected_answers_embedded": false,
+  "actual_client_started": false,
+  "uris": [
+    "uoink://library/v1/items/cDRmeC10aW1lZC0wMQ/cards/0cfc2fb8ebbe61b0675d56d2cff2c39b8b6664464df2f76531db5da8d05ccec7/spread-longest-v2/f443f9f274a8c763b3de29665997664331c74e8e99ef6bc71733552133541bdf",
+    "uoink://library/v1/items/cDRmeC10aW1lZC0wMQ/excerpts/0cfc2fb8ebbe61b0675d56d2cff2c39b8b6664464df2f76531db5da8d05ccec7/b8f0d023131f4c09358dfc8e988067b253d01f04581831128605262272e5effe",
+    "uoink://library/v1/items/cDRmeC10aW1lZC0wMQ/corpus/d7d5a69d5017570144d7f6f5a973d0a099828c50976c15208b3270ac327319d6/0/252",
+    "uoink://library/v1/items/cDRmeC10ZXh0LTAx/cards/8dcb36790c13690611f9445e3f999b7d6a80c44b4942a30036cfeed52f0526e7/spread-longest-v2/4e66977bebac559d2551564bd28a584c034113e72b8e8f1250f65afac312cd13",
+    "uoink://library/v1/items/cDRmeC10ZXh0LTAx/excerpts/8dcb36790c13690611f9445e3f999b7d6a80c44b4942a30036cfeed52f0526e7/97db2867b08cfc05198231863b54001e7aee83fc29f61d9d02a906ac6041d56b",
+    "uoink://library/v1/items/cDRmeC10ZXh0LTAx/corpus/7ce1cd145503e8eb95626fe5252ca06ae2ba0976cf95a6cb3137c64281a7e46f/0/303",
+    "uoink://library/v1/items/cDRmeC1ob3N0aWxlLTAx/cards/3de060762f3d112854cdf82e65b0cf6a73d14ca7725af039d815b534adfbe4d9/spread-longest-v2/2a9e5d90d1cf6ad171dd023d106716a7b68812a0e7e352bfdfcf31f839816b0f",
+    "uoink://library/v1/items/cDRmeC1ob3N0aWxlLTAx/excerpts/3de060762f3d112854cdf82e65b0cf6a73d14ca7725af039d815b534adfbe4d9/2915c19a3d99ae80595b18702a1e5e5dbd8b6b3add4906cacdd3547f5b6bafd1",
+    "uoink://library/v1/items/cDRmeC1ob3N0aWxlLTAx/corpus/5a84dedbe52f24d411814fbd8686629592e6ce18a9aae94a2ee597bded57c67f/0/389",
+    "uoink://library/v1/briefs/2026-09-09/6cd1ae2e4d40d72bead210ec1bea3a93b999b017b195f8fa3fafed76211ea98f"
+  ],
+  "files": {
+    "settings-ordinary-auth-overlay.json": "933b62a56784d19d4a055cc2692f937792f349cb4ae59c8efe44be82a3ed9957",
+    "ordinary-request.txt": "08bea797ba402340a8ce168001000a918f48761f5531adcf3607ea4d592e9ccd",
+    "settings-recall-auth-overlay.json": "2ded5d171f98666cbe87caf74799109ec293962655a022bd69a93eea810feff9",
+    "recall-request.txt": "8cc66598f61bf3a678b4a997cfa3925661542bfa1a404b7afa5b5e2a4c9860af"
+  },
+  "instrument_sha256": "de2891af490b74a3ab4f181511bf2ed2dcdd00d2ae64754577bc6c58d814cc61"
+}

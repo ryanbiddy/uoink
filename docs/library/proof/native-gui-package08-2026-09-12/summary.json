@@ -1,0 +1,165 @@
+{
+  "utc": "2026-09-12T19:15:50.718633+00:00",
+  "observer": "Astra through Sky native window",
+  "actual_gui_observation": true,
+  "window_id": 397512,
+  "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+  "passed_observations": [
+    "Library and search",
+    "Stored video cue at 0:34",
+    "Unknown cue displays time not stored",
+    "No speaker attribution",
+    "Saved transcript and details ready",
+    "Sources has no standing subscriptions or capture",
+    "New note saved through GUI",
+    "New note found and exact AMBER body reopened",
+    "Note file ready without false video asset warnings",
+    "Evidence empty state",
+    "Activity zero running and zero queued, one completed synthetic note"
+  ],
+  "new_product_failures": [],
+  "limitations": [
+    "Synthetic local data only; no external media playback or fetch",
+    "No claim scan, generation, model load, capture, or diarization",
+    "No Claude Desktop observation; prior Desktop isolation claim withdrawn",
+    "Extension onboarding appeared but was not exercised",
+    "Cleanup will terminate owned jobs; no natural window-close claim"
+  ],
+  "original_images": 11,
+  "image_format": "JPEG as returned by Sky",
+  "utc_review": "2026-09-12T19:19:50.474054+00:00",
+  "build_source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "status": "passed_enumerated_native_uoink_flows",
+  "owned_cleanup_affirmed": true,
+  "guard_restored": true,
+  "utc_start": "2026-09-12T19:03:47.092342+00:00",
+  "utc_end": "2026-09-12T19:15:50.889665+00:00",
+  "images": [
+    {
+      "file": "01-library-0.jpg",
+      "sha256": "3064b7411977633063475d0360ba9ac57a9fbad9665fd2ca4a5cdf766b2a2775",
+      "bytes": 109520,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "02-search-0.jpg",
+      "sha256": "e4d98559513965c9f9e555e5cdad866a0d8ea6ce4e2b4569ec9033b0b95f2884",
+      "bytes": 118286,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "03-video-transcript-0.jpg",
+      "sha256": "a1639d1f6852db8036535e81a570480b991480d3887630a7926d0ff50c9c8b57",
+      "bytes": 95376,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "04-video-files-0.jpg",
+      "sha256": "34f587bf5e5ab27d75989cea9a0c0924a5b4850c1ca0a51b3f794e25f92309bc",
+      "bytes": 78141,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "05-sources-0.jpg",
+      "sha256": "3d5124c4cbb9b1b01289790fb55dbdd832dc74fe319e2a9434d39f1ae59aafb5",
+      "bytes": 95974,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "06-note-before-save-0.jpg",
+      "sha256": "099b15fa722e5432cb25974d370929bdd8efe8262c9e53b9083dcc8b1a5f9bba",
+      "bytes": 104626,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "07-note-saved-0.jpg",
+      "sha256": "75894153424682a0edda93996e031ebe4ffc39b64fec1d06df702898ac536708",
+      "bytes": 95532,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "08-note-search-0.jpg",
+      "sha256": "924931a706b58ee060764ec497b9d21d2c62bafc7773428ed414cafc3cdae1e7",
+      "bytes": 88027,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "09-note-detail-0.jpg",
+      "sha256": "ad9424155da32e57f120a51f6d6fd7deabc6c64ea24447d42b328a1a085d9ccc",
+      "bytes": 79347,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "10-evidence-empty-0.jpg",
+      "sha256": "ff11a6f9c4524acd1f5ac93f99055548e3d32adbcfe5ce55ad299a46405e892e",
+      "bytes": 82827,
+      "mimeType": "image/jpeg"
+    },
+    {
+      "file": "11-activity-0.jpg",
+      "sha256": "84ae0d36af386395c41a569fb56b9722d90ca0d03ca4d78ab94315a3dcb4caf7",
+      "bytes": 81374,
+      "mimeType": "image/jpeg"
+    }
+  ],
+  "owned_exit_codes": {
+    "native-gui02-window": 1,
+    "native-gui02-helper": 1,
+    "native-gui02-seed": 0
+  },
+  "natural_close_observed": false,
+  "failed_attempt": "native-gui01 seed import failed before fixture write; no GUI credit; original retained",
+  "legacy_image_format_check": [
+    {
+      "file": "01-library-0.png",
+      "actual_format": "JPEG",
+      "sha256": "124d7da84d194b6db47ca909f41bb7c62a7328f0c5691f4fdd2b738c689cfccd"
+    },
+    {
+      "file": "02-search-0.png",
+      "actual_format": "JPEG",
+      "sha256": "c92e2ef68e396f54ea4b7f5bdb1fd8a96f515e1f3accc27b0b5dc5008ead1438"
+    },
+    {
+      "file": "03-saved-item-0.png",
+      "actual_format": "JPEG",
+      "sha256": "8d60e03e0f6ee6fc62689c3d6bc095924e4cd2be6f5ee9e75ea5bcd34928b7f9"
+    },
+    {
+      "file": "04-evidence-view-0.png",
+      "actual_format": "JPEG",
+      "sha256": "e409da0cd8316b103d42f0833f4f5f6b2553af27de303392542a37555f025efb"
+    },
+    {
+      "file": "05-sources-0.png",
+      "actual_format": "JPEG",
+      "sha256": "cbe062e423e6ad2a26da94756ec08b7084564561ea8900a97965d10f8cb62c72"
+    },
+    {
+      "file": "06-activity-0.png",
+      "actual_format": "JPEG",
+      "sha256": "a4b10067e854f9c614763ffc1230f7b4e87f5ddf94bb2898a8cfa761dad75cc2"
+    },
+    {
+      "file": "07-note-before-save-0.png",
+      "actual_format": "JPEG",
+      "sha256": "4cdfc118e472e7447ae031c6cd4663210bc867d87c5b3ee5bfa5038e555e9789"
+    },
+    {
+      "file": "08-note-saved-0.png",
+      "actual_format": "JPEG",
+      "sha256": "edfcc4d640c2250088232b3bf61be33fa697e92d62a4d2f57fc4da8a3fba054a"
+    },
+    {
+      "file": "09-note-in-library-0.png",
+      "actual_format": "JPEG",
+      "sha256": "e14ec033e9bdbb3204954e7d5b52153b04438851421f34e1590371b1cba31c2a"
+    },
+    {
+      "file": "10-native-note-detail-0.png",
+      "actual_format": "JPEG",
+      "sha256": "d76a15fb8f5e6c58554efb7da18735608d4a12c9596707c87672302d856e5d68"
+    }
+  ],
+  "release_ready": false
+}

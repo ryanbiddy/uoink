@@ -1,0 +1,12 @@
+--- seal_installed08.py.before-extension
++++ seal_installed08.py
+@@ -57,6 +57,9 @@
+     'package08-instrument-adaptations.json','package08-final-source-rebinding.json',
+     'installed08-aggregate-preexecution-review.json','review_installed08.py.preexecution.diff',
+     'prepare_delivery08.py','seal_installed08.py.diff']
++instruments += ['run_browser08_02.py','complete_browser08_02.py','run_browser08_02.py.diff','complete_browser08_02.py.diff',
++    'BROWSER08-PREFLIGHT-REPAIR.md','repair_browser08_preflight.py','browser08-preflight-repair.json',
++    'extend_delivery08_instruments.py','delivery08-instrument-extension.json','seal_installed08.py.extension.diff']
+ for name in instruments:add(scratch/name,'instruments/'+name)
+ add(scratch/'installed08-reviewed-summary.json','summary.json')
+ # Compare against only explicitly disposable receipt tokens. Never inspect auth stores.

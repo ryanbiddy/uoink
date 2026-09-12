@@ -1,0 +1,15 @@
+--- build_native_gui08_launchers.py
++++ build_native_gui08_launchers02.py
+@@ -2,10 +2,10 @@
+ import hashlib,json,subprocess,sys
+ from pathlib import Path
+ repo=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02')
+ compiler=Path(r'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe')
+ pythonw=Path(sys.executable).with_name('pythonw.exe');assert pythonw.is_file()
+-driver=repo/'_scratch/native_gui08_driver.py'
++driver=repo/'_scratch/native_gui08_driver02.py'
+ compile(driver.read_text(encoding='utf8'),str(driver),'exec')
+ for mode in ('dashboard',):
+  argv=subprocess.list2cmdline(['-I','-S','-B',str(driver),mode])

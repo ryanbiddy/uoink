@@ -1,0 +1,28 @@
+{
+  "utc_recorded": "2026-09-12T18:59:35.580971+00:00",
+  "attempt": "network-rule-before-navigation01",
+  "session": "uoink-install08",
+  "wrapper_pid": 33680,
+  "wrapper_created_utc": "2026-09-12T18:54:39.091185Z",
+  "daemon_pid_from_session_file": 12268,
+  "daemon_control_port": 49765,
+  "command": [
+    "network",
+    "route",
+    "http://127.0.0.1:5179/**",
+    "--abort"
+  ],
+  "wrapper_exit": 1,
+  "error": "subprocess.TimeoutExpired after 45 seconds; captured pipe completion waited until daemon close",
+  "dashboard_open_requested": false,
+  "cleanup_command": [
+    "--session",
+    "uoink-install08",
+    "close"
+  ],
+  "cleanup_exit": 0,
+  "cleanup_message": "Browser closed",
+  "owned_wrapper_and_daemon_absent_after": true,
+  "repair_brief": "BROWSER08-PREFLIGHT-REPAIR.md",
+  "observation_claimed": false
+}

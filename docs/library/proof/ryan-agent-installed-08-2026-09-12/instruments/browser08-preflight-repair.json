@@ -1,0 +1,7 @@
+{
+  "scope": "Pre-execution repair, no browser action yet",
+  "source_before_sha256": "d99a6bdf942975660d1fc37baaccf8628193018b9a5a4944b9bf2bdde7c4140e",
+  "source_after_sha256": "e2e9d767622286607686fd4f95b0cc023f9c7fe85f71c6f38d9d9cd580bed765",
+  "original_attempt_preserved": true,
+  "fresh_session": "uoink-install08b"
+}

@@ -1,0 +1,19 @@
+{
+  "video_id": "synthetic-native-media-08",
+  "title": "SYNTHETIC native saved video 08",
+  "source_type": "video",
+  "platform": "youtube",
+  "channel": "SYNTHETIC operator fixture",
+  "duration_seconds": 90,
+  "screenshots": [],
+  "transcript": [
+    {
+      "start_seconds": 34,
+      "end_seconds": 46,
+      "text": "SYNTHETIC stored cue at thirty-four seconds. Verification word: AMBER."
+    },
+    {
+      "text": "SYNTHETIC line with no recorded timestamp."
+    }
+  ]
+}

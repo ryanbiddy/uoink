@@ -1,0 +1,13 @@
+2026-09-12 11:52:20,139 INFO install migration: skipped_isolated_install
+2026-09-12 11:52:20,148 INFO Restored 0 job record(s) from the library index
+2026-09-12 11:52:20,152 INFO sources: restart reconciliation {'released': 0, 'leases_expired': 0, 'succeeded': 0, 'failed': 0, 'uncertain': 1, 'outbox_repaired': 0}
+2026-09-12 11:52:20,153 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-12 11:52:20,431 INFO tray: started (daemon thread)
+2026-09-12 11:52:20,455 INFO splash: spawned (version 3.8.0)
+2026-09-12 11:52:20,455 INFO Uoink server v3.8.0 running on http://127.0.0.1:18081
+2026-09-12 11:52:20,455 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-12 11:52:20,456 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 08\c22\profiles\child-life\output
+2026-09-12 11:52:20,456 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 08\c22\profiles\child-life\server.log
+2026-09-12 11:52:20,456 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-12 11:52:20,585 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 11:52:20,621 INFO GET /health from 127.0.0.1 -> ok

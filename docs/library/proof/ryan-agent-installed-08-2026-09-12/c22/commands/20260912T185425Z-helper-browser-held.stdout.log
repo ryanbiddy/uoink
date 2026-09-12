@@ -1,0 +1,21 @@
+2026-09-12 11:54:26,536 INFO install migration: skipped_isolated_install
+2026-09-12 11:54:26,549 INFO Restored 0 job record(s) from the library index
+2026-09-12 11:54:26,552 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-12 11:54:26,827 INFO tray: started (daemon thread)
+2026-09-12 11:54:26,850 INFO splash: spawned (version 3.8.0)
+2026-09-12 11:54:26,851 INFO Uoink server v3.8.0 running on http://127.0.0.1:18081
+2026-09-12 11:54:26,851 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-12 11:54:26,851 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 08\c22\profiles\child-life\output
+2026-09-12 11:54:26,852 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 08\c22\profiles\child-life\server.log
+2026-09-12 11:54:26,852 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-12 11:54:26,983 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 11:59:42,346 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 11:59:42,401 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-12 11:59:52,504 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:02,504 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:12,504 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:22,505 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:32,504 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:42,504 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:00:52,507 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:01:02,504 INFO GET /health from 127.0.0.1 -> ok

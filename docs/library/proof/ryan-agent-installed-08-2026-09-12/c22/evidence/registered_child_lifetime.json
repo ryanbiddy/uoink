@@ -1,0 +1,2058 @@
+{
+  "id": "registered_child_lifetime",
+  "status": "pass",
+  "driven": {
+    "consented": {
+      "register_source": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "created": true,
+        "source": {
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "kind": "podcast_rss",
+          "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0,
+          "detection_enabled": true,
+          "archived": false,
+          "poll_interval_min": 60,
+          "boundary": "none",
+          "enrollment": {
+            "cap": 25,
+            "enrolled": 0,
+            "initial_completed": false,
+            "known_candidates": 0,
+            "pending": false,
+            "remaining_initial_slots": 25,
+            "coverage": "unknown",
+            "initial_completed_ms": null
+          },
+          "allowance": {
+            "utc_day": "2026-09-12",
+            "cap": 10,
+            "reserved": 0,
+            "charged": 0,
+            "remaining": 10,
+            "resets_at_ms": 1789257600000,
+            "capture_not_before_ms": 0,
+            "hold_reason": null,
+            "hold_until_ms": null
+          },
+          "detection": {
+            "cursor_revision": 0,
+            "enabled": true,
+            "last_poll_attempt_ms": null,
+            "last_poll_success_ms": null,
+            "next_poll_at_ms": 1789239109158,
+            "observed_count": 0,
+            "coverage": "unknown",
+            "truncated": false,
+            "consecutive_failures": 0,
+            "poll_in_progress": false,
+            "error": null
+          },
+          "item_counts": {
+            "observed": 0,
+            "eligible": 0,
+            "reserved": 0,
+            "started": 0,
+            "uncertain": 0,
+            "committed": 0,
+            "failed": 0,
+            "deleted": 0
+          },
+          "in_flight": [],
+          "capture_status": "off",
+          "capture_outcome": "off",
+          "recovery_reason": null,
+          "current_item": null,
+          "legacy": {
+            "feed_id": 1,
+            "playlist_id": null
+          },
+          "created_at_ms": 1789239109158,
+          "updated_at_ms": 1789239109158
+        },
+        "_http_status": 200
+      },
+      "add_feed": {
+        "ok": true,
+        "feed": {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+          "title": null,
+          "description": null,
+          "homepage": null,
+          "last_polled_at": null,
+          "last_etag": null,
+          "last_modified": null,
+          "poll_interval_min": 60,
+          "enabled": 1,
+          "added_at": "2026-09-12T18:51:49Z",
+          "error_count": 0,
+          "last_error": null,
+          "auto_ingest": 0,
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9"
+        },
+        "_http_status": 200
+      },
+      "list_sources": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "sources": [
+          {
+            "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+            "kind": "podcast_rss",
+            "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+            "display_name": null,
+            "adapter": "podcast_rss_v1",
+            "consent_state": "off",
+            "revision": 0,
+            "consent_epoch": 0,
+            "detection_enabled": true,
+            "archived": false,
+            "poll_interval_min": 60,
+            "boundary": "none",
+            "enrollment": {
+              "cap": 25,
+              "enrolled": 0,
+              "initial_completed": false,
+              "known_candidates": 0,
+              "pending": false,
+              "remaining_initial_slots": 25,
+              "coverage": "unknown",
+              "initial_completed_ms": null
+            },
+            "allowance": {
+              "utc_day": "2026-09-12",
+              "cap": 10,
+              "reserved": 0,
+              "charged": 0,
+              "remaining": 10,
+              "resets_at_ms": 1789257600000,
+              "capture_not_before_ms": 0,
+              "hold_reason": null,
+              "hold_until_ms": null
+            },
+            "detection": {
+              "cursor_revision": 0,
+              "enabled": true,
+              "last_poll_attempt_ms": null,
+              "last_poll_success_ms": null,
+              "next_poll_at_ms": 1789239109158,
+              "observed_count": 0,
+              "coverage": "unknown",
+              "truncated": false,
+              "consecutive_failures": 0,
+              "poll_in_progress": false,
+              "error": null
+            },
+            "item_counts": {
+              "observed": 0,
+              "eligible": 0,
+              "reserved": 0,
+              "started": 0,
+              "uncertain": 0,
+              "committed": 0,
+              "failed": 0,
+              "deleted": 0
+            },
+            "in_flight": [],
+            "capture_status": "off",
+            "capture_outcome": "off",
+            "recovery_reason": null,
+            "current_item": null,
+            "legacy": {
+              "feed_id": 1,
+              "playlist_id": null
+            },
+            "created_at_ms": 1789239109158,
+            "updated_at_ms": 1789239109158
+          }
+        ],
+        "next_cursor": null,
+        "as_of_ms": 1789239109203,
+        "_http_status": 200
+      },
+      "list_feeds": {
+        "ok": true,
+        "feeds": [
+          {
+            "id": 1,
+            "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+            "title": null,
+            "description": null,
+            "homepage": null,
+            "last_polled_at": null,
+            "last_etag": null,
+            "last_modified": null,
+            "poll_interval_min": 60,
+            "enabled": 1,
+            "added_at": "2026-09-12T18:51:49Z",
+            "error_count": 0,
+            "last_error": null,
+            "auto_ingest": 0,
+            "episode_count": 0,
+            "latest_episode_published_at": null,
+            "last_episode_title": null
+          }
+        ],
+        "count": 1,
+        "_http_status": 200
+      },
+      "loopback_register_refused": false,
+      "feed_id": 1,
+      "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+      "consent_intent": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "user_intent_token": "ZNqeYkK1c3k24-DYJG9khFhovUYikflCrzzEBOk5xMc",
+        "expires_ms": 1789239409227,
+        "source": {
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "kind": "podcast_rss",
+          "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "consent_state": "off",
+          "revision": 0,
+          "consent_epoch": 0,
+          "detection_enabled": true,
+          "archived": false,
+          "poll_interval_min": 60,
+          "boundary": "none",
+          "enrollment": {
+            "cap": 25,
+            "enrolled": 0,
+            "initial_completed": false,
+            "known_candidates": 0,
+            "pending": false,
+            "remaining_initial_slots": 25,
+            "coverage": "unknown",
+            "initial_completed_ms": null
+          },
+          "allowance": {
+            "utc_day": "2026-09-12",
+            "cap": 10,
+            "reserved": 0,
+            "charged": 0,
+            "remaining": 10,
+            "resets_at_ms": 1789257600000,
+            "capture_not_before_ms": 0,
+            "hold_reason": null,
+            "hold_until_ms": null
+          },
+          "detection": {
+            "cursor_revision": 0,
+            "enabled": true,
+            "last_poll_attempt_ms": null,
+            "last_poll_success_ms": null,
+            "next_poll_at_ms": 1789239109158,
+            "observed_count": 0,
+            "coverage": "unknown",
+            "truncated": false,
+            "consecutive_failures": 0,
+            "poll_in_progress": false,
+            "error": null
+          },
+          "item_counts": {
+            "observed": 0,
+            "eligible": 0,
+            "reserved": 0,
+            "started": 0,
+            "uncertain": 0,
+            "committed": 0,
+            "failed": 0,
+            "deleted": 0
+          },
+          "in_flight": [],
+          "capture_status": "off",
+          "capture_outcome": "off",
+          "recovery_reason": null,
+          "current_item": null,
+          "legacy": {
+            "feed_id": 1,
+            "playlist_id": null
+          },
+          "created_at_ms": 1789239109158,
+          "updated_at_ms": 1789239109158
+        },
+        "confirmation": {
+          "source": "http://c22-fixture.invalid/child-life/feed.xml",
+          "consent_state": "on",
+          "effect": "Standing capture will start automatically for this source: up to 25 back-catalog items, then newly published items, at most 10 starts per UTC day.",
+          "back_catalog_cap": 25,
+          "daily_cap": 10
+        },
+        "_http_status": 200
+      },
+      "consent": {
+        "ok": true,
+        "schema_version": 1,
+        "contract_version": "phase3-v1-2026-09-07",
+        "operation_key": "c22-child-life-on",
+        "changed": true,
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_state": "on",
+        "consent_epoch": 1,
+        "boundary": "initial",
+        "released_reservations": 0,
+        "in_flight": [],
+        "recorded_at_ms": 1789239109251,
+        "authority": "local_user",
+        "_http_status": 200
+      }
+    },
+    "refresh": {
+      "ok": true,
+      "schema_version": 1,
+      "contract_version": "phase3-v1-2026-09-07",
+      "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+      "outcome": "snapshot",
+      "poll": {
+        "ok": true,
+        "outcome": "snapshot",
+        "scan_revision": 1,
+        "coverage": "complete",
+        "truncated": false,
+        "rejected": 0,
+        "conflicts": 0,
+        "stale_epoch": false,
+        "enrollment": {
+          "boundary": "initial",
+          "enrolled": 1,
+          "cohort": [
+            "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778"
+          ]
+        },
+        "inserted": 1,
+        "updated": 0,
+        "linked": 0,
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "kind": "podcast_rss"
+      },
+      "_http_status": 200
+    },
+    "standing": {
+      "counts": {
+        "schema_version": 29,
+        "yoinks": 0,
+        "yoinks_fts": 0,
+        "yoinks_fts_data": 2,
+        "yoinks_fts_idx": 0,
+        "yoinks_fts_content": 0,
+        "yoinks_fts_docsize": 0,
+        "yoinks_fts_config": 1,
+        "jobs": 0,
+        "taxonomy": 0,
+        "sqlite_sequence": 5,
+        "entities": 0,
+        "entity_mentions": 0,
+        "taxonomy_corrections": 0,
+        "pending_yoinks": 0,
+        "yoink_tags": 0,
+        "engagement_events": 0,
+        "memory_layer": 1,
+        "user_channels": 0,
+        "workspaces": 0,
+        "workspace_critique_log": 0,
+        "claims": 0,
+        "scripts": 0,
+        "podcast_feeds": 1,
+        "podcast_episodes": 1,
+        "monitored_playlists": 0,
+        "mobile_queue_events": 0,
+        "writing_pieces": 0,
+        "style_anchors": 5,
+        "allowed_sites": 4,
+        "writing_drafts": 0,
+        "citations": 0,
+        "clips": 0,
+        "clips_fts": 0,
+        "clips_fts_data": 2,
+        "clips_fts_idx": 0,
+        "clips_fts_docsize": 0,
+        "clips_fts_config": 1,
+        "shelves": 0,
+        "shelf_versions": 0,
+        "shelf_nodes": 0,
+        "library_meta": 1,
+        "library_runs": 0,
+        "library_manifest": 0,
+        "library_work": 0,
+        "library_attempts": 0,
+        "library_submissions": 0,
+        "library_proposals": 0,
+        "item_shelves": 0,
+        "library_item_policy": 0,
+        "library_previews": 0,
+        "library_operation_receipts": 0,
+        "library_user_intents": 0,
+        "library_applies": 0,
+        "source_subscriptions": 1,
+        "source_consent_receipts": 1,
+        "source_user_intents": 1,
+        "source_detection_cursors": 1,
+        "source_items": 1,
+        "source_capture_starts": 1,
+        "source_classification_policy": 0,
+        "source_classification_outbox": 0,
+        "media_depth": 0,
+        "diarization_runs": 0,
+        "chapters": 0
+      },
+      "starts": [
+        {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-12",
+          "slot": 1,
+          "state": "started",
+          "reserved_at_ms": 1789239138758,
+          "reservation_expires_ms": 1789239258758,
+          "started_at_ms": 1789239138760,
+          "finished_at_ms": null,
+          "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+          "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "backend_kind": "server_capture",
+          "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "charged_starts": [
+        {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-12",
+          "slot": 1,
+          "state": "started",
+          "reserved_at_ms": 1789239138758,
+          "reservation_expires_ms": 1789239258758,
+          "started_at_ms": 1789239138760,
+          "finished_at_ms": null,
+          "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+          "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "backend_kind": "server_capture",
+          "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "standing_starts": [
+        {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "consent_epoch": 1,
+          "utc_day": "2026-09-12",
+          "slot": 1,
+          "state": "started",
+          "reserved_at_ms": 1789239138758,
+          "reservation_expires_ms": 1789239258758,
+          "started_at_ms": 1789239138760,
+          "finished_at_ms": null,
+          "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+          "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "backend_kind": "server_capture",
+          "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "release_or_failure_code": null,
+          "video_id": null
+        }
+      ],
+      "standing_charge_count": 1,
+      "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+      "items": [
+        {
+          "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "entry_id": "c22-child-life-ep-1",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "canonical_url": "http://c22-fixture.invalid/child-life/episode",
+          "title": "C22 child-lifetime episode",
+          "published_at_ms": 1788782400000,
+          "first_seen_ms": 1789239109281,
+          "last_seen_ms": 1789239109281,
+          "first_scan_revision": 1,
+          "first_seen_consent_epoch": 1,
+          "metadata_json": "{\"audio_url\":\"http://c22-fixture.invalid/child-life/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 12:00:00 GMT\"}",
+          "legacy_episode_id": 1,
+          "eligibility": "back_catalog",
+          "enrolled_epoch": 1,
+          "state": "started",
+          "actual_starts": 1,
+          "preflight_failures": 0,
+          "retry_at_ms": null,
+          "blocked_reason": null,
+          "video_id": null,
+          "committed_at_ms": null
+        }
+      ],
+      "receipts": [
+        {
+          "operation_key": "c22-child-life-on",
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "request_hash": "0379f42190787799964cb5eb0b8146ae7aee630af3f7975c56bfd183c66942d3",
+          "session_hash": "838a82ecb5e46d755a21a9783745256325ef9430cc477f3c731a597d13e1b9ce",
+          "authority": "local_user",
+          "old_state": "off",
+          "new_state": "on",
+          "before_revision": 0,
+          "after_revision": 1,
+          "consent_epoch": 1,
+          "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"c22-child-life-on\",\"recorded_at_ms\":1789239109251,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9\"}",
+          "created_at_ms": 1789239109251
+        }
+      ],
+      "subscriptions": [
+        {
+          "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+          "kind": "podcast_rss",
+          "source_key": "http://c22-fixture.invalid/child-life/feed.xml",
+          "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+          "display_name": null,
+          "adapter": "podcast_rss_v1",
+          "legacy_feed_id": 1,
+          "legacy_playlist_id": null,
+          "detection_enabled": 1,
+          "archived": 0,
+          "consent_state": "on",
+          "revision": 1,
+          "consent_epoch": 1,
+          "boundary": "none",
+          "initial_enrollment_completed_ms": 1789239109281,
+          "back_catalog_enrolled": 1,
+          "poll_interval_min": 60,
+          "capture_not_before_ms": 1789242738760,
+          "accounting_hold_until_ms": 0,
+          "last_observed_ms": 1789239138758,
+          "created_at_ms": 1789239109158,
+          "updated_at_ms": 1789239138760
+        }
+      ],
+      "feeds": [
+        {
+          "id": 1,
+          "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+          "title": null,
+          "description": null,
+          "homepage": null,
+          "last_polled_at": null,
+          "last_etag": null,
+          "last_modified": null,
+          "poll_interval_min": 60,
+          "enabled": 1,
+          "added_at": "2026-09-12T18:51:49Z",
+          "error_count": 0,
+          "last_error": null,
+          "auto_ingest": 0
+        }
+      ],
+      "episodes": [
+        {
+          "id": 1,
+          "feed_id": 1,
+          "guid": "c22-child-life-ep-1",
+          "title": "C22 child-lifetime episode",
+          "audio_url": "http://c22-fixture.invalid/child-life/fixture.mp3",
+          "duration_seconds": null,
+          "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+          "description": null,
+          "status": "new",
+          "yoink_video_id": null,
+          "discovered_at": "2026-09-12T18:51:49Z",
+          "audio_local_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\fixture.mp3",
+          "audio_downloaded_at": null,
+          "audio_size_bytes": null,
+          "audio_download_error": null,
+          "transcript_local_path": null,
+          "transcript_status": "none",
+          "transcript_model_used": null,
+          "diarization_ran": 0,
+          "transcript_finished_at": null,
+          "transcript_error": null,
+          "episode_page_url": "http://c22-fixture.invalid/child-life/episode",
+          "auto_ingest_requested": 0
+        }
+      ],
+      "yoinks": [],
+      "publication_count": 0,
+      "capture_keys": [
+        "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd"
+      ],
+      "video_ids": [],
+      "episode_ids": [
+        "1"
+      ]
+    },
+    "synthetic_url": "http://c22-fixture.invalid/child-life/feed.xml",
+    "episode_guid": "c22-child-life-ep-1",
+    "episode_title": "C22 child-lifetime episode",
+    "ownership": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 41320,
+            "created_ms": 1789239138769,
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "started_ms": 1789239138778,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ],
+    "helper_state": {
+      "incarnations": [
+        {
+          "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\8751f32626d5c47f.json",
+          "name": "8751f32626d5c47f.json",
+          "payload": {
+            "host": "Ryan-PC",
+            "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+            "token": "8751f32626d5c47f",
+            "pid": 41028,
+            "created_ms": 1789239107772,
+            "minted_ms": 1789239108729
+          }
+        }
+      ],
+      "claims": [
+        {
+          "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_claims\\240ef192291161d72f3f32862ba576a197d973fc.json",
+          "name": "240ef192291161d72f3f32862ba576a197d973fc.json",
+          "payload": {
+            "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+            "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+            "owner_token_hash": "fc78a6f9c993a9af9c15591e33b70ee0fced18f657e366003a1b3ec9f3a476d2",
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "pid": 41028,
+            "created_ms": 1789239107772,
+            "claimed_ms": 1789239138762
+          }
+        }
+      ],
+      "children": [
+        {
+          "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "unresolved_launch": false,
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "record": {
+            "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+            "children": [
+              {
+                "pid": 41320,
+                "created_ms": 1789239138769,
+                "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+                "started_ms": 1789239138778,
+                "ended_ms": null
+              }
+            ],
+            "unresolved_launch": false
+          }
+        }
+      ],
+      "locks": [
+        {
+          "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+          "name": "3628d74d782fcd7709d6201b818e21ea0d0b906a.lock"
+        }
+      ]
+    },
+    "inject_child_file": {
+      "pid": 41320,
+      "inject": "spawn_child",
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe"
+    }
+  },
+  "children": [
+    {
+      "pid": 41320,
+      "created_ms": 1789239138769,
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+      "started_ms": 1789239138778,
+      "ended_ms": null,
+      "liveness": "alive",
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "unknown_stays_unknown": false,
+      "start_id": "st_26dea482885fbde4c9cc8874fa0cab70"
+    }
+  ],
+  "before_state": {
+    "incarnations": [],
+    "claims": [],
+    "children": [],
+    "locks": []
+  },
+  "ownership_before_kill": {
+    "incarnations": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\8751f32626d5c47f.json",
+        "name": "8751f32626d5c47f.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "minted_ms": 1789239108729
+        }
+      }
+    ],
+    "claims": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_claims\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "name": "240ef192291161d72f3f32862ba576a197d973fc.json",
+        "payload": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "owner_token_hash": "fc78a6f9c993a9af9c15591e33b70ee0fced18f657e366003a1b3ec9f3a476d2",
+          "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "claimed_ms": 1789239138762
+        }
+      }
+    ],
+    "children": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 41320,
+            "created_ms": 1789239138769,
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "started_ms": 1789239138778,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ],
+    "locks": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+        "name": "3628d74d782fcd7709d6201b818e21ea0d0b906a.lock"
+      }
+    ]
+  },
+  "ownership_after_relaunch": {
+    "incarnations": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\45cbb90219550d48.json",
+        "name": "45cbb90219550d48.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "45cbb90219550d48",
+          "pid": 14924,
+          "created_ms": 1789239139267,
+          "minted_ms": 1789239140149
+        }
+      },
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\8751f32626d5c47f.json",
+        "name": "8751f32626d5c47f.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "minted_ms": 1789239108729
+        }
+      }
+    ],
+    "claims": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_claims\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "name": "240ef192291161d72f3f32862ba576a197d973fc.json",
+        "payload": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "owner_token_hash": "fc78a6f9c993a9af9c15591e33b70ee0fced18f657e366003a1b3ec9f3a476d2",
+          "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "claimed_ms": 1789239138762
+        }
+      }
+    ],
+    "children": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 41320,
+            "created_ms": 1789239138769,
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "started_ms": 1789239138778,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ],
+    "locks": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+        "name": "3628d74d782fcd7709d6201b818e21ea0d0b906a.lock"
+      }
+    ]
+  },
+  "settled": {
+    "incarnations": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\45cbb90219550d48.json",
+        "name": "45cbb90219550d48.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "45cbb90219550d48",
+          "pid": 14924,
+          "created_ms": 1789239139267,
+          "minted_ms": 1789239140149
+        }
+      },
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\4c49a894ff28cdfa.json",
+        "name": "4c49a894ff28cdfa.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "4c49a894ff28cdfa",
+          "pid": 40676,
+          "created_ms": 1789239148000,
+          "minted_ms": 1789239148888
+        }
+      },
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\8751f32626d5c47f.json",
+        "name": "8751f32626d5c47f.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "minted_ms": 1789239108729
+        }
+      }
+    ],
+    "claims": [],
+    "children": [],
+    "locks": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+        "name": "3628d74d782fcd7709d6201b818e21ea0d0b906a.lock"
+      }
+    ]
+  },
+  "before_settlement_restart": {
+    "incarnations": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\45cbb90219550d48.json",
+        "name": "45cbb90219550d48.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "45cbb90219550d48",
+          "pid": 14924,
+          "created_ms": 1789239139267,
+          "minted_ms": 1789239140149
+        }
+      },
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_instances\\8751f32626d5c47f.json",
+        "name": "8751f32626d5c47f.json",
+        "payload": {
+          "host": "Ryan-PC",
+          "root": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+          "token": "8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "minted_ms": 1789239108729
+        }
+      }
+    ],
+    "claims": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_claims\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "name": "240ef192291161d72f3f32862ba576a197d973fc.json",
+        "payload": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+          "owner_token_hash": "fc78a6f9c993a9af9c15591e33b70ee0fced18f657e366003a1b3ec9f3a476d2",
+          "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+          "pid": 41028,
+          "created_ms": 1789239107772,
+          "claimed_ms": 1789239138762
+        }
+      }
+    ],
+    "children": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 41320,
+            "created_ms": 1789239138769,
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "started_ms": 1789239138778,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ],
+    "locks": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+        "name": "3628d74d782fcd7709d6201b818e21ea0d0b906a.lock"
+      }
+    ]
+  },
+  "ledger_after_settlement": {
+    "counts": {
+      "schema_version": 29,
+      "yoinks": 0,
+      "yoinks_fts": 0,
+      "yoinks_fts_data": 2,
+      "yoinks_fts_idx": 0,
+      "yoinks_fts_content": 0,
+      "yoinks_fts_docsize": 0,
+      "yoinks_fts_config": 1,
+      "jobs": 0,
+      "taxonomy": 0,
+      "sqlite_sequence": 5,
+      "entities": 0,
+      "entity_mentions": 0,
+      "taxonomy_corrections": 0,
+      "pending_yoinks": 0,
+      "yoink_tags": 0,
+      "engagement_events": 0,
+      "memory_layer": 1,
+      "user_channels": 0,
+      "workspaces": 0,
+      "workspace_critique_log": 0,
+      "claims": 0,
+      "scripts": 0,
+      "podcast_feeds": 1,
+      "podcast_episodes": 1,
+      "monitored_playlists": 0,
+      "mobile_queue_events": 0,
+      "writing_pieces": 0,
+      "style_anchors": 5,
+      "allowed_sites": 4,
+      "writing_drafts": 0,
+      "citations": 0,
+      "clips": 0,
+      "clips_fts": 0,
+      "clips_fts_data": 2,
+      "clips_fts_idx": 0,
+      "clips_fts_docsize": 0,
+      "clips_fts_config": 1,
+      "shelves": 0,
+      "shelf_versions": 0,
+      "shelf_nodes": 0,
+      "library_meta": 1,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_work": 0,
+      "library_attempts": 0,
+      "library_submissions": 0,
+      "library_proposals": 0,
+      "item_shelves": 0,
+      "library_item_policy": 0,
+      "library_previews": 0,
+      "library_operation_receipts": 0,
+      "library_user_intents": 0,
+      "library_applies": 0,
+      "source_subscriptions": 1,
+      "source_consent_receipts": 1,
+      "source_user_intents": 1,
+      "source_detection_cursors": 1,
+      "source_items": 1,
+      "source_capture_starts": 1,
+      "source_classification_policy": 0,
+      "source_classification_outbox": 0,
+      "media_depth": 0,
+      "diarization_runs": 0,
+      "chapters": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "failed",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": 1789239148889,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": "worker_lost",
+        "video_id": null
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "failed",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": 1789239148889,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": "worker_lost",
+        "video_id": null
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "failed",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": 1789239148889,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": "worker_lost",
+        "video_id": null
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "entry_id": "c22-child-life-ep-1",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "canonical_url": "http://c22-fixture.invalid/child-life/episode",
+        "title": "C22 child-lifetime episode",
+        "published_at_ms": 1788782400000,
+        "first_seen_ms": 1789239109281,
+        "last_seen_ms": 1789239109281,
+        "first_scan_revision": 1,
+        "first_seen_consent_epoch": 1,
+        "metadata_json": "{\"audio_url\":\"http://c22-fixture.invalid/child-life/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 12:00:00 GMT\"}",
+        "legacy_episode_id": 1,
+        "eligibility": "back_catalog",
+        "enrolled_epoch": 1,
+        "state": "eligible",
+        "actual_starts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": 1789240048889,
+        "blocked_reason": "worker_lost",
+        "video_id": null,
+        "committed_at_ms": null
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-child-life-on",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "request_hash": "0379f42190787799964cb5eb0b8146ae7aee630af3f7975c56bfd183c66942d3",
+        "session_hash": "838a82ecb5e46d755a21a9783745256325ef9430cc477f3c731a597d13e1b9ce",
+        "authority": "local_user",
+        "old_state": "off",
+        "new_state": "on",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_epoch": 1,
+        "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"c22-child-life-on\",\"recorded_at_ms\":1789239109251,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9\"}",
+        "created_at_ms": 1789239109251
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "kind": "podcast_rss",
+        "source_key": "http://c22-fixture.invalid/child-life/feed.xml",
+        "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "display_name": null,
+        "adapter": "podcast_rss_v1",
+        "legacy_feed_id": 1,
+        "legacy_playlist_id": null,
+        "detection_enabled": 1,
+        "archived": 0,
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1,
+        "boundary": "none",
+        "initial_enrollment_completed_ms": 1789239109281,
+        "back_catalog_enrolled": 1,
+        "poll_interval_min": 60,
+        "capture_not_before_ms": 1789242738760,
+        "accounting_hold_until_ms": 0,
+        "last_observed_ms": 1789239138758,
+        "created_at_ms": 1789239109158,
+        "updated_at_ms": 1789239138760
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "title": null,
+        "description": null,
+        "homepage": null,
+        "last_polled_at": null,
+        "last_etag": null,
+        "last_modified": null,
+        "poll_interval_min": 60,
+        "enabled": 1,
+        "added_at": "2026-09-12T18:51:49Z",
+        "error_count": 0,
+        "last_error": null,
+        "auto_ingest": 0
+      }
+    ],
+    "episodes": [
+      {
+        "id": 1,
+        "feed_id": 1,
+        "guid": "c22-child-life-ep-1",
+        "title": "C22 child-lifetime episode",
+        "audio_url": "http://c22-fixture.invalid/child-life/fixture.mp3",
+        "duration_seconds": null,
+        "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+        "description": null,
+        "status": "new",
+        "yoink_video_id": null,
+        "discovered_at": "2026-09-12T18:51:49Z",
+        "audio_local_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\fixture.mp3",
+        "audio_downloaded_at": null,
+        "audio_size_bytes": null,
+        "audio_download_error": null,
+        "transcript_local_path": null,
+        "transcript_status": "none",
+        "transcript_model_used": null,
+        "diarization_ran": 0,
+        "transcript_finished_at": null,
+        "transcript_error": null,
+        "episode_page_url": "http://c22-fixture.invalid/child-life/episode",
+        "auto_ingest_requested": 0
+      }
+    ],
+    "yoinks": [],
+    "publication_count": 0,
+    "capture_keys": [
+      "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd"
+    ],
+    "video_ids": [],
+    "episode_ids": [
+      "1"
+    ]
+  },
+  "settlement_identity": {
+    "pid": 40676,
+    "created_ms": 1789239148000,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "observed_ms": 1789239148002,
+    "from_popen": true,
+    "poll": null
+  },
+  "settlement_stop": {
+    "identity": {
+      "pid": 40676,
+      "created_ms": 1789239148000,
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "observed_ms": 1789239148002,
+      "from_popen": true,
+      "poll": null
+    },
+    "quit_http": {
+      "status": 200,
+      "body": "{\"ok\": true, \"stopping\": true}"
+    },
+    "token_present": true,
+    "exit": 0,
+    "stopped": true,
+    "port_freed": true,
+    "guard_restore": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+      "existed": true,
+      "conflict": false,
+      "before_sha256": "2b58b0727448916e27908aa787da4d337eb5a4cba9d9cd9fcdab08d12ba86e75",
+      "removed": true,
+      "restored": false,
+      "absent_after": true,
+      "original_was_absent": true
+    },
+    "pth_preserved": {
+      "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+      "matches_original": true
+    },
+    "guard_original_preserved": {
+      "previous_absent": true,
+      "previous_sha256": null,
+      "rewritten": false
+    },
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "live_index_forbidden": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+      "opened": false,
+      "hashed": false,
+      "exists_probed": false,
+      "mtime_ns": null,
+      "sha256": null,
+      "bytes": null,
+      "note": "forbidden live index path recorded as a string only"
+    }
+  },
+  "settled_lock_probe": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\capture_locks\\3628d74d782fcd7709d6201b818e21ea0d0b906a.lock",
+    "acquired_and_released": true
+  },
+  "terminated": {
+    "identity": {
+      "pid": 41028,
+      "created_ms": 1789239107772,
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "observed_ms": 1789239107778,
+      "from_popen": true,
+      "poll": null
+    },
+    "handle_stop": {
+      "method": "popen_handle",
+      "pid": 41028,
+      "taskkill": false,
+      "checked_identity": {
+        "pid": 41028,
+        "created_ms": 1789239107772,
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+        "observed_ms": 1789239138973,
+        "from_popen": true,
+        "poll": null
+      },
+      "exit": 1,
+      "stopped": true
+    },
+    "exit": 1,
+    "stopped": true
+  },
+  "helper_killed_while_child_alive": true,
+  "child_during_helper_stop": "alive",
+  "first_identity": {
+    "pid": 41028,
+    "created_ms": 1789239107772,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "observed_ms": 1789239107778,
+    "from_popen": true,
+    "poll": null
+  },
+  "second_identity": {
+    "pid": 14924,
+    "created_ms": 1789239139267,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "observed_ms": 1789239139270,
+    "from_popen": true,
+    "poll": null
+  },
+  "duplicate_launch": false,
+  "ledger_before_kill": {
+    "counts": {
+      "schema_version": 29,
+      "yoinks": 0,
+      "yoinks_fts": 0,
+      "yoinks_fts_data": 2,
+      "yoinks_fts_idx": 0,
+      "yoinks_fts_content": 0,
+      "yoinks_fts_docsize": 0,
+      "yoinks_fts_config": 1,
+      "jobs": 0,
+      "taxonomy": 0,
+      "sqlite_sequence": 5,
+      "entities": 0,
+      "entity_mentions": 0,
+      "taxonomy_corrections": 0,
+      "pending_yoinks": 0,
+      "yoink_tags": 0,
+      "engagement_events": 0,
+      "memory_layer": 1,
+      "user_channels": 0,
+      "workspaces": 0,
+      "workspace_critique_log": 0,
+      "claims": 0,
+      "scripts": 0,
+      "podcast_feeds": 1,
+      "podcast_episodes": 1,
+      "monitored_playlists": 0,
+      "mobile_queue_events": 0,
+      "writing_pieces": 0,
+      "style_anchors": 5,
+      "allowed_sites": 4,
+      "writing_drafts": 0,
+      "citations": 0,
+      "clips": 0,
+      "clips_fts": 0,
+      "clips_fts_data": 2,
+      "clips_fts_idx": 0,
+      "clips_fts_docsize": 0,
+      "clips_fts_config": 1,
+      "shelves": 0,
+      "shelf_versions": 0,
+      "shelf_nodes": 0,
+      "library_meta": 1,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_work": 0,
+      "library_attempts": 0,
+      "library_submissions": 0,
+      "library_proposals": 0,
+      "item_shelves": 0,
+      "library_item_policy": 0,
+      "library_previews": 0,
+      "library_operation_receipts": 0,
+      "library_user_intents": 0,
+      "library_applies": 0,
+      "source_subscriptions": 1,
+      "source_consent_receipts": 1,
+      "source_user_intents": 1,
+      "source_detection_cursors": 1,
+      "source_items": 1,
+      "source_capture_starts": 1,
+      "source_classification_policy": 0,
+      "source_classification_outbox": 0,
+      "media_depth": 0,
+      "diarization_runs": 0,
+      "chapters": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "started",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "started",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "started",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "entry_id": "c22-child-life-ep-1",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "canonical_url": "http://c22-fixture.invalid/child-life/episode",
+        "title": "C22 child-lifetime episode",
+        "published_at_ms": 1788782400000,
+        "first_seen_ms": 1789239109281,
+        "last_seen_ms": 1789239109281,
+        "first_scan_revision": 1,
+        "first_seen_consent_epoch": 1,
+        "metadata_json": "{\"audio_url\":\"http://c22-fixture.invalid/child-life/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 12:00:00 GMT\"}",
+        "legacy_episode_id": 1,
+        "eligibility": "back_catalog",
+        "enrolled_epoch": 1,
+        "state": "started",
+        "actual_starts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "blocked_reason": null,
+        "video_id": null,
+        "committed_at_ms": null
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-child-life-on",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "request_hash": "0379f42190787799964cb5eb0b8146ae7aee630af3f7975c56bfd183c66942d3",
+        "session_hash": "838a82ecb5e46d755a21a9783745256325ef9430cc477f3c731a597d13e1b9ce",
+        "authority": "local_user",
+        "old_state": "off",
+        "new_state": "on",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_epoch": 1,
+        "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"c22-child-life-on\",\"recorded_at_ms\":1789239109251,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9\"}",
+        "created_at_ms": 1789239109251
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "kind": "podcast_rss",
+        "source_key": "http://c22-fixture.invalid/child-life/feed.xml",
+        "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "display_name": null,
+        "adapter": "podcast_rss_v1",
+        "legacy_feed_id": 1,
+        "legacy_playlist_id": null,
+        "detection_enabled": 1,
+        "archived": 0,
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1,
+        "boundary": "none",
+        "initial_enrollment_completed_ms": 1789239109281,
+        "back_catalog_enrolled": 1,
+        "poll_interval_min": 60,
+        "capture_not_before_ms": 1789242738760,
+        "accounting_hold_until_ms": 0,
+        "last_observed_ms": 1789239138758,
+        "created_at_ms": 1789239109158,
+        "updated_at_ms": 1789239138760
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "title": null,
+        "description": null,
+        "homepage": null,
+        "last_polled_at": null,
+        "last_etag": null,
+        "last_modified": null,
+        "poll_interval_min": 60,
+        "enabled": 1,
+        "added_at": "2026-09-12T18:51:49Z",
+        "error_count": 0,
+        "last_error": null,
+        "auto_ingest": 0
+      }
+    ],
+    "episodes": [
+      {
+        "id": 1,
+        "feed_id": 1,
+        "guid": "c22-child-life-ep-1",
+        "title": "C22 child-lifetime episode",
+        "audio_url": "http://c22-fixture.invalid/child-life/fixture.mp3",
+        "duration_seconds": null,
+        "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+        "description": null,
+        "status": "new",
+        "yoink_video_id": null,
+        "discovered_at": "2026-09-12T18:51:49Z",
+        "audio_local_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\fixture.mp3",
+        "audio_downloaded_at": null,
+        "audio_size_bytes": null,
+        "audio_download_error": null,
+        "transcript_local_path": null,
+        "transcript_status": "none",
+        "transcript_model_used": null,
+        "diarization_ran": 0,
+        "transcript_finished_at": null,
+        "transcript_error": null,
+        "episode_page_url": "http://c22-fixture.invalid/child-life/episode",
+        "auto_ingest_requested": 0
+      }
+    ],
+    "yoinks": [],
+    "publication_count": 0,
+    "capture_keys": [
+      "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd"
+    ],
+    "video_ids": [],
+    "episode_ids": [
+      "1"
+    ]
+  },
+  "ledger_after_relaunch": {
+    "counts": {
+      "schema_version": 29,
+      "yoinks": 0,
+      "yoinks_fts": 0,
+      "yoinks_fts_data": 2,
+      "yoinks_fts_idx": 0,
+      "yoinks_fts_content": 0,
+      "yoinks_fts_docsize": 0,
+      "yoinks_fts_config": 1,
+      "jobs": 0,
+      "taxonomy": 0,
+      "sqlite_sequence": 5,
+      "entities": 0,
+      "entity_mentions": 0,
+      "taxonomy_corrections": 0,
+      "pending_yoinks": 0,
+      "yoink_tags": 0,
+      "engagement_events": 0,
+      "memory_layer": 1,
+      "user_channels": 0,
+      "workspaces": 0,
+      "workspace_critique_log": 0,
+      "claims": 0,
+      "scripts": 0,
+      "podcast_feeds": 1,
+      "podcast_episodes": 1,
+      "monitored_playlists": 0,
+      "mobile_queue_events": 0,
+      "writing_pieces": 0,
+      "style_anchors": 5,
+      "allowed_sites": 4,
+      "writing_drafts": 0,
+      "citations": 0,
+      "clips": 0,
+      "clips_fts": 0,
+      "clips_fts_data": 2,
+      "clips_fts_idx": 0,
+      "clips_fts_docsize": 0,
+      "clips_fts_config": 1,
+      "shelves": 0,
+      "shelf_versions": 0,
+      "shelf_nodes": 0,
+      "library_meta": 1,
+      "library_runs": 0,
+      "library_manifest": 0,
+      "library_work": 0,
+      "library_attempts": 0,
+      "library_submissions": 0,
+      "library_proposals": 0,
+      "item_shelves": 0,
+      "library_item_policy": 0,
+      "library_previews": 0,
+      "library_operation_receipts": 0,
+      "library_user_intents": 0,
+      "library_applies": 0,
+      "source_subscriptions": 1,
+      "source_consent_receipts": 1,
+      "source_user_intents": 1,
+      "source_detection_cursors": 1,
+      "source_items": 1,
+      "source_capture_starts": 1,
+      "source_classification_policy": 0,
+      "source_classification_outbox": 0,
+      "media_depth": 0,
+      "diarization_runs": 0,
+      "chapters": 0
+    },
+    "starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "uncertain",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "charged_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "uncertain",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "standing_starts": [
+      {
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "consent_epoch": 1,
+        "utc_day": "2026-09-12",
+        "slot": 1,
+        "state": "uncertain",
+        "reserved_at_ms": 1789239138758,
+        "reservation_expires_ms": 1789239258758,
+        "started_at_ms": 1789239138760,
+        "finished_at_ms": null,
+        "owner_token": "IctyDP4BRkLh_FIAMx3-zhU2QOgIoOsr-FePCM7M_VY",
+        "owner_instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "backend_kind": "server_capture",
+        "backend_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "release_or_failure_code": null,
+        "video_id": null
+      }
+    ],
+    "standing_charge_count": 1,
+    "schema_note": "source_capture_starts has no origin/authority/kind; started_at_ms marks a standing charge",
+    "items": [
+      {
+        "item_id": "si_60107d28878db83d3948a1f33a117ecaf13afe141d391d51c1739784a9440778",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "entry_id": "c22-child-life-ep-1",
+        "capture_key": "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd",
+        "canonical_url": "http://c22-fixture.invalid/child-life/episode",
+        "title": "C22 child-lifetime episode",
+        "published_at_ms": 1788782400000,
+        "first_seen_ms": 1789239109281,
+        "last_seen_ms": 1789239109281,
+        "first_scan_revision": 1,
+        "first_seen_consent_epoch": 1,
+        "metadata_json": "{\"audio_url\":\"http://c22-fixture.invalid/child-life/fixture.mp3\",\"duration_raw\":null,\"identity_method\":\"guid\",\"published_raw\":\"Mon, 07 Sep 2026 12:00:00 GMT\"}",
+        "legacy_episode_id": 1,
+        "eligibility": "back_catalog",
+        "enrolled_epoch": 1,
+        "state": "uncertain",
+        "actual_starts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "blocked_reason": null,
+        "video_id": null,
+        "committed_at_ms": null
+      }
+    ],
+    "receipts": [
+      {
+        "operation_key": "c22-child-life-on",
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "request_hash": "0379f42190787799964cb5eb0b8146ae7aee630af3f7975c56bfd183c66942d3",
+        "session_hash": "838a82ecb5e46d755a21a9783745256325ef9430cc477f3c731a597d13e1b9ce",
+        "authority": "local_user",
+        "old_state": "off",
+        "new_state": "on",
+        "before_revision": 0,
+        "after_revision": 1,
+        "consent_epoch": 1,
+        "response_json": "{\"after_revision\":1,\"authority\":\"local_user\",\"before_revision\":0,\"boundary\":\"initial\",\"changed\":true,\"consent_epoch\":1,\"consent_state\":\"on\",\"contract_version\":\"phase3-v1-2026-09-07\",\"in_flight\":[],\"ok\":true,\"operation_key\":\"c22-child-life-on\",\"recorded_at_ms\":1789239109251,\"released_reservations\":0,\"schema_version\":1,\"source_id\":\"src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9\"}",
+        "created_at_ms": 1789239109251
+      }
+    ],
+    "subscriptions": [
+      {
+        "source_id": "src_a540b13677a7cbfab74f0e54cfb0fa0c27f75267997770ee54121f9fec5f3aa9",
+        "kind": "podcast_rss",
+        "source_key": "http://c22-fixture.invalid/child-life/feed.xml",
+        "canonical_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "display_name": null,
+        "adapter": "podcast_rss_v1",
+        "legacy_feed_id": 1,
+        "legacy_playlist_id": null,
+        "detection_enabled": 1,
+        "archived": 0,
+        "consent_state": "on",
+        "revision": 1,
+        "consent_epoch": 1,
+        "boundary": "none",
+        "initial_enrollment_completed_ms": 1789239109281,
+        "back_catalog_enrolled": 1,
+        "poll_interval_min": 60,
+        "capture_not_before_ms": 1789242738760,
+        "accounting_hold_until_ms": 0,
+        "last_observed_ms": 1789239138758,
+        "created_at_ms": 1789239109158,
+        "updated_at_ms": 1789239138760
+      }
+    ],
+    "feeds": [
+      {
+        "id": 1,
+        "feed_url": "http://c22-fixture.invalid/child-life/feed.xml",
+        "title": null,
+        "description": null,
+        "homepage": null,
+        "last_polled_at": null,
+        "last_etag": null,
+        "last_modified": null,
+        "poll_interval_min": 60,
+        "enabled": 1,
+        "added_at": "2026-09-12T18:51:49Z",
+        "error_count": 0,
+        "last_error": null,
+        "auto_ingest": 0
+      }
+    ],
+    "episodes": [
+      {
+        "id": 1,
+        "feed_id": 1,
+        "guid": "c22-child-life-ep-1",
+        "title": "C22 child-lifetime episode",
+        "audio_url": "http://c22-fixture.invalid/child-life/fixture.mp3",
+        "duration_seconds": null,
+        "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+        "description": null,
+        "status": "new",
+        "yoink_video_id": null,
+        "discovered_at": "2026-09-12T18:51:49Z",
+        "audio_local_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\fixture.mp3",
+        "audio_downloaded_at": null,
+        "audio_size_bytes": null,
+        "audio_download_error": null,
+        "transcript_local_path": null,
+        "transcript_status": "none",
+        "transcript_model_used": null,
+        "diarization_ran": 0,
+        "transcript_finished_at": null,
+        "transcript_error": null,
+        "episode_page_url": "http://c22-fixture.invalid/child-life/episode",
+        "auto_ingest_requested": 0
+      }
+    ],
+    "yoinks": [],
+    "publication_count": 0,
+    "capture_keys": [
+      "podcast:6e28bb214da4f8e05a08586ab67446fe492b54781b1197ac45136e83d1b632dd"
+    ],
+    "video_ids": [],
+    "episode_ids": [
+      "1"
+    ]
+  },
+  "charge_delta": 0,
+  "publication_delta": 0,
+  "health_after": {
+    "ok": true,
+    "version": "3.8.0",
+    "migration_version": 30,
+    "migration_pending": false,
+    "last_successful_tick_at": "2026-09-12T18:52:20Z",
+    "heartbeat": {
+      "last_tick_completed_at": "2026-09-12T18:52:20Z",
+      "last_successful_tick_at": "2026-09-12T18:52:20Z",
+      "last_successful_poll_at": null,
+      "last_failed_poll_at": null,
+      "last_poll_error": null,
+      "last_ingest_completed_at": null,
+      "last_tick": {
+        "ok": true,
+        "polls": 0,
+        "failed_polls": 0
+      },
+      "counts": {
+        "ticks": 1,
+        "polls_ok": 0,
+        "polls_failed": 0,
+        "ingests": 0
+      },
+      "tick_interval_sec": 30,
+      "freshness": {
+        "state": "fresh",
+        "age_sec": 0.0,
+        "stale_after_sec": 300
+      }
+    },
+    "whisperx_available": true,
+    "whisper_model": "base",
+    "whisperx_model_loaded": true,
+    "index_recovering": false,
+    "output_root_fallback": false,
+    "path_integrity": {
+      "ok": true,
+      "checked": 0,
+      "missing": 0
+    },
+    "library": {
+      "status": "idle",
+      "waiting_for_client": false,
+      "ready": 0,
+      "leased": 0,
+      "run_revision": null,
+      "recovery_state": "ready",
+      "error_code": null,
+      "apply_enabled": false,
+      "contract_version": "phase2-v1-2026-09-04"
+    },
+    "_http_status": 200
+  },
+  "surviving_until_exit": [
+    {
+      "pid": 41320,
+      "created_ms": 1789239138769,
+      "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+      "started_ms": 1789239138778,
+      "ended_ms": null,
+      "liveness": "dead",
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "unknown_stays_unknown": false,
+      "start_id": "st_26dea482885fbde4c9cc8874fa0cab70"
+    }
+  ],
+  "child_exited": true,
+  "instrument": {
+    "instrument": {
+      "product_module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\source_subscriptions.py",
+      "helper_driven": true,
+      "inject": "spawn_child"
+    },
+    "ownership": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life\\source_children\\240ef192291161d72f3f32862ba576a197d973fc.json",
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+        "unresolved_launch": false,
+        "children": [
+          {
+            "pid": 41320,
+            "created_ms": 1789239138769,
+            "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+            "started_ms": 1789239138778,
+            "ended_ms": null
+          }
+        ],
+        "record": {
+          "start_id": "st_26dea482885fbde4c9cc8874fa0cab70",
+          "children": [
+            {
+              "pid": 41320,
+              "created_ms": 1789239138769,
+              "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+              "started_ms": 1789239138778,
+              "ended_ms": null
+            }
+          ],
+          "unresolved_launch": false
+        }
+      }
+    ]
+  },
+  "helper_stop": {
+    "identity": {
+      "pid": 41028,
+      "created_ms": 1789239107772,
+      "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "observed_ms": 1789239107778,
+      "from_popen": true,
+      "poll": null
+    },
+    "quit_http": null,
+    "token_present": true,
+    "exit": 1,
+    "stopped": true,
+    "port_freed": true,
+    "guard_restore": {
+      "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+      "existed": false,
+      "conflict": false,
+      "restored": false,
+      "absent_after": true,
+      "original_was_absent": true
+    },
+    "pth_preserved": {
+      "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62",
+      "matches_original": true
+    },
+    "guard_original_preserved": {
+      "previous_absent": true,
+      "previous_sha256": null,
+      "rewritten": false
+    },
+    "opened_live_index": false,
+    "hashed_live_index": false,
+    "live_index_forbidden": {
+      "path": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+      "opened": false,
+      "hashed": false,
+      "exists_probed": false,
+      "mtime_ns": null,
+      "sha256": null,
+      "bytes": null,
+      "note": "forbidden live index path recorded as a string only"
+    }
+  },
+  "raw_transition_oracle": {
+    "ok": true,
+    "issues": [],
+    "lock_files_are_not_held_locks": true
+  },
+  "recovery": {
+    "exact_identities": [
+      {
+        "pid": 41320,
+        "created_ms": 1789239138769,
+        "instance": "Ryan-PC:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life#8751f32626d5c47f",
+        "started_ms": 1789239138778,
+        "ended_ms": null,
+        "liveness": "alive",
+        "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+        "unknown_stays_unknown": false,
+        "start_id": "st_26dea482885fbde4c9cc8874fa0cab70"
+      }
+    ],
+    "unknown_cannot_pass": false,
+    "helper_terminated_while_child_alive": true,
+    "relaunched": true,
+    "charge_delta": 0,
+    "publication_delta": 0,
+    "child_exited": true,
+    "duplicate_launch": false,
+    "ok": true
+  }
+}

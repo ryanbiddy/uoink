@@ -1,0 +1,67 @@
+{
+  "exact_expected_export": true,
+  "delay_after_resources_s": 2.10016970000288,
+  "cleanup": {
+    "pid": 33100,
+    "label": "p4-original-installed",
+    "job_assigned": true,
+    "already_exited": false,
+    "exit_code": 1,
+    "assignment_error": null,
+    "descendants_before": {
+      "job_assigned": true,
+      "job_pids": [
+        33100,
+        26780,
+        11476,
+        37368
+      ],
+      "owned_pids": [
+        11476,
+        26780,
+        33100,
+        37368
+      ],
+      "parent_pid": 33100,
+      "parent_exit": null,
+      "job_query_ok": true,
+      "job_empty_affirmed": false,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_after": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        11476,
+        26780,
+        33100,
+        37368
+      ],
+      "parent_pid": 33100,
+      "parent_exit": 1,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_remaining": [],
+    "descendants_exited": true,
+    "job_query_ok": true,
+    "job_empty_affirmed": true,
+    "identity_uncertain": false,
+    "job_query_error": null,
+    "parent_exited": true,
+    "cleaned": true,
+    "stderr_tail": "2026-09-12 12:21:14,832 INFO Processing request of type ListResourcesRequest\r\n2026-09-12 12:21:16,948 INFO Processing request of type CallToolRequest\r\n",
+    "stderr_bytes": 151,
+    "retained_events": 4,
+    "partial_stdout_bytes": 0,
+    "retain_dir": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\p6-published01\\profile\\records\\traffic\\published-protocol01-33100",
+    "stdout_drained": true,
+    "stderr_drained": true,
+    "writer_exited": true,
+    "writer_was_pending": false,
+    "drain_uncertain": false
+  }
+}

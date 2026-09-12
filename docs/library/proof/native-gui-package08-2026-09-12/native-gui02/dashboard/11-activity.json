@@ -1,0 +1,28 @@
+{
+  "utc": "2026-09-12T19:15:33.545Z",
+  "window": {
+    "app": "process:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe",
+    "id": 397512,
+    "title": "Uoink"
+  },
+  "accessibility": {
+    "document_text": "OINK\nLibrary\n5\nSources\n4\nFor You\n7\nGenerate\n5\nSettings\nReady on this device\nPrivate local app\nActivity 0\nAbout Uoink\n⭐ Star on GitHub\nStop Uoink\nACTIVITY\nNothing uoinking right now.\nLive work, queue retries, today's completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.\nRefresh\nCancel all\nLearn: Playlist Mode\nLearn: Mobile Bridge\nSaves queued from your phone carry this tag:\nfrom mobile playlist\nQueue\n0 running | 0 queued\nNothing running right now.\nNew uoinks and rate-limit retries will appear here. Mobile saves use this label:\nfrom mobile playlist\nCompleted today\n1\nSYNTHETIC native note 08\nYou | --:-- | 2m ago\nOpen\nSaved your note. It's in your Library.",
+    "focused_element": "16 document Uoink Dashboard ID: RootWebArea",
+    "tree": "Window: \"Uoink\", App: pythonw.exe.\n\t0 window Uoink Secondary Actions: Raise\n\t\t1 pane ID: 3216096\n\t\t\t8 pane Uoink Dashboard\n\t\t\t\t9 pane (disabled)\n\t\t\t\t10 region Uoink Dashboard - Web content\n\t\t\t\t\t11 region\n\t\t\t\t\t\t12 region\n\t\t\t\t\t\t13 region\n\t\t\t\t\t\t\t14 region\n\t\t\t\t\t\t\t\t16 document Uoink Dashboard ID: RootWebArea\n\t\t\t\t\t\t\t\t\t17 complementary Dashboard navigation\n\t\t\t\t\t\t\t\t\t\t18 text OINK\n\t\t\t\t\t\t\t\t\t\t19 navigation Sections\n\t\t\t\t\t\t\t\t\t\t\t20 button Library, 5 saved sources\n\t\t\t\t\t\t\t\t\t\t\t\t21 group 5 saved sources Description: 5 saved sources ID: libraryNavCount\n\t\t\t\t\t\t\t\t\t\t\t22 button Sources, 4 capture-ready source types\n\t\t\t\t\t\t\t\t\t\t\t\t23 group 4 capture-ready source types Description: 4 capture-ready source types ID: sourcesNavCount\n\t\t\t\t\t\t\t\t\t\t\t24 button For You, 7 suggestions\n\t\t\t\t\t\t\t\t\t\t\t\t25 group 7 suggestions Description: 7 suggestions ID: forYouNavCount\n\t\t\t\t\t\t\t\t\t\t\t26 button Generate, 5 style anchors\n\t\t\t\t\t\t\t\t\t\t\t\t27 group 5 style anchors Description: 5 style anchors ID: writingNavCount\n\t\t\t\t\t\t\t\t\t\t\t28 button Settings\n\t\t\t\t\t\t\t\t\t\t1267 text Ready on this device\n\t\t\t\t\t\t\t\t\t\t1268 text Private local app\n\t\t\t\t\t\t\t\t\t\t31 button Activity, 0 active jobs ID: viewActivity\n\t\t\t\t\t\t\t\t\t\t\t32 group 0 active jobs Description: 0 active jobs ID: activityNavCount\n\t\t\t\t\t\t\t\t\t\t33 details ID: sidebarControls\n\t\t\t\t\t\t\t\t\t\t\t34 button About Uoink\n\t\t\t\t\t\t\t\t\t\t\t35 button ⭐ Star on GitHub ID: starGithub\n\t\t\t\t\t\t\t\t\t\t\t36 button Stop Uoink ID: stopHelper\n\t\t\t\t\t\t\t\t\t37 main\n\t\t\t\t\t\t\t\t\t\t1239 text ACTIVITY\n\t\t\t\t\t\t\t\t\t\t1240 heading Nothing uoinking right now. ID: activityHeadline\n\t\t\t\t\t\t\t\t\t\t1241 text Live work, queue retries, today's completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.\n\t\t\t\t\t\t\t\t\t\t1242 button Refresh ID: refreshActivity\n\t\t\t\t\t\t\t\t\t\t1243 button (disabled) Cancel all Description: No active work to cancel. ID: cancelAll\n\t\t\t\t\t\t\t\t\t\t1244 group Activity walkthrough links\n\t\t\t\t\t\t\t\t\t\t\t1245 link Learn: Playlist Mode\n\t\t\t\t\t\t\t\t\t\t\t1246 link Learn: Mobile Bridge\n\t\t\t\t\t\t\t\t\t\t1247 text Saves queued from your phone carry this tag:\n\t\t\t\t\t\t\t\t\t\t1248 text from mobile playlist\n\t\t\t\t\t\t\t\t\t\t1249 text Queue\n\t\t\t\t\t\t\t\t\t\t1259 text 0 running | 0 queued\n\t\t\t\t\t\t\t\t\t\t1260 text Nothing running right now.\n\t\t\t\t\t\t\t\t\t\t1261 text New uoinks and rate-limit retries will appear here. Mobile saves use this label:\n\t\t\t\t\t\t\t\t\t\t1262 text from mobile playlist\n\t\t\t\t\t\t\t\t\t\t1254 text Completed today\n\t\t\t\t\t\t\t\t\t\t1263 text 1\n\t\t\t\t\t\t\t\t\t\t1264 text SYNTHETIC native note 08\n\t\t\t\t\t\t\t\t\t\t1265 text You | --:-- | 2m ago\n\t\t\t\t\t\t\t\t\t\t1266 button Open\n\t\t\t\t\t\t\t\t\t139 status ID: toast\n\t\t\t\t\t\t\t\t\t\t825 text Saved your note. It's in your Library.\n\t\t\t\t\t\t\t\t15 region\n\t\t2 title bar\n\t\t\t3 menu bar System ID: MenuBar\n\t\t\t\t4 menu item System\n\t\t\t5 button Minimize\n\t\t\t6 button Maximize\n\t\t\t7 button Close\n\nDocument text: ```\nOINK\nLibrary\n5\nSources\n4\nFor You\n7\nGenerate\n5\nSettings\nReady on this device\nPrivate local app\nActivity 0\nAbout Uoink\n⭐ Star on GitHub\nStop Uoink\nACTIVITY\nNothing uoinking right now.\nLive work, queue retries, today's completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.\nRefresh\nCancel all\nLearn: Playlist Mode\nLearn: Mobile Bridge\nSaves queued from your phone carry this tag:\nfrom mobile playlist\nQueue\n0 running | 0 queued\nNothing running right now.\nNew uoinks and rate-limit retries will appear here. Mobile saves use this label:\nfrom mobile playlist\nCompleted today\n1\nSYNTHETIC native note 08\nYou | --:-- | 2m ago\nOpen\nSaved your note. It's in your Library.\n```"
+  },
+  "screenshots": [
+    {
+      "file": "11-activity-0.jpg",
+      "mimeType": "image/jpeg",
+      "bytes": 81374,
+      "sha256": "84ae0d36af386395c41a569fb56b9722d90ca0d03ca4d78ab94315a3dcb4caf7",
+      "id": "screenshot-0",
+      "width": 1261,
+      "height": 775
+    }
+  ],
+  "notes": {
+    "observed": "Activity shows zero running and zero queued jobs, one completed synthetic note; no capture, scan or model job started."
+  },
+  "scope": "Actual package-08 native Uoink window; unchanged original image bytes archived as proof"
+}

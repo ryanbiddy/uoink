@@ -1,0 +1,10 @@
+{
+  "hashes": {
+    "mcp-client.json": "d17b540b63e05c03df2ec8022de207f646633618290ab4b2e60d855e872423e1",
+    "settings.json": "f7a382a7d4e2ca6feb4746f6cbac4382624ae29e9ba77e0be25c980f03623348",
+    "launch.json": "897c660ce97378cb35e8a2c4cca9a48ae24a39f9cf65026712de8b766f9478c9",
+    "observe_media_actions.py": "b2b621949945e5e1b70c6096dcb9b4aa5efca36c119bcfe1fd26218c1ff6ebec"
+  },
+  "apply_enabled": false,
+  "scope": "New dedicated publication scenario; original P4 fixtures unchanged"
+}

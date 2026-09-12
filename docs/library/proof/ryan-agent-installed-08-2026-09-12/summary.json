@@ -1,0 +1,128 @@
+{
+  "utc": "2026-09-12T19:22:30.431665+00:00",
+  "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+  "build_source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "setup_observed": true,
+  "same_version_reinstall_observed": true,
+  "setup_exits": [
+    0,
+    0
+  ],
+  "throwaway_account": false,
+  "ordinary_installation_replaced": false,
+  "account_scope": "Same non-elevated account; separate app/data/credential namespace, uninstall entry and Start Menu group. Not OS-wide containment.",
+  "installed_files_compared": 32497,
+  "installed_files_failed": 0,
+  "recognized_generated_files": 3,
+  "c22_raw_counts": {
+    "pass": 11,
+    "fail": 0,
+    "unexecuted": 3,
+    "executed": 11
+  },
+  "unexpected_runtime_errors": [],
+  "all_owned_children_dead": true,
+  "browser": {
+    "utc": "2026-09-12T19:01:13.804298+00:00",
+    "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+    "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+    "status": "passed_independent_visual_and_state_review",
+    "images": 4,
+    "state_changes": {
+      "after_observation": [
+        "label",
+        "utc"
+      ],
+      "after_stop": [
+        "label",
+        "utc"
+      ]
+    },
+    "visible": {
+      "source": "http://c22-fixture.invalid/child-life/feed.xml",
+      "consent": "On (Standing capture), rev 1",
+      "detection": "healthy",
+      "capture": "settled failed (worker_lost)",
+      "enrollment": "1 / 25",
+      "starts": "1 / 10 used; 9 remaining",
+      "recovery": "eligible for retry; C22 child-lifetime episode; worker_lost; attempt 1/3; start failed; retry scheduled",
+      "activity": "0 running, 0 queued, 0 completed loaded"
+    },
+    "helper_stop_exit": 0,
+    "owned_port_freed": true,
+    "interpreter_and_guard_restored": true,
+    "scope": "Same-account isolated installed dashboard only; original raw pending_review is retained.",
+    "script_sha256": "161bda0fa5cc96a50c7a6ca140bdf96f1d9b2b9fab891b5010f21e81d11cc051"
+  },
+  "p4_raw_counts": {
+    "passed": 15,
+    "failed": 0,
+    "blocked": 1,
+    "unobserved": 5,
+    "pending_review": 2
+  },
+  "p4_route_installed_credit": true,
+  "p4_collection_installed_credit": false,
+  "p4_product_findings": [],
+  "p4_unobserved": [
+    "follow_local_citation",
+    "open_brief",
+    "jump_chapter_fixture",
+    "optional_player_jump",
+    "hostile_actions"
+  ],
+  "p4_pending_review": [
+    "actual_client_ordinary",
+    "actual_client_recall"
+  ],
+  "p4_review": "Two actual clients independently have 20/20 exact comparisons. Native prompts pass separately. Original combined flags and raw pending/unobserved rows remain unchanged.",
+  "client_sessions": 5,
+  "actual_client_tool_calls": 44,
+  "successful_terminal_hooks": 44,
+  "failed_terminal_hooks": 0,
+  "actual_sentinel_calls": 0,
+  "sentinel_discovery_requests": 15,
+  "recall": {
+    "exit_code": 0,
+    "elapsed_ms": 47.6993,
+    "output_empty": true,
+    "positive_injection_credit": false,
+    "replacement_index_created": true
+  },
+  "published_chapter": {
+    "utc": "2026-09-12T19:22:18.735044+00:00",
+    "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+    "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+    "status": "passed_bounded_installed_publication_and_export",
+    "protocol_delay_seconds": 2.10016970000288,
+    "protocol_exact_export": true,
+    "client_delay_after_item_reply_seconds": 1.9874018,
+    "client_exact_export": true,
+    "client_export_calls": 1,
+    "client_wire": "p6-published01\\profile\\records\\stdio-39856\\events.jsonl",
+    "actual_tool_calls": 2,
+    "hook_events": {
+      "PreToolUse": 2,
+      "PostToolUse": 2
+    },
+    "sentinel_requests": 3,
+    "sentinel_calls": 0,
+    "protected_bytes_unchanged": true,
+    "read_payloads_unchanged": true,
+    "stages_exactly_restored": true,
+    "synthetic_hook_preflight_calls": 3,
+    "gui_or_player_credit": false,
+    "release_ready": false
+  },
+  "decoders": "Installed synthetic image/encryption and product-loader WAV checks passed with temporary no-site instrumentation and exact restoration; no model/checkpoint inference.",
+  "release_ready": false,
+  "main_merged": false,
+  "published": false,
+  "open": [
+    "Desktop-client citation/brief/chapter GUI interactions and positive Recall injection remain unobserved. Native Uoink dashboard observation is reviewed separately; the invalid Desktop profile override is blocked.",
+    "Historical AT6 exit disposition",
+    "Retained dependency findings and unsigned package",
+    "Ryan main/public release decision"
+  ],
+  "history": "Prior failed/partial measurements remain unchanged. This aggregate derives timings and action counts from the new package-08 receipts; it does not copy prior outcomes."
+}

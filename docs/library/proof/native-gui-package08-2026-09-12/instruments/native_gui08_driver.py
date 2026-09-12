@@ -1,0 +1,77 @@
+"""Owned, guarded package-08 GUI observation. UI input is exclusively through Sky."""
+import contextlib, datetime as dt, json, os, subprocess, sys, time, traceback
+from pathlib import Path
+from urllib.request import urlopen
+assert sys.flags.isolated and sys.flags.no_site
+repo=Path(__file__).resolve().parents[1]
+root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
+app=root.parent/'app'; profile=root/'p4/profile'; seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'
+mode=sys.argv[1];assert mode == 'dashboard', 'Desktop override is not a verified isolation boundary'
+run=root/mode; run.mkdir(exist_ok=False)
+def save(name,value):
+ with (run/name).open('x',encoding='utf8') as f: json.dump(value,f,indent=2,default=str);f.write('\n')
+record={'utc_start':dt.datetime.now(dt.timezone.utc).isoformat(),'mode':mode,'native_observation':False,'processes':[],'cleanup':[],'limitations':['same account','no OS-wide containment','separate synthetic operator fixture','no model or media fetch'],'status':'starting'}
+guard_record=None;owned=[];safe=True
+try:
+ for key in tuple(os.environ):
+  if key.startswith(('ANTHROPIC_','OPENAI_','GEMINI_','GOOGLE_API_','GROK_','XAI_','CLAUDE_CODE_USE_','UOINK_')):
+   os.environ.pop(key,None)
+ os.environ.pop('PYTHONPATH',None)
+ os.environ.update(IG_FORBIDDEN_LIVE=r'C:\Users\hello\AppData\Local\Uoink\index.db',PYTHONDONTWRITEBYTECODE='1',HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1')
+ for key in ('LOCALAPPDATA','APPDATA','TEMP','TMP'):
+  os.environ[key]=str(root/'environment'/key)
+ sys.path.insert(0,str(repo/'scripts/install_receipt'))
+ import p4_common as common
+ from p4_session import spawn_owned
+ assert json.loads((root/'prepare.json').read_text())['exit_code']==0
+ binding=common.validate_isolation(isolated_profile=profile,isolated_port=18484,receipt_root=root/'p4',installed_app=app,installed_interpreter=app/'python/python.exe',package_manifest=seal/'package-manifest.json',forbid_checkout=repo,runtime_mode='source-runtime',probe_runtime=False,package_path=repo/'build/Uoink-Setup-3.8.0.exe',source_bindings_path=seal/'source-bindings.json')
+ binding['runtime_mode']='installed';env=common.isolation_env(binding)
+ for key in ('LOCALAPPDATA','APPDATA','TEMP','TMP'):
+  env[key]=str(root/'environment'/key)
+ guard=common.write_guard(profile,binding)
+ guard_record=common.install_guard_into_interpreter(app/'python/python.exe',guard,installed_app=app)
+ record['guard_install']=guard_record
+ record['canary']=common.prove_guard_canary(interpreter=app/'python/python.exe',env=env,profile=run,cwd=run)
+ assert record['canary']['refused']
+ binding['runtime_probe']=common.probe_runtime_provenance(app/'python/python.exe',app,env,cwd=run)
+ record['installed_eligibility']=common.evaluate_installed_eligibility(binding)
+ assert record['installed_eligibility']['eligible'],record['installed_eligibility']
+ with contextlib.ExitStack() as stack:
+  def start(argv,label,child_env):
+   global safe
+   out=stack.enter_context((run/(label+'.stdout')).open('xb'));err=stack.enter_context((run/(label+'.stderr')).open('xb'))
+   child=spawn_owned(argv,cwd=profile,env=child_env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,label='native-gui01-'+label)
+   owned.append(child);safe=False;record['processes'].append({'label':label,'pid':child.pid,'argv':argv});return child
+  if mode=='dashboard':
+   seed=start([str(app/'python/python.exe'),'-P','-B','-s',str(repo/'_scratch/native_media08_seed.py')],'seed',env)
+   assert seed.popen.wait(timeout=60)==0, 'Native media fixture preparation failed; preserve attempt'
+   assert seed.terminate_tree(timeout=5)['cleaned']
+   record['synthetic_media_seed']=json.loads((root/'media-seed.json').read_text(encoding='utf8'))
+   helper=start([str(app/'python/python.exe'),'-B','-s',str(app/'server.py'),'--isolated-profile',str(profile),'--isolated-port','18484'],'helper',env)
+   deadline=time.monotonic()+35
+   while time.monotonic()<deadline:
+    if helper.popen.poll() is not None: raise RuntimeError('owned helper exited before health')
+    try:
+     with urlopen('http://127.0.0.1:18484/health',timeout=1) as response:
+      record['health']=json.loads(response.read());break
+    except OSError:time.sleep(.25)
+   else:raise TimeoutError('isolated helper health deadline')
+   gui=start([str(app/'python/pythonw.exe'),'-B','-s',str(app/'uoink_dashboard.py'),'--isolated-profile',str(profile),'--isolated-port','18484'],'window',env)
+  save('ready.json',record)
+  deadline=time.monotonic()+1200
+  while time.monotonic()<deadline and gui.popen.poll() is None and not (run/'observation-complete.json').exists():time.sleep(.5)
+  record['window_exit_before_cleanup']=gui.popen.poll()
+  record['operator_completion_present']=(run/'observation-complete.json').is_file()
+  record['deadline_reached']=time.monotonic()>=deadline
+  record['status']='completed_pending_review' if record['operator_completion_present'] else 'unobserved_or_incomplete'
+except BaseException as exc:
+ record.update(status='failed',error=type(exc).__name__+': '+str(exc),traceback=traceback.format_exc())
+finally:
+ for child in reversed(owned):record['cleanup'].append(child.terminate_tree(timeout=5))
+ safe=all(row.get('cleaned') for row in record['cleanup'])
+ if safe:
+  record['guard_restore']=common.restore_guard(guard_record) if guard_record is not None else {'ok':True,'not_installed':True}
+  if not record['guard_restore'].get('ok'):record['status']='failed_guard_restore'
+ else:record['status']='failed_cleanup_guard_retained'
+ record['utc_end']=dt.datetime.now(dt.timezone.utc).isoformat()
+ save('result.json',record)

@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "source_type": "note",
+  "platform": "note",
+  "author": "You",
+  "title": "SYNTHETIC native note 08",
+  "note": "SYNTHETIC operator note. Verification word: AMBER. Saved through the native Uoink window for package 08.",
+  "extraction_engine": "note",
+  "yoinked_at": "2026-09-12T19:13:46Z",
+  "extracted_at": "2026-09-12T19:13:46Z",
+  "health": {
+    "transcript": "ok",
+    "screenshots": "skipped",
+    "comments": "skipped",
+    "hook": "skipped",
+    "comment_intelligence": "skipped"
+  }
+}

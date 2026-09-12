@@ -1,0 +1,37 @@
+{
+  "scope": "Pre-execution bootstrap-path repair and fresh profile labels only; original failure and sealed scripts unchanged",
+  "original_gui_started": false,
+  "original_seed_exit": 1,
+  "owned_cleanup_affirmed": true,
+  "guard_restored": true,
+  "seed_import_is_installed_path_only": true,
+  "behavior_assertions_changed": false,
+  "product_changed": false,
+  "new_native_observation_claimed": false,
+  "files": [
+    {
+      "before": "prepare_native_gui08.py",
+      "after": "prepare_native_gui08_02.py",
+      "before_sha256": "1756ed8cd7d9fad6ddb080bb6bba66ae25786a3f7e596b24730ed75519e0eb3f",
+      "after_sha256": "3e426a340a2c2b570c7afba8c405b03de9cdb97a5664e9634d441309204a10a5"
+    },
+    {
+      "before": "native_media08_seed.py",
+      "after": "native_media08_seed02.py",
+      "before_sha256": "3be286271490b9ff571b651328e68925e9539ef6700213266fecb97b691b5196",
+      "after_sha256": "954df143e1c7ee65b1dcdd5db7d694db07f67b7de448ff4d33c618e9602e2fbc"
+    },
+    {
+      "before": "native_gui08_driver.py",
+      "after": "native_gui08_driver02.py",
+      "before_sha256": "c5dc4652a935ccdb1cda2e83e35256b7cab48bba2c437fe642b19f2b791ead4e",
+      "after_sha256": "14e4a5ed914641365a4eeda1786c1f22f4a7254d678b8dcd30871d845e70128f"
+    },
+    {
+      "before": "build_native_gui08_launchers.py",
+      "after": "build_native_gui08_launchers02.py",
+      "before_sha256": "f949672abcac1ea830a82c683ccd6561f6efaad56e6ed64878e81aad0cb34f64",
+      "after_sha256": "6f1998f0b57fa1f7553df5a49bc2068b46725736dffefe2c1c84214549a82c80"
+    }
+  ]
+}

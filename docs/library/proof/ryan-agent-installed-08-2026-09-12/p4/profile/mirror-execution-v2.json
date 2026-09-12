@@ -1,0 +1,147 @@
+{
+  "generator_version": "p4-mirror-real-delete-v2",
+  "soft_delete_committed": true,
+  "content_free_tombstone": true,
+  "tombstone_bytes": "---\nschema_version: 1\ncontract_version: \"phase4-v1-2026-09-08\"\nrender_version: \"reach-markdown-v1\"\nkind: \"item\"\nidentity: \"p4fx-timed-01\"\ndeleted: true\ndeleted_at: \"2026-09-12T19:22:23Z\"\nnotice: \"Edits to this file are not imported.\"\n---\n\nThis library item was deleted. Source content is not exported.\n",
+  "tombstone_sha256": "17da5bae6a2200294e142837e2e137b0b524c66f5d23f3e3a3a412525c15cd20",
+  "purge_committed": true,
+  "owned_paths": [
+    {
+      "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md",
+      "absent": true
+    }
+  ],
+  "ledger_before": {
+    "contract_version": "phase4-v1-2026-09-08",
+    "destination": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\p4\\profile\\vault",
+    "entries": {
+      "index:Library.md": {
+        "dependency_hash": "",
+        "desired_generation": 3,
+        "identity": "Library.md",
+        "kind": "index",
+        "last_file_hash": "765393fc3fb3452595e3d88ecce0136ba9e9805f14c76c15cef75c69aa88767f",
+        "pending_action": "none",
+        "relpath": "Library.md",
+        "status": "synced",
+        "written_generation": 3
+      },
+      "item:p4fx-hostile-01": {
+        "dependency_hash": "2a9e5d90d1cf6ad171dd023d106716a7b68812a0e7e352bfdfcf31f839816b0f",
+        "desired_generation": 1,
+        "identity": "p4fx-hostile-01",
+        "kind": "item",
+        "last_file_hash": "86060941c09d6cb1b0eeeb69843e87e2272c3f4cfb7b1dc6fca9dcf282597fb9",
+        "pending_action": "none",
+        "relpath": "Library/b22e2df92643a292fdf8b71ca5a89ee707f525d3135e239d1cbc05978bf69168.md",
+        "status": "synced",
+        "written_generation": 1
+      },
+      "item:p4fx-text-01": {
+        "dependency_hash": "4e66977bebac559d2551564bd28a584c034113e72b8e8f1250f65afac312cd13",
+        "desired_generation": 1,
+        "identity": "p4fx-text-01",
+        "kind": "item",
+        "last_file_hash": "2884217d136f23ab89b9d364ffa439849d4b451330d94ddf215bc06c79c0d8ca",
+        "pending_action": "none",
+        "relpath": "Library/f248ea83bc2e919ba0f12907523c7628b855fb2d87905f5138a752cf159427c0.md",
+        "status": "synced",
+        "written_generation": 1
+      },
+      "item:p4fx-timed-01": {
+        "dependency_hash": "f443f9f274a8c763b3de29665997664331c74e8e99ef6bc71733552133541bdf",
+        "desired_generation": 1,
+        "identity": "p4fx-timed-01",
+        "kind": "item",
+        "last_file_hash": "d412ecda34680d813b3e15539c501d5a78e3e648d71eb2ab7ed5bc1d42437a83",
+        "pending_action": "none",
+        "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md",
+        "status": "synced",
+        "written_generation": 1
+      }
+    },
+    "exports_paused": false,
+    "marker": "p4-synthetic-vault",
+    "pause_reason": null,
+    "purged": {},
+    "schema_version": 1
+  },
+  "ledger_after": {
+    "contract_version": "phase4-v1-2026-09-08",
+    "destination": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\p4\\profile\\vault",
+    "entries": {
+      "index:Library.md": {
+        "dependency_hash": "",
+        "desired_generation": 5,
+        "identity": "Library.md",
+        "kind": "index",
+        "last_file_hash": "765393fc3fb3452595e3d88ecce0136ba9e9805f14c76c15cef75c69aa88767f",
+        "pending_action": "write",
+        "relpath": "Library.md",
+        "status": "user_edit_conflict",
+        "written_generation": 3
+      },
+      "item:p4fx-hostile-01": {
+        "dependency_hash": "2a9e5d90d1cf6ad171dd023d106716a7b68812a0e7e352bfdfcf31f839816b0f",
+        "desired_generation": 1,
+        "identity": "p4fx-hostile-01",
+        "kind": "item",
+        "last_file_hash": "86060941c09d6cb1b0eeeb69843e87e2272c3f4cfb7b1dc6fca9dcf282597fb9",
+        "pending_action": "none",
+        "relpath": "Library/b22e2df92643a292fdf8b71ca5a89ee707f525d3135e239d1cbc05978bf69168.md",
+        "status": "synced",
+        "written_generation": 1
+      },
+      "item:p4fx-text-01": {
+        "dependency_hash": "4e66977bebac559d2551564bd28a584c034113e72b8e8f1250f65afac312cd13",
+        "desired_generation": 1,
+        "identity": "p4fx-text-01",
+        "kind": "item",
+        "last_file_hash": "2884217d136f23ab89b9d364ffa439849d4b451330d94ddf215bc06c79c0d8ca",
+        "pending_action": "none",
+        "relpath": "Library/f248ea83bc2e919ba0f12907523c7628b855fb2d87905f5138a752cf159427c0.md",
+        "status": "synced",
+        "written_generation": 1
+      },
+      "item:p4fx-timed-01": {
+        "dependency_hash": "f443f9f274a8c763b3de29665997664331c74e8e99ef6bc71733552133541bdf",
+        "desired_generation": 3,
+        "identity": "p4fx-timed-01",
+        "kind": "item",
+        "last_file_hash": "",
+        "pending_action": "none",
+        "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md",
+        "status": "purged",
+        "written_generation": 3
+      }
+    },
+    "exports_paused": false,
+    "marker": "p4-synthetic-vault",
+    "pause_reason": null,
+    "purged": {
+      "item:p4fx-timed-01": {
+        "generation": 3,
+        "identity": "p4fx-timed-01",
+        "purged_at": "2026-09-12T19:22:23Z",
+        "relpath": "Library/1b1248e2e3b9953785813dbb81f4be42858788fda43c58ca757063cd3a66ed6d.md"
+      }
+    },
+    "schema_version": 1
+  },
+  "intents_after": {
+    "index:Library.md": {
+      "action": "write",
+      "content_hash": "ad2239dc9db0c80400e0a9ab0060ddf5552027134cabcc25d01b3a216e0c4562",
+      "generation": 5,
+      "identity": "Library.md",
+      "key": "index:Library.md",
+      "kind": "index",
+      "pending_temps": [],
+      "relpath": "Library.md"
+    }
+  },
+  "unaccounted_pending_keys": [],
+  "remaining_temp_paths": [],
+  "user_edit_preserved": true,
+  "unmanaged_preserved": true
+}

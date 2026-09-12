@@ -1,0 +1,18 @@
+{
+  "utc": "2026-09-12T19:20:51.711382+00:00",
+  "reason": "Archive later diagnosed browser/preflight corrections and exact readers. No product scenario, test or result changes. Sealers have not yet executed.",
+  "changes": [
+    {
+      "file": "seal_installed08.py",
+      "before": "f32f53a602d5ec08727418840683c6b742aca92d0108bdb19ae555a785cba00d",
+      "after": "8b2fedd502322b922a9e26b30c036fa09114957319449472fcabf11afdceae89",
+      "diff_sha256": "d350647649e5f48a96d4003f376c2912b63974eb100fbaa5023d8c5cd095c3be"
+    },
+    {
+      "file": "seal_review_bundle08.py",
+      "before": "19f37ccc14fa5687f9a806d629a6545f5bf2fd0a548a2f4248c3477f6fa71cad",
+      "after": "d2a0d9d4d9b8fa0e24e36eccedcd6e6d44e02e214061c50501fb3cd2a8c88d63",
+      "diff_sha256": "886e15e3c338abc30f3a50efcf153abc311984f7bb7211f1c7ff890f1abba538"
+    }
+  ]
+}

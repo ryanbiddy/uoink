@@ -1,0 +1,11 @@
+--- prepare_native_gui08.py
++++ prepare_native_gui08_02.py
+@@ -3,7 +3,7 @@
+ from pathlib import Path
+ assert sys.flags.isolated and sys.flags.no_site
+ repo=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02')
+ root.mkdir(exist_ok=False)
+ app=root.parent/'app'; profile=root/'p4/profile'
+ seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'

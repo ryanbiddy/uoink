@@ -1,0 +1,27 @@
+{
+  "name": "helper-child-life",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\child-life",
+    "--isolated-port",
+    "18081"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+  "started_utc": "2026-09-12T18:51:47Z",
+  "child": {
+    "pid": 41028,
+    "created_ms": 1789239107772,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "observed_ms": 1789239107778,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 41028,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\commands\\20260912T185147Z-helper-child-life.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\commands\\20260912T185147Z-helper-child-life.stderr.log",
+  "synthetic": false
+}

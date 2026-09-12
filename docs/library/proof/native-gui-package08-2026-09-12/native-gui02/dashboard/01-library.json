@@ -1,0 +1,22 @@
+{
+  "utc": "2026-09-12T19:05:50.287Z",
+  "window": {
+    "app": "process:E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe",
+    "id": 397512,
+    "title": "Uoink"
+  },
+  "accessibility": null,
+  "screenshots": [
+    {
+      "file": "01-library-0.jpg",
+      "mimeType": "image/jpeg",
+      "bytes": 109520,
+      "sha256": "3064b7411977633063475d0360ba9ac57a9fbad9665fd2ca4a5cdf766b2a2775",
+      "id": "screenshot-0",
+      "width": 1261,
+      "height": 775
+    }
+  ],
+  "notes": "Native installed dashboard opened with four synthetic items.",
+  "scope": "Actual package-08 native Uoink window; unchanged original image bytes archived as proof"
+}

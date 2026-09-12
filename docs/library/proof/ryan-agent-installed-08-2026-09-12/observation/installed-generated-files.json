@@ -1,0 +1,29 @@
+{
+  "utc": "2026-09-12T18:50:11.605803+00:00",
+  "scope": "Inventory immediately after Setup/reinstall, before the installed helper; generated names are reviewed against actual Inno logs, not treated as signed binaries",
+  "app": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+  "actual_files": 32500,
+  "expected_installed_files": 32497,
+  "missing_expected": [],
+  "extra_files": [
+    {
+      "path": "isolated-install.json",
+      "bytes": 261,
+      "sha256": "b6f206e7e90d62f929c0bf7ac7670649057d6be6911a79f5a31682b8fceeb9a5",
+      "recognized_generated_name": true
+    },
+    {
+      "path": "unins000.dat",
+      "bytes": 20151166,
+      "sha256": "a95f2dbdb79caa8316670da00d305049ea7c033bcad8682e504dba0593d44f1a",
+      "recognized_generated_name": true
+    },
+    {
+      "path": "unins000.exe",
+      "bytes": 4382500,
+      "sha256": "f93db03c7a52c5ad336c086be7f2573f6578e9fb21262b039aa0d2337a30fbe0",
+      "recognized_generated_name": true
+    }
+  ],
+  "unrecognized_extra_files": []
+}

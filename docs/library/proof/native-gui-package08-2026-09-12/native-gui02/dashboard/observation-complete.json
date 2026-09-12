@@ -1,0 +1,30 @@
+{
+  "utc": "2026-09-12T19:15:50.718633+00:00",
+  "observer": "Astra through Sky native window",
+  "actual_gui_observation": true,
+  "window_id": 397512,
+  "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+  "passed_observations": [
+    "Library and search",
+    "Stored video cue at 0:34",
+    "Unknown cue displays time not stored",
+    "No speaker attribution",
+    "Saved transcript and details ready",
+    "Sources has no standing subscriptions or capture",
+    "New note saved through GUI",
+    "New note found and exact AMBER body reopened",
+    "Note file ready without false video asset warnings",
+    "Evidence empty state",
+    "Activity zero running and zero queued, one completed synthetic note"
+  ],
+  "new_product_failures": [],
+  "limitations": [
+    "Synthetic local data only; no external media playback or fetch",
+    "No claim scan, generation, model load, capture, or diarization",
+    "No Claude Desktop observation; prior Desktop isolation claim withdrawn",
+    "Extension onboarding appeared but was not exercised",
+    "Cleanup will terminate owned jobs; no natural window-close claim"
+  ],
+  "original_images": 11,
+  "image_format": "JPEG as returned by Sky"
+}

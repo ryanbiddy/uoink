@@ -1,0 +1,567 @@
+{
+  "utc_start": "2026-09-12T19:03:47.092342+00:00",
+  "mode": "dashboard",
+  "native_observation": false,
+  "processes": [
+    {
+      "label": "seed",
+      "pid": 40512,
+      "argv": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+        "-P",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\native_media08_seed02.py"
+      ]
+    },
+    {
+      "label": "helper",
+      "pid": 40100,
+      "argv": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\native-gui02\\p4\\profile",
+        "--isolated-port",
+        "18484"
+      ]
+    },
+    {
+      "label": "window",
+      "pid": 41216,
+      "argv": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe",
+        "-B",
+        "-s",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_dashboard.py",
+        "--isolated-profile",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\native-gui02\\p4\\profile",
+        "--isolated-port",
+        "18484"
+      ]
+    }
+  ],
+  "cleanup": [
+    {
+      "pid": 41216,
+      "label": "native-gui02-window",
+      "job_assigned": true,
+      "already_exited": false,
+      "exit_code": 1,
+      "assignment_error": null,
+      "descendants_before": {
+        "job_assigned": true,
+        "job_pids": [
+          41216,
+          36704,
+          41168,
+          32760,
+          34324,
+          13576,
+          41288
+        ],
+        "owned_pids": [
+          13576,
+          32760,
+          34324,
+          36704,
+          41168,
+          41216,
+          41288
+        ],
+        "parent_pid": 41216,
+        "parent_exit": null,
+        "job_query_ok": true,
+        "job_empty_affirmed": false,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_after": {
+        "job_assigned": true,
+        "job_pids": [],
+        "owned_pids": [
+          13576,
+          32760,
+          34324,
+          36704,
+          41168,
+          41216,
+          41288
+        ],
+        "parent_pid": 41216,
+        "parent_exit": 1,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_remaining": [],
+      "descendants_exited": true,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "identity_uncertain": false,
+      "job_query_error": null,
+      "parent_exited": true,
+      "cleaned": true
+    },
+    {
+      "pid": 40100,
+      "label": "native-gui02-helper",
+      "job_assigned": true,
+      "already_exited": false,
+      "exit_code": 1,
+      "assignment_error": null,
+      "descendants_before": {
+        "job_assigned": true,
+        "job_pids": [
+          40100,
+          11820,
+          21648,
+          3972,
+          40144,
+          13372,
+          8340,
+          41280,
+          40320
+        ],
+        "owned_pids": [
+          3972,
+          8340,
+          11820,
+          13372,
+          21648,
+          40100,
+          40144,
+          40320,
+          41280
+        ],
+        "parent_pid": 40100,
+        "parent_exit": null,
+        "job_query_ok": true,
+        "job_empty_affirmed": false,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_after": {
+        "job_assigned": true,
+        "job_pids": [],
+        "owned_pids": [
+          3972,
+          8340,
+          11820,
+          13372,
+          21648,
+          40100,
+          40144,
+          40320,
+          41280
+        ],
+        "parent_pid": 40100,
+        "parent_exit": 1,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_remaining": [],
+      "descendants_exited": true,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "identity_uncertain": false,
+      "job_query_error": null,
+      "parent_exited": true,
+      "cleaned": true
+    },
+    {
+      "pid": 40512,
+      "label": "native-gui02-seed",
+      "job_assigned": true,
+      "already_exited": true,
+      "exit_code": 0,
+      "assignment_error": null,
+      "descendants_before": {
+        "job_assigned": true,
+        "job_pids": [],
+        "owned_pids": [
+          40512
+        ],
+        "parent_pid": 40512,
+        "parent_exit": 0,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_after": {
+        "job_assigned": true,
+        "job_pids": [],
+        "owned_pids": [
+          40512
+        ],
+        "parent_pid": 40512,
+        "parent_exit": 0,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_remaining": [],
+      "descendants_exited": true,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "identity_uncertain": false,
+      "job_query_error": null,
+      "parent_exited": true,
+      "cleaned": true
+    }
+  ],
+  "limitations": [
+    "same account",
+    "no OS-wide containment",
+    "separate synthetic operator fixture",
+    "no model or media fetch"
+  ],
+  "status": "completed_pending_review",
+  "guard_install": {
+    "interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "bundled": true,
+    "mutations": [
+      {
+        "action": "created",
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "sha256": "fea3f098ec136638d037dc3cbf47034ea1a614c2b5d6a66601270c101c4445a9",
+        "bytes": 2273,
+        "payload_b64": "IyBQNCByZWNlaXB0IGd1YXJkLiBSZWZ1c2UgbGl2ZSBpbmRleCwgcG9ydCA1MTc5LCBtb2RlbC9jbGllbnQvZmV0Y2guCmltcG9ydCBvcywgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApmcm9tIHVybGxpYi5wYXJzZSBpbXBvcnQgdXJsc3BsaXQsIHVucXVvdGUKCmRlZiBkYXRhYmFzZV9wYXRoKHZhbHVlKToKICAgIGlmIHZhbHVlLnN0YXJ0c3dpdGgoJ2ZpbGU6Jyk6CiAgICAgICAgdXJpID0gdXJsc3BsaXQodmFsdWUpCiAgICAgICAgaWYgdXJpLm5ldGxvYy5sb3dlcigpIG5vdCBpbiAoJycsICdsb2NhbGhvc3QnKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCByZW1vdGUgZGF0YWJhc2UgYXV0aG9yaXR5IGZvcmJpZGRlbicpCiAgICAgICAgdmFsdWUgPSB1bnF1b3RlKHVyaS5wYXRoKQogICAgICAgIGlmIG9zLm5hbWUgPT0gJ250JyBhbmQgbGVuKHZhbHVlKSA+IDIgYW5kIHZhbHVlWzBdID09ICcvJyBhbmQgdmFsdWVbMl0gPT0gJzonOgogICAgICAgICAgICB2YWx1ZSA9IHZhbHVlWzE6XQogICAgcmV0dXJuIFBhdGgodmFsdWUpLnJlc29sdmUoKQoKZGVmIGF1ZGl0KGV2ZW50LCBhcmdzKToKICAgIGZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdQNF9GT1JCSURERU5fSU5ERVgnLCAnJykKICAgIGFic29sdXRlX2ZvcmJpZGRlbiA9IG9zLmVudmlyb24uZ2V0KCdJR19GT1JCSURERU5fTElWRScsICcnKQogICAgcm9vdCA9IG9zLmVudmlyb24uZ2V0KCdQNF9JU09MQVRFRF9QUk9GSUxFJykgb3Igb3MuZW52aXJvbi5nZXQoJ1A0X0ZJWFRVUkVfUk9PVCcpCiAgICBpZiBldmVudCBpbiAoJ29wZW4nLCAnc3FsaXRlMy5jb25uZWN0JykgYW5kIGlzaW5zdGFuY2UoYXJnc1swXSwgKHN0ciwgYnl0ZXMsIG9zLlBhdGhMaWtlKSk6CiAgICAgICAgdmFsdWUgPSBvcy5mc2RlY29kZShhcmdzWzBdKS5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKQogICAgICAgIGlmIGZvcmJpZGRlbiBhbmQgZm9yYmlkZGVuLnJlcGxhY2UoJ1xcJywgJy8nKS5sb3dlcigpIGluIHZhbHVlOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgICAgICBpZiBhYnNvbHV0ZV9mb3JiaWRkZW4gYW5kIGFic29sdXRlX2ZvcmJpZGRlbi5yZXBsYWNlKCdcXCcsICcvJykubG93ZXIoKSBpbiB2YWx1ZToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBpbnRlZ3JhdG9yIGxpdmUgaW5kZXggZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzcWxpdGUzLmNvbm5lY3QnIGFuZCBpc2luc3RhbmNlKGFyZ3NbMF0sIHN0cikgYW5kIGFyZ3NbMF0gIT0gJzptZW1vcnk6JyBhbmQgcm9vdDoKICAgICAgICBpZiBub3QgZGF0YWJhc2VfcGF0aChhcmdzWzBdKS5pc19yZWxhdGl2ZV90byhQYXRoKHJvb3QpLnJlc29sdmUoKSk6CiAgICAgICAgICAgIHJhaXNlIFBlcm1pc3Npb25FcnJvcignUDQgZGF0YWJhc2Ugb3V0c2lkZSBpc29sYXRlZCBwcm9maWxlJykKICAgIGlmIGV2ZW50IGluICgnc29ja2V0LmNvbm5lY3QnLCAnc29ja2V0LmJpbmQnLCAnc29ja2V0LnNlbmR0bycsICdzb2NrZXQuZ2V0YWRkcmluZm8nKToKICAgICAgICBhZGRyZXNzID0gYXJnc1s6Ml0gaWYgZXZlbnQgPT0gJ3NvY2tldC5nZXRhZGRyaW5mbycgZWxzZSBhcmdzWzFdCiAgICAgICAgaWYgaXNpbnN0YW5jZShhZGRyZXNzLCB0dXBsZSkgYW5kICgKICAgICAgICAgICAgc3RyKGFkZHJlc3NbMV0pID09ICc1MTc5JyBvciBhZGRyZXNzWzBdIG5vdCBpbiAoJzEyNy4wLjAuMScsICc6OjEnLCAnbG9jYWxob3N0JywgJycpCiAgICAgICAgKToKICAgICAgICAgICAgcmFpc2UgUGVybWlzc2lvbkVycm9yKCdQNCBleHRlcm5hbCBuZXR3b3JrIG9yIHJlc2lkZW50IHBvcnQgZm9yYmlkZGVuJykKICAgIGlmIGV2ZW50ID09ICdzdWJwcm9jZXNzLlBvcGVuJzoKICAgICAgICBjb21tYW5kID0gYXJnc1sxXQogICAgICAgIGZpcnN0ID0gY29tbWFuZFswXSBpZiBpc2luc3RhbmNlKGNvbW1hbmQsICh0dXBsZSwgbGlzdCkpIGVsc2Ugc3RyKGNvbW1hbmQpLnNwbGl0KClbMF0KICAgICAgICBuYW1lID0gUGF0aChzdHIoZmlyc3QpKS5zdGVtLmxvd2VyKCkKICAgICAgICBpZiBuYW1lIGluICgnY2xhdWRlJywgJ2NvZGV4JywgJ2dyb2snLCAnZ2VtaW5pJywgJ3l0LWRscCcsICdmZm1wZWcnLCAnY3VybCcpOgogICAgICAgICAgICByYWlzZSBQZXJtaXNzaW9uRXJyb3IoJ1A0IGV4ZWN1dGlvbi9mZXRjaCBzZW50aW5lbCcpCgpzeXMuYWRkYXVkaXRob29rKGF1ZGl0KQo="
+      }
+    ],
+    "already_present": false,
+    "mechanism": "bundled_site_packages",
+    "pth_active_import_site": true,
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+    "pth_commented_import_site_ignored": false,
+    "pth_already_imports_site": true,
+    "restorable": true
+  },
+  "canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\native-gui02\\dashboard\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "installed_eligibility": {
+    "eligible": true,
+    "reasons": [],
+    "bundled_interpreter": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "entry_sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+    "server_sha256": "c6a0702e44f142026372328ca4ec927271d0bef3bb0d3863952398d82bf8f655",
+    "interpreter_sha256": "85b71d8c6ec1905935f74be0c9869aae198d00e98f39df699ec66f9c5a84cecd",
+    "sealed_file_comparison": {
+      "ok": true,
+      "compared": 14,
+      "missing_files": [],
+      "mismatched_files": [],
+      "missing_or_unverified_bindings": [],
+      "comparisons": [
+        {
+          "staged_path": "index.py",
+          "status": "equal",
+          "installed_sha256": "da1db9cfffd9110a44fcb3c6fe39cfe9dc06f42775f52f922917eeebc70a3402",
+          "declared_sha256": "da1db9cfffd9110a44fcb3c6fe39cfe9dc06f42775f52f922917eeebc70a3402",
+          "source_git_blob": "3227fadefb2dd45b7007cbc7d6769d63334bdc66"
+        },
+        {
+          "staged_path": "uoink_mcp.py",
+          "status": "equal",
+          "installed_sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+          "declared_sha256": "2939906aa1b2b81109440a2146467c204f8ed0b1c227c82d2c0d0127787e3e7a",
+          "source_git_blob": "ba93c8adb853fa607b33de874e9e00fe26f819fd"
+        },
+        {
+          "staged_path": "uoink_mcp_tools.py",
+          "status": "equal",
+          "installed_sha256": "9d1a01b7061c0e3beaa39fed43343b6d28ef568f962410f64db0295743434775",
+          "declared_sha256": "9d1a01b7061c0e3beaa39fed43343b6d28ef568f962410f64db0295743434775",
+          "source_git_blob": "98a7b0b9ca1771284260e1822959d5bfe0ec1b51"
+        },
+        {
+          "staged_path": "library_cards.py",
+          "status": "equal",
+          "installed_sha256": "2befe80f5d7dbb23922f0f0f7cbd1886ef718447954387824405fd56907823c2",
+          "declared_sha256": "2befe80f5d7dbb23922f0f0f7cbd1886ef718447954387824405fd56907823c2",
+          "source_git_blob": "9c9ef0d2bbef9bdec9f90688b65fd09d6d73e193"
+        },
+        {
+          "staged_path": "library_work.py",
+          "status": "equal",
+          "installed_sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa",
+          "declared_sha256": "d0618fbbb6fa7834bc41a08c254bb796601cd23df5eb85829de34d496f75d2aa",
+          "source_git_blob": "79884788266d0946b616f4f32a324a704d2aafde"
+        },
+        {
+          "staged_path": "library_resources.py",
+          "status": "equal",
+          "installed_sha256": "d5ae6e8e292f24c742ad0e603db15a8d5c40596f961dceab4d0b12878e8b5333",
+          "declared_sha256": "d5ae6e8e292f24c742ad0e603db15a8d5c40596f961dceab4d0b12878e8b5333",
+          "source_git_blob": "ec51a5887430a8dbc71dad6c95cd5ebbb2b2ee1f"
+        },
+        {
+          "staged_path": "library_prompts.py",
+          "status": "equal",
+          "installed_sha256": "e31c832af7c047a67831c1398adaf377cc3a927ac4b2d65156fb39662820d559",
+          "declared_sha256": "e31c832af7c047a67831c1398adaf377cc3a927ac4b2d65156fb39662820d559",
+          "source_git_blob": "54596f6736adf330e0c3070385b8669a6d5c87aa"
+        },
+        {
+          "staged_path": "library_briefs.py",
+          "status": "equal",
+          "installed_sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556",
+          "declared_sha256": "96891dbb9eb113fdd484da415d687bb437c612a47eff3081947e664351dcb556",
+          "source_git_blob": "2581f6538f82d5d0e52fc36b2abe733e4f95ed31"
+        },
+        {
+          "staged_path": "library_mirror.py",
+          "status": "equal",
+          "installed_sha256": "b5205249721a64e6300f4e0bb950c2b1da8de77d0acd00a461c9615a8bc86c17",
+          "declared_sha256": "b5205249721a64e6300f4e0bb950c2b1da8de77d0acd00a461c9615a8bc86c17",
+          "source_git_blob": "3ebeb54b94655862a3444c9146e7c9e951574130"
+        },
+        {
+          "staged_path": "library_mirror_vault_io.py",
+          "status": "equal",
+          "installed_sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7",
+          "declared_sha256": "fba259c83b953edef1020e751e2eda7e42baf82bed321960e6d599e385a979b7",
+          "source_git_blob": "c9b024f746ea02c2808254cffa857ae04fde7d6a"
+        },
+        {
+          "staged_path": "library_media.py",
+          "status": "equal",
+          "installed_sha256": "b4931e457553c8e4740a64459cab2bf92385e65945658b182bd5715119ed0697",
+          "declared_sha256": "b4931e457553c8e4740a64459cab2bf92385e65945658b182bd5715119ed0697",
+          "source_git_blob": "7b987c390e78058ef2c76c2f655343d6eccb3497"
+        },
+        {
+          "staged_path": "library_faithfulness.py",
+          "status": "equal",
+          "installed_sha256": "6e5f03dd73343197d9c81ebdef621d36563943052196580b319dcb9219c77760",
+          "declared_sha256": "6e5f03dd73343197d9c81ebdef621d36563943052196580b319dcb9219c77760",
+          "source_git_blob": "a4531d4af261160428b8a5f56c5a4827b6c011bd"
+        },
+        {
+          "staged_path": "server.py",
+          "status": "equal",
+          "installed_sha256": "c6a0702e44f142026372328ca4ec927271d0bef3bb0d3863952398d82bf8f655",
+          "declared_sha256": "c6a0702e44f142026372328ca4ec927271d0bef3bb0d3863952398d82bf8f655",
+          "source_git_blob": "6a7710fbfb60c4c6c828a8ed53638e8d2249ccb7"
+        },
+        {
+          "staged_path": "scripts/recall_hook.py",
+          "status": "equal",
+          "installed_sha256": "d8b302bc94df6405dbca2f3294829f1245d0c0772ca682970612f9453921a6bf",
+          "declared_sha256": "d8b302bc94df6405dbca2f3294829f1245d0c0772ca682970612f9453921a6bf",
+          "source_git_blob": "ccff32ae2a27cd1963890f2a48bbaafcf0d558c0"
+        }
+      ]
+    },
+    "runtime_probe": {
+      "sys_executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+      "sys_path": [
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python313.zip",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\win32",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\win32\\lib",
+        "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\pythonwin"
+      ],
+      "prefix": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python",
+      "exec_prefix": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python",
+      "version": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+      "version_info": [
+        3,
+        13,
+        15,
+        "final",
+        0
+      ],
+      "flags": {
+        "no_user_site": true,
+        "isolated": true,
+        "safe_path": true
+      },
+      "modules": {
+        "uoink_mcp": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_mcp.py"
+        },
+        "server": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py"
+        },
+        "index": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\index.py"
+        },
+        "library_cards": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\library_cards.py"
+        },
+        "library_work": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\library_work.py"
+        },
+        "library_prompts": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\library_prompts.py"
+        },
+        "mcp": {
+          "ok": true,
+          "file": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\mcp\\__init__.py"
+        }
+      },
+      "dependency_versions": {
+        "server": "3.8.0"
+      },
+      "ok": true,
+      "cleanup": {
+        "pid": 32696,
+        "label": "p4-runtime-probe",
+        "job_assigned": true,
+        "already_exited": true,
+        "exit_code": 0,
+        "assignment_error": null,
+        "descendants_before": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            32696
+          ],
+          "parent_pid": 32696,
+          "parent_exit": 0,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_after": {
+          "job_assigned": true,
+          "job_pids": [],
+          "owned_pids": [
+            32696
+          ],
+          "parent_pid": 32696,
+          "parent_exit": 0,
+          "job_query_ok": true,
+          "job_empty_affirmed": true,
+          "job_query_error": null,
+          "identity_uncertain": false
+        },
+        "descendants_remaining": [],
+        "descendants_exited": true,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "identity_uncertain": false,
+        "job_query_error": null,
+        "parent_exited": true,
+        "cleaned": true
+      },
+      "exit_code": 0,
+      "interpreter_argv": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe"
+    },
+    "inferred_from_not_instrument_only": false,
+    "inferred_from_hex64_string": false
+  },
+  "synthetic_media_seed": {
+    "utc": "2026-09-12T19:03:49.445976+00:00",
+    "synthetic_operator_fixture": true,
+    "video_id": "synthetic-native-media-08",
+    "cue": "SYNTHETIC stored cue at thirty-four seconds. Verification word: AMBER.",
+    "untimed_line": "SYNTHETIC line with no recorded timestamp.",
+    "stored_time": [
+      34,
+      46
+    ],
+    "duration_seconds": 90,
+    "model_or_fetch_performed": false,
+    "original_acceptance_fixture_modified": false,
+    "installed_index_module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\index.py",
+    "files": {
+      "output/videos/synthetic-native-media-08/synthetic-native-media-08.md": "0f193f41090de9faee448706c242bf7d1ddf9ca10e1c849c097401f5621ae4e7",
+      "output/videos/synthetic-native-media-08/synthetic-native-media-08.json": "9140150169ec32acd94b31c0f668d1e17655aa73d7aa3df5dd796d7d1d63c687"
+    }
+  },
+  "health": {
+    "ok": true,
+    "version": "3.8.0",
+    "migration_version": 30,
+    "migration_pending": false,
+    "last_successful_tick_at": "2026-09-12T19:03:50Z",
+    "heartbeat": {
+      "last_tick_completed_at": "2026-09-12T19:03:50Z",
+      "last_successful_tick_at": "2026-09-12T19:03:50Z",
+      "last_successful_poll_at": null,
+      "last_failed_poll_at": null,
+      "last_poll_error": null,
+      "last_ingest_completed_at": null,
+      "last_tick": {
+        "ok": true,
+        "polls": 0,
+        "failed_polls": 0
+      },
+      "counts": {
+        "ticks": 1,
+        "polls_ok": 0,
+        "polls_failed": 0,
+        "ingests": 0
+      },
+      "tick_interval_sec": 30,
+      "freshness": {
+        "state": "fresh",
+        "age_sec": 0.0,
+        "stale_after_sec": 300
+      }
+    },
+    "whisperx_available": true,
+    "whisper_model": "base",
+    "whisperx_model_loaded": false,
+    "index_recovering": false,
+    "output_root_fallback": false,
+    "path_integrity": {
+      "ok": true,
+      "checked": 4,
+      "missing": 0
+    },
+    "library": {
+      "status": "idle",
+      "waiting_for_client": false,
+      "ready": 0,
+      "leased": 0,
+      "run_revision": null,
+      "recovery_state": "ready",
+      "error_code": null,
+      "apply_enabled": false,
+      "contract_version": "phase2-v1-2026-09-04"
+    }
+  },
+  "window_exit_before_cleanup": null,
+  "operator_completion_present": true,
+  "deadline_reached": false,
+  "guard_restore": {
+    "restored": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "action": "removed",
+        "exact_receipt_bytes": true
+      }
+    ],
+    "ok": true,
+    "failures": []
+  },
+  "utc_end": "2026-09-12T19:15:50.889665+00:00"
+}

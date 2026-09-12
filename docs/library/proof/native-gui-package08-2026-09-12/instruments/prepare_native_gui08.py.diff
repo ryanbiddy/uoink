@@ -1,0 +1,15 @@
+--- prepare_native_gui07.py
++++ prepare_native_gui08.py
+@@ -3,10 +3,10 @@
+ from pathlib import Path
+ assert sys.flags.isolated and sys.flags.no_site
+ repo=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07\native-gui01')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
+ root.mkdir(exist_ok=False)
+ app=root.parent/'app'; profile=root/'p4/profile'
+-seal=repo/'docs/library/proof/candidate-package-07-2026-09-12'
++seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'
+ for key in tuple(os.environ):
+  if key.startswith(('ANTHROPIC_','OPENAI_','GEMINI_','GOOGLE_API_','GROK_','XAI_','CLAUDE_CODE_USE_')):
+   os.environ.pop(key,None)

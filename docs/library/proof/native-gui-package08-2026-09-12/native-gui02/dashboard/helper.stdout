@@ -1,0 +1,91 @@
+2026-09-12 12:03:50,380 INFO install migration: skipped_isolated_install
+2026-09-12 12:03:50,659 INFO seeded 5 default style anchors
+2026-09-12 12:03:50,659 INFO default style anchors: seeded 5 on first run
+2026-09-12 12:03:50,659 INFO Restored 0 job record(s) from the library index
+2026-09-12 12:03:50,691 INFO backfill complete: scanned 1 folder(s), indexed 0 new
+2026-09-12 12:03:50,701 INFO phase 2 author backfill: {'total': 4, 'scanned': 2, 'author_from_sidecar': 0, 'channel_corrected': 0, 'stayed_hostname': 0, 'already_ok': 2, 'missing_sidecar': 0}
+2026-09-12 12:03:50,744 INFO tray: started (daemon thread)
+2026-09-12 12:03:50,770 INFO splash: spawned (version 3.8.0)
+2026-09-12 12:03:50,770 INFO Uoink server v3.8.0 running on http://127.0.0.1:18484
+2026-09-12 12:03:50,771 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-12 12:03:50,771 INFO Output: E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02\p4\profile\output
+2026-09-12 12:03:50,771 INFO Log file: E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui02\p4\profile\server.log
+2026-09-12 12:03:50,771 INFO toast: skipped regular ready toast while first-run splash is visible
+2026-09-12 12:03:50,771 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:03:51,695 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:03:52,137 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:03:52,171 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-12 12:03:52,338 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:03:52,518 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-12 12:04:02,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:04:12,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:04:22,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:04:32,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:04:42,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:04:52,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:02,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:12,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:22,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:32,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:42,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:05:52,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:02,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:12,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:22,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:32,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:42,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:06:52,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:02,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:12,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:22,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:32,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:42,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:07:52,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:02,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:12,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:22,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:32,727 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:42,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:08:52,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:02,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:12,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:22,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:32,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:42,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:09:52,724 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:02,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:12,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:22,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:32,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:42,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:10:52,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:02,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:12,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:22,726 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:32,730 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:42,729 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:11:52,726 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:02,722 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:12,726 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:22,723 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:32,725 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:42,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:12:52,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:02,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:12,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:22,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:32,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:42,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:13:46,742 INFO POST /notes -> ok (note_e701eb54ab1)
+2026-09-12 12:13:52,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:02,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:12,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:22,720 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:32,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:42,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:14:52,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:15:02,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:15:12,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:15:22,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:15:32,721 INFO GET /health from 127.0.0.1 -> ok
+2026-09-12 12:15:42,721 INFO GET /health from 127.0.0.1 -> ok

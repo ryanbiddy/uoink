@@ -1,0 +1,18 @@
+{
+  "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "changes": [
+    {
+      "file": "run_installed_client08.py",
+      "sha256": "98db9942003b1c9da05a0eb2e99d0e6aa55213221966939ccba3585807bd52a6",
+      "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+      "executed": false
+    },
+    {
+      "file": "observe_published_chapter08.py",
+      "sha256": "e1185fd8b42c438b6f761dc0f753e6b02a5a5dcb8283197519a7155d18202387",
+      "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+      "executed": false
+    }
+  ],
+  "tree_sealer": "Same complete-union checks; compare preceding 2559 cases with 23 specific additions."
+}

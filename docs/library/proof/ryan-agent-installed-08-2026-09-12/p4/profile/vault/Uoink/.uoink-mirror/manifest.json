@@ -1,0 +1,31 @@
+{
+  "contract_version": "phase4-v1-2026-09-08",
+  "ownership": {
+    "Library.md": {
+      "file_hash": "765393fc3fb3452595e3d88ecce0136ba9e9805f14c76c15cef75c69aa88767f",
+      "generation": 3,
+      "identity": "Library.md",
+      "key": "index:Library.md",
+      "kind": "index",
+      "tombstone": false
+    },
+    "Library/b22e2df92643a292fdf8b71ca5a89ee707f525d3135e239d1cbc05978bf69168.md": {
+      "file_hash": "86060941c09d6cb1b0eeeb69843e87e2272c3f4cfb7b1dc6fca9dcf282597fb9",
+      "generation": 1,
+      "identity": "p4fx-hostile-01",
+      "key": "item:p4fx-hostile-01",
+      "kind": "item",
+      "tombstone": false
+    },
+    "Library/f248ea83bc2e919ba0f12907523c7628b855fb2d87905f5138a752cf159427c0.md": {
+      "file_hash": "2884217d136f23ab89b9d364ffa439849d4b451330d94ddf215bc06c79c0d8ca",
+      "generation": 1,
+      "identity": "p4fx-text-01",
+      "key": "item:p4fx-text-01",
+      "kind": "item",
+      "tombstone": false
+    }
+  },
+  "render_version": "reach-markdown-v1",
+  "schema_version": 1
+}

@@ -1,0 +1,305 @@
+{
+  "scope": "Actual Uoink native window only; synthetic profile; failed attempt retained; no Desktop acceptance or natural shutdown credit. Original JPEG bytes unchanged.",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "instruments/NATIVE08-SEED-REPAIR-BRIEF.md": {
+      "bytes": 1543,
+      "sha256": "6c2d7446f27b4e1f09643f5ce8c59e552ef12a1e7955e1ac8796f61fe98e6c49"
+    },
+    "instruments/build_native_gui08_launchers.py": {
+      "bytes": 1666,
+      "sha256": "f949672abcac1ea830a82c683ccd6561f6efaad56e6ed64878e81aad0cb34f64"
+    },
+    "instruments/build_native_gui08_launchers.py.diff": {
+      "bytes": 786,
+      "sha256": "7693c3c946c3cb50708c3e04fc116971c21944d284d2bd83223cef486349e7d3"
+    },
+    "instruments/build_native_gui08_launchers02.py": {
+      "bytes": 1668,
+      "sha256": "6f1998f0b57fa1f7553df5a49bc2068b46725736dffefe2c1c84214549a82c80"
+    },
+    "instruments/build_native_gui08_launchers02.py.diff": {
+      "bytes": 781,
+      "sha256": "168a053104ea2cc4f700bcd9ad4faafc47c0cfd746365d58c1322582b6459051"
+    },
+    "instruments/native08-screenshot-archiver01.js": {
+      "bytes": 1309,
+      "sha256": "3cb7752ef0bcd3fd43ad15df00edc91ea6aa99e744c1bfe576a1b7e0b961994b"
+    },
+    "instruments/native08-screenshot-archiver02.js": {
+      "bytes": 1402,
+      "sha256": "e00ee7c17c95131ddd150dcc5390a219abc87ddac3e8bfa67c4db498318caf44"
+    },
+    "instruments/native08-screenshot-format-repair.json": {
+      "bytes": 292,
+      "sha256": "f004b21287de5ee5dd1a485d2593bd6ef4aa8aa0a41c6e767d22a658f8968c7e"
+    },
+    "instruments/native08-seed-preexecution-review.json": {
+      "bytes": 1592,
+      "sha256": "ab5907fb8cd23f559e5c156c14331deb4742ba34d78e7f7990e57eaa10612da2"
+    },
+    "instruments/native_gui08_driver.py": {
+      "bytes": 5608,
+      "sha256": "c5dc4652a935ccdb1cda2e83e35256b7cab48bba2c437fe642b19f2b791ead4e"
+    },
+    "instruments/native_gui08_driver.py.diff": {
+      "bytes": 1004,
+      "sha256": "1c7bdc64108b097b939ba6e44821cfa22989257d4ad193d0dc49cb2b03c311f2"
+    },
+    "instruments/native_gui08_driver02.py": {
+      "bytes": 5610,
+      "sha256": "14e4a5ed914641365a4eeda1786c1f22f4a7254d678b8dcd30871d845e70128f"
+    },
+    "instruments/native_gui08_driver02.py.diff": {
+      "bytes": 1723,
+      "sha256": "411695f04ad359311275d163c73f95306634096eca2e76ead6a934a3efec75b7"
+    },
+    "instruments/native_media08_seed.py": {
+      "bytes": 2799,
+      "sha256": "3be286271490b9ff571b651328e68925e9539ef6700213266fecb97b691b5196"
+    },
+    "instruments/native_media08_seed02.py": {
+      "bytes": 2881,
+      "sha256": "954df143e1c7ee65b1dcdd5db7d694db07f67b7de448ff4d33c618e9602e2fbc"
+    },
+    "instruments/native_media08_seed02.py.diff": {
+      "bytes": 1091,
+      "sha256": "0b33027f36b67270b9d9498f15eabca7121c7148ba46b2c370c512c82b99bc53"
+    },
+    "instruments/prepare_native_gui08.py": {
+      "bytes": 2088,
+      "sha256": "1756ed8cd7d9fad6ddb080bb6bba66ae25786a3f7e596b24730ed75519e0eb3f"
+    },
+    "instruments/prepare_native_gui08.py.diff": {
+      "bytes": 737,
+      "sha256": "a549a246add8c3210cb6e12c2682061e5c944611639d2d5226c4c08cb7afcd62"
+    },
+    "instruments/prepare_native_gui08_02.py": {
+      "bytes": 2088,
+      "sha256": "3e426a340a2c2b570c7afba8c405b03de9cdb97a5664e9634d441309204a10a5"
+    },
+    "instruments/prepare_native_gui08_02.py.diff": {
+      "bytes": 510,
+      "sha256": "40d14bf0b343e0066f14ad850e0dc1e49502308982161f68898fc74e2ff8a9b5"
+    },
+    "instruments/repair_native08_seed.py": {
+      "bytes": 2453,
+      "sha256": "366518109750f717b3bdbbfdf751eb921c9c0552234ea7d803c3d939fef9b27a"
+    },
+    "instruments/seal_native08_observation.py": {
+      "bytes": 6216,
+      "sha256": "f2c06b551b9ce68f9e9427b21e2f45ebc4ecc938e78abb4092714abedf6753fd"
+    },
+    "native-gui01/Launch-dashboard.cs": {
+      "bytes": 438,
+      "sha256": "143ab9ee81f91afac8842c47fec5141935423732895ba54bed489ebb6aaf8dd6"
+    },
+    "native-gui01/compile-dashboard.json": {
+      "bytes": 315,
+      "sha256": "3426430e6e436448f09641faa027f84f81f6a8f6a1c01e840dbea54d6e33f496"
+    },
+    "native-gui01/dashboard/result.json": {
+      "bytes": 17134,
+      "sha256": "c9ee29697217104145980fe042104ac0198645aa7126f8578a195b8c2671025a"
+    },
+    "native-gui01/dashboard/seed.stderr": {
+      "bytes": 222,
+      "sha256": "8fc993f89c6fcab6a3a2e1aec2e82d5438b502c1965c1c69fe262c5f7a5f98ec"
+    },
+    "native-gui01/dashboard/seed.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui01/operator-prepare.json": {
+      "bytes": 7468,
+      "sha256": "daefa649da17029c9799f4072f55ee966e07c7ade0f2b737a4abcaf498fdfe90"
+    },
+    "native-gui01/prepare.json": {
+      "bytes": 1528,
+      "sha256": "01bda565d8aa4aa3f5ccc64acc1dae1e9aa7a3e40c3d382392425c40e8911c95"
+    },
+    "native-gui01/prepare.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui01/prepare.stdout": {
+      "bytes": 7598,
+      "sha256": "74669924f430fe1bd921a0b218d5a5ac553eaca0108d061debdcaa4376a824b6"
+    },
+    "native-gui02/Launch-dashboard.cs": {
+      "bytes": 440,
+      "sha256": "f4ff94f3253bc20f0fb27278490cb269652f14a721b901d1ab9cc6fcb51df5a4"
+    },
+    "native-gui02/compile-dashboard.json": {
+      "bytes": 315,
+      "sha256": "7baf5788c34c7663e3a6a1738c7679e9c201da78a2dfcdcc37b5823378f78df7"
+    },
+    "native-gui02/dashboard/01-library-0.jpg": {
+      "bytes": 109520,
+      "sha256": "3064b7411977633063475d0360ba9ac57a9fbad9665fd2ca4a5cdf766b2a2775"
+    },
+    "native-gui02/dashboard/01-library.json": {
+      "bytes": 691,
+      "sha256": "0b6b47a5b5eeb0497fbc6292f84363af0559414ed4ff6e5fd22e67d394d8811d"
+    },
+    "native-gui02/dashboard/02-search-0.jpg": {
+      "bytes": 118286,
+      "sha256": "e4d98559513965c9f9e555e5cdad866a0d8ea6ce4e2b4569ec9033b0b95f2884"
+    },
+    "native-gui02/dashboard/02-search.json": {
+      "bytes": 13712,
+      "sha256": "7afcd1b11275437192a658c62ae17023b8983f1a001cdfa28d03e45fee784983"
+    },
+    "native-gui02/dashboard/03-video-transcript-0.jpg": {
+      "bytes": 95376,
+      "sha256": "a1639d1f6852db8036535e81a570480b991480d3887630a7926d0ff50c9c8b57"
+    },
+    "native-gui02/dashboard/03-video-transcript.json": {
+      "bytes": 7267,
+      "sha256": "f7efe8315cc9093a39616cbd53cc34f5c09825b60dae1d9bb9e5a48ee341d9f6"
+    },
+    "native-gui02/dashboard/04-video-files-0.jpg": {
+      "bytes": 78141,
+      "sha256": "34f587bf5e5ab27d75989cea9a0c0924a5b4850c1ca0a51b3f794e25f92309bc"
+    },
+    "native-gui02/dashboard/04-video-files.json": {
+      "bytes": 7211,
+      "sha256": "c7acff7f5fd0ac822eb2efe63d1119e9ccc1b08206e6fa2a123302eaa327173b"
+    },
+    "native-gui02/dashboard/05-sources-0.jpg": {
+      "bytes": 95974,
+      "sha256": "3d5124c4cbb9b1b01289790fb55dbdd832dc74fe319e2a9434d39f1ae59aafb5"
+    },
+    "native-gui02/dashboard/05-sources.json": {
+      "bytes": 10769,
+      "sha256": "c3a9b58875e31df334fd38d2b68b953a8e9336fbdd49d131dc1d66f8eb2d3d2b"
+    },
+    "native-gui02/dashboard/06-note-before-save-0.jpg": {
+      "bytes": 104626,
+      "sha256": "099b15fa722e5432cb25974d370929bdd8efe8262c9e53b9083dcc8b1a5f9bba"
+    },
+    "native-gui02/dashboard/06-note-before-save.json": {
+      "bytes": 10777,
+      "sha256": "683ce35782bfdde79bc8b0f898ca5d53da8ac2699e33a0c26e275222dcdafec1"
+    },
+    "native-gui02/dashboard/07-note-saved-0.jpg": {
+      "bytes": 95532,
+      "sha256": "75894153424682a0edda93996e031ebe4ffc39b64fec1d06df702898ac536708"
+    },
+    "native-gui02/dashboard/07-note-saved.json": {
+      "bytes": 10816,
+      "sha256": "5a8c9f0e969fbc7413559d883f5ee0821af6f77b88a8e6215a80895c9b55a80c"
+    },
+    "native-gui02/dashboard/08-note-search-0.jpg": {
+      "bytes": 88027,
+      "sha256": "924931a706b58ee060764ec497b9d21d2c62bafc7773428ed414cafc3cdae1e7"
+    },
+    "native-gui02/dashboard/08-note-search.json": {
+      "bytes": 14376,
+      "sha256": "c238eea4627a6db82213c447a93b345f7f183022e110edbb14affd5d002af320"
+    },
+    "native-gui02/dashboard/09-note-detail-0.jpg": {
+      "bytes": 79347,
+      "sha256": "ad9424155da32e57f120a51f6d6fd7deabc6c64ea24447d42b328a1a085d9ccc"
+    },
+    "native-gui02/dashboard/09-note-detail.json": {
+      "bytes": 5879,
+      "sha256": "2fb7ac999d095496d11cd9192d79b1219c6a857d03c011b45753ad8ecfb9d2b1"
+    },
+    "native-gui02/dashboard/10-evidence-empty-0.jpg": {
+      "bytes": 82827,
+      "sha256": "ff11a6f9c4524acd1f5ac93f99055548e3d32adbcfe5ce55ad299a46405e892e"
+    },
+    "native-gui02/dashboard/10-evidence-empty.json": {
+      "bytes": 5525,
+      "sha256": "4ee4a580b3b7591d51a640e90e53ce167dc9ec603ca25adcee249d86e3af2ce4"
+    },
+    "native-gui02/dashboard/11-activity-0.jpg": {
+      "bytes": 81374,
+      "sha256": "84ae0d36af386395c41a569fb56b9722d90ca0d03ca4d78ab94315a3dcb4caf7"
+    },
+    "native-gui02/dashboard/11-activity.json": {
+      "bytes": 5744,
+      "sha256": "791a406d030eeabe0874a63277df8322da5b50b96f48fc8026ccd58c1ff48192"
+    },
+    "native-gui02/dashboard/helper.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui02/dashboard/helper.stdout": {
+      "bytes": 6170,
+      "sha256": "35d67e849c6a8881cfb00d1cb3eb098b28a291dc50382a740c9ebd40c49943a8"
+    },
+    "native-gui02/dashboard/observation-complete.json": {
+      "bytes": 1252,
+      "sha256": "0c7d80a9fccb02aad34c5677d5c32777952378cc4a1e19b382cb3b5c1b130ed1"
+    },
+    "native-gui02/dashboard/ready.json": {
+      "bytes": 18411,
+      "sha256": "58fd28d163abb51f9ba2b33d932e9bc27614d4f40963a6db2f4b0f2c9e47aba6"
+    },
+    "native-gui02/dashboard/result.json": {
+      "bytes": 23134,
+      "sha256": "909d9744c0902ee96a323e6b77fff9a3118d370057ae7e3733e27e3fedddf0ce"
+    },
+    "native-gui02/dashboard/seed.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui02/dashboard/seed.stdout": {
+      "bytes": 798,
+      "sha256": "d81996ed2ecb73eed5862143d975acab40839951963525281d7cd3f76a0df7b9"
+    },
+    "native-gui02/dashboard/window.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui02/dashboard/window.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui02/media-seed.json": {
+      "bytes": 862,
+      "sha256": "6d0310c7575391642a2dd6665ccf297967976fbc2170daa5696986bfcf505817"
+    },
+    "native-gui02/operator-prepare.json": {
+      "bytes": 7468,
+      "sha256": "ef6c0a01c8ced044cd80a41d263ba293a10f279ebf86a3066109fcc439ce84cf"
+    },
+    "native-gui02/prepare.json": {
+      "bytes": 1528,
+      "sha256": "ad3ce7d209835429f740fb7e86cee3e17c2c508eee00a640f81459ad4d75ad01"
+    },
+    "native-gui02/prepare.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-gui02/prepare.stdout": {
+      "bytes": 7598,
+      "sha256": "0086f0290568630881c02f1bc720fc89aacf788ff8785cffa88585bae09fafc5"
+    },
+    "summary.json": {
+      "bytes": 5772,
+      "sha256": "beb912a13399a239bc482ac57b4268d6d75492e9b804ff069fec1d2255c06a28"
+    },
+    "synthetic-saved-files/Notes/synthetic-native-note-08-e701eb54/synthetic-native-note-08-e701eb54.json": {
+      "bytes": 539,
+      "sha256": "e6b134eb7e112e3b053ea12f52b2a1196c56079f915d59fab76a9baa58b22b0c"
+    },
+    "synthetic-saved-files/Notes/synthetic-native-note-08-e701eb54/synthetic-native-note-08-e701eb54.md": {
+      "bytes": 134,
+      "sha256": "bfa319367b536d9ffd513f65a8ff98661b8957360cc9e7468e85f75ab22a3029"
+    },
+    "synthetic-saved-files/videos/synthetic-native-media-08/synthetic-native-media-08.json": {
+      "bytes": 498,
+      "sha256": "9140150169ec32acd94b31c0f668d1e17655aa73d7aa3df5dd796d7d1d63c687"
+    },
+    "synthetic-saved-files/videos/synthetic-native-media-08/synthetic-native-media-08.md": {
+      "bytes": 155,
+      "sha256": "0f193f41090de9faee448706c242bf7d1ddf9ca10e1c849c097401f5621ae4e7"
+    }
+  }
+}

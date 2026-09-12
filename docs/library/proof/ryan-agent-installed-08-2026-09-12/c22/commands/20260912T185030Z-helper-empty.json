@@ -1,0 +1,29 @@
+{
+  "name": "helper-empty",
+  "argv": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty",
+    "--isolated-port",
+    "18081",
+    "--isolated-from-install-dir",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+  "started_utc": "2026-09-12T18:50:30Z",
+  "child": {
+    "pid": 17416,
+    "created_ms": 1789239030500,
+    "executable": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "observed_ms": 1789239030505,
+    "from_popen": true,
+    "poll": null
+  },
+  "pid": 17416,
+  "stdout_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\commands\\20260912T185030Z-helper-empty.stdout.log",
+  "stderr_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\commands\\20260912T185030Z-helper-empty.stderr.log",
+  "synthetic": false
+}

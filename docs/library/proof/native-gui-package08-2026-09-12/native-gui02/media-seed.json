@@ -1,0 +1,19 @@
+{
+  "utc": "2026-09-12T19:03:49.445976+00:00",
+  "synthetic_operator_fixture": true,
+  "video_id": "synthetic-native-media-08",
+  "cue": "SYNTHETIC stored cue at thirty-four seconds. Verification word: AMBER.",
+  "untimed_line": "SYNTHETIC line with no recorded timestamp.",
+  "stored_time": [
+    34,
+    46
+  ],
+  "duration_seconds": 90,
+  "model_or_fetch_performed": false,
+  "original_acceptance_fixture_modified": false,
+  "installed_index_module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\index.py",
+  "files": {
+    "output/videos/synthetic-native-media-08/synthetic-native-media-08.md": "0f193f41090de9faee448706c242bf7d1ddf9ca10e1c849c097401f5621ae4e7",
+    "output/videos/synthetic-native-media-08/synthetic-native-media-08.json": "9140150169ec32acd94b31c0f668d1e17655aa73d7aa3df5dd796d7d1d63c687"
+  }
+}

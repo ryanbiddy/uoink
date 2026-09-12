@@ -1,0 +1,42 @@
+{
+  "schema": "c22-runner-inputs-v1",
+  "created_utc": "2026-09-12T18:46:31.537521+00:00",
+  "synthetic": false,
+  "prepare_before_install": true,
+  "userprofile": "C:\\Users\\hello",
+  "live_index_forbidden": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "opened_live_index": false,
+  "hashed_live_index": false,
+  "installed_app": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+    "server_py": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py",
+    "interpreter": null,
+    "has_space": true,
+    "bundled_python": false,
+    "present": false,
+    "intended_before_install": true
+  },
+  "package": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "bytes": 389570940,
+    "sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+    "matched_supplied_digest": true
+  },
+  "isolated_profile": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty",
+  "isolated_port": 18081,
+  "mode": "installed",
+  "profile_dirs_prepared": true,
+  "candidate_package_02": {
+    "installer_source_sha": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+    "package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+    "package_bytes": 389570940,
+    "invented": false
+  },
+  "manifest": {
+    "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22-operator-manifest.json",
+    "sealed_by": "Astra",
+    "expected_package_sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c",
+    "candidate_sha": "2dd884afb698519b4b583138e6a14fcf93546bac",
+    "installer_source_sha": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8"
+  }
+}

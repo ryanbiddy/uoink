@@ -1,0 +1,30 @@
+[
+  {
+    "path": "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink Living Library Receipt Agent Install 08\\Uoink Isolated.lnk",
+    "target": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\pythonw.exe",
+    "arguments": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\server.py\" --isolated-profile \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\c22\\profiles\\empty\" --isolated-port 18081 --show-dashboard",
+    "working_directory": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+    "sha256": "98bccf7e4d4567d526c78736f3efb78c06437def988113c55a9997878e865aed"
+  },
+  {
+    "path": "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink Living Library Receipt Agent Install 08\\Stop Uoink Isolated.lnk",
+    "target": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\python\\python.exe",
+    "arguments": "\"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\uoink_install_isolation.py\" --isolated-stop --isolated-from-install-dir \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\"",
+    "working_directory": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+    "sha256": "724f480ad47e5c11ec076269913ebd1dad9fad76ee5a8b95e50412568debc710"
+  },
+  {
+    "path": "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink Living Library Receipt Agent Install 08\\Open Uoink Isolated folder.lnk",
+    "target": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+    "arguments": "",
+    "working_directory": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08",
+    "sha256": "b0d50032f2bc0408cb03ded850e64185cb397ce779350c6f0859be719ab5f7fa"
+  },
+  {
+    "path": "C:\\Users\\hello\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Uoink Living Library Receipt Agent Install 08\\Uninstall Uoink Isolated.lnk",
+    "target": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app\\unins000.exe",
+    "arguments": "",
+    "working_directory": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 08\\app",
+    "sha256": "fb37a219ad5ed22c03f9b02dd61572d7335e32df23aa6ba7a415ea3d6a8fb7bb"
+  }
+]

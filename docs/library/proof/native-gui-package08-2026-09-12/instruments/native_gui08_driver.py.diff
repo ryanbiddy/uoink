@@ -1,0 +1,17 @@
+--- native_gui07_driver.py
++++ native_gui08_driver.py
+@@ -1,11 +1,11 @@
+-"""Owned, guarded package-07 GUI observation. UI input is exclusively through Sky."""
++"""Owned, guarded package-08 GUI observation. UI input is exclusively through Sky."""
+ import contextlib, datetime as dt, json, os, subprocess, sys, time, traceback
+ from pathlib import Path
+ from urllib.request import urlopen
+ assert sys.flags.isolated and sys.flags.no_site
+ repo=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07\native-gui01')
+-app=root.parent/'app'; profile=root/'p4/profile'; seal=repo/'docs/library/proof/candidate-package-07-2026-09-12'
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
++app=root.parent/'app'; profile=root/'p4/profile'; seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'
+ mode=sys.argv[1];assert mode in ('dashboard','desktop')
+ run=root/mode; run.mkdir(exist_ok=False)
+ def save(name,value):
