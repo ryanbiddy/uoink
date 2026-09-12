@@ -450,8 +450,8 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Fresh subscription sign-in and confirmation that extra paid usage is off
-  for Agent Install 06/p4-client/profile. It is prepared, route-checked and
+- Confirmation that extra paid usage is off for Agent Install 06/p4-client/
+  profile. Fresh sign-in succeeded; the fixture is prepared, route-checked and
   uncollected. Client streams and citation/brief/chapter visuals remain open;
   see INSTALLED-CLIENT-SIGNIN-2026-09-11.md. Do not copy ordinary credentials.
 - The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
