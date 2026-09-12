@@ -1225,7 +1225,7 @@ class LibraryReader:
             self._sqlite_busy_previous = None
             return
         try:
-            conn.set_progress_handler(None)
+            conn.set_progress_handler(None, 0)
         except (AttributeError, sqlite3.Error, TypeError):
             pass
         previous = self._sqlite_busy_previous
