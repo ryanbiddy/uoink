@@ -1,0 +1,67 @@
+[
+  {
+    "path": "whisper_runner.py",
+    "sha256": "71bd744fd4bc4f44243a2642a918958426dd21f0c06d341cc2c758cb27ce1ef5",
+    "bytes": 18957
+  },
+  {
+    "path": "requirements-installer-lock.txt",
+    "sha256": "8c45bc8aeb5c008dadc6bd8bc58900ce5f8f48ea640a105a301021754c93c8ec",
+    "bytes": 3703
+  },
+  {
+    "path": "tests/test_installer_dependency_lock.py",
+    "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b",
+    "bytes": 5202
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/whisperx/asr.py",
+    "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565",
+    "bytes": 17620
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/whisperx/vads/pyannote.py",
+    "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003",
+    "bytes": 9880
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/whisperx/vads/silero.py",
+    "sha256": "f054f968c757a2329efa8ad72c44d061b0596bfc92b2c8e47d1dc7d8ec877055",
+    "bytes": 3043
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/whisperx/alignment.py",
+    "sha256": "cc3607dcc25e592ae218f74a6ca644d6ce1c77d9cee4672f01c751da8feb9aa7",
+    "bytes": 21696
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/pyannote/audio/core/model.py",
+    "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3",
+    "bytes": 22879
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/pyannote/audio/models/segmentation/PyanNet.py",
+    "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af",
+    "bytes": 7992
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/nltk/data.py",
+    "sha256": "cda75896c3639541f3c3b811d647354dc5829774c2f201a7c942896f5cb99dc8",
+    "bytes": 68443
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/torch/nn/modules/rnn.py",
+    "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb",
+    "bytes": 76334
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/faster_whisper/transcribe.py",
+    "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4",
+    "bytes": 80403
+  },
+  {
+    "path": "installer/staging/python/Lib/site-packages/lightning/fabric/utilities/cloud_io.py",
+    "sha256": "890ffcb7827a18831163c2dbb4e5d123404969d5f3863d2ce6608c23c77898c3",
+    "bytes": 7088
+  }
+]

@@ -1,0 +1,596 @@
+[
+  {
+    "id": "GHSA-29pf-2h5f-8g72",
+    "aliases": [
+      "CVE-2026-4372",
+      "PYSEC-2026-2289"
+    ],
+    "summary": "HuggingFace transformers vulnerable to remote code execution",
+    "details": "A critical remote code execution vulnerability exists in all versions of the HuggingFace transformers library prior to version 5.3.0. The vulnerability allows an attacker to craft a malicious `config.json` file containing the `_attn_implementation_internal` field set to an attacker-controlled HuggingFace Hub repository ID. When a victim loads this model using the standard `AutoModelForCausalLM.from_pretrained()` API, the library downloads and executes arbitrary Python code from the attacker's repository with the victim's full OS privileges. This issue arises due to unfiltered deserialization of configuration attributes, insufficient sanitization of internal fields, and unsandboxed execution of downloaded kernels. The vulnerability bypasses the `trust_remote_code` security mechanism, is invisible to the victim, and exploits the standard documented usage pattern, making it particularly severe. Users are advised to upgrade to version 5.3.0 or later to mitigate this issue.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.3.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-69w3-r845-3855",
+    "aliases": [
+      "CVE-2026-1839",
+      "PYSEC-2026-2288"
+    ],
+    "summary": "HuggingFace Transformers allows for arbitrary code execution in the `Trainer` class",
+    "details": "A vulnerability in the HuggingFace Transformers library, specifically in the `Trainer` class, allows for arbitrary code execution. The `_load_rng_state()` method in `src/transformers/trainer.py` at line 3059 calls `torch.load()` without the `weights_only=True` parameter. This issue affects all versions of the library supporting `torch>=2.2` when used with PyTorch versions below 2.6, as the `safe_globals()` context manager provides no protection in these versions. An attacker can exploit this vulnerability by supplying a malicious checkpoint file, such as `rng_state.pth`, which can execute arbitrary code when loaded. The issue is resolved in version v5.0.0rc3.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.0.0rc3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-8mgp-746c-j5xp",
+    "aliases": [
+      "CVE-2026-81726",
+      "PYSEC-2026-3740"
+    ],
+    "summary": "NLTK: Model-artifact APIs bypass pathsec and touch files outside allowed roots",
+    "details": "### Summary\n\nSeveral model-artifact APIs still treat caller-controlled model paths as ordinary filenames even when NLTK path security is enforced. The same outside-root paths are rejected by guarded helpers, but these public read and write flows still use raw file APIs.\n\n### Details\n\n- **Vulnerability type:** File sandbox bypass\n- **Affected component:** `TransitionParser.train`, `TransitionParser.parse`, `AveragedPerceptron.save`, `AveragedPerceptron.load`, `PerceptronTagger.save_to_json`, `save_maxent_params`\n- **Affected versions:** Published `3.9.4` and current source `v3.10.0-rc2` both reproduced.\n- **Patched versions:** Not yet patched\n- **Root cause:** Model import and export helpers use built-in `open()` on caller-controlled paths instead of pathsec-aware helpers.\n\n`TransitionParser.train()` writes outside allowed roots, `TransitionParser.parse()` reads outside allowed roots, `AveragedPerceptron` bypasses the sandbox in both directions, and adjacent read-side helpers in the same family already show the intended guarded behavior. I confirmed outside-root reads and writes while `pathsec.open()` or the guarded sibling helpers rejected the same paths.\n\n### PoC\n\n**Preconditions**\n- The application enables `pathsec` enforcement and lets untrusted workflows choose model import or export paths.\n\n**Steps**\n1. Enable `pathsec.ENFORCE=True` and restrict allowed roots to a dedicated sandbox directory.\n2. Use public model import or export APIs with paths that point outside that root.\n3. Observe the same paths are rejected by negative-control guarded helpers such as `pathsec.open()`, `PerceptronTagger.load_from_json()`, or `load_maxent_params()`.\n4. Observe the vulnerable APIs still read or write outside-root files successfully.\n\n**Minimal reproducible excerpt**\n\n```text\ntransition_train_exists True\ntransition_parse_loader_read_bytes 13\naveraged_load_keys ['bias']\nmaxent_save wrote ['alwayson.tab', 'labels.txt']\n```\n\n### Impact\n\nConsumers that rely on `pathsec` for local containment can be tricked into reading or overwriting files outside approved roots through normal model persistence and loading APIs.\n\n### Remediation\n\nRoute all model-path file access through `nltk.pathsec.open()` or existing pathsec-aware helpers, and add regression tests that pair each vulnerable API with a negative control on the same path.",
+    "ranges": [
+      {
+        "package": {
+          "name": "nltk",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/nltk"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "3.10.3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-fgcw-684q-jj6r",
+    "aliases": [
+      "CVE-2026-5241",
+      "PYSEC-2026-2290"
+    ],
+    "summary": "huggingface/transformers: Arbitrary Code Execution During Model Initialization in the LightGlue Model Loading Path",
+    "details": "A vulnerability in the LightGlue model loading path of huggingface/transformers version 5.2.0 allows an attacker-controlled model repository to execute arbitrary code during model initialization. The issue arises because the `trust_remote_code` parameter, intended to prevent remote code execution, is overridden by untrusted serialized configuration data in a nested code path. Specifically, when loading a LightGlue model using `AutoModel.from_pretrained()` with `trust_remote_code=False`, the `LightGlueConfig` reads the `trust_remote_code` value from the untrusted `config.json` file and propagates it into nested `AutoConfig.from_pretrained()` calls. This results in the execution of attacker-provided Python modules, even when the victim explicitly disables remote code execution. The vulnerability poses a high risk for environments such as API inference servers, research notebooks, CI/CD pipelines, and model evaluation workers, potentially leading to credential theft, lateral movement, or persistence/backdoor deployment.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.5.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-qfhq-4f3w-5fph",
+    "aliases": [
+      "BIT-pytorch-2025-3001",
+      "CVE-2025-3001",
+      "PYSEC-2025-195"
+    ],
+    "summary": "PyTorch is vulnerable to memory corruption through its torch.lstm_cell function",
+    "details": "A vulnerability classified as critical was found in PyTorch 2.6.0. This vulnerability affects the function torch.lstm_cell. The manipulation leads to memory corruption. The attack needs to be approached locally. The exploit has been disclosed to the public and may be used.\n\nA patch is available through commit [999d94b](https://github.com/pytorch/pytorch/commit/999d94b5ede5f4ec111ba7dd144129e2c2725b03).",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.10.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-qqmf-gpg7-g8gw",
+    "aliases": [
+      "CVE-2026-58659",
+      "PYSEC-2026-3624",
+      "PYSEC-2026-3967"
+    ],
+    "summary": " PyTorch Lightning allows arbitrary code execution through checkpoint _instantiator hyperparameters",
+    "details": "PyTorch Lightning through 2.6.5, fixed in commit d710d68, contains a remote code execution vulnerability in the _load_state function that imports and executes attacker-controlled module names from checkpoint _instantiator hyperparameters. Attackers can craft malicious checkpoint files that bypass weights_only=True protections to execute arbitrary code when LightningModule.load_from_checkpoint is called.",
+    "ranges": [
+      {
+        "package": {
+          "name": "lightning",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/lightning"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2022.6.15"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-rrmf-rvhw-rf47",
+    "aliases": [
+      "BIT-pytorch-2025-3000",
+      "CVE-2025-3000",
+      "PYSEC-2025-194"
+    ],
+    "summary": "PyTorch is vulnerable to memory corruption through its torch.jit.script function",
+    "details": "A vulnerability classified as critical has been found in PyTorch 2.6.0. This affects the function torch.jit.script. The manipulation leads to memory corruption. It is possible to launch the attack on the local host. The exploit has been disclosed to the public and may be used.",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.13.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-vgrw-7cvw-pwgx",
+    "aliases": [
+      "BIT-pytorch-2025-2999",
+      "CVE-2025-2999",
+      "PYSEC-2025-193"
+    ],
+    "summary": "PyTorch is vulnerable to memory corruption through its unpack_sequence function",
+    "details": "A vulnerability was found in PyTorch 2.6.0. It has been rated as critical. Affected by this issue is the function torch.nn.utils.rnn.unpack_sequence. The manipulation leads to memory corruption. Attacking locally is a requirement. The exploit has been disclosed to the public and may be used.\n\nA patch is available through commit [4945180](https://github.com/pytorch/pytorch/commit/494518046816d29099b7d056a74ffa5c244fdcdd).",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.9.1"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GHSA-xrqw-3rrv-vx5w",
+    "aliases": [
+      "CVE-2026-9856",
+      "PYSEC-2026-3929"
+    ],
+    "summary": "Transformers save_pretrained path traversal allows arbitrary file writes through chat template names",
+    "details": "A vulnerability in huggingface/transformers versions < 5.10.0 allows an attacker to perform arbitrary file writes via path traversal. The issue resides in the `save_pretrained()` methods of `PreTrainedTokenizerBase` and `ProcessorMixin`, where keys from the `chat_template` dictionary are used directly as filenames without proper validation. An attacker can exploit this by publishing a malicious Hugging Face Hub repository with a crafted `tokenizer_config.json` file. When a victim downloads and saves the tokenizer or processor, the attacker-controlled keys can escape the intended save directory, enabling arbitrary file writes with attacker-controlled content. This vulnerability affects multiple processors inheriting from `ProcessorMixin`, including Idefics, Florence, Gemma, Phi, and Qwen-VL.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.10.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2025-203",
+    "aliases": [
+      "BIT-pytorch-2025-55551",
+      "CVE-2025-55551"
+    ],
+    "summary": null,
+    "details": "An issue in the component torch.linalg.lu of pytorch v2.8.0 allows attackers to cause a Denial of Service (DoS) when performing a slice operation.",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.9.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2025-204",
+    "aliases": [
+      "BIT-pytorch-2025-55552",
+      "CVE-2025-55552"
+    ],
+    "summary": null,
+    "details": "pytorch v2.8.0 was discovered to display unexpected behavior when the components torch.rot90 and torch.randn_like are used together.",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.9.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2025-206",
+    "aliases": [
+      "BIT-pytorch-2025-55554",
+      "CVE-2025-55554"
+    ],
+    "summary": null,
+    "details": "pytorch v2.8.0 was discovered to contain an integer overflow in the component torch.nan_to_num-.long().",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.9.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2025-217",
+    "aliases": [
+      "CVE-2025-14929"
+    ],
+    "summary": null,
+    "details": "Hugging Face Transformers X-CLIP Checkpoint Conversion Deserialization of Untrusted Data Remote Code Execution Vulnerability. This vulnerability allows remote attackers to execute arbitrary code on affected installations of Hugging Face Transformers. User interaction is required to exploit this vulnerability in that the target must visit a malicious page or open a malicious file.\n\nThe specific flaw exists within the parsing of checkpoints. The issue results from the lack of proper validation of user-supplied data, which can result in deserialization of untrusted data. An attacker can leverage this vulnerability to execute code in the context of the current process. Was ZDI-CAN-28308.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "5.0.0-rc0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-139",
+    "aliases": [
+      "BIT-pytorch-2026-4538",
+      "CVE-2026-4538"
+    ],
+    "summary": null,
+    "details": "A vulnerability was identified in PyTorch 2.10.0. The affected element is an unknown function of the component pt2 Loading Handler. The manipulation leads to deserialization. The attack can only be performed from a local environment. The exploit is publicly available and might be used. The project was informed of the problem early through a pull request but has not reacted yet.",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "2.10.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-2286",
+    "aliases": [
+      "BIT-pytorch-2026-24747",
+      "CVE-2026-24747",
+      "GHSA-63cw-57p8-fm3p",
+      "PYSEC-2026-1856"
+    ],
+    "summary": null,
+    "details": "PyTorch is a Python package that provides tensor computation. Prior to version 2.10.0, a vulnerability in PyTorch's `weights_only` unpickler allows an attacker to craft a malicious checkpoint file (`.pth`) that, when loaded with `torch.load(..., weights_only=True)`, can corrupt memory and potentially lead to arbitrary code execution. Version 2.10.0 fixes the issue.",
+    "ranges": [
+      {
+        "package": {
+          "name": "torch",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/torch"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.10.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-2288",
+    "aliases": [
+      "CVE-2026-1839",
+      "GHSA-69w3-r845-3855"
+    ],
+    "summary": null,
+    "details": "A vulnerability in the HuggingFace Transformers library, specifically in the `Trainer` class, allows for arbitrary code execution. The `_load_rng_state()` method in `src/transformers/trainer.py` at line 3059 calls `torch.load()` without the `weights_only=True` parameter. This issue affects all versions of the library supporting `torch>=2.2` when used with PyTorch versions below 2.6, as the `safe_globals()` context manager provides no protection in these versions. An attacker can exploit this vulnerability by supplying a malicious checkpoint file, such as `rng_state.pth`, which can execute arbitrary code when loaded. The issue is resolved in version v5.0.0rc3.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.0.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-2289",
+    "aliases": [
+      "CVE-2026-4372",
+      "GHSA-29pf-2h5f-8g72"
+    ],
+    "summary": null,
+    "details": "A critical remote code execution vulnerability exists in all versions of the HuggingFace transformers library prior to version 5.3.0. The vulnerability allows an attacker to craft a malicious `config.json` file containing the `_attn_implementation_internal` field set to an attacker-controlled HuggingFace Hub repository ID. When a victim loads this model using the standard `AutoModelForCausalLM.from_pretrained()` API, the library downloads and executes arbitrary Python code from the attacker's repository with the victim's full OS privileges. This issue arises due to unfiltered deserialization of configuration attributes, insufficient sanitization of internal fields, and unsandboxed execution of downloaded kernels. The vulnerability bypasses the `trust_remote_code` security mechanism, is invisible to the victim, and exploits the standard documented usage pattern, making it particularly severe. Users are advised to upgrade to version 5.3.0 or later to mitigate this issue.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.3.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-2290",
+    "aliases": [
+      "CVE-2026-5241",
+      "GHSA-fgcw-684q-jj6r"
+    ],
+    "summary": null,
+    "details": "A vulnerability in the LightGlue model loading path of huggingface/transformers version 5.2.0 allows an attacker-controlled model repository to execute arbitrary code during model initialization. The issue arises because the `trust_remote_code` parameter, intended to prevent remote code execution, is overridden by untrusted serialized configuration data in a nested code path. Specifically, when loading a LightGlue model using `AutoModel.from_pretrained()` with `trust_remote_code=False`, the `LightGlueConfig` reads the `trust_remote_code` value from the untrusted `config.json` file and propagates it into nested `AutoConfig.from_pretrained()` calls. This results in the execution of attacker-provided Python modules, even when the victim explicitly disables remote code execution. The vulnerability poses a high risk for environments such as API inference servers, research notebooks, CI/CD pipelines, and model evaluation workers, potentially leading to credential theft, lateral movement, or persistence/backdoor deployment.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "5.2.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PYSEC-2026-3929",
+    "aliases": [
+      "CVE-2026-9856",
+      "GHSA-xrqw-3rrv-vx5w"
+    ],
+    "summary": "Transformers save_pretrained path traversal allows arbitrary file writes through chat template names",
+    "details": "A vulnerability in huggingface/transformers versions < 5.10.0 allows an attacker to perform arbitrary file writes via path traversal. The issue resides in the `save_pretrained()` methods of `PreTrainedTokenizerBase` and `ProcessorMixin`, where keys from the `chat_template` dictionary are used directly as filenames without proper validation. An attacker can exploit this by publishing a malicious Hugging Face Hub repository with a crafted `tokenizer_config.json` file. When a victim downloads and saves the tokenizer or processor, the attacker-controlled keys can escape the intended save directory, enabling arbitrary file writes with attacker-controlled content. This vulnerability affects multiple processors inheriting from `ProcessorMixin`, including Idefics, Florence, Gemma, Phi, and Qwen-VL.",
+    "ranges": [
+      {
+        "package": {
+          "name": "transformers",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/transformers"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.10.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

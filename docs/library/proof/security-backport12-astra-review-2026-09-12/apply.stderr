@@ -1,0 +1,10 @@
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/security-backport12-astra-review-2026-09-12/review/worker-original.patch:9: trailing whitespace.
+**Date:** 2026-09-12  
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/security-backport12-astra-review-2026-09-12/review/worker-original.patch:10: trailing whitespace.
+**Worker:** gemini  
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/security-backport12-astra-review-2026-09-12/review/worker-original.patch:11: trailing whitespace.
+**Target File:** `docs/library/SECURITY-BACKPORT-FEASIBILITY-2026-09-12.md`  
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/security-backport12-astra-review-2026-09-12/review/worker-original.patch:131: trailing whitespace.
+However, `diarize=False` does not alter WhisperX's Voice Activity Detection step. WhisperX is designed around batched inference: it requires VAD speech boundary intervals to slice long audio into chunks before passing them to CTranslate2. The default VAD pipeline is `pyannote`. 
+Falling back to direct application...
+warning: 4 lines add whitespace errors.

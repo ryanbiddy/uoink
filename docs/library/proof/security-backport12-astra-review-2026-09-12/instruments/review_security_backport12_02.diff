@@ -1,0 +1,21 @@
+--- review_security_backport12.py
++++ review_security_backport12_02.py
+@@ -2,10 +2,10 @@
+ import ast,hashlib,json,shutil,subprocess
+ from pathlib import Path
+ r=Path(__file__).resolve().parents[1];s=r/'_scratch'
+-out=s/'security-backport12-review';out.mkdir(exist_ok=False)
++out=s/'security-backport12-review02';out.mkdir(exist_ok=False)
+ meta=r/'docs/library/proof/security-repair-gemini-2026-09-12'
+ manifest=json.loads((meta/'SHA256.json').read_text(encoding='utf8'))
+-for name,row in manifest['files'].items():
++for name,row in manifest.items():
+     data=(meta/name).read_bytes();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+ advisories=[]
+ for p in sorted((meta/'osv/advisories').glob('*.json')):
+@@ -35,4 +35,4 @@
+ subprocess.run(['git','add','-N','--',name],cwd=w,check=True)
+ (out/'worker-original.patch').write_bytes(subprocess.check_output(['git','diff','--binary'],cwd=w))
+ shutil.copyfile(w/name,out/'worker-report-original.md.txt')
+-print(json.dumps({'primary_metadata_payloads_verified':len(manifest['files']),'source_files_retained':len(bindings),'advisories':len(advisories),'executed_model_code':False}))
++print(json.dumps({'primary_metadata_payloads_verified':len(manifest),'source_files_retained':len(bindings),'advisories':len(advisories),'executed_model_code':False}))

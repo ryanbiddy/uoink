@@ -1,0 +1,6 @@
+{
+  "result": "reader failed before metadata verification",
+  "error": "KeyError: files",
+  "reason": "This worker seal is a direct path-to-hash object, not the integrator files wrapper.",
+  "repair": "Iterate the actual top-level mapping; retain every hash and size check. Use a fresh review02 directory. No product observation rerun."
+}

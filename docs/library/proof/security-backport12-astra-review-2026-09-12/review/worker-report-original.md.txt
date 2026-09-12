@@ -1,0 +1,300 @@
+# Bounded Security Backport and Migration Feasibility Review
+
+**Date:** 2026-09-12  
+**Worker:** gemini  
+**Target File:** `docs/library/SECURITY-BACKPORT-FEASIBILITY-2026-09-12.md`  
+**Inputs Reviewed:**
+- Brief: `_scratch/SECURITY-BACKPORT-FEASIBILITY-BRIEF-2026-09-12.md`
+- Integrator Review: `docs/library/ASTRA-SECURITY-REPAIR-REVIEW-2026-09-12.md`
+- Primary Evidence: `docs/library/proof/security-repair-gemini-2026-09-12/` (35 sealed payloads, SHA-256 verified)
+- Source Inspections: Uoink worktree and read-only staged dependencies (`installer/staging/python/Lib/site-packages/whisperx`, `torch`, `transformers`, `nltk`, `pyannote`)
+
+---
+
+## Executive Summary and Scan Accounting
+
+The runtime inventory for the candidate build contains 140 locked pins satisfying 283 requirements. Raw OSV batch scanning reports:
+- **19 raw advisory entries**
+- **15 distinct alias groups**
+- **4 affected packages**: Lightning (1), NLTK (1), Torch (8), Transformers (9 entries across 5 groups).
+
+Accounting for Lightning 2.6.6's verified source patch (PR #21832 and #21914 in `lightning/pytorch/core/saving.py`, which added an explicit allowlist of trusted instantiators and resolved subclass verification) leaves:
+- **18 open advisory entries**
+- **14 distinct alias groups**
+- **3 unpatched packages**: NLTK (1), Torch (8), Transformers (5 groups).
+
+The raw scanner count remains 19 entries / 15 groups because OSV advisory `GHSA-qqmf-gpg7-g8gw` records an invalid fixed event of `2022.6.15` (a date string parsed as an early version), keeping `lightning==2.6.6` flagged. No entry is suppressed or relabeled.
+
+---
+
+## Question 1: Unsafe Checkpoint and Tokenizer Paths in Default Transcription
+
+### 1.1 Trace of Default Transcription and VAD Execution
+
+When Uoink transcribes audio without speaker diarization (`diarize=False`), execution traverses the following path:
+
+1. **Uoink Entry Point:**
+   - File: `whisper_runner.py`
+   - Lines 288–348: `transcribe_audio(audio_path, ..., diarize=False)` calls `whisperx.load_model(model_size, device=device, compute_type=_compute_type(device), download_root=str(model_path))`.
+   - Line 349: Calls `model.transcribe(str(audio_path), language=language)`.
+   - Lines 357–384: The conditional block `if diarize:` is skipped entirely.
+
+2. **WhisperX Model and VAD Initialization:**
+   - File: `installer/staging/python/Lib/site-packages/whisperx/asr.py`
+   - Line 323: `load_model` specifies `vad_method: Optional[str] = "pyannote"` by default.
+   - Lines 357–364: Instantiates `WhisperModel` (derived from `faster_whisper.WhisperModel`).
+   - Lines 425–430:
+     ```python
+     elif vad_method == "pyannote":
+         if device == 'cuda':
+             device_vad = f'cuda:{device_index}'
+         else:
+             device_vad = device
+         vad_model = Pyannote(torch.device(device_vad), token=None, **default_vad_options)
+     ```
+   - Line 434: Constructs and returns `FasterWhisperPipeline(model=model, vad=vad_model, ...)`. Note that `FasterWhisperPipeline` subclasses `transformers.Pipeline` (`transformers/pipelines/base.py`, line 149).
+
+3. **PyAnnote VAD Pipeline Loading:**
+   - File: `installer/staging/python/Lib/site-packages/whisperx/vads/pyannote.py`
+   - Lines 233–238: `Pyannote.__init__` calls `load_vad_model(device, token=token, model_fp=model_fp)`.
+   - Lines 28–30: Resolves `model_fp` to the packaged checkpoint:
+     `model_fp = os.path.join(main_dir, "assets", "pytorch_model.bin")`
+     (Asset size: 17,719,103 bytes; SHA-256: `0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea`).
+   - Line 41: Calls `vad_model = Model.from_pretrained(model_fp, token=token)`.
+
+4. **Unsafe Checkpoint Deserialization (`torch.load` with `weights_only=False`):**
+   - File: `installer/staging/python/Lib/site-packages/pyannote/audio/core/model.py`
+   - Lines 602–604:
+     ```python
+     loaded_checkpoint = pl_load(
+         path_to_model_checkpoint, map_location=map_location, weights_only=False
+     )
+     ```
+     `pl_load` references `lightning.fabric.utilities.cloud_io._load`.
+   - File: `installer/staging/python/Lib/site-packages/lightning/fabric/utilities/cloud_io.py`
+     Line 73: `torch.load(f, map_location=map_location, weights_only=weights_only)` executes with `weights_only=False`.
+   - File: `installer/staging/python/Lib/site-packages/pyannote/audio/core/model.py`
+     Lines 611–614: Dynamic class resolution loads `loaded_checkpoint["pyannote.audio"]["architecture"]["module"]` (`pyannote.audio.models.segmentation.PyanNet`) and instantiates `Klass`.
+     Lines 621–627:
+     ```python
+     model = Klass.load_from_checkpoint(
+         path_to_model_checkpoint,
+         map_location=map_location,
+         strict=strict,
+         weights_only=False,
+         **kwargs,
+     )
+     ```
+   - File: `installer/staging/python/Lib/site-packages/lightning/pytorch/core/saving.py`
+     Line 72: `_load_from_checkpoint` calls `pl_load` again with `weights_only=False`.
+
+5. **Audio Inference on the Loaded Checkpoint:**
+   - File: `installer/staging/python/Lib/site-packages/whisperx/asr.py`
+   - Line 229: During `model.transcribe()`, WhisperX executes:
+     `vad_segments = self.vad_model({"waveform": waveform, "sample_rate": SAMPLE_RATE})`
+     This calls `VoiceActivitySegmentation.__call__` and evaluates the `PyanNet` neural model over the input audio.
+   - File: `installer/staging/python/Lib/site-packages/pyannote/audio/models/segmentation/PyanNet.py`
+     Line 54: `PyanNet` executes a 2-layer bidirectional LSTM (`nn.LSTM`). In Torch 2.8.0, native LSTM execution reaches the C++ kernel affected by `CVE-2025-3001` (`torch.lstm_cell`).
+
+6. **Tokenizer and Asset Resolution in faster-whisper:**
+   - File: `installer/staging/python/Lib/site-packages/faster_whisper/transcribe.py`
+   - Lines 681–687: If `download_root` (`<data_root>/whisper_models/<model_size>/`) does not contain model files, `download_model()` contacts the Hugging Face Hub over HTTPS.
+   - Lines 700–708:
+     ```python
+     tokenizer_file = os.path.join(model_path, "tokenizer.json")
+     if tokenizer_bytes:
+         self.hf_tokenizer = tokenizers.Tokenizer.from_buffer(tokenizer_bytes)
+     elif os.path.isfile(tokenizer_file):
+         self.hf_tokenizer = tokenizers.Tokenizer.from_file(tokenizer_file)
+     else:
+         self.hf_tokenizer = tokenizers.Tokenizer.from_pretrained(
+             "openai/whisper-tiny" + ("" if self.model.is_multilingual else ".en")
+         )
+     ```
+     If `tokenizer.json` is missing or corrupt, `Tokenizer.from_pretrained` initiates an unauthenticated remote network download from `huggingface.co`.
+   - File: `installer/staging/python/Lib/site-packages/whisperx/asr.py`
+     Lines 236–255: `self.tokenizer = Tokenizer(self.model.hf_tokenizer, ...)` wraps the Hugging Face tokenizer instance.
+
+### 1.2 Why `diarization=false` is Insufficient
+
+Setting `diarize=False` in `whisper_runner.py` line 292 disables the speaker clustering block at lines 357–384:
+- `whisperx.load_align_model` (`whisperx/alignment.py`, line 80), which loads `Wav2Vec2ForCTC` from Hugging Face or Torchaudio.
+- `whisperx.align` (`whisperx/alignment.py`, lines 192–195), which deserializes `tokenizers/punkt_tab/english.pickle` via `nltk.data.load` and calls `nltk.download('punkt_tab')` on cache miss.
+- `_diarization_pipeline` (`whisperx.DiarizationPipeline`), which downloads `pyannote/speaker-diarization-community-1` via Hugging Face Hub using `HF_TOKEN`.
+
+However, `diarize=False` does not alter WhisperX's Voice Activity Detection step. WhisperX is designed around batched inference: it requires VAD speech boundary intervals to slice long audio into chunks before passing them to CTranslate2. The default VAD pipeline is `pyannote`. 
+
+Because `whisperx.load_model()` constructs `Pyannote` on line 430 regardless of `diarize`, every cold transcription run executes:
+1. `Model.from_pretrained('.../pytorch_model.bin')`
+2. `pl_load(..., weights_only=False)`
+3. `LightningModule.load_from_checkpoint(..., weights_only=False)`
+4. `torch.load(..., weights_only=False)`
+
+Disabling diarization skips phoneme alignment and speaker clustering, but leaves the primary checkpoint deserialization path fully operational.
+
+### 1.3 Reachable Advisory Identifiers
+
+| Package | Advisory ID | CVE | Mechanism Reached in Default Route |
+|---|---|---|---|
+| `torch` | `GHSA-63cw-57p8-fm3p` | CVE-2026-24747 | Arbitrary code execution / memory corruption in `torch.load` unpickler. `weights_only=False` executes full pickle bytecode; even with `weights_only=True`, the unpickler C++ parser has open memory corruption. |
+| `torch` | `PYSEC-2026-139` | CVE-2026-4538 | Deserialization vulnerability in PyTorch pt2 Loading Handler. |
+| `torch` | `GHSA-qfhq-4f3w-5fph` | CVE-2025-3001 | Memory corruption in `torch.lstm_cell`. Reached when `PyanNet` runs its two-layer bidirectional LSTM on audio waveforms during VAD segmentation. |
+| `lightning` | `GHSA-qqmf-gpg7-g8gw` | CVE-2026-58659 | Arbitrary code execution during `LightningModule.load_from_checkpoint` via hyperparameters. (Upstream source fix in 2.6.6 verified; scanner entry remains open due to OSV range bug). |
+
+---
+
+## Question 2: First-Party Boundary and Vendor Backport Feasibility
+
+### 2.1 Examination of Proposed Boundaries and Backports
+
+#### Boundary 1: Forcing `weights_only=True` on PyAnnote Checkpoint Loading
+- **Mechanism:** Modify `pyannote/audio/core/model.py` (lines 603 and 625) or monkeypatch `pl_load` to pass `weights_only=True`.
+- **Feasibility:** Not functional without breaking PyAnnote.
+- **Evidence:** `whisperx/assets/pytorch_model.bin` does not store a pure state dictionary. It contains serialized instances of `pyannote.audio.core.task.Specifications`, `pyannote.audio.core.task.Problem`, `pyannote.core.sliding_window.SlidingWindow`, and PyTorch Lightning training hyperparameter structures. Invoking `torch.load(..., weights_only=True)` raises:
+  `torch.serialization.UnsupportedClassException: Unsupported class pyannote.audio.core.task.Specifications`
+- **Security Limitation:** Even if safe globals were registered via `torch.serialization.add_safe_globals`, PyTorch 2.8.0 remains affected by `CVE-2026-24747`. The unpickler vulnerability resides in PyTorch's C++ unpickler implementation and permits code execution even under `weights_only=True`.
+
+#### Boundary 2: Runtime File Hash Verification
+- **Mechanism:** Verify `hashlib.sha256` of `whisperx/assets/pytorch_model.bin` matches `0b5b3216...` before invoking `Model.from_pretrained()`.
+- **Feasibility:** Trivially implemented in `whisper_runner.py` or `whisperx/vads/pyannote.py`.
+- **Security Limitation:** Uoink is a non-elevated desktop application installed into `%LOCALAPPDATA%\Uoink` (or `%LOCALAPPDATA%\Programs\Uoink`). Under the Windows security model, all files in `%LOCALAPPDATA%` share the user's integrity level. Any process running under the same user account can mutate the file between verification and load (TOCTOU), overwrite the Python source files directly, or patch process memory. A preflight hash detects disk corruption, but does not provide a cryptographic security boundary against same-user privilege escalation. Crucially, a hash does not clear the package in an SCA audit.
+
+#### Boundary 3: Switching VAD Engine to Silero (`vad_method="silero"`)
+- **Mechanism:** Configure `vad_method="silero"` in `whisperx.load_model()`.
+- **Feasibility:** Prohibited by security policy.
+- **Evidence:** Inspection of `installer/staging/python/Lib/site-packages/whisperx/vads/silero.py` (lines 26–30) shows:
+  ```python
+  self.vad_pipeline, vad_utils = torch.hub.load(
+      repo_or_dir='snakers4/silero-vad',
+      model='silero_vad',
+      force_reload=False,
+      onnx=False,
+      trust_repo=True
+  )
+  ```
+  `torch.hub.load` with `trust_repo=True` clones or downloads arbitrary Python code from GitHub at runtime. This introduces a remote code execution channel and violates Uoink's offline design.
+
+#### Boundary 4: Offline Model Conversion to Safetensors
+- **Mechanism:** Convert `whisperx/assets/pytorch_model.bin` offline to a `pytorch_model.safetensors` file containing only tensor weights. Instantiate `PyanNet` directly with its fixed architecture configuration (`sample_rate=16000`, `num_channels=1`, `sincnet={"stride": 1}`, `lstm={"hidden_size": 128, "num_layers": 2, "bidirectional": True}`, `linear={"hidden_size": 128, "num_layers": 2}`) and load tensor weights directly into `PyanNet.state_dict`.
+- **Feasibility:** Technically viable as an offline re-architecture, but not as a minimal drop-in patch.
+- **Limitations:**
+  1. `safetensors` is not present in `requirements-installer-lock.txt` and cannot be added without rebuilding the installer runtime inventory.
+  2. Operating `PyanNet` on CPU or CUDA still exercises PyTorch 2.8.0's LSTM C++ kernel (`CVE-2025-3001`).
+  3. Eliminating the call to `torch.load` within the application does not clear `torch==2.8.0` or `transformers==4.57.6` in dependency scanners. Scanner tools audit installed package versions, not runtime coverage.
+
+### 2.2 Smallest Concrete Safe Patches
+
+To eliminate reachable network downloads and unconstrained fallbacks while preserving offline capability:
+
+1. **Enforce `local_files_only=True` in `whisper_runner.py`:**
+   - **Patch:** In `whisper_runner.py`, pass `local_files_only=True` to `whisperx.load_model()`, and verify all required model artifacts (`model.bin`, `config.json`, `vocabulary.json`, `tokenizer.json`) exist in `<data_root>/whisper_models/<model_size>/` before proceeding.
+   - **Effect:** Prevents `faster_whisper` from calling `tokenizers.Tokenizer.from_pretrained("openai/whisper-tiny")` on network channels when local files are missing or damaged.
+
+2. **Bundle Punkt Data for Alignment:**
+   - **Patch:** In `installer/staging/python/Lib/site-packages/whisperx/alignment.py` (line 194), delete `nltk.download('punkt_tab', quiet=True)`. Statically pre-install `tokenizers/punkt_tab/` into the bundled NLTK data directory. If missing, fail with an explicit offline error rather than initiating an unauthenticated HTTP request.
+
+### 2.3 Boundary Assessment Summary
+
+No small first-party boundary or monkeypatch can clear the 18 residual advisory entries (14 alias groups). While first-party boundaries can stop unauthenticated network requests and prevent dynamic GitHub downloads, the presence of `torch==2.8.0` (8 CVEs), `transformers==4.57.6` (5 CVE groups), and `nltk==3.10.3` (1 CVE) cannot be remediated without upgrading or migrating the underlying packages.
+
+---
+
+## Question 3: Stack Migration, Qualification Constraints, and Repair Outline
+
+### 3.1 Upstream Compatibility Conflicts Blocking Safe Closure
+
+To achieve zero advisory findings, the runtime stack must satisfy three competing version requirements that cannot be co-installed today:
+
+```mermaid
+flowchart TD
+    WX["whisperx 3.8.6"]
+    T28["torch 2.8.0"]
+    TR4["transformers 4.57.6"]
+    HF0["huggingface-hub 0.36.2"]
+    TC07["torchcodec 0.7.0"]
+
+    WX -->|"torch~=2.8.0"| T28
+    WX -->|"huggingface-hub<1.0.0"| HF0
+    WX -->|"transformers>=4.48.0"| TR4
+    WX -->|"torchcodec<0.8.0,>=0.6.0"| TC07
+
+    subgraph Security Remediation Targets
+        T_REQ["torch >= 2.13.0\n(resolves CVE-2025-3000,\nCVE-2026-24747, etc.)"]
+        TR_REQ["transformers >= 5.10.0\n(resolves CVE-2026-9856,\nCVE-2026-4372, etc.)"]
+        HF_REQ["huggingface-hub >= 1.5.0\n(mandated by transformers 5.10+)"]
+        NLTK_REQ["nltk >= 3.10.4\n(unreleased upstream)"]
+    end
+
+    T_REQ -.->|Breaks WX constraint torch~=2.8.0| WX
+    TR_REQ --> HF_REQ
+    HF_REQ -.->|Breaks WX constraint huggingface-hub<1.0.0| WX
+    T_REQ -.->|Breaks C++ ABI & FFmpeg 7 DLL links| TC07
+```
+
+1. **Torch Constraint:**
+   - Resolving all 8 Torch CVEs requires `torch >= 2.13.0` (`CVE-2025-3000` is fixed in 2.13.0; `CVE-2026-24747` and `CVE-2025-3001` in 2.10.0).
+   - `whisperx 3.8.6` specifies `torch~=2.8.0`, which strictly prohibits `torch >= 2.9.0`.
+   - `torchcodec 0.7.0` is compiled against Torch 2.8.0 C++ ABI and dynamically links to FFmpeg 7 DLLs (`avcodec-61.dll`). Torch 2.13.0 breaks TorchCodec 0.7.0 binary compatibility.
+   - `tests/test_installer_dependency_lock.py` line 28 explicitly asserts `locked["torch"] == "2.8.0"`.
+
+2. **Transformers and Hugging Face Hub Constraint:**
+   - Resolving all 5 Transformers issues requires `transformers >= 5.10.0` (`CVE-2026-9856` fixed in 5.10.0; `CVE-2026-4372` in 5.3.0).
+   - `transformers >= 5.10.0` requires `huggingface-hub >= 1.5.0`.
+   - `whisperx 3.8.6` specifies `huggingface-hub < 1.0.0` (pinned to `0.36.2`).
+   - Installing Transformers 5.10+ and Hugging Face Hub 1.5+ causes `pip check` to fail against WhisperX 3.8.6.
+
+3. **NLTK Unpatched Status:**
+   - `nltk 3.10.3` is the latest release on PyPI. Advisory `CVE-2026-81726` (`GHSA-8mgp-746c-j5xp`) has no patched upstream release (`last_affected: 3.10.3`). Upstream NLTK must publish a patched version, or WhisperX must eliminate its NLTK dependency.
+
+### 3.2 Offline Synthetic Qualification vs. Prohibited Actions
+
+Any future stack repair must strictly distinguish between allowable offline verification and prohibited operations:
+
+#### Allowable Offline Verification (Synthetic Inputs):
+1. **Graph Resolution:** Verify offline wheel collections satisfy `pip check` and solver constraints using a dedicated virtual environment without network access.
+2. **Import & DLL Smoke Tests:** Confirm `import torch`, `import torchaudio`, `import torchvision`, `import torchcodec`, `import transformers`, and `import whisperx` succeed on Windows x86-64. Validate `_register_packaged_decoder_dlls()` loads the packaged FFmpeg DLLs without error.
+3. **Synthetic Preprocessing Tests:** Pass synthetic in-memory numpy arrays (e.g., `np.zeros(16000, dtype=np.float32)`) to `whisperx.audio.log_mel_spectrogram` and `whisperx.vads.pyannote.Binarize` to confirm numerical and tensor stability.
+4. **Mocked Pipeline Integration:** Verify `whisper_runner.transcribe_audio` error-handling and transcript formatting (`_shape_segments`, JSON structure) using mock transcription objects without loading neural weights.
+5. **Acceptance Suites:** Run existing test suites (`tests/test_installer_*.py`, `tests/security/test_security_findings.py`) with `--runxfail` to maintain test invariance.
+
+#### Prohibited Actions (Require Explicit Integrity Clearance):
+1. **Model Downloads:** No downloading of Whisper models, PyAnnote pipelines, Wav2Vec2 alignment weights, or NLTK punkt archives from Hugging Face Hub, OpenAI, or GitHub.
+2. **Model Deserialization / Real Inference:** No unpickling of production `.bin` weights or running live model execution on user audio during build or test runs.
+3. **Live Index Binding:** No connection to `%LOCALAPPDATA%\Uoink\index.db`.
+4. **Network & Port Binding:** No live network calls, package index fetches, or binding to TCP port 5179.
+
+---
+
+## Actionable Repair Brief Outline
+
+This outline specifies the sequence of engineering actions required if Astra commissions a full dependency security repair:
+
+### Phase 1: Upstream Decoupling and Vendoring (Code Changes)
+1. **Vendor WhisperX:** Fork or vendor `whisperx` within the repository or as an internal wheel to remove artificial constraints:
+   - Relax `torch~=2.8.0` to support `torch >= 2.13.0`.
+   - Relax `huggingface-hub < 1.0.0` to support `huggingface-hub >= 1.5.0`.
+   - Remove transitive dependency on `nltk` by replacing Punkt sentence splitting in `whisperx/alignment.py` with standard library regular expressions or pre-parsed tabular rule sets.
+2. **VAD Architecture Decoupling:**
+   - Replace `pyannote.audio.core.model.Model.from_pretrained` in `whisperx/vads/pyannote.py` with direct instantiation of `PyanNet`.
+   - Convert `whisperx/assets/pytorch_model.bin` into a pure-weight `pytorch_model.safetensors` asset, eliminating `torch.load` and `pl_load` from VAD initialization.
+
+### Phase 2: Runtime Recompilation and Inventory Re-pinning (Installer Build)
+1. **C++ ABI Rebuild for Windows:**
+   - Obtain or compile `torchcodec` against `torch 2.13.x` on Windows x86-64.
+   - Verify matching FFmpeg shared libraries (`avcodec-61.dll`, `avformat-61.dll`, etc.) are packaged in `bin/torchcodec` and pass `_register_packaged_decoder_dlls()`.
+2. **Update Lockfile:**
+   - Update `requirements-installer-lock.txt` with verified wheels: `torch==2.13.x`, `torchaudio==2.13.x`, `transformers>=5.10.0`, `huggingface-hub>=1.5.0`, `lightning>=2.6.7` (once published, or suppress OSV record after confirmation).
+   - Re-run `scripts/verify_installer_lock.py` to confirm zero graph conflicts.
+
+### Phase 3: Offline Qualification Protocol
+1. Run offline import smoke tests across all native extension modules.
+2. Run synthetic audio pipeline tests to verify VAD segmentation and tokenization logic.
+3. Update frozen lock assertions in `tests/test_installer_dependency_lock.py` to match the new approved pins.
+4. Execute full offline test suite under `--runxfail` mode to confirm all 21 existing tests pass without regressions.
+5. Generate a fresh OSV query batch to verify that the 18 residual vulnerabilities are eliminated.
+
+---
+
+## Audit Conclusion
+
+The Uoink Living Library candidate release remains subject to **18 active advisory entries representing 14 distinct alias groups** across `torch`, `transformers`, and `nltk`. First-party preflight checks and setting `diarize=False` do not eliminate unsafe checkpoint deserialization in default transcription. Complete resolution requires an ecosystem upgrade across Torch (>=2.13.0), Transformers (>=5.10.0), and Hugging Face Hub (>=1.5.0), which is blocked by published WhisperX 3.8.6 constraints. Until Phase 1–3 repair actions are authorized and executed, this candidate cannot be certified as having a clean dependency scan.

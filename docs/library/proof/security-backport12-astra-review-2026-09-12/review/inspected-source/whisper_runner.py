@@ -1,0 +1,455 @@
+"""v3.1 WhisperX transcription runner.
+
+Per PROMPT-V3.1 track B step 3 (podcast transcription) + track D
+(A1 re-transcription). Both share the WhisperX runtime + the same
+model + the same lazy-download UX -- one worker, two entry points.
+
+Locked compute policy (LOCAL-FIRST):
+- Whisper inference runs on the user's machine. No cloud API call.
+- WhisperX is imported LAZILY so the helper boots fast, but the Windows
+  installer bundles the runtime. The /transcribe endpoints still surface
+  a structured 503 if an install is damaged or a dependency is missing.
+- Model files (200 MB - 2 GB) are downloaded on first use under
+  <data_root>/whisper_models/<model_size>/. Consent dialog lives in
+  the dashboard; this module just respects an explicit
+  `consent_given=True` flag and refuses without it on first download.
+
+Output shape (transcript JSON written to
+<data_root>/Podcasts/<feed>/<episode>.transcript.json):
+
+    {
+      "model": "base" | "small" | ...,
+      "language": "en",
+      "diarization_ran": true | false,
+      "segments": [
+        {"start": 0.0, "end": 5.2, "speaker": "SPEAKER_00",
+          "text": "Welcome to the show."},
+        ...
+      ],
+      "generated_at": "ISO timestamp"
+    }
+
+Compute budget per ROADMAP: 10-15 minutes per hour of audio on a
+typical laptop with the `base` model. Long episodes are fire-and-
+forget background processing -- the worker runs synchronously here
+but the endpoint can be wrapped in a thread by server.py."""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import inspect
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+log = logging.getLogger("uoink.whisper_runner")
+
+
+def _register_packaged_decoder_dlls():
+    """Keep Windows' loader on the app-owned FFmpeg runtime for TorchCodec."""
+    if sys.platform != "win32":
+        return None
+    app = Path(__file__).resolve().parent
+    directory = app / "bin" / "torchcodec"
+    if not directory.exists():
+        return None  # Source checkouts do not carry the installed native runtime.
+    if directory.resolve() != directory or not directory.is_dir():
+        raise RuntimeError("Packaged decoder directory must stay inside the application")
+    names = ("avcodec-61.dll", "avdevice-61.dll", "avfilter-10.dll",
+             "avformat-61.dll", "avutil-59.dll", "swresample-5.dll", "swscale-8.dll")
+    for name in names:
+        path = directory / name
+        if not path.is_file() or path.resolve() != path:
+            raise RuntimeError(f"Missing or redirected packaged decoder library: {name}")
+    return os.add_dll_directory(str(directory))
+
+
+# server.py imports this module before probing WhisperX. Direct transcription
+# entry points also pass here. The handle must outlive all lazy native imports.
+_PACKAGED_DECODER_DLL_HANDLE = _register_packaged_decoder_dlls()
+
+# Bounded enum for the per-row transcription state. The dashboard reads
+# this directly. 'queued' is set when the user opts in; 'running' once
+# the worker picks it up; 'done' / 'failed' on completion.
+STATUS_NONE = "none"
+STATUS_QUEUED = "queued"
+STATUS_RUNNING = "running"
+STATUS_DONE = "done"
+STATUS_FAILED = "failed"
+_STATUSES = (STATUS_NONE, STATUS_QUEUED, STATUS_RUNNING,
+              STATUS_DONE, STATUS_FAILED)
+
+# Bounded model enum. Larger = slower but more accurate. base is the
+# pragmatic default. tiny is for testing / low-spec hardware.
+MODEL_TINY = "tiny"
+MODEL_BASE = "base"
+MODEL_SMALL = "small"
+MODEL_MEDIUM = "medium"
+MODEL_LARGE = "large"
+MODEL_LARGE_V3_TURBO = "large-v3-turbo"
+_MODELS = (
+    MODEL_TINY, MODEL_BASE, MODEL_SMALL, MODEL_MEDIUM, MODEL_LARGE,
+    MODEL_LARGE_V3_TURBO,
+)
+
+
+def normalize_model(value) -> str:
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in _MODELS:
+            return v
+    return MODEL_BASE
+
+
+def _now_iso() -> str:
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+
+# ---- runtime probe -----------------------------------------------------
+# v3.2 (CC's own v3.1.3 FLAG-1 fix): cache the import attempt at module-top
+# instead of re-running `import whisperx` on every /health and /ping call.
+#
+# Symptom: splash perpetually paints the failure variant on slow cold boots.
+# Root cause: the per-call `import whisperx` paid a multi-second torch CUDA
+# probe on first run, exceeding the splash's 1.5s retry budget. A broken
+# bundle (e.g., torch DLL load failure) raises OSError -- not ImportError --
+# which crashed the helper with HTTP 500 on every health poll. The `except
+# ImportError` clause was too narrow.
+# Fix: probe ONCE at module import, store the result, broaden the exception
+# catch so even a DLL load failure leaves the helper booting cleanly and the
+# transcribe endpoints return a clean 503 instead of a 500.
+def _probe_whisperx() -> bool:
+    try:
+        import whisperx  # noqa: F401
+        return True
+    except BaseException as e:  # noqa: BLE001 -- intentional: see comment above
+        log.warning("whisperx unavailable: %s: %s", type(e).__name__, e)
+        return False
+
+
+_WHISPERX_AVAILABLE = _probe_whisperx()
+
+
+def is_whisperx_available() -> bool:
+    """O(1) lookup of the cached cold-boot probe result. Used by /diagnose
+    + the transcribe endpoints' 503 path + /health + /ping. Re-importing
+    whisperx every call cost up to several seconds on the first cold boot
+    (torch CUDA probe), which was enough to blow the splash retry budget
+    in v3.1.2. This is now a single import at module load time -- the
+    per-call cost is a Python dict lookup."""
+    return _WHISPERX_AVAILABLE
+
+
+def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
+    """Return true once the local Whisper model cache has any payload.
+
+    The first transcription still requires explicit user consent before
+    WhisperX downloads the model. /health uses this as a read-only status
+    bit, so it must not create the model directory as a side effect.
+    """
+    model_size = normalize_model(model_size)
+    model_path = Path(data_root) / "whisper_models" / model_size
+    if not model_path.exists() or not model_path.is_dir():
+        return False
+    try:
+        return any(model_path.iterdir())
+    except OSError:
+        return False
+
+
+def _model_dir(data_root: Path, model_size: str) -> Path:
+    p = Path(data_root) / "whisper_models" / model_size
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _runtime_device() -> str:
+    try:
+        import torch  # type: ignore
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    except Exception:
+        return "cpu"
+
+
+def _compute_type(device: str) -> str:
+    return "float16" if device == "cuda" else "int8"
+
+
+def set_current_thread_below_normal() -> bool:
+    """Lower only the transcription worker on Windows.
+
+    The server, dashboard, and search request threads retain normal priority.
+    Other platforms keep their default scheduling priority.
+    """
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        thread = kernel32.GetCurrentThread()
+        return bool(kernel32.SetThreadPriority(thread, -1))
+    except (AttributeError, OSError):
+        return False
+
+
+def _hf_token() -> str | None:
+    return (
+        os.environ.get("HF_TOKEN")
+        or os.environ.get("HUGGINGFACE_TOKEN")
+        or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    )
+
+
+# The diarization model identifier recorded in Phase 6 run provenance. This
+# is the pyannote pipeline, not Whisper's transcription model size.
+DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
+
+
+def _diarization_model_name(whisperx) -> str | None:
+    """The diarization model this runtime will actually load, or None when
+    the installed WhisperX does not accept an explicit model name (unknown
+    values are recorded as null, never guessed)."""
+    try:
+        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+    except (TypeError, ValueError):
+        return None
+    return DIARIZATION_MODEL if "model_name" in params else None
+
+
+def _package_version(name: str) -> str | None:
+    try:
+        from importlib import metadata as _metadata
+        return _metadata.version(name)
+    except Exception:  # noqa: BLE001 -- provenance is best effort, never fatal
+        return None
+
+
+def _file_sha256(path: Path) -> str | None:
+    """SHA-256 of the input audio, recorded at execution (never duplicated)."""
+    import hashlib
+    try:
+        digest = hashlib.sha256()
+        with open(path, "rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return None
+
+
+def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
+    """Create a WhisperX diarizer across old/new constructor signatures."""
+    kwargs: dict[str, Any] = {}
+    try:
+        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+    except (TypeError, ValueError):
+        params = {}
+    if "model_name" in params:
+        # Current WhisperX defaults here too, but pinning it avoids falling
+        # back to older pyannote 3.1 behavior when dependency resolution drifts.
+        kwargs["model_name"] = DIARIZATION_MODEL
+    token = _hf_token()
+    if token:
+        if "token" in params:
+            kwargs["token"] = token
+        elif "use_auth_token" in params:
+            kwargs["use_auth_token"] = token
+    if "cache_dir" in params:
+        kwargs["cache_dir"] = str(Path(data_root) / "diarization_models")
+    kwargs["device"] = device
+    return whisperx.DiarizationPipeline(**kwargs)
+
+
+# ---- transcript helper -------------------------------------------------
+def _shape_segments(segments) -> list[dict]:
+    """Normalise whisperx's per-segment dicts to our schema. WhisperX
+    returns dicts with start/end/text and optional speaker after the
+    diarization step. We drop everything else (logprobs, timings) --
+    the dashboard never reads them."""
+    out: list[dict] = []
+    for s in segments or []:
+        if not isinstance(s, dict):
+            continue
+        row: dict[str, Any] = {
+            "start": float(s.get("start") or 0.0),
+            "end": float(s.get("end") or 0.0),
+            "text": (s.get("text") or "").strip(),
+        }
+        spk = s.get("speaker")
+        if spk:
+            row["speaker"] = str(spk)
+        out.append(row)
+    return out
+
+
+def transcribe_audio(audio_path: Path, *,
+                      data_root: Path,
+                      model_size: str = MODEL_BASE,
+                      language: str | None = None,
+                      diarize: bool = False,
+                      consent_given: bool = False) -> dict:
+    """End-to-end transcription. Synchronous. Returns the structured
+    transcript dict.
+
+    Raises RuntimeError when whisperx is not importable -- the caller
+    surfaces a 503 with install hints.
+
+    `consent_given` must be True for first-time model downloads. The
+    flag is verified before the load_model call -- on first use the
+    model dir is empty, and we refuse without consent. The dashboard
+    consent dialog records the user's opt-in and re-issues the call."""
+    audio_path = Path(audio_path)
+    if not audio_path.exists():
+        raise FileNotFoundError(f"audio file missing: {audio_path}")
+    model_size = normalize_model(model_size)
+
+    # Short-circuit on the cached cold-boot probe result. If whisperx
+    # failed to import at module-top, re-trying here would pay the same
+    # multi-second cost + raise the same exception. Just fail fast.
+    if not _WHISPERX_AVAILABLE:
+        raise RuntimeError(
+            "whisperx is not installed or its runtime is broken. "
+            "Reinstall Uoink so the bundled WhisperX runtime is restored. "
+            "See the helper log for the underlying import error.")
+    try:
+        import whisperx  # type: ignore
+    except BaseException as e:  # noqa: BLE001 -- matches _probe_whisperx
+        raise RuntimeError(
+            f"whisperx import failed at transcribe time: "
+            f"{type(e).__name__}: {e}"
+        ) from e
+
+    model_path = _model_dir(data_root, model_size)
+    # If the model dir has no checkpoint files yet, this is a first
+    # download. Verify the user consented before WhisperX hits the
+    # internet for 200 MB - 2 GB.
+    has_existing_checkpoint = any(model_path.iterdir())
+    if not has_existing_checkpoint and not consent_given:
+        raise PermissionError(
+            f"Whisper model '{model_size}' has not been downloaded yet "
+            f"and consent_given=False. The dashboard should prompt the "
+            f"user before re-issuing the transcribe call with consent_given=True.")
+
+    # whisperx exposes a load_model + transcribe + align + diarize chain.
+    # Keep the call site narrow so a future WhisperX API rev doesn't
+    # require touching every caller -- just this module.
+    device = _runtime_device()
+    diarization_succeeded = False
+    # Phase 6 (phase6-v1): one fresh run identity per executed diarization
+    # attempt, generated once and persisted with the transcript. A retry or
+    # rebuild reuses it; a genuinely new execution gets a new one.
+    diarization_run: dict[str, Any] | None = None
+    try:
+        model = whisperx.load_model(model_size, device=device,
+                                      compute_type=_compute_type(device),
+                                      download_root=str(model_path))
+        result = model.transcribe(str(audio_path),
+                                    language=language)
+        segments = result.get("segments") or []
+        detected_lang = result.get("language") or language or "en"
+
+        # Optional alignment + diarization. Errors here degrade
+        # gracefully -- we still return the un-aligned transcript, with an
+        # explicit failed run record instead of a claimed success.
+        if diarize:
+            import uuid
+            diarization_run = {
+                "run_id": uuid.uuid4().hex,
+                "status": "failed",
+                "producer": "whisperx",
+                "producer_version": _package_version("whisperx"),
+                "model": _diarization_model_name(whisperx),
+                "generated_at": None,
+                "input_media_sha256": _file_sha256(audio_path),
+                "artifact_sha256": None,
+                "parameters": {"language": detected_lang, "alignment_model": None},
+            }
+            try:
+                align_model, align_meta = whisperx.load_align_model(
+                    language_code=detected_lang, device=device)
+                aligned = whisperx.align(
+                    segments, align_model, align_meta,
+                    str(audio_path), device=device)
+                diarize_pipeline = _diarization_pipeline(
+                    whisperx, device=device, data_root=data_root)
+                diarize_segments = diarize_pipeline(str(audio_path))
+                aligned = whisperx.assign_word_speakers(
+                    diarize_segments, aligned)
+                segments = aligned.get("segments") or segments
+                diarization_succeeded = True
+                diarization_run["status"] = "succeeded"
+            except Exception as diar_err:
+                log.warning("diarization failed (degrading to "
+                              "transcript-only): %s", diar_err)
+            diarization_run["generated_at"] = _now_iso()
+    except Exception as e:
+        raise RuntimeError(f"whisperx transcribe failed: {e}") from e
+
+    transcript: dict[str, Any] = {
+        "model": model_size,
+        "language": detected_lang,
+        "diarization_ran": diarization_succeeded,
+        "segments": _shape_segments(segments),
+        "generated_at": _now_iso(),
+    }
+    if diarization_run is not None:
+        transcript["diarization_run"] = diarization_run
+        transcript["diarization_run_id"] = diarization_run["run_id"]
+    return transcript
+
+
+# ---- persistence helpers (used by the endpoints to record state) -------
+def transcript_output_path(audio_path: Path) -> Path:
+    """Sibling of the MP3 with .transcript.json suffix."""
+    audio_path = Path(audio_path)
+    return audio_path.with_suffix(".transcript.json")
+
+
+def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
+    """Persist the transcript JSON. Phase 6 (phase6-v1): when the transcript
+    carries a ``diarization_run`` record, the output artifact digest is
+    computed over the transcript *without* its run/provenance members
+    (``library_media.transcript_artifact_bytes``) and stored in the record,
+    so the archived artifact never hashes itself."""
+    out = transcript_output_path(audio_path)
+    run = transcript.get("diarization_run")
+    if isinstance(run, dict):
+        import hashlib
+        import library_media  # offline validator; no model, no helper import
+        run["artifact_sha256"] = hashlib.sha256(
+            library_media.transcript_artifact_bytes(transcript)).hexdigest()
+    out.write_text(
+        json.dumps(transcript, indent=2, ensure_ascii=False),
+        encoding="utf-8")
+    return out
+
+
+def update_episode_transcript_state(idx, episode_id: int, *,
+                                      status: str,
+                                      transcript_path: Path | None = None,
+                                      model_used: str | None = None,
+                                      diarization_ran: bool = False,
+                                      error: str | None = None) -> None:
+    """Single UPDATE that lands all transcript_* fields atomically."""
+    if status not in _STATUSES:
+        raise ValueError(f"status must be one of {list(_STATUSES)}")
+    with idx.write_transaction() as conn:
+        conn.execute(
+            "UPDATE podcast_episodes SET "
+            "  transcript_status = ?, "
+            "  transcript_local_path = COALESCE(?, transcript_local_path), "
+            "  transcript_model_used = COALESCE(?, transcript_model_used), "
+            "  diarization_ran = ?, "
+            "  transcript_finished_at = ?, "
+            "  transcript_error = ? "
+            "WHERE id = ?",
+            (status,
+             str(transcript_path) if transcript_path else None,
+             model_used,
+             1 if diarization_ran else 0,
+             _now_iso() if status in (STATUS_DONE, STATUS_FAILED) else None,
+             error,
+             episode_id))

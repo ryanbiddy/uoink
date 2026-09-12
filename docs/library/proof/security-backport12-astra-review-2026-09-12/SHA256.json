@@ -1,0 +1,109 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 9,
+      "sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992"
+    },
+    "apply.stderr": {
+      "bytes": 1128,
+      "sha256": "0b0232603d17f22747aaacc3294996c53c5d4d331262610c04a3a8eb045c0f56"
+    },
+    "apply.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "instruments/integrate_security_backport12.py": {
+      "bytes": 3675,
+      "sha256": "6bfa412fa70bef2273d2dce196ce6ef1028f9224027cf0284331e8bf8cd4ba25"
+    },
+    "instruments/repair_security_backport_reader12.py": {
+      "bytes": 1079,
+      "sha256": "27ee5646841492c8f7152f386aff9777ded87a790acbdab082f570bc69b8420a"
+    },
+    "instruments/review_security_backport12.py": {
+      "bytes": 2886,
+      "sha256": "ba70e9f649be49a8c2df8526be9889d1a30237ce965de02b51f50d3c12c17b8c"
+    },
+    "instruments/review_security_backport12_02.diff": {
+      "bytes": 1329,
+      "sha256": "7212f26ccb19ea0e853ad84d0ad79b887f1a26dd34d824d1394acff3a4839fab"
+    },
+    "instruments/review_security_backport12_02.py": {
+      "bytes": 2870,
+      "sha256": "3c031435061b8ea520d608399aafc61d2225cbad8e19a03bc4c238418c284a1f"
+    },
+    "reader-failure.json": {
+      "bytes": 339,
+      "sha256": "1e14c89a761eb33cdd61cfeb7f3779783569d1d08aafc732452581fb6cfa59ab"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/faster_whisper/transcribe.py": {
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/lightning/fabric/utilities/cloud_io.py": {
+      "bytes": 7088,
+      "sha256": "890ffcb7827a18831163c2dbb4e5d123404969d5f3863d2ce6608c23c77898c3"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/nltk/data.py": {
+      "bytes": 68443,
+      "sha256": "cda75896c3639541f3c3b811d647354dc5829774c2f201a7c942896f5cb99dc8"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/pyannote/audio/core/model.py": {
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/pyannote/audio/models/segmentation/PyanNet.py": {
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/torch/nn/modules/rnn.py": {
+      "bytes": 76334,
+      "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/whisperx/alignment.py": {
+      "bytes": 21696,
+      "sha256": "cc3607dcc25e592ae218f74a6ca644d6ce1c77d9cee4672f01c751da8feb9aa7"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/whisperx/asr.py": {
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/whisperx/vads/pyannote.py": {
+      "bytes": 9880,
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003"
+    },
+    "review/inspected-source/installer/staging/python/Lib/site-packages/whisperx/vads/silero.py": {
+      "bytes": 3043,
+      "sha256": "f054f968c757a2329efa8ad72c44d061b0596bfc92b2c8e47d1dc7d8ec877055"
+    },
+    "review/inspected-source/requirements-installer-lock.txt": {
+      "bytes": 3703,
+      "sha256": "8c45bc8aeb5c008dadc6bd8bc58900ce5f8f48ea640a105a301021754c93c8ec"
+    },
+    "review/inspected-source/tests/test_installer_dependency_lock.py": {
+      "bytes": 5202,
+      "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+    },
+    "review/inspected-source/whisper_runner.py": {
+      "bytes": 18957,
+      "sha256": "71bd744fd4bc4f44243a2642a918958426dd21f0c06d341cc2c758cb27ce1ef5"
+    },
+    "review/retained-advisory-details.json": {
+      "bytes": 24771,
+      "sha256": "e57b91c60e6dcca359c701563d0263e7aef73494e2061248e69488ed61411af2"
+    },
+    "review/source-bindings.json": {
+      "bytes": 2410,
+      "sha256": "dda8c99a98be2fd26169382f35fe4a179ccbe72b62e03da0f9e5fba1b4ea5ed2"
+    },
+    "review/worker-original.patch": {
+      "bytes": 22351,
+      "sha256": "855b7d96172b4d070d36393c2125433210cba812b56e3e58daa5793c41535520"
+    },
+    "review/worker-report-original.md.txt": {
+      "bytes": 21783,
+      "sha256": "d1b24fb04ff0406c99d69b249ff6d86b2b3368040385d951c0829ce385f58870"
+    }
+  }
+}
