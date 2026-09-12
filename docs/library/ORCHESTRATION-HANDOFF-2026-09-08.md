@@ -86,18 +86,18 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; note repair integrated, package-08 qualification next)
+## State at handoff (updated 2026-09-12; note/media repairs integrated, final qualification next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 installed and source-bound; documentary delivery next |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Original historical AT6 exit disposition remains Ryan's; older partial receipts stay partial |
-| 4 | Package-07 installed protocol/client and actual native Uoink observations reviewed; note display repair integrated at d2caac5 | 60 focused checks pass in both roots, including 16 new regressions. Original worker false-success handling rejected and corrected | Package-08 installed/native qualification next. Claude Desktop exposed no targetable window and exited 0; no client GUI credit |
+| 4 | Native note repair d2caac5 and saved-media repair 60d203f integrated | Final media union has 58 passes in both roots, including 23 new cases. Worker boundary and fabricated timing/label defects corrected | Final full tree, package-08 installation and native GUI confirmation next |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
 | Security | Fresh Gemini evidence independently reviewed at a6b9cf0 | 19 raw entries / 15 alias groups remain. 35 upstream payloads verified; 21 existing cases pass in both roots. Four proposed worker tests rejected | No verified compatible drop-in dependency repair. Keep the security hold; broader migration needs a separate qualified scope |
-| Integration | Package-07 full tree remains 2,540 pass / 1 historical failure / 2 skips; its kit and final backup at 0a1f923 are verified | d2caac5 changes packaged note/dashboard source; prior qualification cannot cover it | Follow NOTE-REPAIRED-CANDIDATE-QUALIFICATION-2026-09-12.md: fresh full tree, package-08 build/install/native check, notes/kit/backup |
+| Integration | a25e3be complete tree sealed: 2,556 pass / one historical failure / two skips, 2,559 cases | 60d203f changes packaged media/dashboard source; its 58/58 focused checks do not replace complete qualification | Integrate the documentary second security review, freeze the final source, then package-08 tree/build/install/native/notes/kit/backup |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -158,13 +158,17 @@ This sequence supersedes the completed delivery instructions below.
    shortcut and unconditional readiness. The original native evidence is sealed
    at 2531017: 48 payloads, including ten original PNGs. The corrected patch has
    60 passes in both roots, 16 new cases and 45 review payloads.
-3. Follow NOTE-REPAIRED-CANDIDATE-QUALIFICATION-2026-09-12.md. The focused repair,
-   raw diff/three-way apply and checkout checks are complete. Existing tests and
-   fixtures are unchanged. Freeze this handoff commit,
-   run the corrected complete tree, build package-08 and qualify its installed
-   source plus the native note flow. Update notes/runbook/kit and back up only
-   cc/living-library. Never reuse a consumed profile or claim a prior failure
-   passed without the new result.
+3. Media worker 2dae80cc is integrated at 60d203f. Read ASTRA-MEDIA-DETAIL-
+   REVIEW-2026-09-12.md. Its 108-payload seal preserves all attempts; 58 checks
+   pass in each root. Original source has nine failures / three passes under
+   the worker's twelve cases. Existing tests/fixtures remain unchanged. The
+   a25e3be full tree is separately sealed in 44 payloads and remains FAIL.
+   Integrate documentary security run 940c7fc1 with Astra's corrected review,
+   then freeze the final source. Run ryan-final-partitioned-06 (23 new media
+   cases, none removed), build package-08 and qualify its installed source plus
+   actual native note/media flows. Update notes/runbook/kit and back up only
+   cc/living-library. Prepared package-08 instruments still bind a25e3be;
+   adapt those bindings before execution and preserve the draft/diff history.
 4. Claude Desktop 1.49585.0 honors CLAUDE_USER_DATA_DIR in shipped code. The
    isolated attempt had no targetable window in repeated Sky inventories, then
    exited 0 after about 81 seconds. Its owned job is empty and guard restored.
@@ -3091,3 +3095,20 @@ Native package-07 evidence at 2531017 contains ten actual Uoink window PNGs and
 Claude Desktop exposed no window, so its exit 0 gives no GUI credit. All owned
 native jobs are stopped and guards restored. New source requires package-08 and
 a new installed native note observation; the package-07 kit remains historical.
+
+### 2026-09-12 — media boundaries integrated after negative review
+
+60d203f integrates Gemini 2dae80cc after Astra corrected pre-containment metadata
+probes, character-based reads, deep/non-finite JSON handling, nested private
+fields, A-to-B-to-A stale responses, invented transcript/timeline/speaker values
+and dropped stored time aliases. Final focused result is 58 passes in each root;
+23 new cases are added and existing tests remain unchanged. All 19 recorded
+worker/integrator attempts are retained, including generator/setup failures.
+Read the one-page verdict and exact repair briefs before the original worker
+report. A documentary whitespace preflight rejected its Markdown hard breaks;
+the human-facing copy was trimmed while raw sealed bytes stayed unchanged.
+
+The a25e3be full partitioned tree has 2,556 passes, one historical AT6 failure
+and two skips, with every one of 2,559 cases accounted for exactly once. The
+44-payload seal retains FAIL. The media source postdates that result, so no
+package is built from a25e3be. Package-07 remains historical and unchanged.
