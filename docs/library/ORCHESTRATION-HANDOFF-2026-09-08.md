@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; reader repair `d812785`, package-07 qualification next)
+## State at handoff (updated 2026-09-12; package-07 built from tested `6a89189`, fresh installation next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | SQLite callback repair integrated at d812785, 97 passes in each root | Package-06 client supplements: 20/20 pairs, both native prompts separately; 45 successful / 3 failed tool events, no sentinel calls. Raw combined gate remains open | Freeze new complete tree, build/reseal and installed qualification. Sign-in and extra-usage-off confirmation are complete |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-06 actual range export failed twice; callback fix is integrated with cross-consumer regression passing | Original P4 seed has incomplete chapter sidecar and remains untouched; both diagnoses retained | Qualify package-07 using the separate installed production-publication scenario. Speakers stay blocked |
-| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match. New client proof has 251 payloads and a reproduced product defect; old measurements remain unchanged | New product repair requires complete tree, rebuild and fresh installed qualification. Remaining repair/evidence work belongs to Astra; release dispositions belong to Ryan |
+| Integration | Package-07 built/sealed from 6a89189; complete tree 2,540 passed / 1 historical failure / 2 skipped, all 2,543 cases accounted for | 32,506 compiler inputs and 142 source bindings match; 140 pins / 283 requirements / 983 repair-wheel files verified; Defender reports no threats, EXE unsigned | Fresh Agent Install 07 Setup/reinstall, C22/browser and client observations remain Astra's work; release dispositions belong to Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -232,9 +232,11 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    tests/test_library_resources.py for the brief's resource suite. Astra verified
    97 passes in both roots and four old-code failures / one pass. Raw diff and
    three-way apply are complete; d812785 is the product integration. Read
-   ASTRA-SQLITE-DEADLINE-INTEGRATION-2026-09-12.md, then follow SQLITE-REPAIRED-
-   CANDIDATE-QUALIFICATION-2026-09-12.md: freeze the complete tree, rebuild/reseal
-   and requalify installation. The positive chapter observation has the separate
+   ASTRA-SQLITE-DEADLINE-INTEGRATION-2026-09-12.md. The complete 6a89189 tree
+   records 2,540 passes / one historical failure / two skips, with every prior
+   case plus five new regressions accounted for. Package-07 is built and sealed;
+   read ASTRA-PACKAGE-07-VERDICT-2026-09-12.md. Follow SQLITE-REPAIRED-
+   CANDIDATE-QUALIFICATION-2026-09-12.md into fresh installation. The positive chapter observation has the separate
    INSTALLED-PUBLISHED-CHAPTER-SCENARIO-2026-09-12.md; no old fixture is edited.
    Preserve package-06's two failed media calls, incomplete chapter seed and
    all partial client coverage. No original fixture edits. Authentication and
@@ -482,8 +484,8 @@ HTTP 403 stays blocked. Astra owns the remaining safe installation and evidence
 work under Ryan's delegation; this is not a pending installation permission.
 Use the dedicated installation-receipts directory outside the checkout because
 installed provenance correctly rejects source-checkout module paths. Record the
-actual same-account mode. Fresh client sign-in/usage-credit verification remains
-an operator capability if unavailable to the agent; never copy ordinary secrets.
+actual same-account mode. Client sign-in and usage-credit confirmation are complete;
+reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
@@ -2912,3 +2914,28 @@ is archived byte-identically at _scratch/Uoink-Setup-3.8.0-package06-91120b4a.ex
 The 251-file client proof and earlier qualification plan are remotely verified
 at cf5fa70 via build/installed-client06-proof-2026-09-12.backup.json. Later commits
 still need the next authorized backup. No worker remains active.
+
+### 2026-09-12 - Full SQLite-repaired tree and package-07 are sealed
+
+Source 6a89189 records 2,540 passes, one historical AT6 failure and two skips.
+All 2,543 cases are accounted for once, with five added cleanup regressions and
+no prior case missing. The 44-file seal preserves the failed aggregate and
+original raw reports. No assertion, mark or P4 fixture was changed.
+
+Package-07 built from that same source in 448.374 seconds. Its EXE is
+389,569,575 bytes, SHA-256
+308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b.
+All 32,506 compiler inputs and 142 source bindings are recorded. Fresh checks
+verify 140 pins, 283 dependency requirements and 983 repair-wheel files.
+The 85-file package seal includes those checks and the unchanged checkpoint
+hash. Defender exits zero and reports no threats; the EXE remains unsigned,
+and the dated 19-entry / 15-issue security result is not cleared.
+
+Notices-only f9d9f1f changes two dates after the repeated exact-metadata review;
+it is outside compiler inputs. Pre-execution export review adds the fresh graph
+and pin records before sealing, and preserves raw evidence bytes through Git.
+The authorized backup was verified at 6a89189 in
+build/sqlite-cleanup-qualified-checkpoint-2026-09-12.backup.json; that receipt
+establishes transport equality, not a passed full-tree aggregate. Later docs
+still need the next backup. Agent Install 07 is the next fresh app/data root;
+keep Agent Install 06 profiles and authenticated Claude namespace intact.

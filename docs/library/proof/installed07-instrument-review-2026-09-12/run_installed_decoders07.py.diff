@@ -1,0 +1,11 @@
+--- run_installed_decoders06.py
++++ run_installed_decoders07.py
+@@ -4,7 +4,7 @@
+ r=Path(__file__).resolve().parents[1]
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',required=True,type=Path);args=p.parse_args()
+ root=args.root.resolve();assert root.is_relative_to(Path(r'E:\AI\projects\uoink\installation-receipts'));app=root/'app'
+-seal=json.loads((r/'docs/library/proof/candidate-package-06-2026-09-11/package-manifest.json').read_text())
++seal=json.loads((r/'docs/library/proof/candidate-package-07-2026-09-12/package-manifest.json').read_text())
+ for label in ('install','same-version-reinstall'):
+  record=json.loads((root/(label+'.json')).read_text());assert record['exit']==0 and record['package_sha256']==seal['package_sha256']
+ comparison=json.loads((root/'installed-file-comparison.json').read_text())

@@ -1,0 +1,22 @@
+{
+  "source": "6a89189d601467eeff33d304c2c9b69cdd2e6d0b",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2540,
+    "failed": 1,
+    "skipped": 2
+  },
+  "cases": 2543,
+  "seconds_including_collection": 1794.0776165000025,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree with --runxfail; not a monolithic pytest run",
+  "expected_failure_policy": "Original marks unchanged; --runxfail executes all assertion bodies normally",
+  "finished_utc": "2026-09-12T08:02:22.998500+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "partition": "main"
+    }
+  }
+}

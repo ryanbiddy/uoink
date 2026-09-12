@@ -1,0 +1,15 @@
+--- inventory_installed_extras06.py
++++ inventory_installed_extras07.py
+@@ -2,10 +2,10 @@
+ import datetime as dt,hashlib,json,re,stat
+ from pathlib import Path
+ r=Path(__file__).resolve().parents[1]
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 06')
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07')
+ app=root/'app';out=root/'installed-generated-files.json'
+ assert app.is_dir() and not out.exists()
+-seal=r/'docs/library/proof/candidate-package-06-2026-09-11'
++seal=r/'docs/library/proof/candidate-package-07-2026-09-12'
+ expected={x['path'] for x in json.loads((seal/'staged-inventory.json').read_text())['files'] if x['install_role']=='installed'}
+ files=[];extras=[]
+ for q in app.rglob('*'):

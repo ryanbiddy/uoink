@@ -3,8 +3,11 @@
 Ryan delegated the installation check to Astra. Package-06 now has actual same-account Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful independent browser/state review. Phase 4 collection records 15 passes, one blocked link and seven unobserved client/visual checkpoints. This does not approve an ordinary upgrade.
 
 Agent Install 06 sign-in and extra-paid-usage-off confirmation are complete.
-Actual client observations found a SQLite timeout-cleanup defect; Astra is
-repairing it and owes replacement-package qualification. Do not repeat sign-in
+The SQLite timeout-cleanup repair is integrated at d812785 and qualified in
+the complete 6a89189 tree (2,540 passed / one historical failure / two skipped).
+Package-07 is built and sealed; Astra owns its fresh installed observations.
+See [the package-07 verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md).
+Do not repeat sign-in
 or run these historical package-06 steps against the current receipt. The
 [client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md) records progress
 and remaining checks. The procedure below remains the frozen package-06 runbook.

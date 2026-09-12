@@ -1,0 +1,26 @@
+[
+  {
+    "before": "inventory_installed_extras06.py",
+    "after": "inventory_installed_extras07.py",
+    "scope": "Exact app/seal labels only; original assertions, probes and startup restoration retained.",
+    "before_sha256": "36dab51fe564b4a107521fbaf04ebb18741456192ac859d6accd3d3e41d8f0e3",
+    "after_sha256": "10758d66408f5b21f2af0d7d62390cd8e8eed7dad126ac9f78402c57efa62822",
+    "executed": false
+  },
+  {
+    "before": "run_installed_decoders06.py",
+    "after": "run_installed_decoders07.py",
+    "scope": "Exact app/seal labels only; original assertions, probes and startup restoration retained.",
+    "before_sha256": "51d70b28391a427c21a53480bdfdd970a95ccec63cdc327d6c2c09eb1b1ae34e",
+    "after_sha256": "b8d975f8e1a54880ccb8eb601f1e35a64053e1ea1160f0482320ca53a113c2df",
+    "executed": false
+  },
+  {
+    "before": "run_installed_decoders06_portable.py",
+    "after": "run_installed_decoders07_portable.py",
+    "scope": "Exact app/seal labels only; original assertions, probes and startup restoration retained.",
+    "before_sha256": "20e3fae02dc066f206b9254b8e3fca9c329762c5080e19a96728aa5fcd821d57",
+    "after_sha256": "10448dd0a85bdfc5e3b4e1d5eb7cf1721e7b7de80cd5b666846d896653befc81",
+    "executed": false
+  }
+]

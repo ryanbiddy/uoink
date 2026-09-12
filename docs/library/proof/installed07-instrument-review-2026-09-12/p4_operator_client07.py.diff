@@ -1,0 +1,34 @@
+--- E:\AI\projects\uoink\checkouts\Yoink-library\scripts\install_receipt\p4_operator.py
++++ p4_operator_client07.py
+@@ -9,7 +9,7 @@
+ import subprocess
+ import sys
+ 
+-HERE = Path(__file__).resolve().parent
++HERE = Path(__file__).resolve().parents[1] / "scripts" / "install_receipt"
+ sys.path.insert(0, str(HERE))
+ import p4_common as common
+ from p4_session import spawn_owned
+@@ -85,13 +85,20 @@
+         for name, digest in prep["hashes"].items():
+             if common.sha_file(client / name) != digest:
+                 raise common.IsolationError("prepared client bytes changed: " + name)
+-        launch_file = client / ("launch-isolated.json" if args.client_route == "ordinary" else "launch-recall.json")
++        launch_file = client / ("launch.json" if args.client_route == "ordinary" else "launch-recall.json")
+         launch = json.loads(launch_file.read_text(encoding="utf8"))
+         from p4_prepare_client import validate_original_config
+         config = json.loads((client / "mcp-client.json").read_text(encoding="utf8"))
+         validate_original_config(config, binding)
+         env.update(launch["environment"])
+-        env["CLAUDE_CONFIG_DIR"] = str(client / "claude-config")
++        env["CLAUDE_CONFIG_DIR"] = 'E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\profile\\client\\claude-config'
++        original_settings = client / ("settings.json" if args.client_route == "ordinary" else "settings-recall.json")
++        expected = json.loads(original_settings.read_text(encoding="utf8"))
++        expected["env"]["CLAUDE_CONFIG_DIR"] = env["CLAUDE_CONFIG_DIR"]
++        overlay = profile.parent / ("settings-" + args.client_route + "-auth-overlay.json")
++        if json.loads(overlay.read_text(encoding="utf8")) != expected:
++            raise common.IsolationError("Auth overlay differs beyond the declared isolated credential namespace")
++        launch["args"][launch["args"].index("--settings") + 1] = str(overlay)
+         command = [str(args.client_exe), *launch["args"], "--print", "--verbose",
+                    "--output-format", "stream-json", "--include-hook-events"]
+         cwd = client

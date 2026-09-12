@@ -2,13 +2,13 @@
 
 Updated 2026-09-12. Candidate retained for review; not approved for ordinary upgrade or public release.
 
-Actual package-06 client testing found a SQLite timeout-cleanup defect that
-interrupts later cited-range exports. The fix is integrated at d812785 with
-97 affected tests passing in each root; full replacement qualification remains.
-The same observation established 20/20 paired reads and both native
-prompts in separate sessions; it does not clear combined client/visual acceptance.
-See [the client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md).
-The package and full-tree figures below remain the frozen package-06 record.
+Package-07 contains the SQLite timeout-cleanup fix at d812785. The complete
+tree at 6a89189 records 2,540 passes, one historical AT6 failure and two skips;
+fresh installed qualification is next. Package-06 client observations remain
+retained: 20/20 paired reads and both native prompts in separate sessions,
+alongside two failed range exports and incomplete combined client/visual
+acceptance. See [the package verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md)
+and [the earlier client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md).
 
 The library now supports bounded evidence retrieval, reviewable shelf proposals,
 consented standing capture, native resources and prompts, an optional file mirror,
@@ -19,31 +19,32 @@ public release has occurred. Installation is not a security certification.
 
 | Item | Recorded value |
 |---|---|
-| Installer | Uoink-Setup-3.8.0.exe, package-06 |
-| Build and complete-tree source | `6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d` |
-| Bytes | 389,568,844 |
-| SHA-256 | `91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb` |
+| Installer | Uoink-Setup-3.8.0.exe, package-07 |
+| Build and complete-tree source | `6a89189d601467eeff33d304c2c9b69cdd2e6d0b` |
+| Bytes | 389,569,575 |
+| SHA-256 | `308205ec6273dafe3fb0b2f5273e713803e6e78ea989d883217ecd813a17d32b` |
 | Bundled runtime | Python 3.13.15, MCP 1.28.1, schema 30 |
-| Build interval, UTC | 2026-09-11T18:10:15.1189075Z to 18:17:10.6256317Z; 415.509 seconds |
-| Complete-tree result | 2,535 passed, 1 historical failure, 2 skipped; 2,538 cases |
-| Actual installation | Isolated Setup/reinstall, C22 and repaired browser review complete; real-client gate remains open |
+| Build interval, UTC | 2026-09-12T08:02:41.3666423Z to 08:10:09.7391286Z; 448.374 seconds |
+| Complete-tree result | 2,540 passed, 1 historical failure, 2 skipped; 2,543 cases |
+| Actual installation | Fresh package-07 qualification pending; historical package-06 receipts retained below |
 
-The [package-06 seal](proof/candidate-package-06-2026-09-11/SHA256.json)
+The [package-07 seal](proof/candidate-package-07-2026-09-12/SHA256.json)
 records 32,506 compiler inputs: 32,497 installed destinations, eight wizard
-images and one setup-only script. All 142 source bindings match. Actual Setup
-and installed-file comparisons are recorded separately below.
+images and one setup-only script. All 142 source bindings match. Fresh Setup
+and installed-file comparisons remain separate required observations.
 
 All 140 runtime pins match staging and all 283 declared active requirements
 are satisfied. All 983 compared payload files from the two Lightning repair
 wheels and setuptools match the independently verified downloads; installation-
-rewritten RECORD files are explicitly excluded. See [the package verdict](ASTRA-PACKAGE-06-VERDICT-2026-09-11.md).
+rewritten RECORD files are explicitly excluded. See [the package verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md).
 
-Notices-only commit `d363c04` follows the frozen source. Its 50 corrected license
+Notices-only commit `f9d9f1f` follows the frozen source. Its 50 corrected license
 fields use exact packaged License-Expression metadata; seven missing declarations
 remain unknown. Raw generator output and source metadata are retained. Notices
 are outside the installer payload; no packaged source changed after validation.
-Earlier installers and ZIPs remain preserved. Use this package with its matching
-[runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md).
+Earlier installers and ZIPs remain preserved. The
+[runbook](INSTALL-RECEIPT-RUNBOOK-2026-09-09.md) currently retains the historical
+package-06 procedure; its package-07 update follows fresh installed qualification.
 
 ## What the phases deliver
 
@@ -107,6 +108,7 @@ or complete safety are not adopted.
 | Capture revision and recovery display | `15e3f7e` | 316 passes / one historical AT6 failure in each root; real JavaScript renderer and new installed browser review |
 | Lightning 2.6.6 | `63f7de9` | 16 passes in each root; three native overlay checks; both verified wheel payloads match staging |
 | Required setuptools runtime and notices | `9ea755b` | 19 passes in each root; final 140-pin / 283-requirement graph has no missing edge |
+| SQLite deadline cleanup | `d812785` | 97 passes in each root; four old-code failures / one pass, then all five regressions pass in the complete tree |
 
 Pillow is now 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
 The September 11 exact-version OSV observation of all 140 top-level pins retains
@@ -148,7 +150,7 @@ Start Menu group. It does not sandbox same-user malware. This host has no Window
 Sandbox; no elevation, system-feature installation or protection downgrade was
 used. Actual receipts retain the real account identity and effects.
 
-## Actual installed observations
+## Historical package-06 installed observations
 
 Actual Setup and same-version reinstall each exit zero in **Agent Install 06**,
 outside the checkout under the same non-elevated Windows account. All 32,497
@@ -184,12 +186,12 @@ checks have separate executable evidence. The blocked row carries X's prior
 stays false because client acceptance is incomplete. Terminated transport exit
 one remains recorded; no graceful client exit is claimed.
 
-A separate **p4-client/profile** has been prepared and independently checked,
-and remains uncollected for the user-controlled client session. No ordinary
-credentials were read or copied and Astra has not invoked a client model.
-Fresh subscription sign-in and extra-usage-off confirmation remain required;
-use [the prepared sign-in instructions](INSTALLED-CLIENT-SIGNIN-2026-09-11.md).
-The seven unobserved rows are local citation, brief and chapter visuals, optional
+A separate **p4-client/profile** subsequently completed isolated subscription
+sign-in, and Ryan confirmed extra usage off. Six actual client sessions are
+retained in the September 12 addendum: 45 successful and three failed tool
+events, with no sentinel calls. No ordinary credentials were copied. The raw
+collector's seven unobserved rows remain its original result: local citation,
+brief and chapter visuals, optional
 external player navigation, hostile client actions and ordinary/Recall client
 streams. They are not seven newly failing product features. The prior BD-27
 player observation remains historical; no external source was fetched again.
@@ -216,6 +218,7 @@ Installed Python 3.13.15 observations are separate.
 
 | Source | Passed | Failed | Skipped | Xfailed | Seconds |
 |---|---:|---:|---:|---:|---:|
+| `6a89189` (explicit --runxfail) | 2,540 | 1 | 2 | 0 | 1779.570 |
 | `6697dff` (explicit --runxfail) | 2,535 | 1 | 2 | 0 | 1452.312 |
 | `393010f` | 2,493 | 1 | 2 | 1 | 1451.129 |
 | `9a62e84` | 2,489 | 1 | 2 | 1 | 1464.698 |
@@ -225,7 +228,7 @@ Installed Python 3.13.15 observations are separate.
 | `8fc6a40` | 2,254 | 10 | 3 | 1 | 573.49 |
 | `263b7e4` | 2,193 | 9 | 3 | 1 | 728.37 |
 
-All 2,538 cases are accounted for once: the previous 2,497 plus 41 new regressions, with no prior case missing. The aggregate remains FAIL because the historical AT6 exit assertion remains failed. No existing test or fixture guard changed. See [the current complete-tree verdict](REPAIRED-CANDIDATE-VERIFICATION-2026-09-11.md) and [its seal](proof/ryan-final-partitioned-03-2026-09-11/SHA256.json).
+All 2,543 cases are accounted for once: the previous 2,538 plus five new regressions, with no prior case missing. The aggregate remains FAIL because the historical AT6 exit assertion remains failed. No existing test or fixture guard changed. See [the current qualification verdict](ASTRA-PACKAGE-07-VERDICT-2026-09-12.md) and [its tree seal](proof/ryan-final-partitioned-04-2026-09-12/SHA256.json).
 
 The original AT6 shell wrapper discarded the child exit status. Recovered
 artifacts and a successful replacement AT7 cannot recreate that old status;
@@ -240,7 +243,7 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 - Ryan's disposition of the missing historical AT6 exit and retained dependency
   advisories; neither is presented as a pass or clean security clearance.
-- Fresh isolated client authentication, real-client streams and citation/brief/chapter observations remain open. The capture display repair and its installed browser/state pair are complete; they do not supply the missing client evidence.
+- Fresh package-07 installation, client and citation/brief/chapter observations remain Astra's work. Isolated authentication and extra-usage-off confirmation are complete. The historical package-06 observations do not establish replacement-package behavior.
 - No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
   is deferred. The failed shelf-quality and dashboard-size measurements remain.
 - Main merge and publication require Ryan's decision. Only the authorized
@@ -252,7 +255,7 @@ belongs to this verification. No X access repair or new source-media fetch is
 included. The [handoff](ORCHESTRATION-HANDOFF-2026-09-08.md) retains each integration,
 failed/partial observation and remaining action.
 
-## Current review kit
+## Previous review kit (package-06)
 
 Review kit filename: `build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.zip`.
 It is 417,747,018 bytes, SHA-256

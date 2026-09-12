@@ -1,0 +1,32 @@
+[
+  {
+    "before": "review_package06_notices.py",
+    "after": "review_package07_notices.py",
+    "scope": "Receipt labels/date only; assertions unchanged"
+  },
+  {
+    "before": "compare_package06_repair_wheels.py",
+    "after": "compare_package07_repair_wheels.py",
+    "scope": "Receipt labels/date only; assertions unchanged"
+  },
+  {
+    "before": "verify_package06_graph.py",
+    "after": "verify_package07_graph.py",
+    "scope": "Receipt labels/date only; assertions unchanged"
+  },
+  {
+    "before": "review_package06_pins.py",
+    "after": "review_package07_pins.py",
+    "scope": "Receipt labels/date only; assertions unchanged"
+  },
+  {
+    "before": "finalize_package06.py",
+    "after": "finalize_package07.py",
+    "scope": "Receipt labels/date only; assertions unchanged"
+  },
+  {
+    "before": "seal_partitioned_final_tree03.py",
+    "after": "seal_partitioned_final_tree04.py",
+    "scope": "New receipt label; compare against 2538-case tree, allowing only five new cleanup regressions"
+  }
+]

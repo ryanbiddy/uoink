@@ -1,0 +1,26 @@
+{
+  "scope": "Paths/receipt labels and observed generated-file hashes only; no uninstaller executed",
+  "preserved": "All receipt/profile roots including isolated Claude configuration outside app",
+  "generated_files": [
+    {
+      "path": "isolated-install.json",
+      "bytes": 261,
+      "sha256": "5fd9049eb9b08235981b4c18cd9811e51bee3e9218c1ad3dbaf752509628ff76",
+      "recognized_generated_name": true
+    },
+    {
+      "path": "unins000.dat",
+      "bytes": 20151166,
+      "sha256": "3b213b96f87003b421802101e19927ca3e152210a07a30f0404137ca3143dbff",
+      "recognized_generated_name": true
+    },
+    {
+      "path": "unins000.exe",
+      "bytes": 4382500,
+      "sha256": "f93db03c7a52c5ad336c086be7f2573f6578e9fb21262b039aa0d2337a30fbe0",
+      "recognized_generated_name": true
+    }
+  ],
+  "source_sha256": "5a81d44627ce8d6d83c8012fe3dd1387c4d919e18cbad3598c0d01090c9c5c35",
+  "observer_sha256": "b159a7964105df7dd47ba9996352fd4fbd288665436cae8938e0c4dc38c7688d"
+}

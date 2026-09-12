@@ -1,0 +1,7 @@
+A	tests/test_dashboard_browser_recovery_ux.py
+A	tests/test_dashboard_capture_outcomes.py
+A	tests/test_install_receipt_p4_embedded_probe.py
+A	tests/test_packaged_decoder_loader.py
+A	tests/test_runtime_setuptools_notices.py
+A	tests/test_sqlite_deadline_cleanup.py
+A	tests/test_unicode_search_repair.py

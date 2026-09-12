@@ -1,0 +1,345 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "build-receipt.json": {
+      "bytes": 1424,
+      "sha256": "39ac95103ab1e99cc0d0a13ea4ba6b5d34c2c97bb594d8f30b415d5aa509632b"
+    },
+    "build.log": {
+      "bytes": 42592,
+      "sha256": "0206915e6b446fc1c6f8e3dc72fc82db874c540ef06ef4fe8001ae8d932344ee"
+    },
+    "check_installed_package_inputs.py": {
+      "bytes": 2220,
+      "sha256": "0186ddaa1323c60b041c160d3f47bf8b78f0d59f41ea6c46875d9df26fb84d7e"
+    },
+    "compare_package07_repair_wheels.py": {
+      "bytes": 2533,
+      "sha256": "8a4c7915d28c18d648ae4375e4c208a0802582e804e5f68af3e43cdbb182c90a"
+    },
+    "final-native-media-environment.json": {
+      "bytes": 670,
+      "sha256": "48a7994d595d072d69e3396df1990af9ccadf0bf2235e15277e2e4eece2d43ff"
+    },
+    "finalize_package07.py": {
+      "bytes": 4163,
+      "sha256": "5d7fb391209579dc072bf46a16341073847258f4c975af841712224dbabb1319"
+    },
+    "finalize_package07_initial_draft.py": {
+      "bytes": 3334,
+      "sha256": "5fb2b4d64f63bc9dd46696579ca9b887e6cb810bc51ced5b4771aefc43ee77ba"
+    },
+    "installer-definition.iss": {
+      "bytes": 70472,
+      "sha256": "2366eb4a9763ac0ae05d329fc2f82a3b0a523861e657e17a35cbb6a25f74426e"
+    },
+    "notices-review/generated-notices.md": {
+      "bytes": 12727,
+      "sha256": "11af9800b16c3cc05b621603c66a897a1be19b127bf0acb5fe45513425875055"
+    },
+    "notices-review/metadata/alembic-1.18.5.dist-info/METADATA": {
+      "bytes": 7217,
+      "sha256": "d7fd3308b0b854d58f6c3bddc2c8c8a841e13f45a90abeb02f5ebea70b008e09"
+    },
+    "notices-review/metadata/anyio-4.14.2.dist-info/METADATA": {
+      "bytes": 4645,
+      "sha256": "c5e6fc4dfd833319913b287be7a30d9935e9208c7ef917630621855aaac4d419"
+    },
+    "notices-review/metadata/attrs-26.1.0.dist-info/METADATA": {
+      "bytes": 8754,
+      "sha256": "4cd40e690f23bf37cbcad34efd6758e062df1df07c86833f7e3ce95bf1fa38cc"
+    },
+    "notices-review/metadata/av-18.0.0.dist-info/METADATA": {
+      "bytes": 4659,
+      "sha256": "bcc58ead43a46a10f7abba729c37d0ee9be8315ba4eb7a621840266a7b92c15a"
+    },
+    "notices-review/metadata/cffi-2.1.0.dist-info/METADATA": {
+      "bytes": 2594,
+      "sha256": "b91c3c381eab9e6d307680ef5ea22e91fa2e33ed9790aece5922e1621a087523"
+    },
+    "notices-review/metadata/click-8.4.2.dist-info/METADATA": {
+      "bytes": 2621,
+      "sha256": "194c9dd81d567f9081f026c7e401060fbafa7bc147c8e0a58b3668b40a64c031"
+    },
+    "notices-review/metadata/cryptography-50.0.1.dist-info/METADATA": {
+      "bytes": 4343,
+      "sha256": "8e9b5570da4686848ee5c6bb83fffc224bcddf9793136731dd050ce0c05fffe2"
+    },
+    "notices-review/metadata/fsspec-2026.6.0.dist-info/METADATA": {
+      "bytes": 10530,
+      "sha256": "20c85c024a69a059237c3a7985d381a3745017ae1d634c554b0c5901dde81095"
+    },
+    "notices-review/metadata/greenlet-3.5.4.dist-info/METADATA": {
+      "bytes": 3881,
+      "sha256": "cd54b553dbb3fe69d78b74d8cf0b37866614db8fd9df7dc66278e38c63daacb0"
+    },
+    "notices-review/metadata/grpcio-1.82.1.dist-info/METADATA": {
+      "bytes": 3843,
+      "sha256": "77e90d6d1b15c326d405fb502fb7a54546ac59dbeeef47707f78c2d304f01ef9"
+    },
+    "notices-review/metadata/idna-3.18.dist-info/METADATA": {
+      "bytes": 6119,
+      "sha256": "46dfe6e5ac462d0f680ecd9abcf66e829b6a2334824b4d9e3979b31135caf281"
+    },
+    "notices-review/metadata/jaraco_context-6.1.2.dist-info/METADATA": {
+      "bytes": 4230,
+      "sha256": "f1b65b60aea229af54e09b17ae0036cf048fe4a6161fa2e7966a8ea5c2321491"
+    },
+    "notices-review/metadata/jaraco_functools-4.6.0.dist-info/METADATA": {
+      "bytes": 2920,
+      "sha256": "6ed3cae5b8eef084c3c7b2385a0a8ac4c8155ab7c729212bea099bee69d5bd6c"
+    },
+    "notices-review/metadata/joblib-1.5.3.dist-info/METADATA": {
+      "bytes": 5542,
+      "sha256": "cee9c60896ae4e7a965a840fbde50d111d2f8018f61201d1ed2e9fc3dd4883e6"
+    },
+    "notices-review/metadata/jsonschema-4.26.0.dist-info/METADATA": {
+      "bytes": 7592,
+      "sha256": "05b189866ca98a96da3934bf6b83687ced3ff85325273b77e16b705f6d8b26d2"
+    },
+    "notices-review/metadata/jsonschema_specifications-2025.9.1.dist-info/METADATA": {
+      "bytes": 2907,
+      "sha256": "35abd41757f32b4ea24756920ded47b70173d77cbc052a5a6d3ab583b2e8d89d"
+    },
+    "notices-review/metadata/keyring-25.7.0.dist-info/METADATA": {
+      "bytes": 21447,
+      "sha256": "bd54de98fede6dc3e1f3cd89b4e37c95d8842a523bdbb9e52ab40edff1837163"
+    },
+    "notices-review/metadata/markupsafe-3.0.3.dist-info/METADATA": {
+      "bytes": 2764,
+      "sha256": "f0ae5dbb09d50fb5f7632c3d53f0220995ef76019e5892e0a545740136a4e3cb"
+    },
+    "notices-review/metadata/more_itertools-11.1.0.dist-info/METADATA": {
+      "bytes": 41425,
+      "sha256": "15588fd819d6d7f9d0ddc7b5283502d3512c5d1edadce573b78c1f0734055df0"
+    },
+    "notices-review/metadata/narwhals-2.24.0.dist-info/METADATA": {
+      "bytes": 15173,
+      "sha256": "c8aa441e88f6ee9e37ac5232c33552426f87a6a200c6c66038d37c17b3c1ca56"
+    },
+    "notices-review/metadata/networkx-3.6.1.dist-info/METADATA": {
+      "bytes": 6783,
+      "sha256": "aca5d94a97d1f70f301d033addb635f6e66be8973a00aba4127637eed2ef316a"
+    },
+    "notices-review/metadata/numpy-2.4.6.dist-info/METADATA": {
+      "bytes": 6608,
+      "sha256": "b082c52ccbe3b880bae177c35171b52ed6c947f3ad71e3762f2723f60a411de0"
+    },
+    "notices-review/metadata/opentelemetry_api-1.44.0.dist-info/METADATA": {
+      "bytes": 1411,
+      "sha256": "42aabbbacd266627b5c3839a515150ca90c18f80c9d85ca6f6fa10d440a7eeaa"
+    },
+    "notices-review/metadata/opentelemetry_exporter_otlp-1.44.0.dist-info/METADATA": {
+      "bytes": 2370,
+      "sha256": "93748fe64ef0fd9aad15ee059433b0addf0bdfffc18ff07d78e8d91345bd36c9"
+    },
+    "notices-review/metadata/opentelemetry_exporter_otlp_proto_common-1.44.0.dist-info/METADATA": {
+      "bytes": 1824,
+      "sha256": "fa4a20e2a52c82aa56ebabccdd4877da74ab47c9eaef10fea83bec2666560ebc"
+    },
+    "notices-review/metadata/opentelemetry_exporter_otlp_proto_grpc-1.44.0.dist-info/METADATA": {
+      "bytes": 2573,
+      "sha256": "b5fa42549816bc336a459a9d3bfdefbaf9ee9bae1e1581feeb7817ed4d45f3b4"
+    },
+    "notices-review/metadata/opentelemetry_exporter_otlp_proto_http-1.44.0.dist-info/METADATA": {
+      "bytes": 2414,
+      "sha256": "dc21bafee23969fdf1b58052ca505eabf29705482af6b6a7634430bf96e7d3ec"
+    },
+    "notices-review/metadata/opentelemetry_proto-1.44.0.dist-info/METADATA": {
+      "bytes": 2319,
+      "sha256": "e239e361c2025a7e981dd99432160ba1186e9abe351290067a31fd12dc1ecce5"
+    },
+    "notices-review/metadata/opentelemetry_sdk-1.44.0.dist-info/METADATA": {
+      "bytes": 1627,
+      "sha256": "12cf968ea4d637e6adaa8a9b767f34c70a527e092fc7c7f0eb3e93d06148e7e0"
+    },
+    "notices-review/metadata/opentelemetry_semantic_conventions-0.65b0.dist-info/METADATA": {
+      "bytes": 2408,
+      "sha256": "93f167ca7673cbc0ed24ba8e052fb8c3936b260dff53b7106c574f515ec1deab"
+    },
+    "notices-review/metadata/packaging-26.2.dist-info/METADATA": {
+      "bytes": 3543,
+      "sha256": "4f9cbcd7933415a4793f7767c98a2b6a512c823fc81c87337815705f230ecabf"
+    },
+    "notices-review/metadata/pillow-12.3.0.dist-info/METADATA": {
+      "bytes": 9273,
+      "sha256": "2c4378001803cfac65809a50722d46e0da4ce8061e717f103e5d52734bab30f5"
+    },
+    "notices-review/metadata/pycparser-3.0.dist-info/METADATA": {
+      "bytes": 8229,
+      "sha256": "f547a60b0ab54cc2f242213d1f87960ad80df7dd5dfeb98d17a444d48bfb6b93"
+    },
+    "notices-review/metadata/pydantic-2.13.4.dist-info/METADATA": {
+      "bytes": 109397,
+      "sha256": "d1e56c3412492512fb6b59a9dfc25ab7af2a8204585cd7bca000513023133394"
+    },
+    "notices-review/metadata/pydantic_core-2.46.4.dist-info/METADATA": {
+      "bytes": 6709,
+      "sha256": "e2d0298dfb8712190ad250722e11a46a4391e71d687d5c7667c09e935cadc63b"
+    },
+    "notices-review/metadata/pygments-2.20.0.dist-info/METADATA": {
+      "bytes": 2476,
+      "sha256": "e0528f51b30427fae94723662ba622f8d8db2a4d8d3f1365698d67a52450a845"
+    },
+    "notices-review/metadata/pyjwt-2.13.0.dist-info/METADATA": {
+      "bytes": 3449,
+      "sha256": "0d1b1321a5a688caacd763e006fbbe11f60110e9fe27ff8d23a679863d01a63c"
+    },
+    "notices-review/metadata/pyparsing-3.3.2.dist-info/METADATA": {
+      "bytes": 5783,
+      "sha256": "3311a8b949d70f71a2b9788a9327f11d9d5a6a8012d6c046ca254ad2de877f45"
+    },
+    "notices-review/metadata/referencing-0.37.0.dist-info/METADATA": {
+      "bytes": 2845,
+      "sha256": "c93b00e6ab1524fd60848376604c189a114374776475c25a31d57be47b29de6a"
+    },
+    "notices-review/metadata/regex-2026.7.19.dist-info/METADATA": {
+      "bytes": 41573,
+      "sha256": "1223d297d68f69c7ab0b515667a5b2e715ffed61626685bc1dcc280f93ce80f5"
+    },
+    "notices-review/metadata/rpds_py-2026.6.3.dist-info/METADATA": {
+      "bytes": 4215,
+      "sha256": "e9deba3569d39352c663fd09d01d53a649c8ab2c28de1c37e80b3e2beaf84926"
+    },
+    "notices-review/metadata/scikit_learn-1.9.0.dist-info/METADATA": {
+      "bytes": 11984,
+      "sha256": "ee61a579f42d3edabe3e483db483475e33fffec04d7f3e69c539527bd93eaca6"
+    },
+    "notices-review/metadata/setuptools-83.0.0.dist-info/METADATA": {
+      "bytes": 6581,
+      "sha256": "26e45e90de763c6938d93d1df2ecd6782a0f1514d41cbd22ebef4e0ab6475771"
+    },
+    "notices-review/metadata/sse_starlette-3.4.6.dist-info/METADATA": {
+      "bytes": 15325,
+      "sha256": "37c93cfd62a2295321c63ac1230a8501d871b72a49f635a74db02338fe57fa44"
+    },
+    "notices-review/metadata/starlette-1.3.1.dist-info/METADATA": {
+      "bytes": 6370,
+      "sha256": "d83ccd9665eb05d1f9393c75e209cb353990731a6215a609a0f1c5c0a6286c9a"
+    },
+    "notices-review/metadata/typing_extensions-4.16.0.dist-info/METADATA": {
+      "bytes": 3310,
+      "sha256": "b05084ca1d50879865178d9fff9fabeab61bdfb1f361bfbde95421ffc8f9be46"
+    },
+    "notices-review/metadata/typing_inspection-0.4.2.dist-info/METADATA": {
+      "bytes": 2552,
+      "sha256": "61096cd0bfe3c7040b6f98c22b02d190fe01936d0ff7616c5134fed02891953a"
+    },
+    "notices-review/metadata/urllib3-2.7.0.dist-info/METADATA": {
+      "bytes": 6852,
+      "sha256": "66147856d30bbb6bed01c6ce3326d0f48d84ed5f286ac177633a1486b82eace5"
+    },
+    "notices-review/metadata/uvicorn-0.51.0.dist-info/METADATA": {
+      "bytes": 6589,
+      "sha256": "07c70790c0cde6812f89168f7aa7c185800a690f7e657dfb5603848c1375017e"
+    },
+    "notices-review/metadata/yt_dlp-2026.7.4.dist-info/METADATA": {
+      "bytes": 183762,
+      "sha256": "2440052f5fb52e7b1d955ef52aa99120e0c63ebb605f53ef4e1424e4ac4c1daa"
+    },
+    "notices-review/review.json": {
+      "bytes": 15988,
+      "sha256": "329621f5dff0413c7d56b40a960156ca40bd4341c7b15a4a9ad0a0cd86615b16"
+    },
+    "notices-review/reviewed-notices.md": {
+      "bytes": 12907,
+      "sha256": "31c2a23a0e3efbd3c38f033b9665b7b34be12616a26b9cd52ae0c400fe4e0ab6"
+    },
+    "package-manifest.json": {
+      "bytes": 45501,
+      "sha256": "95589015189cb483f35ab776e0ebef8009edd4108af85c591cd933630e0a78ec"
+    },
+    "package07-finalizer-review.diff": {
+      "bytes": 1818,
+      "sha256": "019990c70dafd16aa8a84b72570b551ab63917eaaa6ff6f445165a25c9eb880d"
+    },
+    "package07-finalizer-review.json": {
+      "bytes": 491,
+      "sha256": "0fe34a0bd49c396cdc11a5aaab436805e6538cf3172520227dc133af80147f3a"
+    },
+    "package07-instrument-adaptations.json": {
+      "bytes": 1044,
+      "sha256": "0879e458243049575bff3a0756154efa1ad7a7e58a10a65a2c4bd71def3e2b65"
+    },
+    "package_decoder_probe.py": {
+      "bytes": 3344,
+      "sha256": "c23087243c3a8989b8bd7b9f57ea40a270fc19b71bee0e101f6898fb06d5ef0c"
+    },
+    "post-build-review.json": {
+      "bytes": 417,
+      "sha256": "3e3fff0bce5960cc8bc5ab48302524977f76910b94ebfe6388f0966c737ce355"
+    },
+    "preinstall-pins/result.json": {
+      "bytes": 17164,
+      "sha256": "ca475f995e81e02d50194d4e7f9cd950e77376ff3b27f7ce4715e01a556b6e4d"
+    },
+    "repair-wheel-bindings.json": {
+      "bytes": 306631,
+      "sha256": "7ae5a111f2613f899695b045bc1eab0bcfc530d16c092376f6ec7c7714209b98"
+    },
+    "review_package07_notices.py": {
+      "bytes": 2922,
+      "sha256": "eec2dd1cd07ef31cbb4c6107685ff11798a0822d5b1209d495e436245c9d9808"
+    },
+    "review_package07_pins.py": {
+      "bytes": 1763,
+      "sha256": "1b2439cb6dce92378aa4691f5f9624990f6f1ab540299954f17a5aed07a996e5"
+    },
+    "run_bound_c22.py": {
+      "bytes": 1285,
+      "sha256": "ef04ac3eff129d17818eeeb7e2b717335cb734acf68decc2ebe3949e14ee7c34"
+    },
+    "runtime-distributions.json": {
+      "bytes": 19405,
+      "sha256": "88e52c77d194deeba1a133cbf16d4716d1a138278a9c9b1ff16e483481970a3b"
+    },
+    "runtime-graph/inventory.json": {
+      "bytes": 3867,
+      "sha256": "42f9196681976b2f4bd95b5364fbfcc963504bee1dd4f0ff1e423a24c4b74b12"
+    },
+    "runtime-graph/summary.json": {
+      "bytes": 42058,
+      "sha256": "80990b169f96b84fee4949375f93d891131cd82068b9e069a999072b6e600863"
+    },
+    "scan.json": {
+      "bytes": 1152,
+      "sha256": "ab581cd3e26c35be354dac52ae856067a24f87b2601ef4c9defaa9e7914f56ae"
+    },
+    "scan.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scan.stdout": {
+      "bytes": 135,
+      "sha256": "b1d89fd20170433cb107678b39f91e30de78c7d955663ea5be83afc4cac1930d"
+    },
+    "scan_candidate_package.ps1": {
+      "bytes": 2621,
+      "sha256": "33845d3ac2cb5350462e8ea160697b298f81571494f38136b458a6a8de291607"
+    },
+    "seal_package_inputs06.py": {
+      "bytes": 7125,
+      "sha256": "36ab09e518a1b74f8e46815ead97d78e362348edb853681b2c6ec7451ed56db1"
+    },
+    "source-bindings.json": {
+      "bytes": 44989,
+      "sha256": "14704fbd565ccef80a5931b40dc56e6664d00b19be98cc7cfd34b8767ac0cbb7"
+    },
+    "staged-inventory.json": {
+      "bytes": 12041901,
+      "sha256": "ef94e60cfc6a6e9b7d63d68816d11216644a8cc2f661e5847ea0ba82fcc4aceb"
+    },
+    "THIRD-PARTY-NOTICES.md": {
+      "bytes": 12907,
+      "sha256": "31c2a23a0e3efbd3c38f033b9665b7b34be12616a26b9cd52ae0c400fe4e0ab6"
+    },
+    "verify_package07_graph.py": {
+      "bytes": 2998,
+      "sha256": "85a45581d61833b0f4c28bdeb2916de19541d8aba59075576eb18ef601301dae"
+    }
+  }
+}

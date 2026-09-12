@@ -1,0 +1,31 @@
+--- finalize_package07_initial_draft.py
++++ finalize_package07.py
+@@ -1,8 +1,9 @@
+-import hashlib,json,shutil
++import hashlib,json,shutil,subprocess,sys
+ from pathlib import Path
+ r=Path(__file__).resolve().parents[1]
+ out=r/'docs/library/proof/candidate-package-07-2026-09-12'
+ assert not (out/'SHA256.json').exists()
++(out/'.gitattributes').write_text('* -text\n',encoding='utf8',newline='\n')
+ def sha(p):
+  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+ def save(p,v):p.write_text(json.dumps(v,indent=2)+'\n',encoding='utf8',newline='\n')
+@@ -31,6 +32,17 @@
+ for name,version in {'pillow':'12.3.0','mcp':'1.28.1','cryptography':'50.0.1','nltk':'3.10.3','lightning':'2.6.6','pytorch-lightning':'2.6.6','setuptools':'83.0.0'}.items():assert versions[name]['version']==version
+ assert len(versions)==140
+ save(out/'runtime-distributions.json',versions)
++subprocess.run([sys.executable,'-I','-S','-B',str(r/'_scratch/review_package07_pins.py')],cwd=r,check=True)
++for folder,label in [('package07-runtime-graph-01','runtime-graph'),('package07-preinstall-review-01','preinstall-pins')]:
++ for source in (r/'_scratch'/folder).iterdir():
++  if source.is_file():
++   target=out/label/source.name;target.parent.mkdir(exist_ok=True)
++   shutil.copyfile(source,target)
++for name in ('verify_package07_graph.py','review_package07_pins.py'):
++ shutil.copyfile(r/'_scratch'/name,out/name)
++for name in ('package07-instrument-adaptations.json','package07-finalizer-review.json',
++             'package07-finalizer-review.diff','finalize_package07_initial_draft.py'):
++ shutil.copyfile(r/'_scratch'/name,out/name)
+ inventory=json.loads((out/'staged-inventory.json').read_text())['files']
+ private=r/'_scratch/package07-static-bin';private.mkdir(exist_ok=False)
+ bins=[]

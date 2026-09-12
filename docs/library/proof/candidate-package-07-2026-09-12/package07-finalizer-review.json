@@ -1,0 +1,7 @@
+{
+  "reason": "Include fresh dependency graph and pin/checkpoint observations in the same final seal. Pin reader executes once after runtime-distributions.json exists, before SHA256.json is created.",
+  "measurement_rerun": false,
+  "product_or_assertion_change": false,
+  "sha256": "5d7fb391209579dc072bf46a16341073847258f4c975af841712224dbabb1319",
+  "additional_export_scope": "Archive the pre-execution adaptation review and disable Git text conversion for exact evidence bytes."
+}

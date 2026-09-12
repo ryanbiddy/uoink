@@ -1,0 +1,18 @@
+[
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\install_receipt\\p4_operator.py",
+    "adaptation": "p4_operator_client07.py",
+    "scope": "Receipt adapter resolves the prepared launch.json and a frozen auth-directory-only settings overlay. Guards, scopes, original hashes and owned cleanup remain.",
+    "source_sha256": "1e09db658ac53846221068ae78011ed744aa6574c921ff195a804dfd3d1ae226",
+    "adapted_sha256": "49a910bb13bc5ea35aa2bf85d3339109262baf9ab479ac6d5d349eb474a83b56",
+    "executed": false
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_installed_client06.py",
+    "adaptation": "run_installed_client07.py",
+    "scope": "New app/package/profile labels, existing usage receipt and isolated auth namespace by reference. Uses the reviewed adapter; original seven prepared files remain immutable.",
+    "source_sha256": "0c073f56c99a45b94dc85b70ed17c4ac2fc9e78534f7c93589bc9f41d8e06983",
+    "adapted_sha256": "7cf12329c3998d0bc5175bff52a5c70d225d78a847825404dedb963939b1895a",
+    "executed": false
+  }
+]

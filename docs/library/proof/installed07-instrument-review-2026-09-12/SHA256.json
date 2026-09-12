@@ -1,0 +1,101 @@
+{
+  "scope": "Pre-execution observer source and review only; no installed pass claimed",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "agent_install_observer05.ps1": {
+      "bytes": 15343,
+      "sha256": "8f05dd4754ee4b019aa2a8db8dc9031dfbc1848bd0a2c445b4f6852105935af2"
+    },
+    "agent_receipt_observe06.py": {
+      "bytes": 9995,
+      "sha256": "8adcdfe5d6e1b34c5d65d0c96187cb004c580da38733d262e0d186a173c10d51"
+    },
+    "client07-instrument-adaptations.json": {
+      "bytes": 1091,
+      "sha256": "7289fafee70163fad73d920ca0e31a1b444959008453d76de79a98d95b32a680"
+    },
+    "freeze_client07_inputs.py": {
+      "bytes": 3438,
+      "sha256": "6c70fa4fda51ef6197071fc6f72781cf678a071c94b46c36e0660727668eaf48"
+    },
+    "installed07-instrument-adaptations.json": {
+      "bytes": 1238,
+      "sha256": "d5105875257ac0d68b83e9bfc6f8da5fd873b659cc0f39c5cbb2cf873a5d18f4"
+    },
+    "inventory_installed_extras07.py": {
+      "bytes": 1714,
+      "sha256": "10758d66408f5b21f2af0d7d62390cd8e8eed7dad126ac9f78402c57efa62822"
+    },
+    "inventory_installed_extras07.py.diff": {
+      "bytes": 746,
+      "sha256": "33cdb112b005889093cc8d70a73c6535194f05bbb9c7c87ff31b4c460ffb0cff"
+    },
+    "observe_published_chapter07.py": {
+      "bytes": 9808,
+      "sha256": "bbea34826b696882eaa3757de5133654963f70fdb3ef4828ec7cf08d0ec1f27f"
+    },
+    "p4_operator_client07.py": {
+      "bytes": 10058,
+      "sha256": "49a910bb13bc5ea35aa2bf85d3339109262baf9ab479ac6d5d349eb474a83b56"
+    },
+    "p4_operator_client07.py.diff": {
+      "bytes": 2158,
+      "sha256": "5b9e274b65ff08c6c7e755ba48f73ca0ee5c5eb799137e1836726e7d53d2b92f"
+    },
+    "prepare_client07_instruments.py": {
+      "bytes": 3885,
+      "sha256": "44114866c89e8fec1e546640812f1a1f6048f2d9f9d2ade332c91aad72ef0868"
+    },
+    "prepare_installed07_instruments.py": {
+      "bytes": 1501,
+      "sha256": "1aea0784be0db64057dcb425fa8ab95cce68c4e408a0399ca49cf987b290ff9a"
+    },
+    "published_chapter07.py": {
+      "bytes": 10570,
+      "sha256": "a4e595983d19d26755f7f692c8d4ab23700c13e8287c78e0e5e76dd64ec5129d"
+    },
+    "run_installed_client07.py": {
+      "bytes": 6976,
+      "sha256": "7cf12329c3998d0bc5175bff52a5c70d225d78a847825404dedb963939b1895a"
+    },
+    "run_installed_client07.py.diff": {
+      "bytes": 5309,
+      "sha256": "ccb56735f525dae923cc9296c2c3e5627e73b33d03777b10cc5304bab536270a"
+    },
+    "run_installed_decoders07.py": {
+      "bytes": 3396,
+      "sha256": "b8d975f8e1a54880ccb8eb601f1e35a64053e1ea1160f0482320ca53a113c2df"
+    },
+    "run_installed_decoders07.py.diff": {
+      "bytes": 837,
+      "sha256": "85bcc680b0c37c84a39a6b0595d19de858ba15e0ac107212214d0c9f6a65d388"
+    },
+    "run_installed_decoders07_portable.py": {
+      "bytes": 3381,
+      "sha256": "10448dd0a85bdfc5e3b4e1d5eb7cf1721e7b7de80cd5b666846d896653befc81"
+    },
+    "run_installed_decoders07_portable.py.diff": {
+      "bytes": 851,
+      "sha256": "9420e1f4d8e47a601e8e7a72e40aec72be1af5e890c01980ffe7f5f0acdf044c"
+    },
+    "seal_installed07_instruments.py": {
+      "bytes": 1673,
+      "sha256": "57fdbf360ae4f162dcafba63b6e522d407ee2d256fd1577e1445efe144f6713d"
+    },
+    "uninstall06-adaptation-review.json": {
+      "bytes": 1007,
+      "sha256": "d97a28d06a9505b13834730bc0b7bb9be295bc09597d70a57d30daffe0cc23cd"
+    },
+    "uninstall_retained_package06.diff": {
+      "bytes": 3528,
+      "sha256": "2131e357c545a56744e27b58fe308ed8380632e8d33be48e4c577c11292cb090"
+    },
+    "uninstall_retained_package06.ps1": {
+      "bytes": 8821,
+      "sha256": "b159a7964105df7dd47ba9996352fd4fbd288665436cae8938e0c4dc38c7688d"
+    }
+  }
+}
