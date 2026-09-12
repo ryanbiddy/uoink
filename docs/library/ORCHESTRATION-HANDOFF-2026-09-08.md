@@ -86,18 +86,19 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; note/media repairs integrated, final qualification next)
+## State at handoff (updated 2026-09-12; package 08 sealed, installed qualification active)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 installed and source-bound; documentary delivery next |
+| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 historical; package-08 installed requalification next |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Original historical AT6 exit disposition remains Ryan's; older partial receipts stay partial |
-| 4 | Native note repair d2caac5 and saved-media repair 60d203f integrated | Final media union has 58 passes in both roots, including 23 new cases. Worker boundary and fabricated timing/label defects corrected | Final full tree, package-08 installation and native GUI confirmation next |
+| 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Fresh package-08 C22/browser next; original AT6 exit disposition remains Ryan's |
+| 4 | Native note repair d2caac5 and saved-media repair 60d203f integrated | Final media union has 58 passes in both roots, including 23 new cases. Worker boundary and fabricated timing/label defects corrected | Final tree complete; package-08 installation and native Uoink GUI confirmation next |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
-| 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
+| 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Fresh package-08 published-range observation next; speakers blocked, no new fetch |
 | Security | Gemini evidence/backport reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; 35 metadata payloads and 13 source files verified. Worker unsupported reachability and proposed frozen-test edits rejected | Security hold remains; compatible runtime migration and model qualification need the exact Ryan scope below |
-| Integration | Final source includes native note d2caac5 and media 60d203f; security follow-up is documentary only | Latest prior complete tree a25e3be: 2,556 pass / one historical failure / two skips; final focused media union 58/58 | Freeze this commit for complete tree06, then package-08 build/install/native/notes/kit/authorized backup |
+| Integration | Package 08 sealed at `755c37e` from `b8e44fb` | Complete tree: 2,579 pass / one historical failure / two skips, 2,582 cases; 23 added media cases, none missing | Fresh isolated package-08 install, C22/browser/CLI/native Uoink flows, notes/kit and authorized backup |
+| Desktop incident | Configuration isolation failed in the package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched. Earlier live-index/5179 effects unknown; owned job empty and guard restored | No further Desktop override launch. Native package-08 driver exposes only Uoink dashboard; future Desktop needs a verified separate environment |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -164,17 +165,22 @@ This sequence supersedes the completed delivery instructions below.
    the worker's twelve cases. Existing tests/fixtures remain unchanged. The
    a25e3be full tree is separately sealed in 44 payloads and remains FAIL.
    Documentary security run 940c7fc1 is integrated at 43b42bc with Astra's
-   corrected review. Freeze this handoff commit as the final source. Run ryan-final-partitioned-06 (23 new media
-   cases, none removed), build package-08 and qualify its installed source plus
-   actual native note/media flows. Update notes/runbook/kit and back up only
-   cc/living-library. Prepared package-08 instruments still bind a25e3be;
-   adapt those bindings before execution and preserve the draft/diff history.
-4. Claude Desktop 1.49585.0 honors CLAUDE_USER_DATA_DIR in shipped code. The
-   isolated attempt had no targetable window in repeated Sky inventories, then
-   exited 0 after about 81 seconds. Its owned job is empty and guard restored.
-   A proposed second-instance activation did not run because the first attempt
-   had already ended; no auth was copied or automated. Preserve this incomplete
-   GUI result. It is distinct from the 44 prior successful native CLI calls.
+   corrected review. The final b8e44fb tree is complete: 2,579 pass / one
+   historical failure / two skips, every one of 2,582 cases accounted for.
+   Package 08 and its 51-payload pre-execution instrument seal are integrated
+   at 755c37e. New instruments bind b8e44fb; the unused a25e3be
+   drafts and exact corrections are preserved. Fresh isolated install and
+   actual Uoink note/media GUI qualification are next, followed by notes,
+   runbook, review ZIP and only the authorized cc/living-library backup.
+4. CR Gemini 46e8e6dc confirms the Desktop isolation failure. Integration
+   e10ba3a withdraws the earlier claim: packaged Claude deletes the override
+   before its setter, and the attempted run launched ordinary connectors.
+   The old empty-job receipt proves cleanup, not absence of earlier effects.
+   Do not inspect/probe the live index or 5179 to investigate. No further
+   launch through CLAUDE_USER_DATA_DIR, guessed flags or vendor-check bypass.
+   Only the separately guarded Uoink dashboard is exposed by the new native
+   driver. Future Desktop GUI acceptance requires a verified separate account/
+   VM or supported isolation method and human sign-in. CLI results stay CLI.
 5. Keep the historical AT6 exit gap and dependency release hold under Blockers
    for Ryan. Source changes need requalification; documentary changes alone do
    not justify repeating the completed product measurements.
@@ -526,12 +532,13 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   notes. Their release disposition cannot be described as a clean security audit.
 - Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
   diarization runs; chapters and cited ranges are the release scope.
-- Native-client citation/brief/chapter GUI acceptance remains unobserved. Sky
-  native automation works and the actual Uoink dashboard has been observed.
-  The isolated Claude Desktop attempt exposed no window and exited 0; its
-  startup needs a diagnosed repair before a fresh attempt. CLI tool calls do
-  not establish GUI acceptance. Astra owns that diagnosis and remaining safe
-  package-08/native checks; these are not pending installation permission.
+- Desktop-client citation/brief/chapter GUI acceptance remains unobserved.
+  The package-07 configuration-isolation claim is withdrawn: ordinary connectors
+  launched, and their earlier live-index/5179 effects are unknown. No live-state
+  probe is permitted. A supported isolation method must be verified before any
+  further Desktop launch, or Ryan must provide/authorize a clean separate Windows
+  account/VM and perform its interactive sign-in. No such environment is prepared.
+  Sky native automation works; remaining Uoink dashboard checks belong to Astra.
 - A dependency migration conflicts with the immutable Torch 2.8.0 / WhisperX
   3.8.6 assertions and requires checkpoint/model qualification prohibited by the
   current scope. Ryan must authorize the exact compatibility-test update and
@@ -3139,3 +3146,31 @@ prepared instruments' stale a25e3be bindings before execution, and perform fresh
 isolated install/client/native note and saved-video checks. Keep all earlier
 partial/failed observations. The historical exit and security hold do not
 excuse skipping the authorized final qualification and delivery work.
+
+
+### 2026-09-12 — final media tree, package 08 and Desktop isolation correction
+
+Package integration 755c37e binds b8e44fb and records 2,579 passes,
+one historical AT6 failure and two platform skips across 2,582 cases. The exact
+disjoint union adds 23 media cases and removes none. Its 44-payload seal retains
+FAIL. Package 08 is 389,570,940 bytes, SHA-256
+69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c. Staged smoke, 140 pins / 283 active requirements
+and 983 repair-wheel payload comparisons pass. Defender reports no threats;
+unsigned and dependency-security holds remain. Actual installed receipts are next.
+
+Incident integration e10ba3a retains CR Gemini 46e8e6dc and independent source/
+owned-log review. Astra's earlier startup inspection missed the deletion before
+the setter. Ordinary Uoink started at 16:58:43.965 UTC and handled ListToolsRequest;
+the ordinary filesystem connector also initialized. Cleanup completed at
+17:00:00.757879 UTC with the owned job empty and package-07 guard restored. Earlier
+live-index/resident-port effects are unknown. Ryan was explicitly informed.
+No ordinary auth/config/index or port was inspected to investigate. The old raw
+receipt and source remain unchanged, and its human-facing claim is withdrawn.
+
+The unused package-08 driver now accepts only dashboard and has no Desktop branch.
+Do not follow the worker's prohibited host-probe suggestion or edit historical
+instruments. Four inspected source hashes match; its example cleanup time and
+global-process wording are corrected in Astra's review. A separate source-reader
+substring error and exact correction are retained; no new application launched
+for this documentary review. Native dashboard, actual CLI and Desktop each need
+their own observed evidence. Never claim one proves the others.
