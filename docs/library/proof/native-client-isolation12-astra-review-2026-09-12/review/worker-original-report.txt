@@ -1,0 +1,194 @@
+# Desktop Client Isolation Review (Package-07 Attempt)
+
+Date: 2026-09-12  
+Author: Gemini (Security Review Worker)  
+Scope: Source-only analysis of the package-07 Claude Desktop isolation failure  
+
+---
+
+## Executive Summary
+
+The package-07 Claude Desktop acceptance attempt did not achieve isolated containment. Statically extracted startup code from the packaged Electron binary demonstrates that `claude.exe` deletes the `CLAUDE_USER_DATA_DIR` environment variable during early startup unless developer authorization (`CLAUDE_CDP_AUTH`) is present and cryptographically verified. As a result, the application did not use the integrator's prepared configuration directory (`run/user-data`), but reverted to the default user profile path, launching the ordinary configured Uoink and filesystem connectors.
+
+The Python guard in `scripts/install_receipt/p4_common.py` was installed only into the bundled runtime (`app/python/python.exe`). It executes inside that specific Python process and provides no OS-level containment for Electron or external connector processes. Windows Job Object cleanup in `scripts/install_receipt/p4_session.py` confirms that child processes terminated when closed; it does not establish what network or filesystem operations occurred before termination.
+
+Desktop GUI acceptance credit is withheld. For package-08, native observation is restricted to the isolated Uoink dashboard (`uoink_dashboard.py`).
+
+---
+
+## Inspected Artifacts
+
+All inspections were restricted to static source files under the repository and the incident extract. No live databases, user profile configurations, authentication stores, or network endpoints were accessed.
+
+| File Path | Bytes | SHA-256 |
+|---|---|---|
+| `_scratch/desktop-startup12-static/.vite/build/index.pre.js` | 896,736 | `389412c74487cfded562bd8808f2b245721c397147ff0c1e1d9dfc7c1a42d821` |
+| `_scratch/native_gui07_driver.py` | 5,839 | `b28770d766392f49ceb09fa22b37681a0a1d3daf2776e4ee23455bb43e0dc411` |
+| `scripts/install_receipt/p4_common.py` | 55,973 | `6e44bcfb5edee0d282de70d3f9100f0de77b234d67fd302b8dec2761dbebf238` |
+| `scripts/install_receipt/p4_session.py` | 32,779 | `8f4b63aac375922c2cd642c816b7ec5253842ac92fc8a8c2df0af604f99d17a8` |
+
+---
+
+## 1. Discard of CLAUDE_USER_DATA_DIR During Packaged Startup
+
+The integrator in `_scratch/native_gui07_driver.py` (lines 61–65) attempted to isolate Claude Desktop by writing a single-server config to a temporary folder and passing `CLAUDE_USER_DATA_DIR`:
+
+```python
+with (data / 'claude_desktop_config.json').open('x', encoding='utf8') as f:
+    json.dump({'mcpServers': config['mcpServers']}, f, indent=2)
+env['CLAUDE_USER_DATA_DIR'] = str(data)
+record['desktop_data_dir'] = str(data)
+gui = start([r'C:\Program Files\WindowsApps\Claude_1.49585.0.0_x64__pzs8sxrjxfjjc\app\claude.exe'], 'window', env)
+```
+
+The static source of `Claude_1.49585.0.0` at `_scratch/desktop-startup12-static/.vite/build/index.pre.js` shows why this failed. At character offset 891438:
+
+```javascript
+nW(!1),aW(!1);var QJ=rW();E.app.isPackaged&&!QJ&&(delete process.env.CLAUDE_USER_DATA_DIR,delete process.env.SSLKEYLOGFILE,delete process.env.sslkeylogfile),QU($J());
+```
+
+The function `rW()` (defined at offset 848479) verifies developer authorization:
+
+```javascript
+function rW(){
+  let e=process.env.CLAUDE_CDP_AUTH,t=process.env.CLAUDE_USER_DATA_DIR;
+  if(!e||!t)return!1;
+  let n=e=>(console.warn(`CDP auth rejected: ${e}`),!1),r=e.split(".");
+  if(r.length!==3)return n("malformed token (expected 3 dot-separated parts)");
+  let[i,a,o]=r,s=`${i}.${a}`;
+  if(Buffer.from(a,"base64").toString()!==t)return n("userData path mismatch");
+  let c=parseInt(i,10);
+  if(isNaN(c))return n("invalid timestamp");
+  let l=Date.now()-c;
+  if(l<0||l>eW)return n(`token expired (age: ${Math.round(l/1e3)}s)`);
+  try{
+    let e=re.createPublicKey($U);
+    return re.verify(null,Buffer.from(s),e,Buffer.from(o,"base64"))?!0:n("invalid signature")
+  }catch{
+    return n("signature verification threw")
+  }
+}
+```
+
+When `claude.exe` is run from the WindowsApps package, `E.app.isPackaged` evaluates to `true`. Without a valid token in `CLAUDE_CDP_AUTH` signed by the vendor's embedded public key `$U`, `QJ` evaluates to `false`. The application executes:
+
+```javascript
+delete process.env.CLAUDE_USER_DATA_DIR
+```
+
+Later in initialization (offset 892053), the code checks whether the variable exists:
+
+```javascript
+if(process.env.CLAUDE_USER_DATA_DIR){
+  let e=process.env.CLAUDE_USER_DATA_DIR;
+  E.app.setPath("userData",e),E.app.setPath("logs",h.default.resolve(e,"Logs"))
+}
+```
+
+Because the variable was deleted, `E.app.setPath("userData", e)` was skipped. The application fell back to its default paths under the user profile (`%APPDATA%\Claude` / `%LOCALAPPDATA%`). It loaded the user's real `claude_desktop_config.json`, which defined the ordinary system Uoink connector and filesystem connector, completely bypassing `run/user-data/claude_desktop_config.json`.
+
+---
+
+## 2. Containment Limits of the Bundled Python Guard
+
+In `_scratch/native_gui07_driver.py` (lines 31–35), the driver installed a Python guard:
+
+```python
+guard = common.write_guard(profile, binding)
+guard_record = common.install_guard_into_interpreter(app / 'python/python.exe', guard, installed_app=app)
+record['guard_install'] = guard_record
+record['canary'] = common.prove_guard_canary(interpreter=app / 'python/python.exe', env=env, profile=run, cwd=run)
+assert record['canary']['refused']
+```
+
+In `scripts/install_receipt/p4_common.py`, `install_guard_into_interpreter()` writes `sitecustomize.py` to `app/python/Lib/site-packages/` and activates `import site` in `python*._pth`. The guard function attaches an audit hook using `sys.addaudithook(audit)` to trap `open`, `sqlite3.connect`, `socket.connect`, and `subprocess.Popen`.
+
+This mechanism has strict boundaries:
+1. **Single-interpreter scope**: The hook exists inside the memory space of `app/python/python.exe`. It does not intercept execution in any other process.
+2. **External binaries**: `claude.exe` is an Electron application executing Node.js and Chromium runtimes. It does not execute `p4_common.py` or `sitecustomize.py`.
+3. **Unrelated connectors**: When Claude Desktop launched the ordinary Uoink connector and filesystem connector, it used command lines specified in the user's standard configuration. If those commands called a system Python, `uv`, or `node`, they executed without the audit hook.
+
+The harness canary (`prove_guard_canary`) confirmed that `app/python/python.exe` refused unauthorized file access. It did not and could not enforce system-wide isolation.
+
+---
+
+## 3. Limits of Windows Job Object Cleanup
+
+In `scripts/install_receipt/p4_session.py`, processes are launched suspended and assigned to a Windows Job Object configured with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`.
+
+When `terminate_tree()` runs:
+1. `_kernel32().TerminateJobObject(self._job, 1)` terminates assigned processes.
+2. `query_job_process_ids()` polls until `assigned == 0` and `count == 0`.
+
+This establishes process lifecycle accounting: at the end of the test run, no orphaned child processes remained running.
+
+It does not establish absence of earlier side effects:
+- A process running inside a Job Object retains full filesystem and network access allowed by the user account until termination occurs.
+- If an ordinary connector connected to resident port 5179 or accessed `index.db` at 16:58:43 UTC, terminating that process at 17:00:04 UTC does not erase socket traffic, query logs, or file alterations.
+- An empty job confirms termination, not isolation.
+
+---
+
+## 4. Confirmed Incident Facts vs. Speculation
+
+Security analysis requires distinguishing verified records from ungrounded inferences:
+
+### Confirmed Source and Log Facts
+- `index.pre.js` unconditionally deletes `CLAUDE_USER_DATA_DIR` in packaged mode when `CLAUDE_CDP_AUTH` signature verification fails.
+- The package-07 attempt did not provide a signed `CLAUDE_CDP_AUTH` token.
+- Logs generated under the run environment record that the ordinary Uoink connector was selected at 16:58:43.965 UTC, followed by successful startup and a `ListToolsRequest`.
+- Logs confirm the ordinary filesystem connector was also selected and initialized.
+- The isolated `run/user-data/claude_desktop_config.json` containing only the isolated server was ignored by the application.
+- The Desktop process tree was terminated cleanly by its Job Object, leaving zero residual processes.
+
+### Speculation to Avoid
+- **Unlogged access is not non-access**: The absence of explicit error messages or detailed write logs does not prove that the ordinary connector avoided the live index or port 5179.
+- **Silence is not isolation**: Concluding that "nothing happened" because the window never rendered or the process exited code 0 is invalid. The connectors started and handled protocol requests.
+- **Integrator intent vs runtime reality**: The presence of code assigning `env['CLAUDE_USER_DATA_DIR']` does not prove the application honored the setting.
+
+Per the review boundaries, no live database files or authentication stores have been opened, hashed, or queried to test hypotheses about prior access.
+
+---
+
+## 5. Supported Safe Environment for Future Desktop GUI Acceptance
+
+Bypassing vendor security checks is explicitly prohibited:
+- No patching of `claude.exe` or third-party packaged JavaScript.
+- No forgery or reverse-engineering of `CLAUDE_CDP_AUTH` signatures.
+- No runtime memory hooking or debugger-based environment restoration.
+
+A valid Desktop GUI acceptance run requires an environment where standard configuration discovery paths are isolated by construction:
+1. **Dedicated OS User Account or Virtual Machine**: Running under a clean Windows user profile or dedicated VM where `%APPDATA%\Claude` and `%LOCALAPPDATA%\Claude` contain no prior configurations, credentials, or connectors.
+2. **Absent Host Data Roots**: Ensuring that neither the live `index.db` path (`%LOCALAPPDATA%\Uoink\index.db`) nor resident port 5179 exists on the host or VM.
+3. **Pre-execution Audit**: Verifying that any config file read by the client points only to isolated, disposable test servers before launching the client.
+
+Because an isolated VM or dedicated clean account is currently unavailable, Desktop GUI acceptance cannot proceed at this stage.
+
+---
+
+## 6. Review of Proposed Correction for Package-08
+
+The proposed correction contains the following points:
+1. Package-08 native launchers expose only the independently guarded Uoink dashboard (`uoink_dashboard.py`).
+2. Desktop GUI acceptance credit remains absent.
+3. Verified CLI acceptance results remain separate and valid, as the CLI uses documented `CLAUDE_CONFIG_DIR` redirection without startup deletion.
+
+### Gaps in the Proposed Correction
+To ensure the correction is robust, three concrete gaps must be addressed:
+
+1. **Excision of Dead Desktop Code in Harness Scripts**:
+   The `desktop` branch in `_scratch/native_gui07_driver.py` should not merely be left unused; it must be excised from active execution scripts to prevent accidental invocation. Driver arguments should accept only `dashboard`.
+
+2. **Environment Path Leakage in Child Spawning**:
+   In `native_gui07_driver.py`, `os.environ` was updated with `LOCALAPPDATA` pointing to `root / 'environment' / key`. Packaged Electron/MSIX applications resolve certain user data paths via Windows package virtualization or specific registry entries rather than basic environment variables. Any future native harness must explicitly audit where child processes resolve paths on Windows before execution.
+
+3. **Explicit Boundary Documentation in Verification Proofs**:
+   Summaries must clearly state that Claude CLI acceptance does not imply Desktop client acceptance. Stdio MCP tool verification in a headless CLI cannot be cited as evidence of GUI integration.
+
+---
+
+## Conclusion
+
+The attempt to isolate Claude Desktop via `CLAUDE_USER_DATA_DIR` failed due to an active security safeguard inside the vendor's packaged application. The Python test guard was structurally incapable of constraining external processes. Process cleanup confirmed termination but did not establish containment.
+
+Excluding Desktop GUI execution from package-08 and limiting native acceptance to the Uoink dashboard is the necessary and correct operational response.

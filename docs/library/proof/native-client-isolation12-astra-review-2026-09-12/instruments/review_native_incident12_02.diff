@@ -1,0 +1,20 @@
+--- literal-if-assumption
++++ actual-setter-literal
+@@ -1,7 +1,7 @@
+ """Retain source/log evidence without ordinary profile inspection or raw log export."""
+ import hashlib,json,subprocess
+ from pathlib import Path
+-r=Path(__file__).resolve().parents[1];s=r/'_scratch';out=s/'native-client-incident12-review';out.mkdir(exist_ok=False)
++r=Path(__file__).resolve().parents[1];s=r/'_scratch';out=s/'native-client-incident12-review02';out.mkdir(exist_ok=False)
+ w=Path(r'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\46e8e6dc-ea4\gemini')
+ expected={
+  '_scratch/desktop-startup12-static/.vite/build/index.pre.js':(896736,'389412c74487cfded562bd8808f2b245721c397147ff0c1e1d9dfc7c1a42d821'),
+@@ -14,7 +14,7 @@
+     bindings.append({'path':name,'bytes':size,'sha256':digest})
+ source=(r/next(iter(expected))).read_text(encoding='utf8')
+ deletion='E.app.isPackaged&&!QJ&&(delete process.env.CLAUDE_USER_DATA_DIR'
+-setter='if(process.env.CLAUDE_USER_DATA_DIR){let e=process.env.CLAUDE_USER_DATA_DIR;E.app.setPath("userData",e)'
++setter='let e=process.env.CLAUDE_USER_DATA_DIR;E.app.setPath("userData",e)'
+ assert source.index(deletion)<source.index(setter)
+ snippet={'source_sha256':bindings[0]['sha256'],'deletion_offset':source.index(deletion),'deletion':source[source.index(deletion):source.index(deletion)+175],'later_setter_offset':source.index(setter),'later_setter':source[source.index(setter):source.index(setter)+160]}
+ root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07\native-gui01')

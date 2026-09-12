@@ -1,0 +1,8 @@
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/native-client-isolation12-astra-review-2026-09-12/review/worker-original.patch:9: trailing whitespace.
+Date: 2026-09-12  
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/native-client-isolation12-astra-review-2026-09-12/review/worker-original.patch:10: trailing whitespace.
+Author: Gemini (Security Review Worker)  
+E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/native-client-isolation12-astra-review-2026-09-12/review/worker-original.patch:11: trailing whitespace.
+Scope: Source-only analysis of the package-07 Claude Desktop isolation failure  
+Falling back to direct application...
+warning: 3 lines add whitespace errors.

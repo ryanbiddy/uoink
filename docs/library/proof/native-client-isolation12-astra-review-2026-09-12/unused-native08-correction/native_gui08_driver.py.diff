@@ -1,0 +1,39 @@
+--- unused-draft/native_gui08_driver.py
++++ corrected/native_gui08_driver.py
+@@ -6,7 +6,7 @@
+ repo=Path(__file__).resolve().parents[1]
+ root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08\native-gui01')
+ app=root.parent/'app'; profile=root/'p4/profile'; seal=repo/'docs/library/proof/candidate-package-08-2026-09-12'
+-mode=sys.argv[1];assert mode in ('dashboard','desktop')
++mode=sys.argv[1];assert mode == 'dashboard', 'Desktop override is not a verified isolation boundary'
+ run=root/mode; run.mkdir(exist_ok=False)
+ def save(name,value):
+  with (run/name).open('x',encoding='utf8') as f: json.dump(value,f,indent=2,default=str);f.write('\n')
+@@ -43,6 +43,10 @@
+    child=spawn_owned(argv,cwd=profile,env=child_env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,label='native-gui01-'+label)
+    owned.append(child);safe=False;record['processes'].append({'label':label,'pid':child.pid,'argv':argv});return child
+   if mode=='dashboard':
++   seed=start([str(app/'python/python.exe'),'-P','-B','-s',str(repo/'_scratch/native_media08_seed.py')],'seed',env)
++   assert seed.popen.wait(timeout=60)==0, 'Native media fixture preparation failed; preserve attempt'
++   assert seed.terminate_tree(timeout=5)['cleaned']
++   record['synthetic_media_seed']=json.loads((root/'media-seed.json').read_text(encoding='utf8'))
+    helper=start([str(app/'python/python.exe'),'-B','-s',str(app/'server.py'),'--isolated-profile',str(profile),'--isolated-port','18484'],'helper',env)
+    deadline=time.monotonic()+35
+    while time.monotonic()<deadline:
+@@ -53,16 +57,6 @@
+     except OSError:time.sleep(.25)
+    else:raise TimeoutError('isolated helper health deadline')
+    gui=start([str(app/'python/pythonw.exe'),'-B','-s',str(app/'uoink_dashboard.py'),'--isolated-profile',str(profile),'--isolated-port','18484'],'window',env)
+-  else:
+-   data=run/'user-data';data.mkdir()
+-   config=json.loads((profile/'mcp.json').read_text())
+-   assert set(config['mcpServers'])=={'uoink'}
+-   # Desktop has its own configuration; original prepared P4 bytes stay unchanged.
+-   with (data/'claude_desktop_config.json').open('x',encoding='utf8') as f:json.dump({'mcpServers':config['mcpServers']},f,indent=2)
+-   env['CLAUDE_USER_DATA_DIR']=str(data)
+-   record['desktop_data_dir']=str(data)
+-   record['desktop_config_sha256']=common.sha_file(data/'claude_desktop_config.json')
+-   gui=start([r'C:\Program Files\WindowsApps\Claude_1.49585.0.0_x64__pzs8sxrjxfjjc\app\claude.exe'],'window',env)
+   save('ready.json',record)
+   deadline=time.monotonic()+1200
+   while time.monotonic()<deadline and gui.popen.poll() is None and not (run/'observation-complete.json').exists():time.sleep(.5)

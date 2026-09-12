@@ -1,0 +1,89 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "apply.stderr": {
+      "bytes": 723,
+      "sha256": "d7ddbc62fb5e38109930b5971c8253092363df078657e80259863ad0d17653fb"
+    },
+    "apply.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "instruments/build_native_gui08_launchers.py": {
+      "bytes": 1666,
+      "sha256": "f949672abcac1ea830a82c683ccd6561f6efaad56e6ed64878e81aad0cb34f64"
+    },
+    "instruments/integrate_native_incident12.py": {
+      "bytes": 4666,
+      "sha256": "7dafeeee270afe6bfbf763c8036b264d437dea69dcddf1c7bc68db88903fa832"
+    },
+    "instruments/native_gui08_driver.py": {
+      "bytes": 5608,
+      "sha256": "c5dc4652a935ccdb1cda2e83e35256b7cab48bba2c437fe642b19f2b791ead4e"
+    },
+    "instruments/native_media08_seed.py": {
+      "bytes": 2799,
+      "sha256": "3be286271490b9ff571b651328e68925e9539ef6700213266fecb97b691b5196"
+    },
+    "instruments/prepare_native08_safety_correction.py": {
+      "bytes": 2464,
+      "sha256": "239a2cca2ada49efa23845d5d1e9c79f066f37f23e79fa7d17bf0f9ea3257022"
+    },
+    "instruments/repair_native_incident_reader12.py": {
+      "bytes": 1287,
+      "sha256": "6a9eeceab871add8a7b11dfcb67e2d2dd6e6dc3315a810a909b7be304e5c691d"
+    },
+    "instruments/review_native_incident12.py": {
+      "bytes": 3843,
+      "sha256": "1ec24a1d7fcf44c8f980f2b7ec865b7ef6189ca4ebfc883f307f7f7790d7dd0e"
+    },
+    "instruments/review_native_incident12_02.diff": {
+      "bytes": 1552,
+      "sha256": "cae71803b2cecc03152572868c2e8c4e14a47e70bc210d4d30b1ccb4d2af376e"
+    },
+    "instruments/review_native_incident12_02.py": {
+      "bytes": 3808,
+      "sha256": "6babb3edce658bc976f546f09d19dd654cd5eaeddaebc9185d7c9eaede2ca369"
+    },
+    "reader-failure.json": {
+      "bytes": 393,
+      "sha256": "812845f21e02f8dc74ed61dbc43fc3382cc9aa554994276badf23ccea8aba7e3"
+    },
+    "review/independent-review.json": {
+      "bytes": 4850,
+      "sha256": "19f76a7d522e651a9809717a931676d33678e678cbc832f619a66d389ee4505d"
+    },
+    "review/worker-original-report.txt": {
+      "bytes": 12342,
+      "sha256": "1d83f360b8aa69f3cc7516701148ca1f7b1658f26aa5dd45348693a6a8ccfa6b"
+    },
+    "review/worker-original.patch": {
+      "bytes": 12807,
+      "sha256": "49cd7500ff9e7766b19db5d4fc500c30e7b5cbcc79550cff9d0a4d674637cfd7"
+    },
+    "unused-native08-correction/build_native_gui08_launchers.py.diff": {
+      "bytes": 802,
+      "sha256": "afcacdc52250bd94afab6e2a55c6db7171b14542adb13cda251c00f05b7422d9"
+    },
+    "unused-native08-correction/build_native_gui08_launchers.py.original.txt": {
+      "bytes": 1675,
+      "sha256": "70ee07243385cbc395d74a9623662493d2bd12f652f0e8bb23eaccf3eba7d42b"
+    },
+    "unused-native08-correction/native_gui08_driver.py.diff": {
+      "bytes": 2717,
+      "sha256": "efe2c6d378e89632571fd4d29a17c200ee540eb27078f932921c24c71f5e6be7"
+    },
+    "unused-native08-correction/native_gui08_driver.py.original.txt": {
+      "bytes": 5839,
+      "sha256": "93b50c73634a722f1723b791d9ecc6da5dda9570e406fa114036fc02bba302ea"
+    },
+    "unused-native08-correction/review.json": {
+      "bytes": 785,
+      "sha256": "b60e38bd12d574fa5273f26aeb481d5a1e4c0b26641e07778223fcf284127e63"
+    }
+  }
+}

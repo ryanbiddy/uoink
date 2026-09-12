@@ -1,0 +1,19 @@
+{
+  "changes": [
+    {
+      "file": "native_gui08_driver.py",
+      "sha256": "c5dc4652a935ccdb1cda2e83e35256b7cab48bba2c437fe642b19f2b791ead4e",
+      "reason": "Remove unverified Desktop launch entirely; only guarded Uoink dashboard. Add a separate synthetic in-root media seed through installed interpreter before UI observation.",
+      "executed": false
+    },
+    {
+      "file": "build_native_gui08_launchers.py",
+      "sha256": "f949672abcac1ea830a82c683ccd6561f6efaad56e6ed64878e81aad0cb34f64",
+      "reason": "Compile only the Uoink dashboard launcher; no Desktop launcher is produced.",
+      "executed": false
+    }
+  ],
+  "original_scenarios_changed": false,
+  "no_gui_started": true,
+  "incident": "NATIVE-CLIENT-ISOLATION-INCIDENT-2026-09-12.md"
+}

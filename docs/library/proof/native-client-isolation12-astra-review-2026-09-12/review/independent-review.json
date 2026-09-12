@@ -1,0 +1,123 @@
+{
+  "source_bindings": [
+    {
+      "path": "_scratch/desktop-startup12-static/.vite/build/index.pre.js",
+      "bytes": 896736,
+      "sha256": "389412c74487cfded562bd8808f2b245721c397147ff0c1e1d9dfc7c1a42d821"
+    },
+    {
+      "path": "_scratch/native_gui07_driver.py",
+      "bytes": 5839,
+      "sha256": "b28770d766392f49ceb09fa22b37681a0a1d3daf2776e4ee23455bb43e0dc411"
+    },
+    {
+      "path": "scripts/install_receipt/p4_common.py",
+      "bytes": 55973,
+      "sha256": "6e44bcfb5edee0d282de70d3f9100f0de77b234d67fd302b8dec2761dbebf238"
+    },
+    {
+      "path": "scripts/install_receipt/p4_session.py",
+      "bytes": 32779,
+      "sha256": "8f4b63aac375922c2cd642c816b7ec5253842ac92fc8a8c2df0af604f99d17a8"
+    }
+  ],
+  "startup_evidence": {
+    "source_sha256": "389412c74487cfded562bd8808f2b245721c397147ff0c1e1d9dfc7c1a42d821",
+    "deletion_offset": 891395,
+    "deletion": "E.app.isPackaged&&!QJ&&(delete process.env.CLAUDE_USER_DATA_DIR,delete process.env.SSLKEYLOGFILE,delete process.env.sslkeylogfile),QU($J());function $J(){return null}var eY=EJ",
+    "later_setter_offset": 892075,
+    "later_setter": "let e=process.env.CLAUDE_USER_DATA_DIR;E.app.setPath(\"userData\",e),E.app.setPath(\"logs\",h.default.resolve(e,\"Logs\"))}if(process.env.CLAUDE_AI_URL)try{let e=new "
+  },
+  "selected_log_events": [
+    {
+      "private_source": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\native-gui01\\environment\\LOCALAPPDATA\\Claude\\logs\\mcp-server-uoink.log",
+      "sha256": "0030a9f005b322741e1643358cb2e8926f9c2f388b3e91784e95826faf2877f6",
+      "selected_events": [
+        "2026-09-12T16:58:43.711Z [uoink] [info] Initializing server... { metadata: undefined }",
+        "2026-09-12T16:58:43.965Z [uoink] [info] Using MCP server command: C:\\Users\\hello\\AppData\\Local\\Uoink\\python\\python.exe with path: {",
+        "2026-09-12T16:58:43.976Z [uoink] [info] Server started and connected successfully { metadata: undefined }",
+        "2026-09-12T16:58:45.470Z [uoink] [info] Initializing server... { metadata: undefined }",
+        "2026-09-12 09:58:45,681 INFO Processing request of type ListToolsRequest"
+      ],
+      "raw_log_exported": false
+    },
+    {
+      "private_source": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\native-gui01\\environment\\LOCALAPPDATA\\Claude\\logs\\mcp-server-filesystem.log",
+      "sha256": "e92f7b659cb6351ad240a5174db971c4b6fddc8041a114e842b5b1c400abcbb8",
+      "selected_events": [
+        "2026-09-12T16:58:43.710Z [filesystem] [info] Initializing server... { metadata: undefined }",
+        "2026-09-12T16:58:44.045Z [filesystem] [info] Server started and connected successfully { metadata: undefined }",
+        "2026-09-12T16:58:48.110Z [filesystem] [info] Initializing server... { metadata: undefined }"
+      ],
+      "raw_log_exported": false
+    }
+  ],
+  "cleanup": [
+    {
+      "pid": 26884,
+      "label": "native-gui01-window",
+      "job_assigned": true,
+      "already_exited": true,
+      "exit_code": 0,
+      "assignment_error": null,
+      "descendants_before": {
+        "job_assigned": true,
+        "job_pids": [
+          38140,
+          13644,
+          32356
+        ],
+        "owned_pids": [
+          13644,
+          26884,
+          32356,
+          38140
+        ],
+        "parent_pid": 26884,
+        "parent_exit": 0,
+        "job_query_ok": true,
+        "job_empty_affirmed": false,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_after": {
+        "job_assigned": true,
+        "job_pids": [],
+        "owned_pids": [
+          13644,
+          26884,
+          32356,
+          38140
+        ],
+        "parent_pid": 26884,
+        "parent_exit": 0,
+        "job_query_ok": true,
+        "job_empty_affirmed": true,
+        "job_query_error": null,
+        "identity_uncertain": false
+      },
+      "descendants_remaining": [],
+      "descendants_exited": true,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "identity_uncertain": false,
+      "job_query_error": null,
+      "parent_exited": true,
+      "cleaned": true
+    }
+  ],
+  "cleanup_finished_utc_record": "2026-09-12T17:00:00.757879+00:00",
+  "guard_restore": {
+    "restored": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 07\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "action": "removed",
+        "exact_receipt_bytes": true
+      }
+    ],
+    "ok": true,
+    "failures": []
+  },
+  "conclusion": "Intended Desktop configuration isolation failed. Earlier ordinary connector effects unknown. No live-index/port/auth-store inspection performed.",
+  "executed_model_code": false
+}

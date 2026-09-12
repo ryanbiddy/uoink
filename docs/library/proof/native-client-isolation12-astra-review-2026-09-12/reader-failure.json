@@ -1,0 +1,6 @@
+{
+  "result": "reader failed before evidence record was written",
+  "error": "ValueError: substring not found",
+  "reason": "The setter follows a compound if condition; the reader incorrectly required a standalone if prefix. Match the actual setter body and retain deletion-before-setter and all byte/hash checks.",
+  "next": "fresh review02, no application or product scenario rerun"
+}

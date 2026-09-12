@@ -1,3 +1,5 @@
+> Correction, 2026-09-12: the Desktop isolation claim below is withdrawn. Packaged Claude discarded the proposed user-data override and launched ordinary configured connectors. Their earlier live-index/port effects are unknown; owned cleanup only proves termination. The Uoink dashboard observations remain distinct. Read [the incident](NATIVE-CLIENT-ISOLATION-INCIDENT-2026-09-12.md) and [Astra review](ASTRA-NATIVE-CLIENT-ISOLATION-REVIEW-2026-09-12.md). The original sealed observation is preserved unchanged.
+
 # Native package-07 checks found note display defects
 
 Astra used the Windows computer-use skill's @oai/sky API to operate the actual
