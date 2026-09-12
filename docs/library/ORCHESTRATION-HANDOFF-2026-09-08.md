@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package 08 installed/native review complete)
+## State at handoff (updated 2026-09-12; package 08 review kit delivered, release held)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -97,7 +97,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | Gemini reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; separating verified Lightning patch leaves 18 / 14. No qualified replacement runtime | Hold remains; compatible runtime migration and model qualification need exact Ryan scope below |
-| Integration | Package 08 at `755c37e`, installed/native evidence and notes at `49e2b31` | Source b8e44fb: 2,579 pass / one historical failure / two skips. Installed seal 525 payloads; native seal 75; no source changes afterward | Finish review ZIP, verify transport, update delivery notes and authorized backup |
+| Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -144,11 +144,21 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ### Active follow-up from Ryan, 2026-09-12
 
-The repair and installed-observation sequence below is complete through `49e2b31`.
-Next: verify all current sealed payloads against committed Git bytes, build and
-inspect review kit 08 from the clean documentary source, seal its delivery, update
-this handoff and make only the authorized cc/living-library backup. Do not rerun
-completed product measurements for documentary edits. Keep release_ready=false.
+The authorized repair, installed/native observation and documentary delivery
+sequence is complete through `684a4a3`. Read RELEASE-DELIVERY-08-2026-09-12.md.
+The immutable kit contains 3,659 payloads with every ZIP/extracted hash verified;
+1,397 supporting proof payloads match Git, and the delivery seal has 31 payloads.
+No Control Room worker remains active. Do not rerun completed product measurements
+or rebuild unchanged source. Keep release_ready=false.
+
+Final transport: fast-forward and push only cc/living-library using the reviewed
+backup helper. The external record is
+build/Uoink-Living-Library-3-8-0-Review-Kit-08-2026-09-12.backup.json. Verify
+source=after_local=after_remote and verified=true before reporting success. Once
+that record is verified, the authorized sequence is complete; do not repeat it.
+Further security migration and Desktop qualification need the exact scope under
+Blockers for Ryan. Any independently found product defect still needs a repair
+brief and qualification, not a waiver or another fixture edit.
 
 This sequence supersedes the completed delivery instructions below.
 
@@ -177,7 +187,8 @@ This sequence supersedes the completed delivery instructions below.
    at 755c37e. New instruments bind b8e44fb; the unused a25e3be
    drafts and exact corrections are preserved. Fresh isolated installation, C22/browser, CLI, publication and actual Uoink
    note/media GUI qualification are complete at 49e2b31, as are notes and runbook.
-   The review ZIP and authorized cc/living-library backup are next.
+   Review ZIP 08 is delivered at 684a4a3; the final external backup receipt
+   governs branch transport completion.
 4. CR Gemini 46e8e6dc confirms the Desktop isolation failure. Integration
    e10ba3a withdraws the earlier claim: packaged Claude deletes the override
    before its setter, and the attempted run launched ordinary connectors.
@@ -544,7 +555,8 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   probe is permitted. A supported isolation method must be verified before any
   further Desktop launch, or Ryan must provide/authorize a clean separate Windows
   account/VM and perform its interactive sign-in. No such environment is prepared.
-  Sky native automation works; remaining Uoink dashboard checks belong to Astra.
+  Sky native automation works; package-08 Uoink dashboard checks are complete
+  at 49e2b31 and provide no Desktop acceptance.
 - A dependency migration conflicts with the immutable Torch 2.8.0 / WhisperX
   3.8.6 assertions and requires checkpoint/model qualification prohibited by the
   current scope. Ryan must authorize the exact compatibility-test update and
@@ -557,7 +569,7 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 Fixture approvals and Phase 2 option 3 are resolved. The reviewed mirror/read
 corrections and all three receipt corrections are applied and verified. The X
-HTTP 403 stays blocked. Astra owns the remaining safe installation and evidence
+HTTP 403 stays blocked. Astra completed the authorized same-account installation and evidence
 work under Ryan's delegation; this is not a pending installation permission.
 Use the dedicated installation-receipts directory outside the checkout because
 installed provenance correctly rejects source-checkout module paths. Record the
@@ -3226,3 +3238,28 @@ Five ignored mirror/log paths were force-added explicitly; all 600 payloads and
 their two seals match staged Git bytes. Nine runbook PowerShell blocks parse,
 a syntax-only result. No production source, existing test or fixture changed
 after b8e44fb. Finish documentary delivery and preserve every release hold.
+
+
+### 2026-09-12 — review kit 08 complete; release remains held
+
+684a4a3 delivers the immutable review ZIP built from documentary source e1be40e,
+binding build/full-tree source b8e44fb. All 3,659 ZIP and extracted payload hashes
+match, with safe unique paths and no nested archive or database/auth files.
+The 1,397 current/supporting proof payloads match actual committed Git bytes;
+31 new delivery payloads also match staged bytes. Nine runbook PowerShell blocks
+parse. Portable paths were reviewed; no new portable execution is claimed.
+
+ZIP: build/Uoink-Living-Library-3-8-0-Review-Kit-08-2026-09-12.zip,
+438,081,038 bytes, SHA-256
+343afc763b724c2f5030e4b856081639b2dbf297006796836d1b43a7fa236130.
+Read RELEASE-DELIVERY-08-2026-09-12.md. All original failures and corrections
+remain; no product source changed after the qualified build. The notes retain
+suggestions-only 0.90/apply false, X 403, no speaker claim, deferred Part B,
+historical AT6 failure, dependency hold and Desktop isolation incident.
+
+The final documentary branch backup uses the reviewed helper, fresh label
+Uoink-Living-Library-3-8-0-Review-Kit-08-2026-09-12 and its external .backup.json.
+This instruction alone is not a successful push; only verified=true and exact
+source/local/remote equality establish completion. No main merge, candidate-branch
+push, ordinary upgrade or publication is included. Keep that final transport
+record outside Git so recording a commit does not require another commit.
