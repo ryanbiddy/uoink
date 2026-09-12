@@ -1,0 +1,8 @@
+{
+  "attempt": "astra-media12-boundary-negative03",
+  "result": "4 assertion failures, 6 setup errors",
+  "reason": "The same new fixture also omitted required yoinked_at. Supply this schema field only. No assertion changed and no existing accepted test edited.",
+  "old_sha256": "8d3e5277aadb60182d5dbe734df6995d658990f3a01f0b1c335df8e3d4c86e49",
+  "new_sha256": "ae0c16d84a383c955399a5f7d27139127fc0765c59804e360d0febdbc9e6268b",
+  "next": "astra-media12-boundary-negative04 on unchanged worker product"
+}

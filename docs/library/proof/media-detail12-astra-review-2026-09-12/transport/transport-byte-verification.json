@@ -1,0 +1,22 @@
+[
+  {
+    "path": "server.py",
+    "git_sha256": "988a55f6373b8f97ac4d329f2fcbc2fa869e1914a58e0edc63a2d20fb7114dae",
+    "normalized_worker_and_checkout_match": true
+  },
+  {
+    "path": "assets/dashboard/index.html",
+    "git_sha256": "82867ab4d6b6a9b125cdd87eebc03e3513dfdb42df818cb5e502ef8ae7f757b4",
+    "normalized_worker_and_checkout_match": true
+  },
+  {
+    "path": "tests/test_dashboard_media_detail_truth.py",
+    "git_sha256": "5ad2683f062af4b526db4e64e2c77caf618cb9d498613f4e91b63a3a35bb865b",
+    "normalized_worker_and_checkout_match": true
+  },
+  {
+    "path": "tests/test_media_detail_boundaries.py",
+    "git_sha256": "5fa4e379ed270a90ccd69e1d87cc865ae3e02b0d796c3837085b1ddc8f63f533",
+    "normalized_worker_and_checkout_match": true
+  }
+]

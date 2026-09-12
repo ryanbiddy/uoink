@@ -1,0 +1,10 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________________ test_saved_time_aliases_are_preserved ____________________
+tests\test_media_detail_boundaries.py:131: in test_saved_time_aliases_are_preserved
+    assert rows[0]['start_seconds']==34 and rows[0]['end_seconds']==46
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'start_seconds'
+=========================== short test summary info ===========================
+FAILED tests/test_media_detail_boundaries.py::test_saved_time_aliases_are_preserved
+1 failed in 0.71s

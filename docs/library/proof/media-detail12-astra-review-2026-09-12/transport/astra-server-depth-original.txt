@@ -15696,15 +15696,6 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = json.loads(content.decode("utf-8"), parse_float=finite_float,
                               parse_constant=reject_constant)
-            # Enforce an explicit bound independent of the process recursion limit.
-            pending = [(data, 0)]
-            while pending:
-                value, depth = pending.pop()
-                if isinstance(value, (dict, list)):
-                    if depth >= 64:
-                        raise ValueError("sidecar JSON too deeply nested")
-                    children = value.values() if isinstance(value, dict) else value
-                    pending.extend((child, depth + 1) for child in children)
         except (ValueError, TypeError, RecursionError):
             return self._send_json(400, {"ok": False,
                                          "error": "malformed sidecar JSON"})
@@ -15750,7 +15741,7 @@ class Handler(BaseHTTPRequestHandler):
             for seg in raw_transcript:
                 if isinstance(seg, dict):
                     clean_seg = {}
-                    for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
+                    for k in ("start", "end", "text", "content", "speaker",
                               "speaker_label", "speaker_id"):
                         if k in seg and isinstance(seg[k], (str, int, float, bool)):
                             clean_seg[k] = seg[k]
@@ -15803,7 +15794,7 @@ class Handler(BaseHTTPRequestHandler):
                 for s in raw_diar["segments"]:
                     if isinstance(s, dict):
                         clean_diar_segs.append({
-                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                            k: s[k] for k in ("start", "end", "speaker",
                                              "speaker_label", "speaker_id")
                             if k in s and isinstance(s[k], (str, int, float))
                         })

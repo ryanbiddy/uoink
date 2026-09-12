@@ -1,0 +1,48 @@
+{
+  "source": "a25e3be1c4b8ca1f0c064dd8383b49870f23465f",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2556,
+    "failed": 1,
+    "skipped": 2
+  },
+  "cases": 2559,
+  "seconds_including_collection": 1500.6381642999986,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree with --runxfail; not a monolithic pytest run",
+  "expected_failure_policy": "Original marks unchanged; --runxfail executes all assertion bodies normally",
+  "finished_utc": "2026-09-12T17:55:18.164063+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "partition": "main"
+    }
+  },
+  "previous_collected_cases": 2543,
+  "new_cases": [
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload0]",
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload1]",
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload2]",
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload3]",
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload4]",
+    "tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload5]",
+    "tests/test_note_readiness_truth.py::test_note_has_no_media_controls_or_placeholders",
+    "tests/test_note_readiness_truth.py::test_note_missing_text_stays_unhealthy",
+    "tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[empty--empty]",
+    "tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[loading--checking]",
+    "tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[no_markdown--unavailable]",
+    "tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[ready-AMBER-ready]",
+    "tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[unavailable--unavailable]",
+    "tests/test_note_readiness_truth.py::test_real_note_capture_enrichment_and_card",
+    "tests/test_note_readiness_truth.py::test_source_labels",
+    "tests/test_note_readiness_truth.py::test_video_health_and_fields_remain_applicable"
+  ],
+  "missing_prior_cases": [],
+  "test_process_seconds": {
+    "main": 1482.148,
+    "media": 4.27
+  },
+  "total_test_process_seconds": 1486.418,
+  "source_scope_check": "No modifications/deletions to prior tests or P4 fixture guard; added regression file only"
+}

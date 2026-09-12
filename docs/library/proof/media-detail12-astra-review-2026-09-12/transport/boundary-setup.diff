@@ -1,0 +1,11 @@
+--- missing-required-slug
++++ supplied-required-slug
+@@ -18,7 +18,7 @@
+     monkeypatch.setattr(server,'_get_index',lambda:idx)
+     path=root/'media.json';path.write_text('{}',encoding='utf8')
+     def register(p=path):
+-        idx.upsert_yoink({'video_id':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
++        idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+     register()
+     handler=server.Handler.__new__(server.Handler)
+     handler._send_json=lambda status,data:(status,data)

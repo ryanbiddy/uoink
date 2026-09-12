@@ -1,0 +1,92 @@
+EEEEEEFFFF                                                               [100%]
+=================================== ERRORS ====================================
+_______ ERROR at setup of test_outside_path_is_rejected_before_metadata _______
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+_________ ERROR at setup of test_read_bound_is_bytes_when_file_grows __________
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+_ ERROR at setup of test_invalid_numeric_or_deep_json_is_structured_refusal[{"duration_seconds":NaN}] _
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+_ ERROR at setup of test_invalid_numeric_or_deep_json_is_structured_refusal[{"duration_seconds":1e999}] _
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+_ ERROR at setup of test_invalid_numeric_or_deep_json_is_structured_refusal[{"nested":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}] _
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+___ ERROR at setup of test_nested_speaker_metadata_excludes_private_fields ____
+tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at
+================================== FAILURES ===================================
+____________ test_reopening_same_item_cannot_accept_old_responses _____________
+tests\test_media_detail_boundaries.py:94: in test_reopening_same_item_cannot_accept_old_responses
+    assert result=={'title':'newest','markdown':'newest'}
+E   AssertionError: assert {'title': 'ol...wn': 'oldest'} == {'title': 'ne...wn': 'newest'}
+E     
+E     Differing items:
+E     {'title': 'oldest'} != {'title': 'newest'}
+E     {'markdown': 'oldest'} != {'markdown': 'newest'}
+E     Use -v to get more diff
+______________ test_unstamped_transcript_does_not_invent_offsets ______________
+tests\test_media_detail_boundaries.py:104: in test_unstamped_transcript_does_not_invent_offsets
+    assert all('start' not in row for row in result['segments'])
+E   assert False
+E    +  where False = all(<generator object test_unstamped_transcript_does_not_invent_offsets.<locals>.<genexpr> at 0x000001E8727BF780>)
+_________________ test_timeline_requires_actual_valid_bounds __________________
+tests\test_media_detail_boundaries.py:116: in test_timeline_requires_actual_valid_bounds
+    assert result==[{'speaker':'SYNTHETIC A','start':3,'end':5}]
+E   AssertionError: assert [{'speaker': ... 3, 'end': 5}] == [{'speaker': ... 3, 'end': 5}]
+E     
+E     At index 0 diff: {'speaker': 'SYNTHETIC A', 'start': 0, 'end': 20} != {'speaker': 'SYNTHETIC A', 'start': 3, 'end': 5}
+E     Left contains 3 more items, first extra item: {'speaker': 'SYNTHETIC A', 'start': 1, 'end': 21}
+E     Use -v to get more diff
+____________ test_empty_speaker_objects_do_not_invent_attribution _____________
+tests\test_media_detail_boundaries.py:120: in test_empty_speaker_objects_do_not_invent_attribution
+    assert result==[]
+E   AssertionError: assert ['Speaker 1'] == []
+E     
+E     Left contains one more item: 'Speaker 1'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+ERROR tests/test_media_detail_boundaries.py::test_outside_path_is_rejected_before_metadata
+ERROR tests/test_media_detail_boundaries.py::test_read_bound_is_bytes_when_file_grows
+ERROR tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{"duration_seconds":NaN}]
+ERROR tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{"duration_seconds":1e999}]
+ERROR tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{"nested":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}]
+ERROR tests/test_media_detail_boundaries.py::test_nested_speaker_metadata_excludes_private_fields
+FAILED tests/test_media_detail_boundaries.py::test_reopening_same_item_cannot_accept_old_responses
+FAILED tests/test_media_detail_boundaries.py::test_unstamped_transcript_does_not_invent_offsets
+FAILED tests/test_media_detail_boundaries.py::test_timeline_requires_actual_valid_bounds
+FAILED tests/test_media_detail_boundaries.py::test_empty_speaker_objects_do_not_invent_attribution
+4 failed, 6 errors in 1.41s

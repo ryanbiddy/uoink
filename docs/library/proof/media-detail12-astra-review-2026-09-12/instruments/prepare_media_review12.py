@@ -1,0 +1,133 @@
+import hashlib,json,shutil,subprocess
+from pathlib import Path
+r=Path(__file__).resolve().parents[1]
+w=Path(r'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\2dae80cc-01a\gemini')
+p=r/'_scratch/media-detail12-review';p.mkdir(exist_ok=False)
+for name in ('tests/test_dashboard_media_detail_truth.py','docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md'):
+    subprocess.run(['git','add','-N','--',name],cwd=w,check=True)
+    shutil.copyfile(w/name,p/(Path(name).name+'.original.txt'))
+(p/'worker-original.patch').write_bytes(subprocess.check_output(['git','diff','--binary'],cwd=w))
+tests=r'''"""Boundary and evidence-truth checks for the newly exposed saved details."""
+import builtins
+import json
+from pathlib import Path
+import subprocess
+import pytest
+import index as index_mod
+import server
+from tests.test_dashboard_media_detail_truth import NODE_DASHBOARD_HARNESS
+
+ROOT=Path(__file__).resolve().parents[1]
+
+@pytest.fixture
+def item(tmp_path,monkeypatch):
+    root=tmp_path/'output';root.mkdir()
+    idx=index_mod.Index.open(tmp_path/'isolated.db')
+    monkeypatch.setattr(server,'DESKTOP_ROOT',root)
+    monkeypatch.setattr(server,'_get_index',lambda:idx)
+    path=root/'media.json';path.write_text('{}',encoding='utf8')
+    def register(p=path):
+        idx.upsert_yoink({'video_id':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+    register()
+    handler=server.Handler.__new__(server.Handler)
+    handler._send_json=lambda status,data:(status,data)
+    def request():return handler._handle_yoink_details('/yoinks/saved-media/details')
+    try:yield path,register,request
+    finally:idx.close()
+
+def node(code):
+    prefix=NODE_DASHBOARD_HARNESS.split('async function execute() {')[0]
+    script=prefix+'\n(async()=>{'+code+'})().catch(e=>{console.error(e);process.exit(1)});'
+    res=subprocess.run(['node','-e',script],input='{}',cwd=ROOT,text=True,capture_output=True,timeout=15)
+    assert res.returncode==0,res.stderr
+    return json.loads(res.stdout)
+
+def test_outside_path_is_rejected_before_metadata(item,tmp_path,monkeypatch):
+    path,register,request=item
+    outside=tmp_path/'outside.json';outside.write_text('{}',encoding='utf8');register(outside)
+    observed=[];original=Path.lstat
+    def observe(p,*args,**kwargs):
+        if p==outside:observed.append(str(p))
+        return original(p,*args,**kwargs)
+    monkeypatch.setattr(Path,'lstat',observe)
+    code,data=request()
+    assert code in (400,403) and data['ok'] is False
+    assert observed==[]
+
+def test_read_bound_is_bytes_when_file_grows(item,monkeypatch):
+    path,register,request=item
+    big=json.dumps({'title':'\u20ac'*800000},ensure_ascii=False).encode('utf8')
+    assert len(big)>server.MAX_SIDECAR_BYTES and len(big.decode('utf8'))<server.MAX_SIDECAR_BYTES
+    original=builtins.open;grown=False
+    def growing_open(file,mode='r',*args,**kwargs):
+        nonlocal grown
+        if Path(file)==path and mode in ('r','rb') and not grown:
+            grown=True
+            with original(path,'wb') as out:out.write(big)
+        return original(file,mode,*args,**kwargs)
+    monkeypatch.setattr(builtins,'open',growing_open)
+    code,data=request()
+    assert grown and code==400 and data['ok'] is False
+
+@pytest.mark.parametrize('raw',[b'{"duration_seconds":NaN}',b'{"duration_seconds":1e999}',b'{"nested":'+b'['*1500+b'0'+b']'*1500+b'}'])
+def test_invalid_numeric_or_deep_json_is_structured_refusal(item,raw):
+    path,register,request=item;path.write_bytes(raw)
+    code,data=request()
+    assert code==400 and data['ok'] is False
+
+def test_nested_speaker_metadata_excludes_private_fields(item):
+    path,register,request=item
+    path.write_text(json.dumps({'speakers':{'SYNTHETIC A':{'private':'DO_NOT_RETURN'}},'diarization':{'speakers':[{'name':'SYNTHETIC B','private':'DO_NOT_RETURN'}]}}),encoding='utf8')
+    code,data=request()
+    assert code==200 and data['ok'] is True
+    encoded=json.dumps(data)
+    assert 'SYNTHETIC A' in encoded and 'SYNTHETIC B' in encoded
+    assert 'DO_NOT_RETURN' not in encoded and 'private' not in encoded
+
+def test_reopening_same_item_cannot_accept_old_responses():
+    result=node(r"""
+      const pending=[];
+      ctx.loadYoinkDetails=id=>new Promise(resolve=>pending.push({id,kind:'details',resolve}));
+      ctx.loadYoinkMarkdown=id=>new Promise(resolve=>pending.push({id,kind:'markdown',resolve}));
+      const row=id=>({video_id:id,source_type:'video',platform:'youtube',title:id});
+      const p1=ctx.openYoinkDetail(row('A'));
+      const p2=ctx.openYoinkDetail(row('B'));
+      const p3=ctx.openYoinkDetail(row('A'));
+      for(const [start,label] of [[4,'newest'],[2,'middle'],[0,'oldest']]) {
+        for(const q of pending.slice(start,start+2)) q.resolve(q.kind==='details'?{title:label,transcript:[{text:label,start:34,end:46}]}:label);
+        await Promise.resolve();await Promise.resolve();
+      }
+      await Promise.all([p1,p2,p3]);
+      process.stdout.write(JSON.stringify({title:ctx.state.selectedYoinkSidecar.title,markdown:ctx.state.selectedYoinkMarkdown}));
+    """)
+    assert result=={'title':'newest','markdown':'newest'}
+
+def test_unstamped_transcript_does_not_invent_offsets():
+    result=node(r"""
+      ctx.state.selectedYoink={video_id:'A',source_type:'video',platform:'youtube'};
+      ctx.state.selectedYoinkSidecar={transcript:'SYNTHETIC first line\nSYNTHETIC second line'};
+      ctx.renderYoinkDetail();
+      process.stdout.write(JSON.stringify({html:ctx.els.yoinkDetail.innerHTML,segments:ctx.transcriptSegments(ctx.state.selectedYoinkSidecar)}));
+    """)
+    assert 'SYNTHETIC first line' in result['html']
+    assert all('start' not in row for row in result['segments'])
+    assert 'time not stored' in result['html']
+
+def test_timeline_requires_actual_valid_bounds():
+    result=node(r"""
+      const result=ctx.diarizationSegments({transcript:[
+        {speaker:'SYNTHETIC A',text:'missing'},
+        {speaker:'SYNTHETIC A',start:1,text:'missing end'},
+        {speaker:'SYNTHETIC A',start:9,end:3,text:'backwards'},
+        {speaker:'SYNTHETIC A',start:3,end:5,text:'stored'}]});
+      process.stdout.write(JSON.stringify(result));
+    """)
+    assert result==[{'speaker':'SYNTHETIC A','start':3,'end':5}]
+
+def test_empty_speaker_objects_do_not_invent_attribution():
+    result=node("process.stdout.write(JSON.stringify(ctx.speakerNames({speakers:[{}]}))); ")
+    assert result==[]
+'''
+target=w/'tests/test_media_detail_boundaries.py';assert not target.exists();target.write_text(tests,encoding='utf8',newline='\n')
+shutil.copyfile(target,p/'test_media_detail_boundaries.py')
+print('Preserved worker patch and wrote 10 independent boundary cases.')

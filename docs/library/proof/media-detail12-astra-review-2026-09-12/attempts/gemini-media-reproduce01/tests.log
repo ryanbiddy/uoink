@@ -1,0 +1,57 @@
+F.F.FFFFFFF.                                                             [100%]
+================================== FAILURES ===================================
+_______________________ test_saved_media_detail_success _______________________
+tests\test_dashboard_media_detail_truth.py:286: in test_saved_media_detail_success
+    assert code == 200, f"Expected 200, got {code}: {res}"
+E   AssertionError: Expected 200, got 404: {'ok': False, 'error': 'not found'}
+E   assert 404 == 200
+________________________ test_media_detail_unknown_id _________________________
+tests\test_dashboard_media_detail_truth.py:319: in test_media_detail_unknown_id
+    assert res.get("error") == "uoink not found"
+E   AssertionError: assert 'not found' == 'uoink not found'
+E     
+E     - uoink not found
+E     ? ------
+E     + not found
+__________________ test_media_detail_corrupt_malformed_json ___________________
+tests\test_dashboard_media_detail_truth.py:341: in test_media_detail_corrupt_malformed_json
+    assert code == 400
+E   assert 404 == 400
+______________________ test_media_detail_oversized_json _______________________
+tests\test_dashboard_media_detail_truth.py:355: in test_media_detail_oversized_json
+    assert code == 400
+E   assert 404 == 400
+______________________ test_media_detail_non_object_json ______________________
+tests\test_dashboard_media_detail_truth.py:366: in test_media_detail_non_object_json
+    assert code == 400
+E   assert 404 == 400
+____________ test_media_detail_outside_root_refusal_without_reads _____________
+tests\test_dashboard_media_detail_truth.py:396: in test_media_detail_outside_root_refusal_without_reads
+    assert code in (400, 403)
+E   assert 404 in (400, 403)
+___________________ test_dashboard_node_open_detail_success ___________________
+tests\test_dashboard_media_detail_truth.py:430: in test_dashboard_node_open_detail_success
+    assert any("/details" in u for u in urls), f"Must fetch /details route: {urls}"
+E   AssertionError: Must fetch /details route: ['/token', '/yoinks/v_test_node_01/markdown']
+E   assert False
+E    +  where False = any(<generator object test_dashboard_node_open_detail_success.<locals>.<genexpr> at 0x000001FFAA3E5490>)
+____________ test_dashboard_node_open_detail_refusal_honest_error _____________
+tests\test_dashboard_media_detail_truth.py:458: in test_dashboard_node_open_detail_refusal_honest_error
+    assert "sidecar file not found" in out["selectedYoinkSidecarError"] or "unavailable" in out["selectedYoinkSidecarError"]
+E   AssertionError: assert ('sidecar file not found' in '' or 'unavailable' in '')
+__________ test_dashboard_node_selection_race_avoids_stale_overwrite __________
+tests\test_dashboard_media_detail_truth.py:493: in test_dashboard_node_selection_race_avoids_stale_overwrite
+    assert out["selectedYoinkSidecar"]["video_id"] == "v_fast_item_02"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable
+=========================== short test summary info ===========================
+FAILED tests/test_dashboard_media_detail_truth.py::test_saved_media_detail_success
+FAILED tests/test_dashboard_media_detail_truth.py::test_media_detail_unknown_id
+FAILED tests/test_dashboard_media_detail_truth.py::test_media_detail_corrupt_malformed_json
+FAILED tests/test_dashboard_media_detail_truth.py::test_media_detail_oversized_json
+FAILED tests/test_dashboard_media_detail_truth.py::test_media_detail_non_object_json
+FAILED tests/test_dashboard_media_detail_truth.py::test_media_detail_outside_root_refusal_without_reads
+FAILED tests/test_dashboard_media_detail_truth.py::test_dashboard_node_open_detail_success
+FAILED tests/test_dashboard_media_detail_truth.py::test_dashboard_node_open_detail_refusal_honest_error
+FAILED tests/test_dashboard_media_detail_truth.py::test_dashboard_node_selection_race_avoids_stale_overwrite
+9 failed, 3 passed in 5.47s

@@ -185,3 +185,17 @@ the vulnerable old version literals would contradict the authorized upgrade.
 Independent four-suite union: 23 passed in the worker and checkout. This is not
 the final full-tree or packaged-runtime observation. See the one-page dependency
 verdict for resolution results and the remaining four affected packages.
+
+
+## 2026-09-12 — new media regression preparation, no accepted fixture change
+
+The new, unaccepted test_media_detail_boundaries.py fixture omitted three
+schema-required fields: slug, yoinked_at and corpus_path. Three recorded setup
+attempts each had six setup errors and four actual UI failures. Each correction
+only supplied its missing field; all behavior assertions stayed unchanged. The
+next attempt reached all ten bodies and failed all ten against the worker patch.
+Exact before/after diffs and reasons are in proof/media-detail12-astra-review-
+2026-09-12/transport/boundary-setup*.diff and corresponding diagnosis JSON files.
+The earlier generator syntax error and no-file pytest result are also preserved.
+No existing accepted fixture or test was modified. Read ASTRA-MEDIA-DETAIL-
+REVIEW-2026-09-12.md for the one-page verdict, repairs and final 58/58 counts.

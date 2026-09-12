@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="6" failures="4" skipped="0" tests="10" time="1.407" timestamp="2026-09-12T11:01:11.360399-07:00" hostname="Ryan-PC"><testcase classname="tests.test_media_detail_boundaries" name="test_outside_path_is_rejected_before_metadata" time="0.068"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_read_bound_is_bytes_when_file_grows" time="0.062"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_invalid_numeric_or_deep_json_is_structured_refusal[{&quot;duration_seconds&quot;:NaN}]" time="0.061"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_invalid_numeric_or_deep_json_is_structured_refusal[{&quot;duration_seconds&quot;:1e999}]" time="0.061"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_invalid_numeric_or_deep_json_is_structured_refusal[{&quot;nested&quot;:[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}]" time="0.061"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_nested_speaker_metadata_excludes_private_fields" time="0.065"><error message="failed on setup with &quot;sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at&quot;">tests\test_media_detail_boundaries.py:22: in item
+    register()
+tests\test_media_detail_boundaries.py:21: in register
+    idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','title':'Synthetic item','sidecar_path':str(p),'source_type':'video','platform':'youtube'})
+index.py:691: in upsert_yoink
+    self._conn.execute(
+E   sqlite3.IntegrityError: NOT NULL constraint failed: yoinks.yoinked_at</error></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_reopening_same_item_cannot_accept_old_responses" time="0.047"><failure message="AssertionError: assert {'title': 'ol...wn': 'oldest'} == {'title': 'ne...wn': 'newest'}&#10;  &#10;  Differing items:&#10;  {'title': 'oldest'} != {'title': 'newest'}&#10;  {'markdown': 'oldest'} != {'markdown': 'newest'}&#10;  Use -v to get more diff">tests\test_media_detail_boundaries.py:94: in test_reopening_same_item_cannot_accept_old_responses
+    assert result=={'title':'newest','markdown':'newest'}
+E   AssertionError: assert {'title': 'ol...wn': 'oldest'} == {'title': 'ne...wn': 'newest'}
+E     
+E     Differing items:
+E     {'title': 'oldest'} != {'title': 'newest'}
+E     {'markdown': 'oldest'} != {'markdown': 'newest'}
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_unstamped_transcript_does_not_invent_offsets" time="0.044"><failure message="assert False&#10; +  where False = all(&lt;generator object test_unstamped_transcript_does_not_invent_offsets.&lt;locals&gt;.&lt;genexpr&gt; at 0x000001E8727BF780&gt;)">tests\test_media_detail_boundaries.py:104: in test_unstamped_transcript_does_not_invent_offsets
+    assert all('start' not in row for row in result['segments'])
+E   assert False
+E    +  where False = all(&lt;generator object test_unstamped_transcript_does_not_invent_offsets.&lt;locals&gt;.&lt;genexpr&gt; at 0x000001E8727BF780&gt;)</failure></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_timeline_requires_actual_valid_bounds" time="0.045"><failure message="AssertionError: assert [{'speaker': ... 3, 'end': 5}] == [{'speaker': ... 3, 'end': 5}]&#10;  &#10;  At index 0 diff: {'speaker': 'SYNTHETIC A', 'start': 0, 'end': 20} != {'speaker': 'SYNTHETIC A', 'start': 3, 'end': 5}&#10;  Left contains 3 more items, first extra item: {'speaker': 'SYNTHETIC A', 'start': 1, 'end': 21}&#10;  Use -v to get more diff">tests\test_media_detail_boundaries.py:116: in test_timeline_requires_actual_valid_bounds
+    assert result==[{'speaker':'SYNTHETIC A','start':3,'end':5}]
+E   AssertionError: assert [{'speaker': ... 3, 'end': 5}] == [{'speaker': ... 3, 'end': 5}]
+E     
+E     At index 0 diff: {'speaker': 'SYNTHETIC A', 'start': 0, 'end': 20} != {'speaker': 'SYNTHETIC A', 'start': 3, 'end': 5}
+E     Left contains 3 more items, first extra item: {'speaker': 'SYNTHETIC A', 'start': 1, 'end': 21}
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_media_detail_boundaries" name="test_empty_speaker_objects_do_not_invent_attribution" time="0.042"><failure message="AssertionError: assert ['Speaker 1'] == []&#10;  &#10;  Left contains one more item: 'Speaker 1'&#10;  Use -v to get more diff">tests\test_media_detail_boundaries.py:120: in test_empty_speaker_objects_do_not_invent_attribution
+    assert result==[]
+E   AssertionError: assert ['Speaker 1'] == []
+E     
+E     Left contains one more item: 'Speaker 1'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

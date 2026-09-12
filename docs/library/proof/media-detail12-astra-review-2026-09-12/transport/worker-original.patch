@@ -1,0 +1,968 @@
+diff --git a/assets/dashboard/index.html b/assets/dashboard/index.html
+index 34985c8..d767941 100644
+--- a/assets/dashboard/index.html
++++ b/assets/dashboard/index.html
+@@ -6761,7 +6761,9 @@
+         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
+         fmtDuration(durationOf(row, sidecar)),
+       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+-      els.yoinkFactMeta.textContent = isNote ? noteReadinessLabel() : (state.selectedYoinkSidecar ? "ready" : "checking saved files");
++      els.yoinkFactMeta.textContent = isNote
++        ? noteReadinessLabel()
++        : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
+       const speakerHtml = speakers.length
+         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
+         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
+@@ -6800,6 +6802,11 @@
+       return JSON.parse(await res.text());
+     }
+ 
++    async function loadYoinkDetails(videoId) {
++      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details`);
++      return data.details || data;
++    }
++
+     async function loadYoinkMarkdown(videoId) {
+       const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/markdown`);
+       return data.markdown || "";
+@@ -6852,30 +6859,43 @@
+       renderYoinkDetail();
+       switchTab("yoink");
+       const isNote = isNoteContent(row);
+-      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
+       const videoId = videoIdOf(row);
+       const tasks = [];
+-      if (sidecarPath) {
+-        tasks.push(loadJsonFile(sidecarPath)
+-          .then((data) => { state.selectedYoinkSidecar = data; })
+-          .catch(() => { state.selectedYoinkSidecarError = "saved details need another moment"; }));
++      if (!isNote && videoId) {
++        tasks.push(loadYoinkDetails(videoId)
++          .then((data) => {
++            if (videoIdOf(state.selectedYoink) !== videoId) return;
++            state.selectedYoinkSidecar = data;
++          })
++          .catch((err) => {
++            if (videoIdOf(state.selectedYoink) !== videoId) return;
++            state.selectedYoinkSidecar = null;
++            state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable";
++          }));
+       }
+       if (videoId) {
+         tasks.push(loadYoinkMarkdown(videoId)
+           .then((markdown) => {
++            if (videoIdOf(state.selectedYoink) !== videoId) return;
+             state.selectedYoinkMarkdown = markdown;
+             state.selectedYoinkMarkdownState = markdown ? "ready" : "empty";
+           })
+           .catch((err) => {
++            if (videoIdOf(state.selectedYoink) !== videoId) return;
+             state.selectedYoinkMarkdown = "";
+             state.selectedYoinkMarkdownState = (err.data && err.data.state) || "unavailable";
+             state.selectedYoinkMarkdownError = err.message;
+           }));
+       } else {
+         state.selectedYoinkMarkdownState = "unavailable";
++        if (!isNote) {
++          state.selectedYoinkSidecarError = "unavailable";
++        }
+       }
+       if (tasks.length) await Promise.all(tasks);
+-      renderYoinkDetail();
++      if (videoIdOf(state.selectedYoink) === videoId) {
++        renderYoinkDetail();
++      }
+     }
+ 
+     async function requestRetranscription() {
+diff --git a/docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md b/docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md
+new file mode 100644
+index 0000000..701cc3e
+--- /dev/null
++++ b/docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md
+@@ -0,0 +1,148 @@
++# Dashboard Media Detail Repair: Bounded Authenticated Read Path
++
++**Date:** 2026-09-12  
++**Worker:** gemini  
++**Worktree:** `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\2dae80cc-01a\gemini`  
++**Assignment:** Implement bounded authenticated saved-media-detail repair per `DASHBOARD-MEDIA-DETAIL-REPAIR-BRIEF-2026-09-12.md` and `NATIVE-NOTE-DISPLAY-INTEGRATOR-REPAIR-2026-09-12.md`.  
++**Status:** Complete. Reproduction confirmed on unmodified source (9 failures / 3 passes). Repair implemented and verified across all 6 named suites (47 passed, exit 0). No existing tests, fixtures, assertions, or marks changed.
++
++---
++
++## 1. Defect Analysis
++
++### 1.1 Root Cause
++In `assets/dashboard/index.html`, opening a saved media item in `openYoinkDetail(row)` initiates `loadJsonFile(sidecarPath)`, which requests:
++```
++GET /file?path=${encodeURIComponent(sidecarPath)}
++```
++The helper's `/file` endpoint in `server.py` is an authenticated image server (`_resolve_served_file`). It checks file suffixes against `_SERVED_IMAGE_TYPES` (`.png`, `.jpg`, `.jpeg`, `.webp`). Requesting a `.json` sidecar triggers HTTP 415 ("unsupported file type").
++
++Consequently:
++1. Video and podcast cards cannot display their saved duration, channel, host, episode title, screenshots, transcript segments, or timeline.
++2. The catch handler in `openYoinkDetail` assigns `state.selectedYoinkSidecarError = "saved details need another moment"`. This message is misleading: the request was rejected with HTTP 415, so waiting or retrying the identical request will never succeed.
++3. In `renderYoinkDetail`, the metadata badge `els.yoinkFactMeta.textContent` displays `"checking saved files"` whenever `state.selectedYoinkSidecar` is missing, even when `selectedYoinkSidecarError` is set. The UI enters a perpetual checking state instead of displaying an honest failure status.
++4. Rapid selection changes can cause stale asynchronous responses from an earlier fetch to overwrite details of a newly selected item.
++
++### 1.2 Boundary Constraints
++Per the repair brief:
++- `/file` must remain image-only. It cannot be widened to serve JSON or arbitrary files.
++- The server must not accept arbitrary client-supplied paths.
++- Sidecar files must be located using the index registration for the item ID.
++- Paths must be resolved and contained under `DESKTOP_ROOT` before opening. Symlinks and junction points must be rejected.
++- Reads must be bounded in byte size. Missing, malformed, oversized, or non-object JSON must return clear errors rather than empty success payloads.
++- Only saved fields needed by the dashboard may be returned; secrets and internal configuration must be excluded.
++- No synthetic data generation: timestamps, cues, and screenshot references are preserved as saved; no speaker attribution or diarization may be fabricated.
++- Notes must keep their measured text readiness and source-aware labels.
++- No existing tests, fixtures, assertions, or marks may change.
++
++---
++
++## 2. Repair Architecture
++
++### 2.1 Authenticated Item Detail Endpoint: `GET /yoinks/<id>/details`
++In `server.py`:
++1. Registered `GET /yoinks/<id>/details` in `do_GET` under token verification (`_require_token()`).
++2. Parsed `video_id` from the path and looked up the row in the SQLite index via `_get_index().get_yoink(video_id)`. If missing, returns HTTP 404 (`{"ok": false, "error": "uoink not found"}`).
++3. Retrieved registered `sidecar_path`. If absent or blank, returns HTTP 404 (`{"ok": false, "error": "This uoink has no saved details on disk yet."}`).
++4. Path containment and security checks:
++   - Traversed candidate path and each parent component to detect symlinks or NTFS junction points. Rejects immediately if found (`{"ok": false, "error": "symlink sidecar rejected"}`).
++   - Resolved path and verified containment under `DESKTOP_ROOT.resolve()`. If it escapes `DESKTOP_ROOT`, rejects without reading (`{"ok": false, "error": "sidecar path escapes Uoink root"}`).
++   - Verified file existence and type (`exists()` and `is_file()`). If missing, returns HTTP 404 (`{"ok": false, "error": "sidecar file not found"}`).
++5. Bounded read and schema validation:
++   - Enforced `MAX_SIDECAR_BYTES = 2 * 1024 * 1024` (2 MB). Rejects files exceeding the limit with HTTP 400 (`{"ok": false, "error": "sidecar file too large"}`).
++   - Read bounded bytes with UTF-8 decoding. Parsed JSON and required a top-level JSON object (`dict`). Malformed JSON or non-object JSON returns HTTP 400 (`"malformed sidecar JSON"` or `"sidecar JSON must be an object"`).
++6. Field filtering:
++   - Extracted only allowed keys used by the dashboard: `video_id`, `youtube_id`, `url`, `source_url`, `platform`, `source_platform`, `media_type`, `content_type`, `kind`, `format`, `source_type`, `title`, `episode_title`, `podcast_title`, `feed_url`, `channel`, `author`, `host`, `duration_seconds`, `is_podcast`, `is_live`, `live_status`, `screenshots`, `transcript`, `segments`, `speakers`, `diarization`.
++   - Sanitized nested screenshot items to retain only media references (`path`, `filename`, `timestamp`, `timestamp_seconds`, `start`, `time`, `absolute_path`, `file_path`, `index`, `width`, `height`).
++   - Retained actual transcript segments, cues, and speaker labels without generating synthetic speaker attributions.
++   - Returned HTTP 200:
++     ```json
++     {
++       "ok": true,
++       "video_id": "<id>",
++       "details": { ... }
++     }
++     ```
++
++### 2.2 Dashboard Wiring (`assets/dashboard/index.html`)
++1. Added `loadYoinkDetails(videoId)`:
++   - Calls `authFetch('/yoinks/' + encodeURIComponent(videoId) + '/details')`.
++   - Returns `data.details || data`.
++2. Updated `openYoinkDetail(row)`:
++   - If `!isNote && videoId`: invokes `loadYoinkDetails(videoId)`.
++   - Prevented race conditions: checked `videoIdOf(state.selectedYoink) === videoId` before updating state and re-rendering.
++   - On refusal/error: sets `state.selectedYoinkSidecar = null` and `state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable"`.
++   - In `renderYoinkDetail`: updated `els.yoinkFactMeta.textContent` to display `noteReadinessLabel()` for notes, `"ready"` when sidecar loaded, or `state.selectedYoinkSidecarError || "checking saved files"` on error.
++   - In `yoinkFactsHtml`: displays `state.selectedYoinkSidecarError` under `"Saved details"`.
++
++---
++
++## 3. Focused Regressions: `tests/test_dashboard_media_detail_truth.py`
++
++Twelve behavioral test cases exercise both HTTP backend constraints and dashboard UI lifecycle:
++1. `test_saved_media_detail_success`: seed video with sidecar containing duration, host, screenshots, transcript; verifies 200 response with filtered fields and exclusion of secret keys.
++2. `test_media_detail_requires_authentication`: verifies request without token returns 403.
++3. `test_media_detail_unknown_id`: verifies request for unknown ID returns 404.
++4. `test_media_detail_missing_sidecar_file`: index row exists but file is missing -> 404.
++5. `test_media_detail_corrupt_malformed_json`: corrupt JSON syntax -> 400 error.
++6. `test_media_detail_oversized_json`: sidecar exceeding byte limit -> 400 error.
++7. `test_media_detail_non_object_json`: sidecar with JSON array or scalar -> 400 error.
++8. `test_media_detail_outside_root_refusal_without_reads`: sidecar path outside `DESKTOP_ROOT` rejected before opening; instrumented `open` confirms file is never read.
++9. `test_dashboard_node_open_detail_success`: Node DOM execution confirms `openYoinkDetail` fetches `/details` (not `/file`), populates video details, sets ready badge, and renders facts.
++10. `test_dashboard_node_open_detail_refusal_honest_error`: Node DOM execution confirms refusal displays error rather than perpetual checking or false ready.
++11. `test_dashboard_node_selection_race_avoids_stale_overwrite`: Node DOM execution verifies rapid selection change discards out-of-order response.
++12. `test_dashboard_node_note_readiness_preserved`: verifies note items continue using markdown text readiness without media sidecar calls.
++
++---
++
++## 4. Empirical Results
++
++All runs executed with `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe` and external `_scratch/integrator_verify.py` with `IG_FORBIDDEN_LIVE` set, API keys scrubbed, and `--runxfail`.
++
++### 4.1 Unmodified Baseline (`gemini-baseline-02`)
++- Command: `tests/test_dashboard_v324_ui.py tests/test_screenshots_reyoink.py tests/test_screenshots_picker_v324.py tests/test_note_readiness_truth.py tests/security/test_security_findings.py --runxfail`
++- Result: Exit 0, 35 passed in 2.45s.
++
++### 4.2 Defect Reproduction on Unmodified Code (`gemini-media-reproduce01`)
++- Command: `tests/test_dashboard_media_detail_truth.py --runxfail`
++- Result: Exit 1, 9 failed, 3 passed in 5.47s.
++- Failures:
++  - `test_saved_media_detail_success`: route missing on server.
++  - `test_media_detail_unknown_id`: endpoint unrouted.
++  - `test_media_detail_corrupt_malformed_json`: endpoint unrouted.
++  - `test_media_detail_oversized_json`: endpoint unrouted.
++  - `test_media_detail_non_object_json`: endpoint unrouted.
++  - `test_media_detail_outside_root_refusal_without_reads`: endpoint unrouted.
++  - `test_dashboard_node_open_detail_success`: dashboard issued `/file?path=...` (HTTP 415).
++  - `test_dashboard_node_open_detail_refusal_honest_error`: dashboard reported "saved details need another moment" and stayed in "checking saved files".
++  - `test_dashboard_node_selection_race_avoids_stale_overwrite`: unhandled asynchronous selection race.
++
++### 4.3 Verified Repair Suite (`gemini-media-full01`)
++- Command: `tests/test_dashboard_v324_ui.py tests/test_screenshots_reyoink.py tests/test_screenshots_picker_v324.py tests/test_note_readiness_truth.py tests/security/test_security_findings.py tests/test_dashboard_media_detail_truth.py --runxfail`
++- Result: Exit 0, 47 passed in 7.37s.
++  - `tests/test_dashboard_v324_ui.py`: passed
++  - `tests/test_screenshots_reyoink.py`: passed
++  - `tests/test_screenshots_picker_v324.py`: passed
++  - `tests/test_note_readiness_truth.py`: passed
++  - `tests/security/test_security_findings.py`: passed (including strict xfail SEC-06)
++  - `tests/test_dashboard_media_detail_truth.py`: 12 passed
++
++---
++
++## 5. Scope and Diff Summary
++
++Files changed:
++- `server.py`:
++  - Defined `MAX_SIDECAR_BYTES = 2 * 1024 * 1024`.
++  - Dispatched `GET /yoinks/<id>/details` under token gate.
++  - Implemented `_handle_yoink_details` with index lookup, symlink/junction rejection, path containment under `DESKTOP_ROOT`, bounded size checks, JSON structure validation, and allowed-field filtering.
++- `assets/dashboard/index.html`:
++  - Added `loadYoinkDetails(videoId)`.
++  - Updated `openYoinkDetail(row)` to invoke `loadYoinkDetails` for media items, discard out-of-order async responses, and assign honest error messages.
++  - Updated `els.yoinkFactMeta.textContent` to show `state.selectedYoinkSidecarError` when detail loading fails rather than staying in `"checking saved files"`.
++- `tests/test_dashboard_media_detail_truth.py`:
++  - Added 12 focused regression tests.
++- `docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md`:
++  - Worker documentation.
++
++No existing tests, fixtures, assertions, or marks were modified. `/file` remains image-only. No dependencies or network calls were introduced.
+diff --git a/server.py b/server.py
+index a79c187..d3457bb 100644
+--- a/server.py
++++ b/server.py
+@@ -374,6 +374,7 @@ MAX_BODY_BYTES = 64 * 1024            # 64KB POST body cap
+ MAX_SCREENSHOTS = 200                  # cap per video
+ PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
+ MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
++MAX_SIDECAR_BYTES = 2 * 1024 * 1024           # 2MB saved-metadata sidecar cap
+ LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
+ LONG_VIDEO_MODE_FULL = "full"
+ LONG_VIDEO_MODE_CHUNKED = "chunked"
+@@ -11683,6 +11684,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._handle_yoink_open_markdown(bare)
+         if bare.startswith("/yoinks/") and bare.endswith("/markdown"):
+             return self._handle_yoink_markdown(bare)
++        if bare.startswith("/yoinks/") and bare.endswith("/details"):
++            return self._handle_yoink_details(bare)
+         if bare == "/agents/detect":
+             return self._handle_agents_detect()
+         if bare == "/open-folder":
+@@ -15604,6 +15607,195 @@ class Handler(BaseHTTPRequestHandler):
+         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
+         return self._send_json(200, {"ok": True, "path": str(path)})
+ 
++    def _handle_yoink_details(self, bare: str):
++        """GET /yoinks/<id>/details -- bounded authenticated saved-media-detail read path.
++        Resolves the item's registered sidecar path from the index, sandboxed to
++        DESKTOP_ROOT, rejecting escapes and symlinks, and bounds the JSON read.
++        Returns only saved fields needed by the dashboard."""
++        from urllib.parse import unquote
++        video_id = unquote(
++            bare[len("/yoinks/"):-len("/details")]).strip("/")
++        if not video_id:
++            return self._send_json(400, {"ok": False,
++                                         "error": "video_id required"})
++        row = _get_index().get_yoink(video_id)
++        if row is None:
++            return self._send_json(404, {"ok": False,
++                                         "error": "uoink not found"})
++        sidecar_raw = (row.get("sidecar_path") or "").strip()
++        if not sidecar_raw:
++            return self._send_json(404, {
++                "ok": False,
++                "error": "This uoink has no saved details on disk yet.",
++                "state": "no_sidecar"})
++        if _path_has_parent_ref(sidecar_raw):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar path escapes Uoink root"})
++        try:
++            p = Path(sidecar_raw)
++            if not p.is_absolute():
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar path escapes Uoink root"})
++            cur = p
++            while True:
++                if cur.is_symlink():
++                    return self._send_json(400, {"ok": False,
++                                                 "error": "symlink sidecar rejected"})
++                try:
++                    if getattr(cur.lstat(), "st_file_attributes", 0) & 0x400:
++                        return self._send_json(400, {"ok": False,
++                                                     "error": "symlink sidecar rejected"})
++                except OSError:
++                    pass
++                if cur == cur.parent:
++                    break
++                cur = cur.parent
++
++            root = DESKTOP_ROOT.resolve()
++            resolved = p.resolve()
++            if any(part == ".." for part in resolved.parts):
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar path escapes Uoink root"})
++            resolved.relative_to(root)
++        except (ValueError, OSError):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar path escapes Uoink root"})
++
++        if not resolved.exists() or not resolved.is_file():
++            return self._send_json(404, {"ok": False,
++                                         "error": "sidecar file not found"})
++
++        try:
++            if resolved.stat().st_size > MAX_SIDECAR_BYTES:
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar file too large"})
++            with open(resolved, "r", encoding="utf-8") as f:
++                content = f.read(MAX_SIDECAR_BYTES + 1)
++            if len(content) > MAX_SIDECAR_BYTES:
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar file too large"})
++        except UnicodeDecodeError:
++            return self._send_json(400, {"ok": False,
++                                         "error": "malformed sidecar JSON"})
++        except OSError as e:
++            log.warning("/yoinks/%s/details read failed: %s", video_id, e)
++            return self._send_json(500, {"ok": False,
++                                         "error": "could not read sidecar"})
++
++        try:
++            data = json.loads(content)
++        except (ValueError, TypeError):
++            return self._send_json(400, {"ok": False,
++                                         "error": "malformed sidecar JSON"})
++
++        if not isinstance(data, dict):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar JSON must be an object"})
++
++        # Return only saved fields needed by the dashboard
++        allowed_scalar_keys = (
++            "video_id", "youtube_id", "url", "source_url", "platform",
++            "source_platform", "media_type", "content_type", "kind",
++            "format", "source_type", "title", "episode_title", "podcast_title",
++            "feed_url", "channel", "author", "host", "duration_seconds",
++            "is_podcast", "is_live", "live_status",
++        )
++        filtered = {}
++        for key in allowed_scalar_keys:
++            if key in data:
++                val = data[key]
++                if isinstance(val, (str, int, float, bool)) or val is None:
++                    filtered[key] = val
++
++        raw_shots = data.get("screenshots")
++        if isinstance(raw_shots, list):
++            clean_shots = []
++            for shot in raw_shots:
++                if isinstance(shot, dict):
++                    clean_shot = {}
++                    for k in ("path", "filename", "timestamp", "timestamp_seconds",
++                              "start", "time", "absolute_path", "file_path", "index",
++                              "width", "height"):
++                        if k in shot and isinstance(shot[k], (str, int, float, bool)):
++                            clean_shot[k] = shot[k]
++                    clean_shots.append(clean_shot)
++            filtered["screenshots"] = clean_shots
++
++        raw_transcript = data.get("transcript")
++        if isinstance(raw_transcript, str):
++            filtered["transcript"] = raw_transcript
++        elif isinstance(raw_transcript, list):
++            clean_segments = []
++            for seg in raw_transcript:
++                if isinstance(seg, dict):
++                    clean_seg = {}
++                    for k in ("start", "end", "text", "content", "speaker",
++                              "speaker_label", "speaker_id"):
++                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
++                            clean_seg[k] = seg[k]
++                    clean_segments.append(clean_seg)
++                elif isinstance(seg, str):
++                    clean_segments.append(seg)
++            filtered["transcript"] = clean_segments
++
++        raw_segments = data.get("segments")
++        if isinstance(raw_segments, list):
++            clean_segments = []
++            for seg in raw_segments:
++                if isinstance(seg, dict):
++                    clean_seg = {}
++                    for k in ("start", "start_seconds", "end", "end_seconds",
++                              "text", "content", "speaker", "speaker_label",
++                              "speaker_id"):
++                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
++                            clean_seg[k] = seg[k]
++                    clean_segments.append(clean_seg)
++                elif isinstance(seg, str):
++                    clean_segments.append(seg)
++            filtered["segments"] = clean_segments
++
++        raw_speakers = data.get("speakers")
++        if isinstance(raw_speakers, list):
++            clean_speakers = []
++            for spk in raw_speakers:
++                if isinstance(spk, str):
++                    clean_speakers.append(spk)
++                elif isinstance(spk, dict):
++                    clean_spk = {k: spk[k] for k in ("name", "label", "id")
++                                 if k in spk and isinstance(spk[k], str)}
++                    clean_speakers.append(clean_spk)
++            filtered["speakers"] = clean_speakers
++        elif isinstance(raw_speakers, dict):
++            filtered["speakers"] = {str(k): v for k, v in raw_speakers.items()
++                                    if isinstance(k, (str, int))}
++
++        raw_diar = data.get("diarization")
++        if isinstance(raw_diar, dict):
++            clean_diar = {}
++            if "speakers" in raw_diar:
++                spk = raw_diar["speakers"]
++                if isinstance(spk, list):
++                    clean_diar["speakers"] = [s for s in spk if isinstance(s, (str, dict))]
++                elif isinstance(spk, dict):
++                    clean_diar["speakers"] = {str(k): v for k, v in spk.items()}
++            if "segments" in raw_diar and isinstance(raw_diar["segments"], list):
++                clean_diar_segs = []
++                for s in raw_diar["segments"]:
++                    if isinstance(s, dict):
++                        clean_diar_segs.append({
++                            k: s[k] for k in ("start", "end", "speaker",
++                                             "speaker_label", "speaker_id")
++                            if k in s and isinstance(s[k], (str, int, float))
++                        })
++                clean_diar["segments"] = clean_diar_segs
++            filtered["diarization"] = clean_diar
++
++        return self._send_json(200, {
++            "ok": True,
++            "video_id": video_id,
++            "details": filtered,
++        })
++
+     def do_DELETE(self):
+         # C-04 Host allowlist first, then token, same as do_POST.
+         if self._reject_bad_host():
+diff --git a/tests/test_dashboard_media_detail_truth.py b/tests/test_dashboard_media_detail_truth.py
+new file mode 100644
+index 0000000..029dc68
+--- /dev/null
++++ b/tests/test_dashboard_media_detail_truth.py
+@@ -0,0 +1,514 @@
++"""Regressions for bounded authenticated saved-media-detail read path.
++
++Tests both the HTTP server /yoinks/<id>/details endpoint and the Node-executed
++dashboard UI lifecycle, including honest refusal states and race conditions.
++"""
++from __future__ import annotations
++
++import json
++from http.server import ThreadingHTTPServer
++from pathlib import Path
++import subprocess
++import threading
++import urllib.error
++import urllib.request
++
++import pytest
++
++import index as index_mod
++import server
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++class _QuietHandler(server.Handler):
++    def log_message(self, format: str, *args) -> None:  # noqa: A002
++        pass
++
++
++@pytest.fixture
++def media_server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
++    desktop = tmp_path / "desktop"
++    desktop.mkdir(parents=True, exist_ok=True)
++    monkeypatch.setattr(server, "DESKTOP_ROOT", desktop)
++    monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
++    monkeypatch.setattr(server, "_path_integrity_status", lambda: {"ok": True})
++    monkeypatch.setattr(server, "_index_recovering", False)
++
++    idx_path = tmp_path / "index.db"
++    idx = index_mod.Index.open(idx_path)
++    monkeypatch.setattr(server, "_get_index", lambda: idx)
++
++    httpd = ThreadingHTTPServer(("127.0.0.1", 0), _QuietHandler)
++    httpd.daemon_threads = True
++    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
++    thread.start()
++    port = int(httpd.server_address[1])
++    try:
++        yield port, idx, desktop
++    finally:
++        httpd.shutdown()
++        httpd.server_close()
++        thread.join(timeout=5)
++        idx.close()
++
++
++def _http_get(port: int, path: str, token: bool = True) -> tuple[int, dict]:
++    headers = {"X-Uoink-Token": server.TOKEN} if token else {}
++    req = urllib.request.Request(f"http://127.0.0.1:{port}{path}", headers=headers)
++    try:
++        with urllib.request.urlopen(req, timeout=5) as r:
++            body = r.read().decode("utf-8")
++            return r.status, json.loads(body) if body else {}
++    except urllib.error.HTTPError as e:
++        body = e.read().decode("utf-8")
++        return e.code, json.loads(body) if body else {}
++
++
++def _insert_yoink_fixture(
++    idx: index_mod.Index,
++    root: Path,
++    video_id: str,
++    *,
++    sidecar: dict | None = None,
++    raw_sidecar_bytes: bytes | None = None,
++    sidecar_rel: str | None = None,
++    custom_sidecar_path: str | None = None,
++) -> Path:
++    folder = root / "videos" / video_id
++    folder.mkdir(parents=True, exist_ok=True)
++    corpus = folder / f"{video_id}.md"
++    corpus.write_text(f"# Video {video_id}\n\nTranscript text.", encoding="utf-8")
++
++    if custom_sidecar_path is not None:
++        target_sidecar_path = custom_sidecar_path
++    else:
++        sidecar_file = folder / (sidecar_rel or f"{video_id}.json")
++        if raw_sidecar_bytes is not None:
++            sidecar_file.write_bytes(raw_sidecar_bytes)
++        elif sidecar is not None:
++            sidecar_file.write_text(json.dumps(sidecar), encoding="utf-8")
++        target_sidecar_path = str(sidecar_file)
++
++    idx.upsert_yoink({
++        "video_id": video_id,
++        "slug": video_id,
++        "channel": "Science Channel",
++        "title": f"Title for {video_id}",
++        "topic": "science",
++        "hook_type": "curiosity_gap",
++        "yoinked_at": "2026-09-12T10:00:00Z",
++        "corpus_path": str(corpus),
++        "sidecar_path": target_sidecar_path,
++        "source_type": "video",
++        "platform": "youtube",
++    })
++    return folder
++
++
++NODE_DASHBOARD_HARNESS = r"""
++const fs = require('node:fs');
++const vm = require('node:vm');
++
++const page = fs.readFileSync('assets/dashboard/index.html', 'utf8');
++const scriptStart = page.indexOf('<script>') + 8;
++const initCall = page.indexOf('    init().catch(');
++const scriptCode = page.slice(scriptStart, initCall > 0 ? initCall : undefined);
++
++const dummyEl = {
++  scrollTop: 0, disabled: false, textContent: '', innerHTML: '', title: '', dataset: {},
++  classList: { add: () => {}, remove: () => {}, contains: () => false, toggle: () => {} },
++  setAttribute: () => {}, getAttribute: () => null, querySelectorAll: () => [], querySelector: () => null,
++};
++const elements = {};
++const getEl = (id) => elements[id] || (elements[id] = { ...dummyEl, id });
++
++const input = JSON.parse(fs.readFileSync(0, 'utf8'));
++const fetchCalls = [];
++
++const fakeFetch = async (url, opts) => {
++  fetchCalls.push({ url, opts });
++  if (url === '/token') {
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, token: 'fake-token' }),
++      text: async () => JSON.stringify({ ok: true, token: 'fake-token' }),
++    };
++  }
++  if (url.startsWith('/file')) {
++    return {
++      ok: false,
++      status: 415,
++      json: async () => ({ ok: false, error: 'unsupported file type' }),
++      text: async () => 'unsupported file type',
++    };
++  }
++  if (url.includes('/markdown')) {
++    const md = input.markdown !== undefined ? input.markdown : '# Markdown';
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, markdown: md }),
++      text: async () => JSON.stringify({ ok: true, markdown: md }),
++    };
++  }
++  if (url.includes('/details')) {
++    if (input.detailsDelayMs) {
++      await new Promise((resolve) => setTimeout(resolve, input.detailsDelayMs));
++    }
++    if (input.detailsRefusal) {
++      return {
++        ok: false,
++        status: input.detailsRefusal.status || 404,
++        json: async () => input.detailsRefusal.body || { ok: false, error: 'sidecar file not found' },
++        text: async () => JSON.stringify(input.detailsRefusal.body || { ok: false, error: 'sidecar file not found' }),
++      };
++    }
++    const details = input.details || {
++      video_id: 'vid_test',
++      duration_seconds: 360,
++      channel: 'Host Channel',
++      screenshots: [{ path: 'shot0.png', timestamp: '00:01:00' }],
++    };
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, video_id: 'vid_test', details }),
++      text: async () => JSON.stringify({ ok: true, video_id: 'vid_test', details }),
++    };
++  }
++  return {
++    ok: true,
++    status: 200,
++    json: async () => ({ ok: true }),
++    text: async () => JSON.stringify({ ok: true }),
++  };
++};
++
++const ctx = {
++  document: { getElementById: getEl, querySelector: () => dummyEl, querySelectorAll: () => [] },
++  window: { addEventListener: () => {} },
++  navigator: { clipboard: { writeText: () => Promise.resolve() } },
++  console,
++  fetch: fakeFetch,
++  setTimeout,
++  clearTimeout,
++  URL: { createObjectURL: () => 'blob:mock', revokeObjectURL: () => {} },
++};
++vm.createContext(ctx);
++vm.runInContext(scriptCode + '; globalThis.state = state; globalThis.els = els; globalThis.openYoinkDetail = openYoinkDetail; globalThis.yoinkFactsHtml = yoinkFactsHtml; globalThis.renderYoinkDetail = renderYoinkDetail;', ctx);
++
++async function execute() {
++  if (input.action === 'openDetail') {
++    await ctx.openYoinkDetail(input.row);
++    process.stdout.write(JSON.stringify({
++      fetchCalls,
++      selectedYoinkSidecar: ctx.state.selectedYoinkSidecar,
++      selectedYoinkSidecarError: ctx.state.selectedYoinkSidecarError,
++      factMetaText: ctx.els.yoinkFactMeta.textContent,
++      factsHtml: ctx.els.yoinkFacts.innerHTML,
++      detailHtml: ctx.els.yoinkDetail.innerHTML,
++      headingHtml: ctx.els.yoinkHeading.innerHTML,
++    }));
++  } else if (input.action === 'selectionRace') {
++    // Start opening item 1 with slow details
++    const p1 = ctx.openYoinkDetail(input.row1);
++    // Immediately open item 2 with fast details
++    input.details = input.details2;
++    input.detailsDelayMs = 0;
++    const p2 = ctx.openYoinkDetail(input.row2);
++    await Promise.all([p1, p2]);
++    process.stdout.write(JSON.stringify({
++      fetchCalls,
++      selectedYoink: ctx.state.selectedYoink,
++      selectedYoinkSidecar: ctx.state.selectedYoinkSidecar,
++      selectedYoinkSidecarError: ctx.state.selectedYoinkSidecarError,
++      factMetaText: ctx.els.yoinkFactMeta.textContent,
++      subheadText: ctx.els.yoinkSubhead.textContent,
++    }));
++  } else {
++    throw new Error('Unknown action: ' + input.action);
++  }
++}
++execute().catch((err) => {
++  console.error(err);
++  process.exit(1);
++});
++"""
++
++
++def _run_node_dashboard(payload: dict) -> dict:
++    res = subprocess.run(
++        ["node", "-e", NODE_DASHBOARD_HARNESS],
++        input=json.dumps(payload),
++        cwd=ROOT,
++        text=True,
++        capture_output=True,
++        timeout=15,
++    )
++    assert res.returncode == 0, f"Node failed (code {res.returncode}): {res.stderr}"
++    return json.loads(res.stdout)
++
++
++# ---------------------------------------------------------------------------
++# HTTP /yoinks/<id>/details behavioral tests
++# ---------------------------------------------------------------------------
++
++
++def test_saved_media_detail_success(media_server):
++    port, idx, desktop = media_server
++    vid = "v_success_01"
++    sidecar_data = {
++        "video_id": vid,
++        "title": "Quantum Physics 101",
++        "duration_seconds": 1820,
++        "channel": "Physics Channel",
++        "host": "Dr. Feynman",
++        "platform": "youtube",
++        "source_type": "video",
++        "secret_api_key": "SK-SUPER-SECRET-NEVER-LEAK",
++        "internal_config": {"db_password": "pwd"},
++        "screenshots": [
++            {"index": 0, "filename": "shot_0.jpg", "path": "screenshots/shot_0.jpg", "timestamp": "00:01:00"}
++        ],
++        "transcript": [
++            {"start": 0, "end": 20, "speaker": "Dr. Feynman", "text": "Nature isn't classical."}
++        ],
++        "diarization": {
++            "speakers": ["Dr. Feynman"],
++            "segments": [{"start": 0, "end": 20, "speaker": "Dr. Feynman"}]
++        }
++    }
++    _insert_yoink_fixture(idx, desktop, vid, sidecar=sidecar_data)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 200, f"Expected 200, got {code}: {res}"
++    assert res["ok"] is True
++    assert res["video_id"] == vid
++    details = res["details"]
++    assert details["duration_seconds"] == 1820
++    assert details["channel"] == "Physics Channel"
++    assert details["host"] == "Dr. Feynman"
++    assert details["title"] == "Quantum Physics 101"
++    assert len(details["screenshots"]) == 1
++    assert details["screenshots"][0]["filename"] == "shot_0.jpg"
++    assert len(details["transcript"]) == 1
++    assert details["transcript"][0]["text"] == "Nature isn't classical."
++    # Secrets must not be returned
++    assert "secret_api_key" not in details
++    assert "internal_config" not in details
++
++
++def test_media_detail_requires_authentication(media_server):
++    port, idx, desktop = media_server
++    vid = "v_auth_01"
++    _insert_yoink_fixture(idx, desktop, vid, sidecar={"video_id": vid, "duration_seconds": 100})
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=False)
++    assert code == 403
++    assert res["ok"] is False
++    assert "token" in res.get("error", "").lower()
++
++
++def test_media_detail_unknown_id(media_server):
++    port, idx, desktop = media_server
++    code, res = _http_get(port, "/yoinks/v_nonexistent/details", token=True)
++    assert code == 404
++    assert res["ok"] is False
++    assert res.get("error") == "uoink not found"
++
++
++def test_media_detail_missing_sidecar_file(media_server):
++    port, idx, desktop = media_server
++    vid = "v_missing_file"
++    missing_path = desktop / "videos" / vid / "does_not_exist.json"
++    _insert_yoink_fixture(idx, desktop, vid, custom_sidecar_path=str(missing_path))
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 404
++    assert res["ok"] is False
++    assert "not found" in res.get("error", "").lower()
++
++
++def test_media_detail_corrupt_malformed_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_corrupt_json"
++    corrupt_bytes = b'{"duration_seconds": 120, "broken": '
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=corrupt_bytes)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "malformed" in res.get("error", "").lower() or "bad json" in res.get("error", "").lower()
++
++
++def test_media_detail_oversized_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_oversized_json"
++    # Create payload exceeding 2MB limit
++    big_pad = "A" * (2 * 1024 * 1024 + 1000)
++    big_json = json.dumps({"video_id": vid, "pad": big_pad}).encode("utf-8")
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=big_json)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "large" in res.get("error", "").lower()
++
++
++def test_media_detail_non_object_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_non_object"
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=b'["just", "a", "list"]')
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "object" in res.get("error", "").lower()
++
++
++def test_media_detail_outside_root_refusal_without_reads(media_server, tmp_path, monkeypatch):
++    port, idx, desktop = media_server
++    vid = "v_outside"
++
++    # Put a sidecar in tmp_path outside desktop root
++    outside_dir = tmp_path / "outside_dir"
++    outside_dir.mkdir(parents=True, exist_ok=True)
++    outside_file = outside_dir / "secret_sidecar.json"
++    outside_file.write_text(json.dumps({"video_id": vid, "duration_seconds": 999}), encoding="utf-8")
++
++    _insert_yoink_fixture(idx, desktop, vid, custom_sidecar_path=str(outside_file))
++
++    # Instrument open to ensure file is NEVER opened
++    opened_paths = []
++    orig_open = open
++
++    def tracking_open(file, *args, **kwargs):
++        if str(outside_file) in str(file):
++            opened_paths.append(str(file))
++            raise AssertionError(f"Security violation: attempted to open out-of-root path {file}")
++        return orig_open(file, *args, **kwargs)
++
++    monkeypatch.setattr("builtins.open", tracking_open)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code in (400, 403)
++    assert res["ok"] is False
++    assert "outside" in res.get("error", "").lower() or "escapes" in res.get("error", "").lower()
++    assert len(opened_paths) == 0, f"File was opened: {opened_paths}"
++
++
++# ---------------------------------------------------------------------------
++# Node-executed Dashboard UI regressions
++# ---------------------------------------------------------------------------
++
++
++def test_dashboard_node_open_detail_success():
++    row = {
++        "video_id": "v_test_node_01",
++        "slug": "v-test-node-01",
++        "title": "Node Dashboard Video",
++        "channel": "Tech Explorers",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    details = {
++        "video_id": "v_test_node_01",
++        "duration_seconds": 1250,
++        "channel": "Tech Explorers",
++        "screenshots": [{"path": "shot1.png", "timestamp": "00:05:00"}],
++        "transcript": [{"start": 0, "text": "Hello world segment."}],
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": row,
++        "details": details,
++    })
++    urls = [c["url"] for c in out["fetchCalls"]]
++    assert any("/details" in u for u in urls), f"Must fetch /details route: {urls}"
++    assert not any("/file" in u for u in urls), f"/file route must NOT be called for details: {urls}"
++
++    assert out["selectedYoinkSidecar"] is not None
++    assert out["selectedYoinkSidecar"]["duration_seconds"] == 1250
++    assert out["factMetaText"] == "ready"
++    assert "20:50" in out["factsHtml"]  # 1250 seconds formatted as mm:ss
++    assert "Tech Explorers" in out["factsHtml"]
++    assert ">ready<" in out["factsHtml"]
++
++
++def test_dashboard_node_open_detail_refusal_honest_error():
++    row = {
++        "video_id": "v_refused_01",
++        "slug": "v-refused-01",
++        "title": "Refused Video",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": row,
++        "detailsRefusal": {"status": 404, "body": {"ok": False, "error": "sidecar file not found"}},
++    })
++    # Honest refusal must not claim "saved details need another moment"
++    assert out["selectedYoinkSidecar"] is None
++    assert out["selectedYoinkSidecarError"] != "saved details need another moment"
++    assert "sidecar file not found" in out["selectedYoinkSidecarError"] or "unavailable" in out["selectedYoinkSidecarError"]
++    # Must NOT be in perpetual checking state or ready
++    assert out["factMetaText"] != "checking saved files"
++    assert out["factMetaText"] != "ready"
++    assert out["factMetaText"] == out["selectedYoinkSidecarError"]
++
++
++def test_dashboard_node_selection_race_avoids_stale_overwrite():
++    row1 = {
++        "video_id": "v_slow_item_01",
++        "slug": "v-slow-01",
++        "title": "Slow Item One",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    row2 = {
++        "video_id": "v_fast_item_02",
++        "slug": "v-fast-02",
++        "title": "Fast Item Two",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    details1 = {"video_id": "v_slow_item_01", "duration_seconds": 100, "channel": "Slow Channel"}
++    details2 = {"video_id": "v_fast_item_02", "duration_seconds": 200, "channel": "Fast Channel"}
++
++    out = _run_node_dashboard({
++        "action": "selectionRace",
++        "row1": row1,
++        "row2": row2,
++        "details": details1,
++        "details2": details2,
++        "detailsDelayMs": 50,  # row1 details return late
++    })
++    # Item 2 must remain the active selection
++    assert out["selectedYoink"]["video_id"] == "v_fast_item_02"
++    assert out["selectedYoinkSidecar"]["video_id"] == "v_fast_item_02"
++    assert out["selectedYoinkSidecar"]["channel"] == "Fast Channel"
++    assert out["subheadText"] == "Title for v_fast_item_02" or "Fast Item Two" in out["subheadText"]
++
++
++def test_dashboard_node_note_readiness_preserved():
++    note_row = {
++        "video_id": "note_01",
++        "slug": "note-01",
++        "title": "Saved Thought",
++        "source_type": "note",
++        "platform": "note",
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": note_row,
++        "markdown": "Here is the note body text.",
++    })
++    urls = [c["url"] for c in out["fetchCalls"]]
++    # Notes must not call details or /file
++    assert not any("/details" in u for u in urls), f"Notes should not call /details: {urls}"
++    assert not any("/file" in u for u in urls), f"Notes should not call /file: {urls}"
++    assert out["factMetaText"] == "ready"
++    assert "Note file" in out["factsHtml"]

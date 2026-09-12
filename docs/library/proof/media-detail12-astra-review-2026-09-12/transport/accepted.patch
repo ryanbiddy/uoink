@@ -1,0 +1,1045 @@
+diff --git a/assets/dashboard/index.html b/assets/dashboard/index.html
+index 34985c8..fb4f5ce 100644
+--- a/assets/dashboard/index.html
++++ b/assets/dashboard/index.html
+@@ -5319,6 +5319,7 @@
+       selectedEvidenceTitle: "",
+       claims: [],
+       selectedYoink: null,
++      selectedYoinkRequest: 0,
+       selectedYoinkSidecar: null,
+       selectedYoinkSidecarError: "",
+       selectedYoinkMarkdown: "",
+@@ -6416,10 +6417,10 @@
+       const out = new Set();
+       const rawSpeakers = sidecar.speakers || (sidecar.diarization && sidecar.diarization.speakers);
+       if (Array.isArray(rawSpeakers)) {
+-        rawSpeakers.forEach((speaker, index) => {
++        rawSpeakers.forEach((speaker) => {
+           const label = typeof speaker === "string"
+             ? speaker
+-            : firstValue(speaker.name, speaker.label, speaker.id, `Speaker ${index + 1}`);
++            : speaker && firstValue(speaker.name, speaker.label, speaker.id);
+           if (label) out.add(String(label));
+         });
+       } else if (rawSpeakers && typeof rawSpeakers === "object") {
+@@ -6435,24 +6436,32 @@
+     function transcriptSegments(sidecar = {}) {
+       const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
+       if (typeof raw === "string") {
+-        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text, index) => ({ start: index * 30, text }));
++        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text) => ({ text }));
+       }
+-      return Array.isArray(raw) ? raw.filter(Boolean) : [];
++      return Array.isArray(raw)
++        ? raw.filter((segment) => typeof segment === "string" || (segment && typeof segment === "object" && !Array.isArray(segment)))
++          .map((segment) => typeof segment === "string" ? { text: segment } : segment)
++        : [];
++    }
++
++    function storedTime(...values) {
++      for (const value of values) {
++        if (typeof value !== "number" && typeof value !== "string") continue;
++        if (typeof value === "string" && !value.trim()) continue;
++        const seconds = Number(value);
++        if (Number.isFinite(seconds) && seconds >= 0) return seconds;
++      }
++      return null;
+     }
+ 
+     function diarizationSegments(sidecar = {}) {
+       return transcriptSegments(sidecar)
+-        .map((segment, index) => {
+-          const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
+-          const start = Number(firstValue(segment.start, segment.start_seconds, index * 30));
+-          const end = Number(firstValue(segment.end, segment.end_seconds, start + 20));
+-          return {
+-            speaker,
+-            start: Number.isFinite(start) ? Math.max(0, start) : index * 30,
+-            end: Number.isFinite(end) && end > start ? end : start + 20,
+-          };
+-        })
+-        .filter((segment) => segment.speaker);
++        .map((segment) => ({
++          speaker: firstValue(segment.speaker, segment.speaker_label, segment.speaker_id),
++          start: storedTime(segment.start, segment.start_seconds),
++          end: storedTime(segment.end, segment.end_seconds),
++        }))
++        .filter((segment) => segment.speaker && segment.start !== null && segment.end !== null && segment.end > segment.start);
+     }
+ 
+     function shouldShowDiarization(row, sidecar = {}) {
+@@ -6645,7 +6654,8 @@
+         <div class="transcript-preview">
+           ${segments.map((segment) => {
+             const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
+-            const label = [fmtTimestamp(segment.start), speaker].filter(Boolean).join(" | ");
++            const start = storedTime(segment.start, segment.start_seconds);
++            const label = [start === null ? "time not stored" : fmtTimestamp(start), speaker].filter(Boolean).join(" | ");
+             return `<div class="transcript-segment"><b>${htmlEscape(label)}</b><div class="job-sub">${htmlEscape(segment.text || segment.content || "")}</div></div>`;
+           }).join("")}
+         </div>
+@@ -6761,7 +6771,9 @@
+         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
+         fmtDuration(durationOf(row, sidecar)),
+       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+-      els.yoinkFactMeta.textContent = isNote ? noteReadinessLabel() : (state.selectedYoinkSidecar ? "ready" : "checking saved files");
++      els.yoinkFactMeta.textContent = isNote
++        ? noteReadinessLabel()
++        : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
+       const speakerHtml = speakers.length
+         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
+         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
+@@ -6800,6 +6812,11 @@
+       return JSON.parse(await res.text());
+     }
+ 
++    async function loadYoinkDetails(videoId) {
++      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details`);
++      return data.details || data;
++    }
++
+     async function loadYoinkMarkdown(videoId) {
+       const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/markdown`);
+       return data.markdown || "";
+@@ -6841,6 +6858,7 @@
+     }
+ 
+     async function openYoinkDetail(row) {
++      const request = ++state.selectedYoinkRequest;
+       state.selectedYoink = row || null;
+       state.selectedYoinkSidecar = null;
+       state.selectedYoinkSidecarError = "";
+@@ -6852,30 +6870,43 @@
+       renderYoinkDetail();
+       switchTab("yoink");
+       const isNote = isNoteContent(row);
+-      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
+       const videoId = videoIdOf(row);
+       const tasks = [];
+-      if (sidecarPath) {
+-        tasks.push(loadJsonFile(sidecarPath)
+-          .then((data) => { state.selectedYoinkSidecar = data; })
+-          .catch(() => { state.selectedYoinkSidecarError = "saved details need another moment"; }));
++      if (!isNote && videoId) {
++        tasks.push(loadYoinkDetails(videoId)
++          .then((data) => {
++            if (state.selectedYoinkRequest !== request) return;
++            state.selectedYoinkSidecar = data;
++          })
++          .catch((err) => {
++            if (state.selectedYoinkRequest !== request) return;
++            state.selectedYoinkSidecar = null;
++            state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable";
++          }));
+       }
+       if (videoId) {
+         tasks.push(loadYoinkMarkdown(videoId)
+           .then((markdown) => {
++            if (state.selectedYoinkRequest !== request) return;
+             state.selectedYoinkMarkdown = markdown;
+             state.selectedYoinkMarkdownState = markdown ? "ready" : "empty";
+           })
+           .catch((err) => {
++            if (state.selectedYoinkRequest !== request) return;
+             state.selectedYoinkMarkdown = "";
+             state.selectedYoinkMarkdownState = (err.data && err.data.state) || "unavailable";
+             state.selectedYoinkMarkdownError = err.message;
+           }));
+       } else {
+         state.selectedYoinkMarkdownState = "unavailable";
++        if (!isNote) {
++          state.selectedYoinkSidecarError = "unavailable";
++        }
+       }
+       if (tasks.length) await Promise.all(tasks);
+-      renderYoinkDetail();
++      if (state.selectedYoinkRequest === request) {
++        renderYoinkDetail();
++      }
+     }
+ 
+     async function requestRetranscription() {
+diff --git a/server.py b/server.py
+index a79c187..6688412 100644
+--- a/server.py
++++ b/server.py
+@@ -374,6 +374,7 @@ MAX_BODY_BYTES = 64 * 1024            # 64KB POST body cap
+ MAX_SCREENSHOTS = 200                  # cap per video
+ PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
+ MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
++MAX_SIDECAR_BYTES = 2 * 1024 * 1024           # 2MB saved-metadata sidecar cap
+ LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
+ LONG_VIDEO_MODE_FULL = "full"
+ LONG_VIDEO_MODE_CHUNKED = "chunked"
+@@ -11683,6 +11684,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._handle_yoink_open_markdown(bare)
+         if bare.startswith("/yoinks/") and bare.endswith("/markdown"):
+             return self._handle_yoink_markdown(bare)
++        if bare.startswith("/yoinks/") and bare.endswith("/details"):
++            return self._handle_yoink_details(bare)
+         if bare == "/agents/detect":
+             return self._handle_agents_detect()
+         if bare == "/open-folder":
+@@ -15604,6 +15607,215 @@ class Handler(BaseHTTPRequestHandler):
+         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
+         return self._send_json(200, {"ok": True, "path": str(path)})
+ 
++    def _handle_yoink_details(self, bare: str):
++        """GET /yoinks/<id>/details -- bounded authenticated saved-media-detail read path.
++        Resolves the item's registered sidecar path from the index, sandboxed to
++        DESKTOP_ROOT, rejecting escapes and symlinks, and bounds the JSON read.
++        Returns only saved fields needed by the dashboard."""
++        from urllib.parse import unquote
++        video_id = unquote(
++            bare[len("/yoinks/"):-len("/details")]).strip("/")
++        if not video_id:
++            return self._send_json(400, {"ok": False,
++                                         "error": "video_id required"})
++        row = _get_index().get_yoink(video_id)
++        if row is None:
++            return self._send_json(404, {"ok": False,
++                                         "error": "uoink not found"})
++        sidecar_raw = (row.get("sidecar_path") or "").strip()
++        if not sidecar_raw:
++            return self._send_json(404, {
++                "ok": False,
++                "error": "This uoink has no saved details on disk yet.",
++                "state": "no_sidecar"})
++        if _path_has_parent_ref(sidecar_raw):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar path escapes Uoink root"})
++        try:
++            p = Path(sidecar_raw)
++            if not p.is_absolute():
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar path escapes Uoink root"})
++            # Lexical containment must precede metadata probes on this path.
++            p.relative_to(DESKTOP_ROOT.absolute())
++            cur = p
++            while True:
++                if cur.is_symlink():
++                    return self._send_json(400, {"ok": False,
++                                                 "error": "symlink sidecar rejected"})
++                try:
++                    if getattr(cur.lstat(), "st_file_attributes", 0) & 0x400:
++                        return self._send_json(400, {"ok": False,
++                                                     "error": "symlink sidecar rejected"})
++                except OSError:
++                    pass
++                if cur == cur.parent:
++                    break
++                cur = cur.parent
++
++            root = DESKTOP_ROOT.resolve()
++            resolved = p.resolve()
++            if any(part == ".." for part in resolved.parts):
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar path escapes Uoink root"})
++            resolved.relative_to(root)
++        except (ValueError, OSError):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar path escapes Uoink root"})
++
++        if not resolved.exists() or not resolved.is_file():
++            return self._send_json(404, {"ok": False,
++                                         "error": "sidecar file not found"})
++
++        try:
++            if resolved.stat().st_size > MAX_SIDECAR_BYTES:
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar file too large"})
++            with open(resolved, "rb") as f:
++                content = f.read(MAX_SIDECAR_BYTES + 1)
++            if len(content) > MAX_SIDECAR_BYTES:
++                return self._send_json(400, {"ok": False,
++                                             "error": "sidecar file too large"})
++        except UnicodeDecodeError:
++            return self._send_json(400, {"ok": False,
++                                         "error": "malformed sidecar JSON"})
++        except OSError as e:
++            log.warning("/yoinks/%s/details read failed: %s", video_id, e)
++            return self._send_json(500, {"ok": False,
++                                         "error": "could not read sidecar"})
++
++        def finite_float(value):
++            number = float(value)
++            if not math.isfinite(number):
++                raise ValueError("non-finite JSON number")
++            return number
++
++        def reject_constant(value):
++            raise ValueError("non-finite JSON constant")
++
++        try:
++            data = json.loads(content.decode("utf-8"), parse_float=finite_float,
++                              parse_constant=reject_constant)
++            # Enforce an explicit bound independent of the process recursion limit.
++            pending = [(data, 0)]
++            while pending:
++                value, depth = pending.pop()
++                if isinstance(value, (dict, list)):
++                    if depth >= 64:
++                        raise ValueError("sidecar JSON too deeply nested")
++                    children = value.values() if isinstance(value, dict) else value
++                    pending.extend((child, depth + 1) for child in children)
++        except (ValueError, TypeError, RecursionError):
++            return self._send_json(400, {"ok": False,
++                                         "error": "malformed sidecar JSON"})
++
++        if not isinstance(data, dict):
++            return self._send_json(400, {"ok": False,
++                                         "error": "sidecar JSON must be an object"})
++
++        # Return only saved fields needed by the dashboard
++        allowed_scalar_keys = (
++            "video_id", "youtube_id", "url", "source_url", "platform",
++            "source_platform", "media_type", "content_type", "kind",
++            "format", "source_type", "title", "episode_title", "podcast_title",
++            "feed_url", "channel", "author", "host", "duration_seconds",
++            "is_podcast", "is_live", "live_status",
++        )
++        filtered = {}
++        for key in allowed_scalar_keys:
++            if key in data:
++                val = data[key]
++                if isinstance(val, (str, int, float, bool)) or val is None:
++                    filtered[key] = val
++
++        raw_shots = data.get("screenshots")
++        if isinstance(raw_shots, list):
++            clean_shots = []
++            for shot in raw_shots:
++                if isinstance(shot, dict):
++                    clean_shot = {}
++                    for k in ("path", "filename", "timestamp", "timestamp_seconds",
++                              "start", "time", "absolute_path", "file_path", "index",
++                              "width", "height"):
++                        if k in shot and isinstance(shot[k], (str, int, float, bool)):
++                            clean_shot[k] = shot[k]
++                    clean_shots.append(clean_shot)
++            filtered["screenshots"] = clean_shots
++
++        raw_transcript = data.get("transcript")
++        if isinstance(raw_transcript, str):
++            filtered["transcript"] = raw_transcript
++        elif isinstance(raw_transcript, list):
++            clean_segments = []
++            for seg in raw_transcript:
++                if isinstance(seg, dict):
++                    clean_seg = {}
++                    for k in ("start", "end", "text", "content", "speaker",
++                              "speaker_label", "speaker_id"):
++                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
++                            clean_seg[k] = seg[k]
++                    clean_segments.append(clean_seg)
++                elif isinstance(seg, str):
++                    clean_segments.append(seg)
++            filtered["transcript"] = clean_segments
++
++        raw_segments = data.get("segments")
++        if isinstance(raw_segments, list):
++            clean_segments = []
++            for seg in raw_segments:
++                if isinstance(seg, dict):
++                    clean_seg = {}
++                    for k in ("start", "start_seconds", "end", "end_seconds",
++                              "text", "content", "speaker", "speaker_label",
++                              "speaker_id"):
++                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
++                            clean_seg[k] = seg[k]
++                    clean_segments.append(clean_seg)
++                elif isinstance(seg, str):
++                    clean_segments.append(seg)
++            filtered["segments"] = clean_segments
++
++        def clean_speakers(raw):
++            def label_fields(speaker):
++                return {key: speaker[key] for key in ("name", "label", "id")
++                        if isinstance(speaker.get(key), str) and speaker[key].strip()}
++            if isinstance(raw, list):
++                return [clean for speaker in raw
++                        if (clean := speaker if isinstance(speaker, str)
++                            else label_fields(speaker) if isinstance(speaker, dict)
++                            else None)]
++            if isinstance(raw, dict):
++                # Map keys are the saved labels; arbitrary map values are private.
++                return {key: label_fields(value) if isinstance(value, dict) else {}
++                        for key, value in raw.items() if key.strip()}
++            return []
++
++        if isinstance(data.get("speakers"), (list, dict)):
++            filtered["speakers"] = clean_speakers(data["speakers"])
++
++        raw_diar = data.get("diarization")
++        if isinstance(raw_diar, dict):
++            clean_diar = {}
++            if isinstance(raw_diar.get("speakers"), (list, dict)):
++                clean_diar["speakers"] = clean_speakers(raw_diar["speakers"])
++            if "segments" in raw_diar and isinstance(raw_diar["segments"], list):
++                clean_diar_segs = []
++                for s in raw_diar["segments"]:
++                    if isinstance(s, dict):
++                        clean_diar_segs.append({
++                            k: s[k] for k in ("start", "end", "speaker",
++                                             "speaker_label", "speaker_id")
++                            if k in s and isinstance(s[k], (str, int, float))
++                        })
++                clean_diar["segments"] = clean_diar_segs
++            filtered["diarization"] = clean_diar
++
++        return self._send_json(200, {
++            "ok": True,
++            "video_id": video_id,
++            "details": filtered,
++        })
++
+     def do_DELETE(self):
+         # C-04 Host allowlist first, then token, same as do_POST.
+         if self._reject_bad_host():
+diff --git a/tests/test_dashboard_media_detail_truth.py b/tests/test_dashboard_media_detail_truth.py
+new file mode 100644
+index 0000000..029dc68
+--- /dev/null
++++ b/tests/test_dashboard_media_detail_truth.py
+@@ -0,0 +1,514 @@
++"""Regressions for bounded authenticated saved-media-detail read path.
++
++Tests both the HTTP server /yoinks/<id>/details endpoint and the Node-executed
++dashboard UI lifecycle, including honest refusal states and race conditions.
++"""
++from __future__ import annotations
++
++import json
++from http.server import ThreadingHTTPServer
++from pathlib import Path
++import subprocess
++import threading
++import urllib.error
++import urllib.request
++
++import pytest
++
++import index as index_mod
++import server
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++class _QuietHandler(server.Handler):
++    def log_message(self, format: str, *args) -> None:  # noqa: A002
++        pass
++
++
++@pytest.fixture
++def media_server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
++    desktop = tmp_path / "desktop"
++    desktop.mkdir(parents=True, exist_ok=True)
++    monkeypatch.setattr(server, "DESKTOP_ROOT", desktop)
++    monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
++    monkeypatch.setattr(server, "_path_integrity_status", lambda: {"ok": True})
++    monkeypatch.setattr(server, "_index_recovering", False)
++
++    idx_path = tmp_path / "index.db"
++    idx = index_mod.Index.open(idx_path)
++    monkeypatch.setattr(server, "_get_index", lambda: idx)
++
++    httpd = ThreadingHTTPServer(("127.0.0.1", 0), _QuietHandler)
++    httpd.daemon_threads = True
++    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
++    thread.start()
++    port = int(httpd.server_address[1])
++    try:
++        yield port, idx, desktop
++    finally:
++        httpd.shutdown()
++        httpd.server_close()
++        thread.join(timeout=5)
++        idx.close()
++
++
++def _http_get(port: int, path: str, token: bool = True) -> tuple[int, dict]:
++    headers = {"X-Uoink-Token": server.TOKEN} if token else {}
++    req = urllib.request.Request(f"http://127.0.0.1:{port}{path}", headers=headers)
++    try:
++        with urllib.request.urlopen(req, timeout=5) as r:
++            body = r.read().decode("utf-8")
++            return r.status, json.loads(body) if body else {}
++    except urllib.error.HTTPError as e:
++        body = e.read().decode("utf-8")
++        return e.code, json.loads(body) if body else {}
++
++
++def _insert_yoink_fixture(
++    idx: index_mod.Index,
++    root: Path,
++    video_id: str,
++    *,
++    sidecar: dict | None = None,
++    raw_sidecar_bytes: bytes | None = None,
++    sidecar_rel: str | None = None,
++    custom_sidecar_path: str | None = None,
++) -> Path:
++    folder = root / "videos" / video_id
++    folder.mkdir(parents=True, exist_ok=True)
++    corpus = folder / f"{video_id}.md"
++    corpus.write_text(f"# Video {video_id}\n\nTranscript text.", encoding="utf-8")
++
++    if custom_sidecar_path is not None:
++        target_sidecar_path = custom_sidecar_path
++    else:
++        sidecar_file = folder / (sidecar_rel or f"{video_id}.json")
++        if raw_sidecar_bytes is not None:
++            sidecar_file.write_bytes(raw_sidecar_bytes)
++        elif sidecar is not None:
++            sidecar_file.write_text(json.dumps(sidecar), encoding="utf-8")
++        target_sidecar_path = str(sidecar_file)
++
++    idx.upsert_yoink({
++        "video_id": video_id,
++        "slug": video_id,
++        "channel": "Science Channel",
++        "title": f"Title for {video_id}",
++        "topic": "science",
++        "hook_type": "curiosity_gap",
++        "yoinked_at": "2026-09-12T10:00:00Z",
++        "corpus_path": str(corpus),
++        "sidecar_path": target_sidecar_path,
++        "source_type": "video",
++        "platform": "youtube",
++    })
++    return folder
++
++
++NODE_DASHBOARD_HARNESS = r"""
++const fs = require('node:fs');
++const vm = require('node:vm');
++
++const page = fs.readFileSync('assets/dashboard/index.html', 'utf8');
++const scriptStart = page.indexOf('<script>') + 8;
++const initCall = page.indexOf('    init().catch(');
++const scriptCode = page.slice(scriptStart, initCall > 0 ? initCall : undefined);
++
++const dummyEl = {
++  scrollTop: 0, disabled: false, textContent: '', innerHTML: '', title: '', dataset: {},
++  classList: { add: () => {}, remove: () => {}, contains: () => false, toggle: () => {} },
++  setAttribute: () => {}, getAttribute: () => null, querySelectorAll: () => [], querySelector: () => null,
++};
++const elements = {};
++const getEl = (id) => elements[id] || (elements[id] = { ...dummyEl, id });
++
++const input = JSON.parse(fs.readFileSync(0, 'utf8'));
++const fetchCalls = [];
++
++const fakeFetch = async (url, opts) => {
++  fetchCalls.push({ url, opts });
++  if (url === '/token') {
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, token: 'fake-token' }),
++      text: async () => JSON.stringify({ ok: true, token: 'fake-token' }),
++    };
++  }
++  if (url.startsWith('/file')) {
++    return {
++      ok: false,
++      status: 415,
++      json: async () => ({ ok: false, error: 'unsupported file type' }),
++      text: async () => 'unsupported file type',
++    };
++  }
++  if (url.includes('/markdown')) {
++    const md = input.markdown !== undefined ? input.markdown : '# Markdown';
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, markdown: md }),
++      text: async () => JSON.stringify({ ok: true, markdown: md }),
++    };
++  }
++  if (url.includes('/details')) {
++    if (input.detailsDelayMs) {
++      await new Promise((resolve) => setTimeout(resolve, input.detailsDelayMs));
++    }
++    if (input.detailsRefusal) {
++      return {
++        ok: false,
++        status: input.detailsRefusal.status || 404,
++        json: async () => input.detailsRefusal.body || { ok: false, error: 'sidecar file not found' },
++        text: async () => JSON.stringify(input.detailsRefusal.body || { ok: false, error: 'sidecar file not found' }),
++      };
++    }
++    const details = input.details || {
++      video_id: 'vid_test',
++      duration_seconds: 360,
++      channel: 'Host Channel',
++      screenshots: [{ path: 'shot0.png', timestamp: '00:01:00' }],
++    };
++    return {
++      ok: true,
++      status: 200,
++      json: async () => ({ ok: true, video_id: 'vid_test', details }),
++      text: async () => JSON.stringify({ ok: true, video_id: 'vid_test', details }),
++    };
++  }
++  return {
++    ok: true,
++    status: 200,
++    json: async () => ({ ok: true }),
++    text: async () => JSON.stringify({ ok: true }),
++  };
++};
++
++const ctx = {
++  document: { getElementById: getEl, querySelector: () => dummyEl, querySelectorAll: () => [] },
++  window: { addEventListener: () => {} },
++  navigator: { clipboard: { writeText: () => Promise.resolve() } },
++  console,
++  fetch: fakeFetch,
++  setTimeout,
++  clearTimeout,
++  URL: { createObjectURL: () => 'blob:mock', revokeObjectURL: () => {} },
++};
++vm.createContext(ctx);
++vm.runInContext(scriptCode + '; globalThis.state = state; globalThis.els = els; globalThis.openYoinkDetail = openYoinkDetail; globalThis.yoinkFactsHtml = yoinkFactsHtml; globalThis.renderYoinkDetail = renderYoinkDetail;', ctx);
++
++async function execute() {
++  if (input.action === 'openDetail') {
++    await ctx.openYoinkDetail(input.row);
++    process.stdout.write(JSON.stringify({
++      fetchCalls,
++      selectedYoinkSidecar: ctx.state.selectedYoinkSidecar,
++      selectedYoinkSidecarError: ctx.state.selectedYoinkSidecarError,
++      factMetaText: ctx.els.yoinkFactMeta.textContent,
++      factsHtml: ctx.els.yoinkFacts.innerHTML,
++      detailHtml: ctx.els.yoinkDetail.innerHTML,
++      headingHtml: ctx.els.yoinkHeading.innerHTML,
++    }));
++  } else if (input.action === 'selectionRace') {
++    // Start opening item 1 with slow details
++    const p1 = ctx.openYoinkDetail(input.row1);
++    // Immediately open item 2 with fast details
++    input.details = input.details2;
++    input.detailsDelayMs = 0;
++    const p2 = ctx.openYoinkDetail(input.row2);
++    await Promise.all([p1, p2]);
++    process.stdout.write(JSON.stringify({
++      fetchCalls,
++      selectedYoink: ctx.state.selectedYoink,
++      selectedYoinkSidecar: ctx.state.selectedYoinkSidecar,
++      selectedYoinkSidecarError: ctx.state.selectedYoinkSidecarError,
++      factMetaText: ctx.els.yoinkFactMeta.textContent,
++      subheadText: ctx.els.yoinkSubhead.textContent,
++    }));
++  } else {
++    throw new Error('Unknown action: ' + input.action);
++  }
++}
++execute().catch((err) => {
++  console.error(err);
++  process.exit(1);
++});
++"""
++
++
++def _run_node_dashboard(payload: dict) -> dict:
++    res = subprocess.run(
++        ["node", "-e", NODE_DASHBOARD_HARNESS],
++        input=json.dumps(payload),
++        cwd=ROOT,
++        text=True,
++        capture_output=True,
++        timeout=15,
++    )
++    assert res.returncode == 0, f"Node failed (code {res.returncode}): {res.stderr}"
++    return json.loads(res.stdout)
++
++
++# ---------------------------------------------------------------------------
++# HTTP /yoinks/<id>/details behavioral tests
++# ---------------------------------------------------------------------------
++
++
++def test_saved_media_detail_success(media_server):
++    port, idx, desktop = media_server
++    vid = "v_success_01"
++    sidecar_data = {
++        "video_id": vid,
++        "title": "Quantum Physics 101",
++        "duration_seconds": 1820,
++        "channel": "Physics Channel",
++        "host": "Dr. Feynman",
++        "platform": "youtube",
++        "source_type": "video",
++        "secret_api_key": "SK-SUPER-SECRET-NEVER-LEAK",
++        "internal_config": {"db_password": "pwd"},
++        "screenshots": [
++            {"index": 0, "filename": "shot_0.jpg", "path": "screenshots/shot_0.jpg", "timestamp": "00:01:00"}
++        ],
++        "transcript": [
++            {"start": 0, "end": 20, "speaker": "Dr. Feynman", "text": "Nature isn't classical."}
++        ],
++        "diarization": {
++            "speakers": ["Dr. Feynman"],
++            "segments": [{"start": 0, "end": 20, "speaker": "Dr. Feynman"}]
++        }
++    }
++    _insert_yoink_fixture(idx, desktop, vid, sidecar=sidecar_data)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 200, f"Expected 200, got {code}: {res}"
++    assert res["ok"] is True
++    assert res["video_id"] == vid
++    details = res["details"]
++    assert details["duration_seconds"] == 1820
++    assert details["channel"] == "Physics Channel"
++    assert details["host"] == "Dr. Feynman"
++    assert details["title"] == "Quantum Physics 101"
++    assert len(details["screenshots"]) == 1
++    assert details["screenshots"][0]["filename"] == "shot_0.jpg"
++    assert len(details["transcript"]) == 1
++    assert details["transcript"][0]["text"] == "Nature isn't classical."
++    # Secrets must not be returned
++    assert "secret_api_key" not in details
++    assert "internal_config" not in details
++
++
++def test_media_detail_requires_authentication(media_server):
++    port, idx, desktop = media_server
++    vid = "v_auth_01"
++    _insert_yoink_fixture(idx, desktop, vid, sidecar={"video_id": vid, "duration_seconds": 100})
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=False)
++    assert code == 403
++    assert res["ok"] is False
++    assert "token" in res.get("error", "").lower()
++
++
++def test_media_detail_unknown_id(media_server):
++    port, idx, desktop = media_server
++    code, res = _http_get(port, "/yoinks/v_nonexistent/details", token=True)
++    assert code == 404
++    assert res["ok"] is False
++    assert res.get("error") == "uoink not found"
++
++
++def test_media_detail_missing_sidecar_file(media_server):
++    port, idx, desktop = media_server
++    vid = "v_missing_file"
++    missing_path = desktop / "videos" / vid / "does_not_exist.json"
++    _insert_yoink_fixture(idx, desktop, vid, custom_sidecar_path=str(missing_path))
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 404
++    assert res["ok"] is False
++    assert "not found" in res.get("error", "").lower()
++
++
++def test_media_detail_corrupt_malformed_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_corrupt_json"
++    corrupt_bytes = b'{"duration_seconds": 120, "broken": '
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=corrupt_bytes)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "malformed" in res.get("error", "").lower() or "bad json" in res.get("error", "").lower()
++
++
++def test_media_detail_oversized_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_oversized_json"
++    # Create payload exceeding 2MB limit
++    big_pad = "A" * (2 * 1024 * 1024 + 1000)
++    big_json = json.dumps({"video_id": vid, "pad": big_pad}).encode("utf-8")
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=big_json)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "large" in res.get("error", "").lower()
++
++
++def test_media_detail_non_object_json(media_server):
++    port, idx, desktop = media_server
++    vid = "v_non_object"
++    _insert_yoink_fixture(idx, desktop, vid, raw_sidecar_bytes=b'["just", "a", "list"]')
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code == 400
++    assert res["ok"] is False
++    assert "object" in res.get("error", "").lower()
++
++
++def test_media_detail_outside_root_refusal_without_reads(media_server, tmp_path, monkeypatch):
++    port, idx, desktop = media_server
++    vid = "v_outside"
++
++    # Put a sidecar in tmp_path outside desktop root
++    outside_dir = tmp_path / "outside_dir"
++    outside_dir.mkdir(parents=True, exist_ok=True)
++    outside_file = outside_dir / "secret_sidecar.json"
++    outside_file.write_text(json.dumps({"video_id": vid, "duration_seconds": 999}), encoding="utf-8")
++
++    _insert_yoink_fixture(idx, desktop, vid, custom_sidecar_path=str(outside_file))
++
++    # Instrument open to ensure file is NEVER opened
++    opened_paths = []
++    orig_open = open
++
++    def tracking_open(file, *args, **kwargs):
++        if str(outside_file) in str(file):
++            opened_paths.append(str(file))
++            raise AssertionError(f"Security violation: attempted to open out-of-root path {file}")
++        return orig_open(file, *args, **kwargs)
++
++    monkeypatch.setattr("builtins.open", tracking_open)
++
++    code, res = _http_get(port, f"/yoinks/{vid}/details", token=True)
++    assert code in (400, 403)
++    assert res["ok"] is False
++    assert "outside" in res.get("error", "").lower() or "escapes" in res.get("error", "").lower()
++    assert len(opened_paths) == 0, f"File was opened: {opened_paths}"
++
++
++# ---------------------------------------------------------------------------
++# Node-executed Dashboard UI regressions
++# ---------------------------------------------------------------------------
++
++
++def test_dashboard_node_open_detail_success():
++    row = {
++        "video_id": "v_test_node_01",
++        "slug": "v-test-node-01",
++        "title": "Node Dashboard Video",
++        "channel": "Tech Explorers",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    details = {
++        "video_id": "v_test_node_01",
++        "duration_seconds": 1250,
++        "channel": "Tech Explorers",
++        "screenshots": [{"path": "shot1.png", "timestamp": "00:05:00"}],
++        "transcript": [{"start": 0, "text": "Hello world segment."}],
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": row,
++        "details": details,
++    })
++    urls = [c["url"] for c in out["fetchCalls"]]
++    assert any("/details" in u for u in urls), f"Must fetch /details route: {urls}"
++    assert not any("/file" in u for u in urls), f"/file route must NOT be called for details: {urls}"
++
++    assert out["selectedYoinkSidecar"] is not None
++    assert out["selectedYoinkSidecar"]["duration_seconds"] == 1250
++    assert out["factMetaText"] == "ready"
++    assert "20:50" in out["factsHtml"]  # 1250 seconds formatted as mm:ss
++    assert "Tech Explorers" in out["factsHtml"]
++    assert ">ready<" in out["factsHtml"]
++
++
++def test_dashboard_node_open_detail_refusal_honest_error():
++    row = {
++        "video_id": "v_refused_01",
++        "slug": "v-refused-01",
++        "title": "Refused Video",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": row,
++        "detailsRefusal": {"status": 404, "body": {"ok": False, "error": "sidecar file not found"}},
++    })
++    # Honest refusal must not claim "saved details need another moment"
++    assert out["selectedYoinkSidecar"] is None
++    assert out["selectedYoinkSidecarError"] != "saved details need another moment"
++    assert "sidecar file not found" in out["selectedYoinkSidecarError"] or "unavailable" in out["selectedYoinkSidecarError"]
++    # Must NOT be in perpetual checking state or ready
++    assert out["factMetaText"] != "checking saved files"
++    assert out["factMetaText"] != "ready"
++    assert out["factMetaText"] == out["selectedYoinkSidecarError"]
++
++
++def test_dashboard_node_selection_race_avoids_stale_overwrite():
++    row1 = {
++        "video_id": "v_slow_item_01",
++        "slug": "v-slow-01",
++        "title": "Slow Item One",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    row2 = {
++        "video_id": "v_fast_item_02",
++        "slug": "v-fast-02",
++        "title": "Fast Item Two",
++        "source_type": "video",
++        "platform": "youtube",
++    }
++    details1 = {"video_id": "v_slow_item_01", "duration_seconds": 100, "channel": "Slow Channel"}
++    details2 = {"video_id": "v_fast_item_02", "duration_seconds": 200, "channel": "Fast Channel"}
++
++    out = _run_node_dashboard({
++        "action": "selectionRace",
++        "row1": row1,
++        "row2": row2,
++        "details": details1,
++        "details2": details2,
++        "detailsDelayMs": 50,  # row1 details return late
++    })
++    # Item 2 must remain the active selection
++    assert out["selectedYoink"]["video_id"] == "v_fast_item_02"
++    assert out["selectedYoinkSidecar"]["video_id"] == "v_fast_item_02"
++    assert out["selectedYoinkSidecar"]["channel"] == "Fast Channel"
++    assert out["subheadText"] == "Title for v_fast_item_02" or "Fast Item Two" in out["subheadText"]
++
++
++def test_dashboard_node_note_readiness_preserved():
++    note_row = {
++        "video_id": "note_01",
++        "slug": "note-01",
++        "title": "Saved Thought",
++        "source_type": "note",
++        "platform": "note",
++    }
++    out = _run_node_dashboard({
++        "action": "openDetail",
++        "row": note_row,
++        "markdown": "Here is the note body text.",
++    })
++    urls = [c["url"] for c in out["fetchCalls"]]
++    # Notes must not call details or /file
++    assert not any("/details" in u for u in urls), f"Notes should not call /details: {urls}"
++    assert not any("/file" in u for u in urls), f"Notes should not call /file: {urls}"
++    assert out["factMetaText"] == "ready"
++    assert "Note file" in out["factsHtml"]
+diff --git a/tests/test_media_detail_boundaries.py b/tests/test_media_detail_boundaries.py
+new file mode 100644
+index 0000000..ee77e11
+--- /dev/null
++++ b/tests/test_media_detail_boundaries.py
+@@ -0,0 +1,120 @@
++"""Boundary and evidence-truth checks for the newly exposed saved details."""
++import builtins
++import json
++from pathlib import Path
++import subprocess
++import pytest
++import index as index_mod
++import server
++from tests.test_dashboard_media_detail_truth import NODE_DASHBOARD_HARNESS
++
++ROOT=Path(__file__).resolve().parents[1]
++
++@pytest.fixture
++def item(tmp_path,monkeypatch):
++    root=tmp_path/'output';root.mkdir()
++    idx=index_mod.Index.open(tmp_path/'isolated.db')
++    monkeypatch.setattr(server,'DESKTOP_ROOT',root)
++    monkeypatch.setattr(server,'_get_index',lambda:idx)
++    path=root/'media.json';path.write_text('{}',encoding='utf8')
++    def register(p=path):
++        idx.upsert_yoink({'video_id':'saved-media','slug':'saved-media','yoinked_at':'2026-09-12T00:00:00Z','title':'Synthetic item','sidecar_path':str(p),'corpus_path':str(root/'media.md'),'source_type':'video','platform':'youtube'})
++    register()
++    handler=server.Handler.__new__(server.Handler)
++    handler._send_json=lambda status,data:(status,data)
++    def request():return handler._handle_yoink_details('/yoinks/saved-media/details')
++    try:yield path,register,request
++    finally:idx.close()
++
++def node(code):
++    prefix=NODE_DASHBOARD_HARNESS.split('async function execute() {')[0]
++    script=prefix+'\n(async()=>{'+code+'})().catch(e=>{console.error(e);process.exit(1)});'
++    res=subprocess.run(['node','-e',script],input='{}',cwd=ROOT,text=True,capture_output=True,timeout=15)
++    assert res.returncode==0,res.stderr
++    return json.loads(res.stdout)
++
++def test_outside_path_is_rejected_before_metadata(item,tmp_path,monkeypatch):
++    path,register,request=item
++    outside=tmp_path/'outside.json';outside.write_text('{}',encoding='utf8');register(outside)
++    observed=[];original=Path.lstat
++    def observe(p,*args,**kwargs):
++        if p==outside:observed.append(str(p))
++        return original(p,*args,**kwargs)
++    monkeypatch.setattr(Path,'lstat',observe)
++    code,data=request()
++    assert code in (400,403) and data['ok'] is False
++    assert observed==[]
++
++def test_read_bound_is_bytes_when_file_grows(item,monkeypatch):
++    path,register,request=item
++    big=json.dumps({'title':'\u20ac'*800000},ensure_ascii=False).encode('utf8')
++    assert len(big)>server.MAX_SIDECAR_BYTES and len(big.decode('utf8'))<server.MAX_SIDECAR_BYTES
++    original=builtins.open;grown=False
++    def growing_open(file,mode='r',*args,**kwargs):
++        nonlocal grown
++        if Path(file)==path and mode in ('r','rb') and not grown:
++            grown=True
++            with original(path,'wb') as out:out.write(big)
++        return original(file,mode,*args,**kwargs)
++    monkeypatch.setattr(builtins,'open',growing_open)
++    code,data=request()
++    assert grown and code==400 and data['ok'] is False
++
++@pytest.mark.parametrize('raw',[b'{"duration_seconds":NaN}',b'{"duration_seconds":1e999}',b'{"nested":'+b'['*1500+b'0'+b']'*1500+b'}'])
++def test_invalid_numeric_or_deep_json_is_structured_refusal(item,raw):
++    path,register,request=item;path.write_bytes(raw)
++    code,data=request()
++    assert code==400 and data['ok'] is False
++
++def test_nested_speaker_metadata_excludes_private_fields(item):
++    path,register,request=item
++    path.write_text(json.dumps({'speakers':{'SYNTHETIC A':{'private':'DO_NOT_RETURN'}},'diarization':{'speakers':[{'name':'SYNTHETIC B','private':'DO_NOT_RETURN'}]}}),encoding='utf8')
++    code,data=request()
++    assert code==200 and data['ok'] is True
++    encoded=json.dumps(data)
++    assert 'SYNTHETIC A' in encoded and 'SYNTHETIC B' in encoded
++    assert 'DO_NOT_RETURN' not in encoded and 'private' not in encoded
++
++def test_reopening_same_item_cannot_accept_old_responses():
++    result=node(r"""
++      const pending=[];
++      ctx.loadYoinkDetails=id=>new Promise(resolve=>pending.push({id,kind:'details',resolve}));
++      ctx.loadYoinkMarkdown=id=>new Promise(resolve=>pending.push({id,kind:'markdown',resolve}));
++      const row=id=>({video_id:id,source_type:'video',platform:'youtube',title:id});
++      const p1=ctx.openYoinkDetail(row('A'));
++      const p2=ctx.openYoinkDetail(row('B'));
++      const p3=ctx.openYoinkDetail(row('A'));
++      for(const [start,label] of [[4,'newest'],[2,'middle'],[0,'oldest']]) {
++        for(const q of pending.slice(start,start+2)) q.resolve(q.kind==='details'?{title:label,transcript:[{text:label,start:34,end:46}]}:label);
++        await Promise.resolve();await Promise.resolve();
++      }
++      await Promise.all([p1,p2,p3]);
++      process.stdout.write(JSON.stringify({title:ctx.state.selectedYoinkSidecar.title,markdown:ctx.state.selectedYoinkMarkdown}));
++    """)
++    assert result=={'title':'newest','markdown':'newest'}
++
++def test_unstamped_transcript_does_not_invent_offsets():
++    result=node(r"""
++      ctx.state.selectedYoink={video_id:'A',source_type:'video',platform:'youtube'};
++      ctx.state.selectedYoinkSidecar={transcript:'SYNTHETIC first line\nSYNTHETIC second line'};
++      ctx.renderYoinkDetail();
++      process.stdout.write(JSON.stringify({html:ctx.els.yoinkDetail.innerHTML,segments:ctx.transcriptSegments(ctx.state.selectedYoinkSidecar)}));
++    """)
++    assert 'SYNTHETIC first line' in result['html']
++    assert all('start' not in row for row in result['segments'])
++    assert 'time not stored' in result['html']
++
++def test_timeline_requires_actual_valid_bounds():
++    result=node(r"""
++      const result=ctx.diarizationSegments({transcript:[
++        {speaker:'SYNTHETIC A',text:'missing'},
++        {speaker:'SYNTHETIC A',start:1,text:'missing end'},
++        {speaker:'SYNTHETIC A',start:9,end:3,text:'backwards'},
++        {speaker:'SYNTHETIC A',start:3,end:5,text:'stored'}]});
++      process.stdout.write(JSON.stringify(result));
++    """)
++    assert result==[{'speaker':'SYNTHETIC A','start':3,'end':5}]
++
++def test_empty_speaker_objects_do_not_invent_attribution():
++    result=node("process.stdout.write(JSON.stringify(ctx.speakerNames({speakers:[{}]}))); ")
++    assert result==[]

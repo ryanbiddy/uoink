@@ -1,0 +1,6 @@
+{
+  "attempt": "astra-media12-boundary-negative04",
+  "result": "4 assertion failures, 6 setup errors",
+  "reason": "Schema migrations/0001_initial_schema.sql additionally requires corpus_path. Supply this final missing NOT NULL field. Existing assertions and accepted tests unchanged.",
+  "next": "astra-media12-boundary-negative05 on unchanged worker product"
+}

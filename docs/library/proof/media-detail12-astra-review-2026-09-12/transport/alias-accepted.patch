@@ -1,0 +1,41 @@
+diff --git a/server.py b/server.py
+index 66884129233c4e148609b2c1ef9ecad66cff1e7e..6a7710fbfb60c4c6c828a8ed53638e8d2249ccb7 100644
+--- a/server.py
++++ b/server.py
+@@ -15750,7 +15750,7 @@ class Handler(BaseHTTPRequestHandler):
+             for seg in raw_transcript:
+                 if isinstance(seg, dict):
+                     clean_seg = {}
+-                    for k in ("start", "end", "text", "content", "speaker",
++                    for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
+                               "speaker_label", "speaker_id"):
+                         if k in seg and isinstance(seg[k], (str, int, float, bool)):
+                             clean_seg[k] = seg[k]
+@@ -15803,7 +15803,7 @@ class Handler(BaseHTTPRequestHandler):
+                 for s in raw_diar["segments"]:
+                     if isinstance(s, dict):
+                         clean_diar_segs.append({
+-                            k: s[k] for k in ("start", "end", "speaker",
++                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                                              "speaker_label", "speaker_id")
+                             if k in s and isinstance(s[k], (str, int, float))
+                         })
+diff --git a/tests/test_media_detail_boundaries.py b/tests/test_media_detail_boundaries.py
+index ee77e118734b7f9ad5ec0f6bb4dcd4fa24cb80a7..e402a665aea0ac7eedca6b27353c4cf7d4ed5ecb 100644
+--- a/tests/test_media_detail_boundaries.py
++++ b/tests/test_media_detail_boundaries.py
+@@ -118,3 +118,14 @@ def test_timeline_requires_actual_valid_bounds():
+ def test_empty_speaker_objects_do_not_invent_attribution():
+     result=node("process.stdout.write(JSON.stringify(ctx.speakerNames({speakers:[{}]}))); ")
+     assert result==[]
++
++
++def test_saved_time_aliases_are_preserved(item):
++    path,register,request=item
++    cue={'start_seconds':34,'end_seconds':46,'text':'SYNTHETIC stored cue'}
++    path.write_text(json.dumps({'transcript':[cue],'segments':[cue],'diarization':{'segments':[cue]}}),encoding='utf8')
++    code,data=request()
++    assert code==200
++    details=data['details']
++    for rows in (details['transcript'],details['segments'],details['diarization']['segments']):
++        assert rows[0]['start_seconds']==34 and rows[0]['end_seconds']==46

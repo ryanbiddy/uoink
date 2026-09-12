@@ -5319,6 +5319,7 @@
       selectedEvidenceTitle: "",
       claims: [],
       selectedYoink: null,
+      selectedYoinkRequest: 0,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
       selectedYoinkMarkdown: "",
@@ -6416,10 +6417,10 @@
       const out = new Set();
       const rawSpeakers = sidecar.speakers || (sidecar.diarization && sidecar.diarization.speakers);
       if (Array.isArray(rawSpeakers)) {
-        rawSpeakers.forEach((speaker, index) => {
+        rawSpeakers.forEach((speaker) => {
           const label = typeof speaker === "string"
             ? speaker
-            : firstValue(speaker.name, speaker.label, speaker.id, `Speaker ${index + 1}`);
+            : speaker && firstValue(speaker.name, speaker.label, speaker.id);
           if (label) out.add(String(label));
         });
       } else if (rawSpeakers && typeof rawSpeakers === "object") {
@@ -6435,24 +6436,32 @@
     function transcriptSegments(sidecar = {}) {
       const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
       if (typeof raw === "string") {
-        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text, index) => ({ start: index * 30, text }));
+        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text) => ({ text }));
       }
-      return Array.isArray(raw) ? raw.filter(Boolean) : [];
+      return Array.isArray(raw)
+        ? raw.filter((segment) => typeof segment === "string" || (segment && typeof segment === "object" && !Array.isArray(segment)))
+          .map((segment) => typeof segment === "string" ? { text: segment } : segment)
+        : [];
+    }
+
+    function storedTime(...values) {
+      for (const value of values) {
+        if (typeof value !== "number" && typeof value !== "string") continue;
+        if (typeof value === "string" && !value.trim()) continue;
+        const seconds = Number(value);
+        if (Number.isFinite(seconds) && seconds >= 0) return seconds;
+      }
+      return null;
     }
 
     function diarizationSegments(sidecar = {}) {
       return transcriptSegments(sidecar)
-        .map((segment, index) => {
-          const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
-          const start = Number(firstValue(segment.start, segment.start_seconds, index * 30));
-          const end = Number(firstValue(segment.end, segment.end_seconds, start + 20));
-          return {
-            speaker,
-            start: Number.isFinite(start) ? Math.max(0, start) : index * 30,
-            end: Number.isFinite(end) && end > start ? end : start + 20,
-          };
-        })
-        .filter((segment) => segment.speaker);
+        .map((segment) => ({
+          speaker: firstValue(segment.speaker, segment.speaker_label, segment.speaker_id),
+          start: storedTime(segment.start, segment.start_seconds),
+          end: storedTime(segment.end, segment.end_seconds),
+        }))
+        .filter((segment) => segment.speaker && segment.start !== null && segment.end !== null && segment.end > segment.start);
     }
 
     function shouldShowDiarization(row, sidecar = {}) {
@@ -6645,7 +6654,8 @@
         <div class="transcript-preview">
           ${segments.map((segment) => {
             const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
-            const label = [fmtTimestamp(segment.start), speaker].filter(Boolean).join(" | ");
+            const start = storedTime(segment.start, segment.start_seconds);
+            const label = [start === null ? "time not stored" : fmtTimestamp(start), speaker].filter(Boolean).join(" | ");
             return `<div class="transcript-segment"><b>${htmlEscape(label)}</b><div class="job-sub">${htmlEscape(segment.text || segment.content || "")}</div></div>`;
           }).join("")}
         </div>
@@ -6761,7 +6771,9 @@
         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
         fmtDuration(durationOf(row, sidecar)),
       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
-      els.yoinkFactMeta.textContent = isNote ? noteReadinessLabel() : (state.selectedYoinkSidecar ? "ready" : "checking saved files");
+      els.yoinkFactMeta.textContent = isNote
+        ? noteReadinessLabel()
+        : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
@@ -6798,6 +6810,11 @@
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return JSON.parse(await res.text());
+    }
+
+    async function loadYoinkDetails(videoId) {
+      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details`);
+      return data.details || data;
     }
 
     async function loadYoinkMarkdown(videoId) {
@@ -6841,6 +6858,7 @@
     }
 
     async function openYoinkDetail(row) {
+      const request = ++state.selectedYoinkRequest;
       state.selectedYoink = row || null;
       state.selectedYoinkSidecar = null;
       state.selectedYoinkSidecarError = "";
@@ -6852,30 +6870,43 @@
       renderYoinkDetail();
       switchTab("yoink");
       const isNote = isNoteContent(row);
-      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
       const videoId = videoIdOf(row);
       const tasks = [];
-      if (sidecarPath) {
-        tasks.push(loadJsonFile(sidecarPath)
-          .then((data) => { state.selectedYoinkSidecar = data; })
-          .catch(() => { state.selectedYoinkSidecarError = "saved details need another moment"; }));
+      if (!isNote && videoId) {
+        tasks.push(loadYoinkDetails(videoId)
+          .then((data) => {
+            if (state.selectedYoinkRequest !== request) return;
+            state.selectedYoinkSidecar = data;
+          })
+          .catch((err) => {
+            if (state.selectedYoinkRequest !== request) return;
+            state.selectedYoinkSidecar = null;
+            state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable";
+          }));
       }
       if (videoId) {
         tasks.push(loadYoinkMarkdown(videoId)
           .then((markdown) => {
+            if (state.selectedYoinkRequest !== request) return;
             state.selectedYoinkMarkdown = markdown;
             state.selectedYoinkMarkdownState = markdown ? "ready" : "empty";
           })
           .catch((err) => {
+            if (state.selectedYoinkRequest !== request) return;
             state.selectedYoinkMarkdown = "";
             state.selectedYoinkMarkdownState = (err.data && err.data.state) || "unavailable";
             state.selectedYoinkMarkdownError = err.message;
           }));
       } else {
         state.selectedYoinkMarkdownState = "unavailable";
+        if (!isNote) {
+          state.selectedYoinkSidecarError = "unavailable";
+        }
       }
       if (tasks.length) await Promise.all(tasks);
-      renderYoinkDetail();
+      if (state.selectedYoinkRequest === request) {
+        renderYoinkDetail();
+      }
     }
 
     async function requestRetranscription() {

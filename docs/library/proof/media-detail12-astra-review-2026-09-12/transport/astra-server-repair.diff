@@ -1,0 +1,93 @@
+--- worker/server.py
++++ reviewed/server.py
+@@ -15636,6 +15636,8 @@
+             if not p.is_absolute():
+                 return self._send_json(400, {"ok": False,
+                                              "error": "sidecar path escapes Uoink root"})
++            # Lexical containment must precede metadata probes on this path.
++            p.relative_to(DESKTOP_ROOT.absolute())
+             cur = p
+             while True:
+                 if cur.is_symlink():
+@@ -15669,7 +15671,7 @@
+             if resolved.stat().st_size > MAX_SIDECAR_BYTES:
+                 return self._send_json(400, {"ok": False,
+                                              "error": "sidecar file too large"})
+-            with open(resolved, "r", encoding="utf-8") as f:
++            with open(resolved, "rb") as f:
+                 content = f.read(MAX_SIDECAR_BYTES + 1)
+             if len(content) > MAX_SIDECAR_BYTES:
+                 return self._send_json(400, {"ok": False,
+@@ -15682,9 +15684,19 @@
+             return self._send_json(500, {"ok": False,
+                                          "error": "could not read sidecar"})
+ 
+-        try:
+-            data = json.loads(content)
+-        except (ValueError, TypeError):
++        def finite_float(value):
++            number = float(value)
++            if not math.isfinite(number):
++                raise ValueError("non-finite JSON number")
++            return number
++
++        def reject_constant(value):
++            raise ValueError("non-finite JSON constant")
++
++        try:
++            data = json.loads(content.decode("utf-8"), parse_float=finite_float,
++                              parse_constant=reject_constant)
++        except (ValueError, TypeError, RecursionError):
+             return self._send_json(400, {"ok": False,
+                                          "error": "malformed sidecar JSON"})
+ 
+@@ -15754,30 +15766,29 @@
+                     clean_segments.append(seg)
+             filtered["segments"] = clean_segments
+ 
+-        raw_speakers = data.get("speakers")
+-        if isinstance(raw_speakers, list):
+-            clean_speakers = []
+-            for spk in raw_speakers:
+-                if isinstance(spk, str):
+-                    clean_speakers.append(spk)
+-                elif isinstance(spk, dict):
+-                    clean_spk = {k: spk[k] for k in ("name", "label", "id")
+-                                 if k in spk and isinstance(spk[k], str)}
+-                    clean_speakers.append(clean_spk)
+-            filtered["speakers"] = clean_speakers
+-        elif isinstance(raw_speakers, dict):
+-            filtered["speakers"] = {str(k): v for k, v in raw_speakers.items()
+-                                    if isinstance(k, (str, int))}
++        def clean_speakers(raw):
++            def label_fields(speaker):
++                return {key: speaker[key] for key in ("name", "label", "id")
++                        if isinstance(speaker.get(key), str) and speaker[key].strip()}
++            if isinstance(raw, list):
++                return [clean for speaker in raw
++                        if (clean := speaker if isinstance(speaker, str)
++                            else label_fields(speaker) if isinstance(speaker, dict)
++                            else None)]
++            if isinstance(raw, dict):
++                # Map keys are the saved labels; arbitrary map values are private.
++                return {key: label_fields(value) if isinstance(value, dict) else {}
++                        for key, value in raw.items() if key.strip()}
++            return []
++
++        if isinstance(data.get("speakers"), (list, dict)):
++            filtered["speakers"] = clean_speakers(data["speakers"])
+ 
+         raw_diar = data.get("diarization")
+         if isinstance(raw_diar, dict):
+             clean_diar = {}
+-            if "speakers" in raw_diar:
+-                spk = raw_diar["speakers"]
+-                if isinstance(spk, list):
+-                    clean_diar["speakers"] = [s for s in spk if isinstance(s, (str, dict))]
+-                elif isinstance(spk, dict):
+-                    clean_diar["speakers"] = {str(k): v for k, v in spk.items()}
++            if isinstance(raw_diar.get("speakers"), (list, dict)):
++                clean_diar["speakers"] = clean_speakers(raw_diar["speakers"])
+             if "segments" in raw_diar and isinstance(raw_diar["segments"], list):
+                 clean_diar_segs = []
+                 for s in raw_diar["segments"]:

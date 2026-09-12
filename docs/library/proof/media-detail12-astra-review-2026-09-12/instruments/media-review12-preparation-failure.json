@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-12",
+  "preparation_exit": 1,
+  "error": "IndentationError: unexpected indent at the nested JavaScript string",
+  "reason": "The generator reused its outer triple-single-quote delimiter for embedded Node snippets.",
+  "product_or_test_file_written": false,
+  "verifier_label": "astra-media12-boundary-negative01",
+  "verifier_exit": 4,
+  "verifier_outcome": "Requested test file did not exist; no tests ran.",
+  "repair": "Use triple-double quotes for the three embedded JavaScript strings. No test assertion changes. Preserve the initial generator and use fresh negative02 label."
+}

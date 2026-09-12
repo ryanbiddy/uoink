@@ -1,0 +1,9 @@
+........F...                                                             [100%]
+================================== FAILURES ===================================
+___________________ test_dashboard_node_open_detail_success ___________________
+tests\test_dashboard_media_detail_truth.py:437: in test_dashboard_node_open_detail_success
+    assert "Tech Explorers" in out["factsHtml"]
+E   assert 'Tech Explorers' in '\n        <div class="job-row">\n          <div class="job-title">Platform</div>\n          <div class="job-sub">yout...        <div class="job-title">Saved details</div>\n          <div class="job-sub">ready</div>\n        </div>\n      '
+=========================== short test summary info ===========================
+FAILED tests/test_dashboard_media_detail_truth.py::test_dashboard_node_open_detail_success
+1 failed, 11 passed in 5.47s

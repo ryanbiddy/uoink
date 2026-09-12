@@ -1,0 +1,30 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_dashboard_v324_ui.py",
+      "tests/test_screenshots_reyoink.py",
+      "tests/test_screenshots_picker_v324.py",
+      "tests/test_note_readiness_truth.py",
+      "tests/security/test_security_findings.py",
+      "tests/test_dashboard_media_detail_truth.py",
+      "tests/test_media_detail_boundaries.py",
+      "--runxfail",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-media12-repair-checkout02-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-media12-repair-checkout02\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-media12-repair-checkout02\\tests.log"
+  }
+]

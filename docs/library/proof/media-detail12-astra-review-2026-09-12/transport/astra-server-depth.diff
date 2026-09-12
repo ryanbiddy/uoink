@@ -1,0 +1,18 @@
+--- implicit-recursion-bound
++++ explicit-depth-bound
+@@ -15696,6 +15696,15 @@
+         try:
+             data = json.loads(content.decode("utf-8"), parse_float=finite_float,
+                               parse_constant=reject_constant)
++            # Enforce an explicit bound independent of the process recursion limit.
++            pending = [(data, 0)]
++            while pending:
++                value, depth = pending.pop()
++                if isinstance(value, (dict, list)):
++                    if depth >= 64:
++                        raise ValueError("sidecar JSON too deeply nested")
++                    children = value.values() if isinstance(value, dict) else value
++                    pending.extend((child, depth + 1) for child in children)
+         except (ValueError, TypeError, RecursionError):
+             return self._send_json(400, {"ok": False,
+                                          "error": "malformed sidecar JSON"})

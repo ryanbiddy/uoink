@@ -1,0 +1,20 @@
+--- before/server.py
++++ after/server.py
+@@ -15750,7 +15750,7 @@
+             for seg in raw_transcript:
+                 if isinstance(seg, dict):
+                     clean_seg = {}
+-                    for k in ("start", "end", "text", "content", "speaker",
++                    for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
+                               "speaker_label", "speaker_id"):
+                         if k in seg and isinstance(seg[k], (str, int, float, bool)):
+                             clean_seg[k] = seg[k]
+@@ -15803,7 +15803,7 @@
+                 for s in raw_diar["segments"]:
+                     if isinstance(s, dict):
+                         clean_diar_segs.append({
+-                            k: s[k] for k in ("start", "end", "speaker",
++                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                                              "speaker_label", "speaker_id")
+                             if k in s and isinstance(s[k], (str, int, float))
+                         })

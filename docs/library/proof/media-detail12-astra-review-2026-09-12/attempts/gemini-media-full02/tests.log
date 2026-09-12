@@ -1,0 +1,22 @@
+...............................................                          [100%]
+============================== warnings summary ===============================
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\2dae80cc-01a\gemini\server.py:9455: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    pixels = list(small.getdata())
+
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+  C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\2dae80cc-01a\gemini\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+47 passed, 12 warnings in 7.44s

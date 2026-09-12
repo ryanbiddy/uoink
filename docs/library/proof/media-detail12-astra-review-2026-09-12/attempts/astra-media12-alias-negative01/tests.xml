@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.713" timestamp="2026-09-12T11:05:49.435225-07:00" hostname="Ryan-PC"><testcase classname="tests.test_media_detail_boundaries" name="test_saved_time_aliases_are_preserved" time="0.079"><failure message="KeyError: 'start_seconds'">tests\test_media_detail_boundaries.py:131: in test_saved_time_aliases_are_preserved
+    assert rows[0]['start_seconds']==34 and rows[0]['end_seconds']==46
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'start_seconds'</failure></testcase></testsuite></testsuites>

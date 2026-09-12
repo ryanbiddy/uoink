@@ -1,0 +1,8 @@
+{
+  "attempt": "astra-media12-boundary-negative02",
+  "result": "4 assertion failures, 6 setup errors",
+  "reason": "New integrator fixture omitted the schema-required slug; six backend bodies did not execute. Supply only that required field; behavior assertions remain byte-identical.",
+  "old_sha256": "bd1da520e5beaee9f49160c5de6bff7e4ac87bec684f73fa4b2ae0e1454d1fe6",
+  "new_sha256": "8d3e5277aadb60182d5dbe734df6995d658990f3a01f0b1c335df8e3d4c86e49",
+  "next": "astra-media12-boundary-negative03 on unchanged worker product"
+}
