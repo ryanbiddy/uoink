@@ -1,0 +1,9 @@
+{
+  "utc": "2026-09-12T18:53:22.042443+00:00",
+  "file": "update_release08_documents.py",
+  "sha256": "0586e97ade6134007873ff3cea8f2be094df1adeb6f935d06290ceb8d6760648",
+  "exit": 0,
+  "scope": "UTF-8 reader and AST syntax only; script not executed, no document or product change",
+  "prior_failure": "delivery08-preflight01.json",
+  "repair_brief": "DELIVERY08-PREFLIGHT-REPAIR.md"
+}

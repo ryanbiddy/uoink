@@ -1,0 +1,35 @@
+--- seal_review_bundle07.py
++++ seal_review_bundle08.py
+@@ -5,22 +5,21 @@
+ import shutil
+ 
+ r = Path(__file__).resolve().parents[1]
+-bundle = r / 'build/Uoink-Living-Library-3-8-0-Review-Kit-07-2026-09-12'
+-out = r / 'docs/library/proof/ryan-review-bundle-07-2026-09-12'
++bundle = r / 'build/Uoink-Living-Library-3-8-0-Review-Kit-08-2026-09-12'
++out = r / 'docs/library/proof/ryan-review-bundle-08-2026-09-12'
+ out.mkdir(exist_ok=False)
+ (out / '.gitattributes').write_text('* -text\n', encoding='utf8', newline='\n')
+ shutil.copyfile(bundle.with_suffix('.receipt.json'), out / 'delivery.json')
+ for name in ('BUNDLE-SHA256.json', 'release-state.json', 'START-HERE.md', 'historical-data-omissions.json'):
+     shutil.copyfile(bundle / name, out / name)
+-for name in ('build_release_bundle07.py', 'review_bundle07.py', 'seal_review_bundle07.py',
+-             'review-bundle07-build.log', 'review-bundle07-inspection.json',
+-             'package07-git-proof-check01.json', 'verify_committed_package07_proofs.py',
+-             'runbook07-syntax.json', 'check_runbook07.ps1',
+-             'prepare_delivery07.py', 'repair_delivery07_preflight.py', 'delivery07-preflight-failures.json',
+-             'stage_installed07.py', 'stage_installed07_02.py', 'stage_installed07_02.py.diff',
+-             'installed07-staged-proof-check.json', 'run_bundle07_once.py',
+-             'build_release_bundle07.py.diff', 'review_bundle07.py.diff',
+-             'seal_review_bundle07.py.diff'):
++for name in ('build_release_bundle08.py', 'review_bundle08.py', 'seal_review_bundle08.py',
++             'review-bundle08-build.log', 'review-bundle08-inspection.json',
++             'package08-git-proof-check01.json', 'verify_committed_package08_proofs.py',
++             'runbook08-syntax.json', 'check_runbook08.ps1',
++             'prepare_delivery08.py', 'delivery08-adaptation-review.json',
++             'installed08-staged-proof-check.json', 'run_bundle08_once.py',
++             'build_release_bundle08.py.diff', 'review_bundle08.py.diff',
++             'seal_review_bundle08.py.diff'):
+     shutil.copyfile(r / '_scratch' / name, out / name)
+ files = {p.relative_to(out).as_posix(): {'bytes': p.stat().st_size,
+          'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}

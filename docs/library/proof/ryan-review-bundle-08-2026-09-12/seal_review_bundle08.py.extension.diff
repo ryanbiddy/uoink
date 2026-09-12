@@ -1,0 +1,15 @@
+--- seal_review_bundle08.py.before-extension
++++ seal_review_bundle08.py
+@@ -19,7 +19,11 @@
+              'prepare_delivery08.py', 'delivery08-adaptation-review.json',
+              'installed08-staged-proof-check.json', 'run_bundle08_once.py',
+              'build_release_bundle08.py.diff', 'review_bundle08.py.diff',
+-             'seal_review_bundle08.py.diff'):
++             'seal_review_bundle08.py.diff', 'seal_review_bundle08.py.extension.diff',
++             'extend_delivery08_instruments.py','delivery08-instrument-extension.json',
++             'DELIVERY08-PREFLIGHT-REPAIR.md','delivery08-preflight01.json',
++             'delivery08_preflight02.py','delivery08-preflight02.json',
++             'update_release08_documents.py','stage_installed08_proofs.py'):
+     shutil.copyfile(r / '_scratch' / name, out / name)
+ files = {p.relative_to(out).as_posix(): {'bytes': p.stat().st_size,
+          'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}

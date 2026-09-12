@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-12",
+  "command": "C:\\Python314\\python.exe -I -S -B -c <Path('_scratch/update_release08_documents.py').read_text(); ast.parse(...)>",
+  "exit": 1,
+  "error": "UnicodeDecodeError: cp1252 could not decode byte 0x9d at position 14232",
+  "stage": "reading the documentary script before AST parsing",
+  "script_executed": false,
+  "product_observation_rerun": false,
+  "repair_brief": "DELIVERY08-PREFLIGHT-REPAIR.md"
+}

@@ -1,0 +1,40 @@
+{
+  "scope": "Pre-execution documentary adaptation. Current outcomes are derived from new receipts, not copied. Native Desktop launch removed and retained incident must be included.",
+  "files": [
+    {
+      "old": "seal_installed07.py",
+      "new": "seal_installed08.py",
+      "sha256": "f32f53a602d5ec08727418840683c6b742aca92d0108bdb19ae555a785cba00d"
+    },
+    {
+      "old": "build_release_bundle07.py",
+      "new": "build_release_bundle08.py",
+      "sha256": "a7368ffb9a65ae88e812a072a648bcfdf22f57fc862d376ce604c0475ab6616b"
+    },
+    {
+      "old": "review_bundle07.py",
+      "new": "review_bundle08.py",
+      "sha256": "3f05aad81ebf9325aedf4c86f63a5fd58a425a1d369e697cacfd17cca4f128ab"
+    },
+    {
+      "old": "check_runbook07.ps1",
+      "new": "check_runbook08.ps1",
+      "sha256": "e8e90da89a7288168749da8fa030604407d6b7dffd0b3603e8d4536ee0a46c68"
+    },
+    {
+      "old": "verify_committed_package07_proofs.py",
+      "new": "verify_committed_package08_proofs.py",
+      "sha256": "ecbb3c5c986dcee3a2abd94f940dc2daf96bdf00317010cd3aed67666e6cce43"
+    },
+    {
+      "old": "run_bundle07_once.py",
+      "new": "run_bundle08_once.py",
+      "sha256": "5ebdf08630446034a39a36236ff8caab28ef06db5febb8186550a68a357e2aeb"
+    },
+    {
+      "old": "seal_review_bundle07.py",
+      "new": "seal_review_bundle08.py",
+      "sha256": "19f37ccc14fa5687f9a806d629a6545f5bf2fd0a548a2f4248c3477f6fa71cad"
+    }
+  ]
+}

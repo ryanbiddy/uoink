@@ -1,0 +1,129 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "build_release_bundle08.py": {
+      "bytes": 11545,
+      "sha256": "a7368ffb9a65ae88e812a072a648bcfdf22f57fc862d376ce604c0475ab6616b"
+    },
+    "build_release_bundle08.py.diff": {
+      "bytes": 5661,
+      "sha256": "c0149ce56ff8b8fae32b65e80cd2e67a0e218ce4f8b7aa6beefa6f46fb63d4ea"
+    },
+    "BUNDLE-SHA256.json": {
+      "bytes": 779976,
+      "sha256": "6ac54d93e28793a634a1abbc5e6ce8d133d34cebad6adcba886dc0e02da759d6"
+    },
+    "check_runbook08.ps1": {
+      "bytes": 980,
+      "sha256": "e8e90da89a7288168749da8fa030604407d6b7dffd0b3603e8d4536ee0a46c68"
+    },
+    "delivery.json": {
+      "bytes": 696,
+      "sha256": "f204beda898e9fa3985dc517f68293ad0401de041a58d48c17f933608bdeabec"
+    },
+    "delivery08-adaptation-review.json": {
+      "bytes": 1470,
+      "sha256": "c79ef0e6ae2bd1b0932e5ff0c68dd268328ef73f998b718b2f91c30cbbb7adb0"
+    },
+    "delivery08-instrument-extension.json": {
+      "bytes": 863,
+      "sha256": "e6f2654ab0628d137a9ace8e4a4d045a475e42f01e0b332d9aa32345a3aff3bb"
+    },
+    "DELIVERY08-PREFLIGHT-REPAIR.md": {
+      "bytes": 612,
+      "sha256": "5d631b26b1d7bbbed9f46568694f1b784ed644935351887a288f6dff272c8590"
+    },
+    "delivery08-preflight01.json": {
+      "bytes": 439,
+      "sha256": "6afc2913014bf691b4d28a1bde8948fde7b8dab5be474c4c87567acbb1d8a041"
+    },
+    "delivery08-preflight02.json": {
+      "bytes": 392,
+      "sha256": "3a8e9bdda178f7ff1ae93c282ec0e41aa25d22e17f026c4f1498f304eea3fa20"
+    },
+    "delivery08_preflight02.py": {
+      "bytes": 841,
+      "sha256": "30893b5899990e6cf9f98ead507e996f37f0c7cd29fe9a46f4b7b4948a8bd602"
+    },
+    "extend_delivery08_instruments.py": {
+      "bytes": 2268,
+      "sha256": "6594fb96dc5533064e2a6d38bac173897489d33210f51f48a460a722067e8072"
+    },
+    "historical-data-omissions.json": {
+      "bytes": 240,
+      "sha256": "ae84e8d5109853dad99f84a548021cc4ebcedafe5a7216b9102f7098d7d022e8"
+    },
+    "installed08-staged-proof-check.json": {
+      "bytes": 1033,
+      "sha256": "0e02b236e52b2433346af743d006de21293c9ff21316c340960bdb583d12c6d9"
+    },
+    "package08-git-proof-check01.json": {
+      "bytes": 999,
+      "sha256": "eb06ff32300a9a559b70ca27081e93b14a9cc8961e76b14937d1a413f125844c"
+    },
+    "prepare_delivery08.py": {
+      "bytes": 6054,
+      "sha256": "d76dfdd4f7c719b3934db165f593043cf84161d494a7ce3ccc330f6ca61ff12f"
+    },
+    "release-state.json": {
+      "bytes": 5800,
+      "sha256": "fa6f1f4ba6c64218ce6f5b3dd2098ff2527b7782aca8993391009a52414b424f"
+    },
+    "review-bundle08-build.log": {
+      "bytes": 712,
+      "sha256": "1a6105ea0f8317f1b9f55e17d41ac4aa70ecdcf1ab76eaec8ba5e868040c9574"
+    },
+    "review-bundle08-inspection.json": {
+      "bytes": 443,
+      "sha256": "5ab072e0934fdf2d70686620de70afeb612ba64d6b605ba991890091f0a96dbf"
+    },
+    "review_bundle08.py": {
+      "bytes": 2673,
+      "sha256": "3f05aad81ebf9325aedf4c86f63a5fd58a425a1d369e697cacfd17cca4f128ab"
+    },
+    "review_bundle08.py.diff": {
+      "bytes": 1812,
+      "sha256": "9891aeeb6cf6eba2105e6f151b7dfa38c4dac81714168c76aa3e4b52b0a8920f"
+    },
+    "run_bundle08_once.py": {
+      "bytes": 1399,
+      "sha256": "5ebdf08630446034a39a36236ff8caab28ef06db5febb8186550a68a357e2aeb"
+    },
+    "runbook08-syntax.json": {
+      "bytes": 593,
+      "sha256": "9c57047ca71576e4cfd711d899c7665333eabb613bcb6bc8cd8a22acd9cd14ce"
+    },
+    "seal_review_bundle08.py": {
+      "bytes": 2065,
+      "sha256": "d2a0d9d4d9b8fa0e24e36eccedcd6e6d44e02e214061c50501fb3cd2a8c88d63"
+    },
+    "seal_review_bundle08.py.diff": {
+      "bytes": 2268,
+      "sha256": "eb9f5544073009723f39cf7fbc2de752321d6f24bbd888a2ad22c1859d7da6b2"
+    },
+    "seal_review_bundle08.py.extension.diff": {
+      "bytes": 977,
+      "sha256": "886e15e3c338abc30f3a50efcf153abc311984f7bb7211f1c7ff890f1abba538"
+    },
+    "stage_installed08_proofs.py": {
+      "bytes": 2133,
+      "sha256": "e318f0ef97377541b48665b1f0c0777f79a60a09a77b3ee41c01fa75225cb81b"
+    },
+    "START-HERE.md": {
+      "bytes": 1334,
+      "sha256": "098c7cd62d3a8a0dfe7f58335d5653e60dc4c7dd803e22ffb40236792c989e77"
+    },
+    "update_release08_documents.py": {
+      "bytes": 14906,
+      "sha256": "0586e97ade6134007873ff3cea8f2be094df1adeb6f935d06290ceb8d6760648"
+    },
+    "verify_committed_package08_proofs.py": {
+      "bytes": 1964,
+      "sha256": "ecbb3c5c986dcee3a2abd94f940dc2daf96bdf00317010cd3aed67666e6cce43"
+    }
+  }
+}

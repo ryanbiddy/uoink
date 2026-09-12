@@ -370,11 +370,14 @@ failed/partial observation and remaining action.
 
 ## Package-08 review kit
 
-The accompanying review ZIP pairs this installer with the matching notes,
-receipt tools and evidence. Its `.receipt.json` records the actual ZIP hash,
-size and source commits; BUNDLE-SHA256.json binds every payload. It retains
-release_ready=false. Creation and transport verification are recorded separately
-in RELEASE-DELIVERY-08-2026-09-12.md.
+The verified kit is `build/Uoink-Living-Library-3-8-0-Review-Kit-08-2026-09-12.zip`,
+438,081,038 bytes, SHA-256
+`343afc763b724c2f5030e4b856081639b2dbf297006796836d1b43a7fa236130`.
+All 3,659 ZIP and extracted payload hashes match. Review source `e1be40e` binds
+build/validation source `b8e44fb`. It pairs the installer with matching notes,
+receipt tools and evidence, with release_ready=false. Its external `.receipt.json`
+and BUNDLE-SHA256.json bind the archive and payloads. This paragraph follows the
+immutable ZIP. See [the delivery record](RELEASE-DELIVERY-08-2026-09-12.md).
 
 ## Historical review kit (package-07)
 

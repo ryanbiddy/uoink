@@ -1,0 +1,23 @@
+{
+  "source": "e1be40eba295090c7a6faa6f78501670e451a767",
+  "result": "PASS",
+  "payloads": 1397,
+  "proofs": {
+    "ryan-final-partitioned-06-2026-09-12": 44,
+    "candidate-package-08-2026-09-12": 84,
+    "repaired-lock-audit-2026-09-11": 35,
+    "ryan-agent-installed-08-2026-09-12": 525,
+    "installed08-instrument-review-2026-09-12": 51,
+    "sqlite-deadline-cleanup-2026-09-12": 21,
+    "ryan-installed-client-06-2026-09-12": 251,
+    "media-detail12-astra-review-2026-09-12": 108,
+    "native-note12-astra-review-2026-09-12": 45,
+    "native-gui-package07-2026-09-12": 48,
+    "native-gui-package08-2026-09-12": 75,
+    "native-client-isolation12-astra-review-2026-09-12": 21,
+    "security-repair-gemini-2026-09-12": 35,
+    "security12-astra-review-2026-09-12": 28,
+    "security-backport12-astra-review-2026-09-12": 26
+  },
+  "scope": "Git blob bytes, not only working-tree files. Any ignored paths are staged explicitly after disk-seal verification; old failures retained separately."
+}
