@@ -42,6 +42,13 @@ Apply stays false. Do not edit the original P4 chapter fixture: a separate
 diagnosis found missing published media_depth in its sidecar, and that
 incomplete setup cannot qualify as a successful chapter-export observation.
 
+Integrator execution note: the native verification environment itself loads
+the historical parent guard at interpreter startup. The first old-code test
+launch omitted IG_FORBIDDEN_LIVE and stopped with KeyError before loading the
+runner or collecting tests. Set the explicit forbidden live path before starting
+that interpreter, as the complete-tree runner already does. Keep that refused
+launch separate from the subsequent old-code regression result.
+
 Deliver the narrow diff, new tests and a short review explaining behavior,
 counts and any remaining concern. The integrator owes a new complete tree,
 package and installed qualification after this production repair.
