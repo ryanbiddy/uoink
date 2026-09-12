@@ -86,18 +86,18 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; native GUI defects under repair, security evidence reviewed)
+## State at handoff (updated 2026-09-12; note repair integrated, package-08 qualification next)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 installed and source-bound; documentary delivery next |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Original historical AT6 exit disposition remains Ryan's; older partial receipts stay partial |
-| 4 | Package-07 installed protocol and actual client observations reviewed; actual native Uoink dashboard now observed | Existing P4 counts and 20/20 actual-client pairs remain; native note save/read succeeds but its type and asset-health presentation fail | Gemini d8840cdd repairs the observed display defects. Claude Desktop exposed no targetable window and exited 0; no client GUI credit |
+| 4 | Package-07 installed protocol/client and actual native Uoink observations reviewed; note display repair integrated at d2caac5 | 60 focused checks pass in both roots, including 16 new regressions. Original worker false-success handling rejected and corrected | Package-08 installed/native qualification next. Claude Desktop exposed no targetable window and exited 0; no client GUI credit |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
 | Security | Fresh Gemini evidence independently reviewed at a6b9cf0 | 19 raw entries / 15 alias groups remain. 35 upstream payloads verified; 21 existing cases pass in both roots. Four proposed worker tests rejected | No verified compatible drop-in dependency repair. Keep the security hold; broader migration needs a separate qualified scope |
-| Integration | Package-07 full tree remains 2,540 pass / 1 historical failure / 2 skips; its kit and final backup at 0a1f923 are verified | Actual native dashboard found new product display defects after that qualification | Integrate d8840cdd if verified, then run a fresh full tree and build/install/reseal package-08. Preserve package-07 failures |
+| Integration | Package-07 full tree remains 2,540 pass / 1 historical failure / 2 skips; its kit and final backup at 0a1f923 are verified | d2caac5 changes packaged note/dashboard source; prior qualification cannot cover it | Follow NOTE-REPAIRED-CANDIDATE-QUALIFICATION-2026-09-12.md: fresh full tree, package-08 build/install/native check, notes/kit/backup |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -154,10 +154,13 @@ This sequence supersedes the completed delivery instructions below.
    native tools are unavailable. Actual installed dashboard evidence is under
    Agent Install 07/native-gui01/dashboard. A new native note saves and reads
    exactly, but shows "note video" and a false missing-media warning. Gemini
-   d8840cdd is running NATIVE-NOTE-DISPLAY-REPAIR-BRIEF-2026-09-12.md.
-3. Verify that worker's behavioral regressions on original and repaired source,
-   named suites in its worktree, raw diff/three-way integration and checkout
-   suites. Existing tests and fixtures stay unchanged. Then freeze a commit,
+   d8840cdd is integrated at d2caac5 after Astra rejected its fixture-flag health
+   shortcut and unconditional readiness. The original native evidence is sealed
+   at 2531017: 48 payloads, including ten original PNGs. The corrected patch has
+   60 passes in both roots, 16 new cases and 45 review payloads.
+3. Follow NOTE-REPAIRED-CANDIDATE-QUALIFICATION-2026-09-12.md. The focused repair,
+   raw diff/three-way apply and checkout checks are complete. Existing tests and
+   fixtures are unchanged. Freeze this handoff commit,
    run the corrected complete tree, build package-08 and qualify its installed
    source plus the native note flow. Update notes/runbook/kit and back up only
    cc/living-library. Never reuse a consumed profile or claim a prior failure
@@ -3070,3 +3073,21 @@ must not be described as natural exit-zero observations. Guard bytes restored.
 The isolated Claude Desktop attempt exposed no window and ended naturally with
 exit 0, so client GUI acceptance remains incomplete. Sign-in was not reached.
 Do not reuse any earlier authentication code or copy credentials.
+
+### 2026-09-12 — Native note repair review and qualification boundary
+
+Astra integrated Control Room Gemini d8840cdd at d2caac5 after correcting two
+false-success paths: synthetic/boolean markers no longer prove note text, and
+note readiness follows the actual text load. The original worker had 54 passing
+checks but nine failures under the new negative probes. The corrected patch has
+60 passes in each root. Original source had ten failures under the 16 new cases.
+The worker's ten-test proposal is rejected as a module; its exact bytes and all
+attempts remain in the 45-payload native-note12 review seal. No existing tests
+changed. Read NATIVE-NOTE-DISPLAY-INTEGRATOR-REPAIR-2026-09-12.md, including the
+pre-pytest missing-guard-variable launch and CRLF transport-check diagnoses.
+
+Native package-07 evidence at 2531017 contains ten actual Uoink window PNGs and
+48 sealed payloads. Native save/read worked; its display failures remain recorded.
+Claude Desktop exposed no window, so its exit 0 gives no GUI credit. All owned
+native jobs are stopped and guards restored. New source requires package-08 and
+a new installed native note observation; the package-07 kit remains historical.
