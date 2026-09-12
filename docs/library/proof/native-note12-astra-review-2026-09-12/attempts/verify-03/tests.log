@@ -1,0 +1,131 @@
+.................................................FFFFF                   [100%]
+================================== FAILURES ===================================
+_______________ test_node_media_label_for_all_canonical_sources _______________
+tests\test_native_note_display_regressions.py:308: in test_node_media_label_for_all_canonical_sources
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "mediaLabelFor", **payload}))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":"note"}
+E     STDERR:
+E     evalmachine.<anonymous>:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.<anonymous>:4804:34)
+E         at renderLibraryUnavailable (evalmachine.<anonymous>:4882:7)
+E         at evalmachine.<anonymous>:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.<anonymous>:4882:7)\n    at evalmachine.<anonymous>:8971:7\n\nNode.js v24.18.0\n').returncode
+______________________ test_node_health_exception_logic _______________________
+tests\test_native_note_display_regressions.py:322: in test_node_health_exception_logic
+    out_clean = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":""}
+E     STDERR:
+E     evalmachine.<anonymous>:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.<anonymous>:4804:34)
+E         at renderLibraryUnavailable (evalmachine.<anonymous>:4882:7)
+E         at evalmachine.<anonymous>:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.<anonymous>:4882:7)\n    at evalmachine.<anonymous>:8971:7\n\nNode.js v24.18.0\n').returncode
+_______________________ test_node_card_html_native_note _______________________
+tests\test_native_note_display_regressions.py:383: in test_node_card_html_native_note
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "cardHtml", "row": note_row}))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":"\n        <article class=\"uoink-card non-youtube\" data-card-id=\"note_12345\" data-folder=\"\" data-video-id=\"note_12345\" tabindex=\"0\" role=\"button\" aria-label=\"Open SYNTHETIC native GUI note 07\">\n          <div class=\"thumb\">\n            <span class=\"duration\">--:--</span>\n            <span class=\"platform-chip \">Note</span>\n            <span class=\"source-type-chip\">note</span>\n            \n            <button class=\"hook-chip\" type=\"button\" data-hook-explain=\"other\" title=\"What's a other hook?\">other</button>\n            <img alt=\"\" data-thumb-for=\"note_12345\" class=\"hidden\">\n          </div>\n          <div class=\"card-body\">\n            <div class=\"card-title\">SYNTHETIC native GUI note 07</div>\n            <div class=\"card-source\">Note &middot; note</div>\n            <div class=\"card-meta\">You</div>\n            <div class=\"card-foot\">\n              <span class=\"topic-chip\">Uncategorized</span>\n              <span class=\"age\">18m ago</span>\n            </div>\n            \n            <button class=\"button ghost card-write\" type=\"button\" data-write-from=\"note_12345\" aria-label=\"Write from SYNTHETIC native GUI note 07\">Write from this</button>\n          </div>\n        </article>\n      "}
+E     STDERR:
+E     evalmachine.<anonymous>:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.<anonymous>:4804:34)
+E         at renderLibraryUnavailable (evalmachine.<anonymous>:4882:7)
+E         at evalmachine.<anonymous>:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.<anonymous>:4882:7)\n    at evalmachine.<anonymous>:8971:7\n\nNode.js v24.18.0\n').returncode
+___________________ test_node_yoink_facts_html_source_aware ___________________
+tests\test_native_note_display_regressions.py:403: in test_node_yoink_facts_html_source_aware
+    out_note = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     
+E     STDERR:
+E     [eval]:68
+E       ctx.state.selectedYoinkMarkdown = input.markdown || "";
+E                                       ^
+E     
+E     TypeError: Cannot set properties of undefined (setting 'selectedYoinkMarkdown')
+E         at [eval]:68:35
+E         at runScriptInThisContext (node:internal/vm:219:10)
+E         at node:internal/process/execution:451:12
+E         at [eval]-wrapper:6:24
+E         at runScriptInContext (node:internal/process/execution:449:60)
+E         at evalFunction (node:internal/process/execution:283:30)
+E         at evalTypeScript (node:internal/process/execution:295:3)
+E         at node:internal/main/eval_string:71:3
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n').returncode
+_____________________ test_node_render_yoink_detail_note ______________________
+tests\test_native_note_display_regressions.py:462: in test_node_render_yoink_detail_note
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     
+E     STDERR:
+E     [eval]:75
+E       ctx.state.selectedYoink = input.row;
+E                               ^
+E     
+E     TypeError: Cannot set properties of undefined (setting 'selectedYoink')
+E         at [eval]:75:27
+E         at runScriptInThisContext (node:internal/vm:219:10)
+E         at node:internal/process/execution:451:12
+E         at [eval]-wrapper:6:24
+E         at runScriptInContext (node:internal/process/execution:449:60)
+E         at evalFunction (node:internal/process/execution:283:30)
+E         at evalTypeScript (node:internal/process/execution:295:3)
+E         at node:internal/main/eval_string:71:3
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n").returncode
+=========================== short test summary info ===========================
+FAILED tests/test_native_note_display_regressions.py::test_node_media_label_for_all_canonical_sources
+FAILED tests/test_native_note_display_regressions.py::test_node_health_exception_logic
+FAILED tests/test_native_note_display_regressions.py::test_node_card_html_native_note
+FAILED tests/test_native_note_display_regressions.py::test_node_yoink_facts_html_source_aware
+FAILED tests/test_native_note_display_regressions.py::test_node_render_yoink_detail_note
+5 failed, 49 passed in 4.00s

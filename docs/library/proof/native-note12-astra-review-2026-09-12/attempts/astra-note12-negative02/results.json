@@ -1,0 +1,23 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_note_readiness_truth.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\astra-note12-negative02-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\astra-note12-negative02\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\astra-note12-negative02\\tests.log"
+  }
+]

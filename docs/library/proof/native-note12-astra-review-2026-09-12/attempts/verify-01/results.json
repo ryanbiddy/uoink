@@ -1,0 +1,27 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_notes_capture.py",
+      "tests/test_dashboard_v324_ui.py",
+      "tests/test_dashboard_capture_outcomes.py",
+      "tests/test_dashboard_sources_api.py",
+      "tests/test_dashboard_browser_recovery_ux.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\verify-01-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\verify-01\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\d8840cdd-c3a\\gemini\\_scratch\\verify-01\\tests.log"
+  }
+]

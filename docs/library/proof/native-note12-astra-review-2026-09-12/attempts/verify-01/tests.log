@@ -1,0 +1,18 @@
+..F...F.....................................                             [100%]
+================================== FAILURES ===================================
+_________________ test_persist_note_writes_under_output_root __________________
+tests\test_notes_capture.py:110: in test_persist_note_writes_under_output_root
+    _assert(corpus.exists(), f"corpus file exists: {corpus}")
+tests\test_notes_capture.py:49: in _assert
+    raise AssertionError(msg)
+E   AssertionError: corpus file exists: C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d8840cdd-c3a\gemini\_scratch\verify-01\tmp47c5fvh6\Notes\kubernetes-autoscaling-notes-for-the-pla-228bb332\kubernetes-autoscaling-notes-for-the-pla-228bb332.md
+_________________ test_route_persists_and_surfaces_everywhere _________________
+tests\test_notes_capture.py:261: in test_route_persists_and_surfaces_everywhere
+    _assert(mcp_corpus.get("ok") is not False
+tests\test_notes_capture.py:49: in _assert
+    raise AssertionError(msg)
+E   AssertionError: MCP must read the note corpus: {'ok': False, 'error': 'uoink not found'}
+=========================== short test summary info ===========================
+FAILED tests/test_notes_capture.py::test_persist_note_writes_under_output_root
+FAILED tests/test_notes_capture.py::test_route_persists_and_surfaces_everywhere
+2 failed, 42 passed in 3.79s

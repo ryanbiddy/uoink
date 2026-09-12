@@ -1,0 +1,81 @@
+.....FFFFFFFFFF.                                                         [100%]
+================================== FAILURES ===================================
+_________________ test_metadata_is_not_note_content[payload5] _________________
+tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok
+_________________ test_real_note_capture_enrichment_and_card __________________
+tests\test_note_readiness_truth.py:36: in test_real_note_capture_enrichment_and_card
+    assert fresh['transcript']=='ok'
+E   AssertionError: assert 'missing' == 'ok'
+E     
+E     - ok
+E     + missing
+___________________ test_note_missing_text_stays_unhealthy ____________________
+tests\test_note_readiness_truth.py:50: in test_note_missing_text_stays_unhealthy
+    assert health['screenshots']==health['comments']=='skipped'
+E   AssertionError: assert 'missing' == 'skipped'
+E     
+E     - skipped
+E     + missing
+__________ test_note_readiness_tracks_text_result[loading--checking] __________
+tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'checking saved files' == 'checking'
+E     
+E     - checking
+E     + checking saved files
+__________ test_note_readiness_tracks_text_result[ready-AMBER-ready] __________
+tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'checking saved files' == 'ready'
+E     
+E     - ready
+E     + checking saved files
+____________ test_note_readiness_tracks_text_result[empty--empty] _____________
+tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'checking saved files' == 'empty'
+E     
+E     - empty
+E     + checking saved files
+______ test_note_readiness_tracks_text_result[no_markdown--unavailable] _______
+tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'checking saved files' == 'unavailable'
+E     
+E     - unavailable
+E     + checking saved files
+______ test_note_readiness_tracks_text_result[unavailable--unavailable] _______
+tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'checking saved files' == 'unavailable'
+E     
+E     - unavailable
+E     + checking saved files
+_______________ test_note_has_no_media_controls_or_placeholders _______________
+tests\test_note_readiness_truth.py:65: in test_note_has_no_media_controls_or_placeholders
+    assert 'Saved note <em>source.</em>' in result['heading']
+E   AssertionError: assert 'Saved note <em>source.</em>' in 'Saved note video <em>source.</em>'
+_____________________________ test_source_labels ______________________________
+tests\test_note_readiness_truth.py:77: in test_source_labels
+    assert render('mediaLabelFor',row={'source_type':st,'platform':platform})['result']==label
+E   AssertionError: assert 'note video' == 'note'
+E     
+E     - note
+E     + note video
+=========================== short test summary info ===========================
+FAILED tests/test_note_readiness_truth.py::test_metadata_is_not_note_content[payload5]
+FAILED tests/test_note_readiness_truth.py::test_real_note_capture_enrichment_and_card
+FAILED tests/test_note_readiness_truth.py::test_note_missing_text_stays_unhealthy
+FAILED tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[loading--checking]
+FAILED tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[ready-AMBER-ready]
+FAILED tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[empty--empty]
+FAILED tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[no_markdown--unavailable]
+FAILED tests/test_note_readiness_truth.py::test_note_readiness_tracks_text_result[unavailable--unavailable]
+FAILED tests/test_note_readiness_truth.py::test_note_has_no_media_controls_or_placeholders
+FAILED tests/test_note_readiness_truth.py::test_source_labels - AssertionErro...
+10 failed, 6 passed in 1.25s

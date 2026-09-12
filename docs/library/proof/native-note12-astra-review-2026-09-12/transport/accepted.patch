@@ -1,0 +1,341 @@
+diff --git a/assets/dashboard/index.html b/assets/dashboard/index.html
+index dba4556..34985c8 100644
+--- a/assets/dashboard/index.html
++++ b/assets/dashboard/index.html
+@@ -6396,6 +6396,17 @@
+       return Boolean(row && row.is_live) || Boolean(sidecar.is_live) || values.includes("live");
+     }
+ 
++    function isNoteContent(row, sidecar = {}) {
++      const meta = metadataOf(row);
++      const st = String(firstValue(
++        row && row.source_type,
++        sidecar.source_type,
++        meta.source_type,
++      ) || "").toLowerCase();
++      const pf = platformOf(row, sidecar);
++      return st === "note" || pf === "note";
++    }
++
+     function durationOf(row, sidecar = {}) {
+       const meta = metadataOf(row);
+       return Number(firstValue(row && row.duration_seconds, sidecar.duration_seconds, meta.duration_seconds, meta.duration));
+@@ -6507,7 +6518,21 @@
+     function mediaLabelFor(row, sidecar = {}) {
+       if (isPodcastContent(row, sidecar)) return "podcast";
+       if (isLiveContent(row, sidecar)) return "live stream";
++      const meta = metadataOf(row);
++      const st = String(firstValue(
++        row && row.source_type,
++        sidecar.source_type,
++        meta.source_type,
++      ) || "").toLowerCase();
++      if (st === "note") return "note";
++      if (st === "image") return "image";
++      if (st === "page") return "page";
++      if (st === "x_article") return "article";
++      if (st === "x_thread") return "post";
++      if (st === "reddit_thread") return "thread";
+       const platform = platformOf(row, sidecar);
++      if (platform === "note") return "note";
++      if (platform === "image") return "image";
+       return platform === "youtube" ? "video" : `${platform} video`;
+     }
+ 
+@@ -6650,9 +6675,17 @@
+       `;
+     }
+ 
++    function noteReadinessLabel() {
++      if (state.selectedYoinkMarkdown) return "ready";
++      if (state.selectedYoinkMarkdownState === "loading") return "checking";
++      if (state.selectedYoinkMarkdownState === "empty") return "empty";
++      return state.selectedYoinkMarkdownError || "unavailable";
++    }
++
+     function yoinkFactsHtml(row, sidecar = {}) {
++      const isNote = isNoteContent(row, sidecar);
+       const speakers = speakerNames(sidecar);
+-      const markdownState = state.selectedYoinkMarkdown
++      const markdownState = isNote ? noteReadinessLabel() : state.selectedYoinkMarkdown
+         ? "ready"
+         : state.selectedYoinkMarkdownState === "no_markdown"
+           ? "needs re-capture"
+@@ -6661,16 +6694,24 @@
+             : (state.selectedYoinkMarkdownError || "not loaded");
+       const facts = [
+         ["Platform", platformOf(row, sidecar)],
+-        ["Duration", fmtDuration(durationOf(row, sidecar))],
+-        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
+-        ["Topic", firstValue(row && row.topic, "Uncategorized")],
+-        ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
+-        ["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))],
+-        ["Re-transcription", state.retranscribeStatus || "ready"],
+-        ["Transcript file", markdownState],
+-        ["Source", sourceUrlOf(row, sidecar) || "not stored"],
+       ];
+-      if (state.selectedYoinkSidecarError) {
++      if (!isNote) {
++        facts.push(["Duration", fmtDuration(durationOf(row, sidecar))]);
++      }
++      facts.push(
++        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
++        ["Topic", firstValue(row && row.topic, "Uncategorized")]
++      );
++      if (!isNote) {
++        facts.push(["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"]);
++        facts.push(["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))]);
++        facts.push(["Re-transcription", state.retranscribeStatus || "ready"]);
++      }
++      facts.push([isNote ? "Note file" : "Transcript file", markdownState]);
++      facts.push(["Source", sourceUrlOf(row, sidecar) || "not stored"]);
++      if (isNote) {
++        facts.push(["Saved details", noteReadinessLabel()]);
++      } else if (state.selectedYoinkSidecarError) {
+         facts.push(["Saved details", state.selectedYoinkSidecarError]);
+       } else {
+         facts.push(["Saved details", state.selectedYoinkSidecar ? "ready" : "checking"]);
+@@ -6687,15 +6728,17 @@
+       const row = state.selectedYoink;
+       const sidecar = state.selectedYoinkSidecar || {};
+       const hasRow = Boolean(row);
++      const isNote = isNoteContent(row, sidecar);
+       const sourceUrl = sourceUrlOf(row, sidecar);
+       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
+       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
+-      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
++      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
+       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
+       els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
+-      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
++      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
+       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
+-      els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
++      els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
++      els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
+       if (!hasRow) {
+         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
+         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
+@@ -6718,7 +6761,7 @@
+         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
+         fmtDuration(durationOf(row, sidecar)),
+       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "checking saved files";
++      els.yoinkFactMeta.textContent = isNote ? noteReadinessLabel() : (state.selectedYoinkSidecar ? "ready" : "checking saved files");
+       const speakerHtml = speakers.length
+         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
+         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
+@@ -6727,17 +6770,19 @@
+           ${waveformHtml(row, sidecar)}
+           ${speakerHtml}
+         `
+-        : screenshotGridHtml(row, sidecar);
++        : isNote
++          ? ""
++          : screenshotGridHtml(row, sidecar);
+       els.yoinkDetail.innerHTML = `
+-        <div class="yoink-hero ${podcast ? "podcast" : ""}">
++        <div class="yoink-hero ${podcast ? "podcast" : isNote ? "note" : ""}">
+           ${mediaChipsHtml(row, sidecar)}
+           ${mediaBody}
+         </div>
+         ${diarizationTimelineHtml(row, sidecar)}
+         <div class="yoink-section">
+           <div class="yoink-section-head">
+-            <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
+-            <div class="localhost">${htmlEscape(transcriptSegments(sidecar).length)} segments</div>
++            <div class="panel-title">${podcast ? "Episode transcript" : isNote ? "Note" : "Transcript preview"}</div>
++            <div class="localhost">${isNote ? "saved note" : `${htmlEscape(transcriptSegments(sidecar).length)} segments`}</div>
+           </div>
+           ${transcriptPreviewHtml(sidecar, podcast)}
+         </div>
+@@ -6806,7 +6851,8 @@
+       state.retranscribing = false;
+       renderYoinkDetail();
+       switchTab("yoink");
+-      const sidecarPath = sidecarPathForRow(row);
++      const isNote = isNoteContent(row);
++      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
+       const videoId = videoIdOf(row);
+       const tasks = [];
+       if (sidecarPath) {
+diff --git a/notes.py b/notes.py
+index 75d98f6..98920ba 100644
+--- a/notes.py
++++ b/notes.py
+@@ -123,6 +123,27 @@ def build_note(text: str, title: str | None = None,
+     }
+ 
+ 
++def compute_note_health(sidecar: dict) -> dict:
++    """Check actual note text; type tags and fixture markers are not content."""
++    def has_text(value):
++        return isinstance(value, str) and bool(value.strip())
++
++    present = any(has_text(sidecar.get(key)) for key in
++                  ("note", "text", "markdown", "body", "transcript"))
++    transcript = sidecar.get("transcript")
++    if isinstance(transcript, list):
++        present = present or any(isinstance(segment, dict) and
++                                 has_text(segment.get("text"))
++                                 for segment in transcript)
++    return {
++        "transcript": "ok" if present else "missing",
++        "screenshots": "skipped",
++        "comments": "skipped",
++        "hook": "skipped",
++        "comment_intelligence": "skipped",
++    }
++
++
+ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+                  subfolder: str = "Notes",
+                  topic_classifier=None) -> str | None:
+@@ -161,6 +182,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+             log.warning("persist_note topic classify failed: %s", e)
+             topic = None
+ 
++    health = compute_note_health({"note": md})
+     corpus_path = None
+     sidecar_path = None
+     if data_root is not None:
+@@ -179,6 +201,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+             "extraction_engine": EXTRACTION_ENGINE,
+             "yoinked_at": yoinked_at,
+             "extracted_at": yoinked_at,
++            "health": health,
+         }, indent=2, ensure_ascii=False), encoding="utf-8")
+ 
+     metadata_json = json.dumps({
+@@ -202,6 +225,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+             "yoinked_at": yoinked_at,
+             "corpus_path": str(corpus_path) if corpus_path else None,
+             "sidecar_path": str(sidecar_path) if sidecar_path else None,
++            "health_score_json": json.dumps(health, ensure_ascii=False),
+             "metadata_json": metadata_json,
+             "source_type": SOURCE_TYPE,
+         }, content=md[:65000])
+diff --git a/server.py b/server.py
+index 69133a4..a79c187 100644
+--- a/server.py
++++ b/server.py
+@@ -2285,11 +2285,16 @@ def _source_deep_link(source_url: str, seconds) -> str:
+ 
+ 
+ def compute_health(sidecar: dict) -> dict:
+-    """A per-video extraction health snapshot (A5), computed at extraction
++    """A per-source extraction health snapshot (A5), computed at extraction
+     time. Stored on the sidecar under `health` and in the index. The
+     comments / hook / comment-intelligence background workers finish *after*
+     this snapshot, so those fields report in-progress status, not the final
+     result."""
++    source_type = str(sidecar.get("source_type") or "").strip().lower()
++    platform = str(sidecar.get("platform") or "").strip().lower()
++    if source_type == "note" or platform == "note":
++        return notes.compute_note_health(sidecar)
++
+     comments = sidecar.get("comments")
+     comments_status = sidecar.get("comments_status") or "unknown"
+     if isinstance(comments, list) and len(comments) >= 5:
+@@ -10748,6 +10753,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
+         if sidecar_path and Path(sidecar_path).exists():
+             try:
+                 live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
++                if not live.get("source_type") and r.get("source_type"):
++                    live["source_type"] = r.get("source_type")
++                if not live.get("platform") and r.get("platform"):
++                    live["platform"] = r.get("platform")
+                 health = compute_health(live)
+             except (OSError, json.JSONDecodeError):
+                 pass
+diff --git a/tests/test_note_readiness_truth.py b/tests/test_note_readiness_truth.py
+new file mode 100644
+index 0000000..789b7a8
+--- /dev/null
++++ b/tests/test_note_readiness_truth.py
+@@ -0,0 +1,85 @@
++"""Real note capture and renderer states, including false-success regressions."""
++import json
++from pathlib import Path
++import subprocess
++import pytest
++import index as index_mod
++import notes
++import server
++
++ROOT=Path(__file__).resolve().parents[1]
++# DOM adapter derived from the rejected worker module; production JS executes unchanged.
++HARNESS='\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst page = fs.readFileSync(\'assets/dashboard/index.html\', \'utf8\');\nconst scriptStart = page.indexOf(\'<script>\') + 8;\nconst initCall = page.indexOf(\'    init().catch(\');\nconst scriptCode = page.slice(scriptStart, initCall > 0 ? initCall : undefined);\n\nfunction createContext(initialState = {}, initialEls = {}) {\n  const elements = {};\n  const getEl = (id) => {\n    if (!elements[id]) {\n      elements[id] = {\n        id,\n        disabled: false,\n        textContent: \'\',\n        innerHTML: \'\',\n        title: \'\',\n        dataset: {},\n        classList: {\n          add: () => {},\n          remove: () => {},\n          contains: () => false,\n          toggle: () => {},\n        },\n        setAttribute: () => {},\n        getAttribute: () => null,\n        querySelectorAll: () => [],\n      };\n    }\n    return elements[id];\n  };\n\n  const fakeDocument = {\n    getElementById: (id) => getEl(id),\n    querySelector: (sel) => null,\n    querySelectorAll: (sel) => [],\n  };\n\n  const ctx = {\n    document: fakeDocument,\n    window: { addEventListener: () => {} },\n    navigator: { clipboard: { writeText: () => Promise.resolve() } },\n    console,\n    fetch: () => Promise.reject(new Error("network forbidden")),\n    setTimeout: () => {},\n    clearTimeout: () => {},\n    URL: { createObjectURL: () => "blob:mock", revokeObjectURL: () => {} },\n  };\n  vm.createContext(ctx);\n  // Execute the dashboard script in the context and bind state and els to globalThis\n  vm.runInContext(scriptCode + \'\\n;globalThis.state = state; globalThis.els = els;\', ctx);\n  return ctx;\n}\n\nconst input = JSON.parse(fs.readFileSync(0, \'utf8\'));\nconst action = input.action;\nconst ctx = createContext();\n\nif (action === "mediaLabelFor") {\n  const result = ctx.mediaLabelFor(input.row, input.sidecar || {});\n  process.stdout.write(JSON.stringify({ result }));\n} else if (action === "healthException") {\n  const result = ctx.healthException(input.health);\n  process.stdout.write(JSON.stringify({ result }));\n} else if (action === "cardHtml") {\n  const result = ctx.cardHtml(input.row);\n  process.stdout.write(JSON.stringify({ result }));\n} else if (action === "yoinkFactsHtml") {\n  ctx.state.selectedYoinkMarkdown = input.markdown || "";\n  ctx.state.selectedYoinkMarkdownState = input.markdownState || "ready";\n  ctx.state.selectedYoinkSidecar = input.sidecar || null;\n  ctx.state.selectedYoinkSidecarError = input.sidecarError || "";\n  const result = ctx.yoinkFactsHtml(input.row, input.sidecar || {});\n  process.stdout.write(JSON.stringify({ result }));\n} else if (action === "renderYoinkDetail") {\n  ctx.state.selectedYoink = input.row;\n  ctx.state.selectedYoinkSidecar = input.sidecar || null;\n  ctx.state.selectedYoinkMarkdown = input.markdown || "";\n  ctx.state.selectedYoinkMarkdownState = input.markdownState || "ready";\n  ctx.renderYoinkDetail();\n  const heading = ctx.els.yoinkHeading.innerHTML;\n  const subhead = ctx.els.yoinkSubhead.textContent;\n  const factMeta = ctx.els.yoinkFactMeta.textContent;\n  const detail = ctx.els.yoinkDetail.innerHTML;\n  const retranscribeDisabled = ctx.els.yoinkRetranscribe.disabled;\n  const retranscribeTitle = ctx.els.yoinkRetranscribe.title;\n  process.stdout.write(JSON.stringify({\n    heading, subhead, factMeta, detail, retranscribeDisabled, retranscribeTitle\n  }));\n} else {\n  throw new Error("Unknown action: " + action);\n}\n'
++
++def render(action, **values):
++    result=subprocess.run(['node','-e',HARNESS], input=json.dumps(dict(action=action,**values)), cwd=ROOT, text=True, capture_output=True, timeout=15)
++    assert result.returncode==0,result.stderr
++    return json.loads(result.stdout)
++
++NOTE={'video_id':'note_review','source_type':'note','platform':'note','title':'Saved idea','author':'You'}
++
++@pytest.mark.parametrize('payload',[{'synthetic_fixture':True},{'note':True},{'text':True},{'note':'  \n\t'},{'markdown':[]},{'transcript':[{'start':0}]}])
++def test_metadata_is_not_note_content(payload):
++    health=server.compute_health(dict(source_type='note',platform='note',**payload))
++    assert health['transcript']=='missing'
++    assert 'Needs attention' in render('healthException',health=health)['result']
++
++def test_real_note_capture_enrichment_and_card(tmp_path):
++    idx=index_mod.Index.open(tmp_path/'isolated.db')
++    try:
++        built=notes.build_note(text='The saved word is AMBER.',title='Saved idea')
++        vid=notes.persist_note(idx,built,data_root=tmp_path/'output')
++        row=idx.get_yoink(vid)
++        assert 'The saved word is AMBER.' in Path(row['corpus_path']).read_text(encoding='utf8')
++        sidecar=json.loads(Path(row['sidecar_path']).read_text(encoding='utf8'))
++        fresh=server.compute_health(sidecar)
++        assert fresh['transcript']=='ok'
++        assert all(fresh[k]=='skipped' for k in ('screenshots','comments','hook','comment_intelligence'))
++        assert json.loads(row['health_score_json'])==fresh==sidecar['health']
++        enriched=server._enrich_yoink_rows(idx,[row])[0]
++        assert enriched['health']==fresh
++        card=render('cardHtml',row=enriched)['result']
++        assert 'Needs attention' not in card
++        assert 'source-type-chip">note<' in card
++    finally:
++        idx.close()
++
++def test_note_missing_text_stays_unhealthy():
++    health=server.compute_health({'source_type':'note','note':''})
++    assert health['transcript']=='missing'
++    assert health['screenshots']==health['comments']=='skipped'
++    assert 'Needs attention' in render('cardHtml',row=dict(NOTE,health=health))['result']
++
++@pytest.mark.parametrize('status,text,expected',[('loading','','checking'),('ready','AMBER','ready'),('empty','','empty'),('no_markdown','','unavailable'),('unavailable','','unavailable')])
++def test_note_readiness_tracks_text_result(status,text,expected):
++    result=render('renderYoinkDetail',row=NOTE,markdown=text,markdownState=status)
++    assert result['factMeta']==expected
++    facts=render('yoinkFactsHtml',row=NOTE,markdown=text,markdownState=status)['result']
++    assert 'Saved details' in facts
++    if expected!='ready':
++        assert '>ready<' not in facts
++    assert 'needs re-capture' not in facts
++
++def test_note_has_no_media_controls_or_placeholders():
++    result=render('renderYoinkDetail',row=NOTE,markdown='AMBER',markdownState='ready')
++    assert 'Saved note <em>source.</em>' in result['heading']
++    assert 'screenshot-grid' not in result['detail']
++    assert 'Video screenshots appear here' not in result['detail']
++    assert result['retranscribeDisabled'] is True
++    facts=render('yoinkFactsHtml',row=NOTE,markdown='AMBER')['result']
++    assert 'Note file' in facts
++    for title in ('Duration','Speakers','Transcript checker','Re-transcription'):
++        assert title not in facts
++
++def test_source_labels():
++    cases=[('note','note','note'),('note','x','note'),('image','image','image'),('page','web','page'),('x_article','x','article'),('x_thread','x','post'),('reddit_thread','reddit','thread'),('video','youtube','video'),('episode','podcast','podcast')]
++    for st,platform,label in cases:
++        assert render('mediaLabelFor',row={'source_type':st,'platform':platform})['result']==label
++    assert render('mediaLabelFor',row={'platform':'youtube','is_live':True})['result']=='live stream'
++
++def test_video_health_and_fields_remain_applicable():
++    health=server.compute_health({'source_type':'video','transcript':None,'screenshots':[],'comments':[]})
++    assert health['transcript']==health['screenshots']==health['comments']=='missing'
++    facts=render('yoinkFactsHtml',row={'source_type':'video','platform':'youtube'})['result']
++    for title in ('Duration','Speakers','Transcript checker','Re-transcription'):
++        assert title in facts

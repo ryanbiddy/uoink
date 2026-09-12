@@ -1,0 +1,7 @@
+2026-09-12: astra-note12-repair-worker01 did not start the verifier or pytest.
+Exit 1. The inherited ig-full-as9/sitecustomize.py audit hook raised
+KeyError: IG_FORBIDDEN_LIVE before Python could open integrator_verify.py.
+The outer command omitted the required literal guard variable. No test result
+directory was created. Repair: restore IG_FORBIDDEN_LIVE to the forbidden ordinary
+index path before starting Python. The next invocation uses fresh label
+astra-note12-repair-worker02; no source or test changes accompany this retry.

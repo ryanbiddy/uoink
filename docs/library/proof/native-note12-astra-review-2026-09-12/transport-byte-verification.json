@@ -1,0 +1,30 @@
+[
+  {
+    "path": "assets/dashboard/index.html",
+    "git_sha256": "0cb3e6877791578719724485465beba442d63f359e8a8dab69a62e532893a1f4",
+    "worker_normalized_matches": true,
+    "checkout_normalized_matches": true,
+    "checkout_exact_matches": false
+  },
+  {
+    "path": "notes.py",
+    "git_sha256": "cd81c8991a9596f12e510f92dfe5b6ef119cb6c20179c935dddcf4cb6f264494",
+    "worker_normalized_matches": true,
+    "checkout_normalized_matches": true,
+    "checkout_exact_matches": false
+  },
+  {
+    "path": "server.py",
+    "git_sha256": "1e0178b72547355343b3cd9f04b3b0cf4b86c0a76fc5bfe90d35b43e71780878",
+    "worker_normalized_matches": true,
+    "checkout_normalized_matches": true,
+    "checkout_exact_matches": false
+  },
+  {
+    "path": "tests/test_note_readiness_truth.py",
+    "git_sha256": "cc3feabf8b9986619a7f879ed4ed912db4346485ebe8ef27b5fe1631bf328c5d",
+    "worker_normalized_matches": true,
+    "checkout_normalized_matches": true,
+    "checkout_exact_matches": false
+  }
+]

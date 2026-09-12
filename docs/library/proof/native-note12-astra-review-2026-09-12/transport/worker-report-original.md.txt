@@ -1,0 +1,181 @@
+# Native Note Display & Asset Health Repair: Worker Report
+
+- **Worker**: gemini
+- **Date**: 2026-09-12
+- **Task**: Repair source-aware native note presentation and asset health defects per `docs/library/NATIVE-NOTE-DISPLAY-REPAIR-BRIEF-2026-09-12.md`
+- **Worktree**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d8840cdd-c3a\gemini`
+
+---
+
+## 1. Problem Summary & Defect Diagnosis
+
+Astra observed the installed package-07 dashboard under an isolated profile on 2026-09-12. Creating a note through Sources / "Jot a note" succeeded functionally (persisted text, incremented Library count from 3 to 4, card present), but exhibited display and health defects:
+
+### Defect 1: Inappropriate Media Labeling and Fields
+- **Observed Behavior**:
+  - The native note card and detail heading displayed `"Saved note video source."` and `"note video"`.
+  - The detail view showed video screenshot placeholder (`"Screenshots unavailable. Video screenshots appear here when the source folder includes local frames."`), speaker count/labels (`"Speakers: not labeled yet"`), transcript model checker (`"Transcript checker: Balanced"`), and re-transcription actions (`"Re-transcription: ready"` / `"Re-transcribe"` button).
+  - The P4 text-only X fixture similarly displayed `"x video"` despite having `source_type="note"`.
+- **Root Cause Analysis**:
+  - In `assets/dashboard/index.html`, `mediaLabelFor(row, sidecar)` ignored non-video source types (`"note"`, `"image"`, `"page"`, etc.) and simply formatted `${platform} video` for any platform other than `"youtube"`. For a native note (`platform="note"`), this returned `"note video"`. For the P4 text-only fixture (`platform="x"`, `source_type="note"`), this returned `"x video"`.
+  - `renderYoinkDetail()` and `yoinkFactsHtml()` unconditionally rendered video screenshot grids, speaker labels, Whisper checker status, and re-transcription options regardless of whether the source was a plain text note.
+
+### Defect 2: Spurious "NEEDS ATTENTION" on Valid Note Saves
+- **Observed Behavior**:
+  - The successfully saved note card in Library displayed `"NEEDS ATTENTION"` with description `"Transcript: missing. Screenshots: missing. Comments: missing"`.
+- **Root Cause Analysis**:
+  - In `server.py`, `compute_health(sidecar)` computed health strictly as a video extraction health snapshot. It checked `sidecar.get("transcript")`, `sidecar.get("screenshots")`, and `sidecar.get("comments")`.
+  - In `notes.py`, `persist_note()` persists notes with `"note": md` (not `"transcript"`), and does not write video screenshots or comments.
+  - When `server.py`'s `_enrich_yoink_rows()` loaded the note sidecar on `/memory/search` or `/recent`, `compute_health(live)` evaluated all three fields as `"missing"`.
+  - In `assets/dashboard/index.html`, `healthException()` flagged these missing media assets as failures, incorrectly marking the clean note save with `"Needs attention"`.
+  - Screenshots and comments are inapplicable to notes. For notes, text body existence represents health; absent inapplicable assets must not produce failure states.
+
+### Defect 3: Misleading Loading State in Local Facts
+- **Observed Behavior**:
+  - In the note detail view, even after the note markdown text was loaded and file status read `"ready"`, the Local facts section displayed `"checking saved files"` and `"Saved details: saved details need another moment"`.
+- **Root Cause Analysis**:
+  - In `assets/dashboard/index.html`, `openYoinkDetail(row)` initiates `loadJsonFile(sidecarPath)`, which requests `GET /file?path=${encodeURIComponent(sidecarPath)}`.
+  - In `server.py`, `/file` is an authenticated image-only endpoint (`_resolve_served_file()` restricts MIME types to `_SERVED_IMAGE_TYPES`: `.png`, `.jpg`, `.jpeg`, `.webp`).
+  - Serving `.json` files via `/file` returns HTTP 415 `"unsupported file type"` (and for fixtures outside output root, HTTP 403 `"path escapes Uoink root"`).
+  - The `.catch()` block in `openYoinkDetail()` caught this rejection and set `state.selectedYoinkSidecarError = "saved details need another moment"`. Because `state.selectedYoinkSidecar` remained null, `els.yoinkFactMeta.textContent` stayed `"checking saved files"`.
+  - For notes, all metadata is self-contained on the row and in the note markdown; no external media sidecar fetch is needed. Omitted sidecar data for notes was causing a permanent fake loading state.
+
+---
+
+## 2. Implementation Plan
+
+1. **`server.py` (`compute_health`)**:
+   - Detect note source types (`source_type == "note"` or `platform == "note"`).
+   - For notes:
+     - Check note body content (`sidecar.get("note")`, `text`, `markdown`, or `transcript`). If non-empty, report `"transcript": "ok"`; if absent, report `"missing"`.
+     - Mark inapplicable media assets (`screenshots`, `comments`) as `"skipped"`.
+     - Keep hook and comment intelligence as `"skipped"` (or existing status).
+   - Preserve exact video, podcast, live, and image behavior.
+
+2. **`notes.py` (`persist_note`)**:
+   - Populate health snapshot on the persisted sidecar and row metadata (`health_score_json`) consistent with `compute_health`.
+   - Ensure note persistence remains standalone without importing `server.py`.
+
+3. **`assets/dashboard/index.html`**:
+   - Update `mediaLabelFor(row, sidecar)` to recognize canonical non-video source types (`note`, `image`, `page`, `x_article`, `x_thread`, `reddit_thread`). Return `"note"` for notes (repairing both native notes and the P4 text-only X fixture).
+   - Add helper `isNoteContent(row, sidecar)` to identify note uoinks.
+   - In `renderYoinkDetail()`:
+     - For notes, omit the screenshot grid (`mediaBody = ""`), so video screenshot placeholder is not shown.
+     - For notes, disable `els.yoinkRetranscribe` with appropriate tooltip.
+     - Update section heading to reflect note content (`"Note"` instead of `"Transcript preview"`, `"saved note"` instead of `"0 segments"`).
+     - In Local facts meta, display `"ready"` when note row is selected.
+   - In `yoinkFactsHtml()`:
+     - Omit video/audio specific facts for notes (`Duration`, `Speakers`, `Transcript checker`, `Re-transcription`).
+     - Label note file as `"Note file"`.
+     - Report `"Saved details": "ready"` for notes without attempting invalid sidecar fetching.
+   - In `openYoinkDetail()`:
+     - Avoid executing `loadJsonFile` on note sidecars since notes do not depend on media sidecar data.
+
+4. **Regressions & Constraints**:
+   - Keep file path containment and `/file` 403/415 refusals intact (no weakening, no fetch added).
+   - Add focused regressions verifying note display labels, facts, health computation, and Node-rendered dashboard UI.
+
+---
+
+## 3. Verification & Preserved Run Log
+
+### Run 1: `baseline-01` (Clean Baseline)
+- Command:
+  ```powershell
+  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
+  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
+  & $py $sc --root $PWD --label "baseline-01" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py
+  ```
+- Result: 44 passed in 3.55s. Exit code 0.
+
+### Run 2: `verify-01` (Failed Attempt)
+- Command: Same command with label `verify-01`.
+- Outcome: 42 passed, 2 failed. Exit code 1.
+- Failures:
+  - `tests/test_notes_capture.py::test_persist_note_writes_under_output_root`: `AssertionError: corpus file exists: ...`
+  - `tests/test_notes_capture.py::test_route_persists_and_surfaces_everywhere`: `AssertionError: MCP must read the note corpus: {'ok': False, 'error': 'uoink not found'}`
+- **Diagnosis**: In `notes.py`, when inserting `health` into `persist_note()`, the line `corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")` was accidentally omitted from the `if data_root is not None:` block. Consequently, while the sidecar JSON was created, the markdown corpus file was not written to disk.
+- **Precise Repair**: Restore `corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")` directly before `sidecar_path.write_text(...)` in `notes.py`.
+
+### Run 3: `verify-02` (Retest after Repair in `notes.py`)
+- Command:
+  ```powershell
+  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
+  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
+  & $py $sc --root $PWD --label "verify-02" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py
+  ```
+- Result: 44 passed in 3.63s. Exit code 0.
+
+### Run 4: `verify-03` (Failed Attempt: Node Test Harness Mock Defect)
+- Command: Added `tests/test_native_note_display_regressions.py` containing 5 backend Python tests and 5 Node-backed UI tests.
+- Outcome: 49 passed, 5 failed (exit code 1).
+- Failures:
+  - All 5 Node tests in `tests/test_native_note_display_regressions.py` failed with:
+    1. `TypeError: els.libraryCount.classList.toggle is not a function` during evaluation of the dashboard's top-level script.
+    2. `TypeError: Cannot set properties of undefined (setting 'selectedYoinkMarkdown')` because lexical `const state` and `const els` inside `<script>` do not attach to `ctx` in Node's `vm.runInContext()`.
+- **Diagnosis**:
+  - The Node harness attempted to evaluate the full `<script>` block including `init().catch()` at the bottom of `index.html`. `init()` triggers DOM interactions (`classList.toggle`, `setAttribute`).
+  - In Node V8 `vm`, top-level `const` variables are block-scoped to the script and not properties of the global context object.
+- **Precise Repair**:
+  - In `tests/test_native_note_display_regressions.py`, slice `scriptCode` to stop right before `init().catch(`, preventing asynchronous startup side-effects.
+  - Added `toggle`, `setAttribute`, and `getAttribute` to mock DOM element definitions.
+  - Added `globalThis.state = state; globalThis.els = els;` to the evaluated script so test assertions can configure and inspect UI state.
+
+### Run 5: `verify-04` (Clean Full Verification)
+- Command:
+  ```powershell
+  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
+  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
+  & $py $sc --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d8840cdd-c3a\gemini" --label "verify-04" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py tests/test_native_note_display_regressions.py
+  ```
+- Result: **54 passed in 4.39s**. Exit code 0.
+- XML and JSON report generated at `_scratch/verify-04/results.json`.
+
+---
+
+## 4. Behavioral Verification Summary
+
+1. **Media Labels (Defect 1)**:
+   - Native notes (`source_type="note"`, `platform="note"`) display `"note"` and `"Saved note source."` (no `"note video"`).
+   - Text-only fixtures (`source_type="note"`, `platform="x"`) display `"note"` (no `"x video"`).
+   - Canonical types (`image`, `page`, `x_article`, `x_thread`, `reddit_thread`, `podcast`, `video`, `live stream`) preserve correct source-specific labels.
+
+2. **Note Detail Panels (Defect 1 & 3)**:
+   - Screenshot grid and screenshot placeholder are omitted for notes (`mediaBody = ""`).
+   - Re-transcription action button is disabled for notes with tooltip `"Re-transcription is not applicable for notes."`.
+   - Facts panel omits `Duration`, `Speakers`, `Transcript checker`, and `Re-transcription` for notes.
+   - Note file displays as `"Note file"` with status `"ready"`.
+   - Saved details displays `"ready"` without hanging on `"checking saved files"` or attempting failed `/file` HTTP 415 requests.
+
+3. **Asset Health & Spurious Needs Attention (Defect 2)**:
+   - Notes with valid text content evaluate health as `{"transcript": "ok", "screenshots": "skipped", "comments": "skipped", ...}`.
+   - Clean note saves produce no `"Needs attention"` badge in card or detail views.
+   - Real applicable failures (missing or empty note body text) continue to trigger `transcript: "missing"` and display `"Needs attention"`.
+   - Full video and podcast asset health checking is completely preserved.
+
+4. **Security & Containment**:
+   - File-path containment in `_resolve_served_file()` remains untouched.
+   - `/file` continues to strictly refuse non-image MIME types with 415 and traversal paths with 403.
+   - Zero live index access, zero external network requests, zero paid API invocations.
+
+---
+
+## 5. Files Changed
+
+- `assets/dashboard/index.html`:
+  - Added `isNoteContent(row, sidecar)` helper.
+  - Updated `mediaLabelFor(row, sidecar)` to handle non-video source types cleanly (`note`, `image`, `page`, `x_article`, `x_thread`, `reddit_thread`).
+  - Updated `yoinkFactsHtml(row, sidecar)` to omit video/audio fields and show `"Note file"` / `"ready"`.
+  - Updated `renderYoinkDetail()` to omit screenshots, disable re-transcription, update section titles, and report fact status `"ready"`.
+  - Updated `openYoinkDetail()` to omit `loadJsonFile` requests for notes.
+- `notes.py`:
+  - Populated initial `health` snapshot in `persist_note()`: `{"transcript": "ok" if md else "missing", "screenshots": "skipped", "comments": "skipped", "hook": "skipped", "comment_intelligence": "skipped"}`.
+  - Included `health_score_json` in `idx.upsert_yoink()` call.
+  - Preserved markdown corpus file writing.
+- `server.py`:
+  - Updated `compute_health(sidecar)` to identify note uoinks and mark inapplicable assets (`screenshots`, `comments`, `hook`, `comment_intelligence`) as `"skipped"`, while checking note text body for `transcript: "ok"` / `"missing"`.
+  - Updated `_enrich_yoink_rows()` to propagate `source_type` and `platform` from row into sidecar before calling `compute_health(live)`.
+- `tests/test_native_note_display_regressions.py`:
+  - New test file with 10 regressions covering Python backend health logic, note persistence health scoring, enrichment, and Node-backed dashboard UI rendering.
+
+

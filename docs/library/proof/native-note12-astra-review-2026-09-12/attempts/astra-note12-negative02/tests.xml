@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="16" time="1.781" timestamp="2026-09-12T10:25:52.241625-07:00" hostname="Ryan-PC"><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload0]" time="0.001"><failure message="AssertionError: assert 'ok' == 'missing'&#10;  &#10;  - missing&#10;  + ok">tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload1]" time="0.001"><failure message="AssertionError: assert 'ok' == 'missing'&#10;  &#10;  - missing&#10;  + ok">tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload2]" time="0.001"><failure message="AssertionError: assert 'ok' == 'missing'&#10;  &#10;  - missing&#10;  + ok">tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload3]" time="0.000"><failure message="AssertionError: assert 'ok' == 'missing'&#10;  &#10;  - missing&#10;  + ok">tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload4]" time="0.049" /><testcase classname="tests.test_note_readiness_truth" name="test_metadata_is_not_note_content[payload5]" time="0.000"><failure message="AssertionError: assert 'ok' == 'missing'&#10;  &#10;  - missing&#10;  + ok">tests\test_note_readiness_truth.py:24: in test_metadata_is_not_note_content
+    assert health['transcript']=='missing'
+E   AssertionError: assert 'ok' == 'missing'
+E     
+E     - missing
+E     + ok</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_real_note_capture_enrichment_and_card" time="0.133" /><testcase classname="tests.test_note_readiness_truth" name="test_note_missing_text_stays_unhealthy" time="0.042" /><testcase classname="tests.test_note_readiness_truth" name="test_note_readiness_tracks_text_result[loading--checking]" time="0.048"><failure message="AssertionError: assert 'ready' == 'checking'&#10;  &#10;  - checking&#10;  + ready">tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'ready' == 'checking'
+E     
+E     - checking
+E     + ready</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_note_readiness_tracks_text_result[ready-AMBER-ready]" time="0.086" /><testcase classname="tests.test_note_readiness_truth" name="test_note_readiness_tracks_text_result[empty--empty]" time="0.044"><failure message="AssertionError: assert 'ready' == 'empty'&#10;  &#10;  - empty&#10;  + ready">tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'ready' == 'empty'
+E     
+E     - empty
+E     + ready</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_note_readiness_tracks_text_result[no_markdown--unavailable]" time="0.043"><failure message="AssertionError: assert 'ready' == 'unavailable'&#10;  &#10;  - unavailable&#10;  + ready">tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'ready' == 'unavailable'
+E     
+E     - unavailable
+E     + ready</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_note_readiness_tracks_text_result[unavailable--unavailable]" time="0.047"><failure message="AssertionError: assert 'ready' == 'unavailable'&#10;  &#10;  - unavailable&#10;  + ready">tests\test_note_readiness_truth.py:56: in test_note_readiness_tracks_text_result
+    assert result['factMeta']==expected
+E   AssertionError: assert 'ready' == 'unavailable'
+E     
+E     - unavailable
+E     + ready</failure></testcase><testcase classname="tests.test_note_readiness_truth" name="test_note_has_no_media_controls_or_placeholders" time="0.092" /><testcase classname="tests.test_note_readiness_truth" name="test_source_labels" time="0.431" /><testcase classname="tests.test_note_readiness_truth" name="test_video_health_and_fields_remain_applicable" time="0.047" /></testsuite></testsuites>

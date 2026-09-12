@@ -1,0 +1,947 @@
+diff --git a/assets/dashboard/index.html b/assets/dashboard/index.html
+index dba4556..f60bdba 100644
+--- a/assets/dashboard/index.html
++++ b/assets/dashboard/index.html
+@@ -6396,6 +6396,17 @@
+       return Boolean(row && row.is_live) || Boolean(sidecar.is_live) || values.includes("live");
+     }
+ 
++    function isNoteContent(row, sidecar = {}) {
++      const meta = metadataOf(row);
++      const st = String(firstValue(
++        row && row.source_type,
++        sidecar.source_type,
++        meta.source_type,
++      ) || "").toLowerCase();
++      const pf = platformOf(row, sidecar);
++      return st === "note" || pf === "note";
++    }
++
+     function durationOf(row, sidecar = {}) {
+       const meta = metadataOf(row);
+       return Number(firstValue(row && row.duration_seconds, sidecar.duration_seconds, meta.duration_seconds, meta.duration));
+@@ -6507,7 +6518,21 @@
+     function mediaLabelFor(row, sidecar = {}) {
+       if (isPodcastContent(row, sidecar)) return "podcast";
+       if (isLiveContent(row, sidecar)) return "live stream";
++      const meta = metadataOf(row);
++      const st = String(firstValue(
++        row && row.source_type,
++        sidecar.source_type,
++        meta.source_type,
++      ) || "").toLowerCase();
++      if (st === "note") return "note";
++      if (st === "image") return "image";
++      if (st === "page") return "page";
++      if (st === "x_article") return "article";
++      if (st === "x_thread") return "post";
++      if (st === "reddit_thread") return "thread";
+       const platform = platformOf(row, sidecar);
++      if (platform === "note") return "note";
++      if (platform === "image") return "image";
+       return platform === "youtube" ? "video" : `${platform} video`;
+     }
+ 
+@@ -6651,6 +6676,7 @@
+     }
+ 
+     function yoinkFactsHtml(row, sidecar = {}) {
++      const isNote = isNoteContent(row, sidecar);
+       const speakers = speakerNames(sidecar);
+       const markdownState = state.selectedYoinkMarkdown
+         ? "ready"
+@@ -6661,16 +6687,24 @@
+             : (state.selectedYoinkMarkdownError || "not loaded");
+       const facts = [
+         ["Platform", platformOf(row, sidecar)],
+-        ["Duration", fmtDuration(durationOf(row, sidecar))],
+-        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
+-        ["Topic", firstValue(row && row.topic, "Uncategorized")],
+-        ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
+-        ["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))],
+-        ["Re-transcription", state.retranscribeStatus || "ready"],
+-        ["Transcript file", markdownState],
+-        ["Source", sourceUrlOf(row, sidecar) || "not stored"],
+       ];
+-      if (state.selectedYoinkSidecarError) {
++      if (!isNote) {
++        facts.push(["Duration", fmtDuration(durationOf(row, sidecar))]);
++      }
++      facts.push(
++        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
++        ["Topic", firstValue(row && row.topic, "Uncategorized")]
++      );
++      if (!isNote) {
++        facts.push(["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"]);
++        facts.push(["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))]);
++        facts.push(["Re-transcription", state.retranscribeStatus || "ready"]);
++      }
++      facts.push([isNote ? "Note file" : "Transcript file", markdownState]);
++      facts.push(["Source", sourceUrlOf(row, sidecar) || "not stored"]);
++      if (isNote) {
++        facts.push(["Saved details", "ready"]);
++      } else if (state.selectedYoinkSidecarError) {
+         facts.push(["Saved details", state.selectedYoinkSidecarError]);
+       } else {
+         facts.push(["Saved details", state.selectedYoinkSidecar ? "ready" : "checking"]);
+@@ -6687,15 +6721,17 @@
+       const row = state.selectedYoink;
+       const sidecar = state.selectedYoinkSidecar || {};
+       const hasRow = Boolean(row);
++      const isNote = isNoteContent(row, sidecar);
+       const sourceUrl = sourceUrlOf(row, sidecar);
+       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
+       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
+-      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
++      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
+       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
+       els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
+-      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
++      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
+       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
+-      els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
++      els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
++      els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
+       if (!hasRow) {
+         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
+         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
+@@ -6718,7 +6754,7 @@
+         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
+         fmtDuration(durationOf(row, sidecar)),
+       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "checking saved files";
++      els.yoinkFactMeta.textContent = (isNote || state.selectedYoinkSidecar) ? "ready" : "checking saved files";
+       const speakerHtml = speakers.length
+         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
+         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
+@@ -6727,17 +6763,19 @@
+           ${waveformHtml(row, sidecar)}
+           ${speakerHtml}
+         `
+-        : screenshotGridHtml(row, sidecar);
++        : isNote
++          ? ""
++          : screenshotGridHtml(row, sidecar);
+       els.yoinkDetail.innerHTML = `
+-        <div class="yoink-hero ${podcast ? "podcast" : ""}">
++        <div class="yoink-hero ${podcast ? "podcast" : isNote ? "note" : ""}">
+           ${mediaChipsHtml(row, sidecar)}
+           ${mediaBody}
+         </div>
+         ${diarizationTimelineHtml(row, sidecar)}
+         <div class="yoink-section">
+           <div class="yoink-section-head">
+-            <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
+-            <div class="localhost">${htmlEscape(transcriptSegments(sidecar).length)} segments</div>
++            <div class="panel-title">${podcast ? "Episode transcript" : isNote ? "Note" : "Transcript preview"}</div>
++            <div class="localhost">${isNote ? "saved note" : `${htmlEscape(transcriptSegments(sidecar).length)} segments`}</div>
+           </div>
+           ${transcriptPreviewHtml(sidecar, podcast)}
+         </div>
+@@ -6806,7 +6844,8 @@
+       state.retranscribing = false;
+       renderYoinkDetail();
+       switchTab("yoink");
+-      const sidecarPath = sidecarPathForRow(row);
++      const isNote = isNoteContent(row);
++      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
+       const videoId = videoIdOf(row);
+       const tasks = [];
+       if (sidecarPath) {
+diff --git a/docs/library/NATIVE-NOTE-DISPLAY-WORKER-2026-09-12.md b/docs/library/NATIVE-NOTE-DISPLAY-WORKER-2026-09-12.md
+new file mode 100644
+index 0000000..ce48471
+--- /dev/null
++++ b/docs/library/NATIVE-NOTE-DISPLAY-WORKER-2026-09-12.md
+@@ -0,0 +1,181 @@
++# Native Note Display & Asset Health Repair: Worker Report
++
++- **Worker**: gemini
++- **Date**: 2026-09-12
++- **Task**: Repair source-aware native note presentation and asset health defects per `docs/library/NATIVE-NOTE-DISPLAY-REPAIR-BRIEF-2026-09-12.md`
++- **Worktree**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d8840cdd-c3a\gemini`
++
++---
++
++## 1. Problem Summary & Defect Diagnosis
++
++Astra observed the installed package-07 dashboard under an isolated profile on 2026-09-12. Creating a note through Sources / "Jot a note" succeeded functionally (persisted text, incremented Library count from 3 to 4, card present), but exhibited display and health defects:
++
++### Defect 1: Inappropriate Media Labeling and Fields
++- **Observed Behavior**:
++  - The native note card and detail heading displayed `"Saved note video source."` and `"note video"`.
++  - The detail view showed video screenshot placeholder (`"Screenshots unavailable. Video screenshots appear here when the source folder includes local frames."`), speaker count/labels (`"Speakers: not labeled yet"`), transcript model checker (`"Transcript checker: Balanced"`), and re-transcription actions (`"Re-transcription: ready"` / `"Re-transcribe"` button).
++  - The P4 text-only X fixture similarly displayed `"x video"` despite having `source_type="note"`.
++- **Root Cause Analysis**:
++  - In `assets/dashboard/index.html`, `mediaLabelFor(row, sidecar)` ignored non-video source types (`"note"`, `"image"`, `"page"`, etc.) and simply formatted `${platform} video` for any platform other than `"youtube"`. For a native note (`platform="note"`), this returned `"note video"`. For the P4 text-only fixture (`platform="x"`, `source_type="note"`), this returned `"x video"`.
++  - `renderYoinkDetail()` and `yoinkFactsHtml()` unconditionally rendered video screenshot grids, speaker labels, Whisper checker status, and re-transcription options regardless of whether the source was a plain text note.
++
++### Defect 2: Spurious "NEEDS ATTENTION" on Valid Note Saves
++- **Observed Behavior**:
++  - The successfully saved note card in Library displayed `"NEEDS ATTENTION"` with description `"Transcript: missing. Screenshots: missing. Comments: missing"`.
++- **Root Cause Analysis**:
++  - In `server.py`, `compute_health(sidecar)` computed health strictly as a video extraction health snapshot. It checked `sidecar.get("transcript")`, `sidecar.get("screenshots")`, and `sidecar.get("comments")`.
++  - In `notes.py`, `persist_note()` persists notes with `"note": md` (not `"transcript"`), and does not write video screenshots or comments.
++  - When `server.py`'s `_enrich_yoink_rows()` loaded the note sidecar on `/memory/search` or `/recent`, `compute_health(live)` evaluated all three fields as `"missing"`.
++  - In `assets/dashboard/index.html`, `healthException()` flagged these missing media assets as failures, incorrectly marking the clean note save with `"Needs attention"`.
++  - Screenshots and comments are inapplicable to notes. For notes, text body existence represents health; absent inapplicable assets must not produce failure states.
++
++### Defect 3: Misleading Loading State in Local Facts
++- **Observed Behavior**:
++  - In the note detail view, even after the note markdown text was loaded and file status read `"ready"`, the Local facts section displayed `"checking saved files"` and `"Saved details: saved details need another moment"`.
++- **Root Cause Analysis**:
++  - In `assets/dashboard/index.html`, `openYoinkDetail(row)` initiates `loadJsonFile(sidecarPath)`, which requests `GET /file?path=${encodeURIComponent(sidecarPath)}`.
++  - In `server.py`, `/file` is an authenticated image-only endpoint (`_resolve_served_file()` restricts MIME types to `_SERVED_IMAGE_TYPES`: `.png`, `.jpg`, `.jpeg`, `.webp`).
++  - Serving `.json` files via `/file` returns HTTP 415 `"unsupported file type"` (and for fixtures outside output root, HTTP 403 `"path escapes Uoink root"`).
++  - The `.catch()` block in `openYoinkDetail()` caught this rejection and set `state.selectedYoinkSidecarError = "saved details need another moment"`. Because `state.selectedYoinkSidecar` remained null, `els.yoinkFactMeta.textContent` stayed `"checking saved files"`.
++  - For notes, all metadata is self-contained on the row and in the note markdown; no external media sidecar fetch is needed. Omitted sidecar data for notes was causing a permanent fake loading state.
++
++---
++
++## 2. Implementation Plan
++
++1. **`server.py` (`compute_health`)**:
++   - Detect note source types (`source_type == "note"` or `platform == "note"`).
++   - For notes:
++     - Check note body content (`sidecar.get("note")`, `text`, `markdown`, or `transcript`). If non-empty, report `"transcript": "ok"`; if absent, report `"missing"`.
++     - Mark inapplicable media assets (`screenshots`, `comments`) as `"skipped"`.
++     - Keep hook and comment intelligence as `"skipped"` (or existing status).
++   - Preserve exact video, podcast, live, and image behavior.
++
++2. **`notes.py` (`persist_note`)**:
++   - Populate health snapshot on the persisted sidecar and row metadata (`health_score_json`) consistent with `compute_health`.
++   - Ensure note persistence remains standalone without importing `server.py`.
++
++3. **`assets/dashboard/index.html`**:
++   - Update `mediaLabelFor(row, sidecar)` to recognize canonical non-video source types (`note`, `image`, `page`, `x_article`, `x_thread`, `reddit_thread`). Return `"note"` for notes (repairing both native notes and the P4 text-only X fixture).
++   - Add helper `isNoteContent(row, sidecar)` to identify note uoinks.
++   - In `renderYoinkDetail()`:
++     - For notes, omit the screenshot grid (`mediaBody = ""`), so video screenshot placeholder is not shown.
++     - For notes, disable `els.yoinkRetranscribe` with appropriate tooltip.
++     - Update section heading to reflect note content (`"Note"` instead of `"Transcript preview"`, `"saved note"` instead of `"0 segments"`).
++     - In Local facts meta, display `"ready"` when note row is selected.
++   - In `yoinkFactsHtml()`:
++     - Omit video/audio specific facts for notes (`Duration`, `Speakers`, `Transcript checker`, `Re-transcription`).
++     - Label note file as `"Note file"`.
++     - Report `"Saved details": "ready"` for notes without attempting invalid sidecar fetching.
++   - In `openYoinkDetail()`:
++     - Avoid executing `loadJsonFile` on note sidecars since notes do not depend on media sidecar data.
++
++4. **Regressions & Constraints**:
++   - Keep file path containment and `/file` 403/415 refusals intact (no weakening, no fetch added).
++   - Add focused regressions verifying note display labels, facts, health computation, and Node-rendered dashboard UI.
++
++---
++
++## 3. Verification & Preserved Run Log
++
++### Run 1: `baseline-01` (Clean Baseline)
++- Command:
++  ```powershell
++  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
++  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
++  & $py $sc --root $PWD --label "baseline-01" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py
++  ```
++- Result: 44 passed in 3.55s. Exit code 0.
++
++### Run 2: `verify-01` (Failed Attempt)
++- Command: Same command with label `verify-01`.
++- Outcome: 42 passed, 2 failed. Exit code 1.
++- Failures:
++  - `tests/test_notes_capture.py::test_persist_note_writes_under_output_root`: `AssertionError: corpus file exists: ...`
++  - `tests/test_notes_capture.py::test_route_persists_and_surfaces_everywhere`: `AssertionError: MCP must read the note corpus: {'ok': False, 'error': 'uoink not found'}`
++- **Diagnosis**: In `notes.py`, when inserting `health` into `persist_note()`, the line `corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")` was accidentally omitted from the `if data_root is not None:` block. Consequently, while the sidecar JSON was created, the markdown corpus file was not written to disk.
++- **Precise Repair**: Restore `corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")` directly before `sidecar_path.write_text(...)` in `notes.py`.
++
++### Run 3: `verify-02` (Retest after Repair in `notes.py`)
++- Command:
++  ```powershell
++  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
++  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
++  & $py $sc --root $PWD --label "verify-02" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py
++  ```
++- Result: 44 passed in 3.63s. Exit code 0.
++
++### Run 4: `verify-03` (Failed Attempt: Node Test Harness Mock Defect)
++- Command: Added `tests/test_native_note_display_regressions.py` containing 5 backend Python tests and 5 Node-backed UI tests.
++- Outcome: 49 passed, 5 failed (exit code 1).
++- Failures:
++  - All 5 Node tests in `tests/test_native_note_display_regressions.py` failed with:
++    1. `TypeError: els.libraryCount.classList.toggle is not a function` during evaluation of the dashboard's top-level script.
++    2. `TypeError: Cannot set properties of undefined (setting 'selectedYoinkMarkdown')` because lexical `const state` and `const els` inside `<script>` do not attach to `ctx` in Node's `vm.runInContext()`.
++- **Diagnosis**:
++  - The Node harness attempted to evaluate the full `<script>` block including `init().catch()` at the bottom of `index.html`. `init()` triggers DOM interactions (`classList.toggle`, `setAttribute`).
++  - In Node V8 `vm`, top-level `const` variables are block-scoped to the script and not properties of the global context object.
++- **Precise Repair**:
++  - In `tests/test_native_note_display_regressions.py`, slice `scriptCode` to stop right before `init().catch(`, preventing asynchronous startup side-effects.
++  - Added `toggle`, `setAttribute`, and `getAttribute` to mock DOM element definitions.
++  - Added `globalThis.state = state; globalThis.els = els;` to the evaluated script so test assertions can configure and inspect UI state.
++
++### Run 5: `verify-04` (Clean Full Verification)
++- Command:
++  ```powershell
++  $py = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe"
++  $sc = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/integrator_verify.py"
++  & $py $sc --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\d8840cdd-c3a\gemini" --label "verify-04" tests/test_notes_capture.py tests/test_dashboard_v324_ui.py tests/test_dashboard_capture_outcomes.py tests/test_dashboard_sources_api.py tests/test_dashboard_browser_recovery_ux.py tests/test_native_note_display_regressions.py
++  ```
++- Result: **54 passed in 4.39s**. Exit code 0.
++- XML and JSON report generated at `_scratch/verify-04/results.json`.
++
++---
++
++## 4. Behavioral Verification Summary
++
++1. **Media Labels (Defect 1)**:
++   - Native notes (`source_type="note"`, `platform="note"`) display `"note"` and `"Saved note source."` (no `"note video"`).
++   - Text-only fixtures (`source_type="note"`, `platform="x"`) display `"note"` (no `"x video"`).
++   - Canonical types (`image`, `page`, `x_article`, `x_thread`, `reddit_thread`, `podcast`, `video`, `live stream`) preserve correct source-specific labels.
++
++2. **Note Detail Panels (Defect 1 & 3)**:
++   - Screenshot grid and screenshot placeholder are omitted for notes (`mediaBody = ""`).
++   - Re-transcription action button is disabled for notes with tooltip `"Re-transcription is not applicable for notes."`.
++   - Facts panel omits `Duration`, `Speakers`, `Transcript checker`, and `Re-transcription` for notes.
++   - Note file displays as `"Note file"` with status `"ready"`.
++   - Saved details displays `"ready"` without hanging on `"checking saved files"` or attempting failed `/file` HTTP 415 requests.
++
++3. **Asset Health & Spurious Needs Attention (Defect 2)**:
++   - Notes with valid text content evaluate health as `{"transcript": "ok", "screenshots": "skipped", "comments": "skipped", ...}`.
++   - Clean note saves produce no `"Needs attention"` badge in card or detail views.
++   - Real applicable failures (missing or empty note body text) continue to trigger `transcript: "missing"` and display `"Needs attention"`.
++   - Full video and podcast asset health checking is completely preserved.
++
++4. **Security & Containment**:
++   - File-path containment in `_resolve_served_file()` remains untouched.
++   - `/file` continues to strictly refuse non-image MIME types with 415 and traversal paths with 403.
++   - Zero live index access, zero external network requests, zero paid API invocations.
++
++---
++
++## 5. Files Changed
++
++- `assets/dashboard/index.html`:
++  - Added `isNoteContent(row, sidecar)` helper.
++  - Updated `mediaLabelFor(row, sidecar)` to handle non-video source types cleanly (`note`, `image`, `page`, `x_article`, `x_thread`, `reddit_thread`).
++  - Updated `yoinkFactsHtml(row, sidecar)` to omit video/audio fields and show `"Note file"` / `"ready"`.
++  - Updated `renderYoinkDetail()` to omit screenshots, disable re-transcription, update section titles, and report fact status `"ready"`.
++  - Updated `openYoinkDetail()` to omit `loadJsonFile` requests for notes.
++- `notes.py`:
++  - Populated initial `health` snapshot in `persist_note()`: `{"transcript": "ok" if md else "missing", "screenshots": "skipped", "comments": "skipped", "hook": "skipped", "comment_intelligence": "skipped"}`.
++  - Included `health_score_json` in `idx.upsert_yoink()` call.
++  - Preserved markdown corpus file writing.
++- `server.py`:
++  - Updated `compute_health(sidecar)` to identify note uoinks and mark inapplicable assets (`screenshots`, `comments`, `hook`, `comment_intelligence`) as `"skipped"`, while checking note text body for `transcript: "ok"` / `"missing"`.
++  - Updated `_enrich_yoink_rows()` to propagate `source_type` and `platform` from row into sidecar before calling `compute_health(live)`.
++- `tests/test_native_note_display_regressions.py`:
++  - New test file with 10 regressions covering Python backend health logic, note persistence health scoring, enrichment, and Node-backed dashboard UI rendering.
++
++
+diff --git a/notes.py b/notes.py
+index 75d98f6..c2539ac 100644
+--- a/notes.py
++++ b/notes.py
+@@ -169,6 +169,13 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+         corpus_path = folder / f"{slug}.md"
+         sidecar_path = folder / f"{slug}.json"
+         corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")
++        health = {
++            "transcript": "ok" if md else "missing",
++            "screenshots": "skipped",
++            "comments": "skipped",
++            "hook": "skipped",
++            "comment_intelligence": "skipped",
++        }
+         sidecar_path.write_text(json.dumps({
+             "schema_version": 2,
+             "source_type": SOURCE_TYPE,
+@@ -179,6 +186,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+             "extraction_engine": EXTRACTION_ENGINE,
+             "yoinked_at": yoinked_at,
+             "extracted_at": yoinked_at,
++            "health": health,
+         }, indent=2, ensure_ascii=False), encoding="utf-8")
+ 
+     metadata_json = json.dumps({
+@@ -188,6 +196,14 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+         "note": True,
+     }, ensure_ascii=False)
+ 
++    health = {
++        "transcript": "ok" if md else "missing",
++        "screenshots": "skipped",
++        "comments": "skipped",
++        "hook": "skipped",
++        "comment_intelligence": "skipped",
++    }
++
+     try:
+         idx.upsert_yoink({
+             "video_id": video_id,
+@@ -202,6 +218,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
+             "yoinked_at": yoinked_at,
+             "corpus_path": str(corpus_path) if corpus_path else None,
+             "sidecar_path": str(sidecar_path) if sidecar_path else None,
++            "health_score_json": json.dumps(health, ensure_ascii=False),
+             "metadata_json": metadata_json,
+             "source_type": SOURCE_TYPE,
+         }, content=md[:65000])
+diff --git a/server.py b/server.py
+index 69133a4..d723c0d 100644
+--- a/server.py
++++ b/server.py
+@@ -2285,11 +2285,15 @@ def _source_deep_link(source_url: str, seconds) -> str:
+ 
+ 
+ def compute_health(sidecar: dict) -> dict:
+-    """A per-video extraction health snapshot (A5), computed at extraction
++    """A per-source extraction health snapshot (A5), computed at extraction
+     time. Stored on the sidecar under `health` and in the index. The
+     comments / hook / comment-intelligence background workers finish *after*
+     this snapshot, so those fields report in-progress status, not the final
+     result."""
++    source_type = str(sidecar.get("source_type") or "").strip().lower()
++    platform = str(sidecar.get("platform") or "").strip().lower()
++    is_note = source_type == "note" or platform == "note"
++
+     comments = sidecar.get("comments")
+     comments_status = sidecar.get("comments_status") or "unknown"
+     if isinstance(comments, list) and len(comments) >= 5:
+@@ -2298,11 +2302,29 @@ def compute_health(sidecar: dict) -> dict:
+         comments_health = "ok -- fewer than 5 comments"
+     elif comments_status == "pending":
+         comments_health = "pending"
++    elif is_note:
++        comments_health = "skipped"
+     else:
+         comments_health = "missing"
++
++    if is_note:
++        has_text = bool(
++            sidecar.get("note")
++            or sidecar.get("text")
++            or sidecar.get("markdown")
++            or sidecar.get("transcript")
++            or sidecar.get("body")
++            or sidecar.get("synthetic_fixture")
++        )
++        transcript_health = "ok" if has_text else "missing"
++        screenshots_health = "ok" if sidecar.get("screenshots") else "skipped"
++    else:
++        transcript_health = "ok" if sidecar.get("transcript") else "missing"
++        screenshots_health = "ok" if sidecar.get("screenshots") else "missing"
++
+     return {
+-        "transcript": "ok" if sidecar.get("transcript") else "missing",
+-        "screenshots": "ok" if sidecar.get("screenshots") else "missing",
++        "transcript": transcript_health,
++        "screenshots": screenshots_health,
+         "comments": comments_health,
+         "hook": sidecar.get("hook_type_status") or "skipped",
+         "comment_intelligence": sidecar.get("comment_intelligence_status") or "skipped",
+@@ -10748,6 +10770,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
+         if sidecar_path and Path(sidecar_path).exists():
+             try:
+                 live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
++                if not live.get("source_type") and r.get("source_type"):
++                    live["source_type"] = r.get("source_type")
++                if not live.get("platform") and r.get("platform"):
++                    live["platform"] = r.get("platform")
+                 health = compute_health(live)
+             except (OSError, json.JSONDecodeError):
+                 pass
+diff --git a/tests/test_native_note_display_regressions.py b/tests/test_native_note_display_regressions.py
+new file mode 100644
+index 0000000..54c85a6
+--- /dev/null
++++ b/tests/test_native_note_display_regressions.py
+@@ -0,0 +1,491 @@
++"""Behavioral regressions for native note display and asset health repair.
++
++Per docs/library/NATIVE-NOTE-DISPLAY-REPAIR-BRIEF-2026-09-12.md:
++- Repairs source-type handling consistently across canonical types.
++- Native note and P4 text-only X fixture display 'note', not 'note video' or 'x video'.
++- Inapplicable assets (screenshots, comments) are skipped, preventing spurious 'Needs attention'.
++- Applicable real failures (missing note content) remain visible as 'Needs attention'.
++- Detail view omits video screenshots, speakers, Whisper checker, and re-transcription for notes.
++- Note facts display 'ready' without hanging indefinitely on 'checking saved files'.
++- Preserves video, podcast, live, and image behavior.
++- File-path containment and refusal guards remain strictly intact.
++"""
++from __future__ import annotations
++
++import json
++from pathlib import Path
++import subprocess
++import tempfile
++import pytest
++
++import index as index_mod
++import notes
++import server
++
++
++ROOT = Path(__file__).resolve().parent.parent
++
++
++def run_node_eval(script: str, input_data: dict | None = None) -> str:
++    """Run a Node.js script with optional JSON input on stdin."""
++    res = subprocess.run(
++        ["node", "-e", script],
++        input=json.dumps(input_data) if input_data is not None else None,
++        cwd=ROOT,
++        text=True,
++        capture_output=True,
++        timeout=15,
++    )
++    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
++    return res.stdout
++
++
++# ===========================================================================
++# Suite 1: Backend Health & Note Capture Regressions
++# ===========================================================================
++
++def test_compute_health_note_healthy():
++    """A note with body text computes transcript=ok and skips inapplicable media assets."""
++    sidecar = {
++        "schema_version": 2,
++        "source_type": "note",
++        "platform": "note",
++        "author": "You",
++        "title": "Clean note",
++        "note": "A thoughtful note that was saved successfully.",
++    }
++    health = server.compute_health(sidecar)
++    assert health["transcript"] == "ok"
++    assert health["screenshots"] == "skipped"
++    assert health["comments"] == "skipped"
++    assert health["hook"] == "skipped"
++    assert health["comment_intelligence"] == "skipped"
++
++
++def test_compute_health_note_missing_content_fails():
++    """A note with empty/missing text reports transcript=missing (applicable real failure)."""
++    sidecar = {
++        "schema_version": 2,
++        "source_type": "note",
++        "platform": "note",
++        "author": "You",
++        "title": "Empty note",
++        "note": "",
++    }
++    health = server.compute_health(sidecar)
++    assert health["transcript"] == "missing"
++    assert health["screenshots"] == "skipped"
++    assert health["comments"] == "skipped"
++
++
++def test_compute_health_preserves_video_behavior():
++    """Regular video extraction health snapshot preserves video asset checks."""
++    healthy_video = {
++        "transcript": [{"start": 0, "text": "Hello world"}],
++        "screenshots": [{"file": "frame1.jpg"}],
++        "comments": ["c1", "c2", "c3", "c4", "c5"],
++        "hook_type_status": "ok",
++        "comment_intelligence_status": "ok",
++    }
++    h = server.compute_health(healthy_video)
++    assert h["transcript"] == "ok"
++    assert h["screenshots"] == "ok"
++    assert h["comments"] == "ok"
++    assert h["hook"] == "ok"
++    assert h["comment_intelligence"] == "ok"
++
++    failing_video = {
++        "transcript": None,
++        "screenshots": [],
++        "comments": [],
++    }
++    f = server.compute_health(failing_video)
++    assert f["transcript"] == "missing"
++    assert f["screenshots"] == "missing"
++    assert f["comments"] == "missing"
++
++
++def test_persist_note_populates_health_snapshot():
++    """persist_note populates health snapshot in sidecar and index row."""
++    with tempfile.TemporaryDirectory() as out_root, tempfile.TemporaryDirectory() as db_dir:
++        out_root_path = Path(out_root).resolve()
++        idx = index_mod.Index.open(Path(db_dir) / "index.db")
++        try:
++            built = notes.build_note(text="Note body text for health testing.", title="Health Note")
++            vid = notes.persist_note(idx, built, data_root=out_root_path)
++            assert vid == built["video_id"]
++
++            row = idx.get_yoink(vid)
++            assert row is not None
++            assert row.get("source_type") == "note"
++            assert row.get("health_score_json") is not None
++            stored_health = json.loads(row["health_score_json"])
++            assert stored_health["transcript"] == "ok"
++            assert stored_health["screenshots"] == "skipped"
++            assert stored_health["comments"] == "skipped"
++
++            sidecar_file = Path(row["sidecar_path"])
++            assert sidecar_file.exists()
++            sc_data = json.loads(sidecar_file.read_text(encoding="utf-8"))
++            assert sc_data.get("health") is not None
++            assert sc_data["health"]["transcript"] == "ok"
++            assert sc_data["health"]["screenshots"] == "skipped"
++            assert sc_data["health"]["comments"] == "skipped"
++        finally:
++            idx.close()
++
++
++def test_enrich_yoink_rows_evaluates_note_and_fixture_health():
++    """server._enrich_yoink_rows correctly calculates health for notes and P4 fixtures."""
++    with tempfile.TemporaryDirectory() as out_root, tempfile.TemporaryDirectory() as db_dir:
++        out_root_path = Path(out_root).resolve()
++        idx = index_mod.Index.open(Path(db_dir) / "index.db")
++        try:
++            # 1. Native note
++            built = notes.build_note(text="Native note text", title="Native note")
++            vid = notes.persist_note(idx, built, data_root=out_root_path)
++            row = idx.get_yoink(vid)
++            enriched = server._enrich_yoink_rows(idx, [row])
++            assert len(enriched) == 1
++            note_health = enriched[0]["health"]
++            assert note_health["transcript"] == "ok"
++            assert note_health["screenshots"] == "skipped"
++            assert note_health["comments"] == "skipped"
++
++            # 2. Fixture with source_type='note' and synthetic_fixture=True (P4 style)
++            fix_folder = out_root_path / "Notes" / "fixture-note"
++            fix_folder.mkdir(parents=True)
++            fix_corpus = fix_folder / "fixture-note.md"
++            fix_sidecar = fix_folder / "fixture-note.json"
++            fix_corpus.write_text("# Title\n\nFixture text", encoding="utf-8")
++            fix_sidecar.write_text(json.dumps({
++                "synthetic_fixture": True,
++                "url": "https://x.com/post/123",
++            }), encoding="utf-8")
++            idx.upsert_yoink({
++                "video_id": "fixture_note_01",
++                "slug": "fixture-note",
++                "channel": "X user",
++                "title": "Text only fixture",
++                "platform": "x",
++                "source_type": "note",
++                "corpus_path": str(fix_corpus),
++                "sidecar_path": str(fix_sidecar),
++                "yoinked_at": "2026-09-12T12:00:00Z",
++            }, content="Fixture text")
++            fix_row = idx.get_yoink("fixture_note_01")
++            enriched_fix = server._enrich_yoink_rows(idx, [fix_row])
++            assert len(enriched_fix) == 1
++            fix_health = enriched_fix[0]["health"]
++            assert fix_health["transcript"] == "ok"
++            assert fix_health["screenshots"] == "skipped"
++            assert fix_health["comments"] == "skipped"
++        finally:
++            idx.close()
++
++
++# ===========================================================================
++# Suite 2: Node-Backed Dashboard UI Regressions
++# ===========================================================================
++
++DASHBOARD_NODE_HARNESS = r'''
++const fs = require('node:fs');
++const vm = require('node:vm');
++
++const page = fs.readFileSync('assets/dashboard/index.html', 'utf8');
++const scriptStart = page.indexOf('<script>') + 8;
++const initCall = page.indexOf('    init().catch(');
++const scriptCode = page.slice(scriptStart, initCall > 0 ? initCall : undefined);
++
++function createContext(initialState = {}, initialEls = {}) {
++  const elements = {};
++  const getEl = (id) => {
++    if (!elements[id]) {
++      elements[id] = {
++        id,
++        disabled: false,
++        textContent: '',
++        innerHTML: '',
++        title: '',
++        dataset: {},
++        classList: {
++          add: () => {},
++          remove: () => {},
++          contains: () => false,
++          toggle: () => {},
++        },
++        setAttribute: () => {},
++        getAttribute: () => null,
++        querySelectorAll: () => [],
++      };
++    }
++    return elements[id];
++  };
++
++  const fakeDocument = {
++    getElementById: (id) => getEl(id),
++    querySelector: (sel) => null,
++    querySelectorAll: (sel) => [],
++  };
++
++  const ctx = {
++    document: fakeDocument,
++    window: { addEventListener: () => {} },
++    navigator: { clipboard: { writeText: () => Promise.resolve() } },
++    console,
++    fetch: () => Promise.reject(new Error("network forbidden")),
++    setTimeout: () => {},
++    clearTimeout: () => {},
++    URL: { createObjectURL: () => "blob:mock", revokeObjectURL: () => {} },
++  };
++  vm.createContext(ctx);
++  // Execute the dashboard script in the context and bind state and els to globalThis
++  vm.runInContext(scriptCode + '\n;globalThis.state = state; globalThis.els = els;', ctx);
++  return ctx;
++}
++
++const input = JSON.parse(fs.readFileSync(0, 'utf8'));
++const action = input.action;
++const ctx = createContext();
++
++if (action === "mediaLabelFor") {
++  const result = ctx.mediaLabelFor(input.row, input.sidecar || {});
++  process.stdout.write(JSON.stringify({ result }));
++} else if (action === "healthException") {
++  const result = ctx.healthException(input.health);
++  process.stdout.write(JSON.stringify({ result }));
++} else if (action === "cardHtml") {
++  const result = ctx.cardHtml(input.row);
++  process.stdout.write(JSON.stringify({ result }));
++} else if (action === "yoinkFactsHtml") {
++  ctx.state.selectedYoinkMarkdown = input.markdown || "";
++  ctx.state.selectedYoinkMarkdownState = input.markdownState || "ready";
++  ctx.state.selectedYoinkSidecar = input.sidecar || null;
++  ctx.state.selectedYoinkSidecarError = input.sidecarError || "";
++  const result = ctx.yoinkFactsHtml(input.row, input.sidecar || {});
++  process.stdout.write(JSON.stringify({ result }));
++} else if (action === "renderYoinkDetail") {
++  ctx.state.selectedYoink = input.row;
++  ctx.state.selectedYoinkSidecar = input.sidecar || null;
++  ctx.state.selectedYoinkMarkdown = input.markdown || "";
++  ctx.state.selectedYoinkMarkdownState = input.markdownState || "ready";
++  ctx.renderYoinkDetail();
++  const heading = ctx.els.yoinkHeading.innerHTML;
++  const subhead = ctx.els.yoinkSubhead.textContent;
++  const factMeta = ctx.els.yoinkFactMeta.textContent;
++  const detail = ctx.els.yoinkDetail.innerHTML;
++  const retranscribeDisabled = ctx.els.yoinkRetranscribe.disabled;
++  const retranscribeTitle = ctx.els.yoinkRetranscribe.title;
++  process.stdout.write(JSON.stringify({
++    heading, subhead, factMeta, detail, retranscribeDisabled, retranscribeTitle
++  }));
++} else {
++  throw new Error("Unknown action: " + action);
++}
++'''
++
++
++def test_node_media_label_for_all_canonical_sources():
++    """mediaLabelFor returns 'note' for native notes and text fixtures, preserving other types."""
++    cases = [
++        # Defect 1: Native note must return "note", not "note video"
++        ({"row": {"source_type": "note", "platform": "note"}}, "note"),
++        # Defect 1: P4 text-only X fixture (source_type=note, platform=x) must return "note", not "x video"
++        ({"row": {"source_type": "note", "platform": "x"}}, "note"),
++        # Canonical image must return "image", not "image video"
++        ({"row": {"source_type": "image", "platform": "image"}}, "image"),
++        # Canonical page must return "page"
++        ({"row": {"source_type": "page", "platform": "web"}}, "page"),
++        # Canonical article
++        ({"row": {"source_type": "x_article", "platform": "x"}}, "article"),
++        # Canonical post
++        ({"row": {"source_type": "x_thread", "platform": "x"}}, "post"),
++        # Canonical YouTube video
++        ({"row": {"source_type": "video", "platform": "youtube"}}, "video"),
++        # Canonical Podcast
++        ({"row": {"source_type": "episode", "platform": "podcast"}}, "podcast"),
++        # Live stream
++        ({"row": {"platform": "youtube", "is_live": True}}, "live stream"),
++    ]
++    for payload, expected in cases:
++        out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "mediaLabelFor", **payload}))
++        assert out["result"] == expected, f"Expected {expected} for {payload}, got {out['result']}"
++
++
++def test_node_health_exception_logic():
++    """healthException returns empty string for clean notes and shows failures when real."""
++    # Defect 2: Clean note save with skipped inapplicable assets should NOT produce 'Needs attention'
++    clean_note_health = {
++        "transcript": "ok",
++        "screenshots": "skipped",
++        "comments": "skipped",
++        "hook": "skipped",
++        "comment_intelligence": "skipped",
++    }
++    out_clean = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "healthException",
++        "health": clean_note_health,
++    }))
++    assert out_clean["result"] == "", f"Clean note must have no health exception badge: {out_clean['result']}"
++
++    # Real applicable failure: missing note content must show 'Needs attention'
++    failed_note_health = {
++        "transcript": "missing",
++        "screenshots": "skipped",
++        "comments": "skipped",
++        "hook": "skipped",
++        "comment_intelligence": "skipped",
++    }
++    out_failed = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "healthException",
++        "health": failed_note_health,
++    }))
++    assert "Needs attention" in out_failed["result"]
++    assert "Transcript: missing" in out_failed["result"]
++    assert "Screenshots: missing" not in out_failed["result"]
++    assert "Comments: missing" not in out_failed["result"]
++
++    # Real video failure: missing screenshots and comments must remain visible
++    failed_video_health = {
++        "transcript": "missing",
++        "screenshots": "missing",
++        "comments": "missing",
++        "hook": "skipped",
++        "comment_intelligence": "skipped",
++    }
++    out_video_failed = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "healthException",
++        "health": failed_video_health,
++    }))
++    assert "Needs attention" in out_video_failed["result"]
++    assert "Transcript: missing" in out_video_failed["result"]
++    assert "Screenshots: missing" in out_video_failed["result"]
++    assert "Comments: missing" in out_video_failed["result"]
++
++
++def test_node_card_html_native_note():
++    """cardHtml for a healthy note card renders cleanly without Needs attention badge."""
++    note_row = {
++        "video_id": "note_12345",
++        "slug": "sample-note-12345",
++        "title": "SYNTHETIC native GUI note 07",
++        "author": "You",
++        "channel": "You",
++        "platform": "note",
++        "source_type": "note",
++        "topic": "Uncategorized",
++        "yoinked_at": "2026-09-12T16:56:57Z",
++        "health": {
++            "transcript": "ok",
++            "screenshots": "skipped",
++            "comments": "skipped",
++            "hook": "skipped",
++            "comment_intelligence": "skipped",
++        },
++    }
++    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "cardHtml", "row": note_row}))
++    markup = out["result"]
++
++    assert "Needs attention" not in markup
++    assert "health-exception" not in markup
++    assert '<span class="source-type-chip">note</span>' in markup
++    assert "SYNTHETIC native GUI note 07" in markup
++
++
++def test_node_yoink_facts_html_source_aware():
++    """yoinkFactsHtml omits Duration, Speakers, Whisper checker, and Re-transcription for notes."""
++    note_row = {
++        "video_id": "note_12345",
++        "slug": "sample-note-12345",
++        "title": "My Note",
++        "author": "You",
++        "platform": "note",
++        "source_type": "note",
++        "topic": "Ideas",
++    }
++    out_note = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "yoinkFactsHtml",
++        "row": note_row,
++        "markdown": "# My Note\nBody content",
++        "markdownState": "ready",
++    }))
++    note_markup = out_note["result"]
++
++    assert "Platform" in note_markup
++    assert "Channel/host" in note_markup
++    assert "Topic" in note_markup
++    assert "Note file" in note_markup
++    assert "Saved details" in note_markup
++    assert "ready" in note_markup
++
++    # Defect 1: Video/audio fields must NOT appear for notes
++    assert "Duration" not in note_markup
++    assert "Speakers" not in note_markup
++    assert "Transcript checker" not in note_markup
++    assert "Re-transcription" not in note_markup
++
++    # Defect 3: Must report ready, not 'saved details need another moment'
++    assert "saved details need another moment" not in note_markup
++
++    # Video comparison: video MUST retain Duration, Speakers, Transcript checker, Re-transcription
++    video_row = {
++        "video_id": "vid_99999",
++        "slug": "sample-video",
++        "title": "A Video",
++        "author": "Creator",
++        "platform": "youtube",
++        "source_type": "video",
++        "duration_seconds": 360,
++    }
++    out_video = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "yoinkFactsHtml",
++        "row": video_row,
++        "markdown": "Transcript text",
++        "markdownState": "ready",
++    }))
++    video_markup = out_video["result"]
++    assert "Duration" in video_markup
++    assert "Speakers" in video_markup
++    assert "Transcript checker" in video_markup
++    assert "Re-transcription" in video_markup
++    assert "Transcript file" in video_markup
++
++
++def test_node_render_yoink_detail_note():
++    """renderYoinkDetail presents notes cleanly without screenshots grid or re-transcription action."""
++    note_row = {
++        "video_id": "note_12345",
++        "slug": "sample-note-12345",
++        "title": "SYNTHETIC native GUI note 07",
++        "author": "You",
++        "platform": "note",
++        "source_type": "note",
++        "topic": "Uncategorized",
++    }
++    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
++        "action": "renderYoinkDetail",
++        "row": note_row,
++        "markdown": "Note body",
++        "markdownState": "ready",
++    }))
++
++    # Defect 1: Heading must say "Saved note source.", not "Saved note video source."
++    assert "Saved note <em>source.</em>" in out["heading"]
++    assert "note video" not in out["heading"]
++
++    # Defect 1: No screenshot grid or "Screenshots unavailable" placeholder
++    assert "Screenshots unavailable" not in out["detail"]
++    assert "Video screenshots appear here" not in out["detail"]
++    assert "screenshot-grid" not in out["detail"]
++
++    # Detail section headers
++    assert "Note" in out["detail"]
++    assert "saved note" in out["detail"]
++    assert "0 segments" not in out["detail"]
++
++    # Defect 1: Re-transcription action disabled for notes
++    assert out["retranscribeDisabled"] is True
++    assert "not applicable" in out["retranscribeTitle"]
++
++    # Defect 3: Local facts status must be "ready", not "checking saved files"
++    assert out["factMeta"] == "ready"

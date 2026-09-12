@@ -6396,6 +6396,17 @@
       return Boolean(row && row.is_live) || Boolean(sidecar.is_live) || values.includes("live");
     }
 
+    function isNoteContent(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const st = String(firstValue(
+        row && row.source_type,
+        sidecar.source_type,
+        meta.source_type,
+      ) || "").toLowerCase();
+      const pf = platformOf(row, sidecar);
+      return st === "note" || pf === "note";
+    }
+
     function durationOf(row, sidecar = {}) {
       const meta = metadataOf(row);
       return Number(firstValue(row && row.duration_seconds, sidecar.duration_seconds, meta.duration_seconds, meta.duration));
@@ -6507,7 +6518,21 @@
     function mediaLabelFor(row, sidecar = {}) {
       if (isPodcastContent(row, sidecar)) return "podcast";
       if (isLiveContent(row, sidecar)) return "live stream";
+      const meta = metadataOf(row);
+      const st = String(firstValue(
+        row && row.source_type,
+        sidecar.source_type,
+        meta.source_type,
+      ) || "").toLowerCase();
+      if (st === "note") return "note";
+      if (st === "image") return "image";
+      if (st === "page") return "page";
+      if (st === "x_article") return "article";
+      if (st === "x_thread") return "post";
+      if (st === "reddit_thread") return "thread";
       const platform = platformOf(row, sidecar);
+      if (platform === "note") return "note";
+      if (platform === "image") return "image";
       return platform === "youtube" ? "video" : `${platform} video`;
     }
 
@@ -6650,9 +6675,17 @@
       `;
     }
 
+    function noteReadinessLabel() {
+      if (state.selectedYoinkMarkdown) return "ready";
+      if (state.selectedYoinkMarkdownState === "loading") return "checking";
+      if (state.selectedYoinkMarkdownState === "empty") return "empty";
+      return state.selectedYoinkMarkdownError || "unavailable";
+    }
+
     function yoinkFactsHtml(row, sidecar = {}) {
+      const isNote = isNoteContent(row, sidecar);
       const speakers = speakerNames(sidecar);
-      const markdownState = state.selectedYoinkMarkdown
+      const markdownState = isNote ? noteReadinessLabel() : state.selectedYoinkMarkdown
         ? "ready"
         : state.selectedYoinkMarkdownState === "no_markdown"
           ? "needs re-capture"
@@ -6661,16 +6694,24 @@
             : (state.selectedYoinkMarkdownError || "not loaded");
       const facts = [
         ["Platform", platformOf(row, sidecar)],
-        ["Duration", fmtDuration(durationOf(row, sidecar))],
-        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
-        ["Topic", firstValue(row && row.topic, "Uncategorized")],
-        ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
-        ["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))],
-        ["Re-transcription", state.retranscribeStatus || "ready"],
-        ["Transcript file", markdownState],
-        ["Source", sourceUrlOf(row, sidecar) || "not stored"],
       ];
-      if (state.selectedYoinkSidecarError) {
+      if (!isNote) {
+        facts.push(["Duration", fmtDuration(durationOf(row, sidecar))]);
+      }
+      facts.push(
+        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
+        ["Topic", firstValue(row && row.topic, "Uncategorized")]
+      );
+      if (!isNote) {
+        facts.push(["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"]);
+        facts.push(["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))]);
+        facts.push(["Re-transcription", state.retranscribeStatus || "ready"]);
+      }
+      facts.push([isNote ? "Note file" : "Transcript file", markdownState]);
+      facts.push(["Source", sourceUrlOf(row, sidecar) || "not stored"]);
+      if (isNote) {
+        facts.push(["Saved details", noteReadinessLabel()]);
+      } else if (state.selectedYoinkSidecarError) {
         facts.push(["Saved details", state.selectedYoinkSidecarError]);
       } else {
         facts.push(["Saved details", state.selectedYoinkSidecar ? "ready" : "checking"]);
@@ -6687,15 +6728,17 @@
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
       const hasRow = Boolean(row);
+      const isNote = isNoteContent(row, sidecar);
       const sourceUrl = sourceUrlOf(row, sidecar);
       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
-      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
-      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
+      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
-      els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
+      els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
+      els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
@@ -6718,7 +6761,7 @@
         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
         fmtDuration(durationOf(row, sidecar)),
       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "checking saved files";
+      els.yoinkFactMeta.textContent = isNote ? noteReadinessLabel() : (state.selectedYoinkSidecar ? "ready" : "checking saved files");
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
@@ -6727,17 +6770,19 @@
           ${waveformHtml(row, sidecar)}
           ${speakerHtml}
         `
-        : screenshotGridHtml(row, sidecar);
+        : isNote
+          ? ""
+          : screenshotGridHtml(row, sidecar);
       els.yoinkDetail.innerHTML = `
-        <div class="yoink-hero ${podcast ? "podcast" : ""}">
+        <div class="yoink-hero ${podcast ? "podcast" : isNote ? "note" : ""}">
           ${mediaChipsHtml(row, sidecar)}
           ${mediaBody}
         </div>
         ${diarizationTimelineHtml(row, sidecar)}
         <div class="yoink-section">
           <div class="yoink-section-head">
-            <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
-            <div class="localhost">${htmlEscape(transcriptSegments(sidecar).length)} segments</div>
+            <div class="panel-title">${podcast ? "Episode transcript" : isNote ? "Note" : "Transcript preview"}</div>
+            <div class="localhost">${isNote ? "saved note" : `${htmlEscape(transcriptSegments(sidecar).length)} segments`}</div>
           </div>
           ${transcriptPreviewHtml(sidecar, podcast)}
         </div>
@@ -6806,7 +6851,8 @@
       state.retranscribing = false;
       renderYoinkDetail();
       switchTab("yoink");
-      const sidecarPath = sidecarPathForRow(row);
+      const isNote = isNoteContent(row);
+      const sidecarPath = isNote ? "" : sidecarPathForRow(row);
       const videoId = videoIdOf(row);
       const tasks = [];
       if (sidecarPath) {

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="54" time="4.000" timestamp="2026-09-12T10:14:23.186422-07:00" hostname="Ryan-PC"><testcase classname="tests.test_notes_capture" name="test_build_note_derives_title_and_author" time="0.000" /><testcase classname="tests.test_notes_capture" name="test_build_note_rejects_empty" time="0.000" /><testcase classname="tests.test_notes_capture" name="test_persist_note_writes_under_output_root" time="0.075" /><testcase classname="tests.test_notes_capture" name="test_persist_note_topic_falls_back_when_unclassified" time="0.066" /><testcase classname="tests.test_notes_capture" name="test_route_token_gated" time="0.526" /><testcase classname="tests.test_notes_capture" name="test_route_relays_empty_error" time="0.511" /><testcase classname="tests.test_notes_capture" name="test_route_persists_and_surfaces_everywhere" time="0.593" /><testcase classname="tests.test_dashboard_v324_ui" name="test_sidebar" time="0.001" /><testcase classname="tests.test_dashboard_v324_ui" name="test_picker" time="0.001" /><testcase classname="tests.test_dashboard_v324_ui" name="test_generate_and_agents" time="0.002" /><testcase classname="tests.test_dashboard_v324_ui" name="test_activity_and_star" time="0.001" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_uncertain_ledger_is_visibly_uncertain" time="0.123" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_unstarted_block_is_not_a_failed_capture" time="0.113" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[idle-idle]" time="0.030" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[released-reservation released]" time="0.028" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[succeeded-completed]" time="0.030" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[archived-archived]" time="0.030" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[uncertain-uncertain]" time="0.030" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[blocked-waiting]" time="0.032" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[settled_failed-settled failed]" time="0.029" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_renderer_uses_latest_outcome_not_historical_count[in_flight-in-flight]" time="0.030" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_actual_renderer_escapes_recovery_fields" time="0.031" /><testcase classname="tests.test_dashboard_capture_outcomes" name="test_consent_off_does_not_hide_uncertain_drain" time="0.031" /><testcase classname="tests.test_dashboard_sources_api.TestRegistryInputSchemas" name="test_list_sources_schema_valid_and_invalid" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestRegistryInputSchemas" name="test_register_source_schema_valid_and_invalid" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestRegistryInputSchemas" name="test_source_status_schema_valid_and_invalid" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestRegistryInputSchemas" name="test_set_source_consent_schema_two_step_rules" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestRegistryInputSchemas" name="test_consent_intent_operation_schema" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestContractPayloadShapes" name="test_source_summary_mandatory_fields" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestContractPayloadShapes" name="test_enrollment_mandatory_fields" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestContractPayloadShapes" name="test_allowance_mandatory_fields" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestContractPayloadShapes" name="test_detection_mandatory_fields" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestSourceSubscriptionsEndpointsIntegration" name="test_service_list_sources" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestSourceSubscriptionsEndpointsIntegration" name="test_service_register_source" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestSourceSubscriptionsEndpointsIntegration" name="test_service_source_status" time="0.000" /><testcase classname="tests.test_dashboard_sources_api.TestSourceSubscriptionsEndpointsIntegration" name="test_service_consent_intent_flow" time="0.000" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_api_summary_exposes_recovery_and_revision" time="0.072" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_api_does_not_leak_owner_tokens_or_private_instances" time="0.073" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_api_charge_and_state_invariance" time="0.070" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_ui_distinguishes_detection_health_from_capture_outcome" time="0.001" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_ui_exposes_recorded_consent_revision" time="0.001" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_ui_contains_current_item_recovery_box" time="0.001" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_ui_no_automatic_retry_action_added" time="0.001" /><testcase classname="tests.test_dashboard_browser_recovery_ux" name="test_adversarial_hostile_display_text_sanitized" time="0.000" /><testcase classname="tests.test_native_note_display_regressions" name="test_compute_health_note_healthy" time="0.000" /><testcase classname="tests.test_native_note_display_regressions" name="test_compute_health_note_missing_content_fails" time="0.000" /><testcase classname="tests.test_native_note_display_regressions" name="test_compute_health_preserves_video_behavior" time="0.000" /><testcase classname="tests.test_native_note_display_regressions" name="test_persist_note_populates_health_snapshot" time="0.071" /><testcase classname="tests.test_native_note_display_regressions" name="test_enrich_yoink_rows_evaluates_note_and_fixture_health" time="0.077" /><testcase classname="tests.test_native_note_display_regressions" name="test_node_media_label_for_all_canonical_sources" time="0.037"><failure message="AssertionError: Node execution failed:&#10;  STDOUT:&#10;  {&quot;result&quot;:&quot;note&quot;}&#10;  STDERR:&#10;  evalmachine.&lt;anonymous&gt;:4804&#10;        els.libraryCount.classList.toggle(&quot;hidden&quot;, !showCount);&#10;                                   ^&#10;  &#10;  TypeError: els.libraryCount.classList.toggle is not a function&#10;      at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)&#10;      at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)&#10;      at evalmachine.&lt;anonymous&gt;:8971:7&#10;  &#10;  Node.js v24.18.0&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode">tests\test_native_note_display_regressions.py:308: in test_node_media_label_for_all_canonical_sources
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "mediaLabelFor", **payload}))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":"note"}
+E     STDERR:
+E     evalmachine.&lt;anonymous&gt;:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)
+E         at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)
+E         at evalmachine.&lt;anonymous&gt;:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode</failure></testcase><testcase classname="tests.test_native_note_display_regressions" name="test_node_health_exception_logic" time="0.035"><failure message="AssertionError: Node execution failed:&#10;  STDOUT:&#10;  {&quot;result&quot;:&quot;&quot;}&#10;  STDERR:&#10;  evalmachine.&lt;anonymous&gt;:4804&#10;        els.libraryCount.classList.toggle(&quot;hidden&quot;, !showCount);&#10;                                   ^&#10;  &#10;  TypeError: els.libraryCount.classList.toggle is not a function&#10;      at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)&#10;      at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)&#10;      at evalmachine.&lt;anonymous&gt;:8971:7&#10;  &#10;  Node.js v24.18.0&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode">tests\test_native_note_display_regressions.py:322: in test_node_health_exception_logic
+    out_clean = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":""}
+E     STDERR:
+E     evalmachine.&lt;anonymous&gt;:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)
+E         at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)
+E         at evalmachine.&lt;anonymous&gt;:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode</failure></testcase><testcase classname="tests.test_native_note_display_regressions" name="test_node_card_html_native_note" time="0.034"><failure message="AssertionError: Node execution failed:&#10;  STDOUT:&#10;  {&quot;result&quot;:&quot;\n        &lt;article class=\&quot;uoink-card non-youtube\&quot; data-card-id=\&quot;note_12345\&quot; data-folder=\&quot;\&quot; data-video-id=\&quot;note_12345\&quot; tabindex=\&quot;0\&quot; role=\&quot;button\&quot; aria-label=\&quot;Open SYNTHETIC native GUI note 07\&quot;&gt;\n          &lt;div class=\&quot;thumb\&quot;&gt;\n            &lt;span class=\&quot;duration\&quot;&gt;--:--&lt;/span&gt;\n            &lt;span class=\&quot;platform-chip \&quot;&gt;Note&lt;/span&gt;\n            &lt;span class=\&quot;source-type-chip\&quot;&gt;note&lt;/span&gt;\n            \n            &lt;button class=\&quot;hook-chip\&quot; type=\&quot;button\&quot; data-hook-explain=\&quot;other\&quot; title=\&quot;What's a other hook?\&quot;&gt;other&lt;/button&gt;\n            &lt;img alt=\&quot;\&quot; data-thumb-for=\&quot;note_12345\&quot; class=\&quot;hidden\&quot;&gt;\n          &lt;/div&gt;\n          &lt;div class=\&quot;card-body\&quot;&gt;\n            &lt;div class=\&quot;card-title\&quot;&gt;SYNTHETIC native GUI note 07&lt;/div&gt;\n            &lt;div class=\&quot;card-source\&quot;&gt;Note &amp;middot; note&lt;/div&gt;\n            &lt;div class=\&quot;card-meta\&quot;&gt;You&lt;/div&gt;\n            &lt;div class=\&quot;card-foot\&quot;&gt;\n              &lt;span class=\&quot;topic-chip\&quot;&gt;Uncategorized&lt;/span&gt;\n              &lt;span class=\&quot;age\&quot;&gt;18m ago&lt;/span&gt;\n            &lt;/div&gt;\n            \n            &lt;button class=\&quot;button ghost card-write\&quot; type=\&quot;button\&quot; data-write-from=\&quot;note_12345\&quot; aria-label=\&quot;Write from SYNTHETIC native GUI note 07\&quot;&gt;Write from this&lt;/button&gt;\n          &lt;/div&gt;\n        &lt;/article&gt;\n      &quot;}&#10;  STDERR:&#10;  evalmachine.&lt;anonymous&gt;:4804&#10;        els.libraryCount.classList.toggle(&quot;hidden&quot;, !showCount);&#10;                                   ^&#10;  &#10;  TypeError: els.libraryCount.classList.toggle is not a function&#10;      at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)&#10;      at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)&#10;      at evalmachine.&lt;anonymous&gt;:8971:7&#10;  &#10;  Node.js v24.18.0&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode">tests\test_native_note_display_regressions.py:383: in test_node_card_html_native_note
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {"action": "cardHtml", "row": note_row}))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     {"result":"\n        &lt;article class=\"uoink-card non-youtube\" data-card-id=\"note_12345\" data-folder=\"\" data-video-id=\"note_12345\" tabindex=\"0\" role=\"button\" aria-label=\"Open SYNTHETIC native GUI note 07\"&gt;\n          &lt;div class=\"thumb\"&gt;\n            &lt;span class=\"duration\"&gt;--:--&lt;/span&gt;\n            &lt;span class=\"platform-chip \"&gt;Note&lt;/span&gt;\n            &lt;span class=\"source-type-chip\"&gt;note&lt;/span&gt;\n            \n            &lt;button class=\"hook-chip\" type=\"button\" data-hook-explain=\"other\" title=\"What's a other hook?\"&gt;other&lt;/button&gt;\n            &lt;img alt=\"\" data-thumb-for=\"note_12345\" class=\"hidden\"&gt;\n          &lt;/div&gt;\n          &lt;div class=\"card-body\"&gt;\n            &lt;div class=\"card-title\"&gt;SYNTHETIC native GUI note 07&lt;/div&gt;\n            &lt;div class=\"card-source\"&gt;Note &amp;middot; note&lt;/div&gt;\n            &lt;div class=\"card-meta\"&gt;You&lt;/div&gt;\n            &lt;div class=\"card-foot\"&gt;\n              &lt;span class=\"topic-chip\"&gt;Uncategorized&lt;/span&gt;\n              &lt;span class=\"age\"&gt;18m ago&lt;/span&gt;\n            &lt;/div&gt;\n            \n            &lt;button class=\"button ghost card-write\" type=\"button\" data-write-from=\"note_12345\" aria-label=\"Write from SYNTHETIC native GUI note 07\"&gt;Write from this&lt;/button&gt;\n          &lt;/div&gt;\n        &lt;/article&gt;\n      "}
+E     STDERR:
+E     evalmachine.&lt;anonymous&gt;:4804
+E           els.libraryCount.classList.toggle("hidden", !showCount);
+E                                      ^
+E     
+E     TypeError: els.libraryCount.classList.toggle is not a function
+E         at setLibraryHeadline (evalmachine.&lt;anonymous&gt;:4804:34)
+E         at renderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)
+E         at evalmachine.&lt;anonymous&gt;:8971:7
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...enderLibraryUnavailable (evalmachine.&lt;anonymous&gt;:4882:7)\n    at evalmachine.&lt;anonymous&gt;:8971:7\n\nNode.js v24.18.0\n').returncode</failure></testcase><testcase classname="tests.test_native_note_display_regressions" name="test_node_yoink_facts_html_source_aware" time="0.035"><failure message="AssertionError: Node execution failed:&#10;  STDOUT:&#10;  &#10;  STDERR:&#10;  [eval]:68&#10;    ctx.state.selectedYoinkMarkdown = input.markdown || &quot;&quot;;&#10;                                    ^&#10;  &#10;  TypeError: Cannot set properties of undefined (setting 'selectedYoinkMarkdown')&#10;      at [eval]:68:35&#10;      at runScriptInThisContext (node:internal/vm:219:10)&#10;      at node:internal/process/execution:451:12&#10;      at [eval]-wrapper:6:24&#10;      at runScriptInContext (node:internal/process/execution:449:60)&#10;      at evalFunction (node:internal/process/execution:283:30)&#10;      at evalTypeScript (node:internal/process/execution:295:3)&#10;      at node:internal/main/eval_string:71:3&#10;  &#10;  Node.js v24.18.0&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n').returncode">tests\test_native_note_display_regressions.py:403: in test_node_yoink_facts_html_source_aware
+    out_note = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     
+E     STDERR:
+E     [eval]:68
+E       ctx.state.selectedYoinkMarkdown = input.markdown || "";
+E                                       ^
+E     
+E     TypeError: Cannot set properties of undefined (setting 'selectedYoinkMarkdown')
+E         at [eval]:68:35
+E         at runScriptInThisContext (node:internal/vm:219:10)
+E         at node:internal/process/execution:451:12
+E         at [eval]-wrapper:6:24
+E         at runScriptInContext (node:internal/process/execution:449:60)
+E         at evalFunction (node:internal/process/execution:283:30)
+E         at evalTypeScript (node:internal/process/execution:295:3)
+E         at node:internal/main/eval_string:71:3
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n').returncode</failure></testcase><testcase classname="tests.test_native_note_display_regressions" name="test_node_render_yoink_detail_note" time="0.033"><failure message="AssertionError: Node execution failed:&#10;  STDOUT:&#10;  &#10;  STDERR:&#10;  [eval]:75&#10;    ctx.state.selectedYoink = input.row;&#10;                            ^&#10;  &#10;  TypeError: Cannot set properties of undefined (setting 'selectedYoink')&#10;      at [eval]:75:27&#10;      at runScriptInThisContext (node:internal/vm:219:10)&#10;      at node:internal/process/execution:451:12&#10;      at [eval]-wrapper:6:24&#10;      at runScriptInContext (node:internal/process/execution:449:60)&#10;      at evalFunction (node:internal/process/execution:283:30)&#10;      at evalTypeScript (node:internal/process/execution:295:3)&#10;      at node:internal/main/eval_string:71:3&#10;  &#10;  Node.js v24.18.0&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n&quot;).returncode">tests\test_native_note_display_regressions.py:462: in test_node_render_yoink_detail_note
+    out = json.loads(run_node_eval(DASHBOARD_NODE_HARNESS, {
+tests\test_native_note_display_regressions.py:39: in run_node_eval
+    assert res.returncode == 0, f"Node execution failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+E   AssertionError: Node execution failed:
+E     STDOUT:
+E     
+E     STDERR:
+E     [eval]:75
+E       ctx.state.selectedYoink = input.row;
+E                               ^
+E     
+E     TypeError: Cannot set properties of undefined (setting 'selectedYoink')
+E         at [eval]:75:27
+E         at runScriptInThisContext (node:internal/vm:219:10)
+E         at node:internal/process/execution:451:12
+E         at [eval]-wrapper:6:24
+E         at runScriptInContext (node:internal/process/execution:449:60)
+E         at evalFunction (node:internal/process/execution:283:30)
+E         at evalTypeScript (node:internal/process/execution:295:3)
+E         at node:internal/main/eval_string:71:3
+E     
+E     Node.js v24.18.0
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', '\nconst fs = require(\'node:fs\');\nconst vm = require(\'node:vm\');\n\nconst pa...lTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.18.0\n").returncode</failure></testcase></testsuite></testsuites>

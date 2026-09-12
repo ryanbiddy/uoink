@@ -2285,11 +2285,16 @@ def _source_deep_link(source_url: str, seconds) -> str:
 
 
 def compute_health(sidecar: dict) -> dict:
-    """A per-video extraction health snapshot (A5), computed at extraction
+    """A per-source extraction health snapshot (A5), computed at extraction
     time. Stored on the sidecar under `health` and in the index. The
     comments / hook / comment-intelligence background workers finish *after*
     this snapshot, so those fields report in-progress status, not the final
     result."""
+    source_type = str(sidecar.get("source_type") or "").strip().lower()
+    platform = str(sidecar.get("platform") or "").strip().lower()
+    if source_type == "note" or platform == "note":
+        return notes.compute_note_health(sidecar)
+
     comments = sidecar.get("comments")
     comments_status = sidecar.get("comments_status") or "unknown"
     if isinstance(comments, list) and len(comments) >= 5:
@@ -10748,6 +10753,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         if sidecar_path and Path(sidecar_path).exists():
             try:
                 live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+                if not live.get("source_type") and r.get("source_type"):
+                    live["source_type"] = r.get("source_type")
+                if not live.get("platform") and r.get("platform"):
+                    live["platform"] = r.get("platform")
                 health = compute_health(live)
             except (OSError, json.JSONDecodeError):
                 pass
