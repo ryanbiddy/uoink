@@ -86,19 +86,19 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package 08 sealed, installed qualification active)
+## State at handoff (updated 2026-09-12; package 08 installed/native review complete)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
-| 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 historical; package-08 installed requalification next |
-| 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
-| 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Fresh package-08 C22/browser next; original AT6 exit disposition remains Ryan's |
-| 4 | Native note repair d2caac5 and saved-media repair 60d203f integrated | Final media union has 58 passes in both roots, including 23 new cases. Worker boundary and fabricated timing/label defects corrected | Final tree complete; package-08 installation and native Uoink GUI confirmation next |
-| 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
-| 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Fresh package-08 published-range observation next; speakers blocked, no new fetch |
-| Security | Gemini evidence/backport reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; 35 metadata payloads and 13 source files verified. Worker unsupported reachability and proposed frozen-test edits rejected | Security hold remains; compatible runtime migration and model qualification need the exact Ryan scope below |
-| Integration | Package 08 sealed at `755c37e` from `b8e44fb` | Complete tree: 2,579 pass / one historical failure / two skips, 2,582 cases; 23 added media cases, none missing | Fresh isolated package-08 install, C22/browser/CLI/native Uoink flows, notes/kit and authorized backup |
-| Desktop incident | Configuration isolation failed in the package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched. Earlier live-index/5179 effects unknown; owned job empty and guard restored | No further Desktop override launch. Native package-08 driver exposes only Uoink dashboard; future Desktop needs a verified separate environment |
+| 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
+| 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
+| 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
+| 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
+| 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
+| 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
+| Security | Gemini reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; separating verified Lightning patch leaves 18 / 14. No qualified replacement runtime | Hold remains; compatible runtime migration and model qualification need exact Ryan scope below |
+| Integration | Package 08 at `755c37e`, installed/native evidence and notes at `49e2b31` | Source b8e44fb: 2,579 pass / one historical failure / two skips. Installed seal 525 payloads; native seal 75; no source changes afterward | Finish review ZIP, verify transport, update delivery notes and authorized backup |
+| Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -144,6 +144,12 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ### Active follow-up from Ryan, 2026-09-12
 
+The repair and installed-observation sequence below is complete through `49e2b31`.
+Next: verify all current sealed payloads against committed Git bytes, build and
+inspect review kit 08 from the clean documentary source, seal its delivery, update
+this handoff and make only the authorized cc/living-library backup. Do not rerun
+completed product measurements for documentary edits. Keep release_ready=false.
+
 This sequence supersedes the completed delivery instructions below.
 
 1. Security run 0ee38a14 is integrated at a6b9cf0. Read
@@ -157,7 +163,7 @@ This sequence supersedes the completed delivery instructions below.
    exactly, but shows "note video" and a false missing-media warning. Gemini
    d8840cdd is integrated at d2caac5 after Astra rejected its fixture-flag health
    shortcut and unconditional readiness. The original native evidence is sealed
-   at 2531017: 48 payloads, including ten original PNGs. The corrected patch has
+   at 2531017: 48 payloads, including ten original images. The corrected patch has
    60 passes in both roots, 16 new cases and 45 review payloads.
 3. Media worker 2dae80cc is integrated at 60d203f. Read ASTRA-MEDIA-DETAIL-
    REVIEW-2026-09-12.md. Its 108-payload seal preserves all attempts; 58 checks
@@ -169,9 +175,9 @@ This sequence supersedes the completed delivery instructions below.
    historical failure / two skips, every one of 2,582 cases accounted for.
    Package 08 and its 51-payload pre-execution instrument seal are integrated
    at 755c37e. New instruments bind b8e44fb; the unused a25e3be
-   drafts and exact corrections are preserved. Fresh isolated install and
-   actual Uoink note/media GUI qualification are next, followed by notes,
-   runbook, review ZIP and only the authorized cc/living-library backup.
+   drafts and exact corrections are preserved. Fresh isolated installation, C22/browser, CLI, publication and actual Uoink
+   note/media GUI qualification are complete at 49e2b31, as are notes and runbook.
+   The review ZIP and authorized cc/living-library backup are next.
 4. CR Gemini 46e8e6dc confirms the Desktop isolation failure. Integration
    e10ba3a withdraws the earlier claim: packaged Claude deletes the override
    before its setter, and the attempted run launched ordinary connectors.
@@ -3174,3 +3180,49 @@ global-process wording are corrected in Astra's review. A separate source-reader
 substring error and exact correction are retained; no new application launched
 for this documentary review. Native dashboard, actual CLI and Desktop each need
 their own observed evidence. Never claim one proves the others.
+
+
+### 2026-09-12 — package-08 installed/native integration and evidence corrections
+
+49e2b31 seals 525 installed payloads and 75 native-window payloads. Setup and
+same-version reinstall exit zero; all 32,497 installed files match with three
+recognized extras. C22 has 11 passes / zero failures / three raw manual rows.
+Four actual browser PNGs show unchanged consent, charges and worker_lost recovery.
+The failed browser preflight is retained; only the diagnosed instrument startup
+was corrected, in a fresh session. No C22 scenario was repeated for that repair.
+
+The original P4 collector remains 15 passed / zero failed / one blocked / five
+unobserved / two pending review. Independent paired CLI responses have 20/20
+exact comparisons each; both native prompts pass separately. Five actual sessions
+total 44 successful terminal hooks, zero failed hooks and zero sentinel calls.
+Separate production-published range exports pass after 2.1001697 s protocol and
+1.9874018 s actual-client delays. No source fetch or speaker/seek invention.
+
+Recall's actual-client 47.6993 ms silence has no recorded diagnostic cause. The
+observer's replacement_index_created=true tests only nonempty file presence;
+the generator creates recall/index.db beforehand. It is not a creation delta.
+The separate missing-index scenario passes in 48.3258 ms without replacement;
+the protocol storage refusal takes 1.373 ms. Do not conflate the three. The
+initial notes' unavailable-storage attribution, including the older package-07
+wording, is withdrawn. Raw records and aggregate remain unchanged; no fixture
+or product observation was rerun for this documentary correction.
+
+Native-gui01 failed before seeding because -P omitted the installed module path.
+Its exact repair brief precedes a fresh native-gui02 run, which shows the saved
+0:34 AMBER cue, an untimed line as time not stored, no speaker attribution,
+ready transcript/details, note save/search/read and a ready note file without
+false video warnings. Evidence is empty and Activity has zero queued/running,
+one completed note. Eleven original JPEG images are preserved. The ten historical
+package-07 images also have JPEG headers despite .png names; sealed bytes/names
+are unchanged. Correct the earlier PNG prose using this record.
+
+All native owned jobs are empty and the exact guard is restored. Forced window/
+helper cleanup exit codes are 1, seed zero; no natural-close claim. Extension
+onboarding was not exercised. No Desktop launched in this observation. The raw
+driver's native_observation=false is its initial placeholder, not the separate
+operator record. Read both the native and installed package-08 verdicts.
+
+Five ignored mirror/log paths were force-added explicitly; all 600 payloads and
+their two seals match staged Git bytes. Nine runbook PowerShell blocks parse,
+a syntax-only result. No production source, existing test or fixture changed
+after b8e44fb. Finish documentary delivery and preserve every release hold.
