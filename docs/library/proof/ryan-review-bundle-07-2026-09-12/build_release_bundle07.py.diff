@@ -1,0 +1,62 @@
+--- build_release_bundle06.py
++++ build_release_bundle07.py
+@@ -12,7 +12,7 @@
+ subprocess.run(['git','merge-base','--is-ancestor',a.validation_source,a.source],cwd=r,check=True)
+ subprocess.run(['git','diff','--exit-code',a.validation_source,a.source,'--','scripts/install_receipt','migrations','tests'],cwd=r,check=True,stdout=subprocess.DEVNULL)
+ tracked=set(git('ls-tree','-r','--name-only',a.source).splitlines())
+-proof_root=r/'docs/library/proof/candidate-package-06-2026-09-11'
++proof_root=r/'docs/library/proof/candidate-package-07-2026-09-12'
+ package=json.loads((proof_root/'package-manifest.json').read_text())
+ artifact=r/'build'/package['package_name'];assert sha(artifact)==package['package_sha256'] and artifact.stat().st_size==package['package_bytes']
+ for row in package['files']:
+@@ -30,14 +30,16 @@
+  assert sha(r/validation_rel/name)==row['sha256'] and (r/validation_rel/name).stat().st_size==row['bytes']
+ selected={name for name in tracked if name.startswith('scripts/install_receipt/') or (name.startswith('migrations/') and name.endswith('.sql')) or (name.startswith('docs/library/') and '/proof/' not in name and name.endswith('.md')) or name.startswith(validation_rel+'/')}
+ active_proofs = (
+- 'candidate-package-06-2026-09-11',
++ 'candidate-package-07-2026-09-12','installed07-instrument-review-2026-09-12',
++ 'sqlite-deadline-cleanup-2026-09-12','ryan-installed-client-06-2026-09-12',
++ 'candidate-package-06-2026-09-11','ryan-agent-installed-06-2026-09-11',
+  'unicode-search-2026-09-11','browser-recovery-2026-09-11','lightning266-2026-09-11',
+  'setuptools-runtime-2026-09-11','repaired-lock-audit-2026-09-11','ryan-proof-transport-06-2026-09-11',
+  'ryan-approved-fixtures-2026-09-09', 'ryan-security-council-ab-2026-09-09',
+  'ryan-isolated-credentials-2026-09-09', 'ryan-dependency-security-2026-09-09',
+  'ryan-agent-installation-review-2026-09-09', 'ryan-receipt-correction-2026-09-09',
+  'ryan-agent-receipt-path-review-2026-09-09', 'ryan-installed-payload-repair-2026-09-09',
+- 'ryan-agent-installed-06-2026-09-11',
++ 'ryan-agent-installed-07-2026-09-12',
+  'ryan-p4-embedded-probe-2026-09-10', 'product-suite-review-2026-09-10',
+  'ryan-proof-byte-transport-2026-09-10',
+  'ryan-native-guard-review-2026-09-09', 'ryan-ffmpeg-pin-repair-2026-09-09',
+@@ -70,13 +72,13 @@
+ for script in ('check_installed_package_inputs.py','package_decoder_probe.py'):
+  shutil.copyfile(proof_root/script,out/script)
+ shutil.copyfile(r/'THIRD-PARTY-NOTICES.md',out/'THIRD-PARTY-NOTICES.md')
+-installed_proof=r/'docs/library/proof/ryan-agent-installed-06-2026-09-11'
++installed_proof=r/'docs/library/proof/ryan-agent-installed-07-2026-09-12'
+ installed_summary=json.loads((installed_proof/'summary.json').read_text(encoding='utf8'))
+ assert installed_summary['package_sha256']==package['package_sha256']
+ assert installed_summary['setup_observed'] is True
+ shutil.copyfile(installed_proof/'instruments/installed_codec_probe.py',out/'installed_codec_probe.py')
+ shutil.copyfile(installed_proof/'instruments/agent_install_observer05.ps1',out/'agent_install_observer.ps1')
+-shutil.copyfile(installed_proof/'instruments/run_installed_decoders06_portable.py',out/'run_installed_decoders.py')
++shutil.copyfile(installed_proof/'instruments/run_installed_decoders07_portable.py',out/'run_installed_decoders.py')
+ 
+ shutil.copyfile(proof_root/'source-bindings.json',out/'source-bindings.json')
+ manifest=dict(package,candidate_sha=a.validation_source,validation_source=a.validation_source,bundle_source=a.source,sealed_by='Astra',expected_package_sha256=package['package_sha256'])
+@@ -84,12 +86,12 @@
+ for key,value in example.items():manifest.setdefault(key,value)
+ save(out/'package-manifest.json',manifest);save(out/'c22-operator-manifest.json',manifest)
+ save(out/'historical-data-omissions.json',excluded)
+-save(out/'release-state.json',{'bundle_source':a.source,'validation_source':a.validation_source,'build_source':package['build_source'],'package_sha256':package['package_sha256'],'installed':True,'release_ready':False,'bundle_kind':'review kit; see installed verdict and remaining client/release decisions','published':False,'main_merged':False,'receipt_scope':'Astra-delegated same-account isolated installation; exact scope and open observations retained','installed_observation':installed_summary,'librarian_apply_enabled':False,'phase5_part_b':'deferred','speaker_attribution':'not claimed'})
++save(out/'release-state.json',{'bundle_source':a.source,'validation_source':a.validation_source,'build_source':package['build_source'],'package_sha256':package['package_sha256'],'installed':True,'release_ready':False,'bundle_kind':'review kit; bounded installed CLI observations complete, GUI/historical/security release scope held','published':False,'main_merged':False,'receipt_scope':'Astra-delegated same-account isolated installation; exact scope and open observations retained','installed_observation':installed_summary,'librarian_apply_enabled':False,'phase5_part_b':'deferred','speaker_attribution':'not claimed'})
+ (out/'START-HERE.md').write_text('''# Living Library review kit
+ 
+-This kit contains package-06 and its measured evidence. It is not approved for
++This kit contains package-07 and its measured evidence. It is not approved for
+ an ordinary upgrade or public release. Read the installed verdict and remaining
+-client, security and release decisions before use. Preserve earlier receipts.
++native-client GUI, historical-evidence, security and release decisions before use. Preserve earlier receipts.
+ 
+ Start with [the release notes](docs/library/RELEASE-NOTES-LIVING-LIBRARY.md).
+ Astra has observed the same-account isolated installation described there.

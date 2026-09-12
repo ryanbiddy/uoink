@@ -1,0 +1,19 @@
+{
+  "source": "Tool-returned diagnostics, retained as structured transcriptions",
+  "failures": [
+    {
+      "instrument": "prepare_delivery07.py",
+      "exit": 1,
+      "error": "AssertionError: ('seal_review_bundle06.py', 'seal_review_bundle06.py')",
+      "effect": "Four completed instrument adaptations preserved; missing final sealer never written"
+    },
+    {
+      "instrument": "stage_installed07.py",
+      "exit": 1,
+      "error": "line 18: assert all(p in paths for p in ignored_paths); AssertionError",
+      "effect": "Reviewed files staged; stopped before exact ignored-file additions or blob checks"
+    }
+  ],
+  "product_reruns": 0,
+  "zip_build_attempts": 0
+}

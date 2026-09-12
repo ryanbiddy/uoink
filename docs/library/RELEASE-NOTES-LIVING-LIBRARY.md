@@ -293,6 +293,17 @@ belongs to this verification. No X access repair or new source-media fetch is
 included. The [handoff](ORCHESTRATION-HANDOFF-2026-09-08.md) retains each integration,
 failed/partial observation and remaining action.
 
+## Current review kit (package-07)
+
+The local kit is `build/Uoink-Living-Library-3-8-0-Review-Kit-07-2026-09-12.zip`,
+425,699,322 bytes, SHA-256
+`7bd525f785f9ddaef2ec1b1e4317b5401eadfd9e083483d4b9ce5f61417206fe`.
+All 2,603 ZIP and extracted payload hashes match. Review source `81e4495` binds
+build/validation source `6a89189`. The kit contains the matching installer,
+receipt tools, notes and retained evidence, with release_ready=false.
+See [the delivery record](RELEASE-DELIVERY-07-2026-09-12.md). Its final transport
+receipt lives beside the ZIP; only origin/cc/living-library is backed up.
+
 ## Previous review kit (package-06)
 
 Review kit filename: `build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.zip`.

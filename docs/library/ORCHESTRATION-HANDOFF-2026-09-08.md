@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package-07 installed and reviewed from tested `6a89189`, delivery next)
+## State at handoff (updated 2026-09-12; package-07 installed/reviewed and kit verified, release held)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Package-07 installed protocol and actual client observations reviewed | P4 15 pass / 0 fail / 1 blocked / 5 unobserved / 2 pending raw rows; actual ordinary and Recall each 20/20 pairs; native prompts pass separately | Preserve false combined flags, negative-only Recall and absent native-client GUI acceptance in release review |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
-| Integration | Package-07 built/installed from 6a89189; full tree 2,540 pass / 1 historical failure / 2 skips | 32,497 installed hashes match; Setup/reinstall exit 0; 480-file installed seal, five actual client sessions / 44 successful terminal hooks / zero sentinel calls | Update/review current runbook, notes and kit; backup only origin/cc/living-library. Historical/security/GUI release scope remains Ryan's decision |
+| Integration | Package-07 built/installed from 6a89189; full tree 2,540 pass / 1 historical failure / 2 skips; review kit from 81e4495 complete | 32,497 installed hashes match; five actual client sessions / 44 successful terminal hooks / zero sentinel calls; all 2,603 ZIP/extracted hashes verified | Verify final external branch-backup receipt. Historical/security/GUI release scope remains Ryan's decision; no product rerun/rebuild owed |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -249,7 +249,10 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    Native prompts succeed separately; five actual sessions have 44 successful
    terminal hooks and zero sentinel calls. Keep absent native GUI, negative-only
    Recall, false combined flags and the historical/security release decisions.
-   Finish documentary review kit 07 and its branch-only backup; no rebuild owed.
+   Documentary review kit 07 is complete: 2,603 payloads, all ZIP/extracted
+   hashes verified. Read RELEASE-DELIVERY-07-2026-09-12.md. The final branch-only
+   backup is complete only when its external .backup.json verifies exact local/
+   remote equality. Do not repeat a verified backup or rebuild unchanged source.
 9. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
@@ -2994,3 +2997,19 @@ one substring-replacement refusal before writing its final sealer; only that
 missing output was generated. Both diagnostics and bounded corrections remain.
 No product observation or ZIP build ran in those preparation steps. All nine
 current runbook PowerShell blocks parse, a syntax-only result.
+
+### 2026-09-12 — review kit 07 complete
+
+Review source 81e4495 binds build/validation source 6a89189. The kit has 2,603
+payloads; every ZIP and extracted hash matches, paths are safe and unique,
+and no nested archive or database/auth file is present. The 940 current and
+supporting proof payloads match Git blobs. Delivery adds a 26-payload seal.
+Portable paths and nine PowerShell blocks were inspected, not separately run.
+
+ZIP: build/Uoink-Living-Library-3-8-0-Review-Kit-07-2026-09-12.zip,
+425,699,322 bytes, SHA-256
+7bd525f785f9ddaef2ec1b1e4317b5401eadfd9e083483d4b9ce5f61417206fe.
+Keep release_ready=false. Bounded installed work is complete; native GUI
+acceptance and historical/security release scope remain explicit. No main merge,
+ordinary upgrade, new fetch or publication. The next final documentary commit
+needs only the authorized cc/living-library backup and verified external receipt.

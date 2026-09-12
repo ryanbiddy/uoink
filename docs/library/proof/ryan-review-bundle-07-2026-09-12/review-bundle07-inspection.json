@@ -1,0 +1,13 @@
+{
+  "source": "81e4495fdcf5d6365587e407e7e61c68440b9e01",
+  "payload_files": 2603,
+  "all_extracted_hashes_match": true,
+  "unique_safe_casefolded_zip_paths": true,
+  "nested_archives": [],
+  "database_or_auth_files": [],
+  "portable_entrypoint_paths_checked": true,
+  "portable_execution_claimed": false,
+  "release_ready": false,
+  "zip_sha256": "7bd525f785f9ddaef2ec1b1e4317b5401eadfd9e083483d4b9ce5f61417206fe",
+  "zip_bytes": 425699322
+}

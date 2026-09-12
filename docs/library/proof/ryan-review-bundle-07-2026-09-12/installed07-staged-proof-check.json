@@ -1,0 +1,12 @@
+{
+  "seal": "ryan-agent-installed-07-2026-09-12",
+  "payloads": 480,
+  "staged_blob_hashes_match": true,
+  "exact_force_adds": [
+    "docs/library/proof/ryan-agent-installed-07-2026-09-12/p4/profile/vault/Uoink/.uoink-mirror/manifest.json",
+    "docs/library/proof/ryan-agent-installed-07-2026-09-12/p4/profile/vault/Uoink/Library/b22e2df92643a292fdf8b71ca5a89ee707f525d3135e239d1cbc05978bf69168.md",
+    "docs/library/proof/ryan-agent-installed-07-2026-09-12/p4/profile/vault/Uoink/Library/f248ea83bc2e919ba0f12907523c7628b855fb2d87905f5138a752cf159427c0.md",
+    "docs/library/proof/ryan-agent-installed-07-2026-09-12/p4/profile/vault/Uoink/Library.md",
+    "docs/library/proof/ryan-agent-installed-07-2026-09-12/p6-published01/profile/server.log"
+  ]
+}

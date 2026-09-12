@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "scope": "PowerShell syntax only; commands not executed",
+  "blocks": [
+    {
+      "block": 1,
+      "errors": []
+    },
+    {
+      "block": 2,
+      "errors": []
+    },
+    {
+      "block": 3,
+      "errors": []
+    },
+    {
+      "block": 4,
+      "errors": []
+    },
+    {
+      "block": 5,
+      "errors": []
+    },
+    {
+      "block": 6,
+      "errors": []
+    },
+    {
+      "block": 7,
+      "errors": []
+    },
+    {
+      "block": 8,
+      "errors": []
+    },
+    {
+      "block": 9,
+      "errors": []
+    }
+  ]
+}

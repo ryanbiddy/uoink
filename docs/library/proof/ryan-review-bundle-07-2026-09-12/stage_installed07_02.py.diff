@@ -1,0 +1,14 @@
+--- 
++++ 
+@@ -12,9 +12,9 @@
+       'INSTALLED-07-REVIEW-PATH-CORRECTION-2026-09-12.md','INSTALL-RECEIPT-RUNBOOK-2026-09-09.md',
+       'ORCHESTRATION-HANDOFF-2026-09-08.md','RELEASE-NOTES-LIVING-LIBRARY.md']
+ subprocess.run(['git','add','--',seal.relative_to(r).as_posix(),*['docs/library/'+n for n in docs]],cwd=r,check=True,capture_output=True)
+-ignored=subprocess.run(['git','check-ignore','--stdin'],cwd=r,input='\n'.join(paths)+'\n',text=True,capture_output=True)
++ignored=subprocess.run(['git','check-ignore','-z','--stdin'],cwd=r,input='\0'.join(paths)+'\0',text=True,capture_output=True)
+ assert ignored.returncode in (0,1)
+-ignored_paths=ignored.stdout.splitlines()
++ignored_paths=[p for p in ignored.stdout.split('\0') if p]
+ assert all(p in paths for p in ignored_paths)
+ if ignored_paths:subprocess.run(['git','add','-f','--',*ignored_paths],cwd=r,check=True,capture_output=True)
+ for path in paths:
