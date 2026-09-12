@@ -86,17 +86,18 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package-07 installed/reviewed and kit verified, release held)
+## State at handoff (updated 2026-09-12; native GUI defects under repair, security evidence reviewed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-07 installed and source-bound; documentary delivery next |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; package-07 C22 and visual review complete | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders. Four images match unchanged consent/charge/recovery state | Original historical AT6 exit disposition remains Ryan's; older partial receipts stay partial |
-| 4 | Package-07 installed protocol and actual client observations reviewed | P4 15 pass / 0 fail / 1 blocked / 5 unobserved / 2 pending raw rows; actual ordinary and Recall each 20/20 pairs; native prompts pass separately | Preserve false combined flags, negative-only Recall and absent native-client GUI acceptance in release review |
+| 4 | Package-07 installed protocol and actual client observations reviewed; actual native Uoink dashboard now observed | Existing P4 counts and 20/20 actual-client pairs remain; native note save/read succeeds but its type and asset-health presentation fail | Gemini d8840cdd repairs the observed display defects. Claude Desktop exposed no targetable window and exited 0; no client GUI credit |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Package-07 production-publication and cited-range observation pass | Exact export after 2.100142 s protocol delay; first actual client export succeeds (separate 1.985696 s delay); original incomplete P4 seed unchanged | Speakers blocked; GUI/player credit remains separate, no new fetch |
-| Integration | Package-07 built/installed from 6a89189; full tree 2,540 pass / 1 historical failure / 2 skips; review kit from 81e4495 complete | 32,497 installed hashes match; five actual client sessions / 44 successful terminal hooks / zero sentinel calls; all 2,603 ZIP/extracted hashes verified | Verify final external branch-backup receipt. Historical/security/GUI release scope remains Ryan's decision; no product rerun/rebuild owed |
+| Security | Fresh Gemini evidence independently reviewed at a6b9cf0 | 19 raw entries / 15 alias groups remain. 35 upstream payloads verified; 21 existing cases pass in both roots. Four proposed worker tests rejected | No verified compatible drop-in dependency repair. Keep the security hold; broader migration needs a separate qualified scope |
+| Integration | Package-07 full tree remains 2,540 pass / 1 historical failure / 2 skips; its kit and final backup at 0a1f923 are verified | Actual native dashboard found new product display defects after that qualification | Integrate d8840cdd if verified, then run a fresh full tree and build/install/reseal package-08. Preserve package-07 failures |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -139,6 +140,39 @@ at that checkpoint; the authorized correction and new result are above.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; updated after explicit correction/install approval)
+
+### Active follow-up from Ryan, 2026-09-12
+
+This sequence supersedes the completed delivery instructions below.
+
+1. Security run 0ee38a14 is integrated at a6b9cf0. Read
+   ASTRA-SECURITY-REPAIR-REVIEW-2026-09-12.md before its retained worker report.
+   The raw scan is 19 / 15, not clean; the worker's adjusted count of 17 and
+   proposed tests are rejected. No product change occurred in that integration.
+2. Native GUI is available through the Windows computer-use skill's @oai/sky
+   API in node_repl. Cua's disabled native surface is not evidence that all
+   native tools are unavailable. Actual installed dashboard evidence is under
+   Agent Install 07/native-gui01/dashboard. A new native note saves and reads
+   exactly, but shows "note video" and a false missing-media warning. Gemini
+   d8840cdd is running NATIVE-NOTE-DISPLAY-REPAIR-BRIEF-2026-09-12.md.
+3. Verify that worker's behavioral regressions on original and repaired source,
+   named suites in its worktree, raw diff/three-way integration and checkout
+   suites. Existing tests and fixtures stay unchanged. Then freeze a commit,
+   run the corrected complete tree, build package-08 and qualify its installed
+   source plus the native note flow. Update notes/runbook/kit and back up only
+   cc/living-library. Never reuse a consumed profile or claim a prior failure
+   passed without the new result.
+4. Claude Desktop 1.49585.0 honors CLAUDE_USER_DATA_DIR in shipped code. The
+   isolated attempt had no targetable window in repeated Sky inventories, then
+   exited 0 after about 81 seconds. Its owned job is empty and guard restored.
+   A proposed second-instance activation did not run because the first attempt
+   had already ended; no auth was copied or automated. Preserve this incomplete
+   GUI result. It is distinct from the 44 prior successful native CLI calls.
+5. Keep the historical AT6 exit gap and dependency release hold under Blockers
+   for Ryan. Source changes need requalification; documentary changes alone do
+   not justify repeating the completed product measurements.
+
+### Earlier queue, completed or superseded by the active follow-up
 
 1. The two approved exact fixture corrections have 180 mirror and 74 ordered
    read/resource/prompt passes. Their review and 14-file seal are in
@@ -3013,3 +3047,26 @@ Keep release_ready=false. Bounded installed work is complete; native GUI
 acceptance and historical/security release scope remain explicit. No main merge,
 ordinary upgrade, new fetch or publication. The next final documentary commit
 needs only the authorized cc/living-library backup and verified external receipt.
+
+
+### 2026-09-12 — fresh security evidence and actual native GUI defects
+
+Security integration a6b9cf0 retains 35 primary-source payloads and a 28-payload
+Astra review seal. Raw audit remains 19 entries / 15 groups. Worker verification
+has 25 passes, but four proposed tests are rejected; the same 21 existing cases
+pass in the checkout. One new test used an always-true object predicate and did
+not test its claimed DLL redirection. Do not equate test count with useful
+coverage. Corrected non-Lightning accounting is 18 entries / 14 groups; retain
+the raw 19 / 15. Explicit UTF-8 repaired a reader-only failure. Twelve checkout
+proof files needed restoration from exact staged blobs after CRLF conversion;
+all 35 now match. No production dependency or existing test changed.
+
+Windows @oai/sky actually works. The installed native dashboard performed
+search, item navigation, Sources/Activity navigation and a new synthetic note
+save/read. It exposed real note-as-video and false asset-health presentation
+defects, assigned to Gemini d8840cdd under the new native-note brief. All owned
+dashboard/helper descendants stopped; forced owned shutdown exits are 1 and
+must not be described as natural exit-zero observations. Guard bytes restored.
+The isolated Claude Desktop attempt exposed no window and ended naturally with
+exit 0, so client GUI acceptance remains incomplete. Sign-in was not reached.
+Do not reuse any earlier authentication code or copy credentials.
