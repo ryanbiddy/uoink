@@ -1,0 +1,196 @@
+{
+  "files": {
+    "Activate-desktop.cs": {
+      "bytes": 326,
+      "sha256": "51b8da12510b2988ca3ab9a8261003c7a17f7ee92ed1dd46784f9776f4d80a89"
+    },
+    "activation-build.json": {
+      "bytes": 229,
+      "sha256": "2d52f1daaeaee58befe79773ad32a72ec1a9501e9a9890578f091416863b1e5a"
+    },
+    "compile-dashboard.json": {
+      "bytes": 315,
+      "sha256": "89a12012ed78c048a3dc0e01d730618777c62d3b710ca7bb711f2257a435dd69"
+    },
+    "compile-desktop.json": {
+      "bytes": 315,
+      "sha256": "839aeeacae6d3e904eff97994d4be92bd8027a7bd4b9e2f3382c1b79938a5e14"
+    },
+    "created-note/synthetic-native-gui-note-07-4ffc6660/synthetic-native-gui-note-07-4ffc6660.json": {
+      "bytes": 455,
+      "sha256": "47f3a6d8fc8e1a16c747265ce7a9ad76ef19d6c5deacf2f12290dd428898b6c5"
+    },
+    "created-note/synthetic-native-gui-note-07-4ffc6660/synthetic-native-gui-note-07-4ffc6660.md": {
+      "bytes": 218,
+      "sha256": "dd5e1187eb882fdf58eb3f26580f7ef357dcd5fdd7408bcb30d2661e2728d9a8"
+    },
+    "dashboard/01-library-0.png": {
+      "bytes": 119137,
+      "sha256": "124d7da84d194b6db47ca909f41bb7c62a7328f0c5691f4fdd2b738c689cfccd"
+    },
+    "dashboard/01-library.json": {
+      "bytes": 20378,
+      "sha256": "fa76ef24538da4d9f4ff06d1d00cf72f7b09a60c692f8bd4b6afe81710c97c93"
+    },
+    "dashboard/02-search-0.png": {
+      "bytes": 114780,
+      "sha256": "c92e2ef68e396f54ea4b7f5bdb1fd8a96f515e1f3accc27b0b5dc5008ead1438"
+    },
+    "dashboard/02-search.json": {
+      "bytes": 15753,
+      "sha256": "9f800633a60bec69faeb73a965e73d0fe5bf3e4632146d1d35de6c9cf1566af2"
+    },
+    "dashboard/03-saved-item-0.png": {
+      "bytes": 95921,
+      "sha256": "8d60e03e0f6ee6fc62689c3d6bc095924e4cd2be6f5ee9e75ea5bcd34928b7f9"
+    },
+    "dashboard/03-saved-item.json": {
+      "bytes": 7000,
+      "sha256": "6ae345c4b807e1fe1a0b2b7814ce4281633259dd02b50ccf9c7b14a1c3a3ff17"
+    },
+    "dashboard/04-evidence-view-0.png": {
+      "bytes": 84933,
+      "sha256": "e409da0cd8316b103d42f0833f4f5f6b2553af27de303392542a37555f025efb"
+    },
+    "dashboard/04-evidence-view.json": {
+      "bytes": 5089,
+      "sha256": "98ab79c0e3881bf5b7d57e9619470215ca30288d5846943e12a03290d416b73f"
+    },
+    "dashboard/05-sources-0.png": {
+      "bytes": 96380,
+      "sha256": "cbe062e423e6ad2a26da94756ec08b7084564561ea8900a97965d10f8cb62c72"
+    },
+    "dashboard/05-sources.json": {
+      "bytes": 10435,
+      "sha256": "c32964b34eef6cd80c766d946134e087634e225040ac2dfc54cd02b9e91527bc"
+    },
+    "dashboard/06-activity-0.png": {
+      "bytes": 82264,
+      "sha256": "a4b10067e854f9c614763ffc1230f7b4e87f5ddf94bb2898a8cfa761dad75cc2"
+    },
+    "dashboard/06-activity.json": {
+      "bytes": 5256,
+      "sha256": "77b6b3e9d686061212c52ad63189ad0ba92e540ac655a552bba4b65fe2458427"
+    },
+    "dashboard/07-note-before-save-0.png": {
+      "bytes": 104369,
+      "sha256": "4cdfc118e472e7447ae031c6cd4663210bc867d87c5b3ee5bfa5038e555e9789"
+    },
+    "dashboard/07-note-before-save.json": {
+      "bytes": 10434,
+      "sha256": "3fdcccd8c51ef79caf7b76d3941254589a7be712e1de60b8f07a401c274bb36e"
+    },
+    "dashboard/08-note-saved-0.png": {
+      "bytes": 95462,
+      "sha256": "edfcc4d640c2250088232b3bf61be33fa697e92d62a4d2f57fc4da8a3fba054a"
+    },
+    "dashboard/08-note-saved.json": {
+      "bytes": 10507,
+      "sha256": "6072186470f09d49f49c35b1169ce44ec85e693359d415cd8b1479032059a536"
+    },
+    "dashboard/09-note-in-library-0.png": {
+      "bytes": 113666,
+      "sha256": "e14ec033e9bdbb3204954e7d5b52153b04438851421f34e1590371b1cba31c2a"
+    },
+    "dashboard/09-note-in-library.json": {
+      "bytes": 17349,
+      "sha256": "52033410cf8b26e4277520d104a956eedecdc6745205210a062aea6c15f19a8e"
+    },
+    "dashboard/10-native-note-detail-0.png": {
+      "bytes": 92818,
+      "sha256": "d76a15fb8f5e6c58554efb7da18735608d4a12c9596707c87672302d856e5d68"
+    },
+    "dashboard/10-native-note-detail.json": {
+      "bytes": 6828,
+      "sha256": "a8a088d40111e6117ce096dcc440620c276f75869da0eef664301921a51e7247"
+    },
+    "dashboard/helper.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dashboard/helper.stdout": {
+      "bytes": 4847,
+      "sha256": "c670f86b9f24b1a66eacef47572d6889003b30b4c0e18fba43c578df2a38817b"
+    },
+    "dashboard/observation-complete.json": {
+      "bytes": 1577,
+      "sha256": "9c32e9e37123c0e5d65df0012a94fb9ca88dbf4861f45d948a6a6c8cbb0aeee5"
+    },
+    "dashboard/ready.json": {
+      "bytes": 17154,
+      "sha256": "a9c46ee4b76a5ac431ef4bd642bd9e026ba3c8faaf9d7803032b3ed9b4b1cafc"
+    },
+    "dashboard/result.json": {
+      "bytes": 20730,
+      "sha256": "47b5c052ab0a0493ac4a0d30cd4ac660f395428cda3aa52f00fab3468922f15b"
+    },
+    "dashboard/window.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dashboard/window.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "desktop/private-log-bindings.json": {
+      "bytes": 693,
+      "sha256": "9396ab4f7f8168251cb2ae00e17f820e3364714be1d09419cff45dc3fb34b099"
+    },
+    "desktop/ready.json": {
+      "bytes": 15158,
+      "sha256": "64f2d4b87616d80d7c853616ccf449aeecf1941c01548800e84ee5c38e7c91d3"
+    },
+    "desktop/result.json": {
+      "bytes": 16959,
+      "sha256": "b52a9dd03a557c9e202289c6693723e58f9f6844db95d91de7ea9854f64bce50"
+    },
+    "instruments/activate_native_desktop07.py": {
+      "bytes": 2320,
+      "sha256": "9a8e86de009db353585e29d6b810535b2c70a80113e64576626980a317263e7d"
+    },
+    "instruments/build_native_gui07_launchers.py": {
+      "bytes": 1675,
+      "sha256": "9d0b02f2624a42fb2c04699180ccae216c784cad54c8fe75c73cbc2d91494c64"
+    },
+    "instruments/native_gui07_driver.py": {
+      "bytes": 5839,
+      "sha256": "b28770d766392f49ceb09fa22b37681a0a1d3daf2776e4ee23455bb43e0dc411"
+    },
+    "instruments/prepare_native_gui07.py": {
+      "bytes": 2088,
+      "sha256": "b739a7ec1be1bc92bc65917f7f92baf201b7c3f1b67f9a107fa6480e08c10ad8"
+    },
+    "Launch-dashboard.cs": {
+      "bytes": 438,
+      "sha256": "91a7e4b668c91017f74bce0c2da8ea73fdff300e4fcaa58c7cc0d02dd26d15f6"
+    },
+    "Launch-desktop.cs": {
+      "bytes": 436,
+      "sha256": "91087761957a62a2d79d800ce74fa916b3e5fe84188668cde30d44561a94b513"
+    },
+    "NATIVE-GUI-PACKAGE-07-OBSERVATION-2026-09-12.md": {
+      "bytes": 3606,
+      "sha256": "6fa93e7461c459240cd168bc571dbb84bec432224c9d6e05cc2775903b4847ed"
+    },
+    "p4/profile/operator-prepare.json": {
+      "bytes": 7462,
+      "sha256": "d60262686b210c8527a762a1f86d76ff8d57c647c625fa0df9ad0bdd5d070401"
+    },
+    "pre-execution-review.json": {
+      "bytes": 606,
+      "sha256": "212ae700edf5e0b47040c84b43ecc9ff621aa642f9bd399086d9f5d2fb43958d"
+    },
+    "prepare.json": {
+      "bytes": 1528,
+      "sha256": "44a10d0fb979a0c36b518f002b709ef50e01a1d2dec633c8cef141fb96546805"
+    },
+    "prepare.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "prepare.stdout": {
+      "bytes": 7592,
+      "sha256": "6c340d899ca997287a9779f63b7e323239fa232c21ba0c8705e74fb067f2b0a3"
+    }
+  }
+}

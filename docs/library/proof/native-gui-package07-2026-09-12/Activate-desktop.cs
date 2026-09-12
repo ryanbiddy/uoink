@@ -1,0 +1,1 @@
+using System;using System.Diagnostics;class Activate { [STAThread] static void Main(){var p=new ProcessStartInfo();p.FileName=@"C:\Python314\pythonw.exe";p.Arguments=@"-I -S -B E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\activate_native_desktop07.py";p.UseShellExecute=false;p.CreateNoWindow=true;Process.Start(p);}}

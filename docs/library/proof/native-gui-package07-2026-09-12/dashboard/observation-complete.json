@@ -1,0 +1,34 @@
+{
+  "utc": "2026-09-12T16:58:19.818496+00:00",
+  "observed_by": "Astra through @oai/sky native Windows UI",
+  "passes": [
+    "installed native dashboard opened",
+    "native search filtered the library",
+    "saved synthetic item detail opened",
+    "evidence empty state rendered without a scan",
+    "Sources showed zero active sources and zero starts",
+    "Activity showed zero running and queued jobs",
+    "native note save succeeded and count changed 3 to 4",
+    "new note appeared in Library",
+    "new note detail showed exact AMBER body"
+  ],
+  "findings": [
+    "fresh native note is incorrectly labeled note video",
+    "fresh successful note card shows NEEDS ATTENTION despite successful text save; investigate expected asset state"
+  ],
+  "limitations": [
+    "older P4 text item uses path outside helper output root; dashboard refuses it correctly",
+    "no native Claude GUI acceptance yet",
+    "no brief/citation/chapter GUI credit",
+    "no media fetch or claim scan",
+    "no ordinary account upgrade"
+  ],
+  "tool_diagnostics": [
+    "launcher exited without its own window; selected actual installed child windows",
+    "offscreen search click refused before scrolling",
+    "intervening input required fresh observation",
+    "WebView UIA set_value unsupported; used observed caret and native keyboard typing",
+    "geometry-less and stale-state clicks refused; refreshed screenshot before coordinate input"
+  ],
+  "scope": "new operator note in synthetic isolated profile; original fixtures and assertions unchanged"
+}
