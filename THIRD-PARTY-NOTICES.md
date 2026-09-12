@@ -1,10 +1,10 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-11; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-12; regenerate with `python scripts/gen_third_party_notices.py`.
 
 SPDX expressions below fill the generator's UNKNOWN fields only where the
-exact packaged wheel declares License-Expression. This September 11 review
+exact packaged wheel declares License-Expression. This September 12 review
 does not infer missing metadata or replace the packaged license files.
 
 | Package | Version | License | Project |
