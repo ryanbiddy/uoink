@@ -1,0 +1,84 @@
+{
+  "started_utc": "2026-09-12T07:06:13.897940+00:00",
+  "diagnostic_only": true,
+  "prepared_before": true,
+  "database_before": "a6032d70dd04357342e34ca9edd74bed5443f955198bf5e6337314220581cbec",
+  "instrument_sha256": "94580dee5e59c43e0d73f54207d4232ad2d31132680fc87d39761331ddb10c16",
+  "guard_canary": {
+    "refused": true,
+    "exit_code": 2,
+    "stdout": "refused\r\n",
+    "stderr_tail": "",
+    "canary_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\profile\\guard-canary\\canary-index.db",
+    "live_index_opened": false,
+    "live_index_hashed": false,
+    "live_index_stat": false,
+    "ig_forbidden_live": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db"
+  },
+  "command": [
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "-P",
+    "-B",
+    "-s",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\diagnose_media06_registry.py",
+    "--child"
+  ],
+  "exit": 0,
+  "cleanup": {
+    "pid": 30776,
+    "label": "media-storage-diagnostic01",
+    "job_assigned": true,
+    "already_exited": true,
+    "exit_code": 0,
+    "assignment_error": null,
+    "descendants_before": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        30776
+      ],
+      "parent_pid": 30776,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_after": {
+      "job_assigned": true,
+      "job_pids": [],
+      "owned_pids": [
+        30776
+      ],
+      "parent_pid": 30776,
+      "parent_exit": 0,
+      "job_query_ok": true,
+      "job_empty_affirmed": true,
+      "job_query_error": null,
+      "identity_uncertain": false
+    },
+    "descendants_remaining": [],
+    "descendants_exited": true,
+    "job_query_ok": true,
+    "job_empty_affirmed": true,
+    "identity_uncertain": false,
+    "job_query_error": null,
+    "parent_exited": true,
+    "cleaned": true
+  },
+  "guard_restore": {
+    "restored": [
+      {
+        "path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\Lib\\site-packages\\sitecustomize.py",
+        "action": "removed",
+        "exact_receipt_bytes": true
+      }
+    ],
+    "ok": true,
+    "failures": []
+  },
+  "prepared_after": true,
+  "database_after": "a6032d70dd04357342e34ca9edd74bed5443f955198bf5e6337314220581cbec",
+  "pth_unchanged": true,
+  "guard_absent": true
+}

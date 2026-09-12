@@ -1,0 +1,14 @@
+{
+  "utc": "2026-09-12T06:53:56.532816+00:00",
+  "session_id": "7fc730fe-0467-4f45-b716-9582e5677a3a",
+  "uri_count": 10,
+  "syntax_errors": 0,
+  "files": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4_operator_read_pairs06.py": "5dde8342e1971c1a1adc39710f94eb2beba53e2f69914f06e72dabd95ce12b40",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_read_pairs06.py": "93a15eca7a32c376455d20a2261410252b8ad4cc566411591efae0f3cfe214b9",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\read-pairs01-request.txt": "a02b57796691382b924644f4358ce457a4f6710d07aaf6914dfa252952cf66f8",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\settings-auth-overlay.json": "679a1ccce0136a9c10b6a8645811b7bfda4198709fa7620db283840b089e5c63",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\read-pairs01-driver.diff": "b3705774cfbf0c715c596bbc1482b98d11f57480e9e2693ade298f340e56d772",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\read-pairs01-observer.diff": "3f53f8e7ae2af19b5110c827722b5873c069e7e0df7f8339a146761beea3bf4d"
+  }
+}

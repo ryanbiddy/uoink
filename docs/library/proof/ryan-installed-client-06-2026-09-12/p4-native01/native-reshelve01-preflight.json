@@ -1,0 +1,16 @@
+{
+  "utc": "2026-09-12T06:50:40.296794+00:00",
+  "preview_id": "bFRw1OtCtJhS9xY9lwu7r3pyFV31eQfZ",
+  "preview_expires_ms": 1789196655270,
+  "auth_namespace": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\profile\\client\\claude-config",
+  "credential_contents_copied_or_inspected": false,
+  "syntax_errors": 0,
+  "files": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4_operator_native_reshelve06.py": "d698f6cd5e0c21c20dc5094d7b39177dde90758dd30bfbdf32bb99ef19f34aab",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_native_reshelve06.py": "88881280405313ded5a0875fd7c4aa81f0b0cae7532cf831b966a0ab330fe92a",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\native-reshelve01-request.txt": "b31fd520d18ed066bcd60c371439957e2b087556eccb3d609e5b280e3311dee2",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\settings-auth-overlay.json": "679a1ccce0136a9c10b6a8645811b7bfda4198709fa7620db283840b089e5c63",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\native-reshelve01-driver.diff": "f995ab19331e569d673b1351edb1842b8d3d29ab937fe351080cca28f0607e89",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\native-reshelve01-observer.diff": "5d4e7678dd8df89894613a676ede1104d0de5f13fca56a902bc897d539de1d81"
+  }
+}

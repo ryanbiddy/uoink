@@ -1,5 +1,10 @@
 # Sign into the prepared isolated client
 
+Completed: Ryan signed into the isolated namespace and confirmed extra paid
+usage is off. Six guarded client sessions have now run. No further sign-in is
+needed. The instructions below are retained as the historical setup procedure;
+see [the current client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md).
+
 Open **Uoink Test Sign-in** on your desktop. Astra has already launched it for
 this session. Finish the browser sign-in; if Claude gives you a code, paste it
 into the sign-in window. When the window says **Signed in**, return to Codex

@@ -1,0 +1,13 @@
+{
+  "utc": "2026-09-12T06:44:24.682848+00:00",
+  "review": "PASS: module lookup, evidence names and fresh session only; guard and prepared inputs unchanged",
+  "syntax_errors": 0,
+  "files": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4_operator_native_consult06.py": "4aaeefd6b1ad434d6dec5f8c422867950763f4c531e880a6d1a9870cb7058fc1",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_native_consult06.py": "ef1f7b88fce23e5b1b6777a21b360d40dea8176b413ae05a63f72fbfd92f3ff8",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\native-consult01-request.txt": "4fce749d5cbfaa0d6761426a72a61c87caf3d09dc2a65425a19a73ef31ef0444",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\native-consult01-plan.json": "930d292b3051831a8b691ebaa6637c6f2fc670b640f99226c88fbc712f743051",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\native-consult01-driver.diff": "1aef24f36402eba123ff87eb24225ced245cb8296c14ef838d5ea2ac0573a698",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\native-consult01-observer.diff": "86cb4236836219ee3ff1a86a7be5fe93a1acb222af4c76961c9951783d57bf28"
+  }
+}

@@ -2,7 +2,12 @@
 
 Ryan delegated the installation check to Astra. Package-06 now has actual same-account Setup/reinstall, 32,497 matching installed files, 11 C22 passes and a successful independent browser/state review. Phase 4 collection records 15 passes, one blocked link and seven unobserved client/visual checkpoints. This does not approve an ordinary upgrade.
 
-The separate Agent Install 06/p4-client/profile is prepared and intact. To finish that existing client session, use [the sign-in instructions](INSTALLED-CLIENT-SIGNIN-2026-09-11.md); do not repeat Setup or collect that fixture before the client observations. The procedure below remains available for a separate fresh-account receipt.
+Agent Install 06 sign-in and extra-paid-usage-off confirmation are complete.
+Actual client observations found a SQLite timeout-cleanup defect; Astra is
+repairing it and owes replacement-package qualification. Do not repeat sign-in
+or run these historical package-06 steps against the current receipt. The
+[client verdict](ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md) records progress
+and remaining checks. The procedure below remains the frozen package-06 runbook.
 
 The steps below are the reproducible procedure for one separate, fresh Windows
 account session on this machine. Do not repeat a completed agent stage in its

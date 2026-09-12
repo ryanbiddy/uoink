@@ -1,0 +1,20 @@
+{
+  "utc": "2026-09-12T06:55:41.467019+00:00",
+  "session_id": "0cb864ff-6036-476c-bee8-61aa6c844c1f",
+  "synthetic_policy_checks": {
+    "passed": 3,
+    "failed": 0
+  },
+  "original_prepared_files_changed": false,
+  "files": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\p4_operator_media06.py": "6cb6f0deb23ed69fb3fb6a221e49b3062737ab0805d21388b5c63d3a6c846b45",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_media06.py": "3d13aac1bed703ccd37442944f8dd38a5768a09e036fa82828efc1336f63cb09",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\profile\\client-overlays\\observe-media-actions.py": "f1d38591fe842855b5510a4e3d8f591080bfc3bfb845d2ae3fe4e19fc40ba61d",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\settings-media-overlay.json": "997af433e476f3d1ce5f5ff92f1ea61a9d9d7ac2d2d0ab2b031daa6dd15c9a36",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\media01-request.txt": "f5e3a733074393ebbada114ec4a3f64b92ee8a8f618401743fd5244cc8a5f557",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\media01-driver.diff": "c175b3997ca5e667bb20a2c50a31fdaf9bbbe8aa0b7b11b35224fdec67715e6e",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\media01-observer.diff": "9c36943956aea12622060fb10084692f9c5ef5399ac5f6cac1a9987e9e55bd48",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\media01-hook.diff": "308900708037d60ec2039ad5d6950a2d5f5cd90b85b1177f2009a98c11101cee",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\media01-hook-policy-review.json": "78e4078429aeedfc500749c8c3feb1fb4753f45a658c98f30b65c0c85db8e7cc"
+  }
+}

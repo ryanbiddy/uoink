@@ -1,0 +1,8 @@
+{
+  "recorded_utc": "2026-09-12T06:33:58.082362+00:00",
+  "confirmed_by": "Ryan",
+  "extra_paid_usage_off": true,
+  "question": "Is extra paid usage switched off in your Claude account?",
+  "user_reply": "correct",
+  "scope": "Existing isolated installed-client checks; no paid API fallback"
+}

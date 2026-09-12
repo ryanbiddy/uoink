@@ -1,0 +1,97 @@
+{
+  "stage": "p4-prepare",
+  "utc_start": "2026-09-12T06:49:12.054052+00:00",
+  "actual_userprofile": "C:\\Users\\hello",
+  "account_isolation": "same account, separate app/data/credential namespace; not OS-wide containment",
+  "throwaway_account": false,
+  "package_sha256": "91120b4a8d1baf13c4b20aab098e889fab008c7ce4e4bea59d68a052fe8224cb",
+  "package_source": "6697dffc30c98e97b22ecc9a5a35dfd3e8a91f5d",
+  "active_package_seal": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-06-2026-09-11",
+  "source_bindings": 142,
+  "installed_credit": false,
+  "installed_binding_report_before": {
+    "ok": true,
+    "files_checked": 141,
+    "installed_files_checked": 141,
+    "compiler_bindings": 142,
+    "compiler_bindings_count": 142,
+    "compiler_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "installer_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "problems": []
+  },
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\install_receipt\\p4_operator.py",
+    "prepare",
+    "--isolated-profile",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\profile",
+    "--isolated-port",
+    "18282",
+    "--installed-app",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app",
+    "--installed-interpreter",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python.exe",
+    "--package-manifest",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-06-2026-09-11\\package-manifest.json",
+    "--receipt-root",
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01",
+    "--package-path",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "--source-bindings",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\candidate-package-06-2026-09-11\\source-bindings.json",
+    "--forbid-checkout",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+    "--runtime-mode",
+    "installed",
+    "--timeout-seconds",
+    "300"
+  ],
+  "exit": 0,
+  "installed_binding_report_after": {
+    "ok": true,
+    "files_checked": 141,
+    "installed_files_checked": 141,
+    "compiler_bindings": 142,
+    "compiler_bindings_count": 142,
+    "compiler_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "installer_only_row": {
+      "staged_path": "upgrade_prep.ps1",
+      "source_path": "installer/upgrade_prep.ps1",
+      "source_git_blob": "acdf2c535be396e168929938897f6e2bee5bc174",
+      "checkout_and_staged_sha256": "1cf816f817a54dc42e31b0db1fcd0647bef64879fc417effddfe850e93503488",
+      "install_role": "installer-only"
+    },
+    "problems": []
+  },
+  "source_bindings_after": true,
+  "status": "completed_pending_independent_review",
+  "pth_before": {
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "pth_after": {
+    "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\python\\python313._pth": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+  },
+  "guard_absent_after": true,
+  "utc_end": "2026-09-12T06:49:15.434328+00:00"
+}

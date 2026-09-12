@@ -1,0 +1,40 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-12T06:54:55.328332+00:00",
+  "monotonic_ns": 21299225807000,
+  "pid": 8832,
+  "input": {
+    "session_id": "7fc730fe-0467-4f45-b716-9582e5677a3a",
+    "transcript_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\profile\\client\\claude-config\\projects\\E--AI-projects-uoink-installation-receipts-Agent-Install-06-p4-native01-profile-client\\7fc730fe-0467-4f45-b716-9582e5677a3a.jsonl",
+    "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\profile\\client",
+    "prompt_id": "db6f7c5b-2abc-48fc-9963-beef2c11527c",
+    "permission_mode": "dontAsk",
+    "effort": {
+      "level": "high"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "ReadMcpResourceTool",
+    "tool_input": {
+      "server": "uoink",
+      "uri": "uoink://library/v1/briefs/2026-09-09/1f0c8db414d1a73c432daef3e53fbfeb49d373a5cdb328fed37b0968b60cfb55"
+    },
+    "tool_use_id": "toolu_01Q7k1oNKnh4wjxoFMLVGBen"
+  },
+  "response": {
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "allow",
+      "permissionDecisionReason": "P4 fixture read or inert sentinel"
+    }
+  },
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__p4_sentinel__record_action"
+  }
+}

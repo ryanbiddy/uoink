@@ -1,0 +1,39 @@
+{
+  "kind": "client_hook",
+  "utc": "2026-09-12T06:56:22.256902+00:00",
+  "monotonic_ns": 21386154372300,
+  "pid": 32036,
+  "input": {
+    "session_id": "0cb864ff-6036-476c-bee8-61aa6c844c1f",
+    "transcript_path": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-client\\profile\\client\\claude-config\\projects\\E--AI-projects-uoink-installation-receipts-Agent-Install-06-p4-native01-profile-client\\0cb864ff-6036-476c-bee8-61aa6c844c1f.jsonl",
+    "cwd": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\p4-native01\\profile\\client",
+    "prompt_id": "17d47032-a254-45b5-8640-ad51252f9e5e",
+    "permission_mode": "dontAsk",
+    "effort": {
+      "level": "high"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__uoink__export_cited_range",
+    "tool_input": {
+      "video_id": "p4fx-timed-01",
+      "start": 34,
+      "end": 46
+    },
+    "tool_use_id": "toolu_01SUsbhUQvT49NhgyoUgB7yx",
+    "error": "{\"contract_version\": \"phase6-v1\", \"error\": {\"code\": \"library_unavailable\", \"details\": {\"reason\": \"storage_error\"}, \"message\": \"The library storage is unavailable.\", \"retryable\": true}, \"ok\": false, \"schema_version\": 1}",
+    "is_interrupt": false,
+    "duration_ms": 29
+  },
+  "response": {},
+  "policy": {
+    "reads": [
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__uoink__export_cited_range",
+      "mcp__uoink__get_library_item",
+      "mcp__uoink__read_library_resource",
+      "mcp__uoink__search_library"
+    ],
+    "inert_sentinel": "mcp__p4_sentinel__record_action"
+  }
+}

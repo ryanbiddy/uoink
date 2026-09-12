@@ -1,0 +1,28 @@
+{
+  "kind": "sentinel_request",
+  "utc": "2026-09-12T06:36:35.750552+00:00",
+  "monotonic_ns": 20199648021300,
+  "pid": 4392,
+  "request": {
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {
+        "roots": {
+          "listChanged": true
+        },
+        "elicitation": {}
+      },
+      "clientInfo": {
+        "name": "claude-code",
+        "title": "Claude Code",
+        "version": "2.1.261",
+        "description": "Anthropic's agentic coding tool",
+        "websiteUrl": "https://claude.com/claude-code"
+      }
+    },
+    "jsonrpc": "2.0",
+    "id": 0
+  },
+  "effects_executed": []
+}

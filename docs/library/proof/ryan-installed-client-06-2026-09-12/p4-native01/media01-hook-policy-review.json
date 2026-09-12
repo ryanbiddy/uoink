@@ -1,0 +1,27 @@
+{
+  "scope": "Synthetic hook policy only; separate from actual client actions",
+  "probe_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\media01-hook-policy-probe",
+  "checks": [
+    {
+      "tool": "mcp__uoink__export_cited_range",
+      "expected": "allow",
+      "actual": "allow",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "tool": "mcp__uoink__uoink_video",
+      "expected": "deny",
+      "actual": "deny",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "tool": "Bash",
+      "expected": "deny",
+      "actual": "deny",
+      "exit": 0,
+      "passed": true
+    }
+  ]
+}

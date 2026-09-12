@@ -1,0 +1,21 @@
+{
+  "diagnostic_only": true,
+  "installed_credit": false,
+  "sql": [
+    "PRAGMA busy_timeout",
+    "PRAGMA busy_timeout=1999",
+    "BEGIN DEFERRED",
+    "SELECT * FROM yoinks WHERE video_id='p4fx-timed-01'",
+    "SELECT * FROM citations WHERE video_id='p4fx-timed-01' AND kind='transcript_chunk' ORDER BY seq",
+    "SELECT * FROM clips WHERE video_id='p4fx-timed-01' ORDER BY seq",
+    "PRAGMA table_info(clips)",
+    "SELECT * FROM media_depth WHERE video_id='p4fx-timed-01'",
+    "ROLLBACK",
+    "PRAGMA busy_timeout=5000"
+  ],
+  "module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\library_media.py",
+  "error": "MediaError: This revision is unavailable. Resolve the item again.",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\diagnose_media06.py\", line 48, in <module>\n    result['result'] = media._export(idx._conn, request, clock=time.monotonic,\n                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                                     deadline=time.monotonic()+resources.LIMITS['service_deadline_s'])\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\library_media.py\", line 2866, in _export\n    snap = _read_snapshot(conn, request[\"video_id\"])\n  File \"E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\library_media.py\", line 1307, in _read_snapshot\n    raise _stale(\"sidecar_snapshot_mismatch\")\nlibrary_media.MediaError: This revision is unavailable. Resolve the item again.\n",
+  "sqlite_errorcode": null,
+  "sqlite_errorname": null
+}

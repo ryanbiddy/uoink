@@ -1,0 +1,61 @@
+{
+  "diagnostic_only": true,
+  "installed_credit": false,
+  "sql": [
+    "PRAGMA busy_timeout",
+    "PRAGMA busy_timeout=1999",
+    "BEGIN DEFERRED",
+    "SELECT * FROM yoinks WHERE video_id='p4fx-timed-01'",
+    "SELECT * FROM citations WHERE video_id='p4fx-timed-01' AND kind='transcript_chunk' ORDER BY seq",
+    "SELECT * FROM clips WHERE video_id='p4fx-timed-01' ORDER BY seq",
+    "PRAGMA table_info(clips)",
+    "SELECT * FROM media_depth WHERE video_id='p4fx-timed-01'",
+    "ROLLBACK",
+    "PRAGMA busy_timeout=5000"
+  ],
+  "module": "E:\\AI\\projects\\uoink\\installation-receipts\\Agent Install 06\\app\\library_media.py",
+  "exceptions": [
+    {
+      "function": "<genexpr>",
+      "line": 947,
+      "type": "GeneratorExit",
+      "message": "",
+      "sqlite_errorcode": null
+    },
+    {
+      "function": "_read_snapshot",
+      "line": 1307,
+      "type": "MediaError",
+      "message": "This revision is unavailable. Resolve the item again.",
+      "sqlite_errorcode": null
+    },
+    {
+      "function": "_export",
+      "line": 2866,
+      "type": "MediaError",
+      "message": "This revision is unavailable. Resolve the item again.",
+      "sqlite_errorcode": null
+    },
+    {
+      "function": "_admitted_export",
+      "line": 2970,
+      "type": "MediaError",
+      "message": "This revision is unavailable. Resolve the item again.",
+      "sqlite_errorcode": null
+    }
+  ],
+  "result": {
+    "ok": false,
+    "schema_version": 1,
+    "contract_version": "phase6-v1",
+    "error": {
+      "code": "revision_unavailable",
+      "message": "This revision is unavailable. Resolve the item again.",
+      "retryable": false,
+      "details": {
+        "reason": "sidecar_snapshot_mismatch",
+        "next_step": "get_library_item"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+--- native-reshelve-driver
++++ read-pairs-driver
+@@ -63,7 +63,7 @@
+         raise common.IsolationError("installed driver requires package bytes, source bindings and forbidden checkout")
+     profile = Path(binding["isolated_profile"])
+     common.ensure_profile_dirs(profile)
+-    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "") + "-native-reshelve01"
++    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "") + "-read-pairs01"
+     receipt_path = profile / ("operator-" + stage_name + ".json")
+     out_path = profile / ("operator-" + stage_name + ".stdout")
+     err_path = profile / ("operator-" + stage_name + ".stderr")
+@@ -98,6 +98,7 @@
+         if json.loads(overlay_path.read_text(encoding="utf8")) != expected_settings:
+             raise common.IsolationError("auth overlay differs beyond the isolated credential directory")
+         launch["args"][launch["args"].index("--settings") + 1] = str(overlay_path)
++        launch["args"][launch["args"].index("--session-id") + 1] = "7fc730fe-0467-4f45-b716-9582e5677a3a"
+         command = [str(args.client_exe), *launch["args"], "--print", "--verbose",
+                    "--output-format", "stream-json", "--include-hook-events"]
+         cwd = client

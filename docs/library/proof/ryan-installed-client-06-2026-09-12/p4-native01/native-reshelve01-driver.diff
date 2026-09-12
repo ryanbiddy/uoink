@@ -1,0 +1,35 @@
+--- original
++++ native-reshelve
+@@ -9,7 +9,7 @@
+ import subprocess
+ import sys
+ 
+-HERE = Path(__file__).resolve().parent
++HERE = Path(r'E:\AI\projects\uoink\checkouts\Yoink-library\scripts\install_receipt')
+ sys.path.insert(0, str(HERE))
+ import p4_common as common
+ from p4_session import spawn_owned
+@@ -63,7 +63,7 @@
+         raise common.IsolationError("installed driver requires package bytes, source bindings and forbidden checkout")
+     profile = Path(binding["isolated_profile"])
+     common.ensure_profile_dirs(profile)
+-    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "")
++    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "") + "-native-reshelve01"
+     receipt_path = profile / ("operator-" + stage_name + ".json")
+     out_path = profile / ("operator-" + stage_name + ".stdout")
+     err_path = profile / ("operator-" + stage_name + ".stderr")
+@@ -91,7 +91,13 @@
+         config = json.loads((client / "mcp-client.json").read_text(encoding="utf8"))
+         validate_original_config(config, binding)
+         env.update(launch["environment"])
+-        env["CLAUDE_CONFIG_DIR"] = str(client / "claude-config")
++        env["CLAUDE_CONFIG_DIR"] = str(Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 06\p4-client\profile\client\claude-config'))
++        overlay_path = profile.parent / "settings-auth-overlay.json"
++        expected_settings = json.loads((client / "settings.json").read_text(encoding="utf8"))
++        expected_settings["env"]["CLAUDE_CONFIG_DIR"] = env["CLAUDE_CONFIG_DIR"]
++        if json.loads(overlay_path.read_text(encoding="utf8")) != expected_settings:
++            raise common.IsolationError("auth overlay differs beyond the isolated credential directory")
++        launch["args"][launch["args"].index("--settings") + 1] = str(overlay_path)
+         command = [str(args.client_exe), *launch["args"], "--print", "--verbose",
+                    "--output-format", "stream-json", "--include-hook-events"]
+         cwd = client

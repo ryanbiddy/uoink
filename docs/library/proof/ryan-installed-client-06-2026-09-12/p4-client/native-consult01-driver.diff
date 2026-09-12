@@ -1,0 +1,28 @@
+--- original
++++ supplement
+@@ -9,7 +9,7 @@
+ import subprocess
+ import sys
+ 
+-HERE = Path(__file__).resolve().parent
++HERE = Path(r'E:\AI\projects\uoink\checkouts\Yoink-library\scripts\install_receipt')
+ sys.path.insert(0, str(HERE))
+ import p4_common as common
+ from p4_session import spawn_owned
+@@ -63,7 +63,7 @@
+         raise common.IsolationError("installed driver requires package bytes, source bindings and forbidden checkout")
+     profile = Path(binding["isolated_profile"])
+     common.ensure_profile_dirs(profile)
+-    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "")
++    stage_name = args.stage + ("-" + args.client_route if args.stage == "client" else "") + "-native-consult01"
+     receipt_path = profile / ("operator-" + stage_name + ".json")
+     out_path = profile / ("operator-" + stage_name + ".stdout")
+     err_path = profile / ("operator-" + stage_name + ".stderr")
+@@ -92,6 +92,7 @@
+         validate_original_config(config, binding)
+         env.update(launch["environment"])
+         env["CLAUDE_CONFIG_DIR"] = str(client / "claude-config")
++        launch["args"][launch["args"].index("--session-id") + 1] = "ebc412b6-9edf-4d88-acfc-f7389ceb1fd4"
+         command = [str(args.client_exe), *launch["args"], "--print", "--verbose",
+                    "--output-format", "stream-json", "--include-hook-events"]
+         cwd = client

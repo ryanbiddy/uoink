@@ -1,0 +1,12 @@
+{
+  "kind": "sentinel_request",
+  "utc": "2026-09-12T06:54:07.190459+00:00",
+  "monotonic_ns": 21251087927700,
+  "pid": 39896,
+  "request": {
+    "method": "tools/list",
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "effects_executed": []
+}

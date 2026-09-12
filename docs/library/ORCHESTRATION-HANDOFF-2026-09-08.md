@@ -86,17 +86,17 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-11; package-06 and complete tree source `6697dff`)
+## State at handoff (updated 2026-09-12; package-06 source `6697dff`, new reader defect open)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; review kit verified |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
-| 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile is signed in and remains uncollected. Extra-paid-usage-off confirmation and client/visual observations remain |
+| 4 | Package-06 client supplements have 20/20 paired reads and both native prompts; combined gate remains open | 48 tool invocations: 45 success / 3 failure events, no sentinel calls. Finished reader leaves an expired SQLite callback; actual media failure reproduced | Gemini repairs callback cleanup under the 2026-09-12 brief; Astra verifies/integrates. Sign-in and extra-usage-off confirmation are complete |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
-| 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
-| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match; 300 installed proof payloads sealed. 140 runtime pins, 283 requirements and 983 repair-wheel files match. Defender no threats; unsigned, raw OSV 19/15 retained | Review ZIP verified; backup completion requires the external transport receipt described in Queue 7. Remaining client and release decisions belong to Ryan. No ordinary upgrade or main merge |
+| 6 | Package-06 actual client range export failed twice with storage_error | Installed diagnosis proves stale Phase 4 callback; a separate diagnosis finds incomplete chapter sidecar in the original P4 seed. Both results retained | Repair callback; observe a separately published synthetic media source without editing old fixtures. Speakers stay blocked |
+| Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match. New client proof has 251 payloads and a reproduced product defect; old measurements remain unchanged | New product repair requires complete tree, rebuild and fresh installed qualification. Remaining repair/evidence work belongs to Astra; release dispositions belong to Ryan |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
 process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
@@ -213,24 +213,35 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    prepare/check/prepare-client already succeeded there. Do not collect it
    before client/visual observations. INSTALLED-CLIENT-SIGNIN-2026-09-11.md
    gives the exact user step. Fresh authentication completed at 2026-09-12
-   06:27:40 UTC; extra-usage-off confirmation remains pending. No ordinary
-   credentials were copied or inspected, and no model was invoked.
+   06:27:40 UTC; Ryan subsequently confirmed extra usage off. No ordinary
+   credentials were copied or inspected. Six bounded client sessions are now
+   recorded in ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md.
    Package-06 review ZIP is complete: 1,715 payloads, all ZIP/extracted hashes
    verified. Read RELEASE-DELIVERY-06-2026-09-11.md. Only the final authorized
    cc/living-library backup and its external transport receipt remain for this
-   documentary checkpoint; client work waits for the account confirmation.
+   documentary checkpoint. New client work found the Queue 8 product defect.
    The first push exited 1 after its owned authentication helper stalled;
    PACKAGE-06-BACKUP-AUTH-REPAIR-2026-09-11.md documents the bounded retry.
    Completion requires verified=true and identical source/after_local/
    after_remote in build/Uoink-Living-Library-3-8-0-Review-Kit-06-2026-09-11.backup.json.
    Keep that final transport receipt outside Git to avoid another commit/push
    solely to record the previous push. Do not repeat a verified transport.
-8. A separate local product-suite review proposes phases 7–13 and a Control Room
+8. Repair the reproduced SQLite callback leak under SQLITE-DEADLINE-CLEANUP-
+   REPAIR-BRIEF-2026-09-12.md. Gemini's run started from 5b69037; the brief was
+   read by absolute checkout path and committed at 284334e. Use the existing
+   tests/test_library_resources.py for the brief's resource suite. Verify old
+   failure/new success, worker and checkout suites, raw diff/three-way apply.
+   Then freeze the complete tree, rebuild/reseal and requalify installation.
+   Preserve package-06's two failed media calls, incomplete chapter seed and
+   all partial client coverage. No original fixture edits. Authentication and
+   extra-paid-usage-off confirmation are resolved; reuse the isolated namespace
+   by reference without copying credentials. Collect only after observations.
+9. A separate local product-suite review proposes phases 7–13 and a Control Room
    reliability brief/interface concept. Files are under
    E:\AI\reports\product-suite-review-2026-09-10. This repository is public;
    the broader computer inventory and cross-product critique stay local.
    Other repositories were reviewed only; do not infer merges/pushes or rewrites.
-9. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
+10. Main release approval remains Ryan's. Suggestions/apply false, X 403, no new
    fetch/speaker runs and deferred Part B remain unchanged.
 
 ### Previous delivered-artifact queue (historical; superseded above)
@@ -450,10 +461,6 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Confirmation that extra paid usage is off for Agent Install 06/p4-client/
-  profile. Fresh sign-in succeeded; the fixture is prepared, route-checked and
-  uncollected. Client streams and citation/brief/chapter visuals remain open;
-  see INSTALLED-CLIENT-SIGNIN-2026-09-11.md. Do not copy ordinary credentials.
 - The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
   failed; any release disposition of missing evidence belongs to Ryan.
 - The revised dependency audit retains 19 entries / 15 distinct issues in four
@@ -2864,3 +2871,28 @@ is false, and usage_credits_off is still not_confirmed. The connected browser
 surface does not expose Ryan's Comet account session, so Astra asked only for
 the remaining extra-paid-usage-off confirmation. Authentication success is
 not an installed-client acceptance result. No product rerun or rebuild occurred.
+
+### 2026-09-12 - Actual installed clients reveal a cross-consumer SQLite defect
+
+Ryan confirmed extra paid usage off with "correct" after isolated sign-in.
+Six bounded subscription sessions completed. The supplement has 20/20 exact
+native/fallback comparisons; both native prompts succeeded in separate sessions.
+All 48 tool calls have pre/terminal hooks: 45 success, three failure, no sentinel
+calls. Recall was silent in 50.0967 ms, not a positive injection result. Original
+partial completeness and absent GUI interactions remain open. See the 251-file
+client addendum and ASTRA-INSTALLED-CLIENT-06-VERDICT-2026-09-12.md.
+
+Both media01 calls failed with storage_error; model exit zero did not pass the
+feature. Installed read-only diagnostics prove _disarm_sqlite_deadline omits
+SQLite's required n argument, suppresses TypeError and leaves an expired handler
+attached. A later query is interrupted (SQLITE_INTERRUPT 9). A fresh read also
+finds the original P4 chapter seed lacks its published sidecar snapshot; do not
+edit that fixture or bypass the refusal. Database bytes stayed unchanged in
+all three diagnostics. Gemini owns the bounded callback repair; Astra owns
+verification, integration, fresh package and installation qualification.
+
+Two evidence-export preflight bugs were repaired without creating partial
+output or altering observations: account for terminal failure hooks, and avoid
+matching a credential screen's own bare source literal. Both versions and the
+review are retained. Sign-in and account-setting confirmation are no longer
+Ryan blockers. The newly discovered defect is product repair work.
