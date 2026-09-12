@@ -93,7 +93,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged, strict-XPASS history retained | Package-06 installed and source-bound; review kit verified |
 | 2 | Option 3 authorized by Ryan on 2026-09-09; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Capture display repaired at 15e3f7e; installed package-06 visual review passes | Actual Setup/reinstall and C22 11 pass / 0 fail; consent rev 1, charge and worker_lost recovery visible with unchanged persisted state | Original AT6 exit disposition remains Ryan's; old package-05 partial receipt stays partial |
-| 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile prepared and checked, not collected. User subscription sign-in/extra-usage confirmation and client/visual observations remain |
+| 4 | Package-06 original installed route passes; real-client gate remains open | 15 passed / 0 failed / 1 blocked X link / 7 unobserved; zero product findings, collector installed_credit false | Fresh p4-client/profile is signed in and remains uncollected. Extra-paid-usage-off confirmation and client/visual observations remain |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit in final notes; Part B deferred |
 | 6 | Refusal repair 71 passed in each root, also present in complete tree | Chapters/cited ranges only; navigation 50/50 frozen tasks at zero mean error, no speaker claim | Speaker gate remains blocked by Ryan; no diarization |
 | Integration | Package-06 built/sealed from 6697dff; complete tree 2,535 passed / 1 historical failure / 2 skipped, 2,538 cases | Setup/reinstall both exit zero; 32,497 installed hashes match; 300 installed proof payloads sealed. 140 runtime pins, 283 requirements and 983 repair-wheel files match. Defender no threats; unsigned, raw OSV 19/15 retained | Review ZIP verified; backup completion requires the external transport receipt described in Queue 7. Remaining client and release decisions belong to Ryan. No ordinary upgrade or main merge |
@@ -212,8 +212,9 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
    separate intact Agent Install 06/p4-client/profile for the real client;
    prepare/check/prepare-client already succeeded there. Do not collect it
    before client/visual observations. INSTALLED-CLIENT-SIGNIN-2026-09-11.md
-   gives the exact user step. Fresh authentication and extra-usage-off
-   confirmation remain pending; no ordinary credentials or model invoked.
+   gives the exact user step. Fresh authentication completed at 2026-09-12
+   06:27:40 UTC; extra-usage-off confirmation remains pending. No ordinary
+   credentials were copied or inspected, and no model was invoked.
    Package-06 review ZIP is complete: 1,715 payloads, all ZIP/extracted hashes
    verified. Read RELEASE-DELIVERY-06-2026-09-11.md. Only the final authorized
    cc/living-library backup and its external transport receipt remain for this
@@ -2847,3 +2848,19 @@ signin-launcher outside the intact client fixture. Ryan completes the browser
 flow; no model runs until authentication and extra-usage-off are confirmed.
 This is operator convenience only. The source, corrected tree, installer and
 review ZIP remain unchanged; no rerun or rebuild is owed.
+
+### 2026-09-11 PDT — isolated Claude authentication confirmed
+
+Ryan supplied the browser code and asked for help because terminal paste did
+not work. Astra verified the existing owned auth process and its empty code
+prompt, then submitted the code through that console's input buffer. The
+desktop tool did not expose the terminal; no window was guessed or recreated.
+No code or credential contents were added to files, clipboard or proof artifacts.
+
+The launcher records signed_in with login exit 0, status exit 0 and logged_in
+true at 2026-09-12 06:27:40.9195916 UTC. Its sanitized result is in Agent
+Install 06/signin-launcher. The intact fixture remains uncollected, model_started
+is false, and usage_credits_off is still not_confirmed. The connected browser
+surface does not expose Ryan's Comet account session, so Astra asked only for
+the remaining extra-paid-usage-off confirmation. Authentication success is
+not an installed-client acceptance result. No product rerun or rebuild occurred.
