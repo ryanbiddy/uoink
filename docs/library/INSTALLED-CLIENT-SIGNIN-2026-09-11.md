@@ -1,5 +1,20 @@
 # Sign into the prepared isolated client
 
+Open **Uoink Test Sign-in** on your desktop. Astra has already launched it for
+this session. Finish the browser sign-in; if Claude gives you a code, paste it
+into the sign-in window. When the window says **Signed in**, return to Codex
+and say **done**. You do not need to type PowerShell commands.
+
+The shortcut runs `Start-IsolatedClientSignIn06.ps1`. It checks the seven
+prepared files, selects the isolated configuration, removes inherited API
+authentication variables, and runs only Claude's subscription login and
+authentication-status commands. It saves a small status record outside the
+fixture, without login codes, account identifiers or credential contents.
+No model or installed acceptance run starts from this shortcut. Extra paid
+usage still needs confirmation before those runs can begin.
+
+The manual commands below remain an alternative if the shortcut is unavailable.
+
 The new installer has passed the isolated Setup/reinstall, C22 and independent
 P4 route checks. The remaining real-client check needs your Claude subscription
 sign-in and confirmation that extra paid usage is off. No ordinary credentials

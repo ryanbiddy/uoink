@@ -2827,3 +2827,23 @@ with process-local credential-helper overrides and prompts disabled. Preserve
 the original attempt and record actual exit plus independently checked remote
 equality in the final external receipt. This is a transport correction; no
 product test, installer, sealed ZIP or installed observation is repeated.
+
+### 2026-09-11 PDT — open the prepared Claude sign-in for Ryan
+
+Ryan cannot perform the manual isolated-client setup and explicitly asked Astra
+to arrange it so only sign-in remains. Start-IsolatedClientSignIn06.ps1 now
+provides that launcher. It validates package-06 identity, apply false, seven
+prepared hashes, owned paths and the dedicated CLAUDE_CONFIG_DIR before auth.
+The preflight passes and PowerShell parsing reports zero errors. Review confirms
+the only Claude calls are auth login --claudeai and auth status --json; inherited
+API/provider authentication variables are removed. No credential store is read
+by the launcher or copied, and it retains only sanitized status fields.
+
+At 2026-09-12 06:22:21 UTC, Astra created and verified the Uoink Test Sign-in
+desktop shortcut and opened its visible PowerShell window (PID 29852), with
+the owned Claude auth child PID 7024. The first status is sign_in_starting,
+not an authenticated or accepted result. Records live in Agent Install 06/
+signin-launcher outside the intact client fixture. Ryan completes the browser
+flow; no model runs until authentication and extra-usage-off are confirmed.
+This is operator convenience only. The source, corrected tree, installer and
+review ZIP remain unchanged; no rerun or rebuild is owed.
