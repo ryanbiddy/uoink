@@ -1,0 +1,11 @@
+--- unused-draft/build_native_gui08_launchers.py
++++ corrected/build_native_gui08_launchers.py
+@@ -7,7 +7,7 @@
+ pythonw=Path(sys.executable).with_name('pythonw.exe');assert pythonw.is_file()
+ driver=repo/'_scratch/native_gui08_driver.py'
+ compile(driver.read_text(encoding='utf8'),str(driver),'exec')
+-for mode in ('dashboard','desktop'):
++for mode in ('dashboard',):
+  argv=subprocess.list2cmdline(['-I','-S','-B',str(driver),mode])
+  literal=lambda s:'@"'+str(s).replace('"','""')+'"'
+  source='using System; using System.Diagnostics; class NativeGui { [STAThread] static void Main() { var p=new ProcessStartInfo(); p.FileName='+literal(pythonw)+'; p.Arguments='+literal(argv)+'; p.UseShellExecute=false; p.CreateNoWindow=true; p.WorkingDirectory='+literal(root)+'; Process.Start(p); } }'

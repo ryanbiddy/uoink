@@ -1,0 +1,11 @@
+--- a25-draft/run_installed_client08.py
++++ final-source/run_installed_client08.py
+@@ -28,7 +28,7 @@
+ assert confirmation['confirmed_by'] == 'Ryan' and confirmation['extra_paid_usage_off'] is True
+ expected_package = json.loads((seal / 'package-manifest.json').read_text(encoding='utf8'))
+ assert sha(package) == expected_package['package_sha256']
+-assert expected_package['build_source'] == 'a25e3be1c4b8ca1f0c064dd8383b49870f23465f'
++assert expected_package['build_source'] == 'b8e44fbc0a16950a22b29ead66951fcb80b2d6e8'
+ for name, row in json.loads((seal / 'SHA256.json').read_text(encoding='utf8'))['files'].items():
+     path = (seal / name).resolve(); assert path.is_relative_to(seal)
+     assert sha(path) == row['sha256'] and path.stat().st_size == row['bytes']

@@ -1,0 +1,209 @@
+{
+  "scope": "Pre-execution observer copies; retained earlier drafts and corrections are historical. No installed or model outcome claimed. Native launch accepts only the isolated Uoink dashboard.",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "agent-browser08.json": {
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    "agent_install_observer05.ps1": {
+      "bytes": 15343,
+      "sha256": "8f05dd4754ee4b019aa2a8db8dc9031dfbc1848bd0a2c445b4f6852105935af2"
+    },
+    "agent_receipt_observe06.py": {
+      "bytes": 9995,
+      "sha256": "8adcdfe5d6e1b34c5d65d0c96187cb004c580da38733d262e0d186a173c10d51"
+    },
+    "build_native_gui08_launchers.py": {
+      "bytes": 1666,
+      "sha256": "f949672abcac1ea830a82c683ccd6561f6efaad56e6ed64878e81aad0cb34f64"
+    },
+    "complete_browser08.py": {
+      "bytes": 2791,
+      "sha256": "2f9c134482d768181cf4c47f08ab01b3ba066f4660db0385ed203c4d9b49a64d"
+    },
+    "correct_installed08_aggregate.py": {
+      "bytes": 3595,
+      "sha256": "dd9c5a9b52a3d29801004b784dea42161133caf7b0483d13f65bac074bc3b1eb"
+    },
+    "delivery08-adaptation-review.json": {
+      "bytes": 1470,
+      "sha256": "c79ef0e6ae2bd1b0932e5ff0c68dd268328ef73f998b718b2f91c30cbbb7adb0"
+    },
+    "freeze_client08_inputs.py": {
+      "bytes": 3438,
+      "sha256": "de2891af490b74a3ab4f181511bf2ed2dcdd00d2ae64754577bc6c58d814cc61"
+    },
+    "installed08-aggregate-preexecution-review.json": {
+      "bytes": 382,
+      "sha256": "ad4c0fdeb50a787804bb76c0b333fa39ef17b4ae8033cd5d754f30f66876dfe1"
+    },
+    "inventory_installed_extras08.py": {
+      "bytes": 1714,
+      "sha256": "312402b86a81740dd1c962ad5ce9b0028cdf65b4a79109dbbd1a1582d18e883f"
+    },
+    "native08-preexecution-corrections/build_native_gui08_launchers.py.diff": {
+      "bytes": 802,
+      "sha256": "afcacdc52250bd94afab6e2a55c6db7171b14542adb13cda251c00f05b7422d9"
+    },
+    "native08-preexecution-corrections/build_native_gui08_launchers.py.original.txt": {
+      "bytes": 1675,
+      "sha256": "70ee07243385cbc395d74a9623662493d2bd12f652f0e8bb23eaccf3eba7d42b"
+    },
+    "native08-preexecution-corrections/native_gui08_driver.py.diff": {
+      "bytes": 2717,
+      "sha256": "efe2c6d378e89632571fd4d29a17c200ee540eb27078f932921c24c71f5e6be7"
+    },
+    "native08-preexecution-corrections/native_gui08_driver.py.original.txt": {
+      "bytes": 5839,
+      "sha256": "93b50c73634a722f1723b791d9ecc6da5dda9570e406fa114036fc02bba302ea"
+    },
+    "native08-preexecution-corrections/review.json": {
+      "bytes": 785,
+      "sha256": "b60e38bd12d574fa5273f26aeb481d5a1e4c0b26641e07778223fcf284127e63"
+    },
+    "native_gui08_driver.py": {
+      "bytes": 5608,
+      "sha256": "c5dc4652a935ccdb1cda2e83e35256b7cab48bba2c437fe642b19f2b791ead4e"
+    },
+    "native_media08_seed.py": {
+      "bytes": 2799,
+      "sha256": "3be286271490b9ff571b651328e68925e9539ef6700213266fecb97b691b5196"
+    },
+    "observe_published_chapter08.py": {
+      "bytes": 9808,
+      "sha256": "e1185fd8b42c438b6f761dc0f753e6b02a5a5dcb8283197519a7155d18202387"
+    },
+    "observe_published_chapter08.py.a25-draft.txt": {
+      "bytes": 9808,
+      "sha256": "bce949721942c730266023cd73fe502922c0a55d6050a17dfb7a2858ac06b318"
+    },
+    "observe_published_chapter08.py.final-source.diff": {
+      "bytes": 697,
+      "sha256": "de12d9448a01604a9f5a83235edde5fd0a51f9f5cd7ecdd9d40978cb55b45237"
+    },
+    "p4_operator_client08.py": {
+      "bytes": 10058,
+      "sha256": "49a910bb13bc5ea35aa2bf85d3339109262baf9ab479ac6d5d349eb474a83b56"
+    },
+    "package08-final-source-rebinding.json": {
+      "bytes": 654,
+      "sha256": "96241b3131d21723c06c610d97074b23019d9febd4cf5783f987049c9f7ed1bb"
+    },
+    "package08-instrument-adaptations-before-final-source.json": {
+      "bytes": 8342,
+      "sha256": "e471a3b7ad8df87a34307da396a9a1c757f70454691ad261b0772146c1a151b5"
+    },
+    "package08-instrument-adaptations.json": {
+      "bytes": 8760,
+      "sha256": "f1cd38deafdfcf03513b0edf7758d2d991df2f7ff06ef41ecabe5210e8f18e8c"
+    },
+    "prepare_collection08.py": {
+      "bytes": 773,
+      "sha256": "65125d6a59959d720164926feabcbce72b45a64a6c3d82705a9a23fe5cbd77f1"
+    },
+    "prepare_delivery08.py": {
+      "bytes": 6054,
+      "sha256": "d76dfdd4f7c719b3934db165f593043cf84161d494a7ce3ccc330f6ca61ff12f"
+    },
+    "prepare_native08.py": {
+      "bytes": 3670,
+      "sha256": "9204ffa40b879a22958094c06c41152fa670e63eeebcdb3daa57dc181a73204b"
+    },
+    "prepare_native08_safety_correction.py": {
+      "bytes": 2464,
+      "sha256": "239a2cca2ada49efa23845d5d1e9c79f066f37f23e79fa7d17bf0f9ea3257022"
+    },
+    "prepare_native_gui08.py": {
+      "bytes": 2088,
+      "sha256": "1756ed8cd7d9fad6ddb080bb6bba66ae25786a3f7e596b24730ed75519e0eb3f"
+    },
+    "prepare_package08_instruments.py": {
+      "bytes": 4009,
+      "sha256": "9360edf38ee7577b830592b92047ffa0254f8b8ea6e1284cdfe205fbfdded0cb"
+    },
+    "published_chapter08.py": {
+      "bytes": 10570,
+      "sha256": "4aedc37b41bf0bf3b4787cc4375de9136df37795c106ec6be5b9616ea3cc32e1"
+    },
+    "rebind_package08_final_source.py": {
+      "bytes": 2834,
+      "sha256": "1e1b4f09f942c32f8de9eeab43b821f3dd4ae35b7977563b7ae370fe89c68865"
+    },
+    "review_browser08.py": {
+      "bytes": 2693,
+      "sha256": "161bda0fa5cc96a50c7a6ca140bdf96f1d9b2b9fab891b5010f21e81d11cc051"
+    },
+    "review_client08.py": {
+      "bytes": 4374,
+      "sha256": "d36fa0ecdc691ff10addca3159083f517d68388fe413cb71901c6ac33894e37f"
+    },
+    "review_installed08.py": {
+      "bytes": 6516,
+      "sha256": "b4bb3c5e1c42abb9171f959d0b8eb5e97d2ea3c374353798b7f287c64351bf6b"
+    },
+    "review_installed08.py.initial-draft.txt": {
+      "bytes": 5692,
+      "sha256": "e40e27f32dda9b157cc74991cb2974a19a5018aa17d671a4b365a3326679d062"
+    },
+    "review_installed08.py.preexecution.diff": {
+      "bytes": 4743,
+      "sha256": "1b6716addfaa0cef120c95f590aaa7a2d28ff9449c9eb286bd6d5a6815a98aed"
+    },
+    "review_native08.py": {
+      "bytes": 4533,
+      "sha256": "fc902f83b4c7defaf6de87c2146eaa19f7179734a343058af69647bbfc7ca5ba"
+    },
+    "review_published08_02.py": {
+      "bytes": 5201,
+      "sha256": "280563beae3b1836ae8fe74aca2e6c9abd5b9c31559b8cd2085f1b80f93d83e6"
+    },
+    "run_browser08.py": {
+      "bytes": 1683,
+      "sha256": "d99a6bdf942975660d1fc37baaccf8628193018b9a5a4944b9bf2bdde7c4140e"
+    },
+    "run_installed_client08.py": {
+      "bytes": 6976,
+      "sha256": "98db9942003b1c9da05a0eb2e99d0e6aa55213221966939ccba3585807bd52a6"
+    },
+    "run_installed_client08.py.a25-draft.txt": {
+      "bytes": 6976,
+      "sha256": "1ef408abec98aabfd56e736fca831a41dd1f459e6d3be592da33fd007be19b8a"
+    },
+    "run_installed_client08.py.final-source.diff": {
+      "bytes": 780,
+      "sha256": "40f5129741872a079c160e84f1cc6e8af01e79b8a96eda9f7bc8ac16d29cdf50"
+    },
+    "run_installed_decoders08.py": {
+      "bytes": 3396,
+      "sha256": "f45bd211f1848f5956e18aa00bc6b1e1b5f723a905d631607cf1c2ed1b0a9a49"
+    },
+    "run_installed_decoders08_portable.py": {
+      "bytes": 3381,
+      "sha256": "78238ad6e828d793e1aed49d4f53bef16a3979f39271e2dd1e197cd15cd0f98d"
+    },
+    "seal_installed08.py": {
+      "bytes": 6241,
+      "sha256": "f32f53a602d5ec08727418840683c6b742aca92d0108bdb19ae555a785cba00d"
+    },
+    "seal_installed08.py.diff": {
+      "bytes": 5101,
+      "sha256": "0703fa4b04f24a84420b68afdc60a26ac793dc60ba9f53adb94ac2ae9c36c290"
+    },
+    "seal_installed08_instruments.py": {
+      "bytes": 3119,
+      "sha256": "87ef2f3d19faa5c4ceaa5cb98bf7e89fd13b591a2f1b8b90158dbce69cf44882"
+    },
+    "uninstall_retained_package07.diff": {
+      "bytes": 3484,
+      "sha256": "98fa4532678fc7fdfb9254d2525d94b2a4abfdd9abbfd431fa90c2ecdfb4a112"
+    },
+    "uninstall_retained_package07.ps1": {
+      "bytes": 8821,
+      "sha256": "7b625f618fe3c6a5a227b16ee7ab2e50a0458f4307f4101098e8a6b39e211ed7"
+    }
+  }
+}

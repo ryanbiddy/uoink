@@ -1,0 +1,30 @@
+{
+  "candidate": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "branch": "cc/living-library-candidate",
+  "started_utc": "2026-09-12T18:37:24.8886211+00:00",
+  "build_script_sha256": "fdad3be49aedbf03b58b0406b2e59a1e71b8bc94d5a6dc900b017d7364a0ae2e",
+  "recursive_targets_checked": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\cache",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\_ffmpeg_tmp",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python"
+  ],
+  "clean_switch": false,
+  "profile": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\candidate-build-20260912-113724\\profile",
+  "receipt_directory": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\candidate-build-20260912-113724",
+  "status": "built; not installed",
+  "installed": false,
+  "pushed": false,
+  "published": false,
+  "artifact": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\build\\Uoink-Setup-3.8.0.exe",
+    "bytes": 389570940,
+    "sha256": "69a5394d842dc7fb5ac770d65954894231b03533bc99db922f34793f372fd06c"
+  },
+  "finished_utc": "2026-09-12T18:44:18.8153632+00:00",
+  "elapsed_s": 413.9284557,
+  "tracked_changes_after": [
+    " M THIRD-PARTY-NOTICES.md"
+  ]
+}

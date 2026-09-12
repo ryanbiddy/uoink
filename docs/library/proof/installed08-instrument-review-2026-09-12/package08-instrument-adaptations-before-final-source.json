@@ -1,0 +1,148 @@
+[
+  {
+    "before": "review_package07_notices.py",
+    "after": "review_package08_notices.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "eec2dd1cd07ef31cbb4c6107685ff11798a0822d5b1209d495e436245c9d9808",
+    "after_sha256": "0124d8cbcbc48fe86ebd4b60be6175c231d8dcd8e4d4febbe38778b638ccd318",
+    "executed": false
+  },
+  {
+    "before": "compare_package07_repair_wheels.py",
+    "after": "compare_package08_repair_wheels.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "8a4c7915d28c18d648ae4375e4c208a0802582e804e5f68af3e43cdbb182c90a",
+    "after_sha256": "8f83b2f68d33d2b09d61c239f7c9289da9b50afe2ae36e825b165c11f1ad3a7f",
+    "executed": false
+  },
+  {
+    "before": "verify_package07_graph.py",
+    "after": "verify_package08_graph.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "85a45581d61833b0f4c28bdeb2916de19541d8aba59075576eb18ef601301dae",
+    "after_sha256": "0ef0d8feac02f0b4ff8c8abf211d5865453ff0035a398f3c7941cd129a071b71",
+    "executed": false
+  },
+  {
+    "before": "review_package07_pins.py",
+    "after": "review_package08_pins.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "1b2439cb6dce92378aa4691f5f9624990f6f1ab540299954f17a5aed07a996e5",
+    "after_sha256": "4fd361f0f639b5aec6c0cf1e870ce446acdabe468fd3618f9535a2ab6b5b4e88",
+    "executed": false
+  },
+  {
+    "before": "finalize_package07.py",
+    "after": "finalize_package08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "5d7fb391209579dc072bf46a16341073847258f4c975af841712224dbabb1319",
+    "after_sha256": "08da7fe136065d6eac4170c49523bda3be3fb9fed7583b8ef49bae8df6b36be9",
+    "executed": false
+  },
+  {
+    "before": "inventory_installed_extras07.py",
+    "after": "inventory_installed_extras08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "10758d66408f5b21f2af0d7d62390cd8e8eed7dad126ac9f78402c57efa62822",
+    "after_sha256": "312402b86a81740dd1c962ad5ce9b0028cdf65b4a79109dbbd1a1582d18e883f",
+    "executed": false
+  },
+  {
+    "before": "run_installed_decoders07.py",
+    "after": "run_installed_decoders08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "b8d975f8e1a54880ccb8eb601f1e35a64053e1ea1160f0482320ca53a113c2df",
+    "after_sha256": "f45bd211f1848f5956e18aa00bc6b1e1b5f723a905d631607cf1c2ed1b0a9a49",
+    "executed": false
+  },
+  {
+    "before": "run_installed_decoders07_portable.py",
+    "after": "run_installed_decoders08_portable.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "10448dd0a85bdfc5e3b4e1d5eb7cf1721e7b7de80cd5b666846d896653befc81",
+    "after_sha256": "78238ad6e828d793e1aed49d4f53bef16a3979f39271e2dd1e197cd15cd0f98d",
+    "executed": false
+  },
+  {
+    "before": "p4_operator_client07.py",
+    "after": "p4_operator_client08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "49a910bb13bc5ea35aa2bf85d3339109262baf9ab479ac6d5d349eb474a83b56",
+    "after_sha256": "49a910bb13bc5ea35aa2bf85d3339109262baf9ab479ac6d5d349eb474a83b56",
+    "executed": false
+  },
+  {
+    "before": "run_installed_client07.py",
+    "after": "run_installed_client08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "7cf12329c3998d0bc5175bff52a5c70d225d78a847825404dedb963939b1895a",
+    "after_sha256": "1ef408abec98aabfd56e736fca831a41dd1f459e6d3be592da33fd007be19b8a",
+    "executed": false
+  },
+  {
+    "before": "freeze_client07_inputs.py",
+    "after": "freeze_client08_inputs.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "6c70fa4fda51ef6197071fc6f72781cf678a071c94b46c36e0660727668eaf48",
+    "after_sha256": "de2891af490b74a3ab4f181511bf2ed2dcdd00d2ae64754577bc6c58d814cc61",
+    "executed": false
+  },
+  {
+    "before": "published_chapter07.py",
+    "after": "published_chapter08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "a4e595983d19d26755f7f692c8d4ab23700c13e8287c78e0e5e76dd64ec5129d",
+    "after_sha256": "4aedc37b41bf0bf3b4787cc4375de9136df37795c106ec6be5b9616ea3cc32e1",
+    "executed": false
+  },
+  {
+    "before": "observe_published_chapter07.py",
+    "after": "observe_published_chapter08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "bbea34826b696882eaa3757de5133654963f70fdb3ef4828ec7cf08d0ec1f27f",
+    "after_sha256": "bce949721942c730266023cd73fe502922c0a55d6050a17dfb7a2858ac06b318",
+    "executed": false
+  },
+  {
+    "before": "review_published07_02.py",
+    "after": "review_published08_02.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "d3164788df949eb50b2c1dc7b74ed5240e75d119110b7ab905e0355523709475",
+    "after_sha256": "280563beae3b1836ae8fe74aca2e6c9abd5b9c31559b8cd2085f1b80f93d83e6",
+    "executed": false
+  },
+  {
+    "before": "prepare_native07.py",
+    "after": "prepare_native08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "3a27d0260d12c0f65b8ecbca85d3094cf33b17fe96a944259675edae76ea9e09",
+    "after_sha256": "9204ffa40b879a22958094c06c41152fa670e63eeebcdb3daa57dc181a73204b",
+    "executed": false,
+    "preexecution_correction": "Two dynamically constructed instrument suffixes must be 08, not the prior 07. No scenario ran with the initial adaptation.",
+    "initial_after_sha256": "2f87a5ea220934f26a2769071f883d3646b4bae1d85572b27bf4d2ab613cf5a9"
+  },
+  {
+    "before": "prepare_collection07.py",
+    "after": "prepare_collection08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "667580d613486fc12941407e746e690a102eb02fce73ac60eff76616d818af1e",
+    "after_sha256": "65125d6a59959d720164926feabcbce72b45a64a6c3d82705a9a23fe5cbd77f1",
+    "executed": false
+  },
+  {
+    "before": "prepare_native_gui07.py",
+    "after": "prepare_native_gui08.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "b739a7ec1be1bc92bc65917f7f92baf201b7c3f1b67f9a107fa6480e08c10ad8",
+    "after_sha256": "1756ed8cd7d9fad6ddb080bb6bba66ae25786a3f7e596b24730ed75519e0eb3f",
+    "executed": false
+  },
+  {
+    "before": "native_gui07_driver.py",
+    "after": "native_gui08_driver.py",
+    "scope": "New package/profile/source labels; finalizer archives this current adaptation instead of obsolete draft review. Existing checks unchanged.",
+    "before_sha256": "b28770d766392f49ceb09fa22b37681a0a1d3daf2776e4ee23455bb43e0dc411",
+    "after_sha256": "93b50c73634a722f1723b791d9ecc6da5dda9570e406fa114036fc02bba302ea",
+    "executed": false
+  }
+]

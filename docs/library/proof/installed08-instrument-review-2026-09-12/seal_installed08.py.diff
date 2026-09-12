@@ -1,0 +1,56 @@
+--- seal_installed07.py
++++ seal_installed08.py
+@@ -2,11 +2,11 @@
+ from pathlib import Path
+ import hashlib,json,os,re,stat
+ repo=Path(__file__).resolve().parents[1];scratch=repo/'_scratch'
+-root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07')
+-prior=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 06\uninstall-before-package07-2026-09-12')
+-out=repo/'docs/library/proof/ryan-agent-installed-07-2026-09-12'
+-summary=json.loads((scratch/'installed07-reviewed-summary.json').read_text())
+-assert summary['setup_observed'] and summary['actual_client_tool_calls']==44
++root=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 08')
++prior=Path(r'E:\AI\projects\uoink\installation-receipts\Agent Install 07\uninstall-before-package08-2026-09-12')
++out=repo/'docs/library/proof/ryan-agent-installed-08-2026-09-12'
++summary=json.loads((scratch/'installed08-reviewed-summary.json').read_text())
++assert summary['setup_observed'] and summary['actual_client_tool_calls']==summary['successful_terminal_hooks'] and summary['failed_terminal_hooks']==0
+ sources={}
+ def add(p,name):
+     assert p.is_relative_to(root) or p.is_relative_to(prior) or p.is_relative_to(scratch)
+@@ -45,18 +45,20 @@
+ tree(root/'p6-published01','p6-published01',{'.json','.jsonl','.stdout','.stderr','.png','.jpg','.txt','.diff','.py','.md','.log'})
+ for folder,label in (('decoder-probe-02','decoder-probe'),('codec-probe-02','codec-probe')):
+     tree(root/folder,label,{'.json','.png','.jpg','.webp'})
+-instruments=['agent_receipt_observe06.py','agent_install_observer05.ps1','uninstall_retained_package06.ps1','uninstall_retained_package06.diff',
++instruments=['agent_receipt_observe06.py','agent_install_observer05.ps1','uninstall_retained_package07.ps1','uninstall_retained_package07.diff',
+     'check_installed_package_inputs.py','package_decoder_probe.py','installed_codec_probe.py',
+-    'inventory_installed_extras07.py','run_installed_decoders07.py','run_installed_decoders07_portable.py',
+-    'complete_browser07.py','review_browser07.py','agent-browser07.json','freeze_client07_inputs.py',
+-    'run_installed_client07.py','p4_operator_client07.py','review_client07.py','prepare_native07.py',
+-    'p4_operator_native_reshelve0107.py','run_native_reshelve0107.py','p4_operator_native_consult0107.py','run_native_consult0107.py',
+-    'p4_operator_native_reshelve0107.py.diff','run_native_reshelve0107.py.diff','p4_operator_native_consult0107.py.diff','run_native_consult0107.py.diff',
+-    'review_native07.py','published_chapter07.py','observe_published_chapter07.py','review_published07.py','review_published07_02.py',
+-    'review_published07_02.py.diff','repair_published_review07.py','published07-review-failure01.json',
+-    'prepare_collection07.py','review_installed07.py','seal_installed07.py']
++    'inventory_installed_extras08.py','run_installed_decoders08.py','run_installed_decoders08_portable.py',
++    'complete_browser08.py','review_browser08.py','agent-browser08.json','run_browser08.py','freeze_client08_inputs.py',
++    'run_installed_client08.py','p4_operator_client08.py','review_client08.py','prepare_native08.py',
++    'p4_operator_native_reshelve0108.py','run_native_reshelve0108.py','p4_operator_native_consult0108.py','run_native_consult0108.py',
++    'p4_operator_native_reshelve0108.py.diff','run_native_reshelve0108.py.diff','p4_operator_native_consult0108.py.diff','run_native_consult0108.py.diff',
++    'review_native08.py','published_chapter08.py','observe_published_chapter08.py','review_published08_02.py',
++    'prepare_collection08.py','review_installed08.py','seal_installed08.py',
++    'package08-instrument-adaptations.json','package08-final-source-rebinding.json',
++    'installed08-aggregate-preexecution-review.json','review_installed08.py.preexecution.diff',
++    'prepare_delivery08.py','seal_installed08.py.diff']
+ for name in instruments:add(scratch/name,'instruments/'+name)
+-add(scratch/'installed07-reviewed-summary.json','summary.json')
++add(scratch/'installed08-reviewed-summary.json','summary.json')
+ # Compare against only explicitly disposable receipt tokens. Never inspect auth stores.
+ tokens=[]
+ for p in [*(c22/'profiles').glob('*/token.txt'),root/'p4/profile/token.txt',root/'p6-published01/profile/token.txt']:
+@@ -73,4 +75,4 @@
+ manifest={'scope':'Same-account isolated installed observations; original partial/pending statuses retained. Explicit private-data exclusions. Actual client records and synthetic instrument probes remain separately labeled.',
+           'files':files}
+ with (out/'SHA256.json').open('x',encoding='utf8',newline='\n') as f:f.write(json.dumps(manifest,indent=2)+'\n')
+-print(json.dumps({'payloads':len(files),'setup_exits':summary['setup_exits'],'c22':summary['c22_raw_counts'],'p4':summary['p4_raw_counts'],'client_calls':44,'release_ready':False},indent=2))
++print(json.dumps({'payloads':len(files),'setup_exits':summary['setup_exits'],'c22':summary['c22_raw_counts'],'p4':summary['p4_raw_counts'],'client_calls':summary['actual_client_tool_calls'],'release_ready':False},indent=2))

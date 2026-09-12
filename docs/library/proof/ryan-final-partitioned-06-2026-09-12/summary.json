@@ -1,0 +1,55 @@
+{
+  "source": "b8e44fbc0a16950a22b29ead66951fcb80b2d6e8",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2579,
+    "failed": 1,
+    "skipped": 2
+  },
+  "cases": 2582,
+  "seconds_including_collection": 1473.236587600004,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree with --runxfail; not a monolithic pytest run",
+  "expected_failure_policy": "Original marks unchanged; --runxfail executes all assertion bodies normally",
+  "finished_utc": "2026-09-12T18:36:38.548964+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "partition": "main"
+    }
+  },
+  "previous_collected_cases": 2559,
+  "new_cases": [
+    "tests/test_dashboard_media_detail_truth.py::test_dashboard_node_note_readiness_preserved",
+    "tests/test_dashboard_media_detail_truth.py::test_dashboard_node_open_detail_refusal_honest_error",
+    "tests/test_dashboard_media_detail_truth.py::test_dashboard_node_open_detail_success",
+    "tests/test_dashboard_media_detail_truth.py::test_dashboard_node_selection_race_avoids_stale_overwrite",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_corrupt_malformed_json",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_missing_sidecar_file",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_non_object_json",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_outside_root_refusal_without_reads",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_oversized_json",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_requires_authentication",
+    "tests/test_dashboard_media_detail_truth.py::test_media_detail_unknown_id",
+    "tests/test_dashboard_media_detail_truth.py::test_saved_media_detail_success",
+    "tests/test_media_detail_boundaries.py::test_empty_speaker_objects_do_not_invent_attribution",
+    "tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{\"duration_seconds\":1e999}]",
+    "tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{\"duration_seconds\":NaN}]",
+    "tests/test_media_detail_boundaries.py::test_invalid_numeric_or_deep_json_is_structured_refusal[{\"nested\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}]",
+    "tests/test_media_detail_boundaries.py::test_nested_speaker_metadata_excludes_private_fields",
+    "tests/test_media_detail_boundaries.py::test_outside_path_is_rejected_before_metadata",
+    "tests/test_media_detail_boundaries.py::test_read_bound_is_bytes_when_file_grows",
+    "tests/test_media_detail_boundaries.py::test_reopening_same_item_cannot_accept_old_responses",
+    "tests/test_media_detail_boundaries.py::test_saved_time_aliases_are_preserved",
+    "tests/test_media_detail_boundaries.py::test_timeline_requires_actual_valid_bounds",
+    "tests/test_media_detail_boundaries.py::test_unstamped_transcript_does_not_invent_offsets"
+  ],
+  "missing_prior_cases": [],
+  "test_process_seconds": {
+    "main": 1459.747,
+    "media": 1.524
+  },
+  "total_test_process_seconds": 1461.271,
+  "source_scope_check": "No modifications/deletions to prior tests or P4 fixture guard; added regression file only"
+}

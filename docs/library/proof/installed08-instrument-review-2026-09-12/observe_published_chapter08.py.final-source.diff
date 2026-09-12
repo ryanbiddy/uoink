@@ -1,0 +1,11 @@
+--- a25-draft/observe_published_chapter08.py
++++ final-source/observe_published_chapter08.py
+@@ -31,7 +31,7 @@
+     if entry.exists():assert not entry.lstat().st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT,entry
+ assert root.is_dir() and app.is_dir()
+ manifest_json=json.loads((seal/'package-manifest.json').read_text())
+-assert manifest_json['build_source']=='a25e3be1c4b8ca1f0c064dd8383b49870f23465f'
++assert manifest_json['build_source']=='b8e44fbc0a16950a22b29ead66951fcb80b2d6e8'
+ assert sha(package)==manifest_json['package_sha256']
+ for name,row in json.loads((seal/'SHA256.json').read_text())['files'].items():
+     q=(seal/name).resolve();assert q.is_relative_to(seal)

@@ -1,0 +1,5 @@
+{
+  "reason": "Prior-run label adapter still named browser07 and copied old recall timing, hook counts and native-unavailable prose. Bind current review and derive actual counts/timing. Preserve all success, exact comparison and cleanup assertions. No observation has run.",
+  "sha256": "b4bb3c5e1c42abb9171f959d0b8eb5e97d2ea3c374353798b7f287c64351bf6b",
+  "executed": false
+}

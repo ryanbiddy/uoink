@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "source_type": "x_thread",
+  "platform": "x",
+  "author": "Ryan Biddy (@ryanbiddy)",
+  "url": "https://x.com/ryanbiddy/status/7",
+  "title": "@ryanbiddy: Persist me.",
+  "extraction_engine": "x-syndication",
+  "metadata": {
+    "author_name": "Ryan Biddy",
+    "author_handle": "ryanbiddy",
+    "tweets_captured": 1,
+    "capture_scope": "shared post + earlier same-author chain",
+    "photo_count": 0,
+    "has_video": false,
+    "full_text_posts": 0
+  },
+  "links": [],
+  "images": [],
+  "screenshot_path": null,
+  "extracted_at": "2026-09-12T18:36:26Z"
+}
