@@ -1,0 +1,116 @@
+{
+  "files": {
+    "accepted-documentary.patch": {
+      "bytes": 4710389,
+      "sha256": "48d0755f40254012908701b153677b971ace76721334a807ac6a8f23cb761d52"
+    },
+    "apply.stderr": {
+      "bytes": 2696,
+      "sha256": "31d761ac75d2ef404023240e1ccf15cdfa467e5a8edbd4b0233c6b41ea4d2fd9"
+    },
+    "apply.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ASTRA-SECURITY-REPAIR-REVIEW-2026-09-12.md": {
+      "bytes": 3852,
+      "sha256": "1e368138f8d5caf4bbe86417e9ff09ff85dac7cbdebe04477dcbfe046e8b8582"
+    },
+    "astra-security12-worker01-results.json": {
+      "bytes": 1164,
+      "sha256": "69da757d1917f687c40d3983cecbdcd28f81c861de9bb53e2df0a324ac039178"
+    },
+    "astra-security12-worker01-tests.log": {
+      "bytes": 1048,
+      "sha256": "a8077d8991ba808f2e5104261c625a58e1c90c65bbc78aad0beadb6e55054ba3"
+    },
+    "attempt-inventory.json": {
+      "bytes": 1181,
+      "sha256": "2694eb2831d9026caf9cb79b10ca2725abe7ccfba8bff40aadc0b8b6b6896f5a"
+    },
+    "checkout01-results.json": {
+      "bytes": 960,
+      "sha256": "50d2c23eb1261dee9848c0705912e1260aeaeadf405f62ef641ee150144d28f2"
+    },
+    "checkout01-tests.log": {
+      "bytes": 1003,
+      "sha256": "7e12bc076711bcd6619297e0f79d079289bca8b942c97bc201dd11881538b0b1"
+    },
+    "gemini-suites-final-01-results.json": {
+      "bytes": 1155,
+      "sha256": "ad1a4a1a5eeceb2b85579f50237d300f63725eb77698af03bbbf6b2433aa0dec"
+    },
+    "gemini-suites-final-01-tests.log": {
+      "bytes": 1048,
+      "sha256": "9224555d9fa1f7e3cadd0771aed00fd28148b2d6af4e00f49c6b6cf946123f1a"
+    },
+    "gemini-suites-raw-01-results.json": {
+      "bytes": 1128,
+      "sha256": "3d058b8c7e23061e8c941e9c0a87f6566f4b6c4f453f2afe87caf995a432715d"
+    },
+    "gemini-suites-raw-01-tests.log": {
+      "bytes": 2036,
+      "sha256": "dc49403d88c1ec1bb4891d3f8db1b58350a52efb273729b0277deeb10909bde0"
+    },
+    "gemini-suites-raw-02-results.json": {
+      "bytes": 1128,
+      "sha256": "3c713135bd69a8ff84b7fbce611653f8b63d166af2592506806e114e479caece"
+    },
+    "gemini-suites-raw-02-tests.log": {
+      "bytes": 1508,
+      "sha256": "ff7f9971a5369aa4ce1bac6ed624e0b7580db10c280c99020050c203de279646"
+    },
+    "gemini-suites-runxfail-01-results.json": {
+      "bytes": 1164,
+      "sha256": "5a9a3170d16c1b695ad5bcadc734d3c7df7e3b2e787e2cc680b7624015066130"
+    },
+    "gemini-suites-runxfail-01-tests.log": {
+      "bytes": 1048,
+      "sha256": "39a90c965d61059c821cc4ffe138e1aef3a3e07ade9ffe114509c8105ca97758"
+    },
+    "integrate_security12.py": {
+      "bytes": 2536,
+      "sha256": "f24802bf39c619e2aae6ccc5b444bb97614e3c18726f2d960c248de794308765"
+    },
+    "rejected-new-tests.py.txt": {
+      "bytes": 4652,
+      "sha256": "96096ee0a1a443541e4389c5ec7b7aa14f20e2b880544cc90aa56d0f73ae6930"
+    },
+    "review_security12.py": {
+      "bytes": 3895,
+      "sha256": "f3edf3feb32053dcb5871947a564df61a40478dbba68a6dd411bf35c39b4a965"
+    },
+    "review_security12_02.py": {
+      "bytes": 4050,
+      "sha256": "1e234209c7cdd9bfc9fa5ce19675a34ff9cd337be5048b86a0cbcd994e8f6439"
+    },
+    "security12-review01-reader-failure-and-repair.json": {
+      "bytes": 617,
+      "sha256": "713066d8915a884f426dec0d65ccd925e480f75bede16868133e17b640829111"
+    },
+    "security12-review02-review.json": {
+      "bytes": 2653,
+      "sha256": "10080903ef2d93a44a54e068bb608323f992931b458b8eefaeb7224e566aa314"
+    },
+    "transport-after.json": {
+      "bytes": 63,
+      "sha256": "fa4866d4f6c8964d57315eb7576f88d418781a7cfa4eff2ee6566f1d9bb8e4f2"
+    },
+    "transport-preflight.json": {
+      "bytes": 2417,
+      "sha256": "4132d1f5d378f5dcec84605d96fddfa0eaf0ddd4dd2dc1e5713a6c1929c01f0b"
+    },
+    "transport-repair-plan.json": {
+      "bytes": 724,
+      "sha256": "13fe14c7525cbf9bc4dc6d91a40ac4c74947f299094eb00c7571c3c5b96771dc"
+    },
+    "worker-full-with-transport-attributes.patch": {
+      "bytes": 4715386,
+      "sha256": "4eb38e2734b548b92c1218b1b0aa413fd35e823dd72fe622bc14d5749d4f0968"
+    },
+    "worker-report-original.md.txt": {
+      "bytes": 25540,
+      "sha256": "e03b653388d2a639aab3fe8df5ec48a901811060239b3a4f3560841557ac0f1c"
+    }
+  }
+}

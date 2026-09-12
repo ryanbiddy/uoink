@@ -1,0 +1,11 @@
+.....................                                                    [100%]
+============================== warnings summary ===============================
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+tests/security/test_security_findings.py::test_sec_01_http_enclosure_url_follows_double_dash
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+21 passed, 4 warnings in 2.38s

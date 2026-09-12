@@ -1,0 +1,8 @@
+{
+  "utc": "2026-09-12T17:08:44.165748+00:00",
+  "status": "failed_reader",
+  "attempt": "review_security12.py / security12-review01",
+  "error": "UnicodeDecodeError: cp1252 cannot decode byte 0x81 in primary PyPI JSON at position 3502",
+  "diagnosis": "Path.read_text used the Windows locale rather than JSON UTF-8. Hash verification and OSV parsing had completed before the primary PyPI parse failed.",
+  "repair": "Reader-only replacement of unqualified read_text calls with explicit UTF-8. Fresh script and output directory security12-review02. No evidence, product, test, fixture, or measurement rerun."
+}

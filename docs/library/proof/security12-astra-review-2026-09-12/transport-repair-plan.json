@@ -1,0 +1,18 @@
+{
+  "diagnosis": "git apply --3way staged exact new blobs while initial worktree materialization applied CRLF conversion. The new -text attribute is now effective.",
+  "repair": "Restore only the 12 new proof paths from their manifest-verified staged blobs, requiring normalized-byte equality beforehand. No source/test or measurement rerun.",
+  "paths": [
+    "fetch_primary_metadata.py",
+    "pypi/huggingface-hub.json",
+    "pypi/lightning.json",
+    "pypi/nltk.json",
+    "pypi/pyannote-audio.json",
+    "pypi/pytorch-lightning.json",
+    "pypi/torch.json",
+    "pypi/torchaudio.json",
+    "pypi/torchcodec.json",
+    "pypi/torchvision.json",
+    "pypi/transformers.json",
+    "pypi/whisperx.json"
+  ]
+}

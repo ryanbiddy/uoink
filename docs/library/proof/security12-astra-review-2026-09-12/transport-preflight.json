@@ -1,0 +1,98 @@
+[
+  {
+    "name": "fetch_primary_metadata.py",
+    "worker_bytes": 6476,
+    "checkout_bytes": 6654,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/huggingface-hub.json",
+    "worker_bytes": 524749,
+    "checkout_bytes": 524750,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/lightning.json",
+    "worker_bytes": 317082,
+    "checkout_bytes": 317083,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/nltk.json",
+    "worker_bytes": 103290,
+    "checkout_bytes": 103291,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/pyannote-audio.json",
+    "worker_bytes": 53066,
+    "checkout_bytes": 53067,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/pytorch-lightning.json",
+    "worker_bytes": 335408,
+    "checkout_bytes": 335409,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/torch.json",
+    "worker_bytes": 850221,
+    "checkout_bytes": 850222,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/torchaudio.json",
+    "worker_bytes": 700083,
+    "checkout_bytes": 700084,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/torchcodec.json",
+    "worker_bytes": 316327,
+    "checkout_bytes": 316328,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/torchvision.json",
+    "worker_bytes": 846888,
+    "checkout_bytes": 846889,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/transformers.json",
+    "worker_bytes": 411851,
+    "checkout_bytes": 411852,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  },
+  {
+    "name": "pypi/whisperx.json",
+    "worker_bytes": 85126,
+    "checkout_bytes": 85127,
+    "index_matches": true,
+    "checkout_matches": false,
+    "lf_normalized_equal": true
+  }
+]

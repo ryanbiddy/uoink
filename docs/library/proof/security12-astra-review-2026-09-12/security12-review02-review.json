@@ -1,0 +1,68 @@
+{
+  "utc": "2026-09-12T17:08:44.252687+00:00",
+  "worker_head": "6ae48d9204a0ce8534a2390ce7a04013647a401d",
+  "checkout_head": "edd5e7ab22d43a1c715d7fcd025f29b94cb79479",
+  "sealed_payloads_verified": 35,
+  "pins_matched": 140,
+  "raw_entries": 19,
+  "alias_groups": 15,
+  "by_package": {
+    "lightning": [
+      "GHSA-qqmf-gpg7-g8gw"
+    ],
+    "nltk": [
+      "GHSA-8mgp-746c-j5xp"
+    ],
+    "torch": [
+      "GHSA-qfhq-4f3w-5fph",
+      "GHSA-rrmf-rvhw-rf47",
+      "GHSA-vgrw-7cvw-pwgx",
+      "PYSEC-2025-203",
+      "PYSEC-2025-204",
+      "PYSEC-2025-206",
+      "PYSEC-2026-139",
+      "PYSEC-2026-2286"
+    ],
+    "transformers": [
+      "GHSA-29pf-2h5f-8g72",
+      "GHSA-69w3-r845-3855",
+      "GHSA-fgcw-684q-jj6r",
+      "GHSA-xrqw-3rrv-vx5w",
+      "PYSEC-2025-217",
+      "PYSEC-2026-2288",
+      "PYSEC-2026-2289",
+      "PYSEC-2026-2290",
+      "PYSEC-2026-3929"
+    ]
+  },
+  "lightning_raw_entries": 1,
+  "non_lightning_raw_entries": 18,
+  "non_lightning_alias_groups": 14,
+  "whisperx_current_constraints": [
+    "ctranslate2>=4.5.0",
+    "faster-whisper>=1.2.0",
+    "nltk>=3.9.1",
+    "numpy>=2.1.0",
+    "omegaconf>=2.3.0",
+    "pandas>=2.2.3",
+    "pyannote-audio>=4.0.0",
+    "huggingface-hub<1.0.0",
+    "torch~=2.8.0",
+    "torchaudio~=2.8.0",
+    "torchvision~=0.23.0",
+    "torchcodec<0.8.0,>=0.6.0; (sys_platform == \"linux\" and platform_machine == \"x86_64\") or sys_platform == \"darwin\" or sys_platform == \"win32\"",
+    "transformers>=4.48.0",
+    "triton>=3.3.0; sys_platform == \"linux\" and platform_machine == \"x86_64\"",
+    "pytest; extra == \"dev\""
+  ],
+  "clean": false,
+  "new_product_repair": false,
+  "rejected_new_tests": "All four omitted from active suite. Two freeze current pins/constraints without testing upstream metadata, one duplicates missing-runtime coverage, and the supposed redirected-DLL regression ends with isinstance(res, object), which is always true. Worker bytes and independent 25-pass run remain as reviewed evidence.",
+  "corrections": [
+    "19 minus one Lightning entry is 18, not the worker-reported 17. Raw scan remains 19/15.",
+    "No claim that every issue fixes in Torch 2.9/2.10 or Transformers 5.0; advisory-specific fixed versions differ.",
+    "Default installer root is LOCALAPPDATA/Uoink, not LOCALAPPDATA/Programs/Uoink.",
+    "Metadata is evidence against a drop-in update for the retained stack, not proof that every possible migration or backport is impossible.",
+    "Low exposure labels are not accepted security ratings; limited observed call paths do not erase retained findings."
+  ]
+}

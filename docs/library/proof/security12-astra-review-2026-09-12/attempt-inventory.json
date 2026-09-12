@@ -1,0 +1,53 @@
+[
+  {
+    "label": "astra-security12-worker01",
+    "retained_files": [
+      "astra-security12-worker01-results.json",
+      "astra-security12-worker01-tests.log"
+    ]
+  },
+  {
+    "label": "gemini-suites-final-01",
+    "retained_files": [
+      "gemini-suites-final-01-results.json",
+      "gemini-suites-final-01-tests.log"
+    ]
+  },
+  {
+    "label": "gemini-suites-final-01-0",
+    "retained_files": []
+  },
+  {
+    "label": "gemini-suites-raw-01",
+    "retained_files": [
+      "gemini-suites-raw-01-results.json",
+      "gemini-suites-raw-01-tests.log"
+    ]
+  },
+  {
+    "label": "gemini-suites-raw-01-0",
+    "retained_files": []
+  },
+  {
+    "label": "gemini-suites-raw-02",
+    "retained_files": [
+      "gemini-suites-raw-02-results.json",
+      "gemini-suites-raw-02-tests.log"
+    ]
+  },
+  {
+    "label": "gemini-suites-raw-02-0",
+    "retained_files": []
+  },
+  {
+    "label": "gemini-suites-runxfail-01",
+    "retained_files": [
+      "gemini-suites-runxfail-01-results.json",
+      "gemini-suites-runxfail-01-tests.log"
+    ]
+  },
+  {
+    "label": "gemini-suites-runxfail-01-0",
+    "retained_files": []
+  }
+]

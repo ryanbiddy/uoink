@@ -1,0 +1,142 @@
+{
+  "fetch_primary_metadata.py": {
+    "bytes": 6476,
+    "sha256": "28ba42407c81f367a822ab19fddcbba4b28d4bfb41a8ad6e13f6eb6417560cfe"
+  },
+  "osv/advisories/GHSA-29pf-2h5f-8g72.json": {
+    "bytes": 4101,
+    "sha256": "038394dda41a2055e6aebaa949ba932ea4a5013ef81beaad3dd743669c3f3d57"
+  },
+  "osv/advisories/GHSA-69w3-r845-3855.json": {
+    "bytes": 3864,
+    "sha256": "275a8d5a753f419f75928f89e199b30058bb2393c7b7bc48cf0bf94f8a8864d5"
+  },
+  "osv/advisories/GHSA-8mgp-746c-j5xp.json": {
+    "bytes": 4877,
+    "sha256": "c489d359f203d5ecd90148e59601c63f4b057fe838604b68e607a3e3f1026a10"
+  },
+  "osv/advisories/GHSA-fgcw-684q-jj6r.json": {
+    "bytes": 4790,
+    "sha256": "bc011417c43f1c719a80ad5680cd59a552c9ec5acbd8609e215430941773bf1e"
+  },
+  "osv/advisories/GHSA-qfhq-4f3w-5fph.json": {
+    "bytes": 2462,
+    "sha256": "f1f20a1a53fee2d22a297d4e5b756ed956bddac53ce7d055c499748022a55ca5"
+  },
+  "osv/advisories/GHSA-qqmf-gpg7-g8gw.json": {
+    "bytes": 4790,
+    "sha256": "bc4b1caf99f9094a7ff46dbe9179fcbd6030756ef2017fa80820ffd8b7b8a1a6"
+  },
+  "osv/advisories/GHSA-rrmf-rvhw-rf47.json": {
+    "bytes": 2422,
+    "sha256": "ad473dd74d30e1c994ffa02ae9d331d2a0c1022346a726ad34752bc44a138588"
+  },
+  "osv/advisories/GHSA-vgrw-7cvw-pwgx.json": {
+    "bytes": 2473,
+    "sha256": "f0af00d3930203d40a95362ae51a8c264546085f119a80c2ac59f4257a492313"
+  },
+  "osv/advisories/GHSA-xrqw-3rrv-vx5w.json": {
+    "bytes": 4143,
+    "sha256": "c525d257350b80ae4f4487dbe97715fb20b79ff78d8b34220b665d715078cc20"
+  },
+  "osv/advisories/PYSEC-2025-203.json": {
+    "bytes": 1254,
+    "sha256": "c2c7beb412daab91f878c04e3bcbb63a08c1cc829aa4db9b7d70629d98b043e8"
+  },
+  "osv/advisories/PYSEC-2025-204.json": {
+    "bytes": 1240,
+    "sha256": "81e009c02ea5d5cc5452419b5a8058c0da4cc3a2fd9b33adf539f3d04d5013f0"
+  },
+  "osv/advisories/PYSEC-2025-206.json": {
+    "bytes": 1211,
+    "sha256": "64f672cb98dbb7b9ef047f28dda45ac9a6c4336c8329dbf77b62dfbb172c4595"
+  },
+  "osv/advisories/PYSEC-2025-217.json": {
+    "bytes": 3213,
+    "sha256": "3adf5df151de0a18f3feadfd2650ba305d3f237118ed1b132f2e842257b1e49d"
+  },
+  "osv/advisories/PYSEC-2026-139.json": {
+    "bytes": 1680,
+    "sha256": "e67ea61edf63c4185e0bd1bbd16bfe0962a7c9197a538d5cb30a3c1a5513b194"
+  },
+  "osv/advisories/PYSEC-2026-2286.json": {
+    "bytes": 2096,
+    "sha256": "eddb11764d6ae93d0b301e8386b2d41616e7a2b999d5d1779ac8fba8526a591b"
+  },
+  "osv/advisories/PYSEC-2026-2288.json": {
+    "bytes": 3434,
+    "sha256": "0bd5fbb352408d200b6c825b238bebc01f9343eb5248b26d1b1f586f18304d0f"
+  },
+  "osv/advisories/PYSEC-2026-2289.json": {
+    "bytes": 3769,
+    "sha256": "eae41fcaa0e12808b9c66dd26291e5f09b6d87fbfb92f5741cc79d5afeef5c0c"
+  },
+  "osv/advisories/PYSEC-2026-2290.json": {
+    "bytes": 4233,
+    "sha256": "4f31cb8878a67adbdbac2e70b5820ec7e77e39847ba89069dd050f40e28ce260"
+  },
+  "osv/advisories/PYSEC-2026-3929.json": {
+    "bytes": 4081,
+    "sha256": "f26041b6f2fa23a42b5fe0c07f5275fc50c17259af4579a1af845736bd6197bb"
+  },
+  "osv/request.json": {
+    "bytes": 18586,
+    "sha256": "99e0f482c39bce8811a58cb9be9d87c13253bdfdb226fd8b8203e367515effea"
+  },
+  "osv/response.json": {
+    "bytes": 1754,
+    "sha256": "8ff6606878546a84a6098bd24db3c03ef10e93e3bf58aa10c97d180d0e0c8480"
+  },
+  "osv/summary.json": {
+    "bytes": 4689,
+    "sha256": "c0c46c56ebb4cefb02411d353bc9ba3b878c93811e568c69003a798023eac7c6"
+  },
+  "pypi/huggingface-hub.json": {
+    "bytes": 524749,
+    "sha256": "0ae1014414655f5f3bfbd22a1693b6123ddb77e5464d89f0e50db9e345fcb9e1"
+  },
+  "pypi/lightning.json": {
+    "bytes": 317082,
+    "sha256": "c0f9c3c1db5e48fe15a85e92150bc8d4d08cd258fe50940eaf6c204c78831f9e"
+  },
+  "pypi/nltk.json": {
+    "bytes": 103290,
+    "sha256": "bcb887db94e1c4fe5eb120e7125ac9da760b3c07f4d8c8065079373fec07db3c"
+  },
+  "pypi/pyannote-audio.json": {
+    "bytes": 53066,
+    "sha256": "2bc7d739d11999866c256e0257834799ae804536af9cc732d9cdda4b93b91750"
+  },
+  "pypi/pytorch-lightning.json": {
+    "bytes": 335408,
+    "sha256": "d7d3d0f525063387b4cdbee53ab6d31b6fbf951a9c03f038fa48c22f183d7b4a"
+  },
+  "pypi/torch.json": {
+    "bytes": 850221,
+    "sha256": "12620a689ae61b70596486dfb3db7f393060f28cad092db7f2d52ec0449bede7"
+  },
+  "pypi/torchaudio.json": {
+    "bytes": 700083,
+    "sha256": "8e9afd201088fcbd978c70a9524c6fdec82d9d33650295039c28ca4d72c6d0a1"
+  },
+  "pypi/torchcodec.json": {
+    "bytes": 316327,
+    "sha256": "41a367168519b67a3578711b0aa0c49d90e64ce2f6842ed6e15446a123c4d5b7"
+  },
+  "pypi/torchvision.json": {
+    "bytes": 846888,
+    "sha256": "1f020312e5099f82b0de19718bc88df85851bcc3d584855f3ad68726a7e12f5b"
+  },
+  "pypi/transformers.json": {
+    "bytes": 411851,
+    "sha256": "4e9f04e629116fed2d48d0895e35cde6f79740e1b08214c61687de27735edc57"
+  },
+  "pypi/whisperx.json": {
+    "bytes": 85126,
+    "sha256": "ca15efa5fc7ae3112475117e396b2bee6552622a79125a87b6ce6e761628c869"
+  },
+  "pypi_summary.json": {
+    "bytes": 27175,
+    "sha256": "ff68d25925b7dabc4ae04f54f877392679295070b059d4f942ef2085185e01ce"
+  }
+}
