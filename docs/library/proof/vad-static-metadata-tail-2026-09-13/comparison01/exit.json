@@ -1,0 +1,6 @@
+{
+  "invocation": "python.exe -I -S -B compare_receipts.py",
+  "reader_or_checkpoint_invoked": false,
+  "source": "saved run03/run04/launch JSON receipts only",
+  "actual_exit": 0
+}

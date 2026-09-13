@@ -1,0 +1,17 @@
+{
+  "scope": "One allowlisted static ZIP/pickle-opcode inventory; no deserialization, object construction, model load, inference or conversion",
+  "reviewed_reader_sha256": "17545bb938104e88eacba85978ab353b41e78df55c13ec6214a564d0fbf351fc",
+  "reader": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\read_checkpoint_inventory.py",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\read_checkpoint_inventory.py",
+    "--inspect",
+    "--run-id",
+    "run02"
+  ],
+  "checkpoint_copied_to_proof": false,
+  "reviewer": "Astra; reporting-only diff, unchanged predicates and 45 synthetic cases reviewed; run01 remains refused",
+  "started_utc": "2026-09-13T12:28:50.9604124Z"
+}

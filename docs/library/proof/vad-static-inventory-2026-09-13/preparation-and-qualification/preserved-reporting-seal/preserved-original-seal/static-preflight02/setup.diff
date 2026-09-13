@@ -1,0 +1,56 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\qualify_parser.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\qualify_parser.py"
+index 5cdd1b4..43db0ca 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\qualify_parser.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\qualify_parser.py"
+@@ -121,6 +121,18 @@ def add(name, raw, reason=None):
+     cases.append((name, lambda raw=raw: inspect_memory(raw), reason))
+ 
+ 
++def unsafe_archive(name):
++    if "\\" not in name:
++        return archive_bytes([(name, LITERAL)])
++    raw = archive_bytes([(name.replace("\\", "/"), LITERAL)])
++    centers, _ = central_offsets(raw)
++    changed = bytearray(raw)
++    encoded = name.encode("ascii")
++    changed[30:30 + len(encoded)] = encoded
++    changed[centers[0] + 46:centers[0] + 46 + len(encoded)] = encoded
++    return bytes(changed)
++
++
+ add("valid_stored", base)
+ add("valid_deflated", archive_bytes([("archive/data.pkl", LITERAL)], zipfile.ZIP_DEFLATED))
+ add("valid_zip64_end_records", zipped64(base))
+@@ -129,7 +141,7 @@ add("missing_pickle", archive_bytes([("archive/storage", b"opaque")]), "Exactly
+ add("ambiguous_pickle", archive_bytes([("one/data.pkl", LITERAL), ("two/data.pkl", LITERAL)]), "Exactly one")
+ add("additional_pickle_suffix", archive_bytes([("data.pkl", LITERAL), ("other.PICKLE", LITERAL)]), "Exactly one")
+ for name in ("../data.pkl", "/data.pkl", "x\\data.pkl", "x:foo/data.pkl", "x//data.pkl", "x/./data.pkl", "x/\x01data.pkl"):
+-    add("unsafe_name_" + repr(name), archive_bytes([(name, LITERAL)]), "ZIP name")
++    add("unsafe_name_" + repr(name), unsafe_archive(name), "ZIP name")
+ add("duplicate_names", archive_bytes([("data.pkl", LITERAL), ("data.pkl", LITERAL)]), "Duplicate")
+ symlink = zipfile.ZipInfo("data.pkl")
+ symlink.create_system = 3
+@@ -168,6 +180,14 @@ underreported = field(underreported, 22, 24, "<L", len(LITERAL))
+ underreported = field(underreported, 14, 16, "<L", zlib.crc32(LITERAL))
+ add("underreported_deflate_payload", underreported, "size")
+ 
++hidden_entries = archive_bytes([("entry" + str(i), b"") for i in range(257)])
++_, hidden_end = central_offsets(hidden_entries)
++hidden_entries = patch(hidden_entries, [(hidden_end + 8, "<H", 1), (hidden_end + 10, "<H", 1)])
++cases.append(("actual_directory_count_checked_before_ZipFile",
++              lambda: reader.directory_bounds(io.BytesIO(hidden_entries), len(hidden_entries)), "entry count"))
++add("underreported_stored_payload", field(base, 22, 24, "<L", len(LITERAL) - 1), "size")
++add("pickle_crc_payload_mismatch", field(base, 14, 16, "<L", 1), "payload CRC")
++
+ started = time.monotonic()
+ results = []
+ for name, operation, expected_refusal in cases:
+@@ -179,7 +199,7 @@ for name, operation, expected_refusal in cases:
+             assert value["global_literals"][0]["literal"] == "example.module Model"
+             assert value["execution_related_opcode_counts"]["GLOBAL"] == 1
+         results.append({"case": name, "status": "passed"})
+-    except (reader.Refusal, zipfile.BadZipFile, ValueError, UnicodeError, struct.error) as exc:
++    except (reader.Refusal, zipfile.BadZipFile, zlib.error, ValueError, UnicodeError, struct.error) as exc:
+         if expected_refusal is not None and expected_refusal in str(exc):
+             results.append({"case": name, "status": "passed", "refusal": str(exc)[:180]})
+         else:

@@ -1,0 +1,61 @@
+{
+  "schema": "uoink.fixed-vad.draft.v1",
+  "status": "DRAFT_UNQUALIFIED_ALWAYS_REFUSE",
+  "asset_id": "uoink-default-vad",
+  "fixed_factory_id": null,
+  "factory_identification": "PyanNet is a source-available candidate; actual artifact architecture unresolved",
+  "release_trust_anchor": null,
+  "original_artifact_from_prior_receipt": {
+    "sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea",
+    "bytes": 17719103,
+    "receipt_sha256": "703df7add11e0d9bd0f50eac6e20da0e0477479ae46f749b5eacfd532cb51b5d",
+    "reopened_in_this_task": false
+  },
+  "artifact": {
+    "filename": "default-vad.safetensors",
+    "exists_or_approved": false,
+    "sha256": null,
+    "bytes": null,
+    "format_version": null,
+    "max_header_bytes": null,
+    "max_tensor_count": null,
+    "max_elements": null
+  },
+  "constructor": {
+    "sample_rate": null,
+    "num_channels": null,
+    "sincnet_stride": null,
+    "lstm_hidden_size": null,
+    "lstm_num_layers": null,
+    "lstm_bidirectional": null,
+    "lstm_monolithic": null,
+    "lstm_dropout": null,
+    "lstm_bias": null,
+    "lstm_proj_size": null,
+    "linear_hidden_size": null,
+    "linear_num_layers": null
+  },
+  "specifications": {
+    "problem": null,
+    "resolution": null,
+    "duration": null,
+    "min_duration": null,
+    "warm_up": null,
+    "ordered_classes": null,
+    "powerset_max_classes": null,
+    "permutation_invariant": null
+  },
+  "tensor_schema": null,
+  "inference_profile": null,
+  "fixed_implementation_hashes": null,
+  "qualified_dependency_lock_sha256": null,
+  "export_or_conversion_provenance": null,
+  "license_receipt": null,
+  "qualification_receipts": [],
+  "approval_receipt": null,
+  "network_allowed": false,
+  "dynamic_imports_from_asset_allowed": false,
+  "pickle_loading_allowed": false,
+  "fallback_loader_allowed": false,
+  "speaker_attribution_allowed": false
+}

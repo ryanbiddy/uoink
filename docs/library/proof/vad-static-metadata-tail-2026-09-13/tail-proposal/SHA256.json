@@ -1,0 +1,76 @@
+{
+  "payload_count": 14,
+  "scope": "Bounded last64 literal-token reporting proposal; synthetic qualification only; original80 proof intact",
+  "payloads": [
+    {
+      "sha256": "60e3f77ba1244e2044b29f1c67facb917b24cc769f6fb4cb08c18c2f4415ee46",
+      "path": "before/prior-final-proof-SHA256.json",
+      "bytes": 17902
+    },
+    {
+      "sha256": "f27b91e610284e26975038ff6826f2190758b1d4c53a402db3c2d0386cc4d40d",
+      "path": "before/read_checkpoint_inventory.py",
+      "bytes": 20205
+    },
+    {
+      "sha256": "9fde6932f3bc6714c31d24953a516e25a375307a8e39a649804a0659b0a3d602",
+      "path": "BRIEF-2026-09-13.md",
+      "bytes": 2942
+    },
+    {
+      "sha256": "726ef6594cfd727f59fb6efe6c0bbd9733c4ec870feae34041c91f5599e74a23",
+      "path": "preservation.json",
+      "bytes": 498
+    },
+    {
+      "sha256": "b0325af95ea475c0ae13a5d595e26963c95ab175f6d68dcaba1724e3c33ef542",
+      "path": "qualify_tail.py",
+      "bytes": 9831
+    },
+    {
+      "sha256": "67e9edd6c3f6845a8dd3fd21b0b471793b57db0222c56379c0dfce9fcf07c9e5",
+      "path": "read_checkpoint_inventory.py",
+      "bytes": 20469
+    },
+    {
+      "sha256": "64b5dd5b94cbb6aabd6aad061210e6df9469a5354e67628ac14531bb4009065d",
+      "path": "REVIEW-VERDICT-2026-09-13.md",
+      "bytes": 2551
+    },
+    {
+      "sha256": "9fde6932f3bc6714c31d24953a516e25a375307a8e39a649804a0659b0a3d602",
+      "path": "static-tail-preflight01/BRIEF-2026-09-13.md",
+      "bytes": 2942
+    },
+    {
+      "sha256": "de8ed6b66e39006e3ac9c6c9d2b6a66e3e189faa0343eb0371fb2121741e6b8d",
+      "path": "static-tail-preflight01/exit.json",
+      "bytes": 184
+    },
+    {
+      "sha256": "b0325af95ea475c0ae13a5d595e26963c95ab175f6d68dcaba1724e3c33ef542",
+      "path": "static-tail-preflight01/qualify_tail.py",
+      "bytes": 9831
+    },
+    {
+      "sha256": "67e9edd6c3f6845a8dd3fd21b0b471793b57db0222c56379c0dfce9fcf07c9e5",
+      "path": "static-tail-preflight01/read_checkpoint_inventory.py",
+      "bytes": 20469
+    },
+    {
+      "sha256": "e0830cc160c43f189d6c9746bd2d9587219d0ab2b7e8bbf6f56f6c368b6cb4df",
+      "path": "static-tail-preflight01/reader.diff",
+      "bytes": 2633
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": "static-tail-preflight01/stderr.log",
+      "bytes": 0
+    },
+    {
+      "sha256": "262d49c3e23afa76cae8ad64f99aa57ad9aff8228522e84d65dd3380af794f30",
+      "path": "static-tail-preflight01/stdout.json",
+      "bytes": 2053
+    }
+  ]
+}

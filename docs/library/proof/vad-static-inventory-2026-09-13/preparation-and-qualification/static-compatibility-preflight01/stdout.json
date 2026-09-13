@@ -1,0 +1,445 @@
+{
+  "label": "static-compatibility-preflight01",
+  "reader_sha256": "f27b91e610284e26975038ff6826f2190758b1d4c53a402db3c2d0386cc4d40d",
+  "isolated": true,
+  "no_site": true,
+  "dont_write_bytecode": true,
+  "actual_checkpoint_opened": false,
+  "reader_main_called": false,
+  "passed": 89,
+  "failed": 0,
+  "elapsed_seconds": 0.020916,
+  "cases": [
+    {
+      "case": "valid_stored",
+      "status": "passed"
+    },
+    {
+      "case": "valid_deflated",
+      "status": "passed"
+    },
+    {
+      "case": "valid_zip64_end_records",
+      "status": "passed"
+    },
+    {
+      "case": "literal_global_is_reported_without_resolution",
+      "status": "passed"
+    },
+    {
+      "case": "missing_pickle",
+      "status": "passed",
+      "refusal": "Exactly one unambiguous data.pkl is required"
+    },
+    {
+      "case": "ambiguous_pickle",
+      "status": "passed",
+      "refusal": "Exactly one unambiguous data.pkl is required"
+    },
+    {
+      "case": "additional_pickle_suffix",
+      "status": "passed",
+      "refusal": "Exactly one unambiguous data.pkl is required"
+    },
+    {
+      "case": "unsafe_name_'../data.pkl'",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "unsafe_name_'/data.pkl'",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "unsafe_name_'x\\\\data.pkl'",
+      "status": "passed",
+      "refusal": "NUL-containing or ambiguous ZIP name"
+    },
+    {
+      "case": "unsafe_name_'x:foo/data.pkl'",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "unsafe_name_'x//data.pkl'",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "unsafe_name_'x/./data.pkl'",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "unsafe_name_'x/\\x01data.pkl'",
+      "status": "passed",
+      "refusal": "Control character in ZIP name"
+    },
+    {
+      "case": "duplicate_names",
+      "status": "passed",
+      "refusal": "Duplicate ZIP member names refused"
+    },
+    {
+      "case": "symlink_member",
+      "status": "passed",
+      "refusal": "ZIP symbolic-link member refused"
+    },
+    {
+      "case": "encrypted_flag",
+      "status": "passed",
+      "refusal": "Encrypted ZIP member refused"
+    },
+    {
+      "case": "unsupported_flag",
+      "status": "passed",
+      "refusal": "Unsupported ZIP member flags"
+    },
+    {
+      "case": "unsupported_compression",
+      "status": "passed",
+      "refusal": "Unsupported ZIP compression"
+    },
+    {
+      "case": "oversized_directory",
+      "status": "passed",
+      "refusal": "ZIP central directory exceeds the inspection limit"
+    },
+    {
+      "case": "oversized_member_count",
+      "status": "passed",
+      "refusal": "ZIP member count exceeds the inspection limit or is empty"
+    },
+    {
+      "case": "oversized_advertised_member",
+      "status": "passed",
+      "refusal": "ZIP member exceeds size bound"
+    },
+    {
+      "case": "oversized_pickle_refused_before_open",
+      "status": "passed",
+      "refusal": "Pickle member exceeds inspection limit"
+    },
+    {
+      "case": "local_central_name_mismatch",
+      "status": "passed",
+      "refusal": "ZIP local/central names disagree"
+    },
+    {
+      "case": "local_central_crc_mismatch",
+      "status": "passed",
+      "refusal": "ZIP local/central CRC fields disagree"
+    },
+    {
+      "case": "central_directory_offset_conflict",
+      "status": "passed",
+      "refusal": "ZIP central-directory extent is inconsistent"
+    },
+    {
+      "case": "split_archive",
+      "status": "passed",
+      "refusal": "Split ZIP archives are unsupported"
+    },
+    {
+      "case": "pickle_trailing_bytes",
+      "status": "passed",
+      "refusal": "Pickle is truncated or has trailing data"
+    },
+    {
+      "case": "pickle_truncated",
+      "status": "passed",
+      "refusal": "pickle exhausted before seeing STOP"
+    },
+    {
+      "case": "unsupported_pickle_protocol",
+      "status": "passed",
+      "refusal": "Unsupported pickle protocol"
+    },
+    {
+      "case": "non_zip_file",
+      "status": "passed",
+      "refusal": "A complete ZIP end record is required"
+    },
+    {
+      "case": "overlapping_local_members",
+      "status": "passed",
+      "refusal": "Overlapping ZIP member extents"
+    },
+    {
+      "case": "underreported_deflate_payload",
+      "status": "passed",
+      "refusal": "Actual pickle size exceeds its declared bound"
+    },
+    {
+      "case": "actual_directory_count_checked_before_ZipFile",
+      "status": "passed",
+      "refusal": "Actual ZIP directory entry count exceeds advertised bound"
+    },
+    {
+      "case": "underreported_stored_payload",
+      "status": "passed",
+      "refusal": "Actual pickle size differs from directory metadata"
+    },
+    {
+      "case": "pickle_crc_payload_mismatch",
+      "status": "passed",
+      "refusal": "Pickle payload CRC differs from directory metadata"
+    },
+    {
+      "case": "numeric_refusal_needed_0",
+      "status": "passed"
+    },
+    {
+      "case": "numeric_refusal_needed_9",
+      "status": "passed"
+    },
+    {
+      "case": "numeric_refusal_needed_46",
+      "status": "passed"
+    },
+    {
+      "case": "numeric_refusal_split_disk",
+      "status": "passed"
+    },
+    {
+      "case": "numeric_refusal_metadata_bound",
+      "status": "passed"
+    },
+    {
+      "case": "numeric_refusal_entry_extent",
+      "status": "passed"
+    },
+    {
+      "case": "compat_exact_stored_version_zero",
+      "status": "passed"
+    },
+    {
+      "case": "compat_other_low_version_1",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_2",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_3",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_4",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_5",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_6",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_7",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_8",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_other_low_version_9",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_high_version_46",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_high_version_65535",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_made_1",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_made_20",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_made_256",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_made_65535",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_disk_1",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_disk_65535",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_nonstored_method_8",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_nonstored_method_12",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_nonstored_method_99",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_0",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_8",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_2048",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_2057",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_2058",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_2060",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_2120",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_10248",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_changed_flags_65535",
+      "status": "passed",
+      "refusal": "Unsupported or split ZIP directory entry"
+    },
+    {
+      "case": "compat_crc_rule_retained",
+      "status": "passed",
+      "refusal": "Pickle payload CRC differs from directory metadata"
+    },
+    {
+      "case": "compat_member_size_rule_retained",
+      "status": "passed",
+      "refusal": "ZIP member exceeds size bound"
+    },
+    {
+      "case": "compat_name_rule_retained",
+      "status": "passed",
+      "refusal": "Non-contained ZIP name"
+    },
+    {
+      "case": "compat_pickle_stop_rule_retained",
+      "status": "passed",
+      "refusal": "Pickle is truncated or has trailing data"
+    },
+    {
+      "case": "compat_stored_size_rule_retained",
+      "status": "passed",
+      "refusal": "Actual pickle size differs from directory metadata"
+    },
+    {
+      "case": "exact_digest_gate_accepts_recorded_digest",
+      "status": "passed"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_1",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_2",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_3",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_4",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_5",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_6",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_7",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_8",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "immutable_digest_gate_refuses_9",
+      "status": "passed",
+      "refusal": "Allowlisted artifact SHA256 differs from immutable expected digest"
+    },
+    {
+      "case": "static_original_42_behavior_assertions_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "static_exact_authorized_version_and_digest_delta",
+      "status": "passed"
+    }
+  ]
+}

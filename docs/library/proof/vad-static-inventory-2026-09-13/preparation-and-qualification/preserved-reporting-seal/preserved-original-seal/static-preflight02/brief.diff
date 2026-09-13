@@ -1,0 +1,32 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\BRIEF-2026-09-13.md" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\BRIEF-2026-09-13.md"
+index f4db510..1aa9d5d 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\BRIEF-2026-09-13.md"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\BRIEF-2026-09-13.md"
+@@ -25,6 +25,8 @@ The reader permits ZIP_STORED and ZIP_DEFLATED only. It checks the ordinary or
+ ZIP64 end records before ZipFile builds its directory, rejects split/encrypted
+ archives and conflicting offsets/counts, and checks member names, bounds,
+ local-header spans, duplicate names, overlapping member regions, and symlinks.
++It scans actual central-directory entries before ZipFile allocates them; ZIP
++minimum-reader versions above 4.5 and unsupported directory records are refused.
+ It refuses a non-ZIP checkpoint, unsupported formats, ambiguous pickle members,
+ or a pickle member whose advertised or actual size exceeds its limit.
+ 
+@@ -38,6 +40,7 @@ Limits are chosen for this inspection, not inferred checkpoint properties:
+ | One member's uncompressed size | 256 MiB |
+ | Sum of advertised uncompressed sizes | 512 MiB |
+ | One member name | 256 UTF-8 bytes |
++| One local/central extra field / member comment | 8 KiB / 1 KiB |
+ | Pickle payload, compressed and uncompressed | 2 MiB each |
+ | Compressed pickle expansion ratio | 100 |
+ | Pickle opcodes | 250,000 |
+@@ -50,6 +53,10 @@ opcodes; this is not an OS-level deadline for a stalled filesystem operation.
+ The reader never decompresses tensor/storage members. Hashing reads their
+ opaque bytes as part of the one allowlisted file.
+ 
++For the pickle member alone, bounded stdlib zlib decompression requires exact
++declared size, a completed stream, no remaining compressed data, and matching
++CRC before any opcode parsing. Stored pickle bytes get size and CRC checks too.
++
+ For a single small `data.pkl`, `pickletools.genops` reports opcode counts,
+ literal GLOBAL references, bounded identifier-like string samples, and counts
+ of stack-global, persistent-ID, object-construction and reduction opcodes. It

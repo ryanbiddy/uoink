@@ -1,0 +1,140 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\preserved-reporting-seal\\qualify_parser.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\qualify_parser.py"
+index 01fb350..5c19e8c 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\preserved-reporting-seal\\qualify_parser.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\qualify_parser.py"
+@@ -227,37 +227,104 @@ long_name = patch(base, [(centers[0] + 28, "<H", 256)])
+ cases.append(("numeric_refusal_entry_extent", lambda: assert_numeric_refusal(
+     long_name, dict(expected_header, name_bytes=256), "ZIP central-directory entry extends outside directory"), None))
+ 
+-baseline_ast = ast.parse((HERE / "preserved-original-seal/read_checkpoint_inventory.py").read_bytes())
+-current_ast = ast.parse(reader_bytes)
+-
+-
+-def assert_unchanged(selector):
+-    before = [selector(node) for node in ast.walk(baseline_ast) if selector(node) is not None]
+-    after = [selector(node) for node in ast.walk(current_ast) if selector(node) is not None]
+-    assert before == after, "Reporting repair changed a frozen acceptance/read boundary"
+-
+-
+-def predicate(node):
+-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "require":
+-        return [ast.dump(argument, include_attributes=False) for argument in node.args]
+-
+-
+-def read_call(node):
+-    if isinstance(node, ast.Call):
+-        if (isinstance(node.func, ast.Name) and node.func.id == "read_exact") or (
+-                isinstance(node.func, ast.Attribute) and node.func.attr in ("open", "read", "read_bytes", "seek")):
+-            return ast.dump(node, include_attributes=False)
+-
+-
+-def constants_unchanged():
+-    before = [ast.dump(node, include_attributes=False) for node in baseline_ast.body if isinstance(node, ast.Assign)]
+-    after = [ast.dump(node, include_attributes=False) for node in current_ast.body if isinstance(node, ast.Assign)]
+-    assert before == after, "Reporting repair changed constants or fixed paths"
+-
+-
+-cases.append(("static_same_refusal_predicates_and_messages", lambda: assert_unchanged(predicate), None))
+-cases.append(("static_same_file_read_expressions", lambda: assert_unchanged(read_call), None))
+-cases.append(("static_same_constants_and_fixed_paths", constants_unchanged, None))
++# COMPATIBILITY SCOPE: retain the 42 behavior/reporting cases above unchanged.
++retained_behavior_count = len(cases)
++EXPECTED_DIGEST = "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea"
++
++
++def legacy_stored_container(raw):
++    offsets, final_offset = central_offsets(raw)
++    assert len(offsets) == 1
++    central = offsets[0]
++    value = bytearray(raw)
++    struct.pack_into("<H", value, 4, 0)
++    struct.pack_into("<H", value, 6, 2056)
++    for offset in (14, 18, 22):
++        struct.pack_into("<L", value, offset, 0)
++    struct.pack_into("<H", value, central + 4, 0)
++    struct.pack_into("<H", value, central + 6, 0)
++    struct.pack_into("<H", value, central + 8, 2056)
++    checksum, packed, unpacked = struct.unpack_from("<3L", value, central + 16)
++    descriptor = struct.pack("<4L", 0x08074B50, checksum, packed, unpacked)
++    value = value[:central] + descriptor + value[central:]
++    struct.pack_into("<L", value, final_offset + len(descriptor) + 16, central + len(descriptor))
++    return bytes(value)
++
++
++legacy = legacy_stored_container(base)
++legacy_centers, _ = central_offsets(legacy)
++add("compat_exact_stored_version_zero", legacy)
++for compat_version in range(1, 10):
++    add("compat_other_low_version_" + str(compat_version),
++        field(legacy, 4, 6, "<H", compat_version), "Unsupported or split ZIP directory entry")
++for compat_version in (46, 65535):
++    add("compat_high_version_" + str(compat_version),
++        field(legacy, 4, 6, "<H", compat_version), "Unsupported or split ZIP directory entry")
++for compat_made in (1, 20, 256, 65535):
++    add("compat_changed_made_" + str(compat_made),
++        patch(legacy, [(legacy_centers[0] + 4, "<H", compat_made)]), "Unsupported or split ZIP directory entry")
++for compat_disk in (1, 65535):
++    add("compat_changed_disk_" + str(compat_disk),
++        patch(legacy, [(legacy_centers[0] + 34, "<H", compat_disk)]), "Unsupported or split ZIP directory entry")
++for compat_method in (8, 12, 99):
++    add("compat_nonstored_method_" + str(compat_method),
++        field(legacy, 8, 10, "<H", compat_method), "Unsupported or split ZIP directory entry")
++for compat_flags in (0, 8, 2048, 2057, 2058, 2060, 2120, 10248, 65535):
++    add("compat_changed_flags_" + str(compat_flags),
++        field(legacy, 6, 8, "<H", compat_flags), "Unsupported or split ZIP directory entry")
++add("compat_crc_rule_retained", patch(legacy, [(legacy_centers[0] + 16, "<L", 1)]), "payload CRC")
++add("compat_member_size_rule_retained", patch(legacy, [(legacy_centers[0] + 24, "<L", reader.MAX_MEMBER + 1)]),
++    "ZIP member exceeds size bound")
++add("compat_name_rule_retained", legacy_stored_container(archive_bytes([("../data.pkl", LITERAL)])), "ZIP name")
++add("compat_pickle_stop_rule_retained", legacy_stored_container(archive_bytes([("data.pkl", LITERAL + b"suffix")])),
++    "trailing data")
++add("compat_stored_size_rule_retained", patch(legacy, [(legacy_centers[0] + 24, "<L", len(LITERAL) - 1)]), "size")
++cases.append(("exact_digest_gate_accepts_recorded_digest", lambda: reader.require_expected_digest(EXPECTED_DIGEST), None))
++for digest_number, bad_digest in enumerate(("0" * 64, EXPECTED_DIGEST.upper(), EXPECTED_DIGEST[:-1],
++                                          EXPECTED_DIGEST + "0", "", None, b"", 0, EXPECTED_DIGEST + " "), 1):
++    cases.append(("immutable_digest_gate_refuses_" + str(digest_number),
++                  lambda digest=bad_digest: reader.require_expected_digest(digest), "immutable expected digest"))
++
++
++def static_retained_behavior_source():
++    previous = (HERE / "preserved-reporting-seal/qualify_parser.py").read_text(encoding="utf-8")
++    current = Path(__file__).read_text(encoding="utf-8")
++    assert previous.split("baseline_ast =", 1)[0] == current.split("# COMPATIBILITY SCOPE:", 1)[0]
++    assert retained_behavior_count == 42
++    assert previous[previous.index("started = time.monotonic()\nresults = []"):] == current[current.index(
++        "started = time.monotonic()\nresults = []"):]
++
++
++def static_exact_authorized_reader_delta():
++    before = (HERE / "preserved-reporting-seal/read_checkpoint_inventory.py").read_text(encoding="utf-8")
++    substitutions = (
++        ('INPUT = ROOT / "installer/staging/python/Lib/site-packages/whisperx/assets/pytorch_model.bin"\n',
++         'INPUT = ROOT / "installer/staging/python/Lib/site-packages/whisperx/assets/pytorch_model.bin"\n'
++         'EXPECTED_ARTIFACT_SHA256 = "' + EXPECTED_DIGEST + '"\n'),
++        ('def clock_check(started):',
++         'def require_expected_digest(observed_digest):\n'
++         '    require(observed_digest == EXPECTED_ARTIFACT_SHA256,\n'
++         '            "Allowlisted artifact SHA256 differs from immutable expected digest")\n\n\n'
++         'def clock_check(started):'),
++        ('        require(10 <= needed <= 45 and member_disk == 0, "Unsupported or split ZIP directory entry",\n',
++         '        stored_version_zero = (needed == 0 and entry["made_version"] == 0 and member_disk == 0\n'
++         '                               and method == zipfile.ZIP_STORED and flags == 2056)\n'
++         '        require((10 <= needed <= 45 or stored_version_zero) and member_disk == 0,\n'
++         '                "Unsupported or split ZIP directory entry",\n'),
++        ('        bounds = directory_bounds(stream, total)\n',
++         '        require_expected_digest(result["artifact"]["sha256"])\n'
++         '        bounds = directory_bounds(stream, total)\n'),
++    )
++    expected = before
++    for old, new in substitutions:
++        assert expected.count(old) == 1, "Authorized delta anchor is ambiguous"
++        expected = expected.replace(old, new, 1)
++    assert ast.dump(ast.parse(expected), include_attributes=False) == ast.dump(ast.parse(reader_bytes), include_attributes=False), (
++        "Reader changes exceed the exact hash gate and stored version-zero exception")
++
++
++cases.append(("static_original_42_behavior_assertions_unchanged", static_retained_behavior_source, None))
++cases.append(("static_exact_authorized_version_and_digest_delta", static_exact_authorized_reader_delta, None))
+ 
+ started = time.monotonic()
+ results = []

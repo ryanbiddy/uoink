@@ -1,0 +1,6 @@
+{
+  "label": "static-reporting-preflight01",
+  "invocation": "python.exe -I -S -B qualify_parser.py static-reporting-preflight01",
+  "actual_checkpoint_invoked": false,
+  "actual_exit": 0
+}

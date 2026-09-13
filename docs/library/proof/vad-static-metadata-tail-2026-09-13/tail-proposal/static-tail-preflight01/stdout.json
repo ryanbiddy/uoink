@@ -1,0 +1,84 @@
+{
+  "label": "static-tail-preflight01",
+  "before_reader_sha256": "f27b91e610284e26975038ff6826f2190758b1d4c53a402db3c2d0386cc4d40d",
+  "reader_sha256": "67e9edd6c3f6845a8dd3fd21b0b471793b57db0222c56379c0dfce9fcf07c9e5",
+  "isolated": true,
+  "no_site": true,
+  "dont_write_bytecode": true,
+  "actual_checkpoint_opened": false,
+  "reader_main_called": false,
+  "reader_inspect_called": false,
+  "passed": 17,
+  "failed": 0,
+  "elapsed_seconds": 0.015939,
+  "cases": [
+    {
+      "case": "more_than_64_first_unchanged_tail_order",
+      "status": "passed"
+    },
+    {
+      "case": "exactly_64_tokens",
+      "status": "passed"
+    },
+    {
+      "case": "short_tail",
+      "status": "passed"
+    },
+    {
+      "case": "empty_tail",
+      "status": "passed"
+    },
+    {
+      "case": "duplicates_after_first_limit",
+      "status": "passed"
+    },
+    {
+      "case": "duplicate_occurrences_keep_order",
+      "status": "passed"
+    },
+    {
+      "case": "repeated_token_counts_as_occurrences",
+      "status": "passed"
+    },
+    {
+      "case": "deflated_tail_same_outputs",
+      "status": "passed"
+    },
+    {
+      "case": "same_regex_and_96_character_bound",
+      "status": "passed"
+    },
+    {
+      "case": "non_string_opcode_arguments_ignored",
+      "status": "passed"
+    },
+    {
+      "case": "global_opcode_and_literal_outputs_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "stack_global_tokens_are_not_resolved",
+      "status": "passed"
+    },
+    {
+      "case": "trailing_pickle_refusal_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "malformed_opcode_refusal_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "unsupported_protocol_refusal_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "missing_pickle_refusal_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "exact_ast_delta_preserves_reads_bounds_hash_and_model_behavior",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# VAD proposal addendum: run04 literals
+
+2026-09-13. Receipt/source review only. Run04's identifier tail strengthens the **PyanNet hypothesis**: it contains both `pyannote.audio.models.segmentation.PyanNet` and `PyanNet`, alongside `architecture`, `module` and `class`. It also names the hyperparameter and specification fields required by the candidate factory in the original proposal. This remains literal evidence. The receipt does not establish which strings are dictionary keys or values, their associations, whether they are subsequently overwritten, or any numeric configuration.
+
+Run04 is `_scratch/vad-static-inventory-proposal01/results/run04.json`, SHA-256 `9dddabcb9237e9163b333ca316194705a6fe544ca5db0fad807f3fd9e938f64e`. It reports exit 0 in 0.016786 seconds against the same artifact hash as run03. Its architecture claim is null; object construction, pickle-semantic validation, persistent-ID resolution, conversion authorization and model/inference authorization remain false. The 64 tail samples are not a complete recovered metadata object.
+
+| New literal evidence | Connection to the source-bound proposal |
+| --- | --- |
+| PyanNet module/class spellings | Matches the available `PYANNET:38,74–140` factory candidate. Actual architecture assignment and trusted provenance remain unresolved. |
+| `hyper_parameters`, sample/channel fields, SincNet/stride, LSTM settings and `linear` | Matches constructor inputs discussed in the proposal. Values, nesting, omitted defaults and duplicate assignments must be established before filling any `FIXED_*` constants. |
+| `specifications`, problem/resolution/duration/warm-up/classes/permutation fields | Matches `TASK:60–146` and the classifier/timing requirements. Ordered classes, enum values, duration, warm-up and missing legacy fields remain unknown. |
+
+The smallest useful next acquisition is a **targeted, nonexecuting metadata trace**, under its own bounded instrument brief, rather than another list of names. Retain opcode offsets/arguments and memo-reference edges sufficient for an independent reviewer to establish final assignments for `hyper_parameters` and `pyannote.audio` architecture, versions and specifications. Represent any reducer/object instructions as inert tagged records; never invoke them. Record duplicate/reassigned keys, unsupported semantics and ambiguous associations explicitly. This could establish the checkpoint's declared configuration; it cannot authenticate that declaration.
+
+To finish the fixed tensor-schema contract, the same static scope would also need the complete `state_dict` key-to-descriptor mapping: referenced storage identifier/type, element count, offset, shape, stride, aliases and persistent-buffer membership. This is metadata inspection, with no storage-to-tensor reconstruction or inference. Confirm byte-order/storage conventions from authoritative format/source evidence or separately bounded archive metadata; do not guess them. Compare the recovered descriptors with the reviewed fixed-class source. Unknowns must remain unresolved, not filled with constructor defaults.
+
+Artifact provenance and license still require independent evidence tying the intended model to these bytes. Producing a plain tensor artifact is **conversion**; importing model modules, constructing the fixed network, loading state and comparing outputs are later **runtime qualification** stages. None is authorized by a successful static trace. The original loader contract still refuses the draft manifest and disallows unrestricted-load fallbacks or blanket globals.
+
+This addendum sits outside `_scratch/vad-fixed-loader-proposal01`. All 38 original payload hashes were rechecked with zero mismatches; its manifest remains `129773fb33e4ec94a4e217373064d6d55de68d1db71f299a2372a91be1a76403`. Only the run04 JSON receipt and retained source evidence were read for this addendum. No checkpoint was opened, and no model or converter code was executed.

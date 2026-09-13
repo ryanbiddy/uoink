@@ -1,0 +1,44 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\preserved-reporting-seal\\read_checkpoint_inventory.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\read_checkpoint_inventory.py"
+index da145ce..5862bdb 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\preserved-reporting-seal\\read_checkpoint_inventory.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-compatibility01\\read_checkpoint_inventory.py"
+@@ -24,6 +24,7 @@ import zlib
+ 
+ ROOT = Path(r"E:\AI\projects\uoink\checkouts\Yoink-library")
+ INPUT = ROOT / "installer/staging/python/Lib/site-packages/whisperx/assets/pytorch_model.bin"
++EXPECTED_ARTIFACT_SHA256 = "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea"
+ OUTPUT = ROOT / "_scratch/vad-static-inventory-proposal01/results"
+ MIB = 1024 * 1024
+ MAX_FILE = 256 * MIB
+@@ -55,6 +56,11 @@ def require(condition, reason, *, directory_entry=None):
+         raise Refusal(reason, directory_entry=directory_entry)
+ 
+ 
++def require_expected_digest(observed_digest):
++    require(observed_digest == EXPECTED_ARTIFACT_SHA256,
++            "Allowlisted artifact SHA256 differs from immutable expected digest")
++
++
+ def clock_check(started):
+     require(time.monotonic() - started <= MAX_SECONDS, "Static inventory exceeded its cooperative time budget")
+ 
+@@ -135,7 +141,10 @@ def directory_bounds(stream, file_size):
+                  "crc32_u32": crc, "compressed_bytes_u32": packed, "uncompressed_bytes_u32": unpacked,
+                  "name_bytes": name_length, "extra_bytes": extra_length, "comment_bytes": comment_length,
+                  "local_header_offset_u32": struct.unpack_from("<L", directory, cursor + 42)[0]}
+-        require(10 <= needed <= 45 and member_disk == 0, "Unsupported or split ZIP directory entry",
++        stored_version_zero = (needed == 0 and entry["made_version"] == 0 and member_disk == 0
++                               and method == zipfile.ZIP_STORED and flags == 2056)
++        require((10 <= needed <= 45 or stored_version_zero) and member_disk == 0,
++                "Unsupported or split ZIP directory entry",
+                 directory_entry=entry)
+         require(0 < name_length <= MAX_NAME and extra_length <= 8192 and comment_length <= 1024,
+                 "ZIP central-directory member metadata exceeds limit", directory_entry=entry)
+@@ -280,6 +289,7 @@ def inspect(result, started):
+             sha.update(data)
+         require(total == opened.st_size, "Allowlisted file size changed during hashing")
+         result["artifact"] = {"allowlisted_path": str(INPUT), "bytes": total, "sha256": sha.hexdigest()}
++        require_expected_digest(result["artifact"]["sha256"])
+         bounds = directory_bounds(stream, total)
+         result["zip_directory"] = bounds
+         with zipfile.ZipFile(stream, "r", allowZip64=True) as archive:

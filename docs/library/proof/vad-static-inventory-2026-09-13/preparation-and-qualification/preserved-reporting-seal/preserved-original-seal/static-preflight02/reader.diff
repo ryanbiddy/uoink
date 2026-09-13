@@ -1,0 +1,82 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\read_checkpoint_inventory.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\read_checkpoint_inventory.py"
+index 93449d4..67f4440 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\static-preflight01\\read_checkpoint_inventory.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-proposal01\\read_checkpoint_inventory.py"
+@@ -19,6 +19,7 @@ import struct
+ import sys
+ import time
+ import zipfile
++import zlib
+ 
+ 
+ ROOT = Path(r"E:\AI\projects\uoink\checkouts\Yoink-library")
+@@ -116,6 +117,21 @@ def directory_bounds(stream, file_size):
+     require(0 < cd_size <= MAX_CD, "ZIP central directory exceeds the inspection limit")
+     require(cd_offset > 0 and cd_offset + cd_size == boundary, "ZIP central-directory extent is inconsistent")
+     require(read_exact(stream, 0, 4, file_size) == b"PK\x03\x04", "Prefixed or non-ZIP checkpoint refused")
++    directory = read_exact(stream, cd_offset, cd_size, file_size)
++    cursor = actual_count = 0
++    while cursor < len(directory):
++        require(actual_count < count, "Actual ZIP directory entry count exceeds advertised bound")
++        require(cursor + 46 <= len(directory), "Truncated ZIP central-directory header")
++        require(directory[cursor:cursor + 4] == b"PK\x01\x02", "Unsupported ZIP central-directory record")
++        needed = struct.unpack_from("<H", directory, cursor + 6)[0]
++        name_length, extra_length, comment_length, member_disk = struct.unpack_from("<4H", directory, cursor + 28)
++        require(10 <= needed <= 45 and member_disk == 0, "Unsupported or split ZIP directory entry")
++        require(0 < name_length <= MAX_NAME and extra_length <= 8192 and comment_length <= 1024,
++                "ZIP central-directory member metadata exceeds limit")
++        cursor += 46 + name_length + extra_length + comment_length
++        require(cursor <= len(directory), "ZIP central-directory entry extends outside directory")
++        actual_count += 1
++    require(actual_count == count, "Actual ZIP directory entry count disagrees with advertised bound")
+     return {"zip64": zip64, "members": count, "central_directory_bytes": cd_size, "central_directory_offset": cd_offset}
+ 
+ 
+@@ -176,19 +192,25 @@ def member_inventory(stream, archive, bounds, file_size, started):
+ def parse_pickle(archive, member, started):
+     require(0 < member.file_size <= MAX_PICKLE and member.compress_size <= MAX_PICKLE, "Pickle member exceeds inspection limit")
+     require(member.file_size <= max(1, member.compress_size) * 100, "Pickle expansion ratio exceeds limit")
+-    chunks = []
+-    length = 0
+-    with archive.open(member, "r") as stream:
+-        while True:
+-            clock_check(started)
+-            piece = stream.read(min(65536, MAX_PICKLE + 1 - length))
+-            if not piece:
+-                break
+-            chunks.append(piece)
+-            length += len(piece)
+-            require(length <= MAX_PICKLE, "Actual pickle payload exceeds limit")
+-    require(length == member.file_size, "Pickle size differs from directory metadata")
+-    payload = b"".join(chunks)
++    # ZipExtFile trusts the declared output length and can hide a longer stream.
++    # Decode this one bounded member ourselves, without extracting any file.
++    header = read_exact(archive.fp, member.header_offset, 30, archive.start_dir)
++    name_length, extra_length = struct.unpack_from("<2H", header, 26)
++    data_offset = member.header_offset + 30 + name_length + extra_length
++    packed = read_exact(archive.fp, data_offset, member.compress_size, archive.start_dir)
++    clock_check(started)
++    if member.compress_type == zipfile.ZIP_STORED:
++        payload = packed
++    else:
++        require(member.compress_type == zipfile.ZIP_DEFLATED, "Unsupported pickle compression")
++        decoder = zlib.decompressobj(-15)
++        payload = decoder.decompress(packed, member.file_size + 1)
++        require(not decoder.unconsumed_tail, "Actual pickle size exceeds its declared bound")
++        require(decoder.eof and not decoder.unused_data, "Incomplete deflate stream or trailing compressed data")
++    clock_check(started)
++    length = len(payload)
++    require(length == member.file_size, "Actual pickle size differs from directory metadata")
++    require(zlib.crc32(payload) == member.CRC, "Pickle payload CRC differs from directory metadata")
+     histogram = Counter()
+     globals_ = []
+     samples = []
+@@ -275,7 +297,7 @@ def main():
+         require(not receipt.exists(), "Receipt already exists; no retry or overwrite")
+         inspect(result, started)
+         result["status"] = "static_inventory_complete"
+-    except (Refusal, zipfile.BadZipFile, NotImplementedError, UnicodeError, ValueError, struct.error) as exc:
++    except (Refusal, zipfile.BadZipFile, zlib.error, NotImplementedError, UnicodeError, ValueError, struct.error) as exc:
+         code = 2
+         result["status"] = "refused"
+         result["reason"] = str(exc)[:240]

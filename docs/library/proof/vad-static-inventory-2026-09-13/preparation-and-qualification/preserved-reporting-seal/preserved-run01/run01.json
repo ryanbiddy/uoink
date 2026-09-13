@@ -1,0 +1,18 @@
+{
+  "scope": "bounded static inventory only",
+  "started_utc": "2026-09-13T12:23:14.907496+00:00",
+  "architecture_claim": null,
+  "model_load_authorized": false,
+  "conversion_authorized": false,
+  "inference_authorized": false,
+  "release_acceptance": false,
+  "artifact": {
+    "allowlisted_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\whisperx\\assets\\pytorch_model.bin",
+    "bytes": 17719103,
+    "sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea"
+  },
+  "status": "refused",
+  "reason": "Unsupported or split ZIP directory entry",
+  "reader_exit": 2,
+  "elapsed_seconds": 0.015924
+}

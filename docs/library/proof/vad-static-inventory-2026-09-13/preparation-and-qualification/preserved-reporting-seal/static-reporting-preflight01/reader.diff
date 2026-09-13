@@ -1,0 +1,56 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\preserved-original-seal\\read_checkpoint_inventory.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\read_checkpoint_inventory.py"
+index 67f4440..da145ce 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\preserved-original-seal\\read_checkpoint_inventory.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-reporting-repair01\\read_checkpoint_inventory.py"
+@@ -45,12 +45,14 @@ IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_.\[\]-]{0,95}\Z")
+ 
+ 
+ class Refusal(Exception):
+-    pass
++    def __init__(self, reason, *, directory_entry=None):
++        super().__init__(reason)
++        self.directory_entry = directory_entry
+ 
+ 
+-def require(condition, reason):
++def require(condition, reason, *, directory_entry=None):
+     if not condition:
+-        raise Refusal(reason)
++        raise Refusal(reason, directory_entry=directory_entry)
+ 
+ 
+ def clock_check(started):
+@@ -125,11 +127,21 @@ def directory_bounds(stream, file_size):
+         require(directory[cursor:cursor + 4] == b"PK\x01\x02", "Unsupported ZIP central-directory record")
+         needed = struct.unpack_from("<H", directory, cursor + 6)[0]
+         name_length, extra_length, comment_length, member_disk = struct.unpack_from("<4H", directory, cursor + 28)
+-        require(10 <= needed <= 45 and member_disk == 0, "Unsupported or split ZIP directory entry")
++        flags, method = struct.unpack_from("<2H", directory, cursor + 8)
++        crc, packed, unpacked = struct.unpack_from("<3L", directory, cursor + 16)
++        entry = {"ordinal": actual_count + 1, "central_header_offset": cd_offset + cursor,
++                 "needed_version": needed, "made_version": struct.unpack_from("<H", directory, cursor + 4)[0],
++                 "disk": member_disk, "compression_method": method, "flags": flags,
++                 "crc32_u32": crc, "compressed_bytes_u32": packed, "uncompressed_bytes_u32": unpacked,
++                 "name_bytes": name_length, "extra_bytes": extra_length, "comment_bytes": comment_length,
++                 "local_header_offset_u32": struct.unpack_from("<L", directory, cursor + 42)[0]}
++        require(10 <= needed <= 45 and member_disk == 0, "Unsupported or split ZIP directory entry",
++                directory_entry=entry)
+         require(0 < name_length <= MAX_NAME and extra_length <= 8192 and comment_length <= 1024,
+-                "ZIP central-directory member metadata exceeds limit")
++                "ZIP central-directory member metadata exceeds limit", directory_entry=entry)
+         cursor += 46 + name_length + extra_length + comment_length
+-        require(cursor <= len(directory), "ZIP central-directory entry extends outside directory")
++        require(cursor <= len(directory), "ZIP central-directory entry extends outside directory",
++                directory_entry=entry)
+         actual_count += 1
+     require(actual_count == count, "Actual ZIP directory entry count disagrees with advertised bound")
+     return {"zip64": zip64, "members": count, "central_directory_bytes": cd_size, "central_directory_offset": cd_offset}
+@@ -301,6 +313,8 @@ def main():
+         code = 2
+         result["status"] = "refused"
+         result["reason"] = str(exc)[:240]
++        if isinstance(exc, Refusal) and exc.directory_entry is not None:
++            result["refusal_context"] = {"zip_directory_entry": exc.directory_entry}
+     except Exception as exc:
+         code = 3
+         result["status"] = "reader_error"

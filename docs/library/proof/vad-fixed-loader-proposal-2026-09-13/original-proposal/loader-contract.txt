@@ -1,0 +1,84 @@
+INERT DESIGN TEXT — NOT PYTHON, NOT A QUALIFIED LOADER
+Date: 2026-09-13
+
+Public integration shape:
+  approved_vad = create_fixed_vad(approved_release_assets, application_device)
+  whisperx.load_model(existing_validated_ASR_path, existing_arguments,
+                      local_files_only=True, vad_model=approved_vad)
+
+The fixed factory is not selected by a checkpoint or external module/class name.
+There is exactly one reviewed implementation for the release's fixed VAD ID.
+PyanNet is a candidate implementation only until provenance and schema gates close.
+The six existing ASR choices and their repository mappings remain unchanged.
+
+Before ANY VAD constructor or tensor allocation:
+1. Require the app's compiled/verified release identity and exact manifest digest.
+   A user-editable sidecar containing its own hashes is not a trust anchor. Reject
+   missing, draft, unknown-version or mismatching manifests with an actionable
+   local integrity error. The draft in this directory must always be rejected.
+2. Read only approved packaged relative filenames below the approved asset root.
+   Reject absolute paths, traversal, ADS/device paths and unapproved reparse targets.
+   Use a bounded read into one immutable bytes object; enforce exact byte length
+   and approved SHA-256 on the same bytes later given to the tensor reader. Never
+   validate a path and then reopen it through a different loader or writable mmap.
+   The signed/compiled manifest fixes the expected bytes; no discovery or download.
+3. Validate bounded, strict JSON with duplicate-key and nonfinite-number refusal.
+   Require every constructor, task and inference field to equal the release's
+   reviewed constants. Reject extra fields, unresolved nulls (except approved
+   semantic nulls), arbitrary kwargs, object tags and dynamic code identifiers.
+4. The release records the exact tensor key/dtype/shape inventory, total element
+   and byte limits and storage policy. Validate the bound artifact's header with a
+   separately reviewed bounded reader/validation stage before any tensor allocation.
+   No pickle reader or arbitrary metadata deserializer is part of this path.
+
+After the preceding validations, in the qualified isolated/runtime environment:
+5. Import only the reviewed, shipped module graph. No trust_remote_code, torch.hub,
+   Model.from_pretrained, Lightning checkpoint loading, pickle.loads, torch.load,
+   safe_globals expansion, environment-selected module, or automatic fallback.
+6. Read the SAME validated bytes with the pinned safetensors.torch.load(bytes)
+   API (current staged source SAFE_TORCH:363–387). Its native parser still needs
+   independent qualification. Accept only the exact dictionary of ordinary dense
+   CPU tensors and the approved dtype/shape/key set. Verify finite values where
+   required, layout, byte/element totals and any approved alias/materialization
+   policy. Do not silently cast, reshape, rename, omit or synthesize state entries.
+7. Call a source-defined, parameterless fixed factory. If approved as PyanNet:
+   instantiate the exact reviewed PyanNet configuration with task=None, construct
+   Specifications from reviewed local enums/plain constants, assign it, and call
+   build() once before loading state. Do not call on_load_checkpoint or setup();
+   current setup internally uses non-strict restoration. Compare the factory's
+   full state schema against the separately frozen schema, including buffers.
+8. Load using model.load_state_dict(state, strict=True). Missing/unexpected keys,
+   size/type/layout disagreement, unsupported aliases or nonfinite values abort.
+   Strict=True alone does not prevent dtype conversion, so prevalidation is
+   mandatory. Discard any partially initialized object on failure. Never retry
+   strict=False and never enter the old loader to make compatibility appear good.
+9. Set eval mode, disable training, and move to the application-selected supported
+   device. No device instruction may come from artifact metadata. CPU baseline
+   qualification precedes any separately authorized GPU qualification.
+10. Construct VoiceActivitySegmentation(segmentation=model, device=device) with
+    the exact approved duration/step/batch/conversion settings, instantiate the
+    existing onset=.500, offset=.363, min_duration_on=.1, min_duration_off=.1
+    parameters unless a separately reviewed behavior change is authorized.
+    Return this callable instance directly. The existing WhisperX fallback for a
+    non-Vad instance supplies Pyannote.preprocess_audio and merge_chunks, preserving
+    the caller's chunk_size/onset/offset behavior without Pyannote.__init__.
+
+Release manifest requirements:
+- A fixed asset/factory ID bound by release trust, not an open registry of classes.
+- Exact artifact filename, length, SHA-256, format version and bounded parse limits.
+- Verified original-model provenance and source hashes for the fixed implementation.
+- Exact constructor, task specifications, tensor schema and inference constants.
+- Exact dependency lock and implementation hashes for each qualified platform.
+- Export/conversion tool and source identity, raw qualification receipt identities,
+  license/redistribution review, approval record and no unresolved fields.
+- No URLs, tokens, executable strings, auto-import maps or loader fallback controls.
+
+Failure behavior:
+Return a specific unavailable/integrity/unsupported-version result before invoking
+WhisperX ASR when the VAD asset is not acceptable. A current ASR cache never bypasses
+the VAD gate. Missing assets require an explicit approved acquisition/install flow;
+this loader fetches nothing. Speaker attribution and diarization stay blocked.
+
+This contract reduces artifact-selected execution. It does not certify the trusted
+Python/native implementation, numerical fidelity, overall offline behavior,
+resource bounds, or outstanding package advisories without separate evidence.

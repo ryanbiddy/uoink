@@ -1,0 +1,172 @@
+{
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "integrator.py": {
+      "bytes": 5794,
+      "sha256": "fdd3c95a95ebf0a550a9115a2538b698a4c77e5719d3a50eb80f0802e23fc29d"
+    },
+    "run04-addendum.md": {
+      "bytes": 3956,
+      "sha256": "7fb48cbd57d479d24e127374edc834baf4a91b149a0889110adeb12b3b6e18b8"
+    },
+    "original-proposal/BRIEF.md": {
+      "bytes": 1463,
+      "sha256": "b27d66e45e12b228f734625f7e6d66d72aef5e81263503c3487c99ef0c9d0bcf"
+    },
+    "original-proposal/capture-attempt01.json": {
+      "bytes": 771,
+      "sha256": "20a6a4b22fac298552cddc90e24b6e8b3712f2d589c903720d0829614118e67e"
+    },
+    "original-proposal/capture_sources.ps1": {
+      "bytes": 5515,
+      "sha256": "81380230ed4309de2d53cca92b0575dcd7523a0a4c76d10555094263e85ca5e4"
+    },
+    "original-proposal/loader-contract.txt": {
+      "bytes": 5916,
+      "sha256": "9ff6f0b95b9bdf72e4898cb16cc480338d15da9c56f5f69779ea61db415adec2"
+    },
+    "original-proposal/manifest.draft.json": {
+      "bytes": 1878,
+      "sha256": "24a7f423b1f20bab887a77156d862ba4709b1e9b7f3565319696fb1c74bd892a"
+    },
+    "original-proposal/QUALIFICATION.md": {
+      "bytes": 5377,
+      "sha256": "459504654f7148a0e116254e8624810e98944b69e0df3341561d10e571b764f1"
+    },
+    "original-proposal/REVIEW.md": {
+      "bytes": 11053,
+      "sha256": "9190e53465f7e4682892c87aeb2edc56f660ca31ba6fddcfb1599a2dd64e4e34"
+    },
+    "original-proposal/SHA256.json": {
+      "bytes": 6601,
+      "sha256": "129773fb33e4ec94a4e217373064d6d55de68d1db71f299a2372a91be1a76403"
+    },
+    "original-proposal/source-bindings.json": {
+      "bytes": 13661,
+      "sha256": "8dbd83213bceac5012bc342e001826902ce3a88fd420fa64f8f8d9a65366fa9c"
+    },
+    "original-proposal/SOURCE-INDEX.md": {
+      "bytes": 3164,
+      "sha256": "b442b95ef889fc643430d0d87bc88e1ae3d76cd70adb47501d696185d8c31de1"
+    },
+    "original-proposal/verification.json": {
+      "bytes": 7070,
+      "sha256": "f39f96d206d406cce575923cea648e327926cb178df37ef8353712b0fddba6a8"
+    },
+    "original-proposal/verify_and_seal.ps1": {
+      "bytes": 5861,
+      "sha256": "41bb5d07133e4adf0a938aaf0b66f0b457f46fadc7d45dd231cabd119262fc95"
+    },
+    "original-proposal/context/candidate02-selection.json": {
+      "bytes": 4295,
+      "sha256": "8628331233238ca4fc8af3b424e64b91906b5ece338ad6ce84226622c7187e50"
+    },
+    "original-proposal/context/candidate03-source-bindings.json": {
+      "bytes": 18642,
+      "sha256": "be5e575d05768a8255dd5bc62665048a0f9ceb64caa98a4ba4d8e9bd5cac1f00"
+    },
+    "original-proposal/context/candidate03-source-review.md": {
+      "bytes": 11945,
+      "sha256": "78d9319060e8887bde21e5005a3190ac7996ff19d144e41b8cdc018f2967c2ca"
+    },
+    "original-proposal/context/runtime-security-scope.md": {
+      "bytes": 4402,
+      "sha256": "2a058015b77474a2509feeb604557472711c385eb6fb9674042e8ea759b09e87"
+    },
+    "original-proposal/context/static-inventory-run03.json": {
+      "bytes": 27438,
+      "sha256": "703df7add11e0d9bd0f50eac6e20da0e0477479ae46f749b5eacfd532cb51b5d"
+    },
+    "original-proposal/drafts/REVIEW01.md": {
+      "bytes": 11053,
+      "sha256": "c532f3628c92dfea58b2d54c2db21717a4519cb70749c1ce119389bbdd450380"
+    },
+    "original-proposal/drafts/REVISION-NOTE.md": {
+      "bytes": 307,
+      "sha256": "493d034989b35370272b05d840087bc69f2ad48fa0641c7f438bec79a5497fb1"
+    },
+    "original-proposal/source/requirements-installer-lock.txt": {
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+    },
+    "original-proposal/source/whisper_runner.py": {
+      "bytes": 22899,
+      "sha256": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f"
+    },
+    "original-proposal/source/asteroid_filterbanks/enc_dec.py": {
+      "bytes": 12431,
+      "sha256": "4b385912861a60c6ebcadc170a3ef747637952e03ab6eab303c523788cb3beee"
+    },
+    "original-proposal/source/asteroid_filterbanks/param_sinc_fb.py": {
+      "bytes": 5191,
+      "sha256": "2df0d1e6f109985c00efcc60970ebceff6a9665c3e65ebae73ea4848e48d8eae"
+    },
+    "original-proposal/source/safetensors/torch.py": {
+      "bytes": 20902,
+      "sha256": "81f477f2ab5e05e99308fc55ed26028eb2bf36334404e9c5558e4730184483f0"
+    },
+    "original-proposal/source/safetensors/__init__.py": {
+      "bytes": 221,
+      "sha256": "3bc1e524ebaba28b4de3b3ebad1edfc623190a1d4fc34e76b900fa34e0c37bbd"
+    },
+    "original-proposal/source/whisperx/asr.py": {
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    "original-proposal/source/whisperx/vads/pyannote.py": {
+      "bytes": 9880,
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003"
+    },
+    "original-proposal/source/whisperx/vads/silero.py": {
+      "bytes": 3043,
+      "sha256": "f054f968c757a2329efa8ad72c44d061b0596bfc92b2c8e47d1dc7d8ec877055"
+    },
+    "original-proposal/source/pyannote/audio/core/inference.py": {
+      "bytes": 25120,
+      "sha256": "c29f525c93a1a5c6bd0a9475ae4fb8c73ce9b48cf9735301302eb99886ad7d41"
+    },
+    "original-proposal/source/pyannote/audio/core/model.py": {
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3"
+    },
+    "original-proposal/source/pyannote/audio/core/pipeline.py": {
+      "bytes": 23030,
+      "sha256": "c126c1ecf3a7172be311e61616145f45fbb5e52f06307adb28ac11103c8ee615"
+    },
+    "original-proposal/source/pyannote/audio/core/task.py": {
+      "bytes": 32399,
+      "sha256": "e2b0cc845a1234fe2f211ba2a0084c3e9be43fbdb82e41e6ca775f4746bbe444"
+    },
+    "original-proposal/source/pyannote/audio/pipelines/voice_activity_detection.py": {
+      "bytes": 7801,
+      "sha256": "24f4234c84f934f400f3a23da15d36104c1c04eb0453f6af9ca4ff2c3bd51fbb"
+    },
+    "original-proposal/source/pyannote/audio/telemetry/metrics.py": {
+      "bytes": 7340,
+      "sha256": "8e30a0a1082914fdd453ce4e7757421c7eb8f06c4a0ff4795e80f02152fa2fd3"
+    },
+    "original-proposal/source/pyannote/audio/utils/multi_task.py": {
+      "bytes": 2192,
+      "sha256": "95e3699ede1cf88015dd2b5d90f74018cf679b7e2ade6d16bf547b13cf4af4c3"
+    },
+    "original-proposal/source/pyannote/audio/utils/params.py": {
+      "bytes": 266,
+      "sha256": "e33654afd8fba201d7bed24d579573a74044e3154ac5b3bb14269fcdcde53e43"
+    },
+    "original-proposal/source/pyannote/audio/pipelines/utils/getter.py": {
+      "bytes": 9339,
+      "sha256": "42bc13a1ba61a7a297e311c0f881f2e5abb8cff6dad219ed7ea654752480eab5"
+    },
+    "original-proposal/source/pyannote/audio/models/blocks/sincnet.py": {
+      "bytes": 5702,
+      "sha256": "3f151a2482c3f8c266b1efd9bdcab297238c52b4792a7265261f2da063e5dade"
+    },
+    "original-proposal/source/pyannote/audio/models/segmentation/PyanNet.py": {
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af"
+    }
+  }
+}

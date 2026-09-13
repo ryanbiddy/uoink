@@ -1,0 +1,13 @@
+{
+  "payloads_verified": [
+    27,
+    47
+  ],
+  "run01_reader_exit": 2,
+  "checkpoint_reopened": false,
+  "original27_manifest_sha256": "a2c2ddeef4b49307f8185ec67cf4336708c7ae6c10d36ef14d1fe09a40ca11df",
+  "reporting47_manifest_sha256": "72d459d36213d4ba58b034d9893b7ad18f709610f7842ab9d6a77f4cfb788528",
+  "run02_reader_exit": 2,
+  "checkpoint_copied": false,
+  "preserved_utc": "2026-09-13T12:32:21.3084112Z"
+}
