@@ -1,0 +1,19 @@
+{
+  "source": "b77bc567ca83f03d548842f3b24a8c4b5e4d6443",
+  "command": [
+    "node",
+    "bin/control-room.mjs",
+    "run",
+    "uoink-library",
+    "Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/windows-adapter-graph-council-brief-2026-09-13/BRIEF.md first. Complete its three bounded source/receipt review groups in your assigned worktree. Write docs/library/GEMINI-WINDOWS-ADAPTER-GRAPH-COUNCIL-REVIEW-2026-09-13.md early and complete it; this is the only allowed write. Use the listed bound text inputs. No subagents, tests, code/native/model execution, archive expansion, network, source edits, staging, commits or pushes. Give a tested-scope verdict for each group and concrete findings. Website/marketing remain paused; no overall release acceptance.",
+    "--mode",
+    "work",
+    "--strategy",
+    "parallel",
+    "--agents",
+    "gemini",
+    "--lead",
+    "gemini",
+    "--approve"
+  ]
+}
