@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
+| 4 | Package-08 note/media results remain historical; combined tree08 has 50 new mirror failures | Source 9dd0cfb fails initial export and later writer exclusion. Seven focused AV5m3 cases pass separately; root cause is not established | Follow MIRROR-TREE08-REPAIR-BRIEF before package09. Preserve Desktop and X limits |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Package 08 remains held; partial combined tree07 is preserved at `784fb73` | e53fe0e collected 2,729 cases but ended without a main exit/summary: 2,203 completed passes, one failure, two skips; one setup-only case and 522 unreported. Not a complete result | Run complete tree08 with the repaired durable supervisor, then qualify package 09. Last complete source b8e44fb remains 2,579 / 1 / 2 |
+| Integration | Complete tree08 at 9dd0cfb is sealed at `44e01ee`; package08 remains held | 2,675 passed / 51 failed / 3 skipped; all 2,729 cases accounted for. Fifty mirror failures plus the historical AT6 gap. The 147 added cases have 146 passes / one skip | Diagnose and repair mirror failures, then qualify a fresh committed tree and package09. Website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -178,27 +178,31 @@ is complete but is not this goal's completion. Current queue:
    and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
    Astra preserved 504 pristine files at _scratch/nltk-upstream-before-local13/nltk,
    with complete before/copy/after hash equality and a separate receipt.
-4. Integrate only reviewed fixes, update this State/Queue, then run the complete
-   tree on the committed combined source. Build/reseal only after code settles.
-   Tree07 stopped without a final process result and is preserved at 784fb73.
-   Read COMPLETE-TREE-INTERRUPTION-REPAIR-BRIEF-2026-09-13.md. Use fresh label
-   ryan-final-partitioned-08 with the hidden durable supervisor; its no-op child
-   preflight exits zero. Preserve the original 2,729-case scope and compare to
-   the last complete tree, not the partial result. Rebind unused package observers
-   to this documentary checkpoint before execution. Production source is unchanged.
-   Follow PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md for local-wheel binding,
-   source-fixture preservation, full-tree membership and new installed receipts.
-   Package 08 remains the unchanged held review artifact, not evidence for the
-   newer build source. Prepare exact remaining owner decisions and release assets
-   while working through the technical repairs. Public publication/main remain
-   gated; only the completed branch backup is authorized.
-5. WEBSITE-RELEASE-INTEGRATION-BRIEF-2026-09-12.md records the read-only site and
-   public-release review. Public GitHub remains v3.7.0. HQ site source is 7d62d1e;
-   its uncommitted content-factory work was not changed. Prepare the final page,
-   artifact links, notes and demo from accepted evidence before publication.
-   PUBLIC-RELEASE-NOTES-LIVING-LIBRARY-DRAFT.md provides concise private copy.
-   RELEASE-OWNER-DECISIONS-2026-09-12.md lists the concrete remaining decisions;
-   neither document authorizes publication or broadens model/client scope.
+4. Complete tree08 is failed and sealed at 44e01ee. Read
+   ASTRA-COMBINED-TREE08-VERDICT-2026-09-13.md and
+   MIRROR-TREE08-REPAIR-BRIEF-2026-09-13.md. Fifty formerly passing mirror cases
+   fail after a cancellation case, with writer-exclusion timeouts. The separate
+   seven-case diagnostic passes. Mirror source is byte-identical to b8e44fb;
+   the cause is not established. Astra investigates owner lifetime; a bounded
+   Gemini assignment reviews process identity with synthetic probes only.
+   No competing real-mirror runs. Do not build or blindly repeat the full tree.
+   Tree07's interrupted evidence remains at 784fb73. Preserve all original tests,
+   guards and failed measurements. Integrate a reviewed product repair, verify
+   both roots, then run a fresh committed complete tree with the durable observer.
+   Rebind the unused package09 instruments to that new qualified source before
+   following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
+   no new installed NLTK or signing credit exists.
+5. PAUSED by Ryan's latest September 13 instruction: no website or marketing
+   work until Astra and the council agree Uoink is ready for market. The saved
+   local site draft is E:\AI\projects\uoink\worktrees\site-living-library on
+   cc/living-library-release-site, based on 140e545. Nothing was pushed/deployed;
+   no website council or marketing agent started. Its preview browser/server are
+   closed. The main HQ site's uncommitted content-factory work is unchanged.
+   After product readiness, Ryan authorizes clearer UX/branding, SEO and agent
+   discovery, coordinated product/main-site updates, then council marketing
+   planning and useful Grokbot execution under Astra review. No paid spend or
+   product main merge follows. Keep exact claims tied to accepted evidence and
+   the final artifact. RELEASE-OWNER-DECISIONS-2026-09-12.md retains owner gates.
 
 Ryan confirmed on September 13 that the website scope includes https://uoink.app/,
 https://uoink-site.vercel.app/ and the Uoink section of his main site. Review the
