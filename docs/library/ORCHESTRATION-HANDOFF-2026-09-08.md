@@ -109,7 +109,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace | Native positive at 668b08a; handshake at e98f4c2; timeout repair at 0d93186; child adoption at 428707d | Exact109 repair passes67 cases in each root and native timeout02 returns valid0. Original timeout01 remains FAIL. Child adoption positive/refusal return valid0 with actual child exits0/2; all82 adoption proof payloads match Git/disk | Qualify the adapter-to-session repair, then council review. Durable recovery and real runtime remain open |
-| Local NLTK graph input | Exact metadata receipt at e5b1ddd; graph at 4827288; cached-wheel inspection at 95a7f29 | Three-record checker passes59 cases in each root; complete144-pin/287-edge graph remains FAIL for two missing wheels. Both existing wheels now pass full byte/RECORD checks; all90 new proof payloads match Git/disk | Qualify the five-record metadata repair and complete missing license notices; no runtime or security clearance |
+| Local wheel graph and notices | Exact NLTK metadata at e5b1ddd; prior graph at 4827288; cached wheels at 95a7f29; source notices at d887f8a | Five-record checker passes68 cases in each root; fresh144-pin/287-edge metadata graph passes with unchanged inputs. Both cached wheels pass byte/RECORD checks. Missing notice texts now retained; all58 notice proof payloads match Git/disk | Seal fresh graph; integrate actual notice staging/installer entries and preserve proxy-tools metadata conflict. Native compatibility and release security remain open |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -324,6 +324,13 @@ ASTRA-CACHED-WHEEL-VERDICT-2026-09-13.md. Independent .NET verifier4ea139 checks
 every wheel/member/RECORD and all28 before/after inputs. The88 inspection and
 two integrator proof payloads match Git/disk. Qualify the exact five-record
 graph change and complete notices. Native models remain unexecuted and closed.
+Source notice evidence is integrated atd887f8a; read
+ASTRA-TWO-WHEEL-NOTICES-VERDICT-2026-09-13.md. Root verifier01bdc441 remains
+failed for an incorrect commit/tree equality; repaired verifier02 returns0
+in503d68 with all52 source and6 integrator payloads now matching Git/disk.
+Proxy-tools metadata says MIT while its actual upstream source/license says
+BSD; retain both facts and exact text. The build currently fails to stage its
+generated notice index. Review the concrete generator/staging/Inno patch next.
 The five-record checker now passes all68 cases in each independent root
 (468c4b/36df84), with the original36 public cases unchanged and valid guards.
 All367 inputs are identical. Fresh complete144 graph e8f43c returns valid0/PASS,
@@ -5083,3 +5090,20 @@ Those diagnostic reads were not saved as separate raw tool objects; the actual
 run object is retained. Proof integration is next. Root also read the complete
 adapter2b6cbbad/six-case0ef40eab connection proposal. No production source changed;
 website and marketing stay paused pending release acceptance.
+
+### 2026-09-13 - Missing notice text retained; installer attribution gap identified
+
+Commitd887f8a retains exact official notice text for the two inspected cached
+wheels and both root verifier outcomes. All58 proof payloads match Git/disk.
+The first verifier's commit/tree assumption failed; the documented second
+verifier reconstructs the saved Git tree and passes without new network or
+wheel access. Header values remain unavailable and proxy-tools' exact release
+commit remains unestablished. Preserve its MIT metadata/BSD-style source
+conflict rather than relabeling the component by guesswork.
+
+The build generates THIRD-PARTY-NOTICES.md but does not stage/install it.
+A concrete patch is being prepared to include that index, the exact two
+notices and their attribution explanation, and to retain the conflict during
+regeneration. Final installed contents and candidate wheel identities still
+need verification. This notice evidence changes no production source and
+grants no market, runtime, or overall license clearance.
