@@ -168,10 +168,12 @@ is complete but is not this goal's completion. Current queue:
    before the retained worker reports. Hash-override, path/receipt and test
    isolation gaps were corrected; original proposals are archived. Final result
    is 37 pass / zero fail / one Windows symlink-permission skip in both roots.
-   Gemini local-wheel preparation is dispatched under NLTK-LOCAL-WHEEL-BRIEF.
+   Gemini a332397f local-wheel preparation is dispatched under NLTK-LOCAL-WHEEL-BRIEF.
    Review its labelled wheel, verified RECORD/hash and provenance, then update
    installer lock/build/notices and qualify it. Preserve pristine upstream NLTK
    and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
+   Astra preserved 504 pristine files at _scratch/nltk-upstream-before-local13/nltk,
+   with complete before/copy/after hash equality and a separate receipt.
 4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
    Package 08 remains the unchanged held review artifact, not evidence for the
@@ -182,6 +184,9 @@ is complete but is not this goal's completion. Current queue:
    public-release review. Public GitHub remains v3.7.0. HQ site source is 7d62d1e;
    its uncommitted content-factory work was not changed. Prepare the final page,
    artifact links, notes and demo from accepted evidence before publication.
+   PUBLIC-RELEASE-NOTES-LIVING-LIBRARY-DRAFT.md provides concise private copy.
+   RELEASE-OWNER-DECISIONS-2026-09-12.md lists the concrete remaining decisions;
+   neither document authorizes publication or broadens model/client scope.
 
 The completed earlier sequence below is retained as history.
 
@@ -631,6 +636,21 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-12 - Branch backup and release-copy preparation
+
+The authorized backup helper pushed only cc/living-library at 19d51a8. Its
+external build/release-repairs-13-graph.backup.json records push exit zero,
+verified=true and exact source/local/remote equality. No main or candidate
+branch push occurred. The release notes now distinguish package 08 from the
+later signing, NLTK preparation and graph-checker source commits.
+
+The 504-file pristine NLTK source fixture is preserved outside staging with
+complete before/copy/after hash equality. Set UOINK_NLTK_BASE_SOURCE to that
+fixture for source tests after the runtime is patched; do not rewrite accepted
+test assertions to accommodate the new installed version. Control Room a332397f
+is still working on the local wheel. No replacement build or installation has
+occurred. The public-notes draft and owner-decision packet are review material.
 
 ### 2026-09-12 23:35 PDT - Graph boundary repair accepted; packaging dispatched
 

@@ -55,7 +55,7 @@ candidate filename. Keep prior downloads available for the documented rollback.
 
 On the product side, finish the security repairs, full candidate tree, installed
 checks and owner dispositions already in the orchestration queue. The added
-signing path at d24cc33 is not in package 08 and has not produced a signed Uoink
+signing path at 0b3629d is not in package 08 and has not produced a signed Uoink
 artifact. The historical AT6 failure remains visible. Phase 5 Part B and speaker
 attribution remain outside this release.
 

@@ -14,6 +14,21 @@ standing capture, native resources and prompts, an optional file mirror,
 descriptive activity reports, and chapters with cited ranges. No main merge or
 publication occurred. Installation is not a security certification.
 
+Source work after package 08 adds signing receipts and final artifact checks at
+`0b3629d` (48 focused passes), the NLTK path-policy preparation at `4aec8ff`
+(37 passes and one Windows permission skip in each root), and the captured
+dependency checker at `5e46f2f` (36 passes in each root). These changes have not
+been rebuilt into an installer or through a new complete-tree observation.
+NLTK's labelled local wheel is being prepared; no advisory is cleared by source
+preparation alone. The completed checkpoint `19d51a8` is backed up to
+`origin/cc/living-library`, with exact source/local/remote equality verified.
+
+The repaired metadata checker rejects the earlier upgrade proposal: five
+WhisperX conflicts, two missing dependencies and three wheel failures, including
+a yanked Transformers release. That result does not establish that a different
+migration is impossible. See the [captured graph verdict](RUNTIME-GRAPH-BOUNDARY-REVIEW-2026-09-12.md).
+Public GitHub remains v3.7.0; the branch backup does not publish 3.8.0.
+
 ## Package and verification
 
 | Item | Recorded value |
