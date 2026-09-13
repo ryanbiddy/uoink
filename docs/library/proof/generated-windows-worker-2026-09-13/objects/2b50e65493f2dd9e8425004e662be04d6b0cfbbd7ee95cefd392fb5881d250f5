@@ -1,0 +1,16 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-file-one-owned-dummy-worker-only",
+  "source_inputs_sha256": "d4fcd5ec3b6d309d5731bae0835be4adb93cce0d84c8459d297b4951789a2b7c",
+  "launcher_sha256": "1c41d45363c639aa654bda25532c27819f98e1a1a07763d0cadf3e9a221ea071",
+  "admitted_by": "Astra /root",
+  "admission_date": "2026-09-13",
+  "no_model_or_product_library_data": true,
+  "native_execution_admitted": true,
+  "run_label": "native02",
+  "previous_result": "native01 failed1 before worker creation, after ctypes/kernel32 bootstrap loading",
+  "repair": "Bind exact installed ctypes._layout verified source, preload warnings, bounded refusal import name; no new binary or flow/assertion changes",
+  "root_review": "Full original source, final native02 deltas and retained11772byte layout source reviewed",
+  "peer_review": "Final exact source/map/launcher review found no actionable preflight mismatch",
+  "one_run_only": true
+}

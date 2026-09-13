@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d8dcd7",
+  "wall_time_seconds": 0.1893468,
+  "exit_code": 0,
+  "original_token_count": 75,
+  "output": "{\"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\dummy-native-combined-proof01\", \"payload_count\": 119, \"payload_bytes\": 722172, \"logical_members\": 169, \"manifest_sha256\": \"72e2fb40f0ba2292cc5c9bc33c1a9278f8ba4cf15a844de2ebad0d54006290d8\", \"tests_or_native_runs_executed\": 0}\r\n"
+}

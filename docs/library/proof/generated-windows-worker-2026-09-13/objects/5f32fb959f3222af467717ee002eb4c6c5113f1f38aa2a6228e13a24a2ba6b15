@@ -1,0 +1,80 @@
+{
+  "bound_at_utc": "2026-09-13T20:36:41.452864+00:00",
+  "native_bindings": {
+    "C:\\Python314\\python.exe": {
+      "bytes": 106208,
+      "sha256": "03168c01b7b7491423350e82c26fee71f35b43694d1319d3c668bda6903a0c38"
+    },
+    "C:\\Python314\\python314.dll": {
+      "bytes": 6778592,
+      "sha256": "fde89cdb5c2d08ae65de7ef4abca1876c93ba3796002f5ac0bf7e4d4f5a94da0"
+    },
+    "C:\\Python314\\python3.dll": {
+      "bytes": 73952,
+      "sha256": "22c6e46d8bd563cdb072650901461ef68be2ea6cb1e80af859559d9395a27e39"
+    },
+    "C:\\Python314\\DLLs\\_ctypes.pyd": {
+      "bytes": 142560,
+      "sha256": "25d9b0be550d428fecc697ca20450343a7c3ce77c9f5283e9aecfd188d609250"
+    },
+    "C:\\Python314\\DLLs\\libffi-8.dll": {
+      "bytes": 39696,
+      "sha256": "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a"
+    },
+    "C:\\Windows\\System32\\kernel32.dll": {
+      "bytes": 844496,
+      "sha256": "8f8629741558b5df71def4e1dd8ef9645d4f806b949762c47757c50fea1a9e6d"
+    },
+    "C:\\Python314\\Lib\\ctypes\\__init__.py": {
+      "bytes": 22814,
+      "sha256": "8c16b1320357ccfac6cc4b6d08e6d61b5dfb8bc700877b35fb711a840d65aecd"
+    },
+    "C:\\Python314\\Lib\\ctypes\\_layout.py": {
+      "bytes": 11772,
+      "sha256": "13eb492c805248ffd411aa4d61e4de90dbd89ef05b5c85152262847c690a7916"
+    },
+    "C:\\Python314\\Lib\\ctypes\\_endian.py": {
+      "bytes": 2635,
+      "sha256": "f2752ab2425dac9bfaff5aa1a3c6cd66aa342fee0db2f2a42de568fc59d5cbea"
+    }
+  },
+  "resource_versions_observed": {
+    "python_exe_and_python_dlls_and_ctypes_pyd": "3.14.6",
+    "kernel32": "10.0.26100.9278",
+    "libffi_resource_version": null
+  },
+  "resource_version_tool_observations": [
+    "b1796b",
+    "1e4057"
+  ],
+  "sdk_bindings": [
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\processthreadsapi.h",
+      "bytes": 37180,
+      "sha256": "436ae4cbb017d1cdb381aaf2119a3f89b04bae257fd4c881ef251daa02533540",
+      "ranges": [
+        [
+          174,
+          182
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\libloaderapi.h",
+      "bytes": 15518,
+      "sha256": "8ad0ba5600d6c2e9aed318ca9d2f48f2bdf9f47ed3cd5d9f243e6f779c8e04c4",
+      "ranges": [
+        [
+          215,
+          224
+        ],
+        [
+          368,
+          374
+        ]
+      ]
+    }
+  ],
+  "limits": "Existing quiescent file hashes; trusted OS/stdlib dependency, not exhaustive DLL attestation.",
+  "native_import_or_candidate_execution": false
+}

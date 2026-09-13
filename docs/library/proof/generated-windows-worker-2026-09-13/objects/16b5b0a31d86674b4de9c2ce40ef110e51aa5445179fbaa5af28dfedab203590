@@ -1,0 +1,85 @@
+{
+  "candidate_executed": false,
+  "parts": {
+    "primitives": [
+      "CreateFileW",
+      "GetFinalPathNameByHandleW",
+      "GetFileInformationByHandleEx",
+      "CloseHandle",
+      "GetCurrentProcess",
+      "DuplicateHandle",
+      "CreateJobObjectW",
+      "SetInformationJobObject",
+      "QueryInformationJobObject",
+      "AssignProcessToJobObject",
+      "TerminateJobObject",
+      "TerminateProcess",
+      "WaitForSingleObject",
+      "GetProcessTimes",
+      "ResumeThread",
+      "InitializeProcThreadAttributeList",
+      "UpdateProcThreadAttribute",
+      "DeleteProcThreadAttributeList",
+      "CreateProcessW"
+    ],
+    "pipe": [
+      "CreateNamedPipeW",
+      "ConnectNamedPipe",
+      "CreateEventW",
+      "ReadFile",
+      "WriteFile",
+      "GetOverlappedResult",
+      "CancelIoEx",
+      "GetFileType",
+      "GetHandleInformation",
+      "SetHandleInformation"
+    ],
+    "exit": [
+      "GetExitCodeProcess"
+    ],
+    "module_path": [
+      "GetModuleFileNameW"
+    ]
+  },
+  "dispatch_names": [
+    "AssignProcessToJobObject",
+    "CancelIoEx",
+    "CloseHandle",
+    "ConnectNamedPipe",
+    "CreateEventW",
+    "CreateFileW",
+    "CreateJobObjectW",
+    "CreateNamedPipeW",
+    "CreateProcessW",
+    "DeleteProcThreadAttributeList",
+    "DuplicateHandle",
+    "GetCurrentProcess",
+    "GetExitCodeProcess",
+    "GetFileInformationByHandleEx",
+    "GetFileType",
+    "GetFinalPathNameByHandleW",
+    "GetHandleInformation",
+    "GetModuleFileNameW",
+    "GetOverlappedResult",
+    "GetProcessTimes",
+    "InitializeProcThreadAttributeList",
+    "QueryInformationJobObject",
+    "ReadFile",
+    "ResumeThread",
+    "SetHandleInformation",
+    "SetInformationJobObject",
+    "TerminateJobObject",
+    "TerminateProcess",
+    "UpdateProcThreadAttribute",
+    "WaitForSingleObject",
+    "WriteFile"
+  ],
+  "dispatch_count": 31,
+  "bootstrap_lookup_only": "GetLastError",
+  "source_sha256": {
+    "win32_worker_connection.py": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+    "win32_private_pipe.py": "4a0cccc8d905f7dc9d93288d8c9187f7da846ee673a57e625e691e17bbed899c",
+    "generated_worker_flow.py": "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0",
+    "frozen_native03_bootstrap": "c2ed73fbb1e202d703d074adb285f7cf2448a025a23fc31735294fa6908cd2ec"
+  }
+}

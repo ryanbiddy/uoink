@@ -1,0 +1,7 @@
+2026-09-13. Root identified an evidence limit before any kernel run: a sharing violation while the parent's original read guard is still open demonstrates joint protection, not the inherited child's protection. The prior connected source is preserved unchanged under drafts.
+
+After the lifecycle-owned handshake and generated-message response, the revised dummy-only probe verifies the child is alive, the exact child read-handle mapping has one member, and all temporary inheritable parent copies were closed. It then closes the exact original parent read handle, keeps its record, verifies the child is still alive and attempts the write-access open. A sharing violation at that point is the planned child-held protection observation. The test fixture writer and every other fixture handle must be closed before acquisition.
+
+The source records original parent handle values, closed flags, child mapping and the retained-process alive observation. It does not release the lifecycle lease or clear ownership records at that point. After a close response, actual child exit 0 and an empty owned job are still required before final endpoint/process/read-set retirement. Only then must write-access open succeed, with zero bytes written and unchanged generated content. No result exists yet.
+
+This deliberate early parent-handle closure is restricted to one disposable generated file. It is not a proposed production snapshot policy, does not permit early model guard release, and does not qualify loader namespace reconstruction or native model access.

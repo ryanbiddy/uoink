@@ -1,0 +1,8 @@
+{
+  "root_reviewed": false,
+  "scope": "generated-file-one-owned-dummy-worker-only",
+  "source_inputs_sha256": "d4fcd5ec3b6d309d5731bae0835be4adb93cce0d84c8459d297b4951789a2b7c",
+  "launcher_sha256": "1c41d45363c639aa654bda25532c27819f98e1a1a07763d0cadf3e9a221ea071",
+  "no_model_or_product_library_data": true,
+  "native_execution_admitted_by_template": false
+}

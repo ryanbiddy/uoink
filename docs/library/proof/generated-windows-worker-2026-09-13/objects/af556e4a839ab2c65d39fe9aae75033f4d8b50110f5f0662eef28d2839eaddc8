@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02\dummy_bootstrap.py", line 232, in <module>
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02\win32_worker_connection.py", line 149, in call
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02\dummy_bootstrap.py", line 126, in audit
+RuntimeError: Fixed dummy boundary refused ctypes.call_function

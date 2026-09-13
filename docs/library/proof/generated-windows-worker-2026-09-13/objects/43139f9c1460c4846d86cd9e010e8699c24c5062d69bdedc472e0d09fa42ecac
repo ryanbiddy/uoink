@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native03\dummy_bootstrap.py", line 324, in <module>
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native03\dummy_bootstrap.py", line 261, in __init__
+AssertionError

@@ -1,0 +1,16 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-file-one-owned-dummy-worker-only",
+  "source_inputs_sha256": "83e8274aef4a21dd2e39ab13073e64c6f3047dc293113ef4fbd5e2716c3d3287",
+  "launcher_sha256": "41e0eeb0f528a30696aacf63d47377b6b99c01df7277534a38ac9886f59db3ae",
+  "admitted_by": "Astra /root",
+  "date": "2026-09-13",
+  "native_execution_admitted": true,
+  "run_label": "native03",
+  "one_run_only": true,
+  "no_model_or_product_library_data": true,
+  "previous_results": "native01 and native02 failed1 and remain failed",
+  "repair": "Fixed same-thread native dispatcher with immutable32function bindings, exact argument/event identity and initialized-buffer cast; context clears; outer counts verified",
+  "review": "Root293715 final exact diffs, all prior source and three preflight notes read; independent peer found no actionable mismatch",
+  "scope_limit": "Trusted installed stdlib/OS dependency, no general native sandbox or model authority"
+}

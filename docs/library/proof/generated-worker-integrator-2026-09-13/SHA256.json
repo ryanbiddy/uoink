@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "DUMMY-NATIVE-PROOF-BUILD01-ACTUAL.json",
+      "bytes": 456,
+      "sha256": "48dacb11a9984997dccec03814a917a46b641c2f5f4b71f3a5327b533f1c4f17"
+    },
+    {
+      "path": "DUMMY-NATIVE-PROOF-VERIFY01-ACTUAL.json",
+      "bytes": 420,
+      "sha256": "a0fd70472cd115c816d67b858592b8983f9a6a2a7ba5cc3d9cd38bceac3e0fe7"
+    }
+  ]
+}

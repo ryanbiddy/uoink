@@ -1,0 +1,84 @@
+"""Data-only composition and AST validation; never invoke the candidate."""
+from pathlib import Path
+import ast
+import difflib
+import hashlib
+import json
+
+BASE = Path(r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch")
+OLD = BASE / "asr-dummy-worker-flow-proposal02"
+HERE = BASE / "asr-dummy-worker-flow-proposal03"
+PINNED = {"dummy_bootstrap.py": "0f7d05b6a3038fd0c641de06ddce706ff6c88538622d3041b2d3b188f324d839",
+          "generated_worker_flow.py": "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0",
+          "run_native02.ps1": "1c41d45363c639aa654bda25532c27819f98e1a1a07763d0cadf3e9a221ea071"}
+
+
+def read(path):
+    with path.open("rb") as stream:
+        raw = stream.read(1048577)
+    assert len(raw) <= 1048576
+    return raw
+
+
+def save(path, raw):
+    with path.open("xb") as stream:
+        stream.write(raw if isinstance(raw, bytes) else raw.encode())
+
+
+def replace(text, old, new):
+    assert text.count(old) == 1, old[:80]
+    return text.replace(old, new)
+
+
+original = {name: read(OLD / name) for name in PINNED}
+assert all(hashlib.sha256(raw).hexdigest() == PINNED[name] for name, raw in original.items())
+(HERE / "before").mkdir()
+for name, raw in original.items():
+    save(HERE / "before" / name, raw)
+bootstrap = original["dummy_bootstrap.py"].decode().replace("asr-dummy-worker-native02", "asr-dummy-worker-native03")
+bootstrap = replace(bootstrap, 'RESULT_WRITTEN = False\n', 'RESULT_WRITTEN = False\nCALL_CONTEXT = None\n')
+bootstrap = replace(bootstrap, '    elif event == "ctypes.create_string_buffer":\n', '''    elif event == "ctypes.call_function":
+        context = CALL_CONTEXT
+        allowed = (context is not None and context["thread"] == threading.get_ident()
+                   and len(args) == 2 and type(args[0]) is int and args[0] == context["pointer"]
+                   and type(args[1]) is tuple and len(args[1]) == len(context["arguments"])
+                   and all(observed is expected for observed, expected in zip(args[1], context["arguments"]))
+                   and context["events"] == 0)
+        if allowed:
+            context["events"] += 1
+    elif event == "ctypes.create_string_buffer":
+''')
+fragment = read(HERE / "dispatch_fragment.py.txt").decode()
+ast.parse(fragment)
+bootstrap = replace(bootstrap, 'DLL_STAGE = "closed"\nname_buffer = ', 'DLL_STAGE = "closed"\n\n\n' + fragment + '\nname_buffer = ')
+bootstrap = replace(bootstrap, 'name_length = api.call("GetModuleFileNameW",', 'name_length = dispatch.call("GetModuleFileNameW",')
+bootstrap = replace(bootstrap, '        return self.originals[name](*args)\n', '''        if name == "InitializeProcThreadAttributeList" and args[0] is not None:
+            assert dispatch.attribute_buffer is None, "one_attribute_buffer"
+        if name == "DeleteProcThreadAttributeList":
+            assert args[0] is dispatch.attribute_buffer, "exact_attribute_buffer_retirement"
+        result = dispatch.call(name, *args)
+        if name == "InitializeProcThreadAttributeList" and args[0] is not None and result:
+            dispatch.attribute_buffer = args[0]
+        if name == "DeleteProcThreadAttributeList":
+            dispatch.attribute_buffer = None
+        return result
+''')
+bootstrap = replace(bootstrap, 'guard = (not DENIALS and not CONTENT_OPEN', 'guard = (dispatch.valid(monitor.functions) and not DENIALS and not CONTENT_OPEN')
+bootstrap = replace(bootstrap, '           "native_api_calls": monitor.calls,', '''           "fixed_dispatch_valid": dispatch.valid(monitor.functions),
+           "fixed_dispatch_completed_calls": dispatch.completed_calls,
+           "fixed_dispatch_audit_events": dispatch.call_events,
+           "fixed_attribute_cast_calls": dispatch.cast_calls,
+           "native_api_calls": monitor.calls,''')
+ast.parse(bootstrap)
+launcher = original["run_native02.ps1"].decode().replace("asr-dummy-worker-flow-proposal02", "asr-dummy-worker-flow-proposal03").replace("asr-dummy-worker-native02", "asr-dummy-worker-native03").replace("run_native02.ps1", "run_native03.ps1")
+for name, text in (("dummy_bootstrap.py", bootstrap), ("run_native03.ps1", launcher)):
+    save(HERE / name, text)
+    old_name = "run_native02.ps1" if name.endswith(".ps1") else name
+    save(HERE / (name + ".diff"), "".join(difflib.unified_diff(original[old_name].decode().splitlines(True), text.splitlines(True), fromfile="frozen-native02/" + old_name, tofile="proposed-native03/" + name)))
+save(HERE / "generated_worker_flow.py", original["generated_worker_flow.py"])
+helper = read(OLD / "prepare_native_inputs.py").decode().replace("asr-dummy-worker-flow-proposal02", "asr-dummy-worker-flow-proposal03").replace("run_native02.ps1", "run_native03.ps1")
+ast.parse(helper)
+save(HERE / "prepare_native_inputs.py", helper)
+save(HERE / "DERIVATIVE-MAPPING.json", json.dumps({"previous_inputs": PINNED, "candidate_executed": False,
+    "after": {name: hashlib.sha256(read(HERE / name)).hexdigest() for name in ("dummy_bootstrap.py", "generated_worker_flow.py", "run_native03.ps1")}}, indent=2) + "\n")
+print((HERE / "DERIVATIVE-MAPPING.json").read_text())

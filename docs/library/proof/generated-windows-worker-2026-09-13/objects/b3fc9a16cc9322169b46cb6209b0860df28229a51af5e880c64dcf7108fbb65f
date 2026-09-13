@@ -1,0 +1,56 @@
+--- frozen-native01/dummy_bootstrap.py
++++ proposed-native02/dummy_bootstrap.py
+@@ -42,9 +42,10 @@
+ import time
+ import types
+ import encodings.utf_16_le
++import warnings
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-EXPECTED_RUN = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native01"
++EXPECTED_RUN = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02"
+ assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+ assert os.environ.get("IG_FORBIDDEN_LIVE") == FORBIDDEN
+ assert os.path.normcase(os.path.dirname(os.path.abspath(__file__))) == os.path.normcase(EXPECTED_RUN)
+@@ -71,6 +72,7 @@
+     r"C:\Python314\DLLs\libffi-8.dll": (39696, "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a"),
+     KERNEL_PATH: (844496, "8f8629741558b5df71def4e1dd8ef9645d4f806b949762c47757c50fea1a9e6d"),
+     r"C:\Python314\Lib\ctypes\__init__.py": (22814, "8c16b1320357ccfac6cc4b6d08e6d61b5dfb8bc700877b35fb711a840d65aecd"),
++    r"C:\Python314\Lib\ctypes\_layout.py": (11772, "13eb492c805248ffd411aa4d61e4de90dbd89ef05b5c85152262847c690a7916"),
+     r"C:\Python314\Lib\ctypes\_endian.py": (2635, "f2752ab2425dac9bfaff5aa1a3c6cd66aa342fee0db2f2a42de568fc59d5cbea"),
+ }
+ MODULES = ("snapshot_lifecycle", "owned_generation_protocol", "win32_worker_connection",
+@@ -82,7 +84,7 @@
+ DLL_STAGE = "closed"
+ DLL_EVENTS = []
+ RESULT_WRITTEN = False
+-ALLOWED_IMPORTS = set(sys.modules) | set(MODULES) | {"ctypes", "ctypes._endian", "_ctypes"}
++ALLOWED_IMPORTS = set(sys.modules) | set(MODULES) | {"ctypes", "ctypes._endian", "ctypes._layout", "_ctypes"}
+ 
+ 
+ def audit(event, args):
+@@ -117,8 +119,11 @@
+     elif event.startswith("ctypes."):
+         allowed = False
+     if not allowed:
+-        DENIALS.append(event)
+-        raise RuntimeError("Fixed dummy boundary refused " + event)
++        detail = event
++        if event == "import" and type(args[0]) is str and len(args[0]) <= 128 and all(char.isascii() and (char.isalnum() or char in "._") for char in args[0]):
++            detail += ":" + args[0]
++        DENIALS.append(detail)
++        raise RuntimeError("Fixed dummy boundary refused " + detail)
+ 
+ 
+ SYMBOLS = {"GetLastError", "CreateFileW", "GetFinalPathNameByHandleW", "GetFileInformationByHandleEx", "CloseHandle",
+@@ -192,8 +197,8 @@
+             spec = importlib.machinery.ModuleSpec(name, importlib.machinery.ExtensionFileLoader(name, origin), origin=origin)
+             spec.has_location = True
+             return spec
+-        if name in ("ctypes", "ctypes._endian"):
+-            origin = r"C:\Python314\Lib\ctypes\__init__.py" if name == "ctypes" else r"C:\Python314\Lib\ctypes\_endian.py"
++        if name in ("ctypes", "ctypes._endian", "ctypes._layout"):
++            origin = {"ctypes": r"C:\Python314\Lib\ctypes\__init__.py", "ctypes._endian": r"C:\Python314\Lib\ctypes\_endian.py", "ctypes._layout": r"C:\Python314\Lib\ctypes\_layout.py"}[name]
+             return importlib.machinery.ModuleSpec(name, VerifiedCtypesLoader(name, origin), origin=origin, is_package=name == "ctypes")
+         if name not in ALLOWED_IMPORTS or name.split(".")[0] in HEAVY:
+             DENIALS.append("import_finder")

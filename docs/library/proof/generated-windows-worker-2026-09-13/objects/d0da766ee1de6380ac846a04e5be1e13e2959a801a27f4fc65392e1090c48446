@@ -1,0 +1,23 @@
+{
+  "native_or_candidate_execution": false,
+  "files": [
+    {
+      "old_name": "dummy_bootstrap.py",
+      "new_name": "dummy_bootstrap.py",
+      "before_sha256": "8b7da115ef005c19ac872f14d7b5916a0d0df9bedbeff9d1970744cae4c0d91c",
+      "after_sha256": "0f7d05b6a3038fd0c641de06ddce706ff6c88538622d3041b2d3b188f324d839"
+    },
+    {
+      "old_name": "generated_worker_flow.py",
+      "new_name": "generated_worker_flow.py",
+      "before_sha256": "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0",
+      "after_sha256": "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0"
+    },
+    {
+      "old_name": "run_native01.ps1",
+      "new_name": "run_native02.ps1",
+      "before_sha256": "b8fc3ce2e2649d1b0f18f0a31395b1121102ed0dd4eefd4f8ca58d5d86e993d1",
+      "after_sha256": "1c41d45363c639aa654bda25532c27819f98e1a1a07763d0cadf3e9a221ea071"
+    }
+  ]
+}

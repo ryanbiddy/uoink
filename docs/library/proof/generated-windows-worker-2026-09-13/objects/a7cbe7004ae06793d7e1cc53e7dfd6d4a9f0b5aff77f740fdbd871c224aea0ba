@@ -1,0 +1,33 @@
+--- frozen-native01/run_native01.ps1
++++ proposed-native02/run_native02.ps1
+@@ -1,7 +1,7 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-flow-proposal01'
+-$taskRun='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-flow-proposal02'
++$taskRun='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02'
+ $taskPython='C:\Python314\python.exe'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
+ $taskSourceMapPath=Join-Path $taskProposal 'SOURCE-INPUTS.json'
+@@ -9,16 +9,16 @@
+ $taskSourceMap=Get-Content -LiteralPath $taskSourceMapPath -Raw | ConvertFrom-Json
+ if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'generated-file-one-owned-dummy-worker-only'){throw 'Exact root native observation admission required'}
+ if($taskAdmission.source_inputs_sha256 -cne (Get-FileHash -LiteralPath $taskSourceMapPath -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Source map admission mismatch'}
+-if($taskAdmission.launcher_sha256 -cne (Get-FileHash -LiteralPath (Join-Path $taskProposal 'run_native01.ps1') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Launcher admission mismatch'}
++if($taskAdmission.launcher_sha256 -cne (Get-FileHash -LiteralPath (Join-Path $taskProposal 'run_native02.ps1') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Launcher admission mismatch'}
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh dummy observation directory required'}
+ $taskControls=@()
+-foreach($taskName in @('ROOT-ADMISSION.json','SOURCE-INPUTS.json','run_native01.ps1')){
++foreach($taskName in @('ROOT-ADMISSION.json','SOURCE-INPUTS.json','run_native02.ps1')){
+     $taskPath=Join-Path $taskProposal $taskName
+     $taskControls += [ordered]@{name=$taskName;path=$taskPath;sha256=(Get-FileHash -LiteralPath $taskPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+ }
+ $taskSourceNames=@('snapshot_lifecycle.py','owned_generation_protocol.py','win32_worker_connection.py','win32_private_pipe.py','generated_worker_flow.py','dummy_bootstrap.py')
+-$taskNativePaths=@('C:\Python314\python.exe','C:\Python314\python314.dll','C:\Python314\python3.dll','C:\Python314\DLLs\_ctypes.pyd','C:\Python314\DLLs\libffi-8.dll','C:\Windows\System32\kernel32.dll','C:\Python314\Lib\ctypes\__init__.py','C:\Python314\Lib\ctypes\_endian.py')
+-if(@($taskSourceMap.source_sha256.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.source_paths.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.native_bindings.PSObject.Properties).Count -ne 8){throw 'Fixed input membership refused'}
++$taskNativePaths=@('C:\Python314\python.exe','C:\Python314\python314.dll','C:\Python314\python3.dll','C:\Python314\DLLs\_ctypes.pyd','C:\Python314\DLLs\libffi-8.dll','C:\Windows\System32\kernel32.dll','C:\Python314\Lib\ctypes\__init__.py','C:\Python314\Lib\ctypes\_endian.py','C:\Python314\Lib\ctypes\_layout.py')
++if(@($taskSourceMap.source_sha256.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.source_paths.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.native_bindings.PSObject.Properties).Count -ne 9){throw 'Fixed input membership refused'}
+ $taskSources=@()
+ foreach($taskName in $taskSourceNames){
+     $taskExpectedSource=Join-Path $taskProposal $taskName

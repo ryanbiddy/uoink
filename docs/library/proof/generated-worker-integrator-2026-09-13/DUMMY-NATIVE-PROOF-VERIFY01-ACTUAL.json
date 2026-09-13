@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b76fbf",
+  "wall_time_seconds": 0.5031328,
+  "exit_code": 0,
+  "original_token_count": 70,
+  "output": "{\"verified\": true, \"payload_count\": 119, \"logical_members\": 169, \"preserved_failed_native_attempts\": 3, \"successful_native_observations\": 1, \"tests_or_native_runs_executed_by_verifier\": 0, \"manifest_sha256\": \"72e2fb40f0ba2292cc5c9bc33c1a9278f8ba4cf15a844de2ebad0d54006290d8\"}\r\n"
+}

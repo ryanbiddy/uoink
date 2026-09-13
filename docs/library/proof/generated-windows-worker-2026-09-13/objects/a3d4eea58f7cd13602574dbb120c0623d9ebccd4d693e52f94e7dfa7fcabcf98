@@ -1,0 +1,36 @@
+--- frozen-native02/run_native02.ps1
++++ final-native03/run_native03.ps1
+@@ -1,7 +1,7 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-flow-proposal02'
+-$taskRun='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native02'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-flow-proposal03'
++$taskRun='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native03'
+ $taskPython='C:\Python314\python.exe'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
+ $taskSourceMapPath=Join-Path $taskProposal 'SOURCE-INPUTS.json'
+@@ -9,10 +9,10 @@
+ $taskSourceMap=Get-Content -LiteralPath $taskSourceMapPath -Raw | ConvertFrom-Json
+ if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'generated-file-one-owned-dummy-worker-only'){throw 'Exact root native observation admission required'}
+ if($taskAdmission.source_inputs_sha256 -cne (Get-FileHash -LiteralPath $taskSourceMapPath -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Source map admission mismatch'}
+-if($taskAdmission.launcher_sha256 -cne (Get-FileHash -LiteralPath (Join-Path $taskProposal 'run_native02.ps1') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Launcher admission mismatch'}
++if($taskAdmission.launcher_sha256 -cne (Get-FileHash -LiteralPath (Join-Path $taskProposal 'run_native03.ps1') -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Launcher admission mismatch'}
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh dummy observation directory required'}
+ $taskControls=@()
+-foreach($taskName in @('ROOT-ADMISSION.json','SOURCE-INPUTS.json','run_native02.ps1')){
++foreach($taskName in @('ROOT-ADMISSION.json','SOURCE-INPUTS.json','run_native03.ps1')){
+     $taskPath=Join-Path $taskProposal $taskName
+     $taskControls += [ordered]@{name=$taskName;path=$taskPath;sha256=(Get-FileHash -LiteralPath $taskPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+ }
+@@ -107,6 +107,10 @@
+     foreach($taskReceipt in @($taskController,$taskChild)){
+         if($taskReceipt.schema -cne 'uoink.generated-owned-worker.v1' -or $taskReceipt.guard_valid -cne $true -or $taskReceipt.native_exit_planned -ne 0 -or $taskReceipt.model_calls -ne 0 -or @($taskReceipt.model_imports).Count -ne 0 -or @($taskReceipt.guard_denials).Count -ne 0 -or $taskReceipt.metadata_traps -ne 12 -or $taskReceipt.registry_traps -ne 25 -or $taskReceipt.kernel32_path_verified -cne $true -or $null -ne $taskReceipt.error_type){$taskReceiptValid=$false}
+         if($taskReceipt.work_budget_closed -cne $false -or @($taskReceipt.reserved_cleanup_calls).Count -ne 0){$taskReceiptValid=$false}
++        $taskExpectedCasts=0
++        if($taskReceipt.role -ceq 'controller'){$taskExpectedCasts=1}
++        $taskExpectedDispatches=33+@($taskReceipt.native_api_calls).Count+$taskExpectedCasts
++        if($taskReceipt.fixed_dispatch_valid -cne $true -or $taskReceipt.fixed_dispatch_function_count -ne 32 -or $taskReceipt.fixed_dispatch_invalid_contexts -ne 0 -or $taskReceipt.fixed_attribute_cast_calls -ne $taskExpectedCasts -or $taskReceipt.fixed_dispatch_completed_calls -ne $taskExpectedDispatches -or $taskReceipt.fixed_dispatch_audit_events -ne $taskExpectedDispatches){$taskReceiptValid=$false}
+         foreach($taskName in $taskSourceNames){if($taskReceipt.source_sha256.$taskName -cne $taskSourceMap.source_sha256.$taskName){$taskReceiptValid=$false}}
+     }
+     $taskResult=$taskController.result

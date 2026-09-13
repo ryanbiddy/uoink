@@ -1,0 +1,90 @@
+"""Read-only native/text binding and manifest preparation; no ctypes import."""
+from pathlib import Path
+import ast
+from datetime import datetime, timezone
+import hashlib
+import json
+
+BASE = Path(r"E:\AI\projects\uoink\checkouts\Yoink-library")
+HERE = BASE / "_scratch/asr-dummy-worker-flow-proposal03"
+FROZEN = BASE / "_scratch/asr-worker-namespace-proposal01"
+
+
+def read(path, cap=1048576):
+    with path.open("rb") as stream:
+        raw = stream.read(cap + 1)
+    assert len(raw) <= cap
+    return raw
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+bootstrap = read(HERE / "dummy_bootstrap.py")
+tree = ast.parse(bootstrap)
+assignments = {node.targets[0].id: node.value for node in tree.body
+               if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)}
+kernel_path = ast.literal_eval(assignments["KERNEL_PATH"])
+
+
+class ConstantKernel(ast.NodeTransformer):
+    def visit_Name(self, node):
+        assert node.id == "KERNEL_PATH"
+        return ast.Constant(kernel_path)
+
+
+native = ast.literal_eval(ConstantKernel().visit(assignments["NATIVE"]))
+assert len(native) == 9
+native_bindings = {}
+for text, (size, expected) in native.items():
+    assert text.startswith("C:\\Python314\\") or text == r"C:\Windows\System32\kernel32.dll"
+    raw = read(Path(text), size)
+    assert len(raw) == size and sha(raw) == expected
+    native_bindings[text] = {"bytes": size, "sha256": expected}
+modules = ast.literal_eval(assignments["MODULES"])
+sources, paths = {}, {}
+for name in tuple(module + ".py" for module in modules) + ("dummy_bootstrap.py",):
+    path = (HERE if name in ("generated_worker_flow.py", "dummy_bootstrap.py") else FROZEN) / name
+    raw = read(path)
+    ast.parse(raw)
+    sources[name], paths[name] = sha(raw), str(path)
+expected = {
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "owned_generation_protocol.py": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507",
+    "win32_worker_connection.py": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+    "win32_private_pipe.py": "4a0cccc8d905f7dc9d93288d8c9187f7da846ee673a57e625e691e17bbed899c",
+}
+assert all(sources[name] == digest for name, digest in expected.items())
+source_map = {"schema": "uoink.fixed-dummy-inputs.v1", "source_sha256": sources,
+              "source_paths": paths, "native_bindings": native_bindings}
+source_raw = (json.dumps(source_map, indent=2) + "\n").encode()
+admission = {"root_reviewed": False, "scope": "generated-file-one-owned-dummy-worker-only",
+             "source_inputs_sha256": sha(source_raw), "launcher_sha256": sha(read(HERE / "run_native03.ps1")),
+             "no_model_or_product_library_data": True, "native_execution_admitted_by_template": False}
+sdk_root = Path(r"C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um")
+sdk_rows, excerpts = [], []
+for name, spans in (("processthreadsapi.h", ((174, 182),)),
+                    ("libloaderapi.h", ((215, 224), (368, 374)))):
+    path = sdk_root / name
+    raw = read(path)
+    lines = raw.decode("utf-8-sig").splitlines()
+    sdk_rows.append({"path": str(path), "bytes": len(raw), "sha256": sha(raw), "ranges": spans})
+    for start, end in spans:
+        assert 1 <= start <= end <= len(lines)
+        excerpts.append(name + ":" + str(start) + "-" + str(end) + "\n")
+        excerpts.extend(str(index) + ": " + lines[index - 1] + "\n" for index in range(start, end + 1))
+record = {"bound_at_utc": datetime.now(timezone.utc).isoformat(), "native_bindings": native_bindings,
+          "resource_versions_observed": {"python_exe_and_python_dlls_and_ctypes_pyd": "3.14.6",
+                                         "kernel32": "10.0.26100.9278", "libffi_resource_version": None},
+          "resource_version_tool_observations": ["b1796b", "1e4057"], "sdk_bindings": sdk_rows,
+          "limits": "Existing quiescent file hashes; trusted OS/stdlib dependency, not exhaustive DLL attestation.",
+          "native_import_or_candidate_execution": False}
+for name, raw in (("SOURCE-INPUTS.json", source_raw),
+                  ("ADMISSION-TEMPLATE.json", (json.dumps(admission, indent=2) + "\n").encode()),
+                  ("NATIVE-SDK-BINDINGS.json", (json.dumps(record, indent=2) + "\n").encode()),
+                  ("SDK-DUMMY-EXCERPTS.txt", "".join(excerpts).encode())):
+    with (HERE / name).open("xb") as stream:
+        stream.write(raw)
+print(json.dumps({"source_count": len(sources), "native_bindings": len(native_bindings),
+                  "source_inputs_sha256": sha(source_raw), "candidate_executed": False}))
