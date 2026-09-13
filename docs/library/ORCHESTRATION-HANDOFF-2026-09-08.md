@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; first actual wheel build at 576cd07 passes byte checks, remains uninstalled | Finish Python 3.13 packaging reproduction and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected-root projection is under review. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; first actual wheel build at 576cd07 passes byte checks, remains uninstalled | Archive completed Python 3.13 packaging reproduction and finish exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -224,6 +224,13 @@ is complete but is not this goal's completion. Current queue:
    refuse any selected cycle alias. It may omit unreachable omitted-root data;
    it cannot claim to exclude every shared training-origin value. No model
    acceptance or actual projection run is authorized by preparation alone.
+   Root subsequently reviewed and ran symbolic-projection01, preserved at
+   ba8d2c8. Read ASTRA-VAD-SELECTED-PROJECTION-VERDICT-2026-09-13.md.
+   Author and root each pass 63 synthetic cases. Actual reader/outer exit 2
+   remains; the selected acyclic closure contains 1,069 nodes and 54 tensor
+   descriptors in a 190,182-byte partial/untrusted receipt. All 228 proof
+   payloads match Git and disk. Map only this safe JSON to the fixed-loader
+   configuration and schema proposal; no model or storage-member execution.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -4049,3 +4056,21 @@ serialization deadline gap was found and repaired while preserving its draft;
 synthetic qualification is next. No additional checkpoint invocation occurred.
 Production source and the full-tree result are unchanged; release, website
 and marketing remain held.
+
+### 2026-09-13 - Selected VAD metadata available under strict refusal
+
+Commit ba8d2c8 preserves 228 payloads with exact Git/disk equality. The root
+static inspection returned the same cycle refusal and reader/outer exit 2,
+in 0.034605 seconds. Its separately checked acyclic selected closure contains
+1,069 nodes and 54 tensor argument descriptors. Recorded configuration now
+includes sample rate/channel count, SincNet stride and LSTM/linear settings.
+These literals remain untrusted; no class, tensor, model or converter ran.
+Map the safe JSON to fixed source and distinguish recorded values from
+source-defined defaults. Do not infer provenance or runtime compatibility.
+
+The private stdlib-only Python 3.13 package reproduction also completed with
+copy/child/outer exits zero and byte-identical B2 output. Its proof is being
+reviewed. The optional Hub-keyword patch passes eight synthetic contract cases
+after retained baseline errors and a documented traceback-formatting guard
+repair; it is still an inert, separate proposal. Production source and the
+complete-tree result are unchanged; release and public work remain held.
