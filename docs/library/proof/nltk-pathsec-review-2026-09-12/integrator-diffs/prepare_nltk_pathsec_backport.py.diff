@@ -1,0 +1,263 @@
+--- worker/scripts/prepare_nltk_pathsec_backport.py
++++ astra/scripts/prepare_nltk_pathsec_backport.py
+@@ -30,7 +30,7 @@
+ import stat
+ import sys
+ from datetime import datetime, timezone
+-from pathlib import Path
++from pathlib import Path, PureWindowsPath
+ 
+ EXPECTED_VERSION = "3.10.3"
+ 
+@@ -63,6 +63,7 @@
+ 
+ def sha256_file(path: str | Path) -> str:
+     """Compute sha256 digest of a file."""
++    verify_no_links_or_reparse(Path(path).absolute(), 'Hash input')
+     h = hashlib.sha256()
+     with open(path, "rb") as f:
+         while chunk := f.read(65536):
+@@ -83,26 +84,51 @@
+         file_attrs = getattr(st, "st_file_attributes", 0)
+         if bool(file_attrs & 0x0400):
+             return True
+-    except (OSError, ValueError):
++    except FileNotFoundError:
+         pass
+     return False
+ 
+ 
+ def verify_no_links_or_reparse(target: Path, label: str) -> None:
+     """Verify that neither target nor any of its ancestors is a symlink or reparse point."""
+-    # Check target without resolving away the evidence
+-    if is_symlink_or_reparse(target):
+-        raise PermissionError(f"{label} path {target} is a symlink or Windows reparse point.")
+-
+-    # Check every ancestor up to filesystem root
+-    for ancestor in target.parents:
+-        if ancestor == ancestor.parent:
+-            # Drive root (e.g. C:\ or E:\)
+-            continue
++    # Inspect from the root toward the leaf before any following probe.
++    for ancestor in [*reversed(target.absolute().parents), target.absolute()]:
+         if is_symlink_or_reparse(ancestor):
+             raise PermissionError(
+                 f"Ancestor {ancestor} of {label} path is a symlink or Windows reparse point."
+             )
++
++
++def safe_local_path(value: str | Path) -> Path:
++    text = str(value)
++    win = PureWindowsPath(text)
++    if not text.strip() or '\x00' in text or text.startswith(('\\\\', '//')):
++        raise ValueError('Local non-device path required')
++    if win.drive and not win.is_absolute():
++        raise ValueError('Drive-relative path refused')
++    if '..' in win.parts or '..' in Path(text).parts:
++        raise ValueError('Path traversal refused')
++    for part in win.parts:
++        if part == win.anchor:
++            continue
++        if ':' in part or part.rstrip(' .') != part or re.fullmatch(r'(?i)(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(?:\..*)?', part):
++            raise ValueError('Device, stream or ambiguous Windows path refused')
++    result = Path(os.path.abspath(text))
++    verify_no_links_or_reparse(result, 'Input')
++    return result
++
++
++def tree_hashes(directory: Path) -> dict[str, str]:
++    result = {}
++    for current, dirs, files in os.walk(directory, followlinks=False):
++        for name in dirs + files:
++            verify_no_links_or_reparse(Path(current) / name, 'Tree entry')
++        for name in files:
++            path = Path(current) / name
++            if not stat.S_ISREG(path.lstat().st_mode):
++                raise PermissionError('Non-regular source entry')
++            result[path.relative_to(directory).as_posix()] = sha256_file(path)
++    return result
+ 
+ 
+ def validate_destination_boundary(dst_path: str | Path, src_dir: Path) -> Path:
+@@ -111,7 +137,7 @@
+     if not dst_str or not dst_str.strip():
+         raise ValueError("Destination path must not be empty.")
+ 
+-    raw_dst = Path(dst_str)
++    raw_dst = safe_local_path(dst_str)
+     if ".." in raw_dst.parts:
+         raise ValueError(f"Path traversal ('..') detected in destination path: {dst_str}")
+ 
+@@ -145,7 +171,7 @@
+ 
+ def validate_source_tree(src_path: str | Path) -> Path:
+     """Validate source tree exists, has no symlinks/reparse points, matches version and hashes."""
+-    src_p = Path(src_path)
++    src_p = safe_local_path(src_path)
+     if not src_p.is_dir():
+         raise FileNotFoundError(f"Source directory not found: {src_p}")
+ 
+@@ -197,6 +223,7 @@
+         receipt_path = dst_dir / "nltk-pathsec-receipt.json"
+     else:
+         raw_r = Path(receipt_arg)
++        safe_local_path(raw_r)
+         if ".." in raw_r.parts:
+             raise ValueError(f"Path traversal ('..') detected in receipt path: {receipt_arg}")
+         if raw_r.is_absolute():
+@@ -211,6 +238,9 @@
+         else:
+             receipt_path = dst_dir / raw_r
+ 
++    receipt_path = safe_local_path(receipt_path)
++    if receipt_path == dst_dir or not receipt_path.is_relative_to(dst_dir) or receipt_path.suffix != '.json':
++        raise ValueError('Receipt path must live inside destination and name a JSON file')
+     return receipt_path
+ 
+ 
+@@ -218,6 +248,8 @@
+     """Copy source tree to destination without following symlinks."""
+     def _copy_file_no_follow(src_file, dst_file):
+         sp = Path(src_file)
++        verify_no_links_or_reparse(sp, 'Copy source')
++        verify_no_links_or_reparse(Path(dst_file), 'Copy destination')
+         if is_symlink_or_reparse(sp):
+             raise PermissionError(f"Refusing to copy symlink/reparse point: {sp}")
+         shutil.copyfile(src_file, dst_file, follow_symlinks=False)
+@@ -246,13 +278,13 @@
+             )
+ 
+ 
+-def apply_reviewed_patch(patch_path: Path, dst_dir: Path, expected_patch_hash: str | None = None) -> dict[str, str]:
++def apply_reviewed_patch(patch_path: Path, dst_dir: Path) -> dict[str, str]:
+     """Apply unified diff patch directly to dst_dir and return dict of patched hashes."""
+     if not patch_path.is_file():
+         raise FileNotFoundError(f"Patch file not found: {patch_path}")
+ 
+     actual_patch_hash = sha256_file(patch_path)
+-    required_hash = expected_patch_hash or EXPECTED_PATCH_SHA256
++    required_hash = EXPECTED_PATCH_SHA256
+     if actual_patch_hash != required_hash:
+         raise ValueError(
+             f"Patch hash mismatch (patch tampered or unexpected)!\n"
+@@ -289,17 +321,13 @@
+     patched_hashes: dict[str, str] = {}
+ 
+     for rel_file, flines in file_patches:
+-        target_file = dst_dir
+-        # Map file path: if rel_file starts with nltk/, remove it if dst_dir is already the nltk package
+-        for part in Path(rel_file).parts:
+-            if part == "nltk" and dst_dir.name == "nltk":
+-                continue
+-            target_file = target_file / part
+-
+-        if not target_file.is_file():
+-            target_file = dst_dir / rel_file
+-        if not target_file.is_file() and rel_file.startswith("nltk/"):
+-            target_file = dst_dir / rel_file[5:]
++        if not rel_file.startswith('nltk/') or os.path.normpath(rel_file[5:]) not in EXPECTED_ORIGINAL_HASHES:
++            raise ValueError('Unexpected patch target')
++        norm_name = os.path.normpath(rel_file[5:])
++        if norm_name in patched_hashes:
++            raise ValueError('Duplicate patch target')
++        target_file = dst_dir / rel_file[5:]
++        verify_no_links_or_reparse(target_file, 'Patch target')
+ 
+         if not target_file.is_file():
+             raise FileNotFoundError(f"Patch target file not found in destination: {rel_file}")
+@@ -350,7 +378,9 @@
+ 
+             target_idx = old_start - 1 + line_offset
+             matched_idx = None
+-            for delta in [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5]:
++            if len(expected_old) != old_len or len(replacement) != new_len or target_idx != new_start - 1:
++                raise ValueError('Patch hunk count/location mismatch')
++            for delta in [0]:
+                 candidate = target_idx + delta
+                 if 0 <= candidate and candidate + len(expected_old) <= len(file_lines):
+                     if file_lines[candidate:candidate + len(expected_old)] == expected_old:
+@@ -376,6 +406,8 @@
+             norm_rel = norm_rel[5:]
+         patched_hashes[norm_rel] = sha256_file(target_file)
+ 
++    if set(patched_hashes) != set(EXPECTED_PATCHED_HASHES):
++        raise ValueError('Incomplete patch output')
+     # Verify patched hashes against expected
+     for rel_p, exp_h in EXPECTED_PATCHED_HASHES.items():
+         norm_key = os.path.normpath(rel_p)
+@@ -394,7 +426,6 @@
+     dst: str | Path,
+     patch_file: str | Path | None = None,
+     receipt_path: str | Path | None = None,
+-    expected_patch_hash: str | None = None,
+ ) -> dict:
+     """Execute the full backport preparation pipeline deterministically."""
+     # 1. Validate inputs and boundaries BEFORE any write
+@@ -408,19 +439,31 @@
+         / "nltk-pathsec"
+         / "nltk-3.10.3-pathsec.patch"
+     )
+-    patch_path = Path(patch_file) if patch_file else default_patch
++    patch_path = safe_local_path(patch_file if patch_file else default_patch)
+     if not patch_path.is_file():
+         raise FileNotFoundError(f"Patch file not found: {patch_path}")
+     patch_sha256 = sha256_file(patch_path)
++    if patch_sha256 != EXPECTED_PATCH_SHA256:
++        raise ValueError('Patch hash mismatch')
++    complete_original = tree_hashes(src_dir)
++    receipt_relative = final_receipt_path.relative_to(dst_dir).as_posix().casefold()
++    if any(receipt_relative == name.casefold() or receipt_relative.startswith(name.casefold() + '/') for name in complete_original):
++        raise ValueError('Receipt would replace a source entry')
+ 
+     # 2. Copy source tree to new destination without following symlinks
+     copy_source_tree(src_dir, dst_dir)
+ 
+     # 3. Validate copied original files in destination before patching
+     validate_copied_source(dst_dir)
++    if tree_hashes(dst_dir) != complete_original:
++        raise ValueError('Copied tree hash mismatch')
+ 
+     # 4. Apply exact reviewed patch
+-    patched_hashes = apply_reviewed_patch(patch_path, dst_dir, expected_patch_hash=expected_patch_hash)
++    patched_hashes = apply_reviewed_patch(patch_path, dst_dir)
++    expected_tree = dict(complete_original)
++    expected_tree.update({Path(k).as_posix(): v for k, v in EXPECTED_PATCHED_HASHES.items()})
++    if tree_hashes(dst_dir) != expected_tree or tree_hashes(src_dir) != complete_original:
++        raise ValueError('Source or prepared tree changed unexpectedly')
+ 
+     # 5. Construct truthful preparation receipt
+     actual_orig_hashes = {
+@@ -439,9 +482,13 @@
+         "original_hashes": actual_orig_hashes,
+         "patched_hashes": patched_hashes,
+         "covered_apis": COVERED_APIS,
++        "source_tree_hashes": complete_original,
++        "prepared_tree_hashes": expected_tree,
++        "release_ready": False,
+     }
+ 
+     # 6. Write receipt exclusively inside the destination
++    verify_no_links_or_reparse(final_receipt_path, 'Final receipt')
+     final_receipt_path.parent.mkdir(parents=True, exist_ok=True)
+     with open(final_receipt_path, "x", encoding="utf-8") as rf:
+         json.dump(receipt, rf, indent=2)
+@@ -477,11 +524,6 @@
+         "--receipt",
+         default=None,
+         help="Optional path to write receipt JSON file (must be inside destination).",
+-    )
+-    parser.add_argument(
+-        "--expected-patch-hash",
+-        default=None,
+-        help="Optional expected SHA-256 hash for patch file verification.",
+     )
+ 
+     args = parser.parse_args()
+@@ -492,7 +534,6 @@
+             dst=args.dst,
+             patch_file=args.patch_file,
+             receipt_path=args.receipt,
+-            expected_patch_hash=args.expected_patch_hash,
+         )
+         print("NLTK Pathsec Backport Preparation Successful!")
+         print(f"  Source:      {receipt['source_directory']}")

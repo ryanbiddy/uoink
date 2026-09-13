@@ -1,0 +1,146 @@
+--- worker/tests/test_nltk_pathsec_backport.py
++++ astra/tests/test_nltk_pathsec_backport.py
+@@ -42,10 +42,12 @@
+ EXPECTED_PATCH_SHA256 = prepare_mod.EXPECTED_PATCH_SHA256
+ EXPECTED_PATCHED_HASHES = prepare_mod.EXPECTED_PATCHED_HASHES
+ 
+-STAGING_NLTK = Path(
++RUNTIME_NLTK = Path(
+     "E:/AI/projects/uoink/checkouts/Yoink-library/installer/staging/python/Lib/site-packages/nltk"
+ )
+-STAGING_SITE_PACKAGES = STAGING_NLTK.parent
++# A patched installer can use a preserved upstream source fixture explicitly.
++STAGING_NLTK = Path(os.environ.get('UOINK_NLTK_BASE_SOURCE', str(RUNTIME_NLTK)))
++STAGING_SITE_PACKAGES = RUNTIME_NLTK.parent
+ 
+ 
+ # ==============================================================================
+@@ -53,13 +55,13 @@
+ # ==============================================================================
+ 
+ @pytest.fixture
+-def minimal_valid_source(staging_available, tmp_path):
+-    """Provide a valid NLTK 3.10.3 source tree using staging source files."""
++def minimal_valid_source(tmp_path):
++    """Provide exact vendored source for portable preparation checks, without imports."""
+     src = tmp_path / "valid_src"
+     src.mkdir()
+     (src / "VERSION").write_text("3.10.3\n", encoding="utf-8")
+     for rel in EXPECTED_ORIGINAL_HASHES:
+-        src_f = staging_available / rel
++        src_f = REPO_ROOT / 'vendor/nltk-pathsec/original' / rel
+         dst_f = src / rel
+         dst_f.parent.mkdir(parents=True, exist_ok=True)
+         shutil.copyfile(src_f, dst_f)
+@@ -99,13 +101,29 @@
+ def run_child_probe(python_code: str, tree_site_dir: Path, timeout: int = 15) -> subprocess.CompletedProcess[str]:
+     """Execute python snippet in an isolated child process with bytecode disabled."""
+     env = os.environ.copy()
+-    python_paths = [str(tree_site_dir)]
+-    if STAGING_SITE_PACKAGES.is_dir():
+-        python_paths.append(str(STAGING_SITE_PACKAGES))
+-    env["PYTHONPATH"] = os.pathsep.join(python_paths)
+     env["PYTHONDONTWRITEBYTECODE"] = "1"
+-
+-    cmd = [sys.executable, "-B", "-c", python_code]
++    # The staged native libraries are cp313; do not load them into the test
++    # runner's possibly different interpreter. Start the matching embedded host
++    # with explicit paths and an audit guard before importing any package.
++    host = STAGING_SITE_PACKAGES.parent.parent / 'python.exe'
++    if not host.is_file():
++        pytest.skip('Matching staged Python interpreter is unavailable')
++    preamble = f"""
++import os, sys
++sys.path[:0] = {[str(tree_site_dir), str(STAGING_SITE_PACKAGES)]!r}
++def audit(event, args):
++    if event.startswith('socket.') or event == 'subprocess.Popen':
++        raise PermissionError('NLTK probe forbids network and subprocesses')
++    if event == 'import' and str(args[0]).split('.')[0] in ('torch', 'whisper', 'whisperx', 'pyannote'):
++        raise PermissionError('NLTK probe forbids model imports')
++    if event in ('open', 'sqlite3.connect') and isinstance(args[0], (str, bytes, os.PathLike)):
++        value = os.fsdecode(args[0]).replace(chr(92), '/').casefold()
++        forbidden = os.environ.get('IG_FORBIDDEN_LIVE', 'C:/Users/hello/AppData/Local/Uoink/index.db').replace(chr(92), '/').casefold()
++        if forbidden in value:
++            raise PermissionError('Live index forbidden')
++sys.addaudithook(audit)
++"""
++    cmd = [str(host), '-I', '-S', '-B', '-c', preamble + python_code]
+     return subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=timeout)
+ 
+ 
+@@ -153,14 +171,14 @@
+         prepare_backport(src=minimal_valid_source, dst=nested_dst)
+ 
+ 
+-def test_prepare_refuses_source_inside_destination(staging_available, tmp_path):
++def test_prepare_refuses_source_inside_destination(tmp_path):
+     """Refuse source nested inside destination path (overlap)."""
+     dst = tmp_path / "dst_dir"
+     nested_src = dst / "nested_src"
+     nested_src.mkdir(parents=True)
+     (nested_src / "VERSION").write_text("3.10.3\n", encoding="utf-8")
+     for rel in EXPECTED_ORIGINAL_HASHES:
+-        src_f = staging_available / rel
++        src_f = REPO_ROOT / 'vendor/nltk-pathsec/original' / rel
+         dst_f = nested_src / rel
+         dst_f.parent.mkdir(parents=True, exist_ok=True)
+         shutil.copyfile(src_f, dst_f)
+@@ -253,21 +271,10 @@
+         assert actual_hash == expected_hash, f"Staging byte corruption detected in {rel_path}"
+ 
+ 
+-def test_scratch_archive_matches_staging(staging_available):
+-    """Verify that scratch archive bytes match staging source bytes."""
+-    scratch_root = REPO_ROOT / "_scratch" / "nltk-original"
+-    if not scratch_root.is_dir():
+-        pytest.skip("Scratch archive not present in this worktree")
+-
+-    for rel in [
+-        "vendor/nltk-pathsec/README.md",
+-        "vendor/nltk-pathsec/nltk-3.10.3-pathsec.patch",
+-        "scripts/prepare_nltk_pathsec_backport.py",
+-        "tests/test_nltk_pathsec_backport.py",
+-        "docs/library/NLTK-PATHSEC-BACKPORT-2026-09-12.md",
+-    ]:
+-        p = scratch_root / rel
+-        assert p.is_file(), f"Expected preserved original file in scratch: {p}"
++def test_vendored_original_source_matches_recorded_hashes():
++    """Compare actual bytes of the portable source fixture, without importing it."""
++    for rel, expected in EXPECTED_ORIGINAL_HASHES.items():
++        assert sha256_file(REPO_ROOT / 'vendor/nltk-pathsec/original' / rel) == expected
+ 
+ 
+ # ==============================================================================
+@@ -288,7 +295,8 @@
+ from nltk.parse.transitionparser import TransitionParser
+ parser = TransitionParser('arc-standard')
+ try:
+-    parser.train(depgraphs=[], modelfile=r'{outside_file}')
++    with mock.patch('nltk.parse.transitionparser.svm.SVC', side_effect=AssertionError('Training boundary reached')), mock.patch('pickle.dump', side_effect=AssertionError('Serialization boundary reached')):
++        parser.train(depgraphs=[], modelfile=r'{outside_file}')
+     sys.exit(1)
+ except PermissionError as e:
+     assert 'Security Violation' in str(e)
+@@ -603,7 +611,8 @@
+ from nltk.classify.maxent import save_maxent_params
+ dummy = mock.MagicMock()
+ try:
+-    save_maxent_params(dummy, {{}}, [], {{}}, tab_dir=r'{outside_dir}')
++    with mock.patch('nltk.tabdata.MaxentEncoder'):
++        save_maxent_params(dummy, {{}}, [], {{}}, tab_dir=r'{outside_dir}')
+     sys.exit(1)
+ except PermissionError as e:
+     assert 'Security Violation' in str(e)
+@@ -715,7 +724,8 @@
+     assert "SUCCESS_SYMLINK_REFUSAL" in res.stdout
+ 
+ 
+-def test_no_torch_or_inference_imported():
+-    """Verify that execution boundary holds: no heavy ML packages imported in test runner."""
+-    for mod in ["torch", "whisper", "whisperx", "pyannote"]:
+-        assert mod not in sys.modules, f"Forbidden module {mod} was imported during pathsec tests"
++def test_no_torch_or_inference_imported(prepared_tree_session):
++    """Inspect the fresh child, independent of other tests' parent imports."""
++    res = run_child_probe("import nltk, sys\nassert not {'torch', 'whisper', 'whisperx', 'pyannote'}.intersection(sys.modules)\nprint('NO_MODEL_IMPORTS')", prepared_tree_session['site_dir'])
++    assert res.returncode == 0, res.stderr
++    assert 'NO_MODEL_IMPORTS' in res.stdout

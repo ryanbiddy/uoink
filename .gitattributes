@@ -176,3 +176,5 @@ docs/library/proof/security12-astra-review-2026-09-12/** -text
 docs/library/proof/native-gui-package07-2026-09-12/** -text
 docs/library/proof/signing-repair-01-2026-09-12/** -text
 docs/library/proof/signing-review-02-2026-09-12/** -text
+vendor/nltk-pathsec/** -text
+docs/library/proof/nltk-pathsec-review-2026-09-12/** -text

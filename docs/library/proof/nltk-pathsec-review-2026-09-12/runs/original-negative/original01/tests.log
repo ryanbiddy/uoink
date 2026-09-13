@@ -1,0 +1,54 @@
+FFFFF..FFF                                                               [100%]
+================================== FAILURES ===================================
+___________ test_tampered_patch_refused_before_destination_creation ___________
+tests\test_nltk_preparation_boundaries.py:33: in test_tampered_patch_refused_before_destination_creation
+    assert not destination.exists()
+E   AssertionError: assert not True
+E    +  where True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-pre-astra-probes/_scratch/original01-0/t0/destination').exists
+_______________________ test_no_expected_hash_override ________________________
+tests\test_nltk_preparation_boundaries.py:40: in test_no_expected_hash_override
+    with pytest.raises(TypeError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE TypeError
+______ test_windows_receipt_aliases_refused_before_copy[C:receipt.json] _______
+tests\test_nltk_preparation_boundaries.py:49: in test_windows_receipt_aliases_refused_before_copy
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+_____ test_windows_receipt_aliases_refused_before_copy[safe.json:stream] ______
+tests\test_nltk_preparation_boundaries.py:49: in test_windows_receipt_aliases_refused_before_copy
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+_________ test_windows_receipt_aliases_refused_before_copy[NUL.json] __________
+tests\test_nltk_preparation_boundaries.py:49: in test_windows_receipt_aliases_refused_before_copy
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+___________________ test_receipt_cannot_replace_copied_file ___________________
+tests\test_nltk_preparation_boundaries.py:58: in test_receipt_cannot_replace_copied_file
+    prepare.prepare_backport(source, destination, receipt_path='existing.json')
+scripts\prepare_nltk_pathsec_backport.py:446: in prepare_backport
+    with open(final_receipt_path, "x", encoding="utf-8") as rf:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileExistsError: [Errno 17] File exists: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ecbf6acd-847\\gemini\\_scratch\\nltk-pre-astra-probes\\_scratch\\original01-0\\t7\\destination\\existing.json'
+_______________ test_complete_copy_hashes_and_receipt_are_bound _______________
+tests\test_nltk_preparation_boundaries.py:65: in test_complete_copy_hashes_and_receipt_are_bound
+    before = prepare.tree_hashes(source)
+             ^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'nltk_boundary_prepare' has no attribute 'tree_hashes'
+_______________ test_ancestor_link_is_refused_before_leaf_probe _______________
+tests\test_nltk_preparation_boundaries.py:87: in test_ancestor_link_is_refused_before_leaf_probe
+    assert linked in inspected and leaf not in inspected
+E   AssertionError: assert (WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-pre-astra-probes/_scratch/original01-0/t9/linked') in [WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-...ntrolRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-pre-astra-probes/_scratch/original01-0/t9/linked')] and WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-pre-astra-probes/_scratch/original01-0/t9/linked/unread/file') not in [WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-...ntrolRoom/worktrees/uoink-library/ecbf6acd-847/gemini/_scratch/nltk-pre-astra-probes/_scratch/original01-0/t9/linked')])
+=========================== short test summary info ===========================
+FAILED tests/test_nltk_preparation_boundaries.py::test_tampered_patch_refused_before_destination_creation
+FAILED tests/test_nltk_preparation_boundaries.py::test_no_expected_hash_override
+FAILED tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[C:receipt.json]
+FAILED tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[safe.json:stream]
+FAILED tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[NUL.json]
+FAILED tests/test_nltk_preparation_boundaries.py::test_receipt_cannot_replace_copied_file
+FAILED tests/test_nltk_preparation_boundaries.py::test_complete_copy_hashes_and_receipt_are_bound
+FAILED tests/test_nltk_preparation_boundaries.py::test_ancestor_link_is_refused_before_leaf_probe
+8 failed, 2 passed in 1.41s
