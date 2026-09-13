@@ -1,0 +1,17 @@
+[
+  {
+    "source": "_scratch/vad-fixed-converter-proposal01/fixed_converter.py",
+    "copy": "fixed_converter.py",
+    "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+  },
+  {
+    "source": "_scratch/vad-fixed-converter-proposal01/zip_bounds.py",
+    "copy": "zip_bounds.py",
+    "sha256": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6"
+  },
+  {
+    "source": "_scratch/vad-buffer-endian-proposal01/buffer_basis.py",
+    "copy": "buffer_basis.py",
+    "sha256": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373"
+  }
+]

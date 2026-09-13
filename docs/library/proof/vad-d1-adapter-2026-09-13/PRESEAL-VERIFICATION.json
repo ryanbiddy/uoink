@@ -1,0 +1,19 @@
+{
+  "scope": "Preseal input/result verification; outer exact-set check prints outside proof",
+  "source_and_both_run_inputs_verified": 24,
+  "author_passed": 54,
+  "root_passed": 54,
+  "failed": 0,
+  "author_native_exit": 0,
+  "root_native_exit": 0,
+  "root_outer_exit": 0,
+  "stderr_empty_both": true,
+  "unexpected_audit_events": 0,
+  "forbidden_conversion_calls": 0,
+  "all_cases_and_non_time_facts_agree": true,
+  "source_changed": false,
+  "test_rerun": false,
+  "actual_artifact_or_storage_read": false,
+  "real_owner_approval_absent": true,
+  "conversion_profile_activated": false
+}

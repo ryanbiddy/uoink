@@ -1,0 +1,241 @@
+{
+  "scope": "D1 generated-archive inspection qualification only",
+  "input_sha256": {
+    "inspect_adapter.py": "533c8abee9a9eea503e444166edf8acca07fc9d5c01b34626b44f957969c6649",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "buffer_basis.py": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373",
+    "synthetic_zip.py": "c63b3901d7f3c9498a94e71358d73a3d5fb5bba701f6e6015825bc2608d24363",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "reviewed_converter_harness.txt": "11f9addddf9b349c4ee249c000cc60c4986b989de2e11ec990ba940d6b7949a9",
+    "qualify_adapter.py": "a6764de823d3479a9159af215873ccdb12d5d20877056300c3a71be3950a6ca2"
+  },
+  "startup_binding_asserted": true,
+  "passed": 54,
+  "failed": 0,
+  "qualification_exit": 0,
+  "elapsed_seconds": 0.038318,
+  "cases": [
+    {
+      "case": "all_131_members_only_1002_bytes_interpreted_little",
+      "passed": true
+    },
+    {
+      "case": "big_endian_consistency_does_not_activate_conversion",
+      "passed": true
+    },
+    {
+      "case": "opaque_pickle_and_other_127_storages_not_evaluated",
+      "passed": true
+    },
+    {
+      "case": "zip64_and_descriptor64",
+      "passed": true
+    },
+    {
+      "case": "observed_writer_version_zero_shape",
+      "passed": true
+    },
+    {
+      "case": "stored_alignment_padding",
+      "passed": true
+    },
+    {
+      "case": "known_inventory_canonical_hash_and_selected_lengths",
+      "passed": true
+    },
+    {
+      "case": "digest_gate_before_zip_or_comparator",
+      "passed": true
+    },
+    {
+      "case": "real_wrapper_refuses_before_any_path_call",
+      "passed": true
+    },
+    {
+      "case": "original_digest_cannot_be_synthetic",
+      "passed": true
+    },
+    {
+      "case": "real_purpose_unapproved",
+      "passed": true
+    },
+    {
+      "case": "unknown_purpose",
+      "passed": true
+    },
+    {
+      "case": "wrong_size",
+      "passed": true
+    },
+    {
+      "case": "bool_size",
+      "passed": true
+    },
+    {
+      "case": "size_over_bound",
+      "passed": true
+    },
+    {
+      "case": "invalid_digest",
+      "passed": true
+    },
+    {
+      "case": "invalid_profile_name",
+      "passed": true
+    },
+    {
+      "case": "missing_inventory_member",
+      "passed": true
+    },
+    {
+      "case": "unordered_inventory",
+      "passed": true
+    },
+    {
+      "case": "mutable_inventory",
+      "passed": true
+    },
+    {
+      "case": "selected_declared_short",
+      "passed": true
+    },
+    {
+      "case": "version_declared_long",
+      "passed": true
+    },
+    {
+      "case": "bool_inventory_size",
+      "passed": true
+    },
+    {
+      "case": "negative_inventory_size",
+      "passed": true
+    },
+    {
+      "case": "crc_over_bound",
+      "passed": true
+    },
+    {
+      "case": "wrong_declared_other_size",
+      "passed": true
+    },
+    {
+      "case": "wrong_declared_crc",
+      "passed": true
+    },
+    {
+      "case": "unsafe_inventory_name",
+      "passed": true
+    },
+    {
+      "case": "mutable_input_refused",
+      "passed": true
+    },
+    {
+      "case": "version_mismatch_before_comparator_no_false_observation",
+      "passed": true
+    },
+    {
+      "case": "actual_selected_member_length_differs_from_inventory",
+      "passed": true
+    },
+    {
+      "case": "window_nan",
+      "passed": true
+    },
+    {
+      "case": "n_infinity",
+      "passed": true
+    },
+    {
+      "case": "wrong_window_order",
+      "passed": true
+    },
+    {
+      "case": "opposite_buffer_orientations",
+      "passed": true
+    },
+    {
+      "case": "opaque_or_selected_crc_archive_data_4",
+      "passed": true
+    },
+    {
+      "case": "opaque_or_selected_crc_archive_data_128",
+      "passed": true
+    },
+    {
+      "case": "opaque_or_selected_crc_archive_data.pkl",
+      "passed": true
+    },
+    {
+      "case": "missing_archive_member",
+      "passed": true
+    },
+    {
+      "case": "extra_archive_member",
+      "passed": true
+    },
+    {
+      "case": "duplicate_archive_member",
+      "passed": true
+    },
+    {
+      "case": "escaping_archive_member",
+      "passed": true
+    },
+    {
+      "case": "unsupported_compression",
+      "passed": true
+    },
+    {
+      "case": "encrypted_flag",
+      "passed": true
+    },
+    {
+      "case": "unsupported_needed_version",
+      "passed": true
+    },
+    {
+      "case": "bad_local_pointer",
+      "passed": true
+    },
+    {
+      "case": "overlapping_payload_with_recomputed_crc",
+      "passed": true
+    },
+    {
+      "case": "unreferenced_zip_gap",
+      "passed": true
+    },
+    {
+      "case": "output_cap_discards_all_partial_facts",
+      "passed": true
+    },
+    {
+      "case": "deadline_after_comparison_refuses",
+      "passed": true
+    },
+    {
+      "case": "deadline_crossed_during_receipt_serialization_refuses",
+      "passed": true
+    },
+    {
+      "case": "unexpected_parser_failure_is_error_exit1",
+      "passed": true
+    },
+    {
+      "case": "exact_frozen_helpers_and_builder_ast",
+      "passed": true
+    },
+    {
+      "case": "adapter_no_conversion_calls_and_real_guard_first",
+      "passed": true
+    }
+  ],
+  "unexpected_audit_events": [],
+  "forbidden_conversion_calls": [],
+  "actual_artifact_or_storage_read": false,
+  "real_owner_profile_approved": false,
+  "conversion_profile_activated": false
+}
