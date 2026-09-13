@@ -62,6 +62,13 @@ and outcomes. Native Torch behavior and factory independence remain untested;
 the real entry point stays closed. The Windows worker and owned WhisperX
 derivative are still being implemented and reviewed.
 
+Owned WhisperX and lifecycle contracts are now integrated at `1935012`.
+Each independent run passes the same 50 WhisperX and 46 lifecycle cases;
+the original failed setup attempts remain preserved. Their 217- and 98-payload
+proofs match Git and disk. These simulated checks cover ownership, output and
+cleanup behavior. Real Windows protection, model compatibility and installation
+remain open; this does not approve release or website/marketing work.
+
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different

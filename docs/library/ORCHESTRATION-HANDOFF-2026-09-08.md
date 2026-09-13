@@ -102,6 +102,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
+| Owned WhisperX | Source/contracts integrated at 1935012 | Author and Astra each 50 passed / 0 failed / 0 errors / 0 skipped / 0 subtests; all 217 proof payloads match Git/disk. Original zero-case host failure and separate empty-list IndexError remain preserved | Exact-text byte build completed in worker; independently verify and seal it. Real runtime remains closed |
+| ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -230,12 +232,18 @@ The Windows source's cancellation, output-budget and interruption repairs are
 under review; a later result-publication race was also repaired before testing.
 No real Torch/model code has run. D1 still awaits Ryan's separate answer.
 
-The owned WhisperX source now passes all 50 inert cases in both roots; the
-lifecycle state/facade passes all 46 cases in both roots after a documented
-startup-guard repair. Their combined documentary proofs are being prepared and
-are not yet integrated. Preserve the failed WhisperX outer invocation and
-failed lifecycle startup; both executed zero cases. Continue concrete factory
-registration and Windows primitives while those proofs are reviewed.
+The owned WhisperX and lifecycle contracts are integrated at 1935012. Read
+ASTRA-OWNED-WHISPERX-CONTRACT-VERDICT-2026-09-13.md and
+ASTRA-ASR-LIFECYCLE-CONTRACT-VERDICT-2026-09-13.md. Both roots pass the same
+50 and 46 cases respectively; all 217 and 98 proof payloads match Git/disk.
+Eight additional integrator-check payloads retain actual documentary tool
+results. Preserve both zero-case setup failures and the unaccepted direct-list
+IndexError. Root has admitted one reviewed text-only wheel build under the
+existing private CPython 3.13.15 runtime; worker reports both native phases and
+actual outer exit zero, 134,793 bytes and 22 members. Independently verify the
+raw result and seal before crediting that build. Continue concrete factory
+registration and Windows namespace/bootstrap source; no real kernel, model,
+dependency installation or market clearance follows from these contracts.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4661,3 +4669,34 @@ factory remain unexecuted. Windows handle/process primitives are source only;
 their environment must include the fixed Pyannote metrics setting. Complete
 namespace protection, authenticated worker coordination and native quiescence
 are not established by these proposals. Uoink remains held for market.
+
+### 2026-09-13 - Owned WhisperX and lifecycle contracts integrated
+
+Commit 1935012 records the independently repeated 50-case WhisperX and 46-case
+lifecycle qualifications. The 217-payload WhisperX seal is
+144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd;
+the 98-payload lifecycle seal is
+74129bbd376def3ae9451ef98025748c527539e94490d551dd01fa7c3761ffcf.
+All payloads and original manifests match Git/disk. The additional eight-payload
+integrator-check seal is
+816bedff918c40ce966d0dbec4335a73791cee402341f5ebed01de281f485c86.
+Actual documentary tools c1aef4/989403/d43185/221eaf and index comparisons
+740636/386cdd returned zero. Documentary checks executed no archived program.
+
+The sealer's PowerShell slash normalization was repaired before execution;
+original scripts and reason are archived. Existing index verifier v3 accepts
+object manifests and a fixed filename, so root prepared and reviewed v4 for
+array manifests and the unchanged lifecycle SHA256-MANIFEST.json name before
+checking these proofs. No failed v3 invocation occurred. The WhisperX host
+failure and lifecycle startup failure remain zero-case failures. The direct
+empty-list diagnostic remains an unaccepted IndexError.
+
+The reviewed private-3.13 exact-text byte-build launcher was admitted once.
+Worker reports outer 405e18 exit zero, two native zero phases and a 22-member
+wheel; root raw verification and a separate build proof are next. No wheel
+member was imported or installed. Windows primitives are source preparation;
+read handles alone do not establish complete loader namespace exclusion.
+The remaining factory generation, worker bootstrap and native boundaries must
+be connected and qualified before the next runtime council acceptance.
+Production remains e8d058f. D1 and Git account-selection questions remain
+pending; no duplicate push, website work or marketing was started.
