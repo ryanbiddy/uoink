@@ -108,7 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace and ASR connection | Timeout repair at 0d93186; child adoption at 428707d; adapter at d58bebe; council at ca61046 | Gemini accepts the three reviewed groups with findings and Astra's three documentary corrections. Exact109 repair passes67 cases per root; adoption child exits0/2; adapter passes6 connected cases per root | Integrate generated facade-to-worker operation observations. Durable recovery and real runtime remain open |
+| Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; generated operations at 7fba83a | Drain returns two generated segments and EOF; cancel returns one then cancellation. Both actual observations return0, guards valid, child0/job0 before release; all108 proof payloads match Git/disk | Qualify the actual adapter startup connection. Durable recovery and real runtime remain open |
 | Local wheel graph and notices | Fresh graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046 | Five-record checker passes68 cases per root; fresh144-pin/287-edge metadata graph passes. Council adds no wheel-signature gate; earlier byte proofs remain valid. All12 council proof payloads match Git/disk | Finish notice patch checkout verification and installer inclusion. Preserve proxy-tools metadata conflict; native compatibility and release security remain open |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -306,7 +306,9 @@ All three groups are accepted with findings for their measured scope only.
 Correct the report's conflicting_constraints field name and Requires-Python
 interpretation; reject its unsupported new wheel-signature requirement.
 The later generated-operation-native-proposal01 derivative now has drain8f8823
-and cancel752948 observations with valid outer0; proof review/integration is next.
+and cancel752948 observations with valid outer0, integrated at7fba83a.
+Read ASTRA-GENERATED-OPERATION-VERDICT-2026-09-13.md. All108 proof payloads match
+Git/disk; the next unit is generated-actual-adapter-proposal01, still unexecuted.
 These use generated text and a sentinel profile, not the actual ASR adapter.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
@@ -5192,3 +5194,24 @@ Generated Windows drain/cancel observations return0 with valid receipts and
 unchanged inputs; their independent evidence review is in progress. Website
 and marketing remain paused. Real runtime, durable recovery, final combined
 tree, signing and current-source installation remain release gates.
+
+### 2026-09-13 - Generated Windows operation interface accepted
+
+Commit7fba83a retains two distinct native observations: drain8f8823 and
+cancel752948. Each returns outer0 with valid receipts and unchanged inputs.
+The drain returns two generated segments then EOF; cancel returns one segment
+then acknowledges cancellation. Both endpoints record the same ordered actions,
+and retained references refuse further work. Actual child exit0 and empty job
+accounting precede parent guard release. No model or audio decoder ran.
+
+All108 proof payloads match Git/disk (fe74d1). The initial admission writer's
+unsupported Set-Content parameter remains an exit1 record; its CreateNew repair
+preceded the first native invocation. The proof plan also retains its first
+null byte total and correction. PowerShell Measure-Object does not reliably
+read OrderedDictionary entry keys as properties; sum explicit numeric values.
+These preparation corrections did not cause either native observation to rerun.
+
+The next generated connection enters the actual ASR adapter and factory with
+visible generated authority seams. It is prepared but unexecuted. Durable
+reservation/recovery implementation follows; real model decisions, signing,
+full source tree and final installation still govern market readiness.
