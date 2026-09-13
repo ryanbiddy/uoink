@@ -105,8 +105,11 @@ Candidate03 at `4827288` removes those version conflicts using the exact local
 derivatives. Its complete graph remains **FAIL**: 144 pins, 287 active edges,
 zero conflicts or missing targets, and two source-only wheel gaps. Its final
 metadata interface passes the same 59 cases in each independent root. Existing
-cached ANTLR 4.9.3 and proxy-tools 0.1.0 wheels need byte/provenance verification
-before inclusion. See [the candidate03 verdict](ASTRA-RUNTIME-CANDIDATE03-GRAPH-VERDICT-2026-09-13.md).
+cached ANTLR 4.9.3 and proxy-tools 0.1.0 wheels now pass whole-file and complete
+RECORD verification at `95a7f29`; their license notices remain incomplete.
+The graph incorporating those exact records is still pending. See
+[the candidate03 verdict](ASTRA-RUNTIME-CANDIDATE03-GRAPH-VERDICT-2026-09-13.md)
+and [the wheel inspection verdict](ASTRA-CACHED-WHEEL-VERDICT-2026-09-13.md).
 The last reviewed public GitHub release was v3.7.0; branch backup did not
 publish 3.8.0.
 
