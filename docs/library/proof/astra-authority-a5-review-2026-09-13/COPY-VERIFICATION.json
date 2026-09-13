@@ -1,0 +1,282 @@
+{
+  "scope": "Documentary copy and hash verification only; no product execution",
+  "release_ready": false,
+  "copied_files": 53,
+  "every_copy_sha256_verified": true,
+  "context": {
+    "snapshot": "authority-a5-review-before01",
+    "source_payloads": 49,
+    "original_manifest_preserved_as": "ARCHIVE-ORIGINAL-SHA256.json",
+    "original_manifest_sha256": "63068e33bad2fd3b45415ad57873296dd09189fbc3d2a4fa1b398de01282a2aa",
+    "worker_manifest_sha256": "46d44e9a63386b5ad0b8027088110eb3a17c1ad9a2d60cc634e666986b83cb3e",
+    "proposal_accepted": false,
+    "active_worker_accessed": false
+  },
+  "files": {
+    "astra-boundary01/guard/ig_paths.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-boundary01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "astra-boundary01/guard/sitecustomize.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-boundary01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "astra-boundary01/results.json": {
+      "source": "_scratch/authority-a5-review-before01/astra-boundary01/results.json",
+      "bytes": 907,
+      "sha256": "d30c0cbae77bc2ebc74012095f0a667b663f9382320ef58bf37aff25cf793bd2"
+    },
+    "astra-boundary01/tests.log": {
+      "source": "_scratch/authority-a5-review-before01/astra-boundary01/tests.log",
+      "bytes": 1730,
+      "sha256": "c3eab2a5c330d4df7e81d2e6397cca585b406c659cf9b0ef0236561ed4624c02"
+    },
+    "astra-boundary01/tests.xml": {
+      "source": "_scratch/authority-a5-review-before01/astra-boundary01/tests.xml",
+      "bytes": 2697,
+      "sha256": "16668061842586c771c6c1f0a61d02013259cfeb660e9961bf74d5a8dc70ec4f"
+    },
+    "astra-probes/FINAL-SOURCE-REVIEW-2026-09-13.md": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/FINAL-SOURCE-REVIEW-2026-09-13.md",
+      "bytes": 5357,
+      "sha256": "f27b8b2167ec34f9f311c272742374f834b4eda76e036283376642296da7729c"
+    },
+    "astra-probes/REVIEW02-PROBE-BRIEF-2026-09-13.draft01-unexecuted.md": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/REVIEW02-PROBE-BRIEF-2026-09-13.draft01-unexecuted.md",
+      "bytes": 2701,
+      "sha256": "669069bc559844b5396c753f6a4d2e019d21ca7a7e0f6a08eb50e453af7219dd"
+    },
+    "astra-probes/REVIEW02-PROBE-BRIEF-2026-09-13.md": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/REVIEW02-PROBE-BRIEF-2026-09-13.md",
+      "bytes": 3414,
+      "sha256": "53332b145a25926ca5337397d8e5be4390320b92195b12d2eaf047a0fd779bd0"
+    },
+    "astra-probes/REVIEW02-PROBE-BRIEF.draft01-to-draft02.diff": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/REVIEW02-PROBE-BRIEF.draft01-to-draft02.diff",
+      "bytes": 3200,
+      "sha256": "caa9311453430a1fa371517aead4460e87cb9a28b7bf35b0883f050052710333"
+    },
+    "astra-probes/test_mirror_authority_review02.draft01-to-draft02.diff": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/test_mirror_authority_review02.draft01-to-draft02.diff",
+      "bytes": 1526,
+      "sha256": "e30e631b13fd8745dc1c7a379b92c48ea23ddbfd5f932b9e4708effdd6c945ef"
+    },
+    "astra-probes/test_mirror_authority_review02.draft01-unexecuted.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/test_mirror_authority_review02.draft01-unexecuted.py",
+      "bytes": 11434,
+      "sha256": "2fe5afa79eaceadabfee5683e20b818441a38bc842ecaa0571b1424f5fc4e3e6"
+    },
+    "astra-probes/test_mirror_authority_review02.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-probes/test_mirror_authority_review02.py",
+      "bytes": 10549,
+      "sha256": "29171f6046cdc270573613810304656350dfc35e1fe2f4047cb675c7114b7045"
+    },
+    "astra-worker01/guard/ig_paths.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-worker01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "astra-worker01/guard/sitecustomize.py": {
+      "source": "_scratch/authority-a5-review-before01/astra-worker01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "astra-worker01/results.json": {
+      "source": "_scratch/authority-a5-review-before01/astra-worker01/results.json",
+      "bytes": 1022,
+      "sha256": "9405e12ca466855b0235b71b59efec98697d0cd7383fa8d7f2a3347d3893ee34"
+    },
+    "astra-worker01/tests.log": {
+      "source": "_scratch/authority-a5-review-before01/astra-worker01/tests.log",
+      "bytes": 101,
+      "sha256": "5874183c3c638a44c977d707df989dedca612b86e324f80aef0607ce2ee6824a"
+    },
+    "astra-worker01/tests.xml": {
+      "source": "_scratch/authority-a5-review-before01/astra-worker01/tests.xml",
+      "bytes": 5321,
+      "sha256": "5326a38ddf19ee94ac2b7f78d95aafe657a634ce16ca75ca66811126e6603d05"
+    },
+    "run_process_authority_a5_verification.ps1": {
+      "source": "_scratch/authority-a5-review-before01/run_process_authority_a5_verification.ps1",
+      "bytes": 1893,
+      "sha256": "067cadf49505fe89e10fae3b1c5978f05f09b95a9dc8006627175e9e004b3c88"
+    },
+    "source/docs/library/MIRROR-AUTHORITY-REPAIR02-GROK-2026-09-13.md": {
+      "source": "_scratch/authority-a5-review-before01/source/docs/library/MIRROR-AUTHORITY-REPAIR02-GROK-2026-09-13.md",
+      "bytes": 8134,
+      "sha256": "ae020118c0417c8d3cac86a93df5c65a8856b7291bb31ecaef0f71f8a0bf8d66"
+    },
+    "source/library_mirror.py": {
+      "source": "_scratch/authority-a5-review-before01/source/library_mirror.py",
+      "bytes": 218498,
+      "sha256": "073058f98829fc7bb9359812b9e3d85828f08ce956d65a01441794987ffc752f"
+    },
+    "source/tests/test_library_mirror_process_authority.py": {
+      "source": "_scratch/authority-a5-review-before01/source/tests/test_library_mirror_process_authority.py",
+      "bytes": 16851,
+      "sha256": "74221830187d566a9bede12ff01dfaf61ed674e9bfb6581a7ab4bac2550bf602"
+    },
+    "source/tests/test_mirror_authority_review02.py": {
+      "source": "_scratch/authority-a5-review-before01/source/tests/test_mirror_authority_review02.py",
+      "bytes": 10549,
+      "sha256": "29171f6046cdc270573613810304656350dfc35e1fe2f4047cb675c7114b7045"
+    },
+    "source/tests/test_mirror_process_handle_lifetime.py": {
+      "source": "_scratch/authority-a5-review-before01/source/tests/test_mirror_process_handle_lifetime.py",
+      "bytes": 10937,
+      "sha256": "1fec835cf12cded6bb0f78564b2085354863ad2c6e821c0c28419cb009b74379"
+    },
+    "source/tests/test_mirror_process_identity_boundaries.py": {
+      "source": "_scratch/authority-a5-review-before01/source/tests/test_mirror_process_identity_boundaries.py",
+      "bytes": 4208,
+      "sha256": "b621d87273d75ee2fee84c8c73f78f98dd3809f6e19e1161ec8bfcc1cb8679c3"
+    },
+    "worker-product-and-tests.diff": {
+      "source": "_scratch/authority-a5-review-before01/worker-product-and-tests.diff",
+      "bytes": 63517,
+      "sha256": "0af202c0071cff7f173245c66c9ed6ce563bfb91ead6aa72a6a1f4c97093aa70"
+    },
+    "worker-proof/baseline/library_mirror.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/baseline/library_mirror.py",
+      "bytes": 205332,
+      "sha256": "83fd37895cc6bf4670ea4b85a6fdb3a3f0631d9b041b6192f737d13c89479584"
+    },
+    "worker-proof/baseline/SOURCE.json": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/baseline/SOURCE.json",
+      "bytes": 362,
+      "sha256": "a20631baac4e439e7897e51ceb7bcc632523a60a4713422c3b8c1c84f644a219"
+    },
+    "worker-proof/diffs/final-library_mirror.diff": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/diffs/final-library_mirror.diff",
+      "bytes": 30761,
+      "sha256": "c020e1ff4a7332e097059108941445b6199463b131b2e81df0bdf496e3e0cd82"
+    },
+    "worker-proof/diffs/final-tests.diff": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/diffs/final-tests.diff",
+      "bytes": 11767,
+      "sha256": "93f38f49c08b1bf76d4ff2f468f68769c580d204d4a7b02049afc10808a9f857"
+    },
+    "worker-proof/diffs/handle-lifetime-setup-attempt1-to-attempt2.diff": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/diffs/handle-lifetime-setup-attempt1-to-attempt2.diff",
+      "bytes": 1951,
+      "sha256": "914df9d20f9ae4bf11f8532b99f763d9ef3f75485ac4f044ce46263fbfaa9bc3"
+    },
+    "worker-proof/diffs/repair02-attempt1-library_mirror.diff": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/diffs/repair02-attempt1-library_mirror.diff",
+      "bytes": 30703,
+      "sha256": "2acad3832b883d33798e8ca306d93fa7fd28ed6e3ffcf28305cdae931cafaa4a"
+    },
+    "worker-proof/drafts/library_mirror.repair02-attempt1.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/library_mirror.repair02-attempt1.py",
+      "bytes": 218498,
+      "sha256": "073058f98829fc7bb9359812b9e3d85828f08ce956d65a01441794987ffc752f"
+    },
+    "worker-proof/drafts/library_mirror.repair02-final.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/library_mirror.repair02-final.py",
+      "bytes": 218498,
+      "sha256": "073058f98829fc7bb9359812b9e3d85828f08ce956d65a01441794987ffc752f"
+    },
+    "worker-proof/drafts/MIRROR-AUTHORITY-REPAIR02-GROK-2026-09-13.md": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/MIRROR-AUTHORITY-REPAIR02-GROK-2026-09-13.md",
+      "bytes": 8134,
+      "sha256": "ae020118c0417c8d3cac86a93df5c65a8856b7291bb31ecaef0f71f8a0bf8d66"
+    },
+    "worker-proof/drafts/repair02-run-01-reason.txt": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/repair02-run-01-reason.txt",
+      "bytes": 432,
+      "sha256": "fe70dc8e10f4a787e8f1f629977d35e19702c27be4dff73aa2db282318c13804"
+    },
+    "worker-proof/drafts/repair02-run-02-reason.txt": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/repair02-run-02-reason.txt",
+      "bytes": 735,
+      "sha256": "b3f3568b790eaba826893e6544fb532859b9cb59334698f89b5f5ae1f8eaabb8"
+    },
+    "worker-proof/drafts/test_library_mirror_process_authority.unchanged.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/test_library_mirror_process_authority.unchanged.py",
+      "bytes": 16851,
+      "sha256": "74221830187d566a9bede12ff01dfaf61ed674e9bfb6581a7ab4bac2550bf602"
+    },
+    "worker-proof/drafts/test_mirror_process_handle_lifetime.attempt1.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/test_mirror_process_handle_lifetime.attempt1.py",
+      "bytes": 10341,
+      "sha256": "0cd284306d4da580f9206d6f226492bba9f40a5893820ab8b11f3a34c054dee9"
+    },
+    "worker-proof/drafts/test_mirror_process_handle_lifetime.attempt2.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/test_mirror_process_handle_lifetime.attempt2.py",
+      "bytes": 10937,
+      "sha256": "1fec835cf12cded6bb0f78564b2085354863ad2c6e821c0c28419cb009b74379"
+    },
+    "worker-proof/drafts/test_mirror_process_handle_lifetime.final.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/test_mirror_process_handle_lifetime.final.py",
+      "bytes": 10937,
+      "sha256": "1fec835cf12cded6bb0f78564b2085354863ad2c6e821c0c28419cb009b74379"
+    },
+    "worker-proof/drafts/test_mirror_process_identity_boundaries.unchanged.py": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/drafts/test_mirror_process_identity_boundaries.unchanged.py",
+      "bytes": 4208,
+      "sha256": "b621d87273d75ee2fee84c8c73f78f98dd3809f6e19e1161ec8bfcc1cb8679c3"
+    },
+    "worker-proof/runs/grok-repair02-run-01/results.json": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-01/results.json",
+      "bytes": 1001,
+      "sha256": "567520bd5bca07d71812c3d9645611464153b9e44d65c28e4a19d60f23758360"
+    },
+    "worker-proof/runs/grok-repair02-run-01/tests.log": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-01/tests.log",
+      "bytes": 2874,
+      "sha256": "fd1d1e6f44698534a2b7a677a8e9c2ddcc27c8cd56c982ec2b427ec40d0ff7f4"
+    },
+    "worker-proof/runs/grok-repair02-run-01/tests.xml": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-01/tests.xml",
+      "bytes": 7465,
+      "sha256": "ae44c527fc78e2304f96d964477b9c5e9ad42173053275f2d889cff7ebef2bd3"
+    },
+    "worker-proof/runs/grok-repair02-run-02/results.json": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-02/results.json",
+      "bytes": 1001,
+      "sha256": "fe71bc1d393081d4f587cb011b20280209792a36106d153a8668c53b9199143b"
+    },
+    "worker-proof/runs/grok-repair02-run-02/tests.log": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-02/tests.log",
+      "bytes": 101,
+      "sha256": "09693b32a88d67b2f61c381988271af0db2fd20b7e6ea1452735d5418fd106b7"
+    },
+    "worker-proof/runs/grok-repair02-run-02/tests.xml": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/runs/grok-repair02-run-02/tests.xml",
+      "bytes": 5321,
+      "sha256": "c5aa426841c4ab3dc2a3bfedcef4d3f2856688178f7d20eb599df082e496816b"
+    },
+    "worker-proof/SHA256.json": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/SHA256.json",
+      "bytes": 3829,
+      "sha256": "46d44e9a63386b5ad0b8027088110eb3a17c1ad9a2d60cc634e666986b83cb3e"
+    },
+    "worker-proof/summary.json": {
+      "source": "_scratch/authority-a5-review-before01/worker-proof/summary.json",
+      "bytes": 922,
+      "sha256": "619c5380f4b7a8b814500eacaf245a4bf49d0617ebd8917cf114eaccf0cd70fc"
+    },
+    "ARCHIVE-ORIGINAL-SHA256.json": {
+      "source": "_scratch/authority-a5-review-before01/SHA256.json",
+      "bytes": 8435,
+      "sha256": "63068e33bad2fd3b45415ad57873296dd09189fbc3d2a4fa1b398de01282a2aa"
+    },
+    "reviews/ASTRA-AUTHORITY-A5-REVIEW-2026-09-13.md": {
+      "source": "docs/library/ASTRA-AUTHORITY-A5-REVIEW-2026-09-13.md",
+      "bytes": 1942,
+      "sha256": "725a5073e7debbc4cd5e647bb151326722c82f74b1e785f803cf4b7d5f1c47b3"
+    },
+    "reviews/MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF-2026-09-13.md": {
+      "source": "docs/library/MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF-2026-09-13.md",
+      "bytes": 2430,
+      "sha256": "3d2eb312380f8e85ba08c095b6f3252833f07c1986f651100d4973e4b40f28cd"
+    },
+    "instruments/seal_partition_exit_and_a5_01.py": {
+      "source": "_scratch/seal_partition_exit_and_a5_01.py",
+      "bytes": 11894,
+      "sha256": "15ca109ee863f45f48e8c8c29184f0a76dd27804f9cdaab9f384946cdbf1aa00"
+    }
+  }
+}

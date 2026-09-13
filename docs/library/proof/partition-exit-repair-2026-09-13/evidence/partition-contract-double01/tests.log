@@ -1,0 +1,16 @@
+.FE                                                                      [100%]
+=================================== ERRORS ====================================
+___ ERROR at teardown of test_call_and_teardown_failures_are_both_retained ____
+_scratch\test_phase4_partition_double_failure_smoke.py:8: in teardown_failure
+    pytest.fail('Deliberate inert teardown failure for receipt accounting')
+E   Failed: Deliberate inert teardown failure for receipt accounting
+================================== FAILURES ===================================
+______________ test_call_and_teardown_failures_are_both_retained ______________
+_scratch\test_phase4_partition_double_failure_smoke.py:16: in test_call_and_teardown_failures_are_both_retained
+    pytest.fail('Deliberate inert call failure for receipt accounting')
+E   Failed: Deliberate inert call failure for receipt accounting
+Mirror state observer: 3 observations, no observer errors.
+=========================== short test summary info ===========================
+ERROR _scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained
+FAILED _scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained
+1 failed, 1 passed, 1 error in 0.17s

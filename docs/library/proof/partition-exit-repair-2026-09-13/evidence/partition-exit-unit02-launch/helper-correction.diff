@@ -1,0 +1,15 @@
+diff --git a/_scratch/partition-exit-unit01-launch/partition_exit_contract.py b/_scratch/partition_exit_contract.py
+index c891fbe..41de7fc 100644
+--- a/_scratch/partition-exit-unit01-launch/partition_exit_contract.py
++++ b/_scratch/partition_exit_contract.py
+@@ -139,7 +139,9 @@ def _validate(selected, reports, session, verifier_results, outer_exit, junit_xm
+     _require(verifier['name'] == 'tests', 'unexpected verifier result name')
+     command = verifier['command']
+     _require(type(command) is list and all(type(part) is str for part in command), 'invalid verifier command')
+-    _require(command.count('-m') == 1 and command[command.index('-m') + 1] == 'pytest', 'verifier command is not pytest')
++    _require(command.count('-m') == 1 and command.index('-m') + 1 < len(command)
++             and command[command.index('-m') + 1] == 'pytest', 'verifier command is not pytest')
++    _require('--runxfail' in command, 'verifier command does not establish --runxfail policy')
+     raw_exit = _integer(verifier['exit'], 'actual pytest exit')
+     _require(raw_exit in (0, 1), 'abnormal actual pytest exit')
+     _require(raw_exit == session_exit, 'actual pytest exit disagrees with session exit')

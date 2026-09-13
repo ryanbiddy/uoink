@@ -1,0 +1,13 @@
+{
+  "scope": "new synthetic unit data only",
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "_scratch/integrator_verify.py",
+    "--root",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+    "--label",
+    "partition-exit-unit01",
+    "_scratch/test_partition_exit_contract.py"
+  ]
+}

@@ -1,0 +1,6 @@
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_passing_case", "when": "setup", "outcome": "passed", "duration": 0.00010720000136643648, "wasxfail": null}
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_passing_case", "when": "call", "outcome": "passed", "duration": 9.14999982342124e-05, "wasxfail": null}
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_passing_case", "when": "teardown", "outcome": "passed", "duration": 8.399999933317304e-05, "wasxfail": null}
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_deliberate_failure", "when": "setup", "outcome": "passed", "duration": 0.000112599998828955, "wasxfail": null}
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_deliberate_failure", "when": "call", "outcome": "failed", "duration": 0.00011959999392274767, "wasxfail": null}
+{"nodeid": "_scratch/test_phase4_mirror_observer_pipeline.py::test_partition_and_observer_keep_a_deliberate_failure", "when": "teardown", "outcome": "passed", "duration": 0.00010449999535921961, "wasxfail": null}

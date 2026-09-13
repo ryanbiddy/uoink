@@ -1,0 +1,1472 @@
+diff --git a/library_mirror.py b/library_mirror.py
+index fe1d3d6..4681cf0 100644
+--- a/library_mirror.py
++++ b/library_mirror.py
+@@ -565,19 +565,114 @@ def _is_console_host(exe: str) -> bool:
+     return name in ("conhost.exe", "openconsole.exe")
+ 
+ 
++def _creation_identity_equal(actual, expected) -> bool:
++    """Exact process-creation identity. One millisecond is a different process."""
++    if actual is None or expected is None:
++        return False
++    try:
++        return int(actual) == int(expected)
++    except (TypeError, ValueError):
++        return False
++
++
++def _creation_differs(actual, expected, tolerance_ms: int = 0) -> bool:
++    if actual is None or expected is None:
++        return True
++    try:
++        return abs(int(actual) - int(expected)) > int(tolerance_ms)
++    except (TypeError, ValueError):
++        return True
++
++
++def _child_born_on_or_after_parent(child_created, parent_created) -> bool:
++    """A child older than its parent is not that parent's child."""
++    if child_created is None or parent_created is None:
++        return False
++    try:
++        return int(child_created) >= int(parent_created)
++    except (TypeError, ValueError):
++        return False
++
++
++def _handle_creation_matches(handle, created_ms: int | None) -> bool:
++    if handle is None or created_ms is None:
++        return False
++    return _creation_identity_equal(_windows_process_created_ms(handle), created_ms)
++
++
++def _creation_from_popen(proc) -> int | None:
++    """Prefer the retained PROCESS_INFORMATION handle. A later PID query is not that handle."""
++    if proc is None:
++        return None
++    handle = getattr(proc, "_handle", None)
++    if handle is not None and os.name == "nt":
++        created = _windows_process_created_ms(handle)
++        if created is not None:
++            return created
++    pid = getattr(proc, "pid", None)
++    return _process_created_ms(pid if isinstance(pid, int) else None)
++
++
++def _recorded_identity_is_alive(pid: int | None, created_ms: int | None) -> bool:
++    """Alive as the recorded identity. Unknown and missing identity are not authority."""
++    if created_ms is None or not isinstance(pid, int) or pid <= 0:
++        return False
++    return _pid_is_alive(pid, created_ms)
++
++
++def _verified_toolhelp_children(
++    parent_pid: int | None, parent_created: int | None,
++) -> list[tuple[int, str, int]]:
++    """Children of one recorded parent identity.
++
++    A Toolhelp PID plus a later timestamp query does not prove the snapshot
++    still describes that process. Revalidate parent identity after the snapshot
++    and after the child query, then require the PID to still be that parent's
++    child with the same creation identity.
++    """
++    if parent_created is None or not isinstance(parent_pid, int) or parent_pid <= 0:
++        return []
++    if not _recorded_identity_is_alive(parent_pid, parent_created):
++        return []
++    snapshot = _windows_process_children(parent_pid)
++    if not _recorded_identity_is_alive(parent_pid, parent_created):
++        return []
++    verified: list[tuple[int, str, int]] = []
++    for child in snapshot:
++        child_pid = int(child.get("pid") or 0)
++        if child_pid <= 0:
++            continue
++        exe = str(child.get("exe") or "")
++        if _is_console_host(exe):
++            continue
++        child_created = _process_created_ms(child_pid)
++        if not _child_born_on_or_after_parent(child_created, parent_created):
++            continue
++        if not _recorded_identity_is_alive(parent_pid, parent_created):
++            continue
++        again = _windows_process_children(parent_pid)
++        if child_pid not in {int(row.get("pid") or 0) for row in again}:
++            continue
++        child_created_again = _process_created_ms(child_pid)
++        if not _creation_identity_equal(child_created_again, child_created):
++            continue
++        if not _recorded_identity_is_alive(parent_pid, parent_created):
++            continue
++        verified.append((child_pid, exe, int(child_created)))
++    return verified
++
++
+ def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
+     """Terminate only the recorded process identity. Recycled PIDs are skipped."""
+-    if os.name != "nt" or not isinstance(pid, int) or pid <= 0:
++    if os.name != "nt" or not isinstance(pid, int) or pid <= 0 or created_ms is None:
+         return False
+     k32 = _kernel32()
+     handle = k32.OpenProcess(_PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+     if not handle:
+         return ctypes.get_last_error() in (87, 0)
+     try:
+-        if created_ms is not None:
+-            actual = _windows_process_created_ms(handle)
+-            if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+-                return False
++        if not _handle_creation_matches(handle, created_ms):
++            return False
+         from ctypes import wintypes
+         code = wintypes.DWORD()
+         if k32.GetExitCodeProcess(handle, ctypes.byref(code)) and int(code.value) != _STILL_ACTIVE:
+@@ -587,8 +682,8 @@ def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
+         k32.CloseHandle(handle)
+ 
+ 
+-def _win_assign_pid(job, pid: int | None) -> bool:
+-    if job is None or os.name != "nt" or not isinstance(pid, int) or pid <= 0:
++def _win_assign_pid(job, pid: int | None, created_ms: int | None = None) -> bool:
++    if job is None or os.name != "nt" or not isinstance(pid, int) or pid <= 0 or created_ms is None:
+         return False
+     k32 = _kernel32()
+     handle = k32.OpenProcess(
+@@ -598,11 +693,27 @@ def _win_assign_pid(job, pid: int | None) -> bool:
+     if not handle:
+         return False
+     try:
++        if not _handle_creation_matches(handle, created_ms):
++            return False
+         return bool(k32.AssignProcessToJobObject(job, handle))
+     finally:
+         k32.CloseHandle(handle)
+ 
+ 
++def _win_terminate_retained_handle(handle, created_ms: int | None) -> bool:
++    """Mutate a caller-owned handle. Does not close it."""
++    if os.name != "nt" or handle is None or created_ms is None:
++        return False
++    if not _handle_creation_matches(handle, created_ms):
++        return False
++    k32 = _kernel32()
++    from ctypes import wintypes
++    code = wintypes.DWORD()
++    if k32.GetExitCodeProcess(handle, ctypes.byref(code)) and int(code.value) != _STILL_ACTIVE:
++        return True
++    return bool(k32.TerminateProcess(handle, 1))
++
++
+ def _windows_process_created_ms(handle) -> int | None:
+     from ctypes import wintypes
+     creation, exit_, kernel, user = (wintypes.FILETIME() for _ in range(4))
+@@ -643,8 +754,15 @@ def _process_created_ms(pid: int | None) -> int | None:
+     return _posix_process_created_ms(int(pid))
+ 
+ 
+-def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
+-    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead."""
++def _process_liveness(
++    pid: int | None, created_ms: int | None = None, *, tolerance_ms: int = 0,
++) -> str:
++    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead.
++
++    Owned-process identity is exact (``tolerance_ms=0``). Legacy dest-lease
++    wire formats may pass the historical start-time window; that path does
++    not authorize kill, job assignment, or child adoption.
++    """
+     if not isinstance(pid, int) or pid <= 0:
+         return "dead"
+     if os.name == "nt":
+@@ -662,7 +780,9 @@ def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
+                 return "dead"
+             if created_ms is not None:
+                 actual = _windows_process_created_ms(handle)
+-                if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++                if actual is None:
++                    return "unknown"
++                if _creation_differs(actual, created_ms, tolerance_ms):
+                     return "dead"
+             return "alive"
+         finally:
+@@ -675,7 +795,9 @@ def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
+         return "unknown"
+     if created_ms is not None:
+         actual = _posix_process_created_ms(int(pid))
+-        if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++        if actual is None:
++            return "unknown"
++        if _creation_differs(actual, created_ms, tolerance_ms):
+             return "dead"
+     return "alive"
+ 
+@@ -933,6 +1055,7 @@ def _lease_holder_status(lease: dict) -> str:
+     created = lease.get("created_ms")
+     return _process_liveness(
+         lease.get("pid"), created if isinstance(created, int) else None,
++        tolerance_ms=_PROCESS_START_TOLERANCE_MS,
+     )
+ 
+ 
+@@ -1403,6 +1526,58 @@ def _win_close_handle(handle) -> None:
+         pass
+ 
+ 
++class _CountedNativeHandle:
++    """CloseHandle only after every user drops the handle."""
++
++    def __init__(self, *, owns_close: bool = True) -> None:
++        self._guard = threading.Lock()
++        self.handle = None
++        self._users = 0
++        self._close_requested = False
++        self.owns_close = bool(owns_close)
++
++    def set_handle(self, handle) -> None:
++        with self._guard:
++            self.handle = handle
++            self._users = 0
++            self._close_requested = False
++
++    def acquire(self):
++        with self._guard:
++            if self._close_requested or self.handle is None:
++                return None
++            self._users += 1
++            return self.handle
++
++    def release(self) -> None:
++        close_now = None
++        with self._guard:
++            if self._users > 0:
++                self._users -= 1
++            if self._users == 0 and self._close_requested:
++                close_now = self.handle
++                self.handle = None
++                self._close_requested = False
++        if close_now is not None and self.owns_close:
++            _win_close_handle(close_now)
++
++    def request_close(self) -> None:
++        close_now = None
++        with self._guard:
++            self._close_requested = True
++            if self._users == 0:
++                close_now = self.handle
++                self.handle = None
++                self._close_requested = False
++        if close_now is not None and self.owns_close:
++            _win_close_handle(close_now)
++
++    @property
++    def in_use(self) -> bool:
++        with self._guard:
++            return self._users > 0
++
++
+ def _win_terminate_job(job) -> None:
+     if job is None or os.name != "nt":
+         return
+@@ -1435,6 +1610,9 @@ class _VaultIoSession:
+         self._exclusion_owner: _DestExclusionOwner | None = None
+         self._owned_exe: dict[int, str] = {}
+         self._owned_created: dict[int, int | None] = {}
++        self._dead_identities: set[tuple[int, int | None]] = set()
++        self._job_lifetime = _CountedNativeHandle()
++        self._owned_handles: dict[int, _CountedNativeHandle] = {}
+         self._launch_t0 = 0.0
+         self._launching = False
+         self._popen_in_progress = False
+@@ -1458,30 +1636,46 @@ class _VaultIoSession:
+             pids.append(pid)
+             if exe:
+                 self._owned_exe[pid] = exe
+-            if pid not in self._owned_created:
+-                self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
++            if pid not in self._owned_created and created is not None:
++                # Recorded identity only. A later raw PID query is not authority.
++                self._owned_created[pid] = created
+ 
+         add(self.pid, created=self.created_ms)
+         add(self.writer_pid, created=self.writer_created_ms)
++        for pid, created in list(self._owned_created.items()):
++            add(pid, exe=self._owned_exe.get(pid, ""), created=created)
++
+         if os.name == "nt" and self.pid:
+-            for child in _windows_process_children(self.pid):
+-                exe = str(child.get("exe") or "")
+-                if _is_console_host(exe):
+-                    continue
+-                add(int(child["pid"]), exe)
++            parent_exited = False
++            if self.proc is not None:
++                try:
++                    parent_exited = self.proc.poll() is not None
++                except Exception:
++                    parent_exited = True
++            if not parent_exited:
++                for child_pid, exe, child_created in _verified_toolhelp_children(
++                    self.pid, self.created_ms,
++                ):
++                    if child_pid in seen or child_pid in self._owned_created:
++                        continue
++                    self._owned_created[child_pid] = child_created
++                    add(child_pid, exe=exe, created=child_created)
+             writer = self.writer_pid
+             if writer and writer != self.pid:
+-                for child in _windows_process_children(writer):
+-                    exe = str(child.get("exe") or "")
+-                    if _is_console_host(exe):
++                for child_pid, exe, child_created in _verified_toolhelp_children(
++                    writer, self.writer_created_ms,
++                ):
++                    if child_pid in seen or child_pid in self._owned_created:
+                         continue
+-                    add(int(child["pid"]), exe)
++                    self._owned_created[child_pid] = child_created
++                    add(child_pid, exe=exe, created=child_created)
+         return pids
+ 
+     def physical_liveness(self) -> str:
+         """``alive``, ``unknown`` or ``dead``. Unknown is unresolved ownership."""
+         states: list[str] = []
+         proc = self.proc
++        launcher_proven_dead = False
+         if proc is not None:
+             try:
+                 poll = proc.poll()
+@@ -1490,15 +1684,51 @@ class _VaultIoSession:
+             else:
+                 if poll is None:
+                     return "alive"
++                launcher_proven_dead = True
++                states.append("dead")
++                if self.pid:
++                    self._dead_identities.add((self.pid, self.created_ms))
++
+         writer = self.writer_pid
+         if writer:
+-            states.append(_process_liveness(writer, self.writer_created_ms))
+-        if self.pid:
+-            states.append(_process_liveness(self.pid, self.created_ms))
++            writer_identity = (writer, self.writer_created_ms)
++            if launcher_proven_dead and self._writer_is_canonical_launcher():
++                # Popen handle death is this writer's death. A failed later
++                # timestamp query cannot resurrect the same launcher identity.
++                states.append("dead")
++                self._dead_identities.add(writer_identity)
++                if self.pid:
++                    self._dead_identities.add((self.pid, self.created_ms))
++            elif writer_identity in self._dead_identities:
++                states.append("dead")
++            else:
++                st = _process_liveness(writer, self.writer_created_ms)
++                if st == "dead":
++                    self._dead_identities.add(writer_identity)
++                states.append(st)
++
++        if self.pid and not launcher_proven_dead:
++            launcher_identity = (self.pid, self.created_ms)
++            if launcher_identity in self._dead_identities:
++                states.append("dead")
++            else:
++                st = _process_liveness(self.pid, self.created_ms)
++                if st == "dead":
++                    self._dead_identities.add(launcher_identity)
++                states.append(st)
++
+         for pid, created in list(self._owned_created.items()):
+             if pid in (self.pid, self.writer_pid):
+                 continue
+-            states.append(_process_liveness(pid, created))
++            child_identity = (pid, created)
++            if child_identity in self._dead_identities:
++                states.append("dead")
++            else:
++                st = _process_liveness(pid, created)
++                if st == "dead":
++                    self._dead_identities.add(child_identity)
++                states.append(st)
++
+         if "alive" in states:
+             return "alive"
+         if "unknown" in states:
+@@ -1612,10 +1842,10 @@ class _VaultIoSession:
+                     self._launching = False
+                     refuse_before_popen = True
+                 else:
+-                    self.job = job
++                    self._publish_job(job)
+                     refuse_before_popen = False
+             if refuse_before_popen:
+-                _win_close_handle(job)
++                self._close_session_job(job)
+                 self._abandon_unstarted()
+                 raise OSError("vault io worker cancelled")
+         env = os.environ.copy()
+@@ -1643,9 +1873,7 @@ class _VaultIoSession:
+                 self._popen_in_progress = True
+                 refuse_before_popen = False
+         if refuse_before_popen:
+-            held = self.job
+-            self.job = None
+-            _win_close_handle(held)
++            self._close_session_job()
+             self._abandon_unstarted()
+             raise OSError("vault io worker cancelled")
+         try:
+@@ -1655,18 +1883,21 @@ class _VaultIoSession:
+             )
+         except Exception as exc:
+             with self._state_lock:
+-                held = self.job
+-                self.job = None
+                 self._popen_in_progress = False
+                 self._launching = False
+-            _win_close_handle(held)
++            self._close_session_job()
+             self._abandon_unstarted()
+             raise OSError("vault io worker failed to start") from exc
+         with self._state_lock:
+             self.proc = proc
+-        self.created_ms = _process_created_ms(self.pid)
++        self.created_ms = _creation_from_popen(proc)
+         if self.pid:
+             self._owned_created[self.pid] = self.created_ms
++            popen_handle = getattr(proc, "_handle", None)
++            if popen_handle is not None:
++                self._retain_owned_handle(
++                    self.pid, popen_handle, self.created_ms, owns_close=False,
++                )
+         # Launch owns the job through process registration and assignment.
+         # Cancellation records intent but cannot close a handle still in use.
+         try:
+@@ -1704,16 +1935,22 @@ class _VaultIoSession:
+             raise OSError("vault io worker failed to start")
+         writer = _optional_int(ready.get("pid"))
+         self.writer_pid = writer if writer else self.pid
+-        self.writer_created_ms = _process_created_ms(self.writer_pid)
++        if self.writer_pid == self.pid:
++            self.writer_created_ms = self.created_ms
++        else:
++            self.writer_created_ms = _process_created_ms(self.writer_pid)
+         self._adopt_owned_tree()
+         if os.name == "nt":
+             for pid in self.owned_pids():
+                 if pid != self.pid:
+-                    # This local handle operation is short. Popen and pipe
+-                    # reads remain outside the state lock.
+-                    with self._state_lock:
+-                        if not self._dead and self.job is not None:
+-                            _win_assign_pid(self.job, pid)
++                    # Do not hold the cancellation state lock across assignment.
++                    created = self._created_for_pid(pid)
++                    job_handle = self._acquire_job_handle()
++                    try:
++                        if job_handle is not None:
++                            _win_assign_pid(job_handle, pid, created)
++                    finally:
++                        self._release_job_handle()
+         self._launching = False
+         if self._dead:
+             confirmed = self.terminate()
+@@ -1734,11 +1971,22 @@ class _VaultIoSession:
+     def _adopt_owned_tree(self) -> None:
+         self.owned_pids()
+         if self.writer_pid is None and os.name == "nt" and self.pid:
+-            for child in _windows_process_children(self.pid):
+-                exe = str(child.get("exe") or "").lower()
+-                if "python" in exe and not _is_console_host(exe):
+-                    self.writer_pid = int(child["pid"])
+-                    self.writer_created_ms = _process_created_ms(self.writer_pid)
++            parent_exited = False
++            if self.proc is not None:
++                try:
++                    parent_exited = self.proc.poll() is not None
++                except Exception:
++                    parent_exited = True
++            if parent_exited:
++                return
++            for child_pid, exe, child_created in _verified_toolhelp_children(
++                self.pid, self.created_ms,
++            ):
++                if "python" in exe.lower() and not _is_console_host(exe):
++                    self.writer_pid = child_pid
++                    self.writer_created_ms = child_created
++                    self._owned_created[child_pid] = child_created
++                    self._owned_exe[child_pid] = exe
+                     break
+ 
+     def claim_lease(self, op_id: int | None = None) -> None:
+@@ -1780,7 +2028,12 @@ class _VaultIoSession:
+         writer = _optional_int(result.get("pid"))
+         if writer:
+             self.writer_pid = writer
+-            if self.writer_created_ms is None:
++            if self.writer_pid == self.pid:
++                if self.writer_created_ms is None:
++                    self.writer_created_ms = self.created_ms
++            elif self.writer_created_ms is None:
++                # A fresh PID query is not parent/launcher authority; it may
++                # only record a distinct writer identity when one is missing.
+                 self.writer_created_ms = _process_created_ms(writer)
+ 
+     def local_put(
+@@ -1938,11 +2191,62 @@ class _VaultIoSession:
+         if not isinstance(pid, int) or pid <= 0:
+             return None
+         if pid == self.writer_pid:
++            if self._writer_is_canonical_launcher() and self.created_ms is not None:
++                return self.created_ms
+             return self.writer_created_ms
+         if pid == self.pid:
+             return self.created_ms
+         return self._owned_created.get(pid)
+ 
++    def _writer_is_canonical_launcher(self) -> bool:
++        """True when the writer is the Popen launcher, not a later same-PID epoch."""
++        if self.writer_pid is None or self.pid is None:
++            return False
++        if int(self.writer_pid) != int(self.pid):
++            return False
++        if self.writer_created_ms is None:
++            return True
++        if self.created_ms is None:
++            return False
++        return int(self.writer_created_ms) == int(self.created_ms)
++
++    def _publish_job(self, job) -> None:
++        self.job = job
++        self._job_lifetime.set_handle(job)
++
++    def _acquire_job_handle(self):
++        with self._state_lock:
++            if self._dead:
++                return None
++            return self._job_lifetime.acquire()
++
++    def _release_job_handle(self) -> None:
++        self._job_lifetime.release()
++        self.job = self._job_lifetime.handle
++
++    def _close_session_job(self, handle=None) -> None:
++        published = self._job_lifetime.handle
++        if handle is None or handle is published:
++            self._job_lifetime.request_close()
++            self.job = self._job_lifetime.handle
++            return
++        if not self._job_lifetime.in_use:
++            _win_close_handle(handle)
++            if self.job is handle:
++                self.job = None
++
++    def _retain_owned_handle(
++        self, pid: int, handle, created_ms: int | None, *, owns_close: bool = True,
++    ) -> None:
++        """Hold a process handle so identity stays stable while another thread uses it."""
++        if not isinstance(pid, int) or pid <= 0 or handle is None:
++            return
++        retained = _CountedNativeHandle(owns_close=owns_close)
++        retained.set_handle(handle)
++        self._owned_handles[pid] = retained
++        if created_ms is not None:
++            self._owned_created[pid] = created_ms
++
+     def _release_held_exclusion(self) -> None:
+         owner = self._exclusion_owner
+         if owner is not None:
+@@ -1976,7 +2280,6 @@ class _VaultIoSession:
+         with self._state_lock:
+             self._dead = True
+             proc = self.proc
+-            job = self.job
+             if self._popen_in_progress:
+                 # Admission cancelled. Do not claim physical death, close a job
+                 # launch still uses, or drop retain/owner while Popen can follow.
+@@ -1986,58 +2289,74 @@ class _VaultIoSession:
+                 # A prepared-only session can no longer enter Popen: launch
+                 # rechecks _dead under this same lock before that transition.
+                 self._launching = False
+-        owned = self.owned_pids()
+-        if job is not None:
+-            _win_terminate_job(job)
+-        if os.name == "nt":
+-            for pid in owned:
+-                if self.owns_pid(pid):
+-                    _win_terminate_pid(pid, self._created_for_pid(pid))
+-        if os.name != "nt" and proc is not None and proc.pid:
+-            try:
+-                os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
+-            except (OSError, ProcessLookupError, PermissionError, AttributeError):
++            job = self._job_lifetime.acquire()
++            job_held = job is not None
++        try:
++            owned = self.owned_pids()
++            if job is not None:
++                _win_terminate_job(job)
++            if os.name == "nt":
++                for pid in owned:
++                    if self.owns_pid(pid):
++                        retained = self._owned_handles.get(pid)
++                        used = retained.acquire() if retained is not None else None
++                        try:
++                            if used is not None:
++                                _win_terminate_retained_handle(used, self._created_for_pid(pid))
++                            else:
++                                _win_terminate_pid(pid, self._created_for_pid(pid))
++                        finally:
++                            if retained is not None:
++                                retained.release()
++            if os.name != "nt" and proc is not None and proc.pid:
++                try:
++                    os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
++                except (OSError, ProcessLookupError, PermissionError, AttributeError):
++                    try:
++                        proc.kill()
++                    except OSError:
++                        pass
++            elif proc is not None and proc.poll() is None:
+                 try:
+                     proc.kill()
+                 except OSError:
+                     pass
+-        elif proc is not None and proc.poll() is None:
+-            try:
+-                proc.kill()
+-            except OSError:
+-                pass
+-        confirmed = not self.physically_alive()
+-        if proc is not None and not confirmed:
+-            try:
+-                proc.wait(timeout=_WORKER_TERMINATE_S)
+-            except subprocess.TimeoutExpired:
+-                pass
+-            if os.name == "nt":
+-                for pid in self.owned_pids():
+-                    if self.owns_pid(pid):
+-                        _win_terminate_pid(pid, self._created_for_pid(pid))
+             confirmed = not self.physically_alive()
+-        if not confirmed and job is not None:
+-            _win_close_handle(job)
+-            self.job = None
+-            job = None
+-            if proc is not None and proc.poll() is None:
++            if proc is not None and not confirmed:
+                 try:
+-                    proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
++                    proc.wait(timeout=_WORKER_TERMINATE_S)
+                 except subprocess.TimeoutExpired:
+                     pass
++                if os.name == "nt":
++                    for pid in self.owned_pids():
++                        if self.owns_pid(pid):
++                            _win_terminate_pid(pid, self._created_for_pid(pid))
+                 confirmed = not self.physically_alive()
+-        if confirmed:
+-            self._launching = False
+-            self._close_streams()
+-            _win_close_handle(job)
+-            self.proc = None
+-            self.job = None
+-            _drop_retained_session(self)
+-            self._release_held_exclusion()
+-            _unbind_dead_session_from_this_thread(self, proven_dead=True)
+-        self.termination_s = time.monotonic() - t0
+-        return confirmed
++            if not confirmed and job is not None:
++                self._close_session_job()
++                if proc is not None and proc.poll() is None:
++                    try:
++                        proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
++                    except subprocess.TimeoutExpired:
++                        pass
++                    confirmed = not self.physically_alive()
++            if confirmed:
++                self._launching = False
++                self._close_streams()
++                self._close_session_job()
++                for retained in list(self._owned_handles.values()):
++                    retained.request_close()
++                self._owned_handles.clear()
++                self.proc = None
++                _drop_retained_session(self)
++                self._release_held_exclusion()
++                _unbind_dead_session_from_this_thread(self, proven_dead=True)
++            return confirmed
++        finally:
++            if job_held:
++                self._job_lifetime.release()
++                self.job = self._job_lifetime.handle
++            self.termination_s = time.monotonic() - t0
+ 
+     def shutdown(self) -> bool:
+         t0 = time.monotonic()
+diff --git a/tests/test_library_mirror_process_authority.py b/tests/test_library_mirror_process_authority.py
+new file mode 100644
+index 0000000..ebeb9a7
+--- /dev/null
++++ b/tests/test_library_mirror_process_authority.py
+@@ -0,0 +1,354 @@
++"""Focused synthetic regressions for mirror process authority.
++
++Tests assert bounded, safe process authority and lifecycle behavior.
++All probes use inert PIDs and mocked kernel/process observations.
++No real processes are opened, assigned, suspended, or terminated.
++"""
++from __future__ import annotations
++
++import os
++from types import SimpleNamespace
++from unittest.mock import MagicMock
++
++import pytest
++
++import library_mirror as mirror
++
++
++class EffectRecorder:
++    def __init__(self):
++        self.terminated_handles: list[int] = []
++        self.assigned_handles: list[tuple[int, int]] = []
++        self.released_exclusion: list[bool] = []
++        self.dropped_session: list[object] = []
++        self.closed_handles: list[int] = []
++
++
++def _mock_k32(recorder: EffectRecorder, handle: int = 11111):
++    mock = MagicMock()
++    mock.OpenProcess.return_value = handle
++    mock.CloseHandle.side_effect = lambda h: recorder.closed_handles.append(h) or 1
++    mock.TerminateProcess.side_effect = lambda h, c: recorder.terminated_handles.append(h) or 1
++    mock.AssignProcessToJobObject.side_effect = lambda j, h: recorder.assigned_handles.append((j, h)) or 1
++    
++    # GetExitCodeProcess sets code to STILL_ACTIVE (0x103)
++    def mock_exit_code(h, code_ptr):
++        try:
++            code_ptr.contents.value = mirror._STILL_ACTIVE
++        except AttributeError:
++            if hasattr(code_ptr, "value"):
++                code_ptr.value = mirror._STILL_ACTIVE
++        return 1
++
++    mock.GetExitCodeProcess.side_effect = mock_exit_code
++    return mock
++
++
++def test_refuse_preexisting_orphan_child(monkeypatch):
++    """Orphan created before parent must be refused adoption in owned_pids and _adopt_owned_tree."""
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session.created_ms = 1_000_000
++
++    # Orphan created at T=500,000 (500s before launcher born)
++    orphan = {"pid": 80002, "exe": "orphan.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [orphan] if p == 70001 else [])
++    
++    def mock_created_ms(pid):
++        if pid == 70001:
++            return 1_000_000
++        if pid == 80002:
++            return 500_000
++        return None
++
++    monkeypatch.setattr(mirror, "_process_created_ms", mock_created_ms)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: "alive")
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++    assert 80002 not in pids, "Older orphan must not be adopted into owned_pids"
++    assert not session.owns_pid(80002), "Older orphan must not be claimed by owns_pid"
++    assert 80002 not in session._owned_created, "Older orphan must not enter _owned_created"
++
++    # Writer fallback in _adopt_owned_tree must also refuse older orphan
++    session2 = mirror._VaultIoSession()
++    session2.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session2.created_ms = 1_000_000
++    session2.writer_pid = None
++    orphan_writer = {"pid": 80002, "exe": "python.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [orphan_writer] if p == 70001 else [])
++    session2._adopt_owned_tree()
++    assert session2.writer_pid != 80002, "_adopt_owned_tree must not adopt older orphan as writer"
++
++
++def test_refuse_children_of_exited_parent(monkeypatch):
++    """Toolhelp children of an exited parent must not be enumerated or adopted."""
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0)  # Launcher already exited
++    session.created_ms = 1_000_000
++
++    child = {"pid": 80002, "exe": "child.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [child] if p == 70001 else [])
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 1_500_000 if pid == 80002 else 1_000_000)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: "dead" if pid == 70001 else "alive")
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++    assert 80002 not in pids, "Children of exited parent must not be adopted"
++    assert not session.owns_pid(80002)
++    assert 80002 not in session._owned_created
++
++    # Writer fallback in _adopt_owned_tree must also refuse adoption when parent exited
++    session2 = mirror._VaultIoSession()
++    session2.proc = SimpleNamespace(pid=70001, poll=lambda: 0)
++    session2.created_ms = 1_000_000
++    session2.writer_pid = None
++    child_writer = {"pid": 80002, "exe": "python.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [child_writer] if p == 70001 else [])
++    session2._adopt_owned_tree()
++    assert session2.writer_pid != 80002, "_adopt_owned_tree must not adopt child when parent exited"
++
++
++def test_refuse_children_of_recycled_parent(monkeypatch):
++    """Toolhelp children of a recycled parent PID must be refused adoption."""
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session.created_ms = 1_000_000  # Original launcher born at 1,000,000 ms
++
++    # OS has recycled PID 70001 to a new process born at 2,000,000 ms
++    def mock_created(pid):
++        if pid == 70001:
++            return 2_000_000
++        if pid == 80002:
++            return 2_050_000
++        return None
++
++    monkeypatch.setattr(mirror, "_process_created_ms", mock_created)
++    # Liveness query with expected 1_000_000 detects mismatch and returns 'dead'
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: "dead" if (pid == 70001 and c == 1_000_000) else "alive")
++    child = {"pid": 80002, "exe": "child.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [child] if p == 70001 else [])
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++    assert 80002 not in pids, "Children of recycled parent PID must not be adopted"
++    assert not session.owns_pid(80002)
++    assert 80002 not in session._owned_created
++
++
++def test_refuse_unknown_creation_time_adoption(monkeypatch):
++    """Children or parents with unverified creation times must be refused adoption."""
++    # Subcase A: Child creation time cannot be queried
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session.created_ms = 1_000_000
++
++    child = {"pid": 80002, "exe": "child.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [child] if p == 70001 else [])
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 1_000_000 if pid == 70001 else None)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: "alive")
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++    assert 80002 not in pids, "Child with unknown creation time must not be adopted"
++    assert not session.owns_pid(80002)
++    assert 80002 not in session._owned_created
++
++    # Subcase B: Parent creation time cannot be queried
++    session_b = mirror._VaultIoSession()
++    session_b.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session_b.created_ms = None
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: None if pid == 70001 else 1_050_000)
++    pids_b = session_b.owned_pids()
++    assert 80002 not in pids_b, "Children must not be adopted when parent creation time is unknown"
++    assert not session_b.owns_pid(80002)
++
++
++def test_valid_child_adoption_positive_control(monkeypatch):
++    """Legitimate child born after parent is adopted into owned_pids and _owned_created."""
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session.created_ms = 1_000_000
++
++    child = {"pid": 80002, "exe": "legit_child.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda p: [child] if p == 70001 else [])
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 1_050_000 if pid == 80002 else 1_000_000)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: "alive")
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++    assert 80002 in pids, "Legitimate child must be included in owned_pids"
++    assert session.owns_pid(80002), "Legitimate child must be owned"
++    assert session._owned_created[80002] == 1_050_000, "Legitimate child timestamp must be recorded"
++
++
++def test_previously_owned_child_survives_parent_exit(monkeypatch):
++    """Proven owned child identity survives parent exit and keeps session alive until child exits."""
++    session = mirror._VaultIoSession()
++    session.dest = "C:\\inert\\dest"
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0)  # Parent has exited
++    session.created_ms = 1_000_000
++    # Child 80002 was previously verified and owned
++    session._owned_created[80002] = 1_050_000
++    session._owned_exe[80002] = "legit_child.exe"
++
++    liveness_status = {70001: "dead", 80002: "alive"}
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: liveness_status.get(pid, "dead"))
++    monkeypatch.setattr(os, "name", "nt")
++
++    recorder = EffectRecorder()
++    monkeypatch.setattr(session, "_release_held_exclusion", lambda: recorder.released_exclusion.append(True))
++    monkeypatch.setattr(mirror, "_drop_retained_session", lambda s: recorder.dropped_session.append(s))
++
++    # Child identity is preserved in owned_pids
++    assert 80002 in session.owned_pids(), "Previously owned child must survive in owned_pids after parent exit"
++    assert session.owns_pid(80002)
++
++    # Session remains physically alive while child lives
++    assert session.physical_liveness() == "alive"
++    assert session.physically_alive() is True
++
++    # Abandonment is blocked; exclusion is held
++    session._abandon_unstarted()
++    assert len(recorder.released_exclusion) == 0, "Exclusion must not be released while owned child lives"
++    assert len(recorder.dropped_session) == 0
++
++    # Now child exits
++    liveness_status[80002] = "dead"
++    assert session.physical_liveness() == "dead"
++    assert session.physically_alive() is False
++
++    # Now abandonment releases exclusion and drops session
++    session._abandon_unstarted()
++    assert len(recorder.released_exclusion) == 1, "Exclusion must be released once child is confirmed dead"
++    assert len(recorder.dropped_session) == 1
++
++
++def test_death_followed_by_unknown_retains_definitive_death(monkeypatch):
++    """Confirmed process exit must not revert to unknown on subsequent failed query."""
++    session = mirror._VaultIoSession()
++    session.writer_pid = 70002
++    session.writer_created_ms = 1_000_000
++    session._owned_created[70002] = 1_000_000
++
++    query_status = "dead"
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: query_status)
++
++    assert session.physical_liveness() == "dead"
++    assert session.physically_alive() is False
++
++    # Later, OS recycles PID 70002 to a privileged process, yielding Access Denied (status 'unknown')
++    query_status = "unknown"
++
++    # Confirmed death must be latched and retained
++    assert session.physical_liveness() == "dead", "Definitive death must not revert to unknown"
++    assert session.physically_alive() is False
++
++
++def test_exited_popen_plus_unknown_other_child_retains_exclusion(monkeypatch):
++    """Popen poll exit is preserved, but unresolved other child retains exclusion."""
++    session = mirror._VaultIoSession()
++    session.dest = "C:\\inert\\dest"
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0)  # Popen definitive exit
++    session.created_ms = 1_000_000
++    session._owned_created[80003] = 1_020_000  # Other owned child
++
++    # If raw PID 70001 were queried, it might return unknown; child 80003 is unknown
++    liveness_status = {70001: "unknown", 80003: "unknown"}
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, c=None: liveness_status.get(pid, "unknown"))
++
++    recorder = EffectRecorder()
++    monkeypatch.setattr(session, "_release_held_exclusion", lambda: recorder.released_exclusion.append(True))
++    monkeypatch.setattr(mirror, "_drop_retained_session", lambda s: recorder.dropped_session.append(s))
++
++    # Popen's exit code is respected, but 80003 is genuinely unknown
++    assert session.physical_liveness() == "unknown", "Unresolved child must yield unknown liveness"
++    assert session.physically_alive() is True, "Unknown child keeps physically_alive True"
++
++    # Exclusion is retained
++    session._abandon_unstarted()
++    assert len(recorder.released_exclusion) == 0, "Exclusion must remain held for unresolved child"
++    assert len(recorder.dropped_session) == 0
++
++
++def test_missing_or_mismatched_creation_time_refuses_kill_and_assignment(monkeypatch):
++    """Missing or mismatched creation time refuses PID-based termination and job assignment."""
++    recorder = EffectRecorder()
++    mock_k32 = _mock_k32(recorder, handle=11111)
++    monkeypatch.setattr(mirror, "_kernel32", lambda: mock_k32)
++    monkeypatch.setattr(os, "name", "nt")
++
++    # 1. Termination: missing creation time
++    assert mirror._win_terminate_pid(70004, created_ms=None) is False
++    assert len(recorder.terminated_handles) == 0, "Kill must refuse mutation without created_ms"
++
++    # 2. Termination: mismatched creation time
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda h: 2_000_000)
++    assert mirror._win_terminate_pid(70004, created_ms=1_000_000) is False
++    assert len(recorder.terminated_handles) == 0, "Kill must refuse mutation on mismatched created_ms"
++
++    # 3. Termination: creation time query failed
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda h: None)
++    assert mirror._win_terminate_pid(70004, created_ms=1_000_000) is False
++    assert len(recorder.terminated_handles) == 0, "Kill must refuse mutation when creation time query fails"
++
++    # 4. Job assignment: missing creation time
++    assert mirror._win_assign_pid(99999, 70004, created_ms=None) is False
++    assert len(recorder.assigned_handles) == 0, "Job assignment must refuse mutation without created_ms"
++
++    # 5. Job assignment: mismatched creation time
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda h: 2_000_000)
++    assert mirror._win_assign_pid(99999, 70004, created_ms=1_000_000) is False
++    assert len(recorder.assigned_handles) == 0, "Job assignment must refuse mutation on mismatched created_ms"
++
++    # 6. Job assignment: creation time query failed
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda h: None)
++    assert mirror._win_assign_pid(99999, 70004, created_ms=1_000_000) is False
++    assert len(recorder.assigned_handles) == 0, "Job assignment must refuse mutation when creation time query fails"
++
++
++def test_matching_creation_time_positive_control_for_kill_and_assignment(monkeypatch):
++    """Verified creation time allows PID-based termination and job assignment."""
++    import ctypes
++    from ctypes import wintypes
++
++    class FakeDWORD:
++        def __init__(self, *args, **kwargs):
++            self.value = mirror._STILL_ACTIVE
++
++    recorder = EffectRecorder()
++    mock_k32 = _mock_k32(recorder, handle=22222)
++    monkeypatch.setattr(mirror, "_kernel32", lambda: mock_k32)
++    monkeypatch.setattr(ctypes, "byref", lambda obj: obj)
++    monkeypatch.setattr(wintypes, "DWORD", FakeDWORD)
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda h: 1_000_000)
++    monkeypatch.setattr(os, "name", "nt")
++
++    # Positive control: kill with matching created_ms
++    assert mirror._win_terminate_pid(70005, created_ms=1_000_000) is True
++    assert recorder.terminated_handles == [22222], "Kill must invoke TerminateProcess on matching handle"
++
++    # Positive control: assignment with matching created_ms
++    assert mirror._win_assign_pid(99999, 70005, created_ms=1_000_000) is True
++    assert recorder.assigned_handles == [(99999, 22222)], "Assignment must invoke AssignProcessToJobObject on matching handle"
++
++
++def test_process_liveness_creation_query_failure_returns_unknown(monkeypatch):
++    """When GetProcessTimes fails on a live handle, _process_liveness returns 'unknown', not 'alive'."""
++    import ctypes
++    from ctypes import wintypes
++
++    class FakeDWORD:
++        def __init__(self, *args, **kwargs):
++            self.value = mirror._STILL_ACTIVE
++
++    recorder = EffectRecorder()
++    mock_k32 = _mock_k32(recorder, handle=33333)
++    monkeypatch.setattr(mirror, "_kernel32", lambda: mock_k32)
++    monkeypatch.setattr(ctypes, "byref", lambda obj: obj)
++    monkeypatch.setattr(wintypes, "DWORD", FakeDWORD)
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda handle: None)  # GetProcessTimes failed!
++    monkeypatch.setattr(os, "name", "nt")
++
++    result = mirror._process_liveness(70006, created_ms=1_000_000)
++    assert result == "unknown", f"Expected 'unknown' when created_ms query fails, got '{result}'"
+diff --git a/tests/test_mirror_process_handle_lifetime.py b/tests/test_mirror_process_handle_lifetime.py
+new file mode 100644
+index 0000000..6e60c05
+--- /dev/null
++++ b/tests/test_mirror_process_handle_lifetime.py
+@@ -0,0 +1,296 @@
++"""Synthetic controls for exact identity and retained-handle lifetime.
++
++The eleven worker assertions and ten Astra boundary assertions are unchanged
++in their own files. This module only adds handle-lifetime and identity
++controls. Every kernel effect is an inert fake; unmocked operations fail
++closed and never open, assign, wait on, or terminate a real process.
++"""
++from __future__ import annotations
++
++import os
++from types import SimpleNamespace
++
++import pytest
++
++import library_mirror as mirror
++
++
++class FailClosedKernel:
++    """Kernel stub: unmocked operations record refusal and return 0."""
++
++    def __init__(self):
++        self.effects: list[tuple] = []
++        self.allowed_open: dict[int, int] = {}
++        self.created_by_handle: dict[int, int] = {}
++        self.exit_by_handle: dict[int, int] = {}
++        self.closed: list[int] = []
++
++    def OpenProcess(self, access, inherit, pid):
++        handle = self.allowed_open.get(int(pid))
++        if not handle:
++            self.effects.append(("refused-open", int(pid), int(access)))
++            return 0
++        self.effects.append(("open", int(pid), int(handle)))
++        return handle
++
++    def CloseHandle(self, handle):
++        self.closed.append(int(handle))
++        self.effects.append(("close", int(handle)))
++        return 1
++
++    def TerminateProcess(self, handle, code):
++        self.effects.append(("terminate", int(handle), int(code)))
++        return 1
++
++    def AssignProcessToJobObject(self, job, handle):
++        self.effects.append(("assign", int(job), int(handle)))
++        return 1
++
++    def GetExitCodeProcess(self, handle, ptr):
++        value = self.exit_by_handle.get(int(handle), mirror._STILL_ACTIVE)
++        written = False
++        obj = getattr(ptr, "_obj", None)
++        if obj is not None and hasattr(obj, "value"):
++            obj.value = value
++            written = True
++        if not written:
++            try:
++                import ctypes
++                from ctypes import wintypes
++                ctypes.cast(ptr, ctypes.POINTER(wintypes.DWORD)).contents.value = value
++                written = True
++            except (AttributeError, TypeError, ValueError):
++                pass
++        if not written:
++            try:
++                ptr.contents.value = value
++            except AttributeError:
++                if hasattr(ptr, "value"):
++                    ptr.value = value
++        self.effects.append(("exit-code", int(handle), int(value)))
++        return 1
++
++    def GetProcessTimes(self, *args):
++        self.effects.append(("refused-times",))
++        return 0
++
++    def __getattr__(self, name):
++        def refused(*args, **kwargs):
++            self.effects.append(("refused", name))
++            return 0
++        return refused
++
++
++def _session(pid=70001, created_ms=1_000_000, poll=None):
++    value = mirror._VaultIoSession()
++    value.proc = SimpleNamespace(
++        pid=pid, poll=lambda: poll, _handle=555,
++        stdin=None, stdout=None, stderr=None,
++    )
++    value.created_ms = created_ms
++    return value
++
++
++@pytest.fixture
++def nt(monkeypatch):
++    monkeypatch.setattr(os, "name", "nt")
++    return monkeypatch
++
++
++def test_fail_closed_kernel_does_not_mutate_unmocked_pid(nt):
++    kernel = FailClosedKernel()
++    nt.setattr(mirror, "_kernel32", lambda: kernel)
++    nt.setattr(mirror, "_windows_process_created_ms", lambda handle: None)
++    mirror._win_terminate_pid(70001, 1_000_000)
++    assert "terminate" not in {e[0] for e in kernel.effects}
++    assert mirror._win_assign_pid(999, 70001, 1_000_000) is False
++    assert "assign" not in {e[0] for e in kernel.effects}
++
++
++def test_exact_identity_positive_control_mutates_only_matching_handle(nt):
++    kernel = FailClosedKernel()
++    kernel.allowed_open[70005] = 22222
++    kernel.created_by_handle[22222] = 1_000_000
++    nt.setattr(mirror, "_kernel32", lambda: kernel)
++    nt.setattr(mirror, "_windows_process_created_ms", lambda handle: kernel.created_by_handle.get(int(handle)))
++    assert mirror._win_terminate_pid(70005, 1_000_000) is True
++    assert ("terminate", 22222, 1) in kernel.effects
++    kernel.effects.clear()
++    assert mirror._win_assign_pid(99999, 70005, 1_000_000) is True
++    assert ("assign", 99999, 22222) in kernel.effects
++
++
++def test_one_millisecond_mismatch_refuses_retained_handle_mutation(nt):
++    kernel = FailClosedKernel()
++    nt.setattr(mirror, "_kernel32", lambda: kernel)
++    nt.setattr(mirror, "_windows_process_created_ms", lambda handle: 1_000_001)
++    assert mirror._win_terminate_retained_handle(444, 1_000_000) is False
++    assert "terminate" not in {e[0] for e in kernel.effects}
++    assert mirror._handle_creation_matches(444, 1_000_000) is False
++
++
++def test_matching_retained_handle_terminates_without_openprocess(nt):
++    kernel = FailClosedKernel()
++    kernel.exit_by_handle[444] = mirror._STILL_ACTIVE
++    nt.setattr(mirror, "_kernel32", lambda: kernel)
++    nt.setattr(mirror, "_windows_process_created_ms", lambda handle: 1_000_000)
++    assert mirror._win_terminate_retained_handle(444, 1_000_000) is True
++    assert ("terminate", 444, 1) in kernel.effects
++    assert "open" not in {e[0] for e in kernel.effects}
++    assert "refused-open" not in {e[0] for e in kernel.effects}
++
++
++def test_job_handle_close_deferred_while_in_use(nt):
++    closed: list[int] = []
++    nt.setattr(mirror, "_win_close_handle", lambda handle: closed.append(int(handle)))
++    session = mirror._VaultIoSession()
++    session._publish_job(4242)
++    held = session._acquire_job_handle()
++    assert held == 4242
++    session._close_session_job()
++    assert closed == []
++    assert session._job_lifetime.in_use
++    session._release_job_handle()
++    assert closed == [4242]
++    assert session.job is None
++
++
++def test_counted_handle_does_not_close_borrowed_popen_handle(nt):
++    closed: list[int] = []
++    nt.setattr(mirror, "_win_close_handle", lambda handle: closed.append(int(handle)))
++    retained = mirror._CountedNativeHandle(owns_close=False)
++    retained.set_handle(555)
++    used = retained.acquire()
++    assert used == 555
++    retained.request_close()
++    assert closed == []
++    retained.release()
++    assert closed == []
++
++
++def test_launcher_identity_prefers_retained_popen_handle(nt):
++    pid_queries: list[int] = []
++    nt.setattr(
++        mirror,
++        "_windows_process_created_ms",
++        lambda handle: 1_000_000 if int(handle) == 555 else 9_000_000,
++    )
++    nt.setattr(
++        mirror,
++        "_process_created_ms",
++        lambda pid: pid_queries.append(int(pid)) or 9_000_000,
++    )
++    proc = SimpleNamespace(pid=70001, poll=lambda: None, _handle=555)
++    assert mirror._creation_from_popen(proc) == 1_000_000
++    assert pid_queries == []
++
++
++def test_missing_handle_does_not_invent_parent_identity_from_later_pid(nt):
++    session = _session()
++    session.created_ms = None
++    nt.setattr(
++        mirror,
++        "_windows_process_children",
++        lambda pid: [{"pid": 80002, "ppid": 70001, "exe": "child.exe"}],
++    )
++    nt.setattr(mirror, "_process_created_ms", lambda pid: 1_050_000 if pid == 80002 else 1_000_000)
++    nt.setattr(mirror, "_process_liveness", lambda *args, **kwargs: "alive")
++    assert 80002 not in session.owned_pids()
++
++
++def test_same_pid_distinct_epoch_writer_is_not_merged(nt):
++    session = _session()
++    session.proc.poll = lambda: 0
++    session.writer_pid = 70001
++    session.writer_created_ms = 2_000_000
++
++    def liveness(pid, created=None, **kwargs):
++        if created == 2_000_000:
++            return "alive"
++        return "unknown"
++
++    nt.setattr(mirror, "_process_liveness", liveness)
++    assert session.physical_liveness() == "alive"
++    assert session._writer_is_canonical_launcher() is False
++
++
++def test_canonical_launcher_writer_stays_dead_when_timestamp_query_fails(nt):
++    session = _session()
++    session.proc.poll = lambda: 0
++    session.writer_pid = 70001
++    session.writer_created_ms = None
++    nt.setattr(mirror, "_process_liveness", lambda *args, **kwargs: "unknown")
++    assert session._writer_is_canonical_launcher() is True
++    assert session.physical_liveness() == "dead"
++
++
++def test_verified_child_still_adopted_with_revalidation(nt):
++    session = _session()
++    nt.setattr(
++        mirror,
++        "_windows_process_children",
++        lambda pid: [{"pid": 80002, "ppid": 70001, "exe": "legit_child.exe"}],
++    )
++    nt.setattr(mirror, "_process_created_ms", lambda pid: 1_050_000 if pid == 80002 else 1_000_000)
++    nt.setattr(mirror, "_process_liveness", lambda *args, **kwargs: "alive")
++    pids = session.owned_pids()
++    assert 80002 in pids
++    assert session._owned_created[80002] == 1_050_000
++
++
++def test_unknown_owned_child_retains_exclusion(nt):
++    session = _session()
++    session.dest = "C:\\inert\\dest"
++    session.proc.poll = lambda: 0
++    session._owned_created[80003] = 1_020_000
++    nt.setattr(mirror, "_process_liveness", lambda pid, created=None, **kwargs: "unknown")
++    released: list[bool] = []
++    dropped: list[object] = []
++    nt.setattr(session, "_release_held_exclusion", lambda: released.append(True))
++    nt.setattr(mirror, "_drop_retained_session", lambda s: dropped.append(s))
++    assert session.physical_liveness() == "unknown"
++    assert session.physically_alive() is True
++    session._abandon_unstarted()
++    assert released == []
++    assert dropped == []
++
++
++def test_session_terminate_uses_retained_handle_not_pid_open(nt):
++    kernel = FailClosedKernel()
++    kernel.exit_by_handle[777] = mirror._STILL_ACTIVE
++    nt.setattr(mirror, "_kernel32", lambda: kernel)
++    nt.setattr(mirror, "_windows_process_created_ms", lambda handle: 1_050_000 if int(handle) == 777 else None)
++    session = _session()
++    session.proc.poll = lambda: 0
++    session._retain_owned_handle(80002, 777, 1_050_000, owns_close=True)
++    session._owned_exe[80002] = "child.exe"
++    nt.setattr(mirror, "_process_liveness", lambda pid, created=None, **kwargs: "dead")
++    nt.setattr(mirror, "_windows_process_children", lambda pid: [])
++    assert session.terminate() is True
++    assert ("terminate", 777, 1) in kernel.effects
++    assert "refused-open" not in {e[0] for e in kernel.effects} or 80002 not in {
++        e[1] for e in kernel.effects if e[0] == "refused-open"
++    }
++
++
++def test_state_lock_is_not_held_across_job_assignment(nt):
++    """Assignment must not take the cancellation lock with the kernel call."""
++    session = mirror._VaultIoSession()
++    session._publish_job(9)
++    held = []
++
++    def assign(job, pid, created_ms=None):
++        held.append(session._state_lock.locked())
++        return True
++
++    nt.setattr(mirror, "_win_assign_pid", assign)
++    job_handle = session._acquire_job_handle()
++    try:
++        if job_handle is not None:
++            mirror._win_assign_pid(job_handle, 80002, 1_050_000)
++    finally:
++        session._release_job_handle()
++    # The product launch loop acquires the job handle, then calls assign
++    # without the state lock. The helper itself only locks to increment the
++    # use count. Direct assign here is outside the lock.
++    assert held == [False]
+diff --git a/tests/test_mirror_process_identity_boundaries.py b/tests/test_mirror_process_identity_boundaries.py
+new file mode 100644
+index 0000000..5401b90
+--- /dev/null
++++ b/tests/test_mirror_process_identity_boundaries.py
+@@ -0,0 +1,100 @@
++"""Astra's inert identity boundaries; no process or kernel API is invoked."""
++import ctypes
++from ctypes import wintypes
++from types import SimpleNamespace
++
++import pytest
++
++import library_mirror as m
++
++
++def session():
++    value=m._VaultIoSession()
++    value.proc=SimpleNamespace(pid=70001,poll=lambda:None)
++    value.created_ms=1_000_000
++    return value
++
++
++def fake_kernel(monkeypatch, actual):
++    effects=[]
++    def exit_code(handle, ptr):
++        ctypes.cast(ptr,ctypes.POINTER(wintypes.DWORD)).contents.value=m._STILL_ACTIVE
++        return 1
++    k=SimpleNamespace(OpenProcess=lambda *args:123,
++                      CloseHandle=lambda *args:1,
++                      GetExitCodeProcess=exit_code,
++                      TerminateProcess=lambda *args:effects.append('terminate') or 1,
++                      AssignProcessToJobObject=lambda *args:effects.append('assign') or 1)
++    monkeypatch.setattr(m,'_kernel32',lambda:k)
++    monkeypatch.setattr(m,'_windows_process_created_ms',lambda handle:actual)
++    return effects
++
++
++@pytest.mark.parametrize('operation',['terminate','assign'])
++@pytest.mark.parametrize('difference',[-1,1])
++def test_pid_action_refuses_any_different_creation_time(monkeypatch,operation,difference):
++    effects=fake_kernel(monkeypatch,1_000_000+difference)
++    if operation=='terminate':
++        result=m._win_terminate_pid(70001,1_000_000)
++    else:
++        result=m._win_assign_pid(999,70001,1_000_000)
++    assert not effects, 'A different process identity received a mutation request'
++    assert result is False
++
++
++def test_liveness_rejects_one_millisecond_identity_mismatch(monkeypatch):
++    fake_kernel(monkeypatch,1_000_001)
++    assert m._process_liveness(70001,1_000_000)=='dead'
++
++
++def test_orphan_one_millisecond_older_than_parent_is_not_owned(monkeypatch):
++    s=session()
++    monkeypatch.setattr(m,'_windows_process_children',lambda pid:[{'pid':80002,'ppid':70001,'exe':'python.exe'}])
++    monkeypatch.setattr(m,'_process_created_ms',lambda pid:999_999 if pid==80002 else 1_000_000)
++    monkeypatch.setattr(m,'_process_liveness',lambda *args:'alive')
++    assert 80002 not in s.owned_pids()
++    s._adopt_owned_tree()
++    assert s.writer_pid != 80002
++
++
++def test_missing_recorded_parent_identity_is_not_filled_from_raw_pid(monkeypatch):
++    s=session();s.created_ms=None
++    monkeypatch.setattr(m,'_windows_process_children',lambda pid:[{'pid':80002,'ppid':70001,'exe':'child.exe'}])
++    monkeypatch.setattr(m,'_process_created_ms',lambda pid:1_050_000 if pid==80002 else 1_000_000)
++    monkeypatch.setattr(m,'_process_liveness',lambda *args:'alive')
++    assert 80002 not in s.owned_pids()
++
++
++def test_parent_replacement_during_snapshot_does_not_adopt_foreign_child(monkeypatch):
++    s=session();state={'replaced':False}
++    def snapshot(pid):
++        state['replaced']=True
++        return [{'pid':80002,'ppid':70001,'exe':'foreign.exe'}]
++    monkeypatch.setattr(m,'_windows_process_children',snapshot)
++    monkeypatch.setattr(m,'_process_created_ms',lambda pid:2_050_000 if pid==80002 else (2_000_000 if state['replaced'] else 1_000_000))
++    monkeypatch.setattr(m,'_process_liveness',lambda pid,created=None:'dead' if pid==70001 and state['replaced'] else 'alive')
++    assert 80002 not in s.owned_pids()
++
++
++def test_child_replacement_between_snapshot_and_identity_query_is_not_owned(monkeypatch):
++    s=session();state={'replaced':False}
++    def created(pid):
++        if pid==80002:
++            state['replaced']=True
++            return 2_000_000
++        return 1_000_000
++    def snapshot(pid):
++        if state['replaced']:
++            return []  # The current child belongs to a different creator.
++        return [{'pid':80002,'ppid':70001,'exe':'child.exe'}]
++    monkeypatch.setattr(m,'_process_created_ms',created)
++    monkeypatch.setattr(m,'_windows_process_children',snapshot)
++    monkeypatch.setattr(m,'_process_liveness',lambda *args:'alive')
++    assert 80002 not in s.owned_pids()
++
++
++def test_exited_launcher_proves_same_pid_writer_dead_when_writer_time_is_unknown(monkeypatch):
++    s=session();s.proc.poll=lambda:0
++    s.writer_pid=70001;s.writer_created_ms=None
++    monkeypatch.setattr(m,'_process_liveness',lambda *args:'unknown')
++    assert s.physical_liveness()=='dead'

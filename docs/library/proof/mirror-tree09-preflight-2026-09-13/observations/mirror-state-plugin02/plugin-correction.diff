@@ -1,0 +1,10 @@
+diff --git a/_scratch/mirror-state-plugin01/plugin.initial.py b/_scratch/mirror_state_receipt_plugin.py
+index 829758d..3f24c0f 100644
+--- a/_scratch/mirror-state-plugin01/plugin.initial.py
++++ b/_scratch/mirror_state_receipt_plugin.py
+@@ -246,4 +246,5 @@ def pytest_terminal_summary(terminalreporter):
+ 
+ def pytest_unconfigure(config):
+     if _OBSERVER is not None and not _OBSERVER.closed:
++        _OBSERVER._failure('session_incomplete', RuntimeError('pytest sessionfinish was not observed'))
+         _OBSERVER.finish(-1, None, None)

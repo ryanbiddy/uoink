@@ -1,0 +1,6 @@
+Repair reason for grok-repair02-run-01:
+First observation of the repaired product. Applied c1008 proposal then removed
+2s tolerance from ownership/mutation, revalidated parent/child identity across
+snapshot and timestamp query, refused unknown recorded parent fill-in, and
+canonicalized a same-PID writer to the Popen launcher. Job/process handles are
+use-counted so CloseHandle waits for users. No prior failed run of this patch.

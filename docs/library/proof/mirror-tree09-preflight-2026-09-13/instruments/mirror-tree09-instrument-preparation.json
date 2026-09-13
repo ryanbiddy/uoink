@@ -1,0 +1,19 @@
+{
+  "purpose": "Observe new combined mirror repair only after reviewed integration; no test/build executed",
+  "changes": [
+    {
+      "before": "run_partitioned_repaired_tree.py",
+      "after": "run_partitioned_mirror_tree09.py",
+      "before_sha256": "f84fa03014b455f82fe1c5092f8a33a3a81a420f084b3b82de14ef49bf5dc0cd",
+      "after_sha256": "05e394184c8ea4b3ae14b17ff66aa101929128510bb0785a7d9ea5e8a95c3f10",
+      "executed": false
+    },
+    {
+      "before": "run_complete_candidate_durable.py",
+      "after": "run_complete_mirror_tree09_durable.py",
+      "before_sha256": "747a21f1b795795cdb877784b335b5d393073349d3c545873fbc65d0222e3e1b",
+      "after_sha256": "8f773f611627fd56b4210d43fb86f91598d7538d2c48596edf83842e8d68ff1e",
+      "executed": false
+    }
+  ]
+}

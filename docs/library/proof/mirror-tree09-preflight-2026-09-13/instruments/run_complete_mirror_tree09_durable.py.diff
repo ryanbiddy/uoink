@@ -1,0 +1,20 @@
+--- run_complete_candidate_durable.py
++++ run_complete_mirror_tree09_durable.py
+@@ -4,7 +4,7 @@
+ p=argparse.ArgumentParser();p.add_argument('--source',required=True);p.add_argument('--label',required=True);p.add_argument('--self-test',action='store_true');a=p.parse_args()
+ r=Path(__file__).resolve().parents[1]
+ assert sys.flags.isolated and sys.flags.no_site
+-assert a.label==('durable-tree-preflight01' if a.self_test else 'ryan-final-partitioned-08')
++assert a.label==('durable-tree09-preflight01' if a.self_test else 'ryan-final-partitioned-09')
+ assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=r,text=True).strip()==a.source
+ if not a.self_test:
+     assert not subprocess.check_output(['git','status','--porcelain'],cwd=r)
+@@ -23,7 +23,7 @@
+            PYTHONDONTWRITEBYTECODE='1',HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',
+            IG_FORBIDDEN_LIVE=r'C:\Users\hello\AppData\Local\Uoink\index.db')
+ command=([sys.executable,'-I','-S','-B','-c','print("durable supervisor child exited")'] if a.self_test else
+-         [sys.executable,'-I','-S','-B',str(r/'_scratch/run_partitioned_repaired_tree.py'),'--source',a.source,'--label',a.label])
++         [sys.executable,'-I','-S','-B',str(r/'_scratch/run_partitioned_mirror_tree09.py'),'--source',a.source,'--label',a.label])
+ record={'source':a.source,'label':a.label,'self_test':a.self_test,'observer_pid':os.getpid(),
+         'started_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'child_pid':None,'child_exit':None,'status':'starting',
+         'command':command,'fixture_files':len(fixture_record['files']),'release_ready':False,

@@ -1,0 +1,34 @@
+diff --git a/_scratch/a5-authority-review-tests/test_mirror_authority_review02.draft01-unexecuted.py b/_scratch/a5-authority-review-tests/test_mirror_authority_review02.py
+index 1707a9b..4fcd5ab 100644
+--- a/_scratch/a5-authority-review-tests/test_mirror_authority_review02.draft01-unexecuted.py
++++ b/_scratch/a5-authority-review-tests/test_mirror_authority_review02.py
+@@ -79,29 +79,6 @@ def inert_native_boundary(monkeypatch):
+     return kernel
+ 
+ 
+-def test_missing_original_popen_creation_refuses_raw_pid_identity(monkeypatch):
+-    """An unavailable original-handle observation cannot borrow a PID epoch."""
+-    proc = SimpleNamespace(pid=LAUNCHER, _handle=LAUNCHER_HANDLE)
+-    handle_queries = []
+-    pid_queries = []
+-
+-    def original_handle_query(handle):
+-        handle_queries.append(handle)
+-        assert handle == LAUNCHER_HANDLE
+-        return None
+-
+-    def raw_pid_query(pid):
+-        pid_queries.append(pid)
+-        return WRITER_CREATED
+-
+-    monkeypatch.setattr(mirror, "_windows_process_created_ms", original_handle_query)
+-    monkeypatch.setattr(mirror, "_process_created_ms", raw_pid_query)
+-    result = mirror._creation_from_popen(proc)
+-    observed = {"created": result, "raw_pid_queries": pid_queries}
+-    assert handle_queries == [LAUNCHER_HANDLE]
+-    assert observed == {"created": None, "raw_pid_queries": []}
+-
+-
+ def test_original_popen_handle_creation_positive_control(monkeypatch):
+     proc = SimpleNamespace(pid=LAUNCHER, _handle=LAUNCHER_HANDLE)
+     monkeypatch.setattr(

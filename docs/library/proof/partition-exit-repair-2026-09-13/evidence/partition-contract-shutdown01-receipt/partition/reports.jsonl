@@ -1,0 +1,3 @@
+{"nodeid": "_scratch/test_partition_shutdown_smoke.py::test_completed_case_remains_passed", "when": "setup", "outcome": "passed", "duration": 0.00010909998673014343, "wasxfail": null}
+{"nodeid": "_scratch/test_partition_shutdown_smoke.py::test_completed_case_remains_passed", "when": "call", "outcome": "passed", "duration": 9.560000034980476e-05, "wasxfail": null}
+{"nodeid": "_scratch/test_partition_shutdown_smoke.py::test_completed_case_remains_passed", "when": "teardown", "outcome": "passed", "duration": 9.339999814983457e-05, "wasxfail": null}

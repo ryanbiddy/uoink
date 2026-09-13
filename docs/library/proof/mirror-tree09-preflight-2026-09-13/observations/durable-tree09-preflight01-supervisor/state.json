@@ -1,0 +1,23 @@
+{
+  "source": "e3abb48e3aa3089e67704f9e11eb4d0d56764427",
+  "label": "durable-tree09-preflight01",
+  "self_test": true,
+  "observer_pid": 42780,
+  "started_utc": "2026-09-13T10:38:56.245798+00:00",
+  "child_pid": 4548,
+  "child_exit": 0,
+  "status": "child_exited",
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-c",
+    "print(\"durable supervisor child exited\")"
+  ],
+  "fixture_files": 504,
+  "release_ready": false,
+  "instrument_sha256": "8f773f611627fd56b4210d43fb86f91598d7538d2c48596edf83842e8d68ff1e",
+  "heartbeat_utc": "2026-09-13T10:38:56.267334+00:00",
+  "finished_utc": "2026-09-13T10:38:56.267322+00:00"
+}

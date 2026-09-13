@@ -1,0 +1,38 @@
+--- before/MIRROR-COMBINED-TREE09-BRIEF-2026-09-13.md
++++ after/MIRROR-COMBINED-TREE09-BRIEF-2026-09-13.md
+@@ -2,8 +2,8 @@
+ 
+ Tree08 remains 2,675 passed, 51 failed and three skipped. The owner handoff
+ repair ff67b84 has 12 focused and 184 Phase 4 passes in both roots. Gemini
+-process-authority repair c1008e0b remains in progress. Do not run this brief
+-until that patch is independently reviewed and verified in both roots around
++process proposal c1008e0b was rejected; Grok continuation a5e7ba0d is active.
++Do not run this brief until a corrected patch is independently reviewed and verified in both roots around
+ raw Git diff / git apply --3way. Keep all earlier results unchanged.
+ 
+ Once both repairs and their handoff updates are committed, use a new durable
+@@ -17,7 +17,12 @@
+ 
+ Retain the two actual media cases in their existing separate process, every
+ other original test in main, only the existing S21 exclusion and --runxfail.
+-Reconcile collected membership, actual reports and XML counts. A synthetic pass
++Reconcile collected membership, actual phase reports, normalized JUnit case
++identities, session exit, actual pytest exit and outer verifier exit for BOTH
++tested partitions. The reviewed partition_exit_contract helper preserves each
++failed phase and refuses incomplete or contradictory execution. Read the
++MIRROR-PARTITION-EXIT-REPAIR-BRIEF-2026-09-13.md and retain its preflight proof.
++A synthetic pass
+ cannot replace the combined result. Any new failure needs a repair brief and
+ fresh label; no fixture edits. Do not mutate source or test files during the
+ observation, including transient test-owned files.
+@@ -26,8 +31,8 @@
+ native runtime. Scrub provider variables, keep model runtimes offline and retain
+ the live-index/5179 guards. No model, installer or client runs concurrently.
+ Preserve supervisor heartbeat, actual child exit and aggregate hash separately
+-from the interactive terminal. A new supervisor self-test may run only its
+-inert print child, with the fresh durable-tree09-preflight01 label.
++from the interactive terminal. The durable-tree09-preflight01 print child
++already exited zero. Preserve that observation; its label is no longer fresh.
+ 
+ The historical AT6 failure stays failed unless Ryan explicitly disposes of its
+ missing original receipt. Even a qualifying combined result does not clear

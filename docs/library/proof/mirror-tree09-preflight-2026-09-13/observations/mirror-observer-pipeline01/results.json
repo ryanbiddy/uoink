@@ -1,0 +1,28 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "_scratch/test_phase4_mirror_observer_pipeline.py",
+      "--runxfail",
+      "-p",
+      "_scratch.partition_receipt_plugin",
+      "-p",
+      "_scratch.mirror_state_receipt_plugin",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\mirror-observer-pipeline01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\mirror-observer-pipeline01\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\mirror-observer-pipeline01\\tests.log"
+  }
+]

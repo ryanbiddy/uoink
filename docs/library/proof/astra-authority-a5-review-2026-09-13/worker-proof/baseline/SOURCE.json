@@ -1,0 +1,8 @@
+{
+  "library_mirror_sha256": "83fd37895cc6bf4670ea4b85a6fdb3a3f0631d9b041b6192f737d13c89479584",
+  "git_head": "4b8dc95912ae74fcdcc0dccf5f9d862d08207fb2",
+  "library_mirror_bytes": 205332,
+  "note": "Accepted owner repair preserved. Process-identity proposal not yet applied.",
+  "owner_repair": "ff67b84",
+  "branch": "control-room/a5e7ba0d-26f-grok"
+}
