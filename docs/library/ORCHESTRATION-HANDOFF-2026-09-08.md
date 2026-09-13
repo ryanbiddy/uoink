@@ -176,6 +176,8 @@ is complete but is not this goal's completion. Current queue:
    with complete before/copy/after hash equality and a separate receipt.
 4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
+   Follow PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md for local-wheel binding,
+   source-fixture preservation, full-tree membership and new installed receipts.
    Package 08 remains the unchanged held review artifact, not evidence for the
    newer build source. Prepare exact remaining owner decisions and release assets
    while working through the technical repairs. Public publication/main remain
