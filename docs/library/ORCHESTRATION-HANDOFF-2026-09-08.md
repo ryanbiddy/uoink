@@ -109,8 +109,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; generated operations at 7fba83a | Drain returns two generated segments and EOF; cancel returns one then cancellation. Both actual observations return0, guards valid, child0/job0 before release; all108 proof payloads match Git/disk | Qualify the actual adapter startup connection. Durable recovery and real runtime remain open |
-| Local wheel graph and notices | Fresh graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046 | Five-record checker passes68 cases per root; fresh144-pin/287-edge metadata graph passes. Council adds no wheel-signature gate; earlier byte proofs remain valid. All12 council proof payloads match Git/disk | Finish notice patch checkout verification and installer inclusion. Preserve proxy-tools metadata conflict; native compatibility and release security remain open |
-| Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
+| Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
+| Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -342,8 +342,12 @@ ASTRA-TWO-WHEEL-NOTICES-VERDICT-2026-09-13.md. Root verifier01bdc441 remains
 failed for an incorrect commit/tree equality; repaired verifier02 returns0
 in503d68 with all52 source and6 integrator payloads now matching Git/disk.
 Proxy-tools metadata says MIT while its actual upstream source/license says
-BSD; retain both facts and exact text. The build currently fails to stage its
-generated notice index. Review the concrete generator/staging/Inno patch next.
+BSD; retain both facts and exact text. The missing notice staging and stale-index
+fallback are repaired at71d3e70. Read ASTRA-NOTICE-INTEGRATION-VERDICT-2026-09-13.md.
+Author832b52 and actual checkout3a56e1 each pass20 Python cases and10 inert block
+cases; all128 proof payloads match Git/disk. Four product notice files match their
+exact index bytes. No full build or installation ran in these checks. The next
+candidate must freshly generate its actual inventory and verify installed notices.
 The five-record checker now passes all68 cases in each independent root
 (468c4b/36df84), with the original36 public cases unchanged and valid guards.
 All367 inputs are identical. Fresh complete144 graph e8f43c returns valid0/PASS,
@@ -1030,8 +1034,10 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   probe is permitted. A supported isolation method must be verified before any
   further Desktop launch, or Ryan must provide/authorize a clean separate Windows
   account/VM and perform its interactive sign-in. No such environment is prepared.
-  Sky native automation works; package-08 Uoink dashboard checks are complete
-  at 49e2b31 and provide no Desktop acceptance.
+  Historical Sky automation supplied package-08 Uoink dashboard checks at
+  49e2b31; those provide no Desktop acceptance. The current computer-use runtime
+  exposes browser control only and disables native app APIs. Do not infer current
+  native GUI capability from the historical receipt.
 - A dependency migration conflicts with the immutable Torch 2.8.0 / WhisperX
   3.8.6 assertions and requires checkpoint/model qualification prohibited by the
   current scope. Ryan must authorize the exact compatibility-test update and
@@ -5215,3 +5221,25 @@ The next generated connection enters the actual ASR adapter and factory with
 visible generated authority seams. It is prepared but unexecuted. Durable
 reservation/recovery implementation follows; real model decisions, signing,
 full source tree and final installation still govern market readiness.
+
+### 2026-09-13 - Installer notices integrated after checkout verification
+
+Production commit71d3e70 adds exact supplemental notices, their Inno entries and
+mandatory notice generation. Failed generation cannot be hidden by successful
+cleanup. Author832b52 and actual checkout3a56e1 each record20 Python passes and
+10 inert build-block passes, no failures or skips. The13 existing cases retain
+their assertions; seven new generator cases were added. No installer, embedded
+runtime or model was executed. All128 proof payloads match disk and Git (c3599a),
+as do the four product notice files (15fc3e).
+
+The original integration byte-check failure9788ef remains recorded; exact-byte
+repairfa439f preceded the fresh checkout check. The proxy-tools MIT/BSD conflict
+and literal upstream texts remain visible. At the eventual build, collect a
+fresh inventory and exact installed notice receipts; isolated source/block tests
+cannot supply that credit. Production has now changed after tree09, so the full
+committed tree and package must be refreshed once runtime work settles.
+
+Git backup session35629 is still pending with no output at270fb9. No duplicate
+push was started. Current native app automation is disabled; historical Sky
+receipts must not be represented as current GUI capability. Website and marketing
+remain paused pending council and integrator market acceptance.

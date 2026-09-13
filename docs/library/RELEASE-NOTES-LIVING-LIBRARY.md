@@ -15,6 +15,13 @@ and model size/Turbo labels are corrected. Both worker and checkout pass all
 53 focused cases plus 13 subtests. The complete tree above predates this change;
 these focused passes do not qualify a new package, native model or installation.
 
+Installer notice repair `71d3e70` adds the main notice index and both retained
+upstream license texts to the Windows staging/Inno sources. A failed generation
+now stops the build. Author and actual checkout each pass 20 Python cases and
+10 isolated build-block cases. Existing assertions are unchanged. The eventual
+candidate still needs a fresh installed inventory and exact installed notice
+checks; see [the notice verdict](ASTRA-NOTICE-INTEGRATION-VERDICT-2026-09-13.md).
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks
@@ -34,7 +41,9 @@ The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals; conversion and runtime qualification remain open.
 The last completed branch backup is `901964c`, verified on September 13;
-later documentary commits are local until another authorized branch backup.
+later source and documentary commits remain local. The authorized backup of
+`01e22fb` is still waiting at Git's account selector; no successful result has
+been recorded for it.
 
 The ASR manifest resolver and plain-state reader now pass 87 and 82 synthetic
 cases respectively in both author and independent runs (`e6a2394`, `e826407`).
@@ -92,6 +101,14 @@ checks. Three earlier setup failures remain retained; failure cleanup and actual
 model behavior still need qualification. Exact local NLTK metadata is accepted
 at `e5b1ddd`. These observations do not clear the current installer or release.
 
+The later timeout repair at `0d93186` retires confirmed broken-pipe I/O while
+preserving logical quarantine. Child adoption at `428707d` verifies identity
+before generated-file reads. The adapter at `d58bebe` passes six connected
+cases per root. Two Windows observations at `7fba83a` then verify generated
+stream completion and cancellation, with actual child exit before guard release.
+They use a sentinel profile; the actual ASR adapter connection, durable recovery
+and real transcription remain open.
+
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different
@@ -106,10 +123,20 @@ derivatives. Its complete graph remains **FAIL**: 144 pins, 287 active edges,
 zero conflicts or missing targets, and two source-only wheel gaps. Its final
 metadata interface passes the same 59 cases in each independent root. Existing
 cached ANTLR 4.9.3 and proxy-tools 0.1.0 wheels now pass whole-file and complete
-RECORD verification at `95a7f29`; their license notices remain incomplete.
-The graph incorporating those exact records is still pending. See
+RECORD verification at `95a7f29`; that inspection did not supply their missing
+license texts.
+The later source-notice evidence at `d887f8a` preserves both complete upstream
+texts and the proxy-tools MIT/BSD metadata conflict. The five-record checker
+at `616f670` passes 68 cases in each independent run; its fresh complete graph
+passes with 144 pins, 287 edges and no diagnostic gaps. The earlier failed
+graph remains unchanged. Missing Requires-Python declarations stay null, and
+metadata closure does not establish runtime compatibility. See
 [the candidate03 verdict](ASTRA-RUNTIME-CANDIDATE03-GRAPH-VERDICT-2026-09-13.md)
-and [the wheel inspection verdict](ASTRA-CACHED-WHEEL-VERDICT-2026-09-13.md).
+and [the five-record graph verdict](ASTRA-FIVE-WHEEL-GRAPH-VERDICT-2026-09-13.md).
+Gemini's next council review is integrated at `ca61046`, with Astra's three
+documentary corrections. It accepts the Windows timeout/adoption, connected
+adapter and graph/notice components within their measured scope. It adds no
+wheel-signature requirement and grants no market acceptance.
 The last reviewed public GitHub release was v3.7.0; branch backup did not
 publish 3.8.0.
 
