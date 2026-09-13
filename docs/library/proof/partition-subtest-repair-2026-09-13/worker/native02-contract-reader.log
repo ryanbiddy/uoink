@@ -1,0 +1,47 @@
+{
+  "result": "FAIL",
+  "complete": true,
+  "counts": {
+    "failed": 6,
+    "passed": 4,
+    "error": 3
+  },
+  "case_count": 13,
+  "failed_phase_count": 8,
+  "subtest_counts": {
+    "passed": 8,
+    "failed": 8,
+    "skipped": 2
+  },
+  "subtest_count": 18,
+  "failed_subtest_count": 8,
+  "raw_failed_phase_count": 6,
+  "raw_failed_report_count": 14,
+  "reported_failed_report_count": 16,
+  "promoted_parent_failures": [
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed",
+      "report_index": 31,
+      "failed_subtests_before_parent": 1
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown",
+      "report_index": 47,
+      "failed_subtests_before_parent": 1
+    }
+  ],
+  "promoted_parent_failure_count": 2,
+  "report_count": 57,
+  "pytest_exit": 1,
+  "outer_exit": 1,
+  "junit": {
+    "case_elements": 15,
+    "raw_suite_counts": {
+      "tests": 33,
+      "failures": 13,
+      "errors": 3,
+      "skipped": 3
+    },
+    "seconds": 0.185
+  }
+}

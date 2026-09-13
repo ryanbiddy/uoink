@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "after_inputs": {
+    "_scratch/partition_exit_contract.py": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171",
+    "_scratch/run_partitioned_mirror_tree09.py": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d",
+    "_scratch/integrator_verify.py": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+    "_scratch/partition-subtest-repair01/run_guarded.ps1": "46ac053aba87b9be66891b9d06967830cf7634bb92123475d6a1b2e2d77ee0fd",
+    "_scratch/partition-subtest-repair01/test_native_semantics.py": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de",
+    "_scratch/seal_partitioned_mirror_tree09.py": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc",
+    "_scratch/agw_heavy_import_guard.py": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9",
+    "_scratch/partition-subtest-repair01/test_guard_activation.py": "a3cb62175e10028bad4baccd850c808e88bdb1beea9865963917fe3b4dc93924",
+    "_scratch/partition-subtest-repair01/conftest.py": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18",
+    "_scratch/partition_receipt_plugin.py": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94",
+    "_scratch/mirror_state_receipt_plugin.py": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+  }
+}

@@ -1,0 +1,94 @@
+..F..uu.uuF-.uFuFEuFEu.Eus.                                      [100%]
+=================================== ERRORS ====================================
+____________ ERROR at teardown of test_pytest_parent_and_teardown _____________
+_scratch\partition-subtest-repair01\test_native_semantics.py:38: in bad_teardown
+    raise RuntimeError("intentional teardown failure")
+E   RuntimeError: intentional teardown failure
+____________ ERROR at teardown of test_pytest_subtest_and_teardown ____________
+_scratch\partition-subtest-repair01\test_native_semantics.py:38: in bad_teardown
+    raise RuntimeError("intentional teardown failure")
+E   RuntimeError: intentional teardown failure
+_____________ ERROR at teardown of test_pytest_pass_and_teardown ______________
+_scratch\partition-subtest-repair01\test_native_semantics.py:38: in bad_teardown
+    raise RuntimeError("intentional teardown failure")
+E   RuntimeError: intentional teardown failure
+================================== FAILURES ===================================
+_____________ TestUnittestSubtests.test_failed [failed] (value=1) _____________
+_scratch\partition-subtest-repair01\test_native_semantics.py:14: in test_failed
+    self.assertEqual(1, 2)
+E   AssertionError: 1 != 2
+_____________ TestUnittestSubtests.test_nested [inner] (level=2) ______________
+_scratch\partition-subtest-repair01\test_native_semantics.py:27: in test_nested
+    self.assertEqual(1, 2)
+E   AssertionError: 1 != 2
+___________ TestUnittestSubtests.test_parent_failure [child fails] ____________
+_scratch\partition-subtest-repair01\test_native_semantics.py:31: in test_parent_failure
+    self.assertEqual(1, 2)
+E   AssertionError: 1 != 2
+__________________ TestUnittestSubtests.test_parent_failure ___________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:32: in test_parent_failure
+    self.fail("intentional parent failure")
+E   AssertionError: intentional parent failure
+---------------------------- Captured stdout call -----------------------------
+u
+____________________ test_pytest_failed [failed] (value=1) ____________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:49: in test_pytest_failed
+    assert False, "intentional subtest failure"
+E   AssertionError: intentional subtest failure
+E   assert False
+_____________________________ test_pytest_failed ______________________________
+contains 1 failed subtest
+__________________ test_pytest_parent_failure [child fails] ___________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:61: in test_pytest_parent_failure
+    assert False, "intentional subtest failure"
+E   AssertionError: intentional subtest failure
+E   assert False
+_________________________ test_pytest_parent_failure __________________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:62: in test_pytest_parent_failure
+    assert False, "intentional parent failure"
+E   AssertionError: intentional parent failure
+E   assert False
+________________ test_pytest_parent_and_teardown [child fails] ________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:67: in test_pytest_parent_and_teardown
+    assert False, "intentional subtest failure"
+E   AssertionError: intentional subtest failure
+E   assert False
+_______________________ test_pytest_parent_and_teardown _______________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:68: in test_pytest_parent_and_teardown
+    assert False, "intentional parent failure"
+E   AssertionError: intentional parent failure
+E   assert False
+_______________ test_pytest_subtest_and_teardown [child fails] ________________
+_scratch\partition-subtest-repair01\test_native_semantics.py:73: in test_pytest_subtest_and_teardown
+    assert False, "intentional subtest failure"
+E   AssertionError: intentional subtest failure
+E   assert False
+______________________ test_pytest_subtest_and_teardown _______________________
+contains 1 failed subtest
+______________ test_pytest_subtest_and_parent_skip [child fails] ______________
+_scratch\partition-subtest-repair01\test_native_semantics.py:83: in test_pytest_subtest_and_parent_skip
+    assert False, "intentional subtest failure"
+E   AssertionError: intentional subtest failure
+E   assert False
+Mirror state observer: 16 observations, no observer errors.
+=========================== short test summary info ===========================
+SUBSKIPPED[skip] (value=1) [1] _scratch\partition-subtest-repair01\test_native_semantics.py:18: intentional subtest skip
+SUBSKIPPED[skip] (value=1) [1] _scratch\partition-subtest-repair01\test_native_semantics.py:56: intentional subtest skip
+SUBSKIPPED[skip] (value=1) [1] _scratch\partition-subtest-repair01\test_native_semantics.py:84: intentional parent skip
+ERROR _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown
+ERROR _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown
+ERROR _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_pass_and_teardown
+SUBFAILED[failed] (value=1) _scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_failed
+SUBFAILED[inner] (level=2) _scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_nested
+SUBFAILED[child fails] _scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_parent_failure
+FAILED _scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_parent_failure
+SUBFAILED[failed] (value=1) _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed
+FAILED _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed
+SUBFAILED[child fails] _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_failure
+FAILED _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_failure
+SUBFAILED[child fails] _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown
+FAILED _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown
+SUBFAILED[child fails] _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown
+FAILED _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown
+SUBFAILED[child fails] _scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_parent_skip
+13 failed, 8 passed, 3 skipped, 3 errors, 8 subtests passed in 0.24s

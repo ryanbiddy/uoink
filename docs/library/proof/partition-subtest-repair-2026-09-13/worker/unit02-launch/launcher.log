@@ -1,0 +1,20 @@
+START tests
+tests exit 1 
+INTERNALERROR>            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_manager.py", line 120, in _hookexec
+INTERNALERROR>     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+INTERNALERROR>            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 167, in _multicall
+INTERNALERROR>     raise exception
+INTERNALERROR>   File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 152, in _multicall
+INTERNALERROR>     teardown.send(result)
+INTERNALERROR>     ~~~~~~~~~~~~~^^^^^^^^
+INTERNALERROR>   File "C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\pluggy\_callers.py", line 43, in run_old_style_hookwrapper
+INTERNALERROR>     teardown.send(result)
+INTERNALERROR>     ~~~~~~~~~~~~~^^^^^^^^
+INTERNALERROR>   File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\partition_receipt_plugin.py", line 39, in pytest_runtest_logreport
+INTERNALERROR>     with (DEST/'reports.jsonl').open('a',encoding='utf8') as stream:
+INTERNALERROR>          ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\test_mirror_state_receipt_plugin.py", line 117, in forbidden_open
+INTERNALERROR>     raise AssertionError('invalid destination reached open')
+INTERNALERROR> AssertionError: invalid destination reached open

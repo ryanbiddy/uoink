@@ -1,0 +1,30 @@
+{
+  "payloads": [
+    {
+      "sha256": "b2e5f7c251b5c8fa71b500bfffed2ef67d3c45b132df1711a0a624fbcd1cd37f",
+      "bytes": 10260,
+      "file": "mirror_state_receipt_plugin.py"
+    },
+    {
+      "sha256": "2cad17a1b8605c2a2c11b156cc2fb73f766cc5d0df77ce51c6981685b5a55e23",
+      "bytes": 9811,
+      "file": "test_mirror_state_receipt_plugin.py"
+    },
+    {
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9",
+      "bytes": 1401,
+      "file": "agw_heavy_import_guard.py"
+    },
+    {
+      "sha256": "d146757ddafe7db96911d5d707cf28317d0b288cc2f1f7561099d87bbdbef91a",
+      "bytes": 6893,
+      "file": "run_partitioned_mirror_tree09.py"
+    },
+    {
+      "sha256": "b31d252514b225d8f280fced42e610d461fa2348d8a8becf6ed497e57e905eb9",
+      "bytes": 7700,
+      "file": "seal_partitioned_mirror_tree09.py"
+    }
+  ],
+  "payload_count": 5
+}

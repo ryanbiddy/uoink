@@ -1,0 +1,770 @@
+{
+  "result": "FAIL",
+  "complete": true,
+  "cases": {
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_failed": {
+      "status": "failed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 1,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "failed",
+            "kwargs": {
+              "value": "1"
+            }
+          }
+        },
+        {
+          "report_index": 2,
+          "ordinal": 2,
+          "outcome": "passed",
+          "context": {
+            "msg": "passed",
+            "kwargs": {
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure"
+          ],
+          "seconds": 0.037
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_nested": {
+      "status": "failed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 6,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "inner",
+            "kwargs": {
+              "level": "2"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_parent_failure": {
+      "status": "failed",
+      "failed_phases": [
+        "call"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 10,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "child fails",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "failure"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_pass_repeated": {
+      "status": "passed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 14,
+          "ordinal": 1,
+          "outcome": "passed",
+          "context": {
+            "msg": "same",
+            "kwargs": {
+              "value": "'repeated'"
+            }
+          }
+        },
+        {
+          "report_index": 15,
+          "ordinal": 2,
+          "outcome": "passed",
+          "context": {
+            "msg": "same",
+            "kwargs": {
+              "value": "'repeated'"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [],
+          "seconds": 0.001
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_skipped": {
+      "status": "passed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 19,
+          "ordinal": 1,
+          "outcome": "skipped",
+          "context": {
+            "msg": "skip",
+            "kwargs": {
+              "value": "1"
+            }
+          }
+        },
+        {
+          "report_index": 20,
+          "ordinal": 2,
+          "outcome": "passed",
+          "context": {
+            "msg": "passed",
+            "kwargs": {
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "skipped"
+          ],
+          "seconds": 0.001
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_pass": {
+      "status": "passed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 24,
+          "ordinal": 1,
+          "outcome": "passed",
+          "context": {
+            "msg": "pass",
+            "kwargs": {
+              "value": "0"
+            }
+          }
+        },
+        {
+          "report_index": 25,
+          "ordinal": 2,
+          "outcome": "passed",
+          "context": {
+            "msg": "pass",
+            "kwargs": {
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [],
+          "seconds": 0.003
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed": {
+      "status": "failed",
+      "failed_phases": [
+        "call"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 29,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "failed",
+            "kwargs": {
+              "value": "1"
+            }
+          }
+        },
+        {
+          "report_index": 30,
+          "ordinal": 2,
+          "outcome": "passed",
+          "context": {
+            "msg": "passed",
+            "kwargs": {
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "failure"
+          ],
+          "seconds": 0.004
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_skipped": {
+      "status": "passed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 34,
+          "ordinal": 1,
+          "outcome": "skipped",
+          "context": {
+            "msg": "skip",
+            "kwargs": {
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "skipped"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_failure": {
+      "status": "failed",
+      "failed_phases": [
+        "call"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 38,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "child fails",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "failure"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown": {
+      "status": "error",
+      "failed_phases": [
+        "call",
+        "teardown"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "failed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 42,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "child fails",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "failure"
+          ],
+          "seconds": 0.002
+        },
+        {
+          "outcomes": [
+            "error"
+          ],
+          "seconds": 0.0
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown": {
+      "status": "error",
+      "failed_phases": [
+        "call",
+        "teardown"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "failed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 46,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "child fails",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "failure"
+          ],
+          "seconds": 0.002
+        },
+        {
+          "outcomes": [
+            "error"
+          ],
+          "seconds": 0.0
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_pass_and_teardown": {
+      "status": "error",
+      "failed_phases": [
+        "teardown"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "passed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "failed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 50,
+          "ordinal": 1,
+          "outcome": "passed",
+          "context": {
+            "msg": "child passes",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "error"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    },
+    "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_parent_skip": {
+      "status": "failed",
+      "failed_phases": [],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "skipped"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [
+        {
+          "report_index": 54,
+          "ordinal": 1,
+          "outcome": "failed",
+          "context": {
+            "msg": "child fails",
+            "kwargs": {}
+          }
+        }
+      ],
+      "failed_subtest_count": 1,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure",
+            "skipped"
+          ],
+          "seconds": 0.002
+        }
+      ]
+    }
+  },
+  "counts": {
+    "failed": 6,
+    "passed": 4,
+    "error": 3
+  },
+  "case_count": 13,
+  "failed_phases": [
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_parent_failure",
+      "when": "call",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed",
+      "when": "call",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_failure",
+      "when": "call",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown",
+      "when": "call",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown",
+      "when": "teardown",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown",
+      "when": "call",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown",
+      "when": "teardown",
+      "outcome": "failed"
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_pass_and_teardown",
+      "when": "teardown",
+      "outcome": "failed"
+    }
+  ],
+  "failed_phase_count": 8,
+  "subtest_counts": {
+    "passed": 8,
+    "failed": 8,
+    "skipped": 2
+  },
+  "subtest_count": 18,
+  "failed_subtests": [
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_failed",
+      "report_index": 1,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "failed",
+        "kwargs": {
+          "value": "1"
+        }
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_nested",
+      "report_index": 6,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "inner",
+        "kwargs": {
+          "level": "2"
+        }
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::TestUnittestSubtests::test_parent_failure",
+      "report_index": 10,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "child fails",
+        "kwargs": {}
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed",
+      "report_index": 29,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "failed",
+        "kwargs": {
+          "value": "1"
+        }
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_failure",
+      "report_index": 38,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "child fails",
+        "kwargs": {}
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_parent_and_teardown",
+      "report_index": 42,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "child fails",
+        "kwargs": {}
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown",
+      "report_index": 46,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "child fails",
+        "kwargs": {}
+      }
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_parent_skip",
+      "report_index": 54,
+      "ordinal": 1,
+      "outcome": "failed",
+      "context": {
+        "msg": "child fails",
+        "kwargs": {}
+      }
+    }
+  ],
+  "failed_subtest_count": 8,
+  "raw_failed_phase_count": 6,
+  "raw_failed_report_count": 14,
+  "reported_failed_report_count": 16,
+  "promoted_parent_failures": [
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_failed",
+      "report_index": 31,
+      "failed_subtests_before_parent": 1
+    },
+    {
+      "nodeid": "_scratch/partition-subtest-repair01/test_native_semantics.py::test_pytest_subtest_and_teardown",
+      "report_index": 47,
+      "failed_subtests_before_parent": 1
+    }
+  ],
+  "promoted_parent_failure_count": 2,
+  "report_count": 57,
+  "pytest_exit": 1,
+  "outer_exit": 1,
+  "junit": {
+    "case_elements": 15,
+    "raw_suite_counts": {
+      "tests": 33,
+      "failures": 13,
+      "errors": 3,
+      "skipped": 3
+    },
+    "seconds": 0.185
+  }
+}

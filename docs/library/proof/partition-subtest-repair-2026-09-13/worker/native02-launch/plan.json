@@ -1,0 +1,26 @@
+{
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "_scratch/integrator_verify.py",
+    "--root",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+    "--label",
+    "partition-subtest-native02",
+    "_scratch/partition-subtest-repair01/test_native_semantics.py",
+    "--runxfail",
+    "-p",
+    "_scratch.partition_receipt_plugin"
+  ],
+  "inputs": {
+    "_scratch/integrator_verify.py": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+    "_scratch/partition-subtest-repair01/run_guarded.ps1": "16bbfa862ef89f51d2e668c1d481889326076dba8dec3159b9809814dc45f171",
+    "_scratch/partition-subtest-repair01/conftest.py": "0c138e0f3509ce478d865853b74e11ec867d547fbaa53e41df7b322e9f8cd547",
+    "_scratch/partition_exit_contract.py": "2fac00a2bfe9a1bced87ae0a46e2715e3d330ef750db35314ed85b62010d088e",
+    "_scratch/run_partitioned_mirror_tree09.py": "d146757ddafe7db96911d5d707cf28317d0b288cc2f1f7561099d87bbdbef91a",
+    "_scratch/partition-subtest-repair01/test_native_semantics.py": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de",
+    "_scratch/partition_receipt_plugin.py": "97ee2a7415197967f76ed3612777cc67e8023e70b35d221b5935a9715b398f2d",
+    "_scratch/seal_partitioned_mirror_tree09.py": "b31d252514b225d8f280fced42e610d461fa2348d8a8becf6ed497e57e905eb9"
+  },
+  "scope": "Inert subtest receipt diagnosis only"
+}

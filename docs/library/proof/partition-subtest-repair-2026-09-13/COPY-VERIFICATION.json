@@ -1,0 +1,1853 @@
+{
+  "verified_utc": "2026-09-13T12:29:53.612616+00:00",
+  "copies": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\.gitattributes",
+      "destination": "worker/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\agw_heavy_import_guard.py",
+      "destination": "worker/after/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\mirror_state_receipt_plugin.py",
+      "destination": "worker/after/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\partition_exit_contract.py",
+      "destination": "worker/after/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\partition_receipt_plugin.py",
+      "destination": "worker/after/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/after/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\after\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/after/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\.gitattributes",
+      "destination": "worker/before/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\BRIEF.md",
+      "destination": "worker/before/BRIEF.md",
+      "bytes": 2542,
+      "sha256": "576610c0d307333ea6b691681e37c512a9150e6cf157d872ebe5ab83041b6226"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\freeze_before.py",
+      "destination": "worker/before/freeze_before.py",
+      "bytes": 2002,
+      "sha256": "b8d227876af00f7f5cd03b9fe48b15aca964f62d5abdb4f231fb7c8ba47bbf24"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\_version.py",
+      "destination": "worker/before/installed-pytest/_version.py",
+      "bytes": 520,
+      "sha256": "a92165fd7b0e147d0e1b873f42ebe87f108f1f3d56b1b53fe4ad352a27adec4a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\junitxml.py",
+      "destination": "worker/before/installed-pytest/junitxml.py",
+      "bytes": 25961,
+      "sha256": "557b8978c66b8010fafc50ada4bf56333f9927f31b2b5909fe4c1a9df1a3c0f0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\main.py",
+      "destination": "worker/before/installed-pytest/main.py",
+      "bytes": 42771,
+      "sha256": "8ee2725057ff1811e2ae9ebdf1befb7518195f8f333f9f8ca024d76a4b80780e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\reports.py",
+      "destination": "worker/before/installed-pytest/reports.py",
+      "bytes": 23230,
+      "sha256": "2e9272a67cde38b925eba24a288b2ef77f741c0daa22da6fbce53ee6e58fa41d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\subtests.py",
+      "destination": "worker/before/installed-pytest/subtests.py",
+      "bytes": 13507,
+      "sha256": "f514883bad06a84cec0d7ddc1dd8ce8c16e5680597f9fc5a9bd8836b878f92a4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\terminal.py",
+      "destination": "worker/before/installed-pytest/terminal.py",
+      "bytes": 65489,
+      "sha256": "28c4a9ebca0243385b154f47ecb83b18a1df415e0b912ebd97079c5ea0036459"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\installed-pytest\\unittest.py",
+      "destination": "worker/before/installed-pytest/unittest.py",
+      "bytes": 25176,
+      "sha256": "24657b6c497eacbf50a978713598b3baed4c05c29f1c01891563cfefed119224"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\integrator_verify.py",
+      "destination": "worker/before/instruments/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\mirror_state_receipt_plugin.py",
+      "destination": "worker/before/instruments/mirror_state_receipt_plugin.py",
+      "bytes": 10260,
+      "sha256": "b2e5f7c251b5c8fa71b500bfffed2ef67d3c45b132df1711a0a624fbcd1cd37f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\partition_exit_contract.py",
+      "destination": "worker/before/instruments/partition_exit_contract.py",
+      "bytes": 10534,
+      "sha256": "2cf1bc8b0e52a15596cfed30aaee3f51ea0c4ad1ed02f338d5a210c1a0d6aa09"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\partition_receipt_plugin.py",
+      "destination": "worker/before/instruments/partition_receipt_plugin.py",
+      "bytes": 1141,
+      "sha256": "a16f640fa850c8dcf1278a8721f56e45df7ec0d3e292824a6d9b36c46786df65"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\run_complete_mirror_tree09_durable.py",
+      "destination": "worker/before/instruments/run_complete_mirror_tree09_durable.py",
+      "bytes": 4040,
+      "sha256": "8f773f611627fd56b4210d43fb86f91598d7538d2c48596edf83842e8d68ff1e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/before/instruments/run_partitioned_mirror_tree09.py",
+      "bytes": 6312,
+      "sha256": "46d9cb9dbde2a883b100b7e7f9a7638924db49174c73e5826bcf8c035f8f5978"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/before/instruments/seal_partitioned_mirror_tree09.py",
+      "bytes": 7134,
+      "sha256": "adccd0a3ff6ec0714a62a94c2e8d74dff77f97eedaa4e47b761fdf2f24d09e42"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\instruments\\test_partition_exit_contract.py",
+      "destination": "worker/before/instruments/test_partition_exit_contract.py",
+      "bytes": 9640,
+      "sha256": "0331758b9370894843eaf52f64d44f5eba6ebe27e8e733afea1a3fd7a3277469"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\ORIGINAL-PARTITION-EXIT-REPAIR-SHA256.json",
+      "destination": "worker/before/ORIGINAL-PARTITION-EXIT-REPAIR-SHA256.json",
+      "bytes": 16442,
+      "sha256": "dcf790d92b5a876865754dde05717303a0c18ad6e2be95e82d531d47d8ee42d3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\before\\SHA256.json",
+      "destination": "worker/before/SHA256.json",
+      "bytes": 5366,
+      "sha256": "a63f12f37043e8aac60cfbf832f2618637325d78df7b543b418c93401e842b0d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\BRIEF.md",
+      "destination": "worker/BRIEF.md",
+      "bytes": 2542,
+      "sha256": "576610c0d307333ea6b691681e37c512a9150e6cf157d872ebe5ab83041b6226"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\check_native02.py",
+      "destination": "worker/check_native02.py",
+      "bytes": 1335,
+      "sha256": "9b07295e4e1f16d7612bd25fdf73c6adeab58b37240ef6515263fce3d66cacec"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-heavy.json",
+      "destination": "worker/collect01-heavy.json",
+      "bytes": 205,
+      "sha256": "7da0f33c01baf1482b47f7eae56e51716ae2c8c9e7ca529c77bf1598c8cd7938"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1737,
+      "sha256": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/collect01-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4806,
+      "sha256": "46ac053aba87b9be66891b9d06967830cf7634bb92123475d6a1b2e2d77ee0fd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/partition-subtest-repair01/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/collect01-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\launcher.log",
+      "destination": "worker/collect01-launch/launcher.log",
+      "bytes": 1278,
+      "sha256": "f2dd3b061baac6335a0d7e68f2eee090eea2536feebde7a00d588a0c13c47d26"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\plan.json",
+      "destination": "worker/collect01-launch/plan.json",
+      "bytes": 1771,
+      "sha256": "f524a928b9c9ca43416e49564ad71119a5224ce8539ae4b8da63073339906558"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-launch\\result.json",
+      "destination": "worker/collect01-launch/result.json",
+      "bytes": 1229,
+      "sha256": "a212afd656dcda08b1a71504d21e56405f6bbe116bd36fc8d206d6e835b91487"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-partition\\membership.json",
+      "destination": "worker/collect01-partition/membership.json",
+      "bytes": 1289,
+      "sha256": "33cef8e26bcdd2fff5ebb0a525d416cd95f117a8fbb45e7c51664a7a58fd312e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-partition\\reports.jsonl",
+      "destination": "worker/collect01-partition/reports.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-partition\\session.json",
+      "destination": "worker/collect01-partition/session.json",
+      "bytes": 84,
+      "sha256": "f62b2abfe9423484e555de52bab0825ee9ce83190bcc483d77739efb037dbee5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-probe\\hooks.json",
+      "destination": "worker/collect01-probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "5a3254168c1a6c352dd991d5560f4c9aa8597c601258417e385223c39787dbaa"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-probe\\membership.json",
+      "destination": "worker/collect01-probe/membership.json",
+      "bytes": 1287,
+      "sha256": "fbf1f838c6bf11f0ccfa33cebd205489fd8b63ffd331d53735cea8435aee8770"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-probe\\reports.jsonl",
+      "destination": "worker/collect01-probe/reports.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\collect01-probe\\session.json",
+      "destination": "worker/collect01-probe/session.json",
+      "bytes": 82,
+      "sha256": "b427f28cebe592d46da3899421fad5a9782fd98ccb1dc8c2ac7066692e559876"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/conftest.py",
+      "bytes": 1737,
+      "sha256": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\COPY-VERIFICATION.json",
+      "destination": "worker/COPY-VERIFICATION.json",
+      "bytes": 15220,
+      "sha256": "411df83310e343cb8fd3346f5c6aa0615cc670505eed3229fd4688cc0d12e014"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\agw_heavy_import_guard.py.diff",
+      "destination": "worker/diffs/agw_heavy_import_guard.py.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\mirror_state_receipt_plugin.py.diff",
+      "destination": "worker/diffs/mirror_state_receipt_plugin.py.diff",
+      "bytes": 507,
+      "sha256": "e3235a7a27a1f4da663e41593207b37f766e49b35392bbfdad4068754ed9823e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\partition_exit_contract.py.diff",
+      "destination": "worker/diffs/partition_exit_contract.py.diff",
+      "bytes": 14324,
+      "sha256": "5880788b7fa8f49ab72dbdec2e201e13b6cc3601e617465ce418e5870fd3880f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\partition_receipt_plugin.py.diff",
+      "destination": "worker/diffs/partition_receipt_plugin.py.diff",
+      "bytes": 2345,
+      "sha256": "0413178d14601f754d08ead8781447de8490b9d6108d16b8b34f298d67eefa84"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\run_partitioned_mirror_tree09.py.diff",
+      "destination": "worker/diffs/run_partitioned_mirror_tree09.py.diff",
+      "bytes": 4182,
+      "sha256": "18a51586fd5ac9eb9eefe59080a27650682d6953d37cc26627e9d18fd030dea3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\diffs\\seal_partitioned_mirror_tree09.py.diff",
+      "destination": "worker/diffs/seal_partitioned_mirror_tree09.py.diff",
+      "bytes": 3830,
+      "sha256": "c49274ef3100ed344c5b6f75465150ef0ee285055e8463bd36c559de7c4263e3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\final-reader.log",
+      "destination": "worker/final-reader.log",
+      "bytes": 4315,
+      "sha256": "29bf99bebb388edfb2f9e1eefd25e9e67e4b51c35545916378d70768713ea13b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\FINAL-VERIFICATION.json",
+      "destination": "worker/FINAL-VERIFICATION.json",
+      "bytes": 8826,
+      "sha256": "ec3e980365d7a7a33fea45816589e6d5cb7981f1a70d2da6345a56e34997c7f9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\freeze_before.py",
+      "destination": "worker/freeze_before.py",
+      "bytes": 2002,
+      "sha256": "b8d227876af00f7f5cd03b9fe48b15aca964f62d5abdb4f231fb7c8ba47bbf24"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\INSTRUMENT-REPAIR-2026-09-13.md",
+      "destination": "worker/INSTRUMENT-REPAIR-2026-09-13.md",
+      "bytes": 1669,
+      "sha256": "66909ecaddce825fd4799ad33268422ff8653b4dd78b939a62f9f4b9915dda32"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\agw_heavy_import_guard.py",
+      "destination": "worker/integration-before/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\mirror_state_receipt_plugin.py",
+      "destination": "worker/integration-before/mirror_state_receipt_plugin.py",
+      "bytes": 10260,
+      "sha256": "b2e5f7c251b5c8fa71b500bfffed2ef67d3c45b132df1711a0a624fbcd1cd37f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/integration-before/run_partitioned_mirror_tree09.py",
+      "bytes": 6893,
+      "sha256": "d146757ddafe7db96911d5d707cf28317d0b288cc2f1f7561099d87bbdbef91a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/integration-before/seal_partitioned_mirror_tree09.py",
+      "bytes": 7700,
+      "sha256": "b31d252514b225d8f280fced42e610d461fa2348d8a8becf6ed497e57e905eb9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\SHA256.json",
+      "destination": "worker/integration-before/SHA256.json",
+      "bytes": 906,
+      "sha256": "ab5509dcfc3f72ec080342f44012024c1f2522f57b6f5696f9f852d0e7623772"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\integration-before\\test_mirror_state_receipt_plugin.py",
+      "destination": "worker/integration-before/test_mirror_state_receipt_plugin.py",
+      "bytes": 9811,
+      "sha256": "2cad17a1b8605c2a2c11b156cc2fb73f766cc5d0df77ce51c6981685b5a55e23"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-launch\\launcher.log",
+      "destination": "worker/native01-launch/launcher.log",
+      "bytes": 1983,
+      "sha256": "541e17004638026d20ab709dda66e1767bbad0a5593f399a48ea5b11edea9d92"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-launch\\plan.json",
+      "destination": "worker/native01-launch/plan.json",
+      "bytes": 1141,
+      "sha256": "822fa23d5206e423987741f2e2acb73acbb07b097fe09a9df76ce3ca7c40393e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-launch\\result.json",
+      "destination": "worker/native01-launch/result.json",
+      "bytes": 657,
+      "sha256": "9f86271d7571cc4a22861ed19e2f0e1c4850cb7a296b89f0929dcad140ab8741"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-original-partition\\membership.json",
+      "destination": "worker/native01-original-partition/membership.json",
+      "bytes": 1289,
+      "sha256": "33cef8e26bcdd2fff5ebb0a525d416cd95f117a8fbb45e7c51664a7a58fd312e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-original-partition\\reports.jsonl",
+      "destination": "worker/native01-original-partition/reports.jsonl",
+      "bytes": 11178,
+      "sha256": "0b80523121cf3bfcb1664569ca1628924d2815f539e1eadbe81429c4652332c1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-original-partition\\session.json",
+      "destination": "worker/native01-original-partition/session.json",
+      "bytes": 86,
+      "sha256": "65a93c97bf1197544e2a205de1d14d0c02ebe4232328cf620ef52256c5d8839b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-probe\\hooks.json",
+      "destination": "worker/native01-probe/hooks.json",
+      "bytes": 1255,
+      "sha256": "9c5299b51c0b9d304f3de52ecb1da7c0430a7c7bd9b32f9743bf950737aaadf1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-probe\\membership.json",
+      "destination": "worker/native01-probe/membership.json",
+      "bytes": 1287,
+      "sha256": "fbf1f838c6bf11f0ccfa33cebd205489fd8b63ffd331d53735cea8435aee8770"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-probe\\reports.jsonl",
+      "destination": "worker/native01-probe/reports.jsonl",
+      "bytes": 21447,
+      "sha256": "c829b84fc500424adb7b3167f4be31e0bba266cb32670c8528a2d7a59f5e8dff"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native01-probe\\session.json",
+      "destination": "worker/native01-probe/session.json",
+      "bytes": 84,
+      "sha256": "4cfdbea6d44ae39aabde82b8d628b369d49dd425ba9ef778bab395cec989f703"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-contract-reader.log",
+      "destination": "worker/native02-contract-reader.log",
+      "bytes": 1122,
+      "sha256": "032714f35a0faa98f40d7241e04347ab8f45cd978fd4f1dc3d15a032cb12ef21"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-contract-result.json",
+      "destination": "worker/native02-contract-result.json",
+      "bytes": 18306,
+      "sha256": "fa61e3b8747429c308693b66a1d5cf4b39bffb144777ba676419cf4bf0f78c68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/native02-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/native02-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1714,
+      "sha256": "0c138e0f3509ce478d865853b74e11ec867d547fbaa53e41df7b322e9f8cd547"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/native02-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 3243,
+      "sha256": "16bbfa862ef89f51d2e668c1d481889326076dba8dec3159b9809814dc45f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/native02-launch/inputs/_scratch/partition-subtest-repair01/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/native02-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 15851,
+      "sha256": "2fac00a2bfe9a1bced87ae0a46e2715e3d330ef750db35314ed85b62010d088e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/native02-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1923,
+      "sha256": "97ee2a7415197967f76ed3612777cc67e8023e70b35d221b5935a9715b398f2d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/native02-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 6893,
+      "sha256": "d146757ddafe7db96911d5d707cf28317d0b288cc2f1f7561099d87bbdbef91a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/native02-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 7700,
+      "sha256": "b31d252514b225d8f280fced42e610d461fa2348d8a8becf6ed497e57e905eb9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\launcher.log",
+      "destination": "worker/native02-launch/launcher.log",
+      "bytes": 1983,
+      "sha256": "4ec305c03bb0e9781e088109a3d4dbb903ead32dc76a58d0c6579b2fb46c81af"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\plan.json",
+      "destination": "worker/native02-launch/plan.json",
+      "bytes": 1469,
+      "sha256": "f3ff194d45f4ac8bc61255325254eed5d3137cd66da545bc370fa5f95d4a8680"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-launch\\result.json",
+      "destination": "worker/native02-launch/result.json",
+      "bytes": 1002,
+      "sha256": "fe4ddbcc5339da67f556e6d8bd94ead03f4a8a4f356edfd4716ff791fb02d415"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-partition\\membership.json",
+      "destination": "worker/native02-partition/membership.json",
+      "bytes": 1289,
+      "sha256": "33cef8e26bcdd2fff5ebb0a525d416cd95f117a8fbb45e7c51664a7a58fd312e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-partition\\reports.jsonl",
+      "destination": "worker/native02-partition/reports.jsonl",
+      "bytes": 22811,
+      "sha256": "8203fca2f62f5ef355f5c2fc2571bc8a5fee8c41c70d78b904cce38c7f1b924d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-partition\\session.json",
+      "destination": "worker/native02-partition/session.json",
+      "bytes": 86,
+      "sha256": "65a93c97bf1197544e2a205de1d14d0c02ebe4232328cf620ef52256c5d8839b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-probe\\hooks.json",
+      "destination": "worker/native02-probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "6b295c76186c4aff1803a670967f6f3c91db8a8a9fb03e1b7e4d033a8290b37c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-probe\\membership.json",
+      "destination": "worker/native02-probe/membership.json",
+      "bytes": 1287,
+      "sha256": "fbf1f838c6bf11f0ccfa33cebd205489fd8b63ffd331d53735cea8435aee8770"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-probe\\reports.jsonl",
+      "destination": "worker/native02-probe/reports.jsonl",
+      "bytes": 21446,
+      "sha256": "cbc0f52bab6d89f8a67afed7b85350fbbc50be90d305447dc7e36a2ce5b7f664"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native02-probe\\session.json",
+      "destination": "worker/native02-probe/session.json",
+      "bytes": 84,
+      "sha256": "4cfdbea6d44ae39aabde82b8d628b369d49dd425ba9ef778bab395cec989f703"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-heavy.json",
+      "destination": "worker/native03-heavy.json",
+      "bytes": 398,
+      "sha256": "38d1273635198aa98d6ae50d8b808c0df6bafa9957396f724009b221ca4dc1b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/native03-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/native03-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/native03-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/native03-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1714,
+      "sha256": "0c138e0f3509ce478d865853b74e11ec867d547fbaa53e41df7b322e9f8cd547"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/native03-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4615,
+      "sha256": "47eb74868b8813e533c342590f0156e4a98fc21f4c6f5f29794fbe93f0c9ea8f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_guard_activation.py",
+      "destination": "worker/native03-launch/inputs/_scratch/partition-subtest-repair01/test_guard_activation.py",
+      "bytes": 540,
+      "sha256": "a3cb62175e10028bad4baccd850c808e88bdb1beea9865963917fe3b4dc93924"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/native03-launch/inputs/_scratch/partition-subtest-repair01/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/native03-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/native03-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1923,
+      "sha256": "97ee2a7415197967f76ed3612777cc67e8023e70b35d221b5935a9715b398f2d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/native03-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/native03-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\launcher.log",
+      "destination": "worker/native03-launch/launcher.log",
+      "bytes": 1983,
+      "sha256": "d6b660343c173b562264fd8a4710ce7b501a5be53577a8ada5ee2fc513053e5f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\plan.json",
+      "destination": "worker/native03-launch/plan.json",
+      "bytes": 2009,
+      "sha256": "307a7c0d1524700df3c02b58c144aa0fecebf652e5cc3d8a00f074438dc57ea9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-launch\\result.json",
+      "destination": "worker/native03-launch/result.json",
+      "bytes": 1366,
+      "sha256": "36bb744dc0085305b225bfd462f2d275af99938f89c0f0083e439238189539f6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-mirror.jsonl",
+      "destination": "worker/native03-mirror.jsonl",
+      "bytes": 5167,
+      "sha256": "fe2cd15e0279832630217f4f0a328d33ff5b2c178d4841cd57ab054f16135cc4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-partition\\membership.json",
+      "destination": "worker/native03-partition/membership.json",
+      "bytes": 1407,
+      "sha256": "37a666978b674ee7cff688ad25649fca14faf8037959f019b90583a8c655db96"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-partition\\reports.jsonl",
+      "destination": "worker/native03-partition/reports.jsonl",
+      "bytes": 24010,
+      "sha256": "d9ef9fa352f0d6cb8a801244ceabd6e9d1da5649569259df2ebcaf5f45f46bda"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-partition\\session.json",
+      "destination": "worker/native03-partition/session.json",
+      "bytes": 86,
+      "sha256": "d6884719d2ecfeec97f768a75a1b8f31c174568743498ea6817884a8237229c0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-probe\\hooks.json",
+      "destination": "worker/native03-probe/hooks.json",
+      "bytes": 1459,
+      "sha256": "a073786b0ae1944c9304f7d8a1991ad94ddd9bf826560655bca5e31872c934ec"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-probe\\membership.json",
+      "destination": "worker/native03-probe/membership.json",
+      "bytes": 1405,
+      "sha256": "f400b5edabcb7032e38f66c34987c885a94804d7375eb97495436d07ebc26d79"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-probe\\reports.jsonl",
+      "destination": "worker/native03-probe/reports.jsonl",
+      "bytes": 22435,
+      "sha256": "c99d3e67d2c6c3328ce8397f667f99ca7e28be2889cd94ea64ec204584a63b5e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native03-probe\\session.json",
+      "destination": "worker/native03-probe/session.json",
+      "bytes": 84,
+      "sha256": "a66fe3a99e44c8913e6109a3f751b4962947c7aa1b3ada4f17419f403806deb7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-heavy.json",
+      "destination": "worker/native04-heavy.json",
+      "bytes": 398,
+      "sha256": "38d1273635198aa98d6ae50d8b808c0df6bafa9957396f724009b221ca4dc1b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/native04-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/native04-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/native04-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/native04-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1737,
+      "sha256": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/native04-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4987,
+      "sha256": "239e4714b6373a15b571352e947bee9ea7bb428fe246d3bf6f8b3c15da4ea367"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_guard_activation.py",
+      "destination": "worker/native04-launch/inputs/_scratch/partition-subtest-repair01/test_guard_activation.py",
+      "bytes": 540,
+      "sha256": "a3cb62175e10028bad4baccd850c808e88bdb1beea9865963917fe3b4dc93924"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/native04-launch/inputs/_scratch/partition-subtest-repair01/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/native04-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/native04-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/native04-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/native04-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\launcher.log",
+      "destination": "worker/native04-launch/launcher.log",
+      "bytes": 1983,
+      "sha256": "92a729c80b6f257ec24e8a3b02def74bcaa2c64f48cdc086e15791984c7af2fe"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\plan.json",
+      "destination": "worker/native04-launch/plan.json",
+      "bytes": 2009,
+      "sha256": "d20faeb63d7f1acda6f8c7d4655553cddf58c43962bdd89e32e61ec8b49d0e5e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-launch\\result.json",
+      "destination": "worker/native04-launch/result.json",
+      "bytes": 1366,
+      "sha256": "b8b83562062973877bed21eb862d617c4418b899c7f6e8ec4c4e3c532f453f61"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-mirror.jsonl",
+      "destination": "worker/native04-mirror.jsonl",
+      "bytes": 5165,
+      "sha256": "87fac80c676ec6c61866962da9460c04f914e8314584cbf0786838dcedfc1ed4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-partition\\membership.json",
+      "destination": "worker/native04-partition/membership.json",
+      "bytes": 1407,
+      "sha256": "37a666978b674ee7cff688ad25649fca14faf8037959f019b90583a8c655db96"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-partition\\reports.jsonl",
+      "destination": "worker/native04-partition/reports.jsonl",
+      "bytes": 24013,
+      "sha256": "480bfc0c2c884e216b7560e016c124e5d5d1c402b24dacb5120c59eca782903d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-partition\\session.json",
+      "destination": "worker/native04-partition/session.json",
+      "bytes": 86,
+      "sha256": "d6884719d2ecfeec97f768a75a1b8f31c174568743498ea6817884a8237229c0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-probe\\hooks.json",
+      "destination": "worker/native04-probe/hooks.json",
+      "bytes": 1459,
+      "sha256": "8b3465776ee48263b19a8228b454c6319cb13462143622e70f8fd3d5249e8c06"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-probe\\membership.json",
+      "destination": "worker/native04-probe/membership.json",
+      "bytes": 1405,
+      "sha256": "f400b5edabcb7032e38f66c34987c885a94804d7375eb97495436d07ebc26d79"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-probe\\reports.jsonl",
+      "destination": "worker/native04-probe/reports.jsonl",
+      "bytes": 22438,
+      "sha256": "34be0f82ffb5597968283d1f2047a7697d62f95300d3e9808d95980d0284eace"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\native04-probe\\session.json",
+      "destination": "worker/native04-probe/session.json",
+      "bytes": 84,
+      "sha256": "a66fe3a99e44c8913e6109a3f751b4962947c7aa1b3ada4f17419f403806deb7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-heavy.json",
+      "destination": "worker/pass01-heavy.json",
+      "bytes": 398,
+      "sha256": "a40f914daa1ceaccf06c2e8cb277aa3934ffc3fa876c43cca36395dd30e95766"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1737,
+      "sha256": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4806,
+      "sha256": "46ac053aba87b9be66891b9d06967830cf7634bb92123475d6a1b2e2d77ee0fd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_guard_activation.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition-subtest-repair01/test_guard_activation.py",
+      "bytes": 540,
+      "sha256": "a3cb62175e10028bad4baccd850c808e88bdb1beea9865963917fe3b4dc93924"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition-subtest-repair01/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/pass01-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\launcher.log",
+      "destination": "worker/pass01-launch/launcher.log",
+      "bytes": 205,
+      "sha256": "9173fbe6c0832ed0d5c91dcec823e5ab44f504c866ff53aab5f83f4c32e21b73"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\plan.json",
+      "destination": "worker/pass01-launch/plan.json",
+      "bytes": 2136,
+      "sha256": "02f4e052f23b3af770c723b644a87cc183b9acf97b8ee201d1883b177e542325"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-launch\\result.json",
+      "destination": "worker/pass01-launch/result.json",
+      "bytes": 1366,
+      "sha256": "659fa9fee0d544289f0128292794f8574ae349a68684fd383fc9a82bd5c45cc1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-mirror.jsonl",
+      "destination": "worker/pass01-mirror.jsonl",
+      "bytes": 359,
+      "sha256": "bd55c95be1e2c0b4e185a101c4d0b87adc956b8c2cca699e21a835e4e303e574"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-partition\\membership.json",
+      "destination": "worker/pass01-partition/membership.json",
+      "bytes": 317,
+      "sha256": "19ba3306e18d0852149ddc15aff9b84ccc75c81276a8594562e1496fe85a282b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-partition\\reports.jsonl",
+      "destination": "worker/pass01-partition/reports.jsonl",
+      "bytes": 5231,
+      "sha256": "42346b18a5f753c5e17a167666e394226323cc262fa7f4617ad5e1d472e10cea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-partition\\session.json",
+      "destination": "worker/pass01-partition/session.json",
+      "bytes": 84,
+      "sha256": "dd7162a07f71c4054c42fa9ef2bea838684243bf5d48220214e00b702f72f033"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-probe\\hooks.json",
+      "destination": "worker/pass01-probe/hooks.json",
+      "bytes": 1459,
+      "sha256": "b64b0cc6ae1b0e07829b308cdd00e47d0b657a7fb144ee5d96bf55582bcfee31"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-probe\\membership.json",
+      "destination": "worker/pass01-probe/membership.json",
+      "bytes": 315,
+      "sha256": "c16e5a2617d09ada42665e27d458996ad91050eec2582f4b798812311a464696"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-probe\\reports.jsonl",
+      "destination": "worker/pass01-probe/reports.jsonl",
+      "bytes": 4201,
+      "sha256": "7b1a0657a01585255991cc851d9f223ce934fb5cf7b460773c45fafff8116f07"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\pass01-probe\\session.json",
+      "destination": "worker/pass01-probe/session.json",
+      "bytes": 82,
+      "sha256": "f7927e3e5aa02b383be904d5e04647f9432e929e57811ecf69874e138d391882"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\collect01\\guard\\ig_paths.py",
+      "destination": "worker/raw/collect01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\collect01\\guard\\sitecustomize.py",
+      "destination": "worker/raw/collect01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\collect01\\results.json",
+      "destination": "worker/raw/collect01/results.json",
+      "bytes": 918,
+      "sha256": "1beb14a3255abd996749c78ecaba4c36209276f5ae325fd0def2841b6ed7932a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\collect01\\tests.log",
+      "destination": "worker/raw/collect01/tests.log",
+      "bytes": 1250,
+      "sha256": "c6b5f9bc3b0d5c6b2c5f7c3fbdfd0742dd2c7415f23d540cf3a7dadc63089e8c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\collect01\\tests.xml",
+      "destination": "worker/raw/collect01/tests.xml",
+      "bytes": 233,
+      "sha256": "b49472685fbfb2e75c68d5aad112aa65609325ae1ff499021af39028175eef74"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native01\\guard\\ig_paths.py",
+      "destination": "worker/raw/native01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native01\\guard\\sitecustomize.py",
+      "destination": "worker/raw/native01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native01\\results.json",
+      "destination": "worker/raw/native01/results.json",
+      "bytes": 835,
+      "sha256": "2f1fbf1b54d6970ada9f6558fc341bd638ed3687a06c28dcbb7cf04fed0956dd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native01\\tests.log",
+      "destination": "worker/raw/native01/tests.log",
+      "bytes": 6605,
+      "sha256": "1752ba3cc2f7ba2ef7faf434da789583f265fcf865ec717bb07266ffa3b8e41e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native01\\tests.xml",
+      "destination": "worker/raw/native01/tests.xml",
+      "bytes": 6927,
+      "sha256": "c781a433e16433cefdd4c6350f56a9ef8b174f9861c01ebb7e9375fde0d751dc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native02\\guard\\ig_paths.py",
+      "destination": "worker/raw/native02/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native02\\guard\\sitecustomize.py",
+      "destination": "worker/raw/native02/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native02\\results.json",
+      "destination": "worker/raw/native02/results.json",
+      "bytes": 835,
+      "sha256": "563df021ee84bfb4f8bc5ee043b752412dc7181fddb502ce1d67b94871b02ec4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native02\\tests.log",
+      "destination": "worker/raw/native02/tests.log",
+      "bytes": 6605,
+      "sha256": "8d30ffc2a04ec69e630402caed26496668f8830d5ab43e30d4384571aa903064"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native02\\tests.xml",
+      "destination": "worker/raw/native02/tests.xml",
+      "bytes": 6927,
+      "sha256": "c830bee937460afadc03cb0603cddee13e741e706d1e01bf43c1f447540524ea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native03\\guard\\ig_paths.py",
+      "destination": "worker/raw/native03/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native03\\guard\\sitecustomize.py",
+      "destination": "worker/raw/native03/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native03\\results.json",
+      "destination": "worker/raw/native03/results.json",
+      "bytes": 1021,
+      "sha256": "3456c4129e2e3f1f96e8342e3540a74e1f1398e5d4a0a0ae0c2fd11334b85990"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native03\\tests.log",
+      "destination": "worker/raw/native03/tests.log",
+      "bytes": 6666,
+      "sha256": "de2b4f3f59c59588552163eb6583916bfd24d2e593a1a8c7bae85e0b24f5fc6b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native03\\tests.xml",
+      "destination": "worker/raw/native03/tests.xml",
+      "bytes": 7079,
+      "sha256": "614393f4d57ebe2e319036e98f7eee672d520239a5c38de475f3899fe44e4b52"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native04\\guard\\ig_paths.py",
+      "destination": "worker/raw/native04/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native04\\guard\\sitecustomize.py",
+      "destination": "worker/raw/native04/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native04\\results.json",
+      "destination": "worker/raw/native04/results.json",
+      "bytes": 1021,
+      "sha256": "397e31907b29a60193a2b970e24aff785ead9fda3b1ee7e937bb8e4904f70c90"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native04\\tests.log",
+      "destination": "worker/raw/native04/tests.log",
+      "bytes": 6666,
+      "sha256": "64175ebfe8648258d50db3ebdb7789effe54cfc0127827f1ce3ca368ce79e248"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\native04\\tests.xml",
+      "destination": "worker/raw/native04/tests.xml",
+      "bytes": 7079,
+      "sha256": "ec5770495c04fe7c657441c929d8c7b5a35e2f15b8d3e96439af7fd5a7715268"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\pass01\\guard\\ig_paths.py",
+      "destination": "worker/raw/pass01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\pass01\\guard\\sitecustomize.py",
+      "destination": "worker/raw/pass01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\pass01\\results.json",
+      "destination": "worker/raw/pass01/results.json",
+      "bytes": 1146,
+      "sha256": "993a06b18b051a0a14ca1c040bf61a24f9199de9505dd267cdb30420577ca7f5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\pass01\\tests.log",
+      "destination": "worker/raw/pass01/tests.log",
+      "bytes": 177,
+      "sha256": "f2b0789cc1bd16d6c25db1427c438d17b724ed6264074c3225ff26509d04bf52"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\pass01\\tests.xml",
+      "destination": "worker/raw/pass01/tests.xml",
+      "bytes": 656,
+      "sha256": "e42e994a4744c2e88361e9e7f2693aa3a2e8415e6a3b092341bf7ad7a8865977"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit01\\guard\\ig_paths.py",
+      "destination": "worker/raw/unit01/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit01\\guard\\sitecustomize.py",
+      "destination": "worker/raw/unit01/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit01\\results.json",
+      "destination": "worker/raw/unit01/results.json",
+      "bytes": 880,
+      "sha256": "4eea7c01508c83e8e0d0e53e2775411d24005adb495b4a214676fdbd42bd88cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit01\\tests.log",
+      "destination": "worker/raw/unit01/tests.log",
+      "bytes": 182,
+      "sha256": "c2230473da6736513e25366296e9b3049d1f20ea79239d3ffce4148adef3afb3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit01\\tests.xml",
+      "destination": "worker/raw/unit01/tests.xml",
+      "bytes": 15531,
+      "sha256": "819b37176bdb6588470ec105f91cc21944e380b0db6b4168af3c741099326df8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit02\\guard\\ig_paths.py",
+      "destination": "worker/raw/unit02/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit02\\guard\\sitecustomize.py",
+      "destination": "worker/raw/unit02/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit02\\results.json",
+      "destination": "worker/raw/unit02/results.json",
+      "bytes": 990,
+      "sha256": "cf8ca71dd71eb1fe2e4e4a265366a20728dadc5c5a134dab93432ea82576e34a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit02\\tests.log",
+      "destination": "worker/raw/unit02/tests.log",
+      "bytes": 13239,
+      "sha256": "edff0b2c504c90cf9f939a531117dcc387465e3f2dab9443e91453fbfaf9d5d1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit02\\tests.xml",
+      "destination": "worker/raw/unit02/tests.xml",
+      "bytes": 24384,
+      "sha256": "2c0ce37d8e33e1691c757514fc65ce029381cbeb2718f093097240b5d64e0dbb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit03\\guard\\ig_paths.py",
+      "destination": "worker/raw/unit03/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit03\\guard\\sitecustomize.py",
+      "destination": "worker/raw/unit03/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit03\\results.json",
+      "destination": "worker/raw/unit03/results.json",
+      "bytes": 990,
+      "sha256": "e732d5f74b52865fb897b6f63ac8ca6572c5af6da0a413cf67cbc80f99181571"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit03\\tests.log",
+      "destination": "worker/raw/unit03/tests.log",
+      "bytes": 183,
+      "sha256": "6dd219bce3b5328a568862ff62bcb077b13f786aa77a115324115caababa4211"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\raw\\unit03\\tests.xml",
+      "destination": "worker/raw/unit03/tests.xml",
+      "bytes": 18976,
+      "sha256": "9f9f3887aeb1c44b3ef31b9f863ed4a00a907a8e3e57e846ddb24d01c24db7b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\REVIEW.md",
+      "destination": "worker/REVIEW.md",
+      "bytes": 5142,
+      "sha256": "6987dad7636fc51c5b3cafe31bf1f0d9b3d661ec212171aa5d7de7404b59247b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/run_guarded.ps1",
+      "bytes": 4987,
+      "sha256": "239e4714b6373a15b571352e947bee9ea7bb428fe246d3bf6f8b3c15da4ea367"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\run_preflight01.ps1",
+      "destination": "worker/run_preflight01.ps1",
+      "bytes": 2610,
+      "sha256": "84a56fafcca5701da2ec5cb3c8b55201fab5c6ddb34569445bdae8e59d705dde"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\seal_final.py",
+      "destination": "worker/seal_final.py",
+      "bytes": 3031,
+      "sha256": "ab98b12895693b14116b49e826bce62aedcf99c023631c9f0a31aa793b8890c6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\test_guard_activation.py",
+      "destination": "worker/test_guard_activation.py",
+      "bytes": 540,
+      "sha256": "a3cb62175e10028bad4baccd850c808e88bdb1beea9865963917fe3b4dc93924"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\test_native_semantics.py",
+      "destination": "worker/test_native_semantics.py",
+      "bytes": 2443,
+      "sha256": "f1616723ffc5b86fbc83f282db28aa843555b409cd4b5c9fae5d99e557d8b3de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\test_subtest_contract.py",
+      "destination": "worker/test_subtest_contract.py",
+      "bytes": 11015,
+      "sha256": "175229d3526029b5a04b6df9dd42118476eba6b826354a5644312c9121e8250e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1714,
+      "sha256": "0c138e0f3509ce478d865853b74e11ec867d547fbaa53e41df7b322e9f8cd547"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/unit01-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 3243,
+      "sha256": "16bbfa862ef89f51d2e668c1d481889326076dba8dec3159b9809814dc45f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_subtest_contract.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/partition-subtest-repair01/test_subtest_contract.py",
+      "bytes": 9530,
+      "sha256": "c4320f827ed24c54bc9a40dd83031976d066b216ae6d6324d049ee76cf975aa6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 15851,
+      "sha256": "2fac00a2bfe9a1bced87ae0a46e2715e3d330ef750db35314ed85b62010d088e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1923,
+      "sha256": "97ee2a7415197967f76ed3612777cc67e8023e70b35d221b5935a9715b398f2d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 6893,
+      "sha256": "d146757ddafe7db96911d5d707cf28317d0b288cc2f1f7561099d87bbdbef91a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 7700,
+      "sha256": "b31d252514b225d8f280fced42e610d461fa2348d8a8becf6ed497e57e905eb9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\inputs\\_scratch\\test_partition_exit_contract.py",
+      "destination": "worker/unit01-launch/inputs/_scratch/test_partition_exit_contract.py",
+      "bytes": 9640,
+      "sha256": "0331758b9370894843eaf52f64d44f5eba6ebe27e8e733afea1a3fd7a3277469"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\launcher.log",
+      "destination": "worker/unit01-launch/launcher.log",
+      "bytes": 210,
+      "sha256": "58fa3633696d5f6de7f814d807dcbc9b2da575f218921ccf96baae20d7f5875d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\plan.json",
+      "destination": "worker/unit01-launch/plan.json",
+      "bytes": 1633,
+      "sha256": "6f576b8003bfd6867e1ff8f26a6cf6e9f7972d79686a5261fe493095c9b68c32"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-launch\\result.json",
+      "destination": "worker/unit01-launch/result.json",
+      "bytes": 1119,
+      "sha256": "a197fb1d822149540252d6bfba6ce15d40e1b896d207b15acfc2f41b2098cfb6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-partition\\membership.json",
+      "destination": "worker/unit01-partition/membership.json",
+      "bytes": 12130,
+      "sha256": "dfbf3ca54a634cd7bc4db4adc04fbc05e252f0af9303ef58a6681a81902127a8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-partition\\reports.jsonl",
+      "destination": "worker/unit01-partition/reports.jsonl",
+      "bytes": 115225,
+      "sha256": "f6063a61dff19e46fac0d7826eee0d87f117b2c177852b5946727ec471c4dd88"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-partition\\session.json",
+      "destination": "worker/unit01-partition/session.json",
+      "bytes": 86,
+      "sha256": "675a5d152737728651b55cb33ed615a5e80225714e478dc71277ba41cc54b368"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-probe\\hooks.json",
+      "destination": "worker/unit01-probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "46fb0fd7224a9252dce4a850676651dcba6c977ce485a97158ddc9c87423aa34"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-probe\\membership.json",
+      "destination": "worker/unit01-probe/membership.json",
+      "bytes": 12128,
+      "sha256": "0130a3ed483fe2eb87aac5507b9ba1e9541e981063674bd7dd829cfc4a645e7d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-probe\\reports.jsonl",
+      "destination": "worker/unit01-probe/reports.jsonl",
+      "bytes": 43965,
+      "sha256": "fa70abd9b2505c16bf2c8a62f0dea022a406d7dc1a00a9f7b0a2b29638302279"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit01-probe\\session.json",
+      "destination": "worker/unit01-probe/session.json",
+      "bytes": 84,
+      "sha256": "8c146c7004a7162e7b8c30aa8f19b020a15d519259f57301969a5a2f2bb4a3e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1714,
+      "sha256": "0c138e0f3509ce478d865853b74e11ec867d547fbaa53e41df7b322e9f8cd547"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/unit02-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4615,
+      "sha256": "47eb74868b8813e533c342590f0156e4a98fc21f4c6f5f29794fbe93f0c9ea8f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_subtest_contract.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/partition-subtest-repair01/test_subtest_contract.py",
+      "bytes": 11015,
+      "sha256": "175229d3526029b5a04b6df9dd42118476eba6b826354a5644312c9121e8250e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1923,
+      "sha256": "97ee2a7415197967f76ed3612777cc67e8023e70b35d221b5935a9715b398f2d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\test_mirror_state_receipt_plugin.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/test_mirror_state_receipt_plugin.py",
+      "bytes": 9811,
+      "sha256": "2cad17a1b8605c2a2c11b156cc2fb73f766cc5d0df77ce51c6981685b5a55e23"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\inputs\\_scratch\\test_partition_exit_contract.py",
+      "destination": "worker/unit02-launch/inputs/_scratch/test_partition_exit_contract.py",
+      "bytes": 9640,
+      "sha256": "0331758b9370894843eaf52f64d44f5eba6ebe27e8e733afea1a3fd7a3277469"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\launcher.log",
+      "destination": "worker/unit02-launch/launcher.log",
+      "bytes": 1635,
+      "sha256": "3418d42a86000532cc447ecf198776ddb28d95ace2f0c697f10c491e219f4288"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\plan.json",
+      "destination": "worker/unit02-launch/plan.json",
+      "bytes": 2085,
+      "sha256": "d098272bd6c7574a48816016ff5c241fc02483f692675b766fc71983aa9e97e8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-launch\\result.json",
+      "destination": "worker/unit02-launch/result.json",
+      "bytes": 1467,
+      "sha256": "77d5eda920ad1513762c192a089069d926126f769db235037f4a88f52c3d5ed8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-partition\\membership.json",
+      "destination": "worker/unit02-partition/membership.json",
+      "bytes": 14792,
+      "sha256": "10f8024fb9dd039c22be1a3229db833307ed68d584a3d5104ad964a757c92c05"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-partition\\reports.jsonl",
+      "destination": "worker/unit02-partition/reports.jsonl",
+      "bytes": 130265,
+      "sha256": "f2bc77d5b64d01e019c60eff676ac69422b6c263d94f5026affea55b2f84a970"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-probe\\hooks.json",
+      "destination": "worker/unit02-probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "b37a0c5f2fb62b40083fedcc20fbacb1dfeb28415c112587bd8c8fac539b1b60"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-probe\\membership.json",
+      "destination": "worker/unit02-probe/membership.json",
+      "bytes": 14790,
+      "sha256": "daddc4549c1f6b8fb991a5f8121c86fffb1d7590334f64986ce2bbdae854854c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit02-probe\\reports.jsonl",
+      "destination": "worker/unit02-probe/reports.jsonl",
+      "bytes": 52266,
+      "sha256": "f5f713cf76c2f4bbbae49941926e04b3668bc1f860c6862e373dc63a1770ddcc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-heavy.json",
+      "destination": "worker/unit03-heavy.json",
+      "bytes": 205,
+      "sha256": "7da0f33c01baf1482b47f7eae56e51716ae2c8c9e7ca529c77bf1598c8cd7938"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\agw_heavy_import_guard.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\integrator_verify.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\mirror_state_receipt_plugin.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/mirror_state_receipt_plugin.py",
+      "bytes": 10445,
+      "sha256": "292f398ad5963e92c5dc622fd7a354e1839770b9f7edb2ecc9bb394423af0300"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\partition-subtest-repair01\\conftest.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/partition-subtest-repair01/conftest.py",
+      "bytes": 1737,
+      "sha256": "5d0e1a808c60bf7a7569645b42440e41691ba68606cbc8121be82d4590d88c18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\partition-subtest-repair01\\run_guarded.ps1",
+      "destination": "worker/unit03-launch/inputs/_scratch/partition-subtest-repair01/run_guarded.ps1",
+      "bytes": 4806,
+      "sha256": "46ac053aba87b9be66891b9d06967830cf7634bb92123475d6a1b2e2d77ee0fd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\partition-subtest-repair01\\test_subtest_contract.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/partition-subtest-repair01/test_subtest_contract.py",
+      "bytes": 11015,
+      "sha256": "175229d3526029b5a04b6df9dd42118476eba6b826354a5644312c9121e8250e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\partition_exit_contract.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\partition_receipt_plugin.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\run_partitioned_mirror_tree09.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/run_partitioned_mirror_tree09.py",
+      "bytes": 7668,
+      "sha256": "af8a9d38c6d596ba1fb8f5132ddb356d8cd89cc2cec95ea994867442d456626d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\seal_partitioned_mirror_tree09.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/seal_partitioned_mirror_tree09.py",
+      "bytes": 8492,
+      "sha256": "2547a86669959afd10b43767abf5ce968170296b321d875daaa33d018a81b9cc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\test_mirror_state_receipt_plugin.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/test_mirror_state_receipt_plugin.py",
+      "bytes": 9811,
+      "sha256": "2cad17a1b8605c2a2c11b156cc2fb73f766cc5d0df77ce51c6981685b5a55e23"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\inputs\\_scratch\\test_partition_exit_contract.py",
+      "destination": "worker/unit03-launch/inputs/_scratch/test_partition_exit_contract.py",
+      "bytes": 9640,
+      "sha256": "0331758b9370894843eaf52f64d44f5eba6ebe27e8e733afea1a3fd7a3277469"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\launcher.log",
+      "destination": "worker/unit03-launch/launcher.log",
+      "bytes": 211,
+      "sha256": "fa6b535eee5753aafd9c6c6e1530a2c007619c796dfe5188a713902b72a1ea5e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\plan.json",
+      "destination": "worker/unit03-launch/plan.json",
+      "bytes": 2085,
+      "sha256": "9ef419781d9aff471f592312f57a9becb99b7b94f04cf2205b4424c1ebcca77a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-launch\\result.json",
+      "destination": "worker/unit03-launch/result.json",
+      "bytes": 1467,
+      "sha256": "e80a4c1f442e4a6ca94d9fe1a0d56212ec5322ef636d3c99e442a511c5e9dd59"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-partition\\membership.json",
+      "destination": "worker/unit03-partition/membership.json",
+      "bytes": 14792,
+      "sha256": "10f8024fb9dd039c22be1a3229db833307ed68d584a3d5104ad964a757c92c05"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-partition\\reports.jsonl",
+      "destination": "worker/unit03-partition/reports.jsonl",
+      "bytes": 142727,
+      "sha256": "e4c60eff9802f90a1bed3ff5b88d3a51355639de6951b2333f5f93fdefb8bc3a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-partition\\session.json",
+      "destination": "worker/unit03-partition/session.json",
+      "bytes": 87,
+      "sha256": "24d80f6def15405cd70ca96fe7aebba27e61d959398d0bc5317e13e7e892fb07"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-probe\\hooks.json",
+      "destination": "worker/unit03-probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "638a2919ff766f9dfbc47ae356430f49154c4a585c1cb6a2a2375cce79441be7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-probe\\membership.json",
+      "destination": "worker/unit03-probe/membership.json",
+      "bytes": 14790,
+      "sha256": "daddc4549c1f6b8fb991a5f8121c86fffb1d7590334f64986ce2bbdae854854c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-probe\\reports.jsonl",
+      "destination": "worker/unit03-probe/reports.jsonl",
+      "bytes": 52263,
+      "sha256": "93a498a59e104c72bd141f611d05085924ccb3f6c3ad9fd892159c1b843836cf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\unit03-probe\\session.json",
+      "destination": "worker/unit03-probe/session.json",
+      "bytes": 85,
+      "sha256": "38b0f9b642926617440e660634a201a6876d00956b88997c4b341ef6d0abd438"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\verify_final.py",
+      "destination": "worker/verify_final.py",
+      "bytes": 6817,
+      "sha256": "e90e2db22252aa598c67722864b2f0ec9bdbde3594a413b0070a5e8f9fcd62ce"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01\\SHA256.json",
+      "destination": "worker/ORIGINAL-WORKER-SHA256.json",
+      "bytes": 46331,
+      "sha256": "9ee6e962038e64b83ee65dc5823190f39d61d3596fb0473e8dadce25b96b1b3b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\actual-exit.json",
+      "destination": "independent/launch/actual-exit.json",
+      "bytes": 34,
+      "sha256": "9d9d75c3032e6c53ffe1575908101f8e84975a9bc7e1f34821bbb2aa13a46296"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\after.json",
+      "destination": "independent/launch/after.json",
+      "bytes": 850,
+      "sha256": "87a3ff32e65e27e59d19352ee9be2c1da368ef75c4f104686a9f7939b626d452"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\validated.json",
+      "destination": "independent/launch/validated.json",
+      "bytes": 75812,
+      "sha256": "d7b7bfbad68c5a89e2c3f3a6fae4610c4034c230be0b7799fa14b439d14599f3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\stdout.log",
+      "destination": "independent/launch/stdout.log",
+      "bytes": 211,
+      "sha256": "af857c08bc109181fe0fa2546a248382c6a105fddad0b6b06a680182a6456f41"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\stderr.log",
+      "destination": "independent/launch/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\heavy-guard.json",
+      "destination": "independent/launch/heavy-guard.json",
+      "bytes": 205,
+      "sha256": "7da0f33c01baf1482b47f7eae56e51716ae2c8c9e7ca529c77bf1598c8cd7938"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\guard-validation.json",
+      "destination": "independent/launch/guard-validation.json",
+      "bytes": 193,
+      "sha256": "3b569581dd5e85d9e2fdee68a71f142e12615b32e824addbce9456c826d12141"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\plan.json",
+      "destination": "independent/launch/plan.json",
+      "bytes": 1597,
+      "sha256": "7139290888bf801bf3361b7bb1c3a72518046e66704e5794967fb7d012815248"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\partition\\session.json",
+      "destination": "independent/launch/partition/session.json",
+      "bytes": 87,
+      "sha256": "24d80f6def15405cd70ca96fe7aebba27e61d959398d0bc5317e13e7e892fb07"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\partition\\reports.jsonl",
+      "destination": "independent/launch/partition/reports.jsonl",
+      "bytes": 142720,
+      "sha256": "e62356f03313db7433e5373666c48f67fd28431b0c00faa15c6736565c1a5549"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\partition\\membership.json",
+      "destination": "independent/launch/partition/membership.json",
+      "bytes": 14792,
+      "sha256": "10f8024fb9dd039c22be1a3229db833307ed68d584a3d5104ad964a757c92c05"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\probe\\session.json",
+      "destination": "independent/launch/probe/session.json",
+      "bytes": 85,
+      "sha256": "38b0f9b642926617440e660634a201a6876d00956b88997c4b341ef6d0abd438"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\probe\\reports.jsonl",
+      "destination": "independent/launch/probe/reports.jsonl",
+      "bytes": 52255,
+      "sha256": "64fd41a7f739229981bafac821e117bd3f896c0c9a28a2bb4129149fcce3546f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\probe\\membership.json",
+      "destination": "independent/launch/probe/membership.json",
+      "bytes": 14790,
+      "sha256": "daddc4549c1f6b8fb991a5f8121c86fffb1d7590334f64986ce2bbdae854854c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01-launch\\probe\\hooks.json",
+      "destination": "independent/launch/probe/hooks.json",
+      "bytes": 1253,
+      "sha256": "7bf31f9d4da3a56da351cc574e68a12cd659b5b699751ebc08f065e88d306537"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01\\tests.xml",
+      "destination": "independent/raw/tests.xml",
+      "bytes": 18976,
+      "sha256": "de44d895c037c5b2c6d205d4f01a47044ca6c614bfa86c06311f84550ea58777"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01\\tests.log",
+      "destination": "independent/raw/tests.log",
+      "bytes": 183,
+      "sha256": "399ed52be148dc94cc71f1ff2d536219edc7b3615a013bfcdc58545d970701af"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01\\results.json",
+      "destination": "independent/raw/results.json",
+      "bytes": 993,
+      "sha256": "dc77a994466e49e69f2cb73d785bd2bd0297fad6fa9bbc07b8f281adac8b40a2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01\\guard\\sitecustomize.py",
+      "destination": "independent/raw/guard/sitecustomize.py",
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-partition-subtest01\\guard\\ig_paths.py",
+      "destination": "independent/raw/guard/ig_paths.py",
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\verify_partition_subtest_astra01.py",
+      "destination": "independent/verify_partition_subtest_astra01.py",
+      "bytes": 3911,
+      "sha256": "94f3ceb7d2da0fe107732071c1f15aedb217297c50e33c4fd74804657e563aa1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\PARTITION-SUBTEST-FINAL-VERDICT-2026-09-13.md",
+      "destination": "REVIEW.md",
+      "bytes": 2933,
+      "sha256": "5522fbf9f43773fa3d2ec51c297b82bfcabe1a53841da68f43834f81ba560e02"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition-subtest-repair01-seal.log",
+      "destination": "worker-seal.log",
+      "bytes": 201,
+      "sha256": "6a4cca00c0e13b65365f61b3e6d242b1911b869d4a4321ae48ad42f88545b3df"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\materialize_partition_subtest_proof01.py",
+      "destination": "materialize_partition_subtest_proof01.py",
+      "bytes": 4571,
+      "sha256": "248fe13b7d4b3ce0fe9f0526fe021e129bc01b45b9534ea46c3b2b6669d73fd2"
+    }
+  ],
+  "original_worker_payloads_verified": 282,
+  "original_worker_seal_unchanged": true,
+  "independent_cases": 116,
+  "independent_subtests": 0,
+  "independent_log_seconds": 0.37,
+  "hash_mismatches": 0
+}
