@@ -1,0 +1,1 @@
+{"ref":"refs/tags/v1.10.0","node_id":"MDM6UmVmNjU2MDA5NzU6cmVmcy90YWdzL3YxLjEwLjA=","url":"https://api.github.com/repos/pytorch/pytorch/git/refs/tags/v1.10.0","object":{"sha":"36449ea93134574c2a22b87baad3de0bf8d64d42","type":"commit","url":"https://api.github.com/repos/pytorch/pytorch/git/commits/36449ea93134574c2a22b87baad3de0bf8d64d42"}}

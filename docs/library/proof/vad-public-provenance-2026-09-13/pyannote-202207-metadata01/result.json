@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:56:06.4741600+00:00",
+  "url": "https://huggingface.co/api/models/pyannote/segmentation/revision/2022.07?blobs=true",
+  "kind": "json",
+  "http_status": 200,
+  "content_type": "application/json",
+  "advertised_bytes": 8583,
+  "headers": "Connection: keep-alive\r\nDate: Sun, 13 Sep 2026 14:56:06 GMT\r\nETag: W/\"2187-ZtZUA6R96E2UwBvMi76oNQYeMjc\"\r\nX-Powered-By: huggingface-moon\r\nX-Request-ID: Root=1-6aa6b986-35b55bc911f4189071d14096\r\nRateLimit: \"api\";r=498;t=202\r\nRateLimit-Policy: \"fixed window\";\"api\";q=500;w=300\r\ncross-origin-opener-policy: same-origin\r\nReferrer-Policy: strict-origin-when-cross-origin\r\nAccess-Control-Max-Age: 86400\r\nAccess-Control-Allow-Origin: https://huggingface.co\r\nVary: Origin\r\nAccess-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash\r\nX-Cache: Miss from cloudfront\r\nVia: 1.1 61e47cd082bb04a8fb8ae61dd54f6b32.cloudfront.net (CloudFront)\r\nX-Amz-Cf-Pop: SFO5-P1\r\nAlt-Svc: h3=\":443\"\r\nX-Amz-Cf-Id: ppqETmGD4vUl5r6_0TtCffZeKhrwZhk6_R6tO1AYiu0VK54POYf0sg==\r\nStrict-Transport-Security: max-age=31536000\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 8583\r\n",
+  "bytes": 8583,
+  "sha256": "83cbd5bdaf3486fa562f73bf4cc90b4e8755645213cfefccb2892904e2f5a882",
+  "utc_end": "2026-09-13T14:56:07.0292650+00:00",
+  "exit": 0
+}

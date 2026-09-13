@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:51:47.9222064+00:00",
+  "url": "https://api.github.com/repos/pytorch/pytorch/git/ref/tags/v1.10.0",
+  "kind": "json",
+  "http_status": 200,
+  "content_type": "application/json",
+  "advertised_bytes": 341,
+  "headers": "Date: Sun, 13 Sep 2026 14:51:48 GMT\r\nCache-Control: public, max-age=60, s-maxage=60\r\nVary: Accept,Accept-Encoding, Accept, X-Requested-With\r\nETag: W/\"0466816bf19ef88c44084a1b548abc66fd3a1c95b7cf456e788d29a615383328\"\r\nX-Poll-Interval: 300\r\nX-GitHub-Media-Type: github.v3; format=json\r\nx-github-api-version-selected: 2022-11-28\r\nAccess-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning\r\nAccess-Control-Allow-Origin: *\r\nStrict-Transport-Security: max-age=31536000; includeSubdomains; preload\r\nX-Frame-Options: deny\r\nX-Content-Type-Options: nosniff\r\nX-XSS-Protection: 0\r\nReferrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin\r\nContent-Security-Policy: default-src 'none'\r\nServer: github.com\r\nAccept-Ranges: bytes\r\nX-RateLimit-Limit: 60\r\nX-RateLimit-Remaining: 58\r\nX-RateLimit-Used: 2\r\nX-RateLimit-Resource: core\r\nX-RateLimit-Reset: 1789314707\r\nX-GitHub-Request-Id: EC12:2ABE18:8EF91F:ADE3E3:6AA6B883\r\nx-github-edge-region: westus3\r\nContent-Type: application/json; charset=utf-8\r\nLast-Modified: Sun, 13 Sep 2026 14:09:29 GMT\r\nContent-Length: 341\r\n",
+  "bytes": 341,
+  "sha256": "fff89b0fb6d7a28d259b3f850d8aa5317388f0a3d7e16fc1850e9737982c8e24",
+  "utc_end": "2026-09-13T14:51:48.2873910+00:00",
+  "exit": 0
+}

@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:52:50.9622999+00:00",
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/36449ea93134574c2a22b87baad3de0bf8d64d42/torch/serialization.py",
+  "kind": "source",
+  "http_status": 200,
+  "content_type": "text/plain",
+  "advertised_bytes": 36544,
+  "headers": "Connection: keep-alive\r\nCache-Control: max-age=300\r\nContent-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox\r\nETag: \"98a57d5aaeff44b34d5bee9de56cf1fd45d1f85912b41a9342199af69ac3230e\"\r\nStrict-Transport-Security: max-age=31536000\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: deny\r\nX-XSS-Protection: 1; mode=block\r\nX-GitHub-Request-Id: F9F0:2087AE:52B795:944143:6AA6B8C2\r\nx-github-edge-region: westus3\r\nAccept-Ranges: bytes\r\nDate: Sun, 13 Sep 2026 14:52:51 GMT\r\nVia: 1.1 varnish\r\nX-Served-By: cache-pao-kpao1770049-PAO\r\nX-Cache: MISS\r\nX-Cache-Hits: 0\r\nX-Timer: S1789311171.969536,VS0,VE129\r\nVary: Authorization,Accept-Encoding\r\nAccess-Control-Allow-Origin: *\r\nCross-Origin-Resource-Policy: cross-origin\r\nX-Fastly-Request-ID: e57c27c46004279c836eba1f3c4693bc8cafd456\r\nSource-Age: 0\r\nContent-Length: 36544\r\nContent-Type: text/plain; charset=utf-8\r\nExpires: Sun, 13 Sep 2026 14:57:51 GMT\r\n",
+  "bytes": 36544,
+  "sha256": "9c4ef2eeea8e80fe8d4c6696209e95bd9ef4d63022d7a9d81d4be00e4301d4e8",
+  "utc_end": "2026-09-13T14:52:51.2649167+00:00",
+  "exit": 0
+}

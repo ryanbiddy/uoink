@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:55:02.0208631+00:00",
+  "url": "https://raw.githubusercontent.com/m-bain/whisperX/a83ddbdf9ba29278cd6de50f2d735df3cd3984b1/README.md",
+  "kind": "source",
+  "http_status": 200,
+  "content_type": "text/plain",
+  "advertised_bytes": 14552,
+  "headers": "Connection: keep-alive\r\nCache-Control: max-age=300\r\nContent-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox\r\nETag: \"28ccd2496f8d9d687a0b442f845288a33a178d55255afc16ff652b5d9d27de6f\"\r\nStrict-Transport-Security: max-age=31536000\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: deny\r\nX-XSS-Protection: 1; mode=block\r\nX-GitHub-Request-Id: B806:20ADFE:523B62:93D4C8:6AA6B944\r\nx-github-edge-region: westus3\r\nAccept-Ranges: bytes\r\nDate: Sun, 13 Sep 2026 14:55:02 GMT\r\nVia: 1.1 varnish\r\nX-Served-By: cache-pao-kpao1770029-PAO\r\nX-Cache: MISS\r\nX-Cache-Hits: 0\r\nX-Timer: S1789311302.013696,VS0,VE129\r\nVary: Authorization,Accept-Encoding\r\nAccess-Control-Allow-Origin: *\r\nCross-Origin-Resource-Policy: cross-origin\r\nX-Fastly-Request-ID: 0e608405476a2fe49acd79bbe335fa028bc30aa7\r\nSource-Age: 0\r\nContent-Length: 14552\r\nContent-Type: text/plain; charset=utf-8\r\nExpires: Sun, 13 Sep 2026 15:00:02 GMT\r\n",
+  "bytes": 14552,
+  "sha256": "d74ad0502d9cae00565287f76a0dd0f4f4c8084888f64a292c1480f99632479a",
+  "utc_end": "2026-09-13T14:55:02.3130374+00:00",
+  "exit": 0
+}

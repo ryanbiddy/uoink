@@ -1,0 +1,10 @@
+{
+  "url": "https://api.github.com/repos/m-bain/whisperX/commits/a83ddbdf9ba29278cd6de50f2d735df3cd3984b1",
+  "kind": "json",
+  "max_bytes": 131072,
+  "expected_pointer_bytes": 0,
+  "expected_blob_sha": "",
+  "utc": "2026-09-13T14:56:06.4741844+00:00",
+  "redirects_allowed": false,
+  "authentication": false
+}

@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:54:14.0907899+00:00",
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/36449ea93134574c2a22b87baad3de0bf8d64d42/caffe2/serialize/versions.h",
+  "kind": "source",
+  "http_status": 200,
+  "content_type": "text/plain",
+  "advertised_bytes": 4755,
+  "headers": "Connection: keep-alive\r\nCache-Control: max-age=300\r\nContent-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox\r\nETag: \"c14ef7fef9b1cf36d4506f66d71d05d0454f2d17799616db98633579f7bbcaa4\"\r\nStrict-Transport-Security: max-age=31536000\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: deny\r\nX-XSS-Protection: 1; mode=block\r\nX-GitHub-Request-Id: FDE8:208D0A:5323F3:94B7AD:6AA6B915\r\nx-github-edge-region: westus3\r\nAccept-Ranges: bytes\r\nDate: Sun, 13 Sep 2026 14:54:14 GMT\r\nVia: 1.1 varnish\r\nX-Served-By: cache-pao-kpao1770082-PAO\r\nX-Cache: MISS\r\nX-Cache-Hits: 0\r\nX-Timer: S1789311254.091969,VS0,VE124\r\nVary: Authorization,Accept-Encoding\r\nAccess-Control-Allow-Origin: *\r\nCross-Origin-Resource-Policy: cross-origin\r\nX-Fastly-Request-ID: 99a809c9c34c325adc8a6030df9a5705a4e0c79d\r\nSource-Age: 0\r\nContent-Length: 4755\r\nContent-Type: text/plain; charset=utf-8\r\nExpires: Sun, 13 Sep 2026 14:59:14 GMT\r\n",
+  "bytes": 4755,
+  "sha256": "b656c158ebb3368d90013967ab784dd33c7e8601a2b6cbfa5dcdc2a4e8b42ca7",
+  "utc_end": "2026-09-13T14:54:14.3842311+00:00",
+  "exit": 0
+}

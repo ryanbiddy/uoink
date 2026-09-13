@@ -1,0 +1,14 @@
+{
+  "status": "collected_text_only",
+  "utc_start": "2026-09-13T14:56:59.6286059+00:00",
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/36449ea93134574c2a22b87baad3de0bf8d64d42/torch/_utils.py",
+  "kind": "source",
+  "http_status": 200,
+  "content_type": "text/plain",
+  "advertised_bytes": 21617,
+  "headers": "Connection: keep-alive\r\nCache-Control: max-age=300\r\nContent-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox\r\nETag: \"db343172fb8a1b48ff84d73a612d9831401a43919b951ffe8e1568d88b319b38\"\r\nStrict-Transport-Security: max-age=31536000\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: deny\r\nX-XSS-Protection: 1; mode=block\r\nX-GitHub-Request-Id: B11E:10CD83:221F2A:5DAD1F:6AA6B9BA\r\nx-github-edge-region: westus2\r\nAccept-Ranges: bytes\r\nDate: Sun, 13 Sep 2026 14:56:59 GMT\r\nVia: 1.1 varnish\r\nX-Served-By: cache-pao-kpao1770032-PAO\r\nX-Cache: MISS\r\nX-Cache-Hits: 0\r\nX-Timer: S1789311420.652387,VS0,VE141\r\nVary: Authorization,Accept-Encoding\r\nAccess-Control-Allow-Origin: *\r\nCross-Origin-Resource-Policy: cross-origin\r\nX-Fastly-Request-ID: c707cd4c68fae939bdc2b5d2bd8c69aa195c4d35\r\nSource-Age: 0\r\nContent-Length: 21617\r\nContent-Type: text/plain; charset=utf-8\r\nExpires: Sun, 13 Sep 2026 15:01:59 GMT\r\n",
+  "bytes": 21617,
+  "sha256": "b1e821dbed7a990298e670d34ca50ae8236f74af0dc20d8ddcd5aedc8a03e5f0",
+  "utc_end": "2026-09-13T14:56:59.9654127+00:00",
+  "exit": 0
+}
