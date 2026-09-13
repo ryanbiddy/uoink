@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; first actual wheel build at 576cd07 passes byte checks, remains uninstalled | Archive completed Python 3.13 packaging reproduction and finish exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -200,9 +200,17 @@ is complete but is not this goal's completion. Current queue:
    remain failed. The reviewed py314-01 build exits zero and verifies all 16
    members, RECORD, unchanged license and opaque ONNX bytes. Wheel size is
    1,387,859 bytes; SHA256 d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883.
-   All 132 proof payloads match Git and disk. Prepare and review a private
-   stdlib-only Python 3.13 reproduction; do not launch the original embedded
-   interpreter with its site-enabled configuration. No runtime acceptance.
+   All 132 proof payloads match Git and disk. Private stdlib-only Python 3.13
+   reproduction is now complete at d9f2208: copy/child/outer exits zero, all 34
+   private files verified and wheel byte-identical under a different epoch.
+   All 46 reproduction proof payloads match Git and disk. Read the independent
+   verdict under proof/companion-b2-reproduction-2026-09-13. Original embedded
+   interpreters were not launched or modified. No runtime acceptance.
+   A separate optional Hub-keyword repair passes eight synthetic contracts in
+   author and root runs; baseline is four pass/four TypeError errors with a
+   valid guard. Preserve all earlier invalid-guard attempts. Prepare combined
+   B3 as localassets2 with both source fixes, independent review and synthetic
+   packaging checks before another actual build. Do not mutate B2 seals.
    Windows casing alone is not a Path inequality; reject the resolve-first
    suggestion because it discards alias evidence. B2 is built but not installed.
    Static VAD evidence and fixed-loader preparation are archived at 01163e1.
@@ -4074,3 +4082,21 @@ reviewed. The optional Hub-keyword patch passes eight synthetic contract cases
 after retained baseline errors and a documented traceback-formatting guard
 repair; it is still an inert, separate proposal. Production source and the
 complete-tree result are unchanged; release and public work remain held.
+
+### 2026-09-13 - Python 3.13 reproduces B2; optional Hub repair follows
+
+Commit d9f2208 preserves all 46 reproduction payloads with exact Git/disk
+equality and refreshes release notes. The private runtime's 34 files match,
+startup confirms no-site isolation and exactly two private stdlib paths,
+and copy/child/outer exits are zero. Complete B2 wheel bytes match the first
+Python 3.14 build. This qualifies packaging only; B2 remains uninstalled.
+
+The optional Hub keyword baseline and patched runs now repeat independently
+with valid guards: four pass/four TypeError errors versus eight passes.
+Earlier root guard events were reproduced as denied lexical <unknown> paths
+during traceback formatting. A source-free exception formatter resolves the
+instrument issue without changing any of eight assertions or read roots.
+All earlier invalid attempts and the insufficient filename repair remain
+preserved. A combined localassets2 proposal will add this one-line fix while
+keeping B2's exact artifacts and measurements unchanged. No source-tree or
+installed acceptance changed; website and marketing remain paused.
