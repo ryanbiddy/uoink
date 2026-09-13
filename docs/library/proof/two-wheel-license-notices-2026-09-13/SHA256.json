@@ -1,0 +1,266 @@
+{
+  "payload_count": 52,
+  "payload_bytes": 219818.0,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1330,
+      "sha256": "d7979181dad4879957d8067b64ca82debb1836905827ead713083da66a03732b"
+    },
+    {
+      "path": "collect_text.ps1",
+      "bytes": 2817,
+      "sha256": "e0863b2820d030785659e660b23a365bb8955b0fe70ca16f126f4f272091b15a"
+    },
+    {
+      "path": "inputs/antlr-pypi.json",
+      "bytes": 28137,
+      "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15"
+    },
+    {
+      "path": "inputs/inspection02.json",
+      "bytes": 38444,
+      "sha256": "950e4ff459397921765ad3aad43ae0120acd0d9efd27460c4560c12430948c0c"
+    },
+    {
+      "path": "inputs/proxy-pypi.json",
+      "bytes": 3887,
+      "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0"
+    },
+    {
+      "path": "materialize_notices.ps1",
+      "bytes": 4450,
+      "sha256": "b4eb6873fe7dd572d0d525c33437932ffab2455a6bcdb2f38251f8f5b1a94853"
+    },
+    {
+      "path": "NOTICE-PROPOSAL.md",
+      "bytes": 1648,
+      "sha256": "3d2b69b9f21bd7e1958b0cabc548d5f4287f0621422ffe923ea518a914aa99c0"
+    },
+    {
+      "path": "notices/antlr4-python3-runtime-4.9.3-LICENSE.txt",
+      "bytes": 2699,
+      "sha256": "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a"
+    },
+    {
+      "path": "notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+      "bytes": 1436,
+      "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4"
+    },
+    {
+      "path": "plan01.json",
+      "bytes": 294,
+      "sha256": "1ef5b11182d7f9cce6e7636cbab1e50228c179c0e8f86e90e22f15de8f03fcc5"
+    },
+    {
+      "path": "plan02.json",
+      "bytes": 434,
+      "sha256": "2214a0543eee1b99c1bc90e15c0c4c27904d960de680b0cf7fb24bd0faf4b56f"
+    },
+    {
+      "path": "plan03.json",
+      "bytes": 666,
+      "sha256": "d5924db8aec1954e8ec838913529f73abf0b8bee264519d5812d4c74a75aa9bb"
+    },
+    {
+      "path": "plan04.json",
+      "bytes": 272,
+      "sha256": "a377bff87035b14313beebf0fe28cd8459db583c49fdae71e5daf3b187ab7111"
+    },
+    {
+      "path": "plan05.json",
+      "bytes": 255,
+      "sha256": "556af0064a3eead8dab580271535ccd3ac7b09cdbf3d0c705cf26bda07f39f6c"
+    },
+    {
+      "path": "responses/antlr-commit/body.json",
+      "bytes": 1082,
+      "sha256": "3d8a4beda4b113635118433856f61b6862193027d13a2feba8d1c0610ece7cc0"
+    },
+    {
+      "path": "responses/antlr-commit/receipt.json",
+      "bytes": 1370,
+      "sha256": "b48c130d9b961951a0e4a4ee225a8d897ebec2651075be9c1f38a34e8c392d78"
+    },
+    {
+      "path": "responses/antlr-license/body.json",
+      "bytes": 4001,
+      "sha256": "82652cf7f6abc3ad243a56853a61ebcaafccd56ca2e27bb6f3301622ae6bd458"
+    },
+    {
+      "path": "responses/antlr-license/receipt.json",
+      "bytes": 1335,
+      "sha256": "be2f262b71f32abdb22cc949b2bda71965647f72da06f3f4796e6f5aa1b7a663"
+    },
+    {
+      "path": "responses/antlr-python3-tree/body.json",
+      "bytes": 20967,
+      "sha256": "a2841a00ffd950e41be8faf0296081680774c95c818f19eb746a7279c5336ce0"
+    },
+    {
+      "path": "responses/antlr-python3-tree/receipt.json",
+      "bytes": 1384,
+      "sha256": "6017e66db6a4924a6f25a4dbdd6e1de44a79cb1c1f8805daf4ae1a02899ae9ff"
+    },
+    {
+      "path": "responses/antlr-recognizer/body.json",
+      "bytes": 7701,
+      "sha256": "819fc3577f001e2ef8dde8c49cdb350b9ff90bff1f27a8bb4201f0c7854cc80d"
+    },
+    {
+      "path": "responses/antlr-recognizer/receipt.json",
+      "bytes": 1338,
+      "sha256": "289fd26f13e86e6491ef44f4fc7193e0105796e56dc370b1301a05d067a530e2"
+    },
+    {
+      "path": "responses/antlr-root-tree/body.json",
+      "bytes": 4957,
+      "sha256": "2c79923e10822693a7327a9de3affb6b3ec241b188f26640befac6c53d92e6ab"
+    },
+    {
+      "path": "responses/antlr-root-tree/receipt.json",
+      "bytes": 1368,
+      "sha256": "d889898a89bf9d9fa83af24081e764ab27d5627e98952852dc2ae79fb5c73ad5"
+    },
+    {
+      "path": "responses/antlr-runtime-tree/body.json",
+      "bytes": 1954,
+      "sha256": "f0448c04f6feecbb772453335ea23fbaf6b6d696d3735de84060dd325fc4d32e"
+    },
+    {
+      "path": "responses/antlr-runtime-tree/receipt.json",
+      "bytes": 1368,
+      "sha256": "9a1b71649407432dd6624ec1ba3f777910aa5f2154e86045009691ce02d69c3d"
+    },
+    {
+      "path": "responses/antlr-setup/body.json",
+      "bytes": 1008,
+      "sha256": "dc9d37f5a2a029eca83c34f8f39be6eee4b97e1bfe796663f69aa0e9b41077dd"
+    },
+    {
+      "path": "responses/antlr-setup/receipt.json",
+      "bytes": 1335,
+      "sha256": "f76cd2dfb869ebc450bff7b5a4d68f3bf1b9de8e08c24ef01a8404bb24a1525c"
+    },
+    {
+      "path": "responses/antlr-tag/body.json",
+      "bytes": 327,
+      "sha256": "8a6da6ba88ed787a440376c6d8db46cbdcc51da8739d6f24619f539b43d72de3"
+    },
+    {
+      "path": "responses/antlr-tag/receipt.json",
+      "bytes": 1370,
+      "sha256": "caecaf5a96a00450d571553a9d7368012979ca9f65d57cd7e6de4cb0e40a5fad"
+    },
+    {
+      "path": "responses/proxy-commits/body.json",
+      "bytes": 29465,
+      "sha256": "cb413f4df8c913cbc95fe8e4c87387a0de0d373a20cb7dcd4faeee3f86aa8cb7"
+    },
+    {
+      "path": "responses/proxy-commits/receipt.json",
+      "bytes": 1347,
+      "sha256": "32883305715ac9119ce12aa01acfb9a8dc1e23e2e8fa65e91ee75d95849ec8cd"
+    },
+    {
+      "path": "responses/proxy-current-tree/body.json",
+      "bytes": 3293,
+      "sha256": "e80d694b786bfce13d6ef55b015fe79afdc49734ba3c72fee581699772d9da6f"
+    },
+    {
+      "path": "responses/proxy-current-tree/receipt.json",
+      "bytes": 1388,
+      "sha256": "45f750ab1169920b48c3ae232651b24b92b27a257f6a956399b2a50ea63c4198"
+    },
+    {
+      "path": "responses/proxy-init/body.json",
+      "bytes": 9127,
+      "sha256": "eab19a259511e4061ad39dd425a19de766c7d206868b7a9376bec5eb8952361b"
+    },
+    {
+      "path": "responses/proxy-init/receipt.json",
+      "bytes": 1343,
+      "sha256": "574fa161acbba613474527c473782110b1793d47faf2ff1bf3fff5c32d08c63f"
+    },
+    {
+      "path": "responses/proxy-license/body.json",
+      "bytes": 2273,
+      "sha256": "cbf9381186d8bf038a87c2923335793f6f97610bcbe8de17645555a6303c38d4"
+    },
+    {
+      "path": "responses/proxy-license/receipt.json",
+      "bytes": 1343,
+      "sha256": "7b7004a00a635f3b79b428cda3da56abdc349a5aed6d357ac9fc97e2886baa0f"
+    },
+    {
+      "path": "responses/proxy-preupload-setup/body.json",
+      "bytes": 1280,
+      "sha256": "a154218616214e9f0536b808b8712b2c397f422884b56d59aa8a8d9c9352fa2b"
+    },
+    {
+      "path": "responses/proxy-preupload-setup/receipt.json",
+      "bytes": 1343,
+      "sha256": "28dce6609b7ddf613281b1500994fbefc827e581e219850b0ba487ddaafc723f"
+    },
+    {
+      "path": "responses/proxy-preupload-tree/body.json",
+      "bytes": 3293,
+      "sha256": "96a43e29c1e1587b5cfae84605f69d5dfdb57ea3b34247e64dd6b1d5da8b0bd6"
+    },
+    {
+      "path": "responses/proxy-preupload-tree/receipt.json",
+      "bytes": 1388,
+      "sha256": "c6d7f85877350be9520f11a7e26da5d65559dcfefe757f25dd564b50b60cf34b"
+    },
+    {
+      "path": "responses/proxy-tags/body.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "responses/proxy-tags/receipt.json",
+      "bytes": 1340,
+      "sha256": "fd0b70ecdead090a65827e7779cf48b9408c9601b9062ba6b758146da6da2fbc"
+    },
+    {
+      "path": "RETRIEVAL-NOTES.md",
+      "bytes": 1469,
+      "sha256": "d4b6c919e3c7c6cd18cdc34b464408776cdd5b9338e2ccc263924cb549657be5"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 3782,
+      "sha256": "a63ebb71a8609d8ba695a3f17b7dfc20fe777d26e440531466f1a9139b93b10a"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 3666,
+      "sha256": "b27b1c15ab2c377cad50ffa3d85ca4385a7c1a1b7964e79e2f98a6032e0231de"
+    },
+    {
+      "path": "source-text/antlr-Recognizer.py.txt",
+      "bytes": 5383,
+      "sha256": "be6280b528c8811f4b42be58cee2b93a63d958c277c7af4eb95650fc54f34071"
+    },
+    {
+      "path": "source-text/antlr-setup.py.txt",
+      "bytes": 527,
+      "sha256": "00ce3bb1670e8e4961d9ef2414dfa6ac467b52465382841b432578f91733ec67"
+    },
+    {
+      "path": "source-text/proxy-init.py.txt",
+      "bytes": 6409,
+      "sha256": "d1539d95e1a713c068ca81d42e047b2c76568964cf277596d4e19efb22f476be"
+    },
+    {
+      "path": "source-text/proxy-setup.py.txt",
+      "bytes": 715,
+      "sha256": "75476e75fb4ead5d59ba93aa841348906f5e00565bf94f2bffed0679749780d2"
+    }
+  ]
+}

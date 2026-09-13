@@ -1,0 +1,11 @@
+{
+  "url": "https://api.github.com/repos/antlr/antlr4/git/blobs/2042d1bda6c933e504d9dc2fe3197a6e42a71fe2",
+  "started_utc": "2026-09-13T21:36:28.4523940Z",
+  "status": 200,
+  "content_type": "application/json; charset=utf-8",
+  "headers": "[Date, System.String[]] [Cache-Control, System.String[]] [Vary, System.String[]] [ETag, System.String[]] [X-GitHub-Media-Type, System.String[]] [x-github-api-version-selected, System.String[]] [Access-Control-Expose-Headers, System.String[]] [Access-Control-Allow-Origin, System.String[]] [Strict-Transport-Security, System.String[]] [X-Frame-Options, System.String[]] [X-Content-Type-Options, System.String[]] [X-XSS-Protection, System.String[]] [Referrer-Policy, System.String[]] [Content-Security-Policy, System.String[]] [Server, System.String[]] [Accept-Ranges, System.String[]] [X-RateLimit-Limit, System.String[]] [X-RateLimit-Remaining, System.String[]] [X-RateLimit-Used, System.String[]] [X-RateLimit-Resource, System.String[]] [X-RateLimit-Reset, System.String[]] [X-GitHub-Request-Id, System.String[]] [x-github-edge-region, System.String[]][Content-Type, System.String[]] [Content-Length, System.String[]]",
+  "bytes": 4001,
+  "sha256": "82652cf7f6abc3ad243a56853a61ebcaafccd56ca2e27bb6f3301622ae6bd458",
+  "error": null,
+  "finished_utc": "2026-09-13T21:36:28.7253512Z"
+}

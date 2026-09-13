@@ -1,0 +1,11 @@
+{
+  "url": "https://api.github.com/repos/antlr/antlr4/git/trees/26883533a700a997b7791daab044f7f9b6485422",
+  "started_utc": "2026-09-13T21:36:28.7392840Z",
+  "status": 200,
+  "content_type": "application/json; charset=utf-8",
+  "headers": "[Date, System.String[]] [Cache-Control, System.String[]] [Vary, System.String[]] [ETag, System.String[]] [X-GitHub-Media-Type, System.String[]] [x-github-api-version-selected, System.String[]] [Access-Control-Expose-Headers, System.String[]] [Access-Control-Allow-Origin, System.String[]] [Strict-Transport-Security, System.String[]] [X-Frame-Options, System.String[]] [X-Content-Type-Options, System.String[]] [X-XSS-Protection, System.String[]] [Referrer-Policy, System.String[]] [Content-Security-Policy, System.String[]] [Server, System.String[]] [Accept-Ranges, System.String[]] [X-RateLimit-Limit, System.String[]] [X-RateLimit-Remaining, System.String[]] [X-RateLimit-Used, System.String[]] [X-RateLimit-Resource, System.String[]] [X-RateLimit-Reset, System.String[]] [X-GitHub-Request-Id, System.String[]] [x-github-edge-region, System.String[]][Content-Type, System.String[]] [Last-Modified, System.String[]] [Content-Length, System.String[]]",
+  "bytes": 1954,
+  "sha256": "f0448c04f6feecbb772453335ea23fbaf6b6d696d3735de84060dd325fc4d32e",
+  "error": null,
+  "finished_utc": "2026-09-13T21:36:28.8936785Z"
+}

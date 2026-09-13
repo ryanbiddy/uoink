@@ -1,0 +1,7 @@
+{
+  "chunk_id": "503d68",
+  "wall_time_seconds": 0.4341286,
+  "exit_code": 0,
+  "original_token_count": 102,
+  "output": "{\r\n  \"verification\": \"PASS\",\r\n  \"sealed_payloads\": 52,\r\n  \"saved_http_responses_checked\": 15,\r\n  \"decoded_git_blobs_checked\": 6,\r\n  \"retained_wheel_member_matches\": 2,\r\n  \"antlr_tag\": \"4.9.3\",\r\n  \"proxy_release_commit_not_established\": true,\r\n  \"proxy_metadata_license_conflict_preserved\": true,\r\n  \"network_or_wheel_access\": 0,\r\n  \"archived_code_executed\": 0,\r\n  \"headers_values_not_available\": true\r\n}\r\n"
+}

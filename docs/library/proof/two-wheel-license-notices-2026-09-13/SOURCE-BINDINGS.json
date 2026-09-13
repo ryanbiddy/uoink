@@ -1,0 +1,87 @@
+{
+  "model_or_package_execution": false,
+  "local_inputs": [
+    {
+      "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate02-metadata\\evidence\\pypi\\antlr4-python3-runtime.json",
+      "target": "inputs/antlr-pypi.json"
+    },
+    {
+      "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate02-metadata\\evidence\\pypi\\proxy-tools.json",
+      "target": "inputs/proxy-pypi.json"
+    },
+    {
+      "sha256": "950e4ff459397921765ad3aad43ae0120acd0d9efd27460c4560c12430948c0c",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inspection02.json",
+      "target": "inputs/inspection02.json"
+    }
+  ],
+  "blobs": [
+    {
+      "response": "responses/antlr-license/body.json",
+      "sha256": "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a",
+      "output": "notices/antlr4-python3-runtime-4.9.3-LICENSE.txt",
+      "bytes": 2699,
+      "git_blob": "2042d1bda6c933e504d9dc2fe3197a6e42a71fe2"
+    },
+    {
+      "response": "responses/proxy-license/body.json",
+      "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4",
+      "output": "notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+      "bytes": 1436,
+      "git_blob": "078411c7399fbc0454f36cbe8c8cdbaaba7ebc95"
+    },
+    {
+      "response": "responses/proxy-preupload-setup/body.json",
+      "sha256": "75476e75fb4ead5d59ba93aa841348906f5e00565bf94f2bffed0679749780d2",
+      "output": "source-text/proxy-setup.py.txt",
+      "bytes": 715,
+      "git_blob": "2376239e25d530a4909c0d85437f133ef53fca73"
+    },
+    {
+      "response": "responses/proxy-init/body.json",
+      "sha256": "d1539d95e1a713c068ca81d42e047b2c76568964cf277596d4e19efb22f476be",
+      "output": "source-text/proxy-init.py.txt",
+      "bytes": 6409,
+      "git_blob": "ea266c8f49da949ec6199a616609637c9aab3fb8"
+    },
+    {
+      "response": "responses/antlr-setup/body.json",
+      "sha256": "00ce3bb1670e8e4961d9ef2414dfa6ac467b52465382841b432578f91733ec67",
+      "output": "source-text/antlr-setup.py.txt",
+      "bytes": 527,
+      "git_blob": "75d0dc5f55c117e03801da4fe0f8a6552ef3f62a"
+    },
+    {
+      "response": "responses/antlr-recognizer/body.json",
+      "sha256": "be6280b528c8811f4b42be58cee2b93a63d958c277c7af4eb95650fc54f34071",
+      "output": "source-text/antlr-Recognizer.py.txt",
+      "bytes": 5383,
+      "git_blob": "d87738be57ebfd87569615ef24de72e04094ecaf"
+    }
+  ],
+  "materialized_utc": "2026-09-13T21:38:09.8988996Z",
+  "retained_member_comparisons": [
+    {
+      "wheel_sha256": "a049f8570f5ce89b723ba282b90291ac3aa1fdcbd7d7100426ff659447400c68",
+      "actual_wheel_read_in_this_invocation": false,
+      "equal": true,
+      "source": "source-text/proxy-init.py.txt",
+      "bytes": 6409,
+      "sha256": "d1539d95e1a713c068ca81d42e047b2c76568964cf277596d4e19efb22f476be",
+      "package": "proxy-tools",
+      "member": "proxy_tools/__init__.py"
+    },
+    {
+      "wheel_sha256": "d50ab331bff062b5e7f74e19fb16a2e891a47e893d805bcdbff8e6e6beb09c37",
+      "actual_wheel_read_in_this_invocation": false,
+      "equal": true,
+      "source": "source-text/antlr-Recognizer.py.txt",
+      "bytes": 5383,
+      "sha256": "be6280b528c8811f4b42be58cee2b93a63d958c277c7af4eb95650fc54f34071",
+      "package": "antlr4-python3-runtime",
+      "member": "antlr4/Recognizer.py"
+    }
+  ]
+}

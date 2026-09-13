@@ -1,0 +1,7 @@
+# Exact wheel redistribution notices, 2026-09-13
+
+Find the official license and notice text applicable to the existing ANTLR Python runtime 4.9.3 and proxy-tools 0.1.0 wheels. The inspection proof committed at 95a7f29 found no license-text members in either wheel. This task proposes external redistribution notices; it does not change wheel or candidate metadata.
+
+Read the retained PyPI JSON and inspected wheel text. Follow their official project links to public repository metadata, immutable source license files, and version declarations. Record request URLs, status, UTC time, response bytes and hashes; bind text to Git blob and commit identities where available. A current license alone does not establish a historical version's terms. Preserve missing tags, redirects, failed requests and any version uncertainty.
+
+Only public JSON and small source/license text may be acquired. No wheel, sdist, model, checkpoint, media or executable artifact download; no package installation, code import or execution; no candidate edits. Limit each response to 512 KiB and do not follow redirects automatically. Retain exact license bytes in a notice proposal, with attribution and a source map separate from the unmodified upstream text. The integrator decides how to add notices to the release package after reviewing the evidence.

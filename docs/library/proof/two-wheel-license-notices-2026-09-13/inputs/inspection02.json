@@ -1,0 +1,725 @@
+{
+  "inspection_status": "VALID",
+  "exit": 0,
+  "scope": "Existing two wheel bytes only; no extraction, member import, execution, fetch, build or install. Missing license text is a separate reported finding.",
+  "results": [
+    {
+      "package": "antlr4-python3-runtime",
+      "version": "4.9.3",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\cache\\wheels\\d5\\b3\\74\\a35b66048c9de6631cd74cbc9475e6feb3e69a467983446bd8\\antlr4_python3_runtime-4.9.3-py3-none-any.whl",
+      "bytes": 144613,
+      "sha256": "d50ab331bff062b5e7f74e19fb16a2e891a47e893d805bcdbff8e6e6beb09c37",
+      "historical_pin_matched": true,
+      "artifact_verified_in_this_invocation": true,
+      "public_release_record": false,
+      "public_wheel_url": null,
+      "member_count": 61,
+      "expanded_bytes": 479266,
+      "record_members_verified": 61,
+      "inventory": [
+        {
+          "path": "antlr4/BufferedTokenStream.py",
+          "bytes": 10780,
+          "sha256": "fc1c26cce1f54ceeb22f6c82fd9694ce4821abcc3373450f1df2375299d95303",
+          "crc32": "95cb05d4",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/CommonTokenFactory.py",
+          "bytes": 2110,
+          "sha256": "4efd7ace0fe9583d43bf722986cc45bbc9f059d2de5d872a27c082e721f08c7f",
+          "crc32": "b2a0c10a",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/CommonTokenStream.py",
+          "bytes": 2770,
+          "sha256": "34d2475f0460dbf667e3a6612720f166dbd9cec3d685be898d76bb063338e5e8",
+          "crc32": "4083c081",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/FileStream.py",
+          "bytes": 868,
+          "sha256": "f9947ffa397f21ff4820160b20d230950ae54d29aee64d5550a0dcde27bb591e",
+          "crc32": "204053a5",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/InputStream.py",
+          "bytes": 2334,
+          "sha256": "b208231368c41af4a0426c45bea79eb93dda39581c1f9b52ee63326d6f30292e",
+          "crc32": "95960714",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/IntervalSet.py",
+          "bytes": 5965,
+          "sha256": "09dd162a177f9186e22d82a40cd9dc812335f4602e4bb39a4ce0b8fb962e6ece",
+          "crc32": "11be4094",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/LL1Analyzer.py",
+          "bytes": 7752,
+          "sha256": "a0906f3bbfd2f1c0256ff0f8a963717762252b4a8fe246bea1ea03c71d7a099e",
+          "crc32": "6b67a0c4",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/Lexer.py",
+          "bytes": 11542,
+          "sha256": "0bbda1a9ac9f9329a9c5be3a01c4a784f0fd915674aae5a06e81b16ba81c21c8",
+          "crc32": "bb072453",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/ListTokenSource.py",
+          "bytes": 5356,
+          "sha256": "21f7cb328ed84270ff0a32abcabae03564a4d2ae5049877ba6e672c9493bbce9",
+          "crc32": "bc47de42",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/Parser.py",
+          "bytes": 22883,
+          "sha256": "176436e73d3efff2877dadf9e0a4210eedd9395ccb15f6a0decda2c49e1d97fa",
+          "crc32": "b0d99961",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/ParserInterpreter.py",
+          "bytes": 7206,
+          "sha256": "f9053d927e31dd6090f8b480f7d476df51e889c4ea6a488767928cef697e848a",
+          "crc32": "cd85232d",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/ParserRuleContext.py",
+          "bytes": 6762,
+          "sha256": "c0701574ec4c00ee63914aa5a135d5ce7ff16272618876efbee859a6d874645f",
+          "crc32": "c3699940",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/PredictionContext.py",
+          "bytes": 22977,
+          "sha256": "71be0a23a106a52eec47327c52f3c4931a6120d66e5a1ca267de7be76837a6b2",
+          "crc32": "ffcb6a6d",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/Recognizer.py",
+          "bytes": 5383,
+          "sha256": "be6280b528c8811f4b42be58cee2b93a63d958c277c7af4eb95650fc54f34071",
+          "crc32": "87b68ab0",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/RuleContext.py",
+          "bytes": 8099,
+          "sha256": "1a2be246fda4fda97520181d24e104a03d2884969577efe1e53fc23c6fc1b268",
+          "crc32": "7b9ea2a3",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/StdinStream.py",
+          "bytes": 303,
+          "sha256": "30c487e3337c4fa8bf9eefb7fd394dfb71389cf3386f92a02b8193ea7fc55100",
+          "crc32": "6f016c8b",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/Token.py",
+          "bytes": 5206,
+          "sha256": "3ad58269be14b79d97fe72cb000fbcc78665eb1685e9310dfb4d37dee6a8684a",
+          "crc32": "09c5646d",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/TokenStreamRewriter.py",
+          "bytes": 10324,
+          "sha256": "72e12b413ad7c02ff492a56fdccb135866529be135572d72cc0fb748e84a77fb",
+          "crc32": "236f99ad",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/Utils.py",
+          "bytes": 931,
+          "sha256": "3b283c0890912f54eb17f41207f2cb955756381e25a1570a3a014d4fe89c3bb7",
+          "crc32": "34012ec8",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/__init__.py",
+          "bytes": 1125,
+          "sha256": "83c506a5f96794c59c0322ed8a17a3ceb8003f5528ddbf468707c8f109d98edc",
+          "crc32": "cf34ac79",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATN.py",
+          "bytes": 5789,
+          "sha256": "2d813c913f83f05a547797e93adc8e2eabd72c591449af374d5168c210960226",
+          "crc32": "3265f577",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNConfig.py",
+          "bytes": 6565,
+          "sha256": "b4d7480bafc6af15e5947071de7a405b20e1e8aae884b64357f5f23ebc9d44c6",
+          "crc32": "19d3c39a",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNConfigSet.py",
+          "bytes": 8312,
+          "sha256": "a91cd5b0178caa4dadc631b70eb1a9b7017a55bda11c2e70dee9a448bd06349c",
+          "crc32": "a032b960",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNDeserializationOptions.py",
+          "bytes": 1010,
+          "sha256": "95457f6c65ba9b18fbb76d1eb1d6b962ff97f66f94ff1d7ed3168b89f85720fa",
+          "crc32": "2cb07e00",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNDeserializer.py",
+          "bytes": 22252,
+          "sha256": "6982c30ed43ec32a3780877a03ec03d44dd09a97eb3d9957c63e3f2039be9946",
+          "crc32": "ef253da8",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNSimulator.py",
+          "bytes": 2298,
+          "sha256": "98373e1b7185de449eaa97c60da6d438b27458b553aa26f166592f5d06260519",
+          "crc32": "73288317",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNState.py",
+          "bytes": 7663,
+          "sha256": "35b9dd212594c050c5fefb817db4e2659f063c7a106ba51776a6c3fb28c913b7",
+          "crc32": "8aafdae5",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ATNType.py",
+          "bytes": 422,
+          "sha256": "c60bfc00c554eed734ed4ef7fe14539b502267b32f1a1a1a3f97d388eaeb0868",
+          "crc32": "b7c51302",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/LexerATNSimulator.py",
+          "bytes": 25465,
+          "sha256": "9185d1c14bc7a6d49153c4ff2bda52ac694293d632a5678794072382bcb5555a",
+          "crc32": "a89b55a4",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/LexerAction.py",
+          "bytes": 10014,
+          "sha256": "294789c0a7a405c8749b5a6848fb241c887ed7975c2801b8951ef396af7cb737",
+          "crc32": "ec60b570",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/LexerActionExecutor.py",
+          "bytes": 6420,
+          "sha256": "eeb960d7b4c77302ecb939a1ecdb0bad36d11f80d3ae6f2a21d5bdff6df90847",
+          "crc32": "a9f0674a",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/ParserATNSimulator.py",
+          "bytes": 80365,
+          "sha256": "20a0b3b032dcce744e495a2353e75a03280aaf7b2f9740e62b90e19149650126",
+          "crc32": "1a2f0b0f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/PredictionMode.py",
+          "bytes": 22486,
+          "sha256": "8bc07b3142c0eeffaa6d778263fc69eac822db590733a9326ea22b1baad2aeba",
+          "crc32": "98ebb5d5",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/SemanticContext.py",
+          "bytes": 10495,
+          "sha256": "76cd1398ce2a7a76f42cdfab976169fcdff107de7d69b37aec8d7d105eabb3ca",
+          "crc32": "a503fec2",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/Transition.py",
+          "bytes": 8762,
+          "sha256": "640b041696b923f9fecf10fa53e0dab8ce7fdf78c52bae71dcf5aeebe356d110",
+          "crc32": "03605d43",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/atn/__init__.py",
+          "bytes": 28,
+          "sha256": "82c9d076d4c7f085200a2554a507f3871c76a4546f92c5bbe928f0224ddf6129",
+          "crc32": "b32f912f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/dfa/DFA.py",
+          "bytes": 5388,
+          "sha256": "c1e221d2e6917da90fd76985bc7a3b534b6a3b718e355dfe9c7164736c64f991",
+          "crc32": "554eb0be",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/dfa/DFASerializer.py",
+          "bytes": 2518,
+          "sha256": "d6cb7f1cef39c972d8cbb8089d3127933b6003a6a6e024fec917a1fa66b3a7d1",
+          "crc32": "acab9708",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/dfa/DFAState.py",
+          "bytes": 5583,
+          "sha256": "47b27029fd06b4012cf49fcc0ff63458a72ecddb740555f5b28c3ebaff721587",
+          "crc32": "121a8c0e",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/dfa/__init__.py",
+          "bytes": 28,
+          "sha256": "82c9d076d4c7f085200a2554a507f3871c76a4546f92c5bbe928f0224ddf6129",
+          "crc32": "b32f912f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/error/DiagnosticErrorListener.py",
+          "bytes": 4430,
+          "sha256": "1304b60ff3b1e829af09ad7a34f27db9de1060f1e694f5edebe59d9f58792a0f",
+          "crc32": "119a45c2",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/error/ErrorListener.py",
+          "bytes": 2722,
+          "sha256": "c8ffcc0e0ba89780a3d3fa443f2373787defe19bd48d6e62c038e16135401db1",
+          "crc32": "7cfce00f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/error/ErrorStrategy.py",
+          "bytes": 30391,
+          "sha256": "d2687314be7b6559e32a41abb5a76d6bddd99b7357745f875b5d03543d3b557b",
+          "crc32": "84233a9d",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/error/Errors.py",
+          "bytes": 6759,
+          "sha256": "8652a781c9417d77640e20329a162cbe1d8e09796f98733691397f035be0a7ec",
+          "crc32": "5cc0290a",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/error/__init__.py",
+          "bytes": 28,
+          "sha256": "82c9d076d4c7f085200a2554a507f3871c76a4546f92c5bbe928f0224ddf6129",
+          "crc32": "b32f912f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/Chunk.py",
+          "bytes": 695,
+          "sha256": "a022198e894babdc64c6d54344e103c5f50682775c127b035b479498b33b1a99",
+          "crc32": "5d103876",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/ParseTreeMatch.py",
+          "bytes": 4485,
+          "sha256": "0dce86556494aa820015751a519a94c0252565f4dc8146c62c6ccd7fa43142f1",
+          "crc32": "ec277d49",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/ParseTreePattern.py",
+          "bytes": 2825,
+          "sha256": "01204d6903918777fb7fc2a715e6490b6c96145c78b90971bc2d98e7989f858d",
+          "crc32": "6334e957",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/ParseTreePatternMatcher.py",
+          "bytes": 16388,
+          "sha256": "1ed13dca2d54aebd903cb18b24306faf4971bfa6e3ba3f421e5fb87256a149ef",
+          "crc32": "68f82b32",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/RuleTagToken.py",
+          "bytes": 2022,
+          "sha256": "9f8cd7726aeb7ec1b297dd698f965871cfc278a3213ebbd8914769a60301a5b6",
+          "crc32": "9f6aa8bb",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/TokenTagToken.py",
+          "bytes": 1576,
+          "sha256": "4b7a370c985fccbe64a42971b0ac88f8897ec6fbae650881008b0b08a163447a",
+          "crc32": "80223dfb",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/Tree.py",
+          "bytes": 5572,
+          "sha256": "648ed4ff923104b9bf22b9df24eb5bd760423c85b2cdf799b4b9e11ca555648c",
+          "crc32": "20c2cac1",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/Trees.py",
+          "bytes": 3968,
+          "sha256": "26d43b7185a62b023d4c804feb2f572208e5352e26623bf7011c0e7f059ce558",
+          "crc32": "f621def2",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/tree/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/xpath/XPath.py",
+          "bytes": 13015,
+          "sha256": "3bdb38f840ef2db01b632b4ffdb69ef59da484b974880b51ccf02d55bb9650ce",
+          "crc32": "fb615f74",
+          "compression": 8
+        },
+        {
+          "path": "antlr4/xpath/__init__.py",
+          "bytes": 28,
+          "sha256": "82c9d076d4c7f085200a2554a507f3871c76a4546f92c5bbe928f0224ddf6129",
+          "crc32": "b32f912f",
+          "compression": 8
+        },
+        {
+          "path": "antlr4_python3_runtime-4.9.3.data/scripts/pygrun",
+          "bytes": 6275,
+          "sha256": "19e5db997a20d119517c06c855cf5a09e0edce61268d81faa5c26f50cc844868",
+          "crc32": "d0c5b1ea",
+          "compression": 8
+        },
+        {
+          "path": "antlr4_python3_runtime-4.9.3.dist-info/METADATA",
+          "bytes": 418,
+          "sha256": "d1de5c7416841a56a3d73795e7f30587c2b8f3ba01fbbff68c094e308c629e7d",
+          "crc32": "ad706042",
+          "compression": 8
+        },
+        {
+          "path": "antlr4_python3_runtime-4.9.3.dist-info/WHEEL",
+          "bytes": 91,
+          "sha256": "2b6eb4118ce7cd7b09601406aa623c553c4476265836f0d9c16f5c061f7efcc0",
+          "crc32": "9d7f9899",
+          "compression": 8
+        },
+        {
+          "path": "antlr4_python3_runtime-4.9.3.dist-info/top_level.txt",
+          "bytes": 7,
+          "sha256": "3aca19b21f5b6f7d308176f6cc1523743c18838e8c7d5f9155903a3e4f29701d",
+          "crc32": "f37b5e66",
+          "compression": 8
+        },
+        {
+          "path": "antlr4_python3_runtime-4.9.3.dist-info/RECORD",
+          "bytes": 5032,
+          "sha256": "620efc093ea8a6f329280df3592075dc1ef01ad9df8c5a896d9b2bcf7878865f",
+          "crc32": "b2e8eb5d",
+          "compression": 8
+        }
+      ],
+      "selected_text": {
+        "antlr4_python3_runtime-4.9.3.data/scripts/pygrun": "#!python\r\n__author__ = 'jszheng'\r\nimport optparse\r\nimport sys\r\nimport os\r\nimport importlib\r\nfrom antlr4 import *\r\n\r\n\r\n# this is a python version of TestRig\r\ndef beautify_lisp_string(in_string):\r\n    indent_size = 3\r\n    add_indent = ' '*indent_size\r\n    out_string = in_string[0]  # no indent for 1st (\r\n    indent = ''\r\n    for i in range(1, len(in_string)):\r\n        if in_string[i] == '(' and in_string[i+1] != ' ':\r\n            indent += add_indent\r\n            out_string += \"\\n\" + indent + '('\r\n        elif in_string[i] == ')':\r\n            out_string += ')'\r\n            if len(indent) > 0:\r\n                indent = indent.replace(add_indent, '', 1)\r\n        else:\r\n            out_string += in_string[i]\r\n    return out_string\r\n\r\n\r\nif __name__ == '__main__':\r\n\r\n    #############################################################\r\n    # parse options\r\n    # not support -gui -encoding -ps\r\n    #############################################################\r\n    usage = \"Usage: %prog [options] Grammar_Name Start_Rule\"\r\n    parser = optparse.OptionParser(usage=usage)\r\n    # parser.add_option('-t', '--tree',\r\n    #                   dest=\"out_file\",\r\n    #                   default=\"default.out\",\r\n    #                   help='set output file name',\r\n    #                   )\r\n    parser.add_option('-t', '--tree',\r\n                      default=False,\r\n                      action='store_true',\r\n                      help='Print AST tree'\r\n                      )\r\n    parser.add_option('-k', '--tokens',\r\n                      dest=\"token\",\r\n                      default=False,\r\n                      action='store_true',\r\n                      help='Show Tokens'\r\n                      )\r\n    parser.add_option('-s', '--sll',\r\n                      dest=\"sll\",\r\n                      default=False,\r\n                      action='store_true',\r\n                      help='Show SLL'\r\n                      )\r\n    parser.add_option('-d', '--diagnostics',\r\n                      dest=\"diagnostics\",\r\n                      default=False,\r\n                      action='store_true',\r\n                      help='Enable diagnostics error listener'\r\n                      )\r\n    parser.add_option('-a', '--trace',\r\n                      dest=\"trace\",\r\n                      default=False,\r\n                      action='store_true',\r\n                      help='Enable Trace'\r\n                      )\r\n\r\n    options, remainder = parser.parse_args()\r\n    if len(remainder) < 2:\r\n        print('ERROR: You have to provide at least 2 arguments!')\r\n        parser.print_help()\r\n        exit(1)\r\n    else:\r\n        grammar = remainder.pop(0)\r\n        start_rule = remainder.pop(0)\r\n        file_list = remainder\r\n\r\n    #############################################################\r\n    # check and load antlr generated files\r\n    #############################################################\r\n    # dynamic load the module and class\r\n    lexerName = grammar + 'Lexer'\r\n    parserName = grammar + 'Parser'\r\n    # check if the generate file exist\r\n    lexer_file = lexerName + '.py'\r\n    parser_file = parserName + '.py'\r\n    if not os.path.exists(lexer_file):\r\n        print(\"[ERROR] Can't find lexer file {}!\".format(lexer_file))\r\n        print(os.path.realpath('.'))\r\n        exit(1)\r\n    if not os.path.exists(parser_file):\r\n        print(\"[ERROR] Can't find parser file {}!\".format(lexer_file))\r\n        print(os.path.realpath('.'))\r\n        exit(1)\r\n\r\n    # current directory is where the generated file loaded\r\n    # the script might be in different place.\r\n    sys.path.append('.')\r\n    # print(sys.path)\r\n\r\n    # print(\"Load Lexer {}\".format(lexerName))\r\n    module_lexer = __import__(lexerName, globals(), locals(), lexerName)\r\n    class_lexer = getattr(module_lexer, lexerName)\r\n    # print(class_lexer)\r\n\r\n    # print(\"Load Parser {}\".format(parserName))\r\n    module_parser = __import__(parserName, globals(), locals(), parserName)\r\n    class_parser = getattr(module_parser, parserName)\r\n    # print(class_parser)\r\n\r\n    #############################################################\r\n    # main process steps.\r\n    #############################################################\r\n    def process(input_stream, class_lexer, class_parser):\r\n        lexer = class_lexer(input_stream)\r\n        token_stream = CommonTokenStream(lexer)\r\n        token_stream.fill()\r\n        if options.token:  # need to show token\r\n            for tok in token_stream.tokens:\r\n                print(tok)\r\n        if start_rule == 'tokens':\r\n            return\r\n\r\n        parser = class_parser(token_stream)\r\n\r\n        if options.diagnostics:\r\n            parser.addErrorListener(DiagnosticErrorListener())\r\n            parser._interp.predictionMode = PredictionMode.LL_EXACT_AMBIG_DETECTION\r\n        if options.tree:\r\n            parser.buildParseTrees = True\r\n        if options.sll:\r\n            parser._interp.predictionMode = PredictionMode.SLL\r\n        #parser.setTokenStream(token_stream)\r\n        parser.setTrace(options.trace)\r\n        if hasattr(parser, start_rule):\r\n            func_start_rule = getattr(parser, start_rule)\r\n            parser_ret = func_start_rule()\r\n            if options.tree:\r\n                lisp_tree_str = parser_ret.toStringTree(recog=parser)\r\n                print(beautify_lisp_string(lisp_tree_str))\r\n        else:\r\n            print(\"[ERROR] Can't find start rule '{}' in parser '{}'\".format(start_rule, parserName))\r\n\r\n    #############################################################\r\n    # use stdin if not provide file as input stream\r\n    #############################################################\r\n    if len(file_list) == 0:\r\n        input_stream = InputStream(sys.stdin.read())\r\n        process(input_stream, class_lexer, class_parser)\r\n        exit(0)\r\n\r\n    #############################################################\r\n    # iterate all input file\r\n    #############################################################\r\n    for file_name in file_list:\r\n        if os.path.exists(file_name) and os.path.isfile(file_name):\r\n            input_stream = FileStream(file_name)\r\n            process(input_stream, class_lexer, class_parser)\r\n        else:\r\n            print(\"[ERROR] file {} not exist\".format(os.path.normpath(file_name)))\r\n",
+        "antlr4_python3_runtime-4.9.3.dist-info/METADATA": "Metadata-Version: 2.4\r\nName: antlr4-python3-runtime\r\nVersion: 4.9.3\r\nSummary: ANTLR 4.9.3 runtime for Python 3.7\r\nHome-page: http://www.antlr.org\r\nAuthor: Eric Vergnaud, Terence Parr, Sam Harwell\r\nAuthor-email: eric.vergnaud@wanadoo.fr\r\nLicense: BSD\r\nRequires-Dist: typing; python_version < \"3.5\"\r\nDynamic: author\r\nDynamic: author-email\r\nDynamic: home-page\r\nDynamic: license\r\nDynamic: requires-dist\r\nDynamic: summary\r\n",
+        "antlr4_python3_runtime-4.9.3.dist-info/WHEEL": "Wheel-Version: 1.0\nGenerator: setuptools (83.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n",
+        "antlr4_python3_runtime-4.9.3.dist-info/RECORD": "antlr4/BufferedTokenStream.py,sha256=_BwmzOH1TO6yL2yC_ZaUzkghq8wzc0UPHfI3UpnZUwM,10780\nantlr4/CommonTokenFactory.py,sha256=Tv16zg_pWD1Dv3IphsxFu8nwWdLeXYcqJ8CC5yHwjH8,2110\nantlr4/CommonTokenStream.py,sha256=NNJHXwRg2_Zn46ZhJyDxZtvZzsPWhb6JjXa7BjM45eg,2770\nantlr4/FileStream.py,sha256=-ZR_-jl_If9IIBYLINIwlQrlTSmu5k1VUKDc3ie7WR4,868\nantlr4/InputStream.py,sha256=sggjE2jEGvSgQmxFvqeeuT3aOVgcH5tS7mMybW8wKS4,2334\nantlr4/IntervalSet.py,sha256=Cd0WKhd_kYbiLYKkDNncgSM19GAuS7OaTOC4-5Yubs4,5965\nantlr4/LL1Analyzer.py,sha256=oJBvO7_S8cAlb_D4qWNxd2IlK0qP4ka-oeoDxx16CZ4,7752\nantlr4/Lexer.py,sha256=C72hqayfkympxb46AcSnhPD9kVZ0quWgboGxa6gcIcg,11542\nantlr4/ListTokenSource.py,sha256=IffLMo7YQnD_CjKryrrgNWSk0q5QSYd7puZyyUk7vOk,5356\nantlr4/Parser.py,sha256=F2Q25z0-__KHfa354KQhDu3ZOVzLFfag3s2ixJ4dl_o,22883\nantlr4/ParserInterpreter.py,sha256=-QU9kn4x3WCQ-LSA99R231HoicTqakiHZ5KM72l-hIo,7206\nantlr4/ParserRuleContext.py,sha256=wHAVdOxMAO5jkUqloTXVzn_xYnJhiHbvvuhZpth0ZF8,6762\nantlr4/PredictionContext.py,sha256=cb4KI6EGpS7sRzJ8UvPEkxphINZuWhyiZ95752g3prI,22977\nantlr4/Recognizer.py,sha256=vmKAtSjIgR9LQr5YzuK5OmPZWMJ3x69OuVZQ_FTzQHE,5383\nantlr4/RuleContext.py,sha256=GiviRv2k_al1IBgdJOEEoD0ohJaVd-_h5T_CPG_Bsmg,8099\nantlr4/StdinStream.py,sha256=MMSH4zN8T6i_nu-3_TlN-3E4nPM4b5KgK4GT6n_FUQA,303\nantlr4/Token.py,sha256=OtWCab4Ut52X_nLLAA-8x4Zl6xaF6TEN-0033uaoaEo,5206\nantlr4/TokenStreamRewriter.py,sha256=cuErQTrXwC_0kqVv3MsTWGZSm-E1Vy1yzA-3SOhKd_s,10324\nantlr4/Utils.py,sha256=Oyg8CJCRL1TrF_QSB_LLlVdWOB4loVcKOgFNT-icO7c,931\nantlr4/__init__.py,sha256=g8UGpflnlMWcAyLtihejzrgAP1Uo3b9GhwfI8QnZjtw,1125\nantlr4/atn/ATN.py,sha256=LYE8kT-D8FpUd5fpOtyOLqvXLFkUSa83TVFowhCWAiY,5789\nantlr4/atn/ATNConfig.py,sha256=tNdIC6_GrxXllHBx3npAWyDh6KrohLZDV_XyPrydRMY,6565\nantlr4/atn/ATNConfigSet.py,sha256=qRzVsBeMqk2txjG3DrGptwF6Vb2hHC5w3umkSL0GNJw,8312\nantlr4/atn/ATNDeserializationOptions.py,sha256=lUV_bGW6mxj7t20esda5Yv-X9m-U_x1-0xaLifhXIPo,1010\nantlr4/atn/ATNDeserializer.py,sha256=aYLDDtQ-wyo3gId6A-wD1E3QmpfrPZlXxj4_IDm-mUY,22252\nantlr4/atn/ATNSimulator.py,sha256=mDc-G3GF3kSeqpfGDabUOLJ0WLVTqibxZlkvXQYmBRk,2298\nantlr4/atn/ATNState.py,sha256=NbndISWUwFDF_vuBfbTiZZ8GPHoQa6UXdqbD-yjJE7c,7663\nantlr4/atn/ATNType.py,sha256=xgv8AMVU7tc07U73_hRTm1AiZ7MvGhoaP5fTiOrrCGg,422\nantlr4/atn/LexerATNSimulator.py,sha256=kYXRwUvHptSRU8T_K9pSrGlCk9YypWeHlAcjgry1VVo,25465\nantlr4/atn/LexerAction.py,sha256=KUeJwKekBch0m1poSPskHIh-15dcKAG4lR7zlq98tzc,10014\nantlr4/atn/LexerActionExecutor.py,sha256=7rlg17THcwLsuTmh7NsLrTbRH4DTrm8qIdW9_235CEc,6420\nantlr4/atn/ParserATNSimulator.py,sha256=IKCzsDLcznROSVojU-daAygKr3svl0DmK5DhkUllASY,80365\nantlr4/atn/PredictionMode.py,sha256=i8B7MULA7v-qbXeCY_xp6sgi21kHM6kybqIrG6rSrro,22486\nantlr4/atn/SemanticContext.py,sha256=ds0TmM4qenb0LN-rl2Fp_N_xB959abN67I19EF6rs8o,10495\nantlr4/atn/Transition.py,sha256=ZAsEFpa5I_n-zxD6U-DauM5_33jFK65x3PWu6-NW0RA,8762\nantlr4/atn/__init__.py,sha256=gsnQdtTH8IUgCiVUpQfzhxx2pFRvksW76SjwIk3fYSk,28\nantlr4/dfa/DFA.py,sha256=weIh0uaRfakP12mFvHo7U0tqO3GONV3-nHFkc2xk-ZE,5388\nantlr4/dfa/DFASerializer.py,sha256=1st_HO85yXLYy7gInTEnkztgA6am4CT-yReh-mazp9E,2518\nantlr4/dfa/DFAState.py,sha256=R7JwKf0GtAEs9J_MD_Y0WKcuzdt0BVX1sow-uv9yFYc,5583\nantlr4/dfa/__init__.py,sha256=gsnQdtTH8IUgCiVUpQfzhxx2pFRvksW76SjwIk3fYSk,28\nantlr4/error/DiagnosticErrorListener.py,sha256=EwS2D_Ox6CmvCa16NPJ9ud4QYPHmlPXt6-Wdn1h5Kg8,4430\nantlr4/error/ErrorListener.py,sha256=yP_MDguol4Cj0_pEPyNzeH3v4ZvUjW5iwDjhYTVAHbE,2722\nantlr4/error/ErrorStrategy.py,sha256=0mhzFL57ZVnjKkGrtadta93Zm3NXdF-HW10DVD07VXs,30391\nantlr4/error/Errors.py,sha256=hlKngclBfXdkDiAymhYsvh2OCXlvmHM2kTl_A1vgp-w,6759\nantlr4/error/__init__.py,sha256=gsnQdtTH8IUgCiVUpQfzhxx2pFRvksW76SjwIk3fYSk,28\nantlr4/tree/Chunk.py,sha256=oCIZjolLq9xkxtVDROEDxfUGgndcEnsDW0eUmLM7Gpk,695\nantlr4/tree/ParseTreeMatch.py,sha256=Dc6GVWSUqoIAFXUaUZqUwCUlZfTcgUbGLGzNf6QxQvE,4485\nantlr4/tree/ParseTreePattern.py,sha256=ASBNaQORh3f7f8KnFeZJC2yWFFx4uQlxvC2Y55ifhY0,2825\nantlr4/tree/ParseTreePatternMatcher.py,sha256=HtE9yi1Urr2QPLGLJDBvr0lxv6bjuj9CHl-4clahSe8,16388\nantlr4/tree/RuleTagToken.py,sha256=n4zXcmrrfsGyl91pj5ZYcc_CeKMhPrvYkUdppgMBpbY,2022\nantlr4/tree/TokenTagToken.py,sha256=S3o3DJhfzL5kpClxsKyI-Il-xvuuZQiBAIsLCKFjRHo,1576\nantlr4/tree/Tree.py,sha256=ZI7U_5IxBLm_IrnfJOtb12BCPIWyzfeZtLnhHKVVZIw,5572\nantlr4/tree/Trees.py,sha256=JtQ7cYWmKwI9TIBP6y9XIgjlNS4mYjv3ARwOfwWc5Vg,3968\nantlr4/tree/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0\nantlr4/xpath/XPath.py,sha256=O9s4-EDvLbAbYytP_bae9Z2khLl0iAtRzPAtVbuWUM4,13015\nantlr4/xpath/__init__.py,sha256=gsnQdtTH8IUgCiVUpQfzhxx2pFRvksW76SjwIk3fYSk,28\nantlr4_python3_runtime-4.9.3.data/scripts/pygrun,sha256=GeXbmXog0RlRfAbIVc9aCeDtzmEmjYH6pcJvUMyESGg,6275\nantlr4_python3_runtime-4.9.3.dist-info/METADATA,sha256=0d5cdBaEGlaj1zeV5_MFh8K487oB-7_2jAlOMIxinn0,418\nantlr4_python3_runtime-4.9.3.dist-info/WHEEL,sha256=K260EYznzXsJYBQGqmI8VTxEdiZYNvDZwW9cBh9-_MA,91\nantlr4_python3_runtime-4.9.3.dist-info/top_level.txt,sha256=OsoZsh9bb30wgXb2zBUjdDwYg46MfV-RVZA6Pk8pcB0,7\nantlr4_python3_runtime-4.9.3.dist-info/RECORD,,\n"
+      },
+      "script_text_member": "antlr4_python3_runtime-4.9.3.data/scripts/pygrun",
+      "script_text_sha256": "19e5db997a20d119517c06c855cf5a09e0edce61268d81faa5c26f50cc844868",
+      "script_execution_or_install_approved": false,
+      "license_text_members": [],
+      "license_text_missing": true,
+      "metadata_license_claim": [
+        "BSD"
+      ],
+      "requires_python": [],
+      "requires_dist": [
+        "typing; python_version < \"3.5\""
+      ],
+      "path_identity": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 562949955091636,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 144613,
+        "st_mtime_ns": 1789018002394000400,
+        "st_ctime_ns": 1789018002267015300,
+        "st_birthtime_ns": 1789018002267015300
+      },
+      "handle_identity": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 562949955091636,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 144613,
+        "st_mtime_ns": 1789018002394000400,
+        "st_ctime_ns": 1789018002423002100,
+        "st_birthtime_ns": 1789018002267015300
+      },
+      "provenance_limit": "Historical pip log/origin claims were retained; matching bytes do not authenticate a publisher or reproduce the build."
+    },
+    {
+      "package": "proxy-tools",
+      "version": "0.1.0",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\cache\\wheels\\1b\\86\\84\\a8355e4f91698784a475f3eb40500d31a57c528e3217758043\\proxy_tools-0.1.0-py3-none-any.whl",
+      "bytes": 2943,
+      "sha256": "a049f8570f5ce89b723ba282b90291ac3aa1fdcbd7d7100426ff659447400c68",
+      "historical_pin_matched": true,
+      "artifact_verified_in_this_invocation": true,
+      "public_release_record": false,
+      "public_wheel_url": null,
+      "member_count": 5,
+      "expanded_bytes": 7432,
+      "record_members_verified": 5,
+      "inventory": [
+        {
+          "path": "proxy_tools/__init__.py",
+          "bytes": 6409,
+          "sha256": "d1539d95e1a713c068ca81d42e047b2c76568964cf277596d4e19efb22f476be",
+          "crc32": "e9b70464",
+          "compression": 8
+        },
+        {
+          "path": "proxy_tools-0.1.0.dist-info/METADATA",
+          "bytes": 527,
+          "sha256": "34f8db57e46ca03c6185c649a15cc52a0c9120f4f781e9b64701044b22a7fc86",
+          "crc32": "92c4abd7",
+          "compression": 8
+        },
+        {
+          "path": "proxy_tools-0.1.0.dist-info/WHEEL",
+          "bytes": 91,
+          "sha256": "2b6eb4118ce7cd7b09601406aa623c553c4476265836f0d9c16f5c061f7efcc0",
+          "crc32": "9d7f9899",
+          "compression": 8
+        },
+        {
+          "path": "proxy_tools-0.1.0.dist-info/top_level.txt",
+          "bytes": 12,
+          "sha256": "5787cceffb627f279f0ca8c359b2a84462a455fee63525f3fbde19c2de0ff252",
+          "crc32": "b95a380d",
+          "compression": 8
+        },
+        {
+          "path": "proxy_tools-0.1.0.dist-info/RECORD",
+          "bytes": 393,
+          "sha256": "de7d732cc8aa447857bb1d37bbe3d77eb8b140ae2ee15e6705963a41ae2b0365",
+          "crc32": "807655fa",
+          "compression": 8
+        }
+      ],
+      "selected_text": {
+        "proxy_tools-0.1.0.dist-info/METADATA": "Metadata-Version: 2.4\r\nName: proxy_tools\r\nVersion: 0.1.0\r\nSummary: Proxy Implementation\r\nHome-page: http://github.com/jtushman/proxy_tools\r\nAuthor: Jonathan Tushman\r\nAuthor-email: jonathan@zefr.com\r\nLicense: MIT\r\nClassifier: Intended Audience :: Developers\r\nClassifier: License :: OSI Approved :: MIT License\r\nClassifier: Programming Language :: Python :: 2.7\r\nClassifier: Programming Language :: Python :: 3\r\nDynamic: author\r\nDynamic: author-email\r\nDynamic: classifier\r\nDynamic: home-page\r\nDynamic: license\r\nDynamic: summary\r\n",
+        "proxy_tools-0.1.0.dist-info/WHEEL": "Wheel-Version: 1.0\nGenerator: setuptools (83.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n",
+        "proxy_tools-0.1.0.dist-info/RECORD": "proxy_tools/__init__.py,sha256=0VOdleGnE8BoyoHULgR7LHZWiWTPJ3WW1OGe-yL0dr4,6409\nproxy_tools-0.1.0.dist-info/METADATA,sha256=NPjbV-RsoDxhhcZJoVzFKgyRIPT3gem2RwEESyKn_IY,527\nproxy_tools-0.1.0.dist-info/WHEEL,sha256=K260EYznzXsJYBQGqmI8VTxEdiZYNvDZwW9cBh9-_MA,91\nproxy_tools-0.1.0.dist-info/top_level.txt,sha256=V4fM7_tifyefDKjDWbKoRGKkVf7mNSXz-94Zwt4P8lI,12\nproxy_tools-0.1.0.dist-info/RECORD,,\n"
+      },
+      "script_text_member": null,
+      "script_text_sha256": null,
+      "script_execution_or_install_approved": false,
+      "license_text_members": [],
+      "license_text_missing": true,
+      "metadata_license_claim": [
+        "MIT"
+      ],
+      "requires_python": [],
+      "requires_dist": [],
+      "path_identity": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 844424931802241,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2943,
+        "st_mtime_ns": 1789018002747314300,
+        "st_ctime_ns": 1789018002743953500,
+        "st_birthtime_ns": 1789018002743953500
+      },
+      "handle_identity": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 844424931802241,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2943,
+        "st_mtime_ns": 1789018002747314300,
+        "st_ctime_ns": 1789018002771316600,
+        "st_birthtime_ns": 1789018002743953500
+      },
+      "provenance_limit": "Historical pip log/origin claims were retained; matching bytes do not authenticate a publisher or reproduce the build."
+    }
+  ],
+  "error": null,
+  "preparation_sha256": "7ea8f1951bbbc7324bda36ab5528df19a864b45c0738a9a970235b704f465b42",
+  "source_hashes_after": [
+    {
+      "path": "before-cp437-preload/inspect_existing_wheels.py",
+      "bytes": 12656,
+      "sha256": "5850e3de4b33eccee654b8df51b1b2e074f06dd549f7b1d30d8c8c325f826218"
+    },
+    {
+      "path": "before-cp437-preload/PREPARATION-HASHES.json",
+      "bytes": 2516,
+      "sha256": "eee7ec569c027ec060b52e4ae811f8d8df1aefdc9b20951c9c1177011b65b0ca"
+    },
+    {
+      "path": "before-inspection01/inspect_existing_wheels.py",
+      "bytes": 12679,
+      "sha256": "e8401878d352026fc56a2d5b3aa58637bfeb05c8365785deb8caa6a3ce5814d2"
+    },
+    {
+      "path": "before-inspection01/PREPARATION-HASHES.json",
+      "bytes": 3172,
+      "sha256": "57e8c6ba88efabf44f67eccd2cf214cd1c2f13d3d8278e9590325c7c28909d52"
+    },
+    {
+      "path": "before-publication-clock/inspect_existing_wheels.py",
+      "bytes": 12648,
+      "sha256": "756f9c190f4cc1bca90db2834f4cf18e65e18949f4619532d9a84e498fc2364f"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1317,
+      "sha256": "7ad164a68909e8e51b0676da8dafe7a47cf96f2ef402a704f7d4d242a5e30a48"
+    },
+    {
+      "path": "CP437-PRELOAD-REPAIR.md",
+      "bytes": 794,
+      "sha256": "deaab9edc0c279461bac08459d0a343f1575cdf8de5dde113086382845440575"
+    },
+    {
+      "path": "cp437-preload.patch.txt",
+      "bytes": 733,
+      "sha256": "b83cd1e66864549e90876376e4102a45566c3ce7eb47694ed339691d21c6ef4c"
+    },
+    {
+      "path": "inputs/antlr-origin.json",
+      "bytes": 344,
+      "sha256": "21b1ca13e0884e0c9dc3194c15b95afc28871f67362d415454f569734f2f0a68"
+    },
+    {
+      "path": "inputs/antlr-pypi.json",
+      "bytes": 28137,
+      "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15"
+    },
+    {
+      "path": "inputs/historical-commands.json",
+      "bytes": 1994,
+      "sha256": "0ea778fcaf1affa8808efa9ffe1bb8910e63588476bf3bb42a7f3a1141726e1b"
+    },
+    {
+      "path": "inputs/historical-install-command.json",
+      "bytes": 948,
+      "sha256": "489cf804bdbc42c88460751d6515cfbe52e1e3e4206d1369024aecb92453105f"
+    },
+    {
+      "path": "inputs/historical-install-report.json",
+      "bytes": 2079145,
+      "sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303"
+    },
+    {
+      "path": "inputs/historical-install.stdout.txt",
+      "bytes": 37666,
+      "sha256": "aec0733af2050bdb45bebcbf1a159ca5f5eead4fb87d8f2db055a414d597fd90"
+    },
+    {
+      "path": "inputs/proxy-origin.json",
+      "bytes": 333,
+      "sha256": "bcf6c01adc52c53a7598af78be2cb2826d1b70954f0144e1d4e2f89914838040"
+    },
+    {
+      "path": "inputs/proxy-pypi.json",
+      "bytes": 3887,
+      "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0"
+    },
+    {
+      "path": "inspect_existing_wheels.py",
+      "bytes": 13311,
+      "sha256": "33489998f47ea9a445a8e60d17fca36d73df99a9c194741da276dd5e7cafd3e6"
+    },
+    {
+      "path": "INSPECTION-PROTOCOL.md",
+      "bytes": 4026,
+      "sha256": "7838e6c80a2d8c02e4637eda0850d8f92500f149c94dd437c6365915f170879f"
+    },
+    {
+      "path": "INSPECTION02-PROTOCOL.md",
+      "bytes": 1939,
+      "sha256": "1a39cc6ec1f2dfd55ee9006066bee6e046fb0dc70c70211903b33463b43ff6b9"
+    },
+    {
+      "path": "launcher-label.patch.txt",
+      "bytes": 2656,
+      "sha256": "ee9afb9d29c2a0489c92600b445eba160139a652ee79b5072ad9fda32d2931cd"
+    },
+    {
+      "path": "PREPUBLICATION-CLOCK-REFINEMENT.md",
+      "bytes": 529,
+      "sha256": "6d2e669e121818af7207386194621416bc35b899c8d1decbc96bb849c76a54f7"
+    },
+    {
+      "path": "REPAIR-PLAN.md",
+      "bytes": 4993,
+      "sha256": "e63ee1ff3ed38182cf6249da90293653b8de52c1c8daac014335368a37711650"
+    },
+    {
+      "path": "REPAIR02-BRIEF.md",
+      "bytes": 2197,
+      "sha256": "177989a321b6d8b56963e9eb02e4d7ec487850f3235045f6db0b06ec4cae7ce6"
+    },
+    {
+      "path": "run_inspection01.ps1",
+      "bytes": 5127,
+      "sha256": "1deeaf69ad7b910e2ca5fbe4f9b2534cf977859a77a27529dbd0f419acab4aec"
+    },
+    {
+      "path": "run_inspection02.ps1",
+      "bytes": 5127,
+      "sha256": "5ce46cdc706a44b3f94115d3ac322e43cdbd1f58a4da0450026014f56d87eda7"
+    },
+    {
+      "path": "script-root-repair.patch.txt",
+      "bytes": 6693,
+      "sha256": "33e457853ae65e1f52b9a8286d4c66c2ac09455208aa22c618aa582a09fb2172"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 2421,
+      "sha256": "1986a4a9871f908a20f76f6c32d27e089687bbf5e46826b436c63765200aae69"
+    },
+    {
+      "path": "SOURCE-COPY-BINDINGS.json",
+      "bytes": 5969,
+      "sha256": "55a1f3feaa8e7e246ef0055e944376f7ea2282242583e3dc83439ce989e809d8"
+    }
+  ],
+  "guard": {
+    "startup_binding": true,
+    "violations": []
+  },
+  "elapsed_seconds": 0.04581079998752102
+}
