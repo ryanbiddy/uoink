@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner repair ff67b84 accepted; process proposals c1008e0b and a5e7ba0d held | Grok: 35 worker cases pass, two new boundaries fail and two controls pass. Astra's first correction has 39 synthetic passes; stable native discovery remains under repair | Follow MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF in the completed Grok worktree; no real-process suites until review. Tree08 cause remains unproved |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
+| Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; candidate02 metadata reviewed at f22456c | Candidate02: 144 pins, 282 edges, zero missing targets; FAIL on five WhisperX constraints, two source-only wheels and local NLTK evidence gap. All 359 review payloads match Git. No runtime change or installed credit | Finish source/API and advisory review for a concrete migration proposal. Combined tree/package09 follow mirror repair; model qualification retains Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree08 at 9dd0cfb remains failed; future receipt instruments reviewed at e8b5d8e | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Corrected partition validator: 53 synthetic passes in agent and Astra runs; abnormal shutdown is refused | Finish process-authority repair03, qualify combined source, then package09. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -164,6 +164,15 @@ is complete but is not this goal's completion. Current queue:
    wheel failures. No binary/runtime security clearance follows from metadata.
    Gemini 85ce8600 stays INCOMPLETE despite its completed/zero status. Read the
    revised RUNTIME-GRAPH-01 and RUNTIME-GRAPH-BOUNDARY-REVIEW documents.
+   Candidate02 is now independently reviewed at f22456c; read
+   ASTRA-RUNTIME-CANDIDATE02-REVIEW-2026-09-13.md. Both offline executions exit
+   one with 144 selections, 282 active edges and zero missing targets. Five
+   WhisperX conflicts, two source-only wheel failures and the accepted local
+   NLTK version's missing public record remain. The 359-payload review seal
+   preserves nine new metadata retrievals and the original 342-payload capture.
+   Source/API and fresh advisory review continue without installing dependencies
+   or executing models. Prepare an exact derivative and protocol before Ryan's
+   frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
    before the retained worker reports. Hash-override, path/receipt and test
    isolation gaps were corrected; original proposals are archived. Final result
@@ -3673,3 +3682,25 @@ WhisperX constraints, two known source-only wheel records and the local NLTK
 artifact's absence from public PyPI. The new 342-payload scratch capture is not
 an accepted runtime or installed artifact. Source/API review follows without
 models or binary downloads. Website and marketing remain paused.
+
+### 2026-09-13 — proposed runtime graph independently verified
+
+f22456c retains the candidate02 metadata selection and an independent Astra
+execution. Both exit one with 144 pins / 282 active edges / zero missing targets.
+All five WhisperX conflicts, two known source-only wheel failures and one local
+NLTK public-record gap remain. The 359 review payloads match staged Git and
+disk; 342 original capture files are unchanged, nine retrievals are verified
+and 141 exact METADATA bindings match published hashes. No dependency changed.
+
+An Astra reader preflight incorrectly treated propagated extras as root extras.
+The original-lock assertion stopped it before any selection write or checker
+execution. Lightning and MCP already activate fsspec[http] and pyjwt[crypto],
+and the original graph records both. The incorrect proposal is withdrawn and
+retained; no graph02 measurement exists. The independent review used the original
+selection without modification. Inspect actual active_extras before claiming a
+selection omitted transitive extras.
+
+Native compatibility, loader/cache safety and fresh advisories still need
+review. Version metadata cannot authorize model deserialization or frozen-test
+changes. Candidate source/API review and the reference-candidate OSV query are
+separate metadata/source-only tasks; no model, binary or media fetch is included.
