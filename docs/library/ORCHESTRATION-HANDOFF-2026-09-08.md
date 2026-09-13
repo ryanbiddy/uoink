@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; package 08 review kit delivered, release held)
+## State at handoff (updated 2026-09-12; release fixes continue after package 08)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -97,6 +97,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | Gemini reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; separating verified Lightning patch leaves 18 / 14. No qualified replacement runtime | Hold remains; compatible runtime migration and model qualification need exact Ryan scope below |
+| Signing | Optional signing path integrated at d24cc33 | 34 focused passes; real Inno callback refuses a missing certificate. No successful signing credit | Independent Gemini review, then full candidate tree; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -143,6 +144,29 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 ## Queue (in order; updated after explicit correction/install approval)
 
 ### Active follow-up from Ryan, 2026-09-12
+
+Ryan's renewed goal is to continue fixing the product until it is ready for
+release, website/GitHub updates and marketing. The earlier review-kit delivery
+is complete but is not this goal's completion. Current queue:
+
+1. Review d24cc33 through GEMINI-SIGNING-REVIEW-BRIEF-2026-09-12.md. The first
+   signing suite was 32/2; its documented code repair passes the same 34 cases.
+   Inno wiring03 confirms refusal after two preserved wrapper failures. The
+   34-payload signing proof seal matches staged Git bytes.
+2. Runtime graph run db13e13b finished; Astra reproduced 14 passes, but rejected
+   its verifier's integrity, tag, identity and extras gaps. Its report also
+   mislabels Torch 2.10 as a fixed target and metadata relaxation as capability
+   preservation. Follow RUNTIME-GRAPH-REPAIR-BRIEF-2026-09-12.md in a fresh run,
+   preserving the first worktree and all raw metadata. Do not integrate the
+   uncorrected checker or use its 281-edge count as complete closure.
+3. Integrate only reviewed fixes, update this State/Queue, then run the complete
+   tree on the committed combined source. Build/reseal only after code settles.
+   Package 08 remains the unchanged held review artifact, not evidence for the
+   newer build source. Prepare exact remaining owner decisions and release assets
+   while working through the technical repairs. Public publication/main remain
+   gated; only the completed branch backup is authorized.
+
+The completed earlier sequence below is retained as history.
 
 The authorized repair, installed/native observation and documentary delivery
 sequence is complete through `684a4a3`. Read RELEASE-DELIVERY-08-2026-09-12.md.
@@ -542,6 +566,16 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
+- Actual release signing requires Ryan's publisher certificate and timestamp
+  service selection. The optional implementation is d24cc33; it has no successful
+  signing credit. Standard personal stores returned no code-signing certificate
+  and SignTool was not on PATH. Do not buy a service or change Windows trust.
+- This host is Windows 11 Home build 26200; WindowsSandbox.exe and vmconnect.exe
+  are absent. Routine sign-in is now authorized by Ryan's AGENTS instructions,
+  but the failed Desktop override remains forbidden. A separately verified clean
+  account/VM is still needed before further Desktop acceptance. No new account,
+  VM, ordinary connector or live library was opened in this inspection.
+
 - The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
   failed; any release disposition of missing evidence belongs to Ryan.
 - The revised dependency audit retains 19 entries / 15 distinct issues in four
@@ -578,6 +612,24 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-12 22:00 PDT - Release work resumes; signing path and graph review
+
+Integrated d24cc33 with 34 focused passes and the exact 34-payload proof seal.
+Raw first failures and both incomplete/failed Inno observers are preserved;
+wiring03 records the real callback refusal and no output installer. No successful
+signing or new full-tree/build claim is made. Raw diagnostic whitespace remains
+unchanged; authored source/docs passed whitespace checks, and -text preserves
+proof bytes through Git. No existing acceptance file changed.
+
+Control Room's configured Gemini engine resolved to gemini-3.8-flash-high for
+db13e13b, despite the source default naming 3.7. Its 14 passes do not cover key
+checker requirements. Reject absent manifests passing, host-derived wheel tags,
+unchecked wheel/METADATA identities, wildcard fallbacks, swallowed marker/range
+errors and unpropagated extras. The repair brief assigns these exact defects.
+Its two upstream sdist-only packages are not new installed-graph failures; the
+existing build already builds those wheels. Capping Torch below 2.12 would leave
+later advisory fixes unresolved. No production pin changed.
 
 ### 2026-09-09 00:07 PDT - Candidate branch and final verification plan
 
