@@ -2329,14 +2329,9 @@ def _reliability_model_status(model_name: object | None = None) -> dict:
     selected_model = _normalize_reliability_model(
         model_name if model_name is not None else _selected_reliability_model()
     )
-    model_file = RELIABILITY_MODEL_ROOT / f"{selected_model}.pt"
-    cached = model_file.exists()
-    return {
-        "model": selected_model,
-        "model_root": str(RELIABILITY_MODEL_ROOT),
-        "cached": bool(cached),
-        "estimated_download_mb": 150,
-    }
+    return uoink_reliability.reliability_model_status(
+        selected_model, RELIABILITY_MODEL_ROOT,
+    )
 
 
 def _asr_duration_expectation(duration_seconds: object) -> dict:

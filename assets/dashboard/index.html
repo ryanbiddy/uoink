@@ -5385,7 +5385,7 @@
       ["mixed", "Mixed"],
     ];
 
-    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"];
+    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo"];
 
     const SCRIPT_LENGTH_PRESETS = [
       [30, "30 sec"],
@@ -6296,17 +6296,6 @@
         mixed: "Mixed evidence",
         inconclusive: "Needs more checking",
         extracted: "Ready to review",
-      })[key] || humanLabel(key);
-    }
-
-    function transcriptModelLabel(value) {
-      const key = String(value || "base").toLowerCase();
-      return ({
-        tiny: "Tiny, fastest",
-        base: "Base, balanced",
-        small: "Small, more careful",
-        medium: "Medium, slower",
-        large: "Large, slowest",
       })[key] || humanLabel(key);
     }
 
@@ -11285,6 +11274,18 @@
         : "New captures save here.";
     }
 
+    // Conservative rounded decimal MB of advertised Hub file totals captured
+    // 2026-09-13 (model/config/tokenizer/vocabulary/preprocessor logical bytes,
+    // not observed transfers or an approved model manifest).
+    const TRANSCRIPT_MODEL_DOWNLOAD_MB = {
+      tiny: 80,
+      base: 150,
+      small: 490,
+      medium: 1540,
+      large: 3100,
+      "large-v3-turbo": 1630,
+    };
+
     function transcriptModelLabel(model) {
       const labels = {
         tiny: "Fast",
@@ -11292,8 +11293,70 @@
         small: "Careful",
         medium: "Deep",
         large: "Max accuracy",
+        "large-v3-turbo": "Turbo",
       };
-      return labels[String(model || "").toLowerCase()] || "Balanced";
+      const key = String(model || "").toLowerCase();
+      return labels[key] || humanLabel(key) || "Balanced";
+    }
+
+    function transcriptModelDownloadMb(model) {
+      const key = String(model || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(TRANSCRIPT_MODEL_DOWNLOAD_MB, key)) {
+        return TRANSCRIPT_MODEL_DOWNLOAD_MB[key];
+      }
+      return null;
+    }
+
+    function transcriptModelSizeCopy(model, serverMb) {
+      const mb = transcriptModelDownloadMb(model);
+      if (typeof mb === "number") return `~${mb} MB`;
+      if (typeof serverMb === "number") return `~${serverMb} MB`;
+      return "size unknown";
+    }
+
+    function transcriptModelConfirmMessage(model) {
+      const modelLabel = transcriptModelLabel(model);
+      const mb = transcriptModelDownloadMb(model);
+      const sizeBit = typeof mb === "number"
+        ? `It's about ${mb} MB and stays on this machine.`
+        : "The download size is unknown. It stays on this machine.";
+      return `Download the ${modelLabel} transcript checker now? ${sizeBit}`;
+    }
+
+    function reliabilityStatusText(selectedModel, relModel) {
+      const selected = String(selectedModel || "").toLowerCase();
+      const info = relModel && typeof relModel === "object" ? relModel : {};
+      const saved = String(info.model || "").toLowerCase();
+      const modelLabel = transcriptModelLabel(selected || saved);
+      const selectedIsSaved = Boolean(selected) && selected === saved;
+      const cached = selectedIsSaved && Boolean(info.cached);
+      if (cached) {
+        return `${modelLabel} checker model is ready on this device.`;
+      }
+      const sizeCopy = transcriptModelSizeCopy(selected || saved, selectedIsSaved ? info.estimated_download_mb : null);
+      return `${modelLabel} checker model is not downloaded yet (${sizeCopy}).`;
+    }
+
+    async function downloadSelectedReliabilityModel() {
+      const selectedModel = els.whisperModel.value;
+      const modelLabel = transcriptModelLabel(selectedModel);
+      if (!confirm(transcriptModelConfirmMessage(selectedModel))) return;
+      els.downloadReliabilityModel.disabled = true;
+      els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
+      try {
+        const data = await authFetch("/reliability/model/download", {
+          method: "POST",
+          body: JSON.stringify({ model: els.whisperModel.value }),
+        });
+        if (!data.ok) throw new Error(data.error || "download failed");
+        showToast("Transcript checker model downloaded.");
+        refreshSettings();
+      } catch (err) {
+        els.reliabilityStatus.textContent = "Model download failed.";
+        showToast("Couldn't download model.");
+      } finally {
+        els.downloadReliabilityModel.disabled = false;
+      }
     }
 
     async function refreshSettings() {
@@ -11324,10 +11387,10 @@
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
-        const modelLabel = transcriptModelLabel(relModel.model || state.settings.whisper_model);
-        els.reliabilityStatus.textContent = relModel.cached
-          ? `${modelLabel} checker model is ready on this device.`
-          : `${modelLabel} checker model is not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
+        els.reliabilityStatus.textContent = reliabilityStatusText(
+          els.whisperModel.value || relModel.model || state.settings.whisper_model,
+          relModel
+        );
       } catch (err) {
         els.keyStatus.textContent = "Settings need another moment.";
         renderRolePicker("mixed");
@@ -13777,6 +13840,10 @@
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
+      els.whisperModel.addEventListener("change", () => {
+        const relModel = (state.settings && state.settings.transcript_reliability_model) || {};
+        els.reliabilityStatus.textContent = reliabilityStatusText(els.whisperModel.value, relModel);
+      });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       if (els.entityExtractionToggle) {
         els.entityExtractionToggle.addEventListener("change", () => saveSettingsPatch(
@@ -13796,23 +13863,7 @@
       if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.asrFallbackEnabled.addEventListener("change", () => saveSettingsPatch({ asr_fallback_enabled: els.asrFallbackEnabled.checked }, els.asrFallbackEnabled.checked ? "Caption-less video transcription is on." : "Caption-less video transcription is off."));
-      els.downloadReliabilityModel.addEventListener("click", async () => {
-        const modelLabel = transcriptModelLabel(els.whisperModel.value);
-        if (!confirm(`Download the ${modelLabel} transcript checker now? It's about 150 MB and stays on this machine.`)) return;
-        els.downloadReliabilityModel.disabled = true;
-        els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
-        try {
-          const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({ model: els.whisperModel.value }) });
-          if (!data.ok) throw new Error(data.error || "download failed");
-          showToast("Transcript checker model downloaded.");
-          refreshSettings();
-        } catch (err) {
-          els.reliabilityStatus.textContent = "Model download failed.";
-          showToast("Couldn't download model.");
-        } finally {
-          els.downloadReliabilityModel.disabled = false;
-        }
-      });
+      els.downloadReliabilityModel.addEventListener("click", downloadSelectedReliabilityModel);
       document.getElementById("saveOutput").addEventListener("click", saveOutputFolder);
       els.pickOutputFolder.addEventListener("click", pickOutputFolder);
       document.getElementById("saveScreenshotCount").addEventListener("click", () => {

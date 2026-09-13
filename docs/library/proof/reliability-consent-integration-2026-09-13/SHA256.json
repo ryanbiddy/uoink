@@ -1,0 +1,102 @@
+{
+  "created_utc": "2026-09-13T16:09:19.249721+00:00",
+  "payload_count": 19,
+  "scope": "Documentary reliability integration evidence; 563 separately hash-bound ZIP members",
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "ARCHIVE-RECEIPT.json",
+      "bytes": 352,
+      "sha256": "cb031aa0400e4f9956758eb4418886c3ca6a20839563d66e20d3bfe0eca5b752"
+    },
+    {
+      "file": "archive.py",
+      "bytes": 2106,
+      "sha256": "702b45ad90a866c126eb2b866c4b2dd349f5a167ba66194a3646db1e1483399f"
+    },
+    {
+      "file": "BRIEF.md",
+      "bytes": 1709,
+      "sha256": "315956286a2fadfb3f55593273441fac1907edff51e6e867c59e2a7b7c2b7df4"
+    },
+    {
+      "file": "FINAL-ROOT-BINDINGS.json",
+      "bytes": 7736,
+      "sha256": "bb43ad394081650a1f26e3b2a1e27389cc32d0c89bbf3b75f231fb759c73803b"
+    },
+    {
+      "file": "INPUT-LIST.json",
+      "bytes": 188065,
+      "sha256": "3d4ace85165c874a52964620b802d119a1c7bd2a2761e0fc008411dbc665b6b7"
+    },
+    {
+      "file": "INVENTORY-REPAIR.md",
+      "bytes": 460,
+      "sha256": "fcb02a5fea8540759d8015d63b6575d1f9e264e728335ec0d20a797d15ece549"
+    },
+    {
+      "file": "inventory-repair.patch",
+      "bytes": 726,
+      "sha256": "ee3d754ec5c00befa7f7c4ad6d026516c44e1a35f1b7dcf6146c6d4dbee2b115"
+    },
+    {
+      "file": "inventory.py",
+      "bytes": 6042,
+      "sha256": "d920036585295415916d56ff965b37f4b8a065c31f2fd76d5d5c39223025dc03"
+    },
+    {
+      "file": "inventory01-exit.json",
+      "bytes": 209,
+      "sha256": "8d0c30ae5516af6bd42e471e8d895f3e874ca14bb4b311f670c1d665d790f915"
+    },
+    {
+      "file": "inventory02.py",
+      "bytes": 6050,
+      "sha256": "a9d2ce196a0d168c3caa4a7c2d6b592d191ad14e3ef885b7f19a24ea8db70a95"
+    },
+    {
+      "file": "prepare-inventory02.py",
+      "bytes": 585,
+      "sha256": "d21aad7b67e47e1d5cdf8004cc792cf89a62dfb4db15763188b422644d06387a"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3103,
+      "sha256": "97948b7ea8dbab0b101bbaa9bb357aa225b45cea99b894cc599cca29700e1876"
+    },
+    {
+      "file": "receipts.zip",
+      "bytes": 1833982,
+      "sha256": "b18d1985e2449e56278ff3f6d2a7e41cbf2571ff6952493587fcce6fc2ee2f80"
+    },
+    {
+      "file": "seal.py",
+      "bytes": 1139,
+      "sha256": "829280795de84d037ae8c3b66c4b18f7773412059fcc834fcb983bd71e3936ff"
+    },
+    {
+      "file": "VALIDATION-OBSERVED.json",
+      "bytes": 695,
+      "sha256": "1d830c9cc32ae9a7727d5206f67d1e642e1ef62167096a9b108e0ecc3669bdaa"
+    },
+    {
+      "file": "VERDICT.md",
+      "bytes": 2083,
+      "sha256": "d1c24bc0b97d7727ed908071d2a35ddf5154dcd66b4ed147dbcb892463dd2be5"
+    },
+    {
+      "file": "verify_archive.py",
+      "bytes": 3570,
+      "sha256": "15d9c826cb5645f390ed8c0d47138f179c2215fb039f239abc3bb5f4638f1935"
+    },
+    {
+      "file": "ZIP-MEMBERS-SHA256.json",
+      "bytes": 103274,
+      "sha256": "2ef02e20758375f584a85bb3ab0339df77d62b48088ff0ea3f3cf4f03e96319a"
+    }
+  ]
+}
