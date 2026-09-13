@@ -101,6 +101,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | Implement the concrete CPU tensor services and qualify them separately. Real entry point remains closed; no native or release credit |
+| ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -206,11 +207,16 @@ native_exit was null after local LASTEXITCODE shadowing. Four fresh inert scope
 observations confirm explicit global capture on PowerShell 7.6.5; the original
 failed receipt remains unchanged. The repaired two-wrapper/four-guard subset
 met its expectations; the unchanged 58 ASR cases then pass independently in
-author and Astra roots. Integrate their complete proof next.
+author and Astra roots. Their 260-payload proof is integrated at a3e02f4; read
+ASTRA-ASR-ADAPTER-VERDICT-2026-09-13.md. All payloads match Git/disk.
 The tensor bridge is qualified at 2b9068a: 61 generated/fake-port cases pass in
 both roots, with 59 proof payloads matching Git/disk. Read
 ASTRA-VAD-STATE-BRIDGE-VERDICT-2026-09-13.md. Native tensor services, the real ASR
 lifecycle and the owned WhisperX derivative remain implementation work.
+Dispatch GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-BRIEF-2026-09-13.md for a bounded
+source review of the ASR adapter, bridge and dormant D1 invocation. This is
+implementation review, not final market acceptance. Continue concrete services
+and the owned WhisperX source/whitelist proposal while it runs.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4531,3 +4537,19 @@ no denials/imports, and matching ordered cases. Its separate combined proof
 is being prepared; no native runtime ran. Keep the original null exit failed.
 No production change follows; source remains e8d058f. Website and marketing
 remain paused pending council and integrator approval of the finished product.
+
+### 2026-09-13 - ASR adapter proof integrated; source council queued
+
+ASR orchestration is qualified at a3e02f4 with the same 58 cases passing in
+both roots. All 260 proof payloads match Git/disk. The seal preserves the
+209-payload author/history archive and 37 independent-root files, including
+the old null native receipt, four scope observations, two distinct wrapper
+outcomes and four guard checks. Fabricated parser rows are not ASR cases.
+The independently copied runner differs only in its proposal directory.
+
+Astra's full source review and raw-result checks accept this fake-port scope.
+The concrete snapshot lifecycle, owned worker, CPU tensor services and WhisperX
+derivative are still being implemented. The new Gemini brief reviews these
+three qualified orchestration components; it cannot close native or release
+gates. The D1 question is pending; no owner approval or artifact access is
+inferred from elapsed time. Website and marketing stay paused.
