@@ -1,0 +1,28 @@
+{
+  "source": "56d9d4cf11f20ff4448b21db172dbf217d02c6d6",
+  "label": "ryan-final-partitioned-09",
+  "self_test": false,
+  "observer_pid": 13208,
+  "started_utc": "2026-09-13T12:33:04.278140+00:00",
+  "child_pid": 26224,
+  "child_exit": 1,
+  "status": "child_exited",
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_partitioned_mirror_tree09.py",
+    "--source",
+    "56d9d4cf11f20ff4448b21db172dbf217d02c6d6",
+    "--label",
+    "ryan-final-partitioned-09"
+  ],
+  "fixture_files": 504,
+  "release_ready": false,
+  "instrument_sha256": "8f773f611627fd56b4210d43fb86f91598d7538d2c48596edf83842e8d68ff1e",
+  "heartbeat_utc": "2026-09-13T12:58:26.065427+00:00",
+  "finished_utc": "2026-09-13T12:58:26.062113+00:00",
+  "aggregate_summary_present": true,
+  "aggregate_summary_sha256": "192216367f93008eef7370ee9770d1ed9e7d66a78ea5b51a5c9125d10b86b9a7"
+}

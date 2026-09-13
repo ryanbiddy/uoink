@@ -1,0 +1,4 @@
+[
+  "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end",
+  "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs"
+]

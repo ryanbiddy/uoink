@@ -1,0 +1,155 @@
+{
+  "source": "56d9d4cf11f20ff4448b21db172dbf217d02c6d6",
+  "result": "FAIL",
+  "counts": {
+    "passed": 2796,
+    "failed": 1,
+    "skipped": 3
+  },
+  "cases": 2800,
+  "seconds_including_collection": 1521.0999198000063,
+  "complete_disjoint_union": true,
+  "only_absent_file": "tests/library_work_astra/test_phase3_s21.py",
+  "label": "Complete partitioned tree with --runxfail; not a monolithic pytest run",
+  "expected_failure_policy": "Original marks unchanged; --runxfail executes all assertion bodies normally",
+  "finished_utc": "2026-09-13T12:58:26.041713+00:00",
+  "failures": {
+    "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status": {
+      "status": "failed",
+      "failed_phases": [
+        "call"
+      ],
+      "phase_outcomes": [
+        {
+          "when": "setup",
+          "outcome": "passed"
+        },
+        {
+          "when": "call",
+          "outcome": "failed"
+        },
+        {
+          "when": "teardown",
+          "outcome": "passed"
+        }
+      ],
+      "subtests": [],
+      "failed_subtest_count": 0,
+      "junit_elements": [
+        {
+          "outcomes": [
+            "failure"
+          ],
+          "seconds": 0.0
+        }
+      ],
+      "partition": "main"
+    }
+  },
+  "partition_exit_contract": "Every tested partition reconciles session, pytest, verifier, reports and JUnit; abnormal or incomplete execution cannot produce this complete aggregate.",
+  "failed_phases": {
+    "main": [
+      {
+        "nodeid": "tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status",
+        "when": "call",
+        "outcome": "failed"
+      }
+    ],
+    "media": []
+  },
+  "subtest_counts": {
+    "passed": 13
+  },
+  "subtest_count": 13,
+  "failed_subtest_count": 0,
+  "failed_subtests": {
+    "main": [],
+    "media": []
+  },
+  "raw_failed_report_count": 1,
+  "reported_failed_report_count": 1,
+  "promoted_parent_failures": {
+    "main": [],
+    "media": []
+  },
+  "new_cases_since_tree08": [
+    "tests/test_library_mirror_process_authority.py::test_death_followed_by_unknown_retains_definitive_death",
+    "tests/test_library_mirror_process_authority.py::test_exited_popen_plus_unknown_other_child_retains_exclusion",
+    "tests/test_library_mirror_process_authority.py::test_matching_creation_time_positive_control_for_kill_and_assignment",
+    "tests/test_library_mirror_process_authority.py::test_missing_or_mismatched_creation_time_refuses_kill_and_assignment",
+    "tests/test_library_mirror_process_authority.py::test_previously_owned_child_survives_parent_exit",
+    "tests/test_library_mirror_process_authority.py::test_process_liveness_creation_query_failure_returns_unknown",
+    "tests/test_library_mirror_process_authority.py::test_refuse_children_of_exited_parent",
+    "tests/test_library_mirror_process_authority.py::test_refuse_children_of_recycled_parent",
+    "tests/test_library_mirror_process_authority.py::test_refuse_preexisting_orphan_child",
+    "tests/test_library_mirror_process_authority.py::test_refuse_unknown_creation_time_adoption",
+    "tests/test_library_mirror_process_authority.py::test_valid_child_adoption_positive_control",
+    "tests/test_mirror_authority_review02.py::test_cancelled_launch_does_not_release_active_terminator_job_lease",
+    "tests/test_mirror_authority_review02.py::test_original_popen_handle_creation_positive_control",
+    "tests/test_mirror_authority_review02.py::test_ready_launcher_identity_positive_control",
+    "tests/test_mirror_authority_review02.py::test_ready_pid_foreign_epoch_is_neither_registered_nor_assigned",
+    "tests/test_mirror_owner_admission.py::test_prepare_failure_releases_its_reservation[attach]",
+    "tests/test_mirror_owner_admission.py::test_prepare_failure_releases_its_reservation[replacement]",
+    "tests/test_mirror_owner_admission.py::test_prepare_failure_releases_its_reservation[retain]",
+    "tests/test_mirror_owner_admission.py::test_prepared_cancel_releases_and_never_enters_popen",
+    "tests/test_mirror_owner_admission.py::test_refused_replacement_drops_only_incoming_reservation",
+    "tests/test_mirror_owner_admission.py::test_stale_session_cleanup_does_not_reenter_global_guard",
+    "tests/test_mirror_owner_admission.py::test_stopping_owner_refuses_reservation_and_attachment",
+    "tests/test_mirror_owner_admission.py::test_sweep_cannot_release_acquired_owner_before_session_attachment",
+    "tests/test_mirror_owner_admission.py::test_sweep_snapshot_cannot_release_new_admission[attachment]",
+    "tests/test_mirror_owner_admission.py::test_sweep_snapshot_cannot_release_new_admission[reservation]",
+    "tests/test_mirror_owner_admission.py::test_unknown_child_keeps_owner_after_preparation_reservation_ends",
+    "tests/test_mirror_process_handle_lifetime.py::test_canonical_launcher_writer_stays_dead_when_timestamp_query_fails",
+    "tests/test_mirror_process_handle_lifetime.py::test_counted_handle_does_not_close_borrowed_popen_handle",
+    "tests/test_mirror_process_handle_lifetime.py::test_exact_identity_positive_control_mutates_only_matching_handle",
+    "tests/test_mirror_process_handle_lifetime.py::test_fail_closed_kernel_does_not_mutate_unmocked_pid",
+    "tests/test_mirror_process_handle_lifetime.py::test_job_handle_close_deferred_while_in_use",
+    "tests/test_mirror_process_handle_lifetime.py::test_launcher_identity_prefers_retained_popen_handle",
+    "tests/test_mirror_process_handle_lifetime.py::test_matching_retained_handle_terminates_without_openprocess",
+    "tests/test_mirror_process_handle_lifetime.py::test_missing_handle_does_not_invent_parent_identity_from_later_pid",
+    "tests/test_mirror_process_handle_lifetime.py::test_one_millisecond_mismatch_refuses_retained_handle_mutation",
+    "tests/test_mirror_process_handle_lifetime.py::test_same_pid_distinct_epoch_writer_is_not_merged",
+    "tests/test_mirror_process_handle_lifetime.py::test_session_terminate_uses_retained_handle_not_pid_open",
+    "tests/test_mirror_process_handle_lifetime.py::test_state_lock_is_not_held_across_job_assignment",
+    "tests/test_mirror_process_handle_lifetime.py::test_unknown_owned_child_retains_exclusion",
+    "tests/test_mirror_process_handle_lifetime.py::test_verified_child_still_adopted_with_revalidation",
+    "tests/test_mirror_process_identity_boundaries.py::test_child_replacement_between_snapshot_and_identity_query_is_not_owned",
+    "tests/test_mirror_process_identity_boundaries.py::test_exited_launcher_proves_same_pid_writer_dead_when_writer_time_is_unknown",
+    "tests/test_mirror_process_identity_boundaries.py::test_liveness_rejects_one_millisecond_identity_mismatch",
+    "tests/test_mirror_process_identity_boundaries.py::test_missing_recorded_parent_identity_is_not_filled_from_raw_pid",
+    "tests/test_mirror_process_identity_boundaries.py::test_orphan_one_millisecond_older_than_parent_is_not_owned",
+    "tests/test_mirror_process_identity_boundaries.py::test_parent_replacement_during_snapshot_does_not_adopt_foreign_child",
+    "tests/test_mirror_process_identity_boundaries.py::test_pid_action_refuses_any_different_creation_time[-1-assign]",
+    "tests/test_mirror_process_identity_boundaries.py::test_pid_action_refuses_any_different_creation_time[-1-terminate]",
+    "tests/test_mirror_process_identity_boundaries.py::test_pid_action_refuses_any_different_creation_time[1-assign]",
+    "tests/test_mirror_process_identity_boundaries.py::test_pid_action_refuses_any_different_creation_time[1-terminate]",
+    "tests/test_mirror_stable_handle_discovery.py::test_borrowed_handle_keeps_owner_until_last_user_finishes",
+    "tests/test_mirror_stable_handle_discovery.py::test_borrowed_owner_destructor_runs_outside_handle_guard[False]",
+    "tests/test_mirror_stable_handle_discovery.py::test_borrowed_owner_destructor_runs_outside_handle_guard[True]",
+    "tests/test_mirror_stable_handle_discovery.py::test_cancellation_during_discovery_defers_cleanup_without_losing_child",
+    "tests/test_mirror_stable_handle_discovery.py::test_cancelled_session_refuses_canonical_writer_publication",
+    "tests/test_mirror_stable_handle_discovery.py::test_child_older_within_same_millisecond_is_refused",
+    "tests/test_mirror_stable_handle_discovery.py::test_foreign_replacement_before_child_open_fails_final_relationship",
+    "tests/test_mirror_stable_handle_discovery.py::test_parent_without_original_handle_cannot_adopt_from_raw_pid",
+    "tests/test_mirror_stable_handle_discovery.py::test_pinned_child_cannot_be_replaced_before_relationship_or_mutation",
+    "tests/test_mirror_stable_handle_discovery.py::test_repeated_discovery_keeps_original_child_handle_open",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_all_six_current_model_options_reuse_cache_without_download",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_arbitrary_file_does_not_authorize_download",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_bad_download_result_refuses_before_factory",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_consent_resolves_then_passes_local_snapshot_to_factory",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_damaged_runtime_does_not_start_a_consented_download",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_each_missing_required_file_refuses_before_factory",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_empty_tokenizer_is_not_ready",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_readiness_does_not_create_a_cache",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_resolved_blob_inside_repo_is_allowed_but_outside_file_is_not",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_snapshot_change_during_device_selection_refuses_before_factory",
+    "tests/test_whisper_cache_consent.py::ProductGuardContracts::test_unknown_or_path_shaped_reference_is_not_ready"
+  ],
+  "test_process_seconds": {
+    "main": 1505.061,
+    "media": 4.118
+  },
+  "observer_capture_count": 174,
+  "observer_diagnostic_complete": true,
+  "release_ready": false
+}

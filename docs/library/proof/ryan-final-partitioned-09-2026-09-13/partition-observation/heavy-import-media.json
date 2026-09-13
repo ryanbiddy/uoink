@@ -1,0 +1,9 @@
+{
+  "profile": "synthetic-import-blocked-no-native-model-credit",
+  "already_loaded_at_startup": [],
+  "blocked_import_attempts": [
+    "whisperx"
+  ],
+  "pytest_exitstatus": 0,
+  "guard_installed_at_finish": true
+}

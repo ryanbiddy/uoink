@@ -1,0 +1,6 @@
+{
+  "validated": true,
+  "blocked_attempt_count": 1,
+  "scope": "This pytest process only; subprocesses are not covered by this import plugin",
+  "native_or_model_qualification": false
+}
