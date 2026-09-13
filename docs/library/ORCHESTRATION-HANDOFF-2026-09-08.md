@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Finish exact conversion protocol and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root; its real basis remains undecided. Finish exact conversion protocol and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Repair reliability consent/readiness and model-setting copy under brief44e69fc; continue VAD/dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -293,6 +293,13 @@ repair is independent of the reserved model migration decisions below.
    No further converter synthetic rerun is needed without a changed concern.
    Review the separate fixed-buffer byte-order consistency proposal and
    concrete runtime protocol; REAL_PROFILE stays absent.
+   Buffer comparator qualification is archived at 9859a8a; read
+   ASTRA-VAD-BUFFER-BASIS-VERDICT-2026-09-13.md. All35 payloads match Git
+   and disk. Author/root each pass37 generated cases with identical membership.
+   The eight-ULP basis is conditional consistency evidence, not historical
+   writer authentication; no real buffer was read. Finish the exact static
+   inspection and migration protocol before Ryan's reserved decision. Do not
+   widen the tolerance, activate a profile or fetch models from this result.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -4281,3 +4288,14 @@ Reliability review brief b109e66 records a resolve-before-comparison cache
 alias defect and a cross-model unknown-size fallback in Grok's developing
 patch. Preserve its completed diff, reproduce these new cases under reviewed
 instrumentation, repair and verify both roots. Website/marketing remain held.
+### 2026-09-13 - Generated buffer consistency basis qualified
+
+9859a8a preserves35 payloads, original20seal and Astra's verdict. Author/root
+37-case runs both pass, all exits0, unchanged inputs and no unexpected events.
+The comparator checks250 words across both source-defined buffers against
+one fixed eight-ULP basis and requires exactly one common orientation. The
+measured generated arithmetic variants differ by0-2ULP; historical backend
+bounds and saved-buffer immutability are not proven. Applying orientation to
+other storages remains an explicit protocol assumption. No actual storage or
+version read occurred and REAL_PROFILE remains absent. Next is the exact
+owner-review protocol, alongside the active reliability product repair.
