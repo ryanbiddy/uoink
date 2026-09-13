@@ -108,7 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace | Protocol and pipe contracts integrated at 9c40271; native04 raw positive observed | Author and Astra each pass 54 generated-memory cases. Native04 controller/child/outer exit0; root verifies six sources, three controls, nine support inputs and child-only file protection | Seal native01–04 history and qualify timeout/forced-stop. No native model or release acceptance |
+| Windows namespace | Protocol/pipe contracts at 9c40271; native01–04 history and positive result at 668b08a | Native04 controller/child/outer exit0; root verifies six sources, three controls, nine support inputs and child-only file protection. All119 native and three integrator payloads match Git/disk | Qualify timeout/forced-stop and integrate the independently passing eight handshake cases. No native model or release acceptance |
 | Local NLTK graph input | Exact metadata receipt at e5b1ddd; final graph at 4827288 | Three-record checker passes the same 59 cases in each root. Complete 144-pin/287-edge graph remains valid FAIL only for two missing wheels; all 26 graph and five integrator payloads match Git/disk | Verify the two existing cached wheel candidates and repair the artifact plan; no runtime or security clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -273,8 +273,11 @@ the retained child exits0 and job active count reaches0. Root a58725 verifies
 six sources, three controls, nine support files and exact generated fixture.
 Native01 import refusal, native02 ctypes audit refusal and native03 erroneous
 32-binding assertion remain failures before worker creation. Native04 binds the
-actual31 functions. Seal the complete history, then qualify the prepared bounded
-timeout/forced-stop case and eight negative/positive handshake contracts. No
+actual31 functions. The complete history is integrated at668b08a; read
+ASTRA-GENERATED-WINDOWS-WORKER-VERDICT-2026-09-13.md. All119 native plus three
+integrator payloads match Git/disk. Qualify the prepared bounded timeout/forced-stop
+case. The eight negative/positive handshake contracts now pass in author and
+independent Astra roots (actual00f8b6 andd16104); raw review/sealing is next. No
 model is involved; failure cleanup and actual loader adoption remain open.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
@@ -4933,3 +4936,27 @@ separately reviewed generated-only positive result; its combined proof and a
 real timeout/forced-stop test are next. Production remains e8d058f; no current
 runtime, installer, council release or market acceptance. Website/marketing
 remain paused. Backup35629 still waits at account selection (5de96c, no output).
+
+### 2026-09-13 - Generated Windows child positive path integrated
+
+Integration668b08a preserves native01/02/03 failures and native04 success in
+119 payloads/722172 bytes, mapping169 logical members to111 content objects.
+Builderd8dcd7/verifierb76fbf exit0; integration3cf00b checks all119 native and
+three integrator payloads against Git/disk. Seal72e2fb40f0ba2292cc5c9bc33c1a9278f8ba4cf15a844de2ebad0d54006290d8.
+No native observation was repeated for sealing. The original outer manifest
+was renamed SHA256.json on repository copy without changing bytes.
+
+The real child-only write refusal, authenticated40K exchange and retained
+process/job shutdown are accepted narrowly. The original count32 source-review
+claim is withdrawn;31 fixed functions actually bind. No failure-cleanup,
+model-loader, native ML, installed or market credit follows. Peer review
+supports the same limit. A new bounded nonresponse test preserves quarantine
+and must handle any unconfirmed OVERLAPPED buffer without Python finalization
+freeing it before process termination. That source is under review, unexecuted.
+
+The handshake launcher's missing admission hash was corrected before its first
+run, with the original source and narrow diff retained. Authoractual00f8b6 and
+independentrootd16104 both exit0; each reports eight passes, zero failures/skips
+and valid guards. Final raw checks and proof integration are next. Two existing
+cached wheels have exact historical origins; the read-only inspector is under
+review. Production remains e8d058f and website/marketing remain paused.
