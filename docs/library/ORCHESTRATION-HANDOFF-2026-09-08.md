@@ -108,7 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; generated operations at 7fba83a | Drain returns two generated segments and EOF; cancel returns one then cancellation. Both actual observations return0, guards valid, child0/job0 before release; all108 proof payloads match Git/disk | Qualify the actual adapter startup connection. Durable recovery and real runtime remain open |
+| Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -308,8 +308,13 @@ interpretation; reject its unsupported new wheel-signature requirement.
 The later generated-operation-native-proposal01 derivative now has drain8f8823
 and cancel752948 observations with valid outer0, integrated at7fba83a.
 Read ASTRA-GENERATED-OPERATION-VERDICT-2026-09-13.md. All108 proof payloads match
-Git/disk; the next unit is generated-actual-adapter-proposal01, still unexecuted.
-These use generated text and a sentinel profile, not the actual ASR adapter.
+Git/disk. Those two observations use generated text and a sentinel profile.
+The next actual proposed-adapter connection is now qualified at7ced134:
+fc23ea returns valid0 through faster_whisper_session, the real factory/permit
+path and adapter-owned cleanup, with explicit generated authority seams.
+Read ASTRA-GENERATED-ADAPTER-VERDICT-2026-09-13.md; all63 proof payloads match
+Git/disk. No real runtime authority was granted. Durable reservation/recovery
+and the worker-local runtime owner remain the next implementation work.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5243,3 +5248,28 @@ Git backup session35629 is still pending with no output at270fb9. No duplicate
 push was started. Current native app automation is disabled; historical Sky
 receipts must not be represented as current GUI capability. Website and marketing
 remain paused pending council and integrator market acceptance.
+
+### 2026-09-13 - Actual proposed adapter reaches the generated Windows worker
+
+Commit7ced134 accepts one generated-data observation through the proposed ASR
+adapter's actual faster_whisper_session, OwnedRuntimeFactory and cleanup path.
+Toolfc23ea returns0 in0.9091834s. Controller/child guards are valid with319/285
+matching dispatch/audit calls, zero pending I/O and zero model calls. Both
+endpoints bind the same policy/acknowledgement before generated materialization.
+Actual child exit0 and job0 precede parent release; temporary adapter services
+are restored and real resolver approval remains absent.
+
+Root and the independent source reviewer confirm the wrapper/identity-token
+boundary and reservation order. All63 proof payloads match disk and Git in
+c477cf; original preparations and raw native/outer receipts are retained. This
+is one happy-path connection observation, not speech, startup-failure, full
+namespace or crash-recovery qualification. The fixed model label is generated
+policy metadata, not a loaded model.
+
+Durable reservation source is now being implemented in a separate preparation.
+Its gate must collide for the same physical directory regardless of semantic
+choice/revision/manifest aliases. A failed final flush can leave readable bytes;
+readable CLEARED text alone cannot establish restart quiescence. Worker-local
+runtime owner contracts are being mapped independently. A three-group Gemini
+review of notice packaging, generated operations and this connection is next.
+Website and marketing remain paused.

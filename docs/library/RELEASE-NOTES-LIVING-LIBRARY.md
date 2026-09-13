@@ -106,8 +106,10 @@ preserving logical quarantine. Child adoption at `428707d` verifies identity
 before generated-file reads. The adapter at `d58bebe` passes six connected
 cases per root. Two Windows observations at `7fba83a` then verify generated
 stream completion and cancellation, with actual child exit before guard release.
-They use a sentinel profile; the actual ASR adapter connection, durable recovery
-and real transcription remain open.
+They use a sentinel profile. A further observation at `7ced134` enters the
+proposed adapter's actual session and cleanup methods through generated authority
+seams and passes its Windows stream check. Durable recovery and real
+transcription remain open; no production runtime authority was enabled.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
