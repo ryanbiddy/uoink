@@ -1,0 +1,59 @@
+{
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "assertion-preservation.json",
+      "bytes": 465,
+      "sha256": "811d6b4b2bee80ebc3464b3abdd0b92e3faf531f58a6a229b777b6e0f4cb0174"
+    },
+    {
+      "file": "formatter-repair.patch.txt",
+      "bytes": 2808,
+      "sha256": "6f1836e6716da82360b1a2493ef805b02afaf530403a15fbeb20da441b58ff93"
+    },
+    {
+      "file": "hub-signature-source.py.txt",
+      "bytes": 31197,
+      "sha256": "29c2316ec5d0862d0311b0a2cfd97cd39be636042073cef427279b4261893a93"
+    },
+    {
+      "file": "launch.py",
+      "bytes": 1905,
+      "sha256": "dba7b627a483d11b3a73e1e43b913d5b3fa2098ee50e9d99fc9e1c5e67763397"
+    },
+    {
+      "file": "patch.txt",
+      "bytes": 280,
+      "sha256": "d083b6647a89c70529e328a977ea4ba2a14cbfa101cdd944df75a852ac736aee"
+    },
+    {
+      "file": "prepare.py",
+      "bytes": 2953,
+      "sha256": "892ee4b1530a4360a6d17c1cb60ba65122cf7c82be9e67907461b12d5a838203"
+    },
+    {
+      "file": "qualify.py",
+      "bytes": 7224,
+      "sha256": "daa6e50c168e6261805e3f73d2eb72a86bec4a2f2cad661f7bf218df12037ae5"
+    },
+    {
+      "file": "REPAIR-BRIEF.md",
+      "bytes": 2014,
+      "sha256": "bfdf54a5913c2d47090741e752b41e0b308f61f7363c7c0e58d127e0e1f998d5"
+    },
+    {
+      "file": "utils-after.py.txt",
+      "bytes": 4897,
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+    },
+    {
+      "file": "utils-before.py.txt",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    }
+  ]
+}

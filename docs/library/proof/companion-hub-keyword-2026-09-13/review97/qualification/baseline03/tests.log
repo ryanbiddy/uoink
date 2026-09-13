@@ -1,0 +1,72 @@
+test_cache_fetch_mode (__main__.Contracts.test_cache_fetch_mode) ... ok
+test_cache_local_only (__main__.Contracts.test_cache_local_only) ... ok
+test_false_token_is_forwarded (__main__.Contracts.test_false_token_is_forwarded) ... ok
+test_invalid_name_does_not_call_hub (__main__.Contracts.test_invalid_name_does_not_call_hub) ... ok
+test_output_error_propagates_unchanged (__main__.Contracts.test_output_error_propagates_unchanged) ... ERROR
+test_output_fetch_mode (__main__.Contracts.test_output_fetch_mode) ... ERROR
+test_output_local_only (__main__.Contracts.test_output_local_only) ... ERROR
+test_output_revision_token_cache (__main__.Contracts.test_output_revision_token_cache) ... ERROR
+
+======================================================================
+ERROR: test_output_error_propagates_unchanged (__main__.Contracts.test_output_error_propagates_unchanged)
+----------------------------------------------------------------------
+Traceback (frame locations; source lookup disabled):
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 58, in testPartExecutor
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 669, in run
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 615, in _callTestMethod
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 107, in test_output_error_propagates_unchanged
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\utils-before.py.txt', line 116, in download_model
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 62, in fake_snapshot
+  File 'C:\\Python314\\Lib\\inspect.py', line 3236, in bind
+  File 'C:\\Python314\\Lib\\inspect.py', line 3225, in _bind
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_fetch_mode (__main__.Contracts.test_output_fetch_mode)
+----------------------------------------------------------------------
+Traceback (frame locations; source lookup disabled):
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 58, in testPartExecutor
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 669, in run
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 615, in _callTestMethod
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 93, in test_output_fetch_mode
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 82, in expected
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\utils-before.py.txt', line 116, in download_model
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 62, in fake_snapshot
+  File 'C:\\Python314\\Lib\\inspect.py', line 3236, in bind
+  File 'C:\\Python314\\Lib\\inspect.py', line 3225, in _bind
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_local_only (__main__.Contracts.test_output_local_only)
+----------------------------------------------------------------------
+Traceback (frame locations; source lookup disabled):
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 58, in testPartExecutor
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 669, in run
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 615, in _callTestMethod
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 92, in test_output_local_only
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 82, in expected
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\utils-before.py.txt', line 116, in download_model
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 62, in fake_snapshot
+  File 'C:\\Python314\\Lib\\inspect.py', line 3236, in bind
+  File 'C:\\Python314\\Lib\\inspect.py', line 3225, in _bind
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_revision_token_cache (__main__.Contracts.test_output_revision_token_cache)
+----------------------------------------------------------------------
+Traceback (frame locations; source lookup disabled):
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 58, in testPartExecutor
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 669, in run
+  File 'C:\\Python314\\Lib\\unittest\\case.py', line 615, in _callTestMethod
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 94, in test_output_revision_token_cache
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 82, in expected
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\utils-before.py.txt', line 116, in download_model
+  File 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-qualified01\\qualify.py', line 62, in fake_snapshot
+  File 'C:\\Python314\\Lib\\inspect.py', line 3236, in bind
+  File 'C:\\Python314\\Lib\\inspect.py', line 3225, in _bind
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+FAILED (errors=4)

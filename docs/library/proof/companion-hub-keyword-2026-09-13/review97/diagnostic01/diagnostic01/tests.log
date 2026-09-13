@@ -1,0 +1,103 @@
+test_cache_fetch_mode (__main__.Contracts.test_cache_fetch_mode) ... ok
+test_cache_local_only (__main__.Contracts.test_cache_local_only) ... ok
+test_false_token_is_forwarded (__main__.Contracts.test_false_token_is_forwarded) ... ok
+test_invalid_name_does_not_call_hub (__main__.Contracts.test_invalid_name_does_not_call_hub) ... ok
+test_output_error_propagates_unchanged (__main__.Contracts.test_output_error_propagates_unchanged) ... ERROR
+test_output_fetch_mode (__main__.Contracts.test_output_fetch_mode) ... ERROR
+test_output_local_only (__main__.Contracts.test_output_local_only) ... ERROR
+test_output_revision_token_cache (__main__.Contracts.test_output_revision_token_cache) ... ERROR
+
+======================================================================
+ERROR: test_output_error_propagates_unchanged (__main__.Contracts.test_output_error_propagates_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 107, in test_output_error_propagates_unchanged
+    call('small.en', output_dir='local-destination', local_files_only=True)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\utils-before.py.txt", line 116, in download_model
+    return huggingface_hub.snapshot_download(repo_id, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 62, in fake_snapshot
+    bound = signature.bind(*args, **kwargs)
+  File "C:\Python314\Lib\inspect.py", line 3236, in bind
+    return self._bind(args, kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\inspect.py", line 3225, in _bind
+    raise TypeError(
+        'got an unexpected keyword argument {arg!r}'.format(
+            arg=next(iter(kwargs))))
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_fetch_mode (__main__.Contracts.test_output_fetch_mode)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 93, in test_output_fetch_mode
+    def test_output_fetch_mode(self): self.expected(output=True, local=False)
+                                      ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 82, in expected
+    result = call('small.en' if mapped else 'owner/model', **supplied)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\utils-before.py.txt", line 116, in download_model
+    return huggingface_hub.snapshot_download(repo_id, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 62, in fake_snapshot
+    bound = signature.bind(*args, **kwargs)
+  File "C:\Python314\Lib\inspect.py", line 3236, in bind
+    return self._bind(args, kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\inspect.py", line 3225, in _bind
+    raise TypeError(
+        'got an unexpected keyword argument {arg!r}'.format(
+            arg=next(iter(kwargs))))
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_local_only (__main__.Contracts.test_output_local_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 92, in test_output_local_only
+    def test_output_local_only(self): self.expected(output=True)
+                                      ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 82, in expected
+    result = call('small.en' if mapped else 'owner/model', **supplied)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\utils-before.py.txt", line 116, in download_model
+    return huggingface_hub.snapshot_download(repo_id, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 62, in fake_snapshot
+    bound = signature.bind(*args, **kwargs)
+  File "C:\Python314\Lib\inspect.py", line 3236, in bind
+    return self._bind(args, kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\inspect.py", line 3225, in _bind
+    raise TypeError(
+        'got an unexpected keyword argument {arg!r}'.format(
+            arg=next(iter(kwargs))))
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+======================================================================
+ERROR: test_output_revision_token_cache (__main__.Contracts.test_output_revision_token_cache)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 94, in test_output_revision_token_cache
+    def test_output_revision_token_cache(self): self.expected(output=True, mapped=False, extra=True)
+                                                ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 82, in expected
+    result = call('small.en' if mapped else 'owner/model', **supplied)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\utils-before.py.txt", line 116, in download_model
+    return huggingface_hub.snapshot_download(repo_id, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\companion-hub-keyword-diagnostic01\qualify.py", line 62, in fake_snapshot
+    bound = signature.bind(*args, **kwargs)
+  File "C:\Python314\Lib\inspect.py", line 3236, in bind
+    return self._bind(args, kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\inspect.py", line 3225, in _bind
+    raise TypeError(
+        'got an unexpected keyword argument {arg!r}'.format(
+            arg=next(iter(kwargs))))
+TypeError: got an unexpected keyword argument 'local_dir_use_symlinks'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.003s
+
+FAILED (errors=4)

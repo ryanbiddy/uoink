@@ -1,0 +1,59 @@
+{
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "DIAGNOSTIC-BRIEF.md",
+      "bytes": 1233,
+      "sha256": "76c947e2d74a18caa5598a27009b96a7e1190cf39dba23c5db093651678aa0af"
+    },
+    {
+      "file": "diagnostic-only.patch.txt",
+      "bytes": 1815,
+      "sha256": "5394297f144c8393a7175ca2bdd6235ffcd0bff149b6f9c3593d21cea742f5fb"
+    },
+    {
+      "file": "hub-signature-source.py.txt",
+      "bytes": 31197,
+      "sha256": "29c2316ec5d0862d0311b0a2cfd97cd39be636042073cef427279b4261893a93"
+    },
+    {
+      "file": "launch.py",
+      "bytes": 1717,
+      "sha256": "36f8dcd34c83e571ad4ed343e929641d740a829aa15737855477aa2c3bd7ddaa"
+    },
+    {
+      "file": "original-copy-manifest.json",
+      "bytes": 2916,
+      "sha256": "84f7c3d2d02b3af9c4423426f384977faa28c4f94f8937f64c6c5ef116c5dea9"
+    },
+    {
+      "file": "patch.txt",
+      "bytes": 280,
+      "sha256": "d083b6647a89c70529e328a977ea4ba2a14cbfa101cdd944df75a852ac736aee"
+    },
+    {
+      "file": "prepare.py",
+      "bytes": 2759,
+      "sha256": "66cddccb9f63df2c9c1d894860bc8fa66cc06ea653aa7ed45e3c11bfaaf4d2b5"
+    },
+    {
+      "file": "qualify.py",
+      "bytes": 6701,
+      "sha256": "324f52139d23b1a2b5a2b4a3dd165ad1ae886ba4c99aef438265863e7196fd9a"
+    },
+    {
+      "file": "utils-after.py.txt",
+      "bytes": 4897,
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+    },
+    {
+      "file": "utils-before.py.txt",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    }
+  ]
+}

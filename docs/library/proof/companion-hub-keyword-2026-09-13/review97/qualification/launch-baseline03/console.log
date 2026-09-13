@@ -1,0 +1,1 @@
+{"label": "baseline03", "tests_run": 8, "passed": 4, "failures": 0, "errors": 4, "skipped": 0, "exit": 1, "guard_valid": true, "blocked": [], "inputs_unchanged": true, "packages_or_models_executed": false, "scope": "selected download helper AST only, fake Hub call bound to captured signature"}

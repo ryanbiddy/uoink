@@ -1,0 +1,44 @@
+{
+  "payloads": [
+    {
+      "bytes": 1975,
+      "file": "BRIEF.md",
+      "sha256": "ba48e10a65031660e7a8b7b493168687ca772d64134a970fa90312ee3521527e"
+    },
+    {
+      "bytes": 1864,
+      "file": "prepare.py",
+      "sha256": "27212a8fb10337cd7afaff78cd113a56f942a87548679df4ffa35b2dfa244e11"
+    },
+    {
+      "bytes": 6661,
+      "file": "qualify.py",
+      "sha256": "46bbaabe69e31729bec5171bb28a6167846d070d29d1df87a4c9e7ae5b055c16"
+    },
+    {
+      "bytes": 4946,
+      "file": "utils-before.py.txt",
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    {
+      "bytes": 4897,
+      "file": "utils-after.py.txt",
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+    },
+    {
+      "bytes": 31197,
+      "file": "hub-signature-source.py.txt",
+      "sha256": "29c2316ec5d0862d0311b0a2cfd97cd39be636042073cef427279b4261893a93"
+    },
+    {
+      "bytes": 280,
+      "file": "patch.txt",
+      "sha256": "d083b6647a89c70529e328a977ea4ba2a14cbfa101cdd944df75a852ac736aee"
+    },
+    {
+      "bytes": 830,
+      "file": "RECEIPT-PATH-REPAIR.md",
+      "sha256": "deb4dd84d823eff31b2dcca68d4e29db523eb342550f625b3de92fa493c05521"
+    }
+  ]
+}

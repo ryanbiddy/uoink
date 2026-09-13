@@ -1,0 +1,152 @@
+{
+  "created_utc": "2026-09-13T14:23:21.543613+00:00",
+  "original18_unchanged": true,
+  "contract_classes": [
+    {
+      "source": "original/qualify.py",
+      "class_ast_sha256": "6550e86eaf7ecaf37c5e71b362e7456be5662dd3f2fe500eec02be8fc862baf7",
+      "class_source_sha256_normalized_lf": "7a8d90a160632841b4a0fe62b6791890c6011e234599c9ee49908444bb8c5a2c"
+    },
+    {
+      "source": "diagnostic01/qualify.py",
+      "class_ast_sha256": "6550e86eaf7ecaf37c5e71b362e7456be5662dd3f2fe500eec02be8fc862baf7",
+      "class_source_sha256_normalized_lf": "7a8d90a160632841b4a0fe62b6791890c6011e234599c9ee49908444bb8c5a2c"
+    },
+    {
+      "source": "diagnostic02/qualify.py",
+      "class_ast_sha256": "6550e86eaf7ecaf37c5e71b362e7456be5662dd3f2fe500eec02be8fc862baf7",
+      "class_source_sha256_normalized_lf": "7a8d90a160632841b4a0fe62b6791890c6011e234599c9ee49908444bb8c5a2c"
+    },
+    {
+      "source": "qualification/qualify.py",
+      "class_ast_sha256": "6550e86eaf7ecaf37c5e71b362e7456be5662dd3f2fe500eec02be8fc862baf7",
+      "class_source_sha256_normalized_lf": "7a8d90a160632841b4a0fe62b6791890c6011e234599c9ee49908444bb8c5a2c"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt": "original/baseline01",
+      "passed": 4,
+      "errors": 4,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": false,
+      "actual_child_exit": 1,
+      "actual_outer_exit": 1,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    },
+    {
+      "attempt": "original/baseline02",
+      "passed": 4,
+      "errors": 4,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": false,
+      "actual_child_exit": 1,
+      "actual_outer_exit": 1,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    },
+    {
+      "attempt": "diagnostic01/diagnostic01",
+      "passed": 4,
+      "errors": 4,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": true,
+      "actual_child_exit": 1,
+      "actual_outer_exit": 1,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    },
+    {
+      "attempt": "diagnostic02/diagnostic02",
+      "passed": 4,
+      "errors": 4,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": false,
+      "actual_child_exit": 1,
+      "actual_outer_exit": 1,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    },
+    {
+      "attempt": "qualification/baseline03",
+      "passed": 4,
+      "errors": 4,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": true,
+      "actual_child_exit": 1,
+      "actual_outer_exit": 1,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    },
+    {
+      "attempt": "qualification/patched03",
+      "passed": 8,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "guard_valid": true,
+      "actual_child_exit": 0,
+      "actual_outer_exit": 0,
+      "case_ids": [
+        "test_cache_fetch_mode",
+        "test_cache_local_only",
+        "test_false_token_is_forwarded",
+        "test_invalid_name_does_not_call_hub",
+        "test_output_error_propagates_unchanged",
+        "test_output_fetch_mode",
+        "test_output_local_only",
+        "test_output_revision_token_cache"
+      ]
+    }
+  ],
+  "exact_removed_line_bytes": 49,
+  "proposed_source_sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19",
+  "prior_python313_preparation_sha256": "0b1cb98b296f34965d8bcebe8a67755bb5315df1a3663b479e282da630346f4c",
+  "no_additional_execution_during_assembly": true
+}

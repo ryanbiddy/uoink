@@ -1,0 +1,13 @@
+test_cache_fetch_mode (__main__.Contracts.test_cache_fetch_mode) ... ok
+test_cache_local_only (__main__.Contracts.test_cache_local_only) ... ok
+test_false_token_is_forwarded (__main__.Contracts.test_false_token_is_forwarded) ... ok
+test_invalid_name_does_not_call_hub (__main__.Contracts.test_invalid_name_does_not_call_hub) ... ok
+test_output_error_propagates_unchanged (__main__.Contracts.test_output_error_propagates_unchanged) ... ok
+test_output_fetch_mode (__main__.Contracts.test_output_fetch_mode) ... ok
+test_output_local_only (__main__.Contracts.test_output_local_only) ... ok
+test_output_revision_token_cache (__main__.Contracts.test_output_revision_token_cache) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+OK
