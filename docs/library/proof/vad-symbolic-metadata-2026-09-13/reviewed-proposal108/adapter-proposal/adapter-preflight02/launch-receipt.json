@@ -1,0 +1,21 @@
+{
+  "label": "adapter-preflight02",
+  "started_utc": "2026-09-13T13:34:42.7030773Z",
+  "finished_utc": "2026-09-13T13:34:42.8443734Z",
+  "actual_qualification_exit": 0,
+  "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "qualify_adapter.py",
+    "adapter-preflight02"
+  ],
+  "forbidden_live_binding_set_before_startup": true,
+  "forbidden_live_binding": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "source_sha256_before": "0b5e786b1721dd63c84d9cd12eabf23af2c856790d6bdcabd6b270288e0049fc",
+  "source_sha256_after": "0b5e786b1721dd63c84d9cd12eabf23af2c856790d6bdcabd6b270288e0049fc",
+  "harness_sha256_before": "f665893556812d2f12915f51397895a59359588304363c691fe569748e1587a9",
+  "harness_sha256_after": "f665893556812d2f12915f51397895a59359588304363c691fe569748e1587a9",
+  "scope": "In-memory synthetic ZIP/pickle bytes and inert receipt/file fixtures only"
+}

@@ -1,0 +1,13 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\draft01\\symbolic_trace.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\symbolic_trace.py"
+index 4cdd53d..ab13514 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\draft01\\symbolic_trace.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\symbolic_trace.py"
+@@ -312,7 +312,7 @@ class _Trace:
+             "symbolic_operations_executed": False, "globals_resolved": False, "persistent_ids_resolved": False,
+             "objects_or_tensors_constructed": False, "architecture_verified": False,
+             "configuration_verified": False, "model_compatibility_verified": False,
+-            "note": "Literal associations and inert instruction records only; no loader authority or inferred defaults",
++            "note": "Final literal-container reference graph and per-object instruction order only; no global event order, historical argument snapshots, evaluated constructor/BUILD state, loader authority or inferred defaults",
+         }
+         self.tick()
+         encoded = json.dumps(result, ensure_ascii=True, allow_nan=False, separators=(",", ":")).encode("utf-8")

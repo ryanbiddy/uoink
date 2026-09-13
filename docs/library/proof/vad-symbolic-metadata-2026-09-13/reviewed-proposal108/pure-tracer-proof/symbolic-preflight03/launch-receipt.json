@@ -1,0 +1,21 @@
+{
+  "label": "symbolic-preflight03",
+  "started_utc": "2026-09-13T13:21:12.3810124Z",
+  "finished_utc": "2026-09-13T13:21:12.4441340Z",
+  "interpreter": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "qualify_symbolic.py",
+    "symbolic-preflight03"
+  ],
+  "actual_reader_exit": 0,
+  "forbidden_live_binding_set_before_startup": true,
+  "forbidden_live_binding": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "source_sha256_before": "f41ce88a2eceee565fcc9116e19f064723bf3339ffe4ca8669ae20bff6033127",
+  "source_sha256_after": "f41ce88a2eceee565fcc9116e19f064723bf3339ffe4ca8669ae20bff6033127",
+  "harness_sha256_before": "31f470f73f1712d87084bb319d4f86ae8ec9354be8b62e0d397b0ef73cfee271",
+  "harness_sha256_after": "31f470f73f1712d87084bb319d4f86ae8ec9354be8b62e0d397b0ef73cfee271",
+  "scope": "Literal synthetic pickle bytes only; no checkpoint, adapter main, model or product execution"
+}

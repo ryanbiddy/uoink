@@ -1,0 +1,110 @@
+{
+  "label": "adapter-preflight01",
+  "source_sha256": "0b5e786b1721dd63c84d9cd12eabf23af2c856790d6bdcabd6b270288e0049fc",
+  "passed": 23,
+  "failed": 1,
+  "forbidden_live_startup_binding_asserted": true,
+  "actual_checkpoint_opened": false,
+  "actual_main_input_output_paths_used": false,
+  "objects_or_tensors_constructed": false,
+  "elapsed_seconds": 0.056542,
+  "cases": [
+    {
+      "case": "exact_permitted_ast_composition",
+      "status": "passed"
+    },
+    {
+      "case": "fixed_path_digest_and_output_bounds_unchanged",
+      "status": "passed"
+    },
+    {
+      "case": "stored_unchanged_inventory_plus_inert_trace",
+      "status": "passed"
+    },
+    {
+      "case": "deflated_unchanged_inventory_plus_inert_trace",
+      "status": "passed"
+    },
+    {
+      "case": "malicious_target_remains_data",
+      "status": "passed"
+    },
+    {
+      "case": "no_selected_storage_member_payload_read",
+      "status": "passed"
+    },
+    {
+      "case": "crc_rejected_before_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "actual_payload_size_rejected_before_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "trailing_pickle_rejected_before_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "duplicate_metadata_key_refused",
+      "status": "passed"
+    },
+    {
+      "case": "omitted_training_cycle_refused",
+      "status": "passed"
+    },
+    {
+      "case": "unsupported_symbolic_opcode_refused",
+      "status": "passed"
+    },
+    {
+      "case": "escaping_zip_member_refused_before_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "ambiguous_pickle_members_refused_before_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "reader_deadline_checked_after_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "wrong_digest_refused_before_directory_and_symbolic",
+      "status": "passed"
+    },
+    {
+      "case": "inert_main_success_status_and_return_zero",
+      "status": "passed"
+    },
+    {
+      "case": "inert_main_trace_refusal_status_and_return_two",
+      "status": "passed"
+    },
+    {
+      "case": "inert_main_unexpected_error_return_three",
+      "status": "passed"
+    },
+    {
+      "case": "inert_main_receipt_failure_return_four",
+      "status": "passed"
+    },
+    {
+      "case": "fresh_receipt_refused_before_inert_inspection",
+      "status": "passed"
+    },
+    {
+      "case": "final_receipt_cap_refuses_without_widening",
+      "status": "passed"
+    },
+    {
+      "case": "overall_clock_refuses_before_accepted_completion",
+      "status": "passed"
+    },
+    {
+      "case": "source_imports_and_no_dynamic_loader_boundary",
+      "status": "failed",
+      "error": "AssertionError: "
+    }
+  ]
+}

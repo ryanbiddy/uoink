@@ -1,0 +1,240 @@
+{
+  "label": "symbolic-preflight02",
+  "source_sha256": "f41ce88a2eceee565fcc9116e19f064723bf3339ffe4ca8669ae20bff6033127",
+  "passed": 57,
+  "failed": 0,
+  "target_side_effect_count": 0,
+  "checkpoint_opened": false,
+  "model_imported": false,
+  "elapsed_seconds": 0.007474,
+  "cases": [
+    {
+      "case": "malicious_global_reduce_newobj_build_no_side_effect",
+      "status": "passed"
+    },
+    {
+      "case": "unknown_object_mutations_remain_tagged",
+      "status": "passed"
+    },
+    {
+      "case": "memo_alias_mutated_after_selected_root",
+      "status": "passed"
+    },
+    {
+      "case": "raw_configuration_and_absence_preserved",
+      "status": "passed"
+    },
+    {
+      "case": "specifications_state_and_order_without_defaults",
+      "status": "passed"
+    },
+    {
+      "case": "tensor_hooks_and_optional_metadata_refs_preserved",
+      "status": "passed"
+    },
+    {
+      "case": "optimizer_training_root_content_omitted",
+      "status": "passed"
+    },
+    {
+      "case": "diamond_dag_depth_uses_completed_child_heights",
+      "status": "passed"
+    },
+    {
+      "case": "unsupported_opcode",
+      "status": "passed"
+    },
+    {
+      "case": "too_short_input",
+      "status": "passed"
+    },
+    {
+      "case": "missing_initial_protocol",
+      "status": "passed"
+    },
+    {
+      "case": "wrong_protocol",
+      "status": "passed"
+    },
+    {
+      "case": "repeated_protocol",
+      "status": "passed"
+    },
+    {
+      "case": "post_stop_bytes",
+      "status": "passed"
+    },
+    {
+      "case": "missing_stop",
+      "status": "passed"
+    },
+    {
+      "case": "incomplete_stop_stack",
+      "status": "passed"
+    },
+    {
+      "case": "mark_used_as_tuple_value",
+      "status": "passed"
+    },
+    {
+      "case": "missing_mark",
+      "status": "passed"
+    },
+    {
+      "case": "odd_mapping_items",
+      "status": "passed"
+    },
+    {
+      "case": "unsupported_mapping_target",
+      "status": "passed"
+    },
+    {
+      "case": "unsupported_sequence_target",
+      "status": "passed"
+    },
+    {
+      "case": "nonprimitive_mapping_key",
+      "status": "passed"
+    },
+    {
+      "case": "duplicate_string_key",
+      "status": "passed"
+    },
+    {
+      "case": "boolean_integer_duplicate_key",
+      "status": "passed"
+    },
+    {
+      "case": "integer_float_duplicate_key",
+      "status": "passed"
+    },
+    {
+      "case": "signed_zero_duplicate_key",
+      "status": "passed"
+    },
+    {
+      "case": "duplicate_memo_assignment",
+      "status": "passed"
+    },
+    {
+      "case": "missing_memo_reference",
+      "status": "passed"
+    },
+    {
+      "case": "nonliteral_reducer_target",
+      "status": "passed"
+    },
+    {
+      "case": "nontuple_reducer_arguments",
+      "status": "passed"
+    },
+    {
+      "case": "duplicate_build",
+      "status": "passed"
+    },
+    {
+      "case": "mixed_symbolic_mutation_families",
+      "status": "passed"
+    },
+    {
+      "case": "symbolic_duplicate_mapping_key",
+      "status": "passed"
+    },
+    {
+      "case": "direct_memo_cycle",
+      "status": "passed"
+    },
+    {
+      "case": "cycle_only_in_omitted_training_root",
+      "status": "passed"
+    },
+    {
+      "case": "nonfinite_float",
+      "status": "passed"
+    },
+    {
+      "case": "no_selected_metadata",
+      "status": "passed"
+    },
+    {
+      "case": "symbolic_root_not_literal_dict",
+      "status": "passed"
+    },
+    {
+      "case": "invalid_tensor_descriptor_arity",
+      "status": "passed"
+    },
+    {
+      "case": "resource_input",
+      "status": "passed"
+    },
+    {
+      "case": "resource_opcodes",
+      "status": "passed"
+    },
+    {
+      "case": "resource_nodes",
+      "status": "passed"
+    },
+    {
+      "case": "resource_edges",
+      "status": "passed"
+    },
+    {
+      "case": "resource_stack",
+      "status": "passed"
+    },
+    {
+      "case": "resource_marks",
+      "status": "passed"
+    },
+    {
+      "case": "resource_memo",
+      "status": "passed"
+    },
+    {
+      "case": "resource_collection",
+      "status": "passed"
+    },
+    {
+      "case": "resource_depth",
+      "status": "passed"
+    },
+    {
+      "case": "resource_string",
+      "status": "passed"
+    },
+    {
+      "case": "resource_total_string",
+      "status": "passed"
+    },
+    {
+      "case": "resource_global",
+      "status": "passed"
+    },
+    {
+      "case": "resource_descriptors",
+      "status": "passed"
+    },
+    {
+      "case": "resource_output",
+      "status": "passed"
+    },
+    {
+      "case": "resource_time_without_sleep",
+      "status": "passed"
+    },
+    {
+      "case": "limits_cannot_be_loosened",
+      "status": "passed"
+    },
+    {
+      "case": "unknown_limit_refused",
+      "status": "passed"
+    },
+    {
+      "case": "source_has_only_stdlib_syntax_data_operations",
+      "status": "passed"
+    }
+  ]
+}

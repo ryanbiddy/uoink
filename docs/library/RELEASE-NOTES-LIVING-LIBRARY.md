@@ -1,33 +1,44 @@
 # Living Library 3.8.0 release candidate
 
-Updated 2026-09-12. Candidate retained for review; not approved for ordinary upgrade or public release.
+Updated 2026-09-13. Release remains held. Website work and marketing are paused
+until the council and integrator accept the product for market.
 
-Package 08 includes the native note and saved-media repairs at `d2caac5`
-and `60d203f`. Its complete tree at `b8e44fb` records **2,579 passed, one
-historical failure and two skips**. Actual isolated installation, browser and
-CLI observations are complete; native Uoink GUI results have their own verdict.
-Desktop GUI acceptance, retained dependency findings and the historical receipt
-remain release holds. The candidate is not approved for an ordinary upgrade.
+The latest complete source tree at `56d9d4c` records **2,796 passed, one failed
+and three skipped cases, plus 13 passing subtests**. All 50 mirror regressions
+from the previous complete run now pass. The missing historical AT6 child-exit
+record remains a failure. Model-loading security, actual publisher signing and
+verified Claude Desktop isolation are still open.
+
+Package 08 remains the latest built and installed review artifact. It includes
+the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
+is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks
+apply to that package. The newer source has not been packaged or installed,
+and no ordinary upgrade or public download is approved.
 
 The library supports evidence retrieval, reviewable shelf proposals, consented
 standing capture, native resources and prompts, an optional file mirror,
 descriptive activity reports, and chapters with cited ranges. No main merge or
 publication occurred. Installation is not a security certification.
 
-Source work after package 08 adds signing receipts and final artifact checks at
-`0b3629d` (48 focused passes), the NLTK path-policy preparation at `4aec8ff`
-(37 passes and one Windows permission skip in each root), and the captured
-dependency checker at `5e46f2f` (36 passes in each root). These changes have not
-been rebuilt into an installer or through a new complete-tree observation.
-NLTK's labelled local wheel is being prepared; no advisory is cleared by source
-preparation alone. The completed checkpoint `19d51a8` is backed up to
-`origin/cc/living-library`, with exact source/local/remote equality verified.
+Source work after package 08 includes signing receipts at `0b3629d`, the
+accepted local NLTK wheel at `52d9f7d` and installer binding at `07084fe`,
+owner/process repairs at `ff67b84` and `747fb6b`, and the ASR cache-consent guard
+at `b96dbd0`. These changes are covered by the latest complete source tree.
+The proposed tokenizer derivative and fixed VAD loader remain separate
+preparation; they have not been installed. The last completed branch backup
+is `19d51a8`; later commits are local until another authorized branch backup.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different
 migration is impossible. See the [captured graph verdict](RUNTIME-GRAPH-BOUNDARY-REVIEW-2026-09-12.md).
-Public GitHub remains v3.7.0; the branch backup does not publish 3.8.0.
+The later candidate02 graph has 144 selections, 282 active edges and zero
+missing targets, but still fails five WhisperX caps and two source-only wheel
+checks. Its exact-version advisory observation has one raw entry/one alias
+group; that is an uninstalled proposal, not clean-security credit for the
+shipping runtime. See [the current security scope](ASTRA-RUNTIME-SECURITY-SCOPE-2026-09-13.md).
+The last reviewed public GitHub release was v3.7.0; branch backup did not
+publish 3.8.0.
 
 ## Package and verification
 
@@ -121,8 +132,24 @@ or complete safety are not adopted.
 | SQLite deadline cleanup | `d812785` | 97 passes in each root; four old-code failures / one pass, then all five regressions pass in the complete tree |
 | Native note display and readiness | `d2caac5` | 60 passes in each root; 16 new negative/positive cases, original worker shortcuts rejected |
 | Saved media details and truthful timing | `60d203f` | 58 passes in each root; 23 new cases cover authenticated bounded reads, stale selection, private metadata and unsupported timestamps |
+| Local NLTK path-policy wheel and installer binding | `52d9f7d`, `07084fe` | 43 wheel checks and 51 binding checks in each root; local version 3.10.3+uoink.pathsec1 remains explicitly labeled |
+| Mirror owner reservation and process authority | `ff67b84`, `747fb6b` | All 50 prior mirror failures pass in tree09; final process union has 233 passes in each root |
+| Complete local ASR cache before construction | `b96dbd0` | 144 focused passes plus 13 subtests in each root; synthetic cache/constructor seams, no model execution |
 
-Pillow is now 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
+Gemini's cache review is integrated at `9d25ed`. Its empty-buffer finding is
+repaired in the inert B2 tokenizer derivative, with ten synthetic cases passing
+in author and independent runs. The original B1 boundary result remains six
+passed/four failed. The Windows casing finding was rejected after a native
+Path equality probe disproved its premise. See [Astra's disposition](ASTRA-ASSET-COUNCIL-VERDICT-2026-09-13.md)
+and [the unapplied B2 scope](ASTRA-COMPANION-B2-PREPARATION-VERDICT-2026-09-13.md).
+
+Bounded static inspection of the packaged VAD checkpoint is archived at
+`01163e1`. Runs01/02 refused; reviewed runs03/04 completed without constructing
+objects or tensors. PyanNet literals alone do not establish configuration,
+provenance or compatibility. The fixed-loader draft remains unqualified.
+See [the static evidence verdict](ASTRA-VAD-STATIC-PREPARATION-VERDICT-2026-09-13.md).
+
+Package 08 contains Pillow 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
 The September 11 exact-version OSV observation of all 140 top-level pins retains
 **19 advisory entries / 15 alias-connected issues across four packages**. The
 earlier baseline had 95 entries / 55 issues across seven. The new raw scan is
@@ -339,6 +366,7 @@ Installed Python 3.13.15 observations are separate.
 
 | Source | Passed | Failed | Skipped | Xfailed | Seconds |
 |---|---:|---:|---:|---:|---:|
+| `56d9d4c` (explicit --runxfail; 13 passing subtests separate) | 2,796 | 1 | 3 | 0 | 1521.100 |
 | `b8e44fb` (explicit --runxfail) | 2,579 | 1 | 2 | 0 | 1473.237 |
 | `a25e3be` (explicit --runxfail) | 2,556 | 1 | 2 | 0 | 1500.638 |
 | `6a89189` (explicit --runxfail) | 2,540 | 1 | 2 | 0 | 1779.570 |
@@ -351,7 +379,13 @@ Installed Python 3.13.15 observations are separate.
 | `8fc6a40` | 2,254 | 10 | 3 | 1 | 573.49 |
 | `263b7e4` | 2,193 | 9 | 3 | 1 | 728.37 |
 
-All 2,582 cases are accounted for once: the prior 2,559 plus 23 media regressions,
+Tree09 accounts for all 2,800 collected cases, with only the existing S21 file
+excluded. Its 13 subtests are additional outcomes, not extra collected cases.
+Main and media pytest times were 1,505.07 and 4.12 seconds; the table records
+aggregate wall time including collection. The overall result is FAIL. See
+[the complete tree09 verdict](ASTRA-COMBINED-TREE09-VERDICT-2026-09-13.md).
+
+Package 08 accounted for all 2,582 cases once: the prior 2,559 plus 23 media regressions,
 with none missing. The aggregate remains FAIL because the historical AT6 exit
 assertion fails. Existing tests and fixture guards are unchanged. See
 [the qualification verdict](ASTRA-PACKAGE-08-VERDICT-2026-09-12.md) and
