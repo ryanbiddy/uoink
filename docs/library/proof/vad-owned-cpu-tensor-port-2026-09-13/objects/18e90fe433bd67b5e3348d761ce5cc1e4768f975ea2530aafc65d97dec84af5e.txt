@@ -1,0 +1,7 @@
+# Pre-execution allocation publication correction
+
+The first source draft set its registered marker immediately after inserting the owner into the live dictionary. A later weak-reference dictionary insertion could raise before the tensor returned to the bridge. The cleanup branch would then leave a live registry entry with no returned owner. This was found by source review; no code or test was executed.
+
+Preserve that draft in drafts/owned_cpu_tensor_port-before-publication-review.py. Replace the marker with publication only after all bookkeeping completes, track whether live-byte accounting happened, and remove this owner's partial registry entries on any failure before return. Count allocation attempts up front, so repeated failures cannot grow bookkeeping beyond the fixed 54-attempt scope. The successful bridge path still requires exactly 54 tensor allocations. No frozen bridge, reader or behavior assertion changes.
+
+This correction covers references acquired by the port. The native allocation call must itself clean internal allocations if it raises before returning a Tensor. Python tracebacks and the native allocator may retain memory; dropping port ownership is not evidence of immediate OS reclamation.

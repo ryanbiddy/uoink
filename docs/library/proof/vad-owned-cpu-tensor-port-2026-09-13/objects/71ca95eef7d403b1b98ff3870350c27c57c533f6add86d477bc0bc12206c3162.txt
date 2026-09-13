@@ -1,0 +1,6 @@
+{
+  "returned_utc": "2026-09-13T18:38:00.1882867Z",
+  "native_exit": 0,
+  "exit_source": "global:LASTEXITCODE immediately after child; never reset",
+  "postchecks_started": false
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "unexecuted_source_proposal",
+  "executions": 0,
+  "native_qualified": false,
+  "files": [
+    {
+      "path": "BRIEF.md",
+      "bytes": 3852,
+      "sha256": "e04c11d4029ed3d39faf9f2f8d3bb8b998bdf01eb2b1c03ab76cd487f4d0c7e3"
+    },
+    {
+      "path": "owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "PRE-REVIEW-PUBLICATION-CORRECTION.md",
+      "bytes": 1227,
+      "sha256": "18e90fe433bd67b5e3348d761ce5cc1e4768f975ea2530aafc65d97dec84af5e"
+    },
+    {
+      "path": "SOURCE-CONTRACTS.md",
+      "bytes": 4660,
+      "sha256": "9903e52703001205d31fa5752af5a16647482827e301ab461571795c0f66803f"
+    },
+    {
+      "path": "INTEGRATION-CONTRACT.md",
+      "bytes": 4918,
+      "sha256": "ac44f93394c89a843a31df5fba36143f414905ffdd6f79f18a2f7bfb79fd2e38"
+    },
+    {
+      "path": "drafts/owned_cpu_tensor_port-before-publication-review.py",
+      "bytes": 11285,
+      "sha256": "6f26e4fe1a8e3b9d9f2b9076ec8b789ecd3c2544336a537d5203e214c91b9f81"
+    }
+  ]
+}

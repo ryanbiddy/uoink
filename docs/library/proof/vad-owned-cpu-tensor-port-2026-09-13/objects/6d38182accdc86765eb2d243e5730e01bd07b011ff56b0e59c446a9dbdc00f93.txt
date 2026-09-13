@@ -1,0 +1,13 @@
+# CPU-port combined documentary proof proposal
+
+2026-09-13. Prepare a fixed independent-copy recipe and a documentary builder/verifier for root review. Do not execute either in this author task. The author has one preserved 60/0 fake-Torch result; the independent root result must exist before a combined proof can be built.
+
+The copy recipe validates the exact 13-entry author pins and copies those bytes plus PINS.json into a fresh root directory. It records original/copy bindings and stops. It does not create an execution admission or run a qualifier. Root must separately record its own exact-source admission before using the copied launcher.
+
+The builder reads only documentary text from the named author and root scratch trees and these fixed preparation files. It validates both raw 60-case results, actual Python/outer exits, ten final guard fields, exact ordered case membership, original and executed source bindings, generated INPUTS.json before/after binding, admissions and empty stderr. It stores each distinct input byte string once as objects/<sha256>.txt with a complete logical/original path mapping.
+
+All copy checks and derived comparison receipts precede the outer SHA256.json. Only that manifest is excluded from itself. Verification checks exact physical membership, every physical/logical hash, mapped object membership and reproducible raw-run comparison without importing or executing any archived code. An external tool record may be written beside the preparation after the proof is sealed; never append an unlisted file inside the proof.
+
+The previous bridge proof is frozen and excluded from mutation. This new proof cannot qualify native APIs, model values, factory ownership or release readiness. No tests, asset/model reads, network calls or runtime imports repeat during documentary sealing.
+
+Root independently prepared and completed its run before this proposed copy recipe was used. The existing root COPY-BINDINGS.json records the 13 entries under files; the final builder checks that actual schema. The unused recipe is retained as preparation text only and must not be executed against the existing destination. Root's actual result is 60/0/0 in 0.3032889000023715 seconds, with all ten guards intact. No new copy or qualification is needed.

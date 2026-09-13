@@ -55,6 +55,13 @@ Gemini's follow-up source council is integrated at `cf5614d`; Astra accepts
 its three limited-scope verdicts with documented corrections. It adds no native
 execution, package, installation or market-readiness result.
 
+The concrete CPU tensor port now passes 60 simulated cases in each independent
+run, with all ten final guards intact. Its proof and
+[Astra verdict](ASTRA-VAD-CPU-PORT-VERDICT-2026-09-13.md) preserve exact source
+and outcomes. Native Torch behavior and factory independence remain untested;
+the real entry point stays closed. The Windows worker and owned WhisperX
+derivative are still being implemented and reviewed.
+
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different

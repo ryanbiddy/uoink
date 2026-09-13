@@ -1,0 +1,849 @@
+"""Prepared inert qualification of the exact proposed CPU port; not yet admitted."""
+from contextlib import contextmanager
+import dataclasses
+import encodings.utf_8_sig
+import hashlib
+import inspect
+import json
+import math
+import ntpath
+import os
+from pathlib import Path
+import re
+import struct
+import sys
+import time
+import types
+import typing
+import weakref
+
+HERE = Path(__file__).absolute().parent
+FORBIDDEN = r'C:\Users\hello\AppData\Local\Uoink\index.db'
+assert os.environ.get('IG_FORBIDDEN_LIVE') == FORBIDDEN
+assert os.environ.get('TORCH_DEVICE_BACKEND_AUTOLOAD') == '0'
+assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+NAMES = ('plain_state_reader.py', 'state_bridge.py', 'owned_cpu_tensor_port.py',
+         'qualify_cpu_port.py', 'EXPECTED-CASES.json', 'INPUTS.json')
+READS = {ntpath.normcase(str(HERE / name)) for name in NAMES}
+HEAVY = {'torch', 'torchaudio', 'whisperx', 'whisper', 'faster_whisper', 'ctranslate2',
+         'pyannote', 'transformers', 'tokenizers', 'safetensors', 'numpy', 'huggingface_hub'}
+assert not [name for name in sys.modules if name.split('.')[0] in HEAVY]
+ALLOWED_IMPORTS = set(sys.modules) | {'plain_state_reader', 'state_bridge', 'owned_cpu_tensor_port'}
+EVENTS = []
+READS_OPEN = True
+
+
+def deny(event):
+    EVENTS.append(event)
+    raise AssertionError('CPU port synthetic guard denied ' + event)
+
+
+def allowed_path(path):
+    return (isinstance(path, (str, bytes, os.PathLike))
+            and ntpath.normcase(ntpath.abspath(os.fsdecode(path))) in READS)
+
+
+def audit(event, args):
+    if event == 'open':
+        path, mode, flags = args
+        if (not READS_OPEN or not allowed_path(path)
+                or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)):
+            deny(event)
+    elif event == 'import' and args[0] not in ALLOWED_IMPORTS:
+        deny('import:' + str(args[0]))
+    elif event.startswith(('socket.', 'subprocess.', 'ctypes.', 'winreg.')) or event in {
+            'os.system', 'os.startfile', 'os.startfile/2', 'os.spawn', 'os.fork', 'os.exec',
+            'os.add_dll_directory', 'os.listdir', 'os.scandir', 'os.mkdir', 'os.remove',
+            'os.rmdir', 'os.rename', 'os.link', 'os.symlink', 'os.chmod', 'os.utime'}:
+        deny(event)
+
+
+INSTALLED_METADATA = []
+for metadata_name in ('stat', 'lstat', 'readlink'):
+    original = getattr(os, metadata_name)
+    def wrapped(path, *args, _original=original, **kwargs):
+        if not READS_OPEN or not allowed_path(path):
+            deny('metadata')
+        return _original(path, *args, **kwargs)
+    setattr(os, metadata_name, wrapped)
+    INSTALLED_METADATA.append((metadata_name, wrapped))
+INSTALLED_METADATA = tuple(INSTALLED_METADATA)
+ORIGINAL_REALPATH = os.path.realpath
+
+
+def wrapped_realpath(path, *args, **kwargs):
+    if not READS_OPEN or not allowed_path(path):
+        deny('realpath')
+    return ORIGINAL_REALPATH(path, *args, **kwargs)
+
+
+os.path.realpath = wrapped_realpath
+sys.addaudithook(audit)
+RAW = {name: (HERE / name).read_bytes() for name in NAMES}
+INPUTS = json.loads(RAW['INPUTS.json'].decode('utf-8-sig'))
+for name in NAMES[:-1]:
+    assert hashlib.sha256(RAW[name]).hexdigest() == INPUTS['child_files'][name]
+assert hashlib.sha256(RAW['plain_state_reader.py']).hexdigest() == '3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c'
+assert hashlib.sha256(RAW['state_bridge.py']).hexdigest() == 'b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2'
+assert hashlib.sha256(RAW['owned_cpu_tensor_port.py']).hexdigest() == 'ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964'
+READS_OPEN = False
+for module_name in ('plain_state_reader', 'state_bridge', 'owned_cpu_tensor_port'):
+    module = types.ModuleType(module_name)
+    module.__file__ = str(HERE / (module_name + '.py'))
+    sys.modules[module_name] = module
+    exec(compile(RAW[module_name + '.py'], module.__file__, 'exec'), module.__dict__)
+reader = sys.modules['plain_state_reader']
+bridge = sys.modules['state_bridge']
+port_module = sys.modules['owned_cpu_tensor_port']
+Port = port_module._OwnedCPUTorchPortProposal
+METHODS = tuple((name, value) for name, value in vars(Port).items() if callable(value))
+ORIGINAL_OWNER = port_module._Owner
+ORIGINAL_REAL_ENTRY = port_module.open_real_tensor_port
+ORIGINAL_WEAKREF = weakref.ref
+EXPECTED = json.loads(RAW['EXPECTED-CASES.json'].decode('utf-8-sig'))
+
+
+@contextmanager
+def patched(owner, name, value):
+    previous = getattr(owner, name)
+    setattr(owner, name, value)
+    try:
+        yield
+    finally:
+        setattr(owner, name, previous)
+
+
+@contextmanager
+def environment(name, value):
+    previous = os.environ.get(name)
+    os.environ[name] = value
+    try:
+        yield
+    finally:
+        if previous is None:
+            del os.environ[name]
+        else:
+            os.environ[name] = previous
+
+
+class FakeStorage:
+    def __init__(self, size, address):
+        self.data = bytearray(size)
+        self.address = address
+        self.advertised = size
+
+    def data_ptr(self):
+        return self.address
+
+    def nbytes(self):
+        return self.advertised
+
+
+class FakeTensor:
+    def __init__(self, runtime, shape, storage, offset=0):
+        self.runtime = runtime
+        self.shape = tuple(shape)
+        self.storage = storage
+        self.offset = offset
+        self.dtype = runtime.float32
+        self.device = types.SimpleNamespace(type='cpu', index=None)
+        self.layout = runtime.strided
+        self.requires_grad = False
+        self.contiguous = True
+        self.conjugate = self.negative = False
+
+    def numel(self): return math.prod(self.shape)
+    def element_size(self): return 4
+    def is_contiguous(self): return self.contiguous
+    def is_conj(self): return self.conjugate
+    def is_neg(self): return self.negative
+    def storage_offset(self): return self.offset
+    def untyped_storage(self): return self.storage
+    def data_ptr(self): return self.storage.address + self.offset * 4
+
+    def view(self, shape):
+        assert shape == -1
+        return FakeTensor(self.runtime, (self.numel(),), self.storage, self.offset)
+
+    def narrow(self, dim, start, count):
+        assert dim == 0 and 0 <= start <= self.numel() - count
+        result = FakeTensor(self.runtime, (count,), self.storage, self.offset + start)
+        if self.runtime.view_hook is not None:
+            return self.runtime.view_hook(result)
+        return result
+
+    def copy_(self, other):
+        self.runtime.copy_calls += 1
+        assert type(other) is FakeTensor and self.numel() == other.numel()
+        if self.runtime.copy_hook is not None:
+            self.runtime.copy_hook(self, other, 'before')
+        start, stop = self.offset * 4, (self.offset + self.numel()) * 4
+        begin = other.offset * 4
+        self.storage.data[start:stop] = other.storage.data[begin:begin + self.numel() * 4]
+        if self.runtime.copy_hook is not None:
+            self.runtime.copy_hook(self, other, 'after')
+        return self
+
+    def tolist(self):
+        self.runtime.read_calls += 1
+        start, stop = self.offset * 4, (self.offset + self.numel()) * 4
+        values = [row[0] for row in struct.iter_unpack('<f', self.storage.data[start:stop])]
+        if self.runtime.read_hook is not None:
+            return self.runtime.read_hook(values)
+        return values
+
+    def zero_(self):
+        self.runtime.zero_calls += 1
+        if self.runtime.zero_hook is not None:
+            self.runtime.zero_hook(self)
+        start, stop = self.offset * 4, (self.offset + self.numel()) * 4
+        self.storage.data[start:stop] = bytes(stop - start)
+        return self
+
+
+def fake_torch():
+    runtime = types.ModuleType('torch')  # Deliberately never installed as torch.
+    runtime.Tensor = FakeTensor
+    runtime.UntypedStorage = FakeStorage
+    runtime.float32 = object()
+    runtime.strided = object()
+    runtime.default_dtype = runtime.float32
+    runtime.get_default_dtype = lambda: runtime.default_dtype
+    runtime.swap = runtime.overwrite = False
+    runtime.__future__ = types.SimpleNamespace(
+        get_swap_module_params_on_conversion=lambda: runtime.swap,
+        get_overwrite_module_params_on_conversion=lambda: runtime.overwrite)
+    runtime.address = 0x100000
+    runtime.empty_calls = runtime.tensor_calls = runtime.copy_calls = 0
+    runtime.read_calls = runtime.zero_calls = 0
+    runtime.empty_hook = runtime.tensor_hook = runtime.view_hook = None
+    runtime.copy_hook = runtime.read_hook = runtime.zero_hook = None
+    runtime.created = []  # Weakrefs only; do not manufacture lifetime retention.
+
+    @contextmanager
+    def no_grad():
+        yield
+    runtime.no_grad = no_grad
+
+    def fresh(shape):
+        size = math.prod(shape) * 4
+        storage = FakeStorage(size, runtime.address)
+        runtime.address += size + 64
+        tensor = FakeTensor(runtime, shape, storage)
+        runtime.created.append(weakref.ref(tensor))
+        return tensor
+    runtime.fresh = fresh
+
+    def empty(shape, *, dtype, device, requires_grad):
+        runtime.empty_calls += 1
+        assert dtype is runtime.float32 and device == 'cpu' and requires_grad is False
+        if runtime.empty_hook is not None:
+            return runtime.empty_hook(shape)
+        return fresh(shape)
+    runtime.empty = empty
+
+    def tensor(values, *, dtype, device, requires_grad):
+        runtime.tensor_calls += 1
+        assert type(values) is list and all(type(v) is float for v in values)
+        assert dtype is runtime.float32 and device == 'cpu' and requires_grad is False
+        assert 0 < len(values) <= 16384
+        if runtime.tensor_hook is not None:
+            return runtime.tensor_hook(values)
+        result = fresh((len(values),))
+        result.storage.data[:] = struct.pack('<' + str(len(values)) + 'f', *values)
+        return result
+    runtime.tensor = tensor
+    return runtime
+
+
+def setup(shape=(125,)):
+    runtime = fake_torch()
+    port = Port(runtime)
+    tensor = port.allocate_owned_cpu_f32(shape)
+    return runtime, port, tensor
+
+
+def refused(action, reason):
+    try:
+        action()
+    except port_module.TensorPortRefusal as error:
+        assert str(error) == reason, (str(error), reason)
+        return
+    raise AssertionError('Expected port refusal: ' + reason)
+
+
+def failure(action, kind=RuntimeError):
+    try:
+        action()
+    except kind:
+        return
+    raise AssertionError('Expected inert injected failure')
+
+
+def fail(*args):
+    raise RuntimeError('inert failure')
+
+
+PATTERN = struct.pack('<12I', 0, 0x80000000, 1, 0x80000001,
+                      0x007fffff, 0x807fffff, 0x00800000, 0x80800000,
+                      0x7f7fffff, 0xff7fffff, 0x3f800000, 0xbf800000)
+
+
+def pattern(size):
+    return (PATTERN * ((size + len(PATTERN) - 1) // len(PATTERN)))[:size]
+
+
+CASES = []
+
+
+def case(name):
+    def register(fn):
+        CASES.append((name, fn))
+        return fn
+    return register
+
+
+@case('real_entry_refuses_without_argument_inspection')
+def _():
+    class Poison:
+        def __getattribute__(self, name): raise AssertionError('Argument inspected')
+    refused(lambda: port_module.open_real_tensor_port(Poison(), approval=Poison()), 'real_authority_absent')
+
+
+@case('foreign_module_name_refused')
+def _():
+    refused(lambda: Port(types.ModuleType('other')), 'module_shape')
+
+
+@case('backend_current_state_required')
+def _():
+    with environment('TORCH_DEVICE_BACKEND_AUTOLOAD', '1'):
+        refused(lambda: Port(fake_torch()), 'backend_autoload_current_state')
+
+
+@case('default_dtype_change_refused')
+def _():
+    runtime = fake_torch(); runtime.default_dtype = object()
+    refused(lambda: Port(runtime), 'default_dtype')
+
+
+@case('swap_flag_refused')
+def _():
+    runtime = fake_torch(); runtime.swap = True
+    refused(lambda: Port(runtime), 'module_conversion_flags')
+
+
+@case('overwrite_flag_refused')
+def _():
+    runtime = fake_torch(); runtime.overwrite = True
+    refused(lambda: Port(runtime), 'module_conversion_flags')
+
+
+@case('owned_handle_is_exact_tensor_with_full_facts')
+def _():
+    runtime, port, tensor = setup()
+    facts = port.inspect_owned(tensor)
+    assert type(tensor) is runtime.Tensor and type(facts) is bridge.TensorFacts
+    assert facts.shape == (125,) and facts.storage_bytes == 500
+    assert facts.owned and facts.no_external_aliases and facts.storage_offset_bytes == 0
+    assert port._live[id(tensor)].storage is tensor.storage
+    port.release_owned(tensor)
+    assert not port._live and port._live_bytes == 0 and runtime.zero_calls == 1
+
+
+@case('all_54_shapes_copy_readback_then_retire')
+def _():
+    runtime = fake_torch(); port = Port(runtime); owners = []
+    assert len(bridge.FIXED_SHAPES) == 54
+    for key, shape in bridge.FIXED_SHAPES:
+        tensor = port.allocate_owned_cpu_f32(shape); owners.append(tensor)
+        size = math.prod(shape) * 4
+        for offset in range(0, size, 65536):
+            chunk = pattern(min(65536, size - offset))
+            port.copy_owned_f32le(tensor, offset, chunk)
+            assert port.read_owned_f32le(tensor, offset, len(chunk)) == chunk
+    assert port._live_bytes == 5891996 and port._allocated == 54
+    for tensor in reversed(owners): port.release_owned(tensor)
+    assert not port._live and port._live_bytes == 0 and runtime.zero_calls == 54
+
+
+@case('signed_zero_subnormal_and_finite_extremes_roundtrip')
+def _():
+    runtime, port, tensor = setup()
+    port.copy_owned_f32le(tensor, 0, PATTERN)
+    assert port.read_owned_f32le(tensor, 0, len(PATTERN)) == PATTERN
+    assert runtime.tensor_calls == runtime.copy_calls == runtime.read_calls == 1
+    port.release_owned(tensor)
+
+
+@case('readback_observes_destination_change_not_cached_input')
+def _():
+    runtime, port, tensor = setup()
+    port.copy_owned_f32le(tensor, 0, PATTERN)
+    tensor.storage.data[0:4] = struct.pack('<f', 2.0)
+    assert port.read_owned_f32le(tensor, 0, 4) == struct.pack('<f', 2.0)
+    port.release_owned(tensor)
+
+
+@case('native_allocation_failure_has_no_published_owner')
+def _():
+    runtime = fake_torch(); port = Port(runtime); runtime.empty_hook = fail
+    failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and port._live_bytes == 0 and port._allocated == 1
+
+
+@case('non_tensor_allocation_return_rejected')
+def _():
+    runtime = fake_torch(); port = Port(runtime); runtime.empty_hook = lambda shape: object()
+    refused(lambda: port.allocate_owned_cpu_f32((125,)), 'ordinary_tensor')
+    assert not port._live and port._live_bytes == 0
+
+
+class InsertFailure(dict):
+    def __init__(self, after):
+        super().__init__(); self.after = after
+    def __setitem__(self, key, value):
+        if self.after: super().__setitem__(key, value)
+        raise RuntimeError('inert insertion failure')
+
+
+@case('live_registry_failure_before_insertion_cleans')
+def _():
+    runtime = fake_torch(); port = Port(runtime); port._live = InsertFailure(False)
+    failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and not port._retired and port._live_bytes == 0
+
+
+@case('live_registry_failure_after_insertion_cleans')
+def _():
+    runtime = fake_torch(); port = Port(runtime); port._live = InsertFailure(True)
+    failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and not port._retired and port._live_bytes == 0
+
+
+@case('retired_registry_failure_before_insertion_cleans')
+def _():
+    runtime = fake_torch(); port = Port(runtime); port._retired = InsertFailure(False)
+    failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and not port._retired and port._live_bytes == 0
+
+
+@case('retired_registry_failure_after_insertion_cleans')
+def _():
+    runtime = fake_torch(); port = Port(runtime); port._retired = InsertFailure(True)
+    failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and not port._retired and port._live_bytes == 0
+
+
+@case('weak_reference_failure_before_registry_cleans')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    # Prepare a Tensor first so the injected failure is the port's weakref call,
+    # not the fake allocator's independent instrumentation weakref.
+    tensor = runtime.fresh((125,)); runtime.empty_hook = lambda shape: tensor
+    with patched(weakref, 'ref', fail):
+        failure(lambda: port.allocate_owned_cpu_f32((125,)))
+    assert not port._live and not port._retired and port._live_bytes == 0
+
+
+@case('duplicate_tensor_return_does_not_retire_prior_owner')
+def _():
+    runtime, port, tensor = setup(); runtime.empty_hook = lambda shape: tensor
+    refused(lambda: port.allocate_owned_cpu_f32((125,)), 'overlapping_storage')
+    assert len(port._live) == 1 and port._live[id(tensor)].tensor is tensor
+    assert port._live_bytes == 500
+    port.release_owned(tensor)
+
+
+@case('distinct_tensor_same_owned_storage_refused')
+def _():
+    runtime, port, tensor = setup()
+    runtime.empty_hook = lambda shape: FakeTensor(runtime, shape, tensor.storage)
+    refused(lambda: port.allocate_owned_cpu_f32((125,)), 'overlapping_storage')
+    assert len(port._live) == 1 and port._live_bytes == 500
+    port.release_owned(tensor)
+
+
+@case('allocation_attempt_count_bound')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    for _index in range(54):
+        tensor = port.allocate_owned_cpu_f32((1,)); port.release_owned(tensor)
+    refused(lambda: port.allocate_owned_cpu_f32((1,)), 'allocation_bound')
+    assert runtime.empty_calls == 54 and not port._live
+
+
+@case('failed_allocation_attempts_are_bounded')
+def _():
+    runtime = fake_torch(); port = Port(runtime); runtime.empty_hook = fail
+    for _index in range(54): failure(lambda: port.allocate_owned_cpu_f32((1,)))
+    refused(lambda: port.allocate_owned_cpu_f32((1,)), 'allocation_bound')
+    assert runtime.empty_calls == 54 and not port._live
+
+
+@case('live_destination_byte_bound')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    owners = [port.allocate_owned_cpu_f32((512, 256)) for _index in range(11)]
+    refused(lambda: port.allocate_owned_cpu_f32((512, 256)), 'allocation_bound')
+    assert port._live_bytes == 11 * 512 * 256 * 4 and runtime.empty_calls == 11
+    for tensor in owners: port.release_owned(tensor)
+
+
+@case('shape_container_must_be_exact_tuple')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    refused(lambda: port.allocate_owned_cpu_f32([125]), 'fixed_shape')
+    assert runtime.empty_calls == 0
+
+
+@case('shape_bool_refused')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    refused(lambda: port.allocate_owned_cpu_f32((True,)), 'fixed_shape')
+    assert runtime.empty_calls == 0
+
+
+@case('shape_outside_fixed_plan_refused')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    refused(lambda: port.allocate_owned_cpu_f32((2,)), 'fixed_shape')
+    assert runtime.empty_calls == 0
+
+
+@case('shape_zero_and_excess_dimensions_refused')
+def _():
+    runtime = fake_torch(); port = Port(runtime)
+    refused(lambda: port.allocate_owned_cpu_f32((0,)), 'fixed_shape')
+    refused(lambda: port.allocate_owned_cpu_f32((1, 1, 1, 1)), 'fixed_shape')
+    assert runtime.empty_calls == 0
+
+
+@case('foreign_ordinary_tensor_handle_refused')
+def _():
+    runtime, port, tensor = setup(); foreign = runtime.fresh((125,))
+    refused(lambda: port.inspect_owned(foreign), 'foreign_handle')
+    refused(lambda: port.release_owned(foreign), 'foreign_handle')
+    port.release_owned(tensor)
+
+
+@case('original_storage_retained_across_tensor_substitution')
+def _():
+    runtime, port, tensor = setup(); original = weakref.ref(tensor.storage)
+    replacement = runtime.fresh((125,)).storage
+    tensor.storage = replacement
+    assert original() is port._live[id(tensor)].storage
+    assert original() is not replacement and original().data_ptr() != replacement.data_ptr()
+    refused(lambda: port.inspect_owned(tensor), 'storage_identity_changed')
+    refused(lambda: port.release_owned(tensor), 'storage_identity_changed')
+    assert runtime.zero_calls == 0 and not port._live and port._live_bytes == 0
+
+
+@case('substitution_cleanup_never_zeroes_replacement')
+def _():
+    runtime, port, tensor = setup()
+    replacement = runtime.fresh((125,)).storage; replacement.data[:] = pattern(500)
+    tensor.storage = replacement
+    refused(lambda: port.release_owned(tensor), 'storage_identity_changed')
+    assert bytes(replacement.data) == pattern(500) and runtime.zero_calls == 0
+    port.release_owned(tensor)  # Only confirms prior retirement, not a successful wipe.
+    assert runtime.zero_calls == 0
+
+
+@case('changed_storage_length_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.storage.advertised += 4
+    refused(lambda: port.inspect_owned(tensor), 'complete_storage')
+    refused(lambda: port.release_owned(tensor), 'complete_storage')
+    assert not port._live and runtime.zero_calls == 0
+
+
+@case('changed_tensor_offset_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.offset = 1
+    refused(lambda: port.inspect_owned(tensor), 'zero_offset')
+    refused(lambda: port.release_owned(tensor), 'zero_offset')
+    assert not port._live and runtime.zero_calls == 0
+
+
+@case('changed_dtype_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.dtype = object()
+    refused(lambda: port.inspect_owned(tensor), 'cpu_f32_strided')
+    refused(lambda: port.release_owned(tensor), 'cpu_f32_strided')
+
+
+@case('changed_negative_view_flag_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.negative = True
+    refused(lambda: port.inspect_owned(tensor), 'tensor_shape_flags')
+    refused(lambda: port.release_owned(tensor), 'tensor_shape_flags')
+
+
+@case('changed_requires_grad_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.requires_grad = True
+    refused(lambda: port.inspect_owned(tensor), 'tensor_shape_flags')
+    refused(lambda: port.release_owned(tensor), 'tensor_shape_flags')
+
+
+@case('staging_alias_of_owned_storage_refused_before_copy')
+def _():
+    runtime, port, tensor = setup()
+    runtime.tensor_hook = lambda values: FakeTensor(runtime, (len(values),), tensor.storage)
+    refused(lambda: port.copy_owned_f32le(tensor, 0, pattern(500)), 'overlapping_storage')
+    assert runtime.copy_calls == 0 and bytes(tensor.storage.data) == bytes(500)
+    port.release_owned(tensor)
+
+
+@case('staging_allocation_failure_preserves_destination_owner')
+def _():
+    runtime, port, tensor = setup(); runtime.tensor_hook = fail
+    failure(lambda: port.copy_owned_f32le(tensor, 0, PATTERN))
+    assert len(port._live) == 1 and bytes(tensor.storage.data) == bytes(500)
+    port.release_owned(tensor)
+
+
+@case('staging_wrong_dtype_refused')
+def _():
+    runtime, port, tensor = setup()
+    def changed(values):
+        result = runtime.fresh((len(values),)); result.dtype = object(); return result
+    runtime.tensor_hook = changed
+    refused(lambda: port.copy_owned_f32le(tensor, 0, PATTERN), 'cpu_f32_strided')
+    assert runtime.copy_calls == 0
+    port.release_owned(tensor)
+
+
+@case('destination_view_offset_mismatch_refused')
+def _():
+    runtime, port, tensor = setup()
+    def changed(view): view.offset += 1; return view
+    runtime.view_hook = changed
+    refused(lambda: port.copy_owned_f32le(tensor, 0, PATTERN), 'destination_view')
+    assert runtime.copy_calls == 0
+    port.release_owned(tensor)
+
+
+@case('copy_failure_before_write_keeps_owner_for_cleanup')
+def _():
+    runtime, port, tensor = setup(); runtime.copy_hook = fail
+    failure(lambda: port.copy_owned_f32le(tensor, 0, PATTERN))
+    assert len(port._live) == 1 and bytes(tensor.storage.data) == bytes(500)
+    port.release_owned(tensor)
+
+
+@case('copy_failure_after_write_keeps_owner_for_cleanup')
+def _():
+    runtime, port, tensor = setup()
+    def changed(dst, src, phase):
+        if phase == 'after': fail()
+    runtime.copy_hook = changed
+    failure(lambda: port.copy_owned_f32le(tensor, 0, PATTERN))
+    assert port.read_owned_f32le(tensor, 0, len(PATTERN)) == PATTERN
+    port.release_owned(tensor)
+    assert bytes(tensor.storage.data) == bytes(500)
+
+
+@case('copy_cancellation_keeps_owner_for_cleanup')
+def _():
+    runtime, port, tensor = setup()
+    def cancel(*args): raise KeyboardInterrupt('inert cancellation')
+    runtime.copy_hook = cancel
+    failure(lambda: port.copy_owned_f32le(tensor, 0, PATTERN), KeyboardInterrupt)
+    assert len(port._live) == 1
+    port.release_owned(tensor)
+
+
+@case('copy_requires_exact_immutable_bytes')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, 0, bytearray(4)), 'immutable_chunk')
+    refused(lambda: port.copy_owned_f32le(tensor, 0, memoryview(bytes(4))), 'immutable_chunk')
+    assert runtime.tensor_calls == 0
+    port.release_owned(tensor)
+
+
+@case('unaligned_offset_refused')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, 1, bytes(4)), 'bounded_range')
+    assert runtime.tensor_calls == 0
+    port.release_owned(tensor)
+
+
+@case('unaligned_size_refused')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, 0, bytes(3)), 'bounded_range')
+    port.release_owned(tensor)
+
+
+@case('empty_chunk_refused')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, 0, b''), 'bounded_range')
+    port.release_owned(tensor)
+
+
+@case('chunk_above_65536_refused')
+def _():
+    runtime, port, tensor = setup((512, 256))
+    refused(lambda: port.copy_owned_f32le(tensor, 0, bytes(65540)), 'bounded_range')
+    assert runtime.tensor_calls == 0
+    port.release_owned(tensor)
+
+
+@case('chunk_outside_destination_refused')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, 500, bytes(4)), 'bounded_range')
+    port.release_owned(tensor)
+
+
+@case('bool_offset_refused')
+def _():
+    runtime, port, tensor = setup()
+    refused(lambda: port.copy_owned_f32le(tensor, False, bytes(4)), 'bounded_range')
+    port.release_owned(tensor)
+
+
+@case('nan_and_infinity_encodings_refused_before_staging')
+def _():
+    runtime, port, tensor = setup()
+    for word in (0x7f800000, 0xff800000, 0x7fc00001, 0xff800001):
+        refused(lambda: port.copy_owned_f32le(tensor, 0, struct.pack('<I', word)), 'nonfinite_chunk')
+    assert runtime.tensor_calls == runtime.copy_calls == 0
+    port.release_owned(tensor)
+
+
+@case('bounded_offset_copy_does_not_touch_neighbors')
+def _():
+    runtime, port, tensor = setup()
+    port.copy_owned_f32le(tensor, 4, PATTERN)
+    assert bytes(tensor.storage.data[:4]) == bytes(4)
+    assert bytes(tensor.storage.data[4:4+len(PATTERN)]) == PATTERN
+    assert bytes(tensor.storage.data[4+len(PATTERN):]) == bytes(496-len(PATTERN))
+    port.release_owned(tensor)
+
+
+@case('read_size_and_offset_bounds_refused')
+def _():
+    runtime, port, tensor = setup()
+    for offset, count in ((-4, 4), (0, 0), (0, 3), (498, 4), (0, True)):
+        refused(lambda: port.read_owned_f32le(tensor, offset, count), 'bounded_range')
+    assert runtime.read_calls == 0
+    port.release_owned(tensor)
+
+
+@case('read_failure_does_not_retire_owner')
+def _():
+    runtime, port, tensor = setup(); runtime.read_hook = fail
+    failure(lambda: port.read_owned_f32le(tensor, 0, 4))
+    assert len(port._live) == 1
+    port.release_owned(tensor)
+
+
+@case('read_non_list_refused')
+def _():
+    runtime, port, tensor = setup(); runtime.read_hook = tuple
+    refused(lambda: port.read_owned_f32le(tensor, 0, 4), 'native_readback_values')
+    port.release_owned(tensor)
+
+
+@case('read_wrong_length_refused')
+def _():
+    runtime, port, tensor = setup(); runtime.read_hook = lambda values: values + [0.0]
+    refused(lambda: port.read_owned_f32le(tensor, 0, 4), 'native_readback_values')
+    port.release_owned(tensor)
+
+
+@case('read_non_float_refused')
+def _():
+    runtime, port, tensor = setup(); runtime.read_hook = lambda values: [0]
+    refused(lambda: port.read_owned_f32le(tensor, 0, 4), 'native_readback_values')
+    port.release_owned(tensor)
+
+
+@case('read_nonfinite_refused')
+def _():
+    runtime, port, tensor = setup(); tensor.storage.data[0:4] = struct.pack('<I', 0x7f800000)
+    refused(lambda: port.read_owned_f32le(tensor, 0, 4), 'native_readback_values')
+    port.release_owned(tensor)
+
+
+@case('release_zero_failure_still_retires_owner')
+def _():
+    runtime, port, tensor = setup(); runtime.zero_hook = fail
+    failure(lambda: port.release_owned(tensor))
+    assert not port._live and port._live_bytes == 0 and runtime.zero_calls == 1
+    port.release_owned(tensor)
+    assert runtime.zero_calls == 1  # Retirement only; the earlier failure is unchanged.
+
+
+@case('release_is_idempotent_without_strong_retired_owner')
+def _():
+    runtime, port, tensor = setup(); identity = id(tensor)
+    port.release_owned(tensor); port.release_owned(tensor)
+    assert runtime.zero_calls == 1 and not port._live
+    assert type(port._retired[identity]) is weakref.ReferenceType
+    assert port._retired[identity]() is tensor
+
+
+@case('release_works_when_future_flag_changes_after_allocation')
+def _():
+    runtime, port, tensor = setup(); runtime.swap = True
+    refused(lambda: port.inspect_owned(tensor), 'module_conversion_flags')
+    port.release_owned(tensor)
+    assert not port._live and runtime.zero_calls == 1
+
+
+@case('copy_after_retirement_refused')
+def _():
+    runtime, port, tensor = setup(); port.release_owned(tensor)
+    refused(lambda: port.copy_owned_f32le(tensor, 0, bytes(4)), 'foreign_handle')
+    assert runtime.copy_calls == 0
+
+
+START = time.monotonic()
+assert [name for name, _ in CASES] == EXPECTED['cases']
+assert len(CASES) == len({name for name, _ in CASES}) == EXPECTED['case_count']
+results = []
+for name, fn in CASES:
+    try:
+        assert time.monotonic() - START < 120, 'Total synthetic deadline exceeded'
+        fn()
+        results.append({'name': name, 'status': 'passed'})
+    except BaseException as error:
+        results.append({'name': name, 'status': 'failed', 'error_type': type(error).__name__,
+                        'message': str(error)[:200]})
+failed = sum(item['status'] != 'passed' for item in results)
+heavy_after = [name for name in sys.modules if name.split('.')[0] in HEAVY]
+guard_fields = {
+    'metadata_wrappers_intact': all(getattr(os, name) is wrapper for name, wrapper in INSTALLED_METADATA),
+    'realpath_wrapper_intact': os.path.realpath is wrapped_realpath,
+    'content_access_closed': READS_OPEN is False,
+    'reader_real_profile_closed': reader.REAL_PROFILE is None,
+    'bridge_real_profile_absent': 'REAL_PROFILE' not in vars(bridge),
+    'port_real_profile_absent': 'REAL_PROFILE' not in vars(port_module),
+    'port_methods_intact': all(getattr(Port, name) is method for name, method in METHODS),
+    'port_helpers_intact': port_module._Owner is ORIGINAL_OWNER
+                           and port_module.open_real_tensor_port is ORIGINAL_REAL_ENTRY
+                           and weakref.ref is ORIGINAL_WEAKREF,
+    'native_packages_absent': not heavy_after,
+    'backend_current_state_restored': os.environ.get('TORCH_DEVICE_BACKEND_AUTOLOAD') == '0',
+}
+guard_integrity = all(guard_fields.values())
+report = {'scope': 'generated_bytes_and_fake_torch_storage_apis_only',
+          'passed': len(results)-failed, 'failed': failed, 'skipped': 0, 'cases': results,
+          'elapsed_seconds': time.monotonic()-START,
+          'qualification_exit': 1 if failed or EVENTS or not guard_integrity else 0,
+          'startup_binding': True, 'guard_integrity': guard_integrity, 'guard_fields': guard_fields,
+          'audit_denials': EVENTS,
+          'source_sha256': {name: hashlib.sha256(RAW[name]).hexdigest() for name in NAMES[:-1]},
+          'native_qualified': False, 'release_approved': False,
+          'limitations': 'Exact port methods with fake storage. No Torch/native APIs, assets, factory or OS reclamation measured; no complete OS sandbox claim.'}
+output = json.dumps(report, sort_keys=True, indent=2)
+assert len(output.encode('utf-8')) <= 65536
+print(output)
+raise SystemExit(report['qualification_exit'])

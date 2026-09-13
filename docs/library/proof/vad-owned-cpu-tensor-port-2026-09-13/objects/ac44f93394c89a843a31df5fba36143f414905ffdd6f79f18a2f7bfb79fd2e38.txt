@@ -1,0 +1,25 @@
+# CPU port integration contract
+
+`owned_cpu_tensor_port.py` supplies concrete method bodies for a future admitted native trial. `open_real_tensor_port` refuses before examining any argument. `_OwnedCPUTorchPortProposal` takes an already imported Torch module as a trusted implementation dependency. A module's type/name and a current environment value are not authentication. Calling this private class without a separate D4 admission would bypass the scope of this proposal; no application route calls it.
+
+The frozen reader still refuses real purposes, and the frozen bridge's real entry remains closed. A synthetic profile cannot authorize assets, native imports or this port. Later wiring must bind exact reader, bridge, port, fixed factory and runtime hashes and preserve the original artifact/output trust chain before creating tensors. The current file does not grant that authority or supply a new asset reader.
+
+The five bridge methods are implemented directly:
+
+| Method | Behavior |
+| --- | --- |
+| allocate_owned_cpu_f32 | Exact allowed shape, explicit CPU/F32/no-grad, at most 54 attempts, live destination total at most 5,891,996 bytes. Validate a complete zero-offset storage and disjoint address interval, hold original Tensor/storage references, then return the actual Tensor only after bookkeeping completes. |
+| inspect_owned | Require registry object identity and unchanged original/current storage address and length; validate CPU, F32, shape, layout, contiguous storage, flags and offset; return exact bridge TensorFacts. |
+| copy_owned_f32le | Reject foreign handles, non-bytes, nonfinite F32 encodings, unaligned/out-of-range or oversized chunks. Decode at most 16,384 finite values, create a fresh ordinary CPU/F32 staging tensor, check it is disjoint from all live destinations, and copy into a checked destination view. |
+| read_owned_f32le | Read the bounded destination view through tolist, require exact finite Python floats, pack fresh little-endian F32 bytes and recheck identity. No source-byte cache is retained. |
+| release_owned | Recheck identity before zeroing; never zero replacement storage after a failed check. Retire the registry owner and its strong references even on failure. Keep a weak reference for idempotent repeated retirement. The first failure remains a bridge failure; a later idempotent return does not erase it. |
+
+`owned` and `no_external_aliases` are claims under the private ownership contract, not observations of all possible Python/native references. The port never intentionally publishes a view or staging tensor. Internal checked views briefly alias an owned destination and are dropped before return. Exact Tensor type rules exclude ordinary subclasses, but they do not neutralize arbitrary monkeypatching, active TorchFunction/TorchDispatch modes, allocator changes or concurrent trusted code. These remain controlled-runtime prerequisites.
+
+Before a Tensor is returned, the port owns cleanup of any references it acquired. The native empty/tensor call must clean its own internal allocations if it raises before returning an object. An exception traceback can retain a Tensor or storage; dropping registry and local references does not prove all objects have been destroyed. On a normal first release, the identity/zeroing operations returned and the port retired its strong owner references. On repeated release, normal return confirms only that retirement already happened. Neither return proves OS reclamation or release of the bridge's remaining local references.
+
+The future factory port must clean partial model construction internally if it raises before returning a product. A successful product must own its parameters/buffers independently of the temporary plain-state Tensors. The bridge subsequently zeros/releases those temporary owners. Native qualification must show the product's values remain unchanged after this cleanup under the exact no-swap, assign=False, trusted-hook conditions. This tensor port does not implement or certify the factory port.
+
+Use one private, quiescent instance for one build. There are no locks or asynchronous operations. Chunk/shape/count bounds limit the amount of requested work; they cannot preempt a blocked native allocator, copy, readback or destructor. The existing bridge's 30-second cooperative deadline and cleanup accounting still apply.
+
+Future qualification must be separately admitted. It should exercise the exact five method bodies with the controlled Torch build, generated finite boundary values (positive/negative zero, smallest/largest subnormal, smallest normal and finite maxima), native source/storage identity, disjoint destinations/staging, failed allocation/registration/copy/read/zero operations, idempotent release, unchanged product state after temporary cleanup, import flags, dispatch/global state and total time. No new harness, native launch or result was created here.

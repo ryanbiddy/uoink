@@ -1,0 +1,73 @@
+{
+  "scope": "prepared_generated_bytes_and_fake_torch_storage_only",
+  "executions": 0,
+  "case_count": 60,
+  "native_qualified": false,
+  "files": [
+    {
+      "path": "BRIEF.md",
+      "bytes": 3852,
+      "sha256": "e04c11d4029ed3d39faf9f2f8d3bb8b998bdf01eb2b1c03ab76cd487f4d0c7e3"
+    },
+    {
+      "path": "PRE-REVIEW-PUBLICATION-CORRECTION.md",
+      "bytes": 1227,
+      "sha256": "18e90fe433bd67b5e3348d761ce5cc1e4768f975ea2530aafc65d97dec84af5e"
+    },
+    {
+      "path": "SOURCE-CONTRACTS.md",
+      "bytes": 4660,
+      "sha256": "9903e52703001205d31fa5752af5a16647482827e301ab461571795c0f66803f"
+    },
+    {
+      "path": "INTEGRATION-CONTRACT.md",
+      "bytes": 4918,
+      "sha256": "ac44f93394c89a843a31df5fba36143f414905ffdd6f79f18a2f7bfb79fd2e38"
+    },
+    {
+      "path": "QUALIFICATION-PROPOSAL.md",
+      "bytes": 3003,
+      "sha256": "537b0670181fe075e4451ab7ebea3167005951610578f57c880dc10d33fa31ae"
+    },
+    {
+      "path": "owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "qualify_cpu_port.py",
+      "bytes": 31961,
+      "sha256": "93d724b4c49267b0250a4ab95f70af859549176319928cca3b15fc9d79f7368c"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 2800,
+      "sha256": "4a522032ad9d392fc1dbf952f0b8e2dbb427fa2e751c1ae43cb190be577e52b2"
+    },
+    {
+      "path": "run_preflight01.ps1",
+      "bytes": 8057,
+      "sha256": "faf472d32a4c016190f2699a1fd216f002f631c50d3a0548900ebfe74b8d78c3"
+    },
+    {
+      "path": "context/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "context/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "drafts/owned_cpu_tensor_port-before-publication-review.py",
+      "bytes": 11285,
+      "sha256": "6f26e4fe1a8e3b9d9f2b9076ec8b789ecd3c2544336a537d5203e214c91b9f81"
+    },
+    {
+      "path": "drafts/PINS-source-only.json",
+      "bytes": 1124,
+      "sha256": "0a7722ff1c0cd10f62ff40c1c1afd7d7eb3f09a4ab193b36d5d14c0fc49b16e1"
+    }
+  ]
+}
