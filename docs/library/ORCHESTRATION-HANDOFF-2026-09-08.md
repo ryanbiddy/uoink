@@ -102,7 +102,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
-| VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini review of CPU/factory, lifecycle and owned WhisperX next; actual runtime bootstrap, native semantics and numerical behavior remain open |
+| VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini98b5e1a3 is reviewing CPU/factory, lifecycle and owned WhisperX; actual runtime bootstrap, native semantics and numerical behavior remain open |
 | Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Recompute captured compatibility graph with the exact built derivatives; real runtime remains closed |
 | ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
@@ -250,9 +250,12 @@ market clearance follows from this packaging. The factory and registry are
 integrated at 803df4b after author/root each pass the same 59 cases. Read
 ASTRA-VAD-FACTORY-PORT-VERDICT-2026-09-13.md; all 65 proof payloads match
 Git/disk and map 119 original logical files. The context-cleanup, registration
-and expired-retirement repairs precede both runs. Dispatch the three-group
-GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-BRIEF-2026-09-13.md with text review
-only, no new execution suite. Continue the candidate03 graph adaptation and
+and expired-retirement repairs precede both runs. Gemini98b5e1a3-c100-4cf6-b147-1b73555538ce
+is running the three-group GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-BRIEF-2026-09-13.md
+from frozen59f3aeb; controller exec66449. It is text review only, with no new
+execution suite. Collect the actual report/events/controller outcome when it
+finishes, review independently and integrate via diff/three-way apply. Continue
+the candidate03 graph adaptation and
 connected Windows worker source while council reviews; preserve all original
 failures and keep native authority closed.
 
@@ -4768,3 +4771,15 @@ and handle-backed buffers; root found inbound numeric/budget/binding questions
 before its first test. Complete Windows and model qualification remain ahead.
 Production remains e8d058f; D1/Git account selection are still pending. No
 website, marketing, main merge or publication work started.
+
+### 2026-09-13 - Gemini component council dispatched
+
+Control Room98b5e1a3-c100-4cf6-b147-1b73555538ce is running the new three-group
+source review from frozen59f3aeb84fdf2c545fcd90ffbc569f784a9818db, with twelve
+verified inputs. Engine gemini-3.8-flash-high at high effort; controller exec
+66449. Dispatch actual1fcf96 is saved in scratch. Read-only Control Room status
+fdfa2c confirms run/agent running; this is not a completed review. Provider API
+variables were removed from the child environment without printing values.
+The brief permits only a report and text inspection, no new execution suite.
+Continue Windows worker and metadata-graph implementation while it runs; review
+and preserve the actual report, source identities and events before acceptance.
