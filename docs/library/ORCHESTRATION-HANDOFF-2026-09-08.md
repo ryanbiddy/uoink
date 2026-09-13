@@ -96,9 +96,9 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative and distribution preparation sealed at f0181f8: ten synthetic cases pass independently; derivative remains unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic adapter review is next; no model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative and distribution preparation sealed at f0181f8: ten synthetic cases pass independently; derivative remains unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); bounded refusal diagnostics are next. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held |
+| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -204,6 +204,12 @@ is complete but is not this goal's completion. Current queue:
    preserved inside the last archive. Finish exact symbolic-adapter review
    before any targeted static trace. Configuration, provenance, conversion
    and runtime acceptance remain unresolved; do not fill unknown defaults.
+   Actual symbolic-run01 is sealed at 4a3644a: reader/outer exit2, Reference
+   cycle refused. The 121-payload proof preserves the reviewed108 seal,
+   author24/0 and root24/0 synthetic checks and original23/1 failure. Prepare
+   only a bounded refusal witness under the new brief; no cycle bypass or
+   partial metadata acceptance. Release notes now reflect tree09 and package08
+   separately. Model/runtime decisions remain open.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -3967,3 +3973,24 @@ builder is being qualified with synthetic ZIPs. Root review found unbounded
 read_bytes after stat/hash preconditions; the author is repairing those reads
 before qualification. No actual wheel build, model asset decompression,
 installation, frozen-test change or new complete-tree run occurred.
+
+### 2026-09-13 - Actual symbolic inspection refuses a cycle; release notes refreshed
+
+Commit 4a3644a preserves the reviewed adapter and root static run in 121
+verified payloads, including the original108 seal. Author and root synthetic
+qualification each pass24; the prior23/1 remains failed. The actual reader and
+outer process exit2 in0.035824s on Reference cycle refused. Recorded artifact
+size/hash and ZIP131 match prior inventory; normal final file-identity checks
+were not reached after the refusal. No complete metadata, provenance or model
+acceptance follows, and the cycle's owning structure is not yet identified.
+
+The next instrument adds a bounded cycle witness without changing refusal,
+grammar, hash/ZIP/CRC rules or output limits. Its author and independent reviewer
+may prepare and synthetically qualify it; root must review before any new
+static invocation. No referenced object, tensor or model was constructed.
+
+Release notes now lead with tree09 (2796/1/3 plus13 subtests), distinguish the
+unchanged package08 artifact, record the accepted NLTK/owner/process/cache
+repairs and retain all runtime, signing, historical and client holds.
+Website and marketing remain paused. The tokenizer builder's final synthetic
+run has62 passes after two retained61/1 attempts; root review is next.
