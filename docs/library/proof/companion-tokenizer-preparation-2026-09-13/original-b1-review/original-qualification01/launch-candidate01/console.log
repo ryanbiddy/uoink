@@ -1,0 +1,1 @@
+{"label": "candidate01", "tests_run": 6, "passed": 6, "failed": 0, "errors": 0, "skipped": 0, "exit": 0, "guard": {"preloaded_heavy": [], "postloaded_heavy": [], "blocked_imports": [], "blocked_audit_events": [], "finder_installed_at_finish": true, "valid": true}}

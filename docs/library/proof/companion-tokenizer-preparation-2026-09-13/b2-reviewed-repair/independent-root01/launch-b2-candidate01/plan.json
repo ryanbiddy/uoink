@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\harness.py",
+    "b2-candidate01"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01",
+  "input_hashes": {
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\harness.py": "3bb6de18d61313e452e8a56e77098eb258c0951f8a19a9b5b6a07611e2e1ab39",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\constructor-contracts.py.txt": "1626224d43b10272661445aa8c03d8dd187c29a29cb5b9622ac31e4f52b4335f",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\source-mapping.json": "b75bc8c315961ff8a43992e2b77339bbb8fd5a8fe179de405ba608136974cf1b",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\launch.py": "d91a9643b1465bad6525b5e8c9769d9c4b68ee38d4d9d17248d956ad03e1ccb7"
+  },
+  "scrubbed_variable_names": [],
+  "started_utc": "2026-09-13T13:24:52.156848+00:00"
+}

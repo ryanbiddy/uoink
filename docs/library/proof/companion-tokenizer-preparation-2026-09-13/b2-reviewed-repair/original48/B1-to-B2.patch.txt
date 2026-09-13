@@ -1,0 +1,11 @@
+--- a/B1/faster_whisper/transcribe.py
++++ b/faster_whisper/transcribe.py
+@@ -688,7 +688,7 @@
+ 
+         tokenizer_file = os.path.join(model_path, 'tokenizer.json')
+         prepared_tokenizer = None
+-        if tokenizer_bytes:
++        if tokenizer_bytes is not None:
+             prepared_tokenizer = tokenizers.Tokenizer.from_buffer(tokenizer_bytes)
+         elif os.path.isfile(tokenizer_file):
+             prepared_tokenizer = tokenizers.Tokenizer.from_file(tokenizer_file)

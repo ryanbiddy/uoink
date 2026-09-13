@@ -1,0 +1,123 @@
+{
+  "label": "b1-boundary01",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1.py.txt",
+  "source_sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269",
+  "test_protocol_sha256": "1626224d43b10272661445aa8c03d8dd187c29a29cb5b9622ac31e4f52b4335f",
+  "tests_run": 10,
+  "passed": 6,
+  "failed": 4,
+  "errors": 0,
+  "skipped": 0,
+  "observations": [
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_explicit_nonlocal_fallback_is_preserved",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_invalid_local_tokenizer_refuses_before_constructor",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_missing_local_tokenizer_refuses_before_constructor",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_supplied_tokenizer_bytes_precede_constructor",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_tokenizer_disappearing_after_file_check_still_refuses_before_constructor",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_valid_local_tokenizer_is_prepared_before_constructor",
+      "status": "passed",
+      "boundary": null
+    },
+    {
+      "id": "companion_b_selected_contracts.EmptyBufferContracts.test_empty_buffer_local_with_ambient_file_refuses_before_allocation",
+      "status": "failed",
+      "trace": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 151, in test_empty_buffer_local_with_ambient_file_refuses_before_allocation\n    self._check_empty_buffer(True, True)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 145, in _check_empty_buffer\n    self.assertIsInstance(error, ValueError, self.boundary_observation)\n    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: None is not an instance of <class 'ValueError'> : {'local_files_only': True, 'ambient_file': True, 'exception_type': None, 'events': ['tokenizer.file', 'constructor'], 'model_assigned': True, 'tokenizer_assigned': True}\n",
+      "boundary": {
+        "local_files_only": true,
+        "ambient_file": true,
+        "exception_type": null,
+        "events": [
+          "tokenizer.file",
+          "constructor"
+        ],
+        "model_assigned": true,
+        "tokenizer_assigned": true
+      }
+    },
+    {
+      "id": "companion_b_selected_contracts.EmptyBufferContracts.test_empty_buffer_local_without_ambient_file_refuses_before_allocation",
+      "status": "failed",
+      "trace": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 154, in test_empty_buffer_local_without_ambient_file_refuses_before_allocation\n    self._check_empty_buffer(True, False)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 145, in _check_empty_buffer\n    self.assertIsInstance(error, ValueError, self.boundary_observation)\n    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: FileNotFoundError('Local Whisper snapshot is missing tokenizer.json') is not an instance of <class 'ValueError'> : {'local_files_only': True, 'ambient_file': False, 'exception_type': 'FileNotFoundError', 'events': [], 'model_assigned': False, 'tokenizer_assigned': False}\n",
+      "boundary": {
+        "local_files_only": true,
+        "ambient_file": false,
+        "exception_type": "FileNotFoundError",
+        "events": [],
+        "model_assigned": false,
+        "tokenizer_assigned": false
+      }
+    },
+    {
+      "id": "companion_b_selected_contracts.EmptyBufferContracts.test_empty_buffer_nonlocal_with_ambient_file_refuses_before_allocation",
+      "status": "failed",
+      "trace": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 157, in test_empty_buffer_nonlocal_with_ambient_file_refuses_before_allocation\n    self._check_empty_buffer(False, True)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 145, in _check_empty_buffer\n    self.assertIsInstance(error, ValueError, self.boundary_observation)\n    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: None is not an instance of <class 'ValueError'> : {'local_files_only': False, 'ambient_file': True, 'exception_type': None, 'events': ['tokenizer.file', 'constructor'], 'model_assigned': True, 'tokenizer_assigned': True}\n",
+      "boundary": {
+        "local_files_only": false,
+        "ambient_file": true,
+        "exception_type": null,
+        "events": [
+          "tokenizer.file",
+          "constructor"
+        ],
+        "model_assigned": true,
+        "tokenizer_assigned": true
+      }
+    },
+    {
+      "id": "companion_b_selected_contracts.EmptyBufferContracts.test_empty_buffer_nonlocal_without_ambient_file_refuses_before_allocation",
+      "status": "failed",
+      "trace": "Traceback (most recent call last):\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 160, in test_empty_buffer_nonlocal_without_ambient_file_refuses_before_allocation\n    self._check_empty_buffer(False, False)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt\", line 145, in _check_empty_buffer\n    self.assertIsInstance(error, ValueError, self.boundary_observation)\n    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: None is not an instance of <class 'ValueError'> : {'local_files_only': False, 'ambient_file': False, 'exception_type': None, 'events': ['constructor', 'tokenizer.remote'], 'model_assigned': True, 'tokenizer_assigned': True}\n",
+      "boundary": {
+        "local_files_only": false,
+        "ambient_file": false,
+        "exception_type": null,
+        "events": [
+          "constructor",
+          "tokenizer.remote"
+        ],
+        "model_assigned": true,
+        "tokenizer_assigned": true
+      }
+    }
+  ],
+  "exit": 1,
+  "scope": "Selected constructor prefix only; all model/tokenizer/download seams are inert fakes.",
+  "guard": {
+    "preloaded_heavy": [],
+    "postloaded_heavy": [],
+    "blocked_imports": [],
+    "blocked_audit_events": [],
+    "finder_installed_at_finish": true,
+    "valid": true
+  },
+  "whole_dependency_module_executed": false,
+  "real_tokenizer_or_model_executed": false,
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "flags": {
+    "isolated": 1,
+    "no_site": 1,
+    "dont_write_bytecode": 1
+  },
+  "finished_utc": "2026-09-13T12:58:32.243706+00:00"
+}

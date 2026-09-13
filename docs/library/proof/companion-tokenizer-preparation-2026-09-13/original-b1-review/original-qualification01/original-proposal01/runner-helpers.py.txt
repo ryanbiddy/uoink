@@ -1,0 +1,114 @@
+# Repository identities from the pinned faster-whisper 1.2.1 mapping.
+_MODEL_REPOSITORIES = {
+    "tiny": "Systran/faster-whisper-tiny",
+    "base": "Systran/faster-whisper-base",
+    "small": "Systran/faster-whisper-small",
+    "medium": "Systran/faster-whisper-medium",
+    "large": "Systran/faster-whisper-large-v3",
+    "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+}
+_ASR_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
+
+
+def _model_cache_root(data_root: Path, model_size: str) -> Path:
+    """Return the private ASR cache root without creating it."""
+    root = Path(data_root).resolve()
+    cache = root / "whisper_models" / normalize_model(model_size)
+    if cache.resolve() != cache:
+        raise RuntimeError("Whisper cache directories must not be redirected")
+    return cache
+
+
+def _model_repo_root(data_root: Path, model_size: str) -> Path:
+    model_size = normalize_model(model_size)
+    repo_id = _MODEL_REPOSITORIES[model_size]
+    repo = _model_cache_root(data_root, model_size) / (
+        "models--" + repo_id.replace("/", "--"))
+    for directory in (repo, repo / "refs", repo / "snapshots", repo / "blobs"):
+        if directory.resolve() != directory:
+            raise RuntimeError("Whisper repository cache must not be redirected")
+    return repo
+
+
+def _checked_model_snapshot(data_root: Path, model_size: str,
+                            snapshot: Path) -> Path | None:
+    """Check minimum ASR cache structure, not model integrity or safety."""
+    try:
+        repo = _model_repo_root(data_root, model_size)
+        snapshot = Path(snapshot).absolute()
+        if (snapshot.parent != repo / "snapshots"
+                or re.fullmatch(r"[0-9a-f]{40}", snapshot.name) is None
+                or snapshot.resolve(strict=True) != snapshot
+                or not snapshot.is_dir()):
+            return None
+        for name in _ASR_CACHE_FILES:
+            asset = (snapshot / name).resolve(strict=True)
+            # Hub may link snapshot files to this repository's blob store.
+            if (not asset.is_relative_to(repo) or not asset.is_file()
+                    or asset.stat().st_size == 0):
+                return None
+        return snapshot
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def _cached_model_snapshot(data_root: Path, model_size: str) -> Path | None:
+    """Read the pinned helper's default Hub cache layout; never fetch or write."""
+    try:
+        repo = _model_repo_root(data_root, model_size)
+        reference = repo / "refs" / "main"
+        if reference.resolve(strict=True) != reference or not reference.is_file():
+            return None
+        with reference.open("rb") as stream:
+            raw_revision = stream.read(65)
+        if len(raw_revision) > 64:
+            return None
+        revision = raw_revision.decode("ascii").strip()
+        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+            return None
+        return _checked_model_snapshot(
+            data_root, model_size, repo / "snapshots" / revision)
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
+    """Report minimum ASR files cached, without importing a runtime or writing.
+
+    This is structural readiness for consent/preflight, not artifact validation
+    or a claim that the model has loaded. Execution rechecks the snapshot.
+    """
+    return _cached_model_snapshot(data_root, normalize_model(model_size)) is not None
+
+
+def _model_dir(data_root: Path, model_size: str) -> Path:
+    p = _model_cache_root(data_root, model_size)
+    _model_repo_root(data_root, model_size)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _download_model_snapshot(model_size: str, cache_root: Path) -> Path:
+    """Use the existing helper and model scope only after explicit consent."""
+    from faster_whisper.utils import download_model
+    return Path(download_model(model_size, cache_dir=str(cache_root)))
+
+
+def _prepare_model_snapshot(data_root: Path, model_size: str, *,
+                            consent_given: bool) -> Path:
+    model_size = normalize_model(model_size)
+    snapshot = _cached_model_snapshot(data_root, model_size)
+    if snapshot is not None:
+        return snapshot
+    if not consent_given:
+        raise PermissionError(
+            f"Whisper model '{model_size}' is not fully cached; "
+            "explicit download consent is required.")
+    cache_root = _model_dir(data_root, model_size)
+    snapshot = _download_model_snapshot(model_size, cache_root)
+    checked = _checked_model_snapshot(data_root, model_size, snapshot)
+    if checked is None:
+        raise RuntimeError(
+            f"Whisper model '{model_size}' download did not provide the required "
+            "local ASR files (model.bin, config.json and tokenizer.json).")
+    return checked

@@ -1,0 +1,138 @@
+{
+  "status": "PROPOSED_ONLY",
+  "distribution": "faster-whisper",
+  "version": "1.2.1+uoink.localassets1",
+  "filename": "faster_whisper-1.2.1+uoink.localassets1-py3-none-any.whl",
+  "output_wheel_sha256": null,
+  "output_wheel_built": false,
+  "member_count": 16,
+  "members": [
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/LICENSE",
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=r2eYE15yn4qmyFOTbQN9_epElzTSa46mqJgF_KdYwNU"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/METADATA",
+      "bytes": 16635,
+      "sha256": "0fdb45afb6a3a299b24cf9a03dc89d8863062308ccc5678b8ca2dba57b8a944e",
+      "basis": "Proposed exact text bytes only; not packaged",
+      "record_hash": "sha256=D9tFr7ajopmyTPmgPcidiGMGIwjMxWeLjKLbpXuKlE4"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/UOINK-LOCALASSETS-NOTICE.txt",
+      "bytes": 647,
+      "sha256": "7a8c9122ac17e080383b8c7297266efcf920b7edf9022c1368cdc13747e9ffeb",
+      "basis": "Proposed new notice bytes only; not packaged",
+      "record_hash": "sha256=eoyRIqwX4IA4O4xylyZu_Pkgt-35AiwTaM3BN0fp_-s"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/WHEEL",
+      "bytes": 99,
+      "sha256": "30e4224f649e5b14681b14d5b6ea11e1b8dc9d7b1ab6a00417b22868e3acc8ee",
+      "basis": "Proposed exact text bytes only; not packaged",
+      "record_hash": "sha256=MOQiT2SeWxRoGxTVtuoR4bjcnXsatqAEF7IoaOOsyO4"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/top_level.txt",
+      "bytes": 15,
+      "sha256": "636865f23cdf2058d3db77b66d6d7f8d4154e9894fcf7700374dfb847b76b188",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=Y2hl8jzfIFjT23e2bW1_jUFU6YlPz3cAN037hHt2sYg"
+    },
+    {
+      "member": "faster_whisper/__init__.py",
+      "bytes": 430,
+      "sha256": "5396c3a025a7b0cf81246fcd680c0bb7e384e2e587cc2e18f9518cef4c26d56c",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=U5bDoCWnsM-BJG_NaAwLt-OE4uWHzC4Y-VGM70wm1Ww"
+    },
+    {
+      "member": "faster_whisper/assets/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"
+    },
+    {
+      "member": "faster_whisper/assets/silero_vad_v6.onnx",
+      "bytes": 1245151,
+      "sha256": "4cbf549b8326f60f80f2536d9eefeb450a9abe83365a098031c89719f1be17d2",
+      "basis": "Upstream RECORD declaration; model member not read",
+      "record_hash": "sha256=TL9Um4Mm9g-A8lNtnu_rRQqavoM2WgmAMciXGfG-F9I"
+    },
+    {
+      "member": "faster_whisper/audio.py",
+      "bytes": 3506,
+      "sha256": "60a1d8638f718cbf6d245aed3e5a5aa61c1f822a0b0fe9b48a7c928d47c23909",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=YKHYY49xjL9tJFrtPlpaphwfgioLD-m0inySjUfCOQk"
+    },
+    {
+      "member": "faster_whisper/feature_extractor.py",
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=5AOWbbxZKlNpXuoq6iT6YLq1DvZ1XgB2sxH5B756OXw"
+    },
+    {
+      "member": "faster_whisper/tokenizer.py",
+      "bytes": 8429,
+      "sha256": "614a96b6a9660096e4f4e9fbe8860cd75ad250dce8e85a847998a3d6d48165d2",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=YUqWtqlmAJbk9On76IYM11rSUNzo6FqEeZij1tSBZdI"
+    },
+    {
+      "member": "faster_whisper/transcribe.py",
+      "bytes": 82600,
+      "sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269",
+      "basis": "Proposed exact text bytes only; not packaged",
+      "record_hash": "sha256=5QDhKwpYQgzl9BsgK6fZQrkBqbmcYX1so9MwS5ST8mk"
+    },
+    {
+      "member": "faster_whisper/utils.py",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=WzbOudD9OWHejPsUS9gvmk7zFRsuWVhAWhHvtPOsT4I"
+    },
+    {
+      "member": "faster_whisper/vad.py",
+      "bytes": 12543,
+      "sha256": "37a9c774aefdd3162d936b896c8dcf5571b2ed938d65bffecfd631770049a18d",
+      "basis": "Verified original text bytes; proposed unchanged",
+      "record_hash": "sha256=N6nHdK790xYtk2uJbI3PVXGy7ZONZb_-z9YxdwBJoY0"
+    },
+    {
+      "member": "faster_whisper/version.py",
+      "bytes": 69,
+      "sha256": "de0f60699bec3dd135ee08449a5bfdd4267d2bba61e438354cbab03ffbbc68e8",
+      "basis": "Proposed exact text bytes only; not packaged",
+      "record_hash": "sha256=3g9gaZvsPdE17ghEmlv91CZ9K7ph5Dg1TLqwP_u8aOg"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets1.dist-info/RECORD",
+      "bytes": 1501,
+      "sha256": "daca224e1ccaa397affe3521e6d0167baf8653e371041def06ce79a916ddd901",
+      "basis": "Proposed RECORD text from declared/planned members; not verified against an output wheel",
+      "record_hash": ""
+    }
+  ],
+  "zip": {
+    "compression": "ZIP_STORED",
+    "timestamp": [
+      2026,
+      9,
+      13,
+      0,
+      0,
+      0
+    ],
+    "create_system": 3,
+    "file_mode": "0o100644",
+    "order": "sorted non-RECORD members, then RECORD",
+    "comments": "empty"
+  }
+}

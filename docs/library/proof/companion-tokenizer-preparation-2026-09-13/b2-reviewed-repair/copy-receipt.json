@@ -1,0 +1,400 @@
+{
+  "created_utc": "2026-09-13T13:27:07.878844+00:00",
+  "copies": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\.gitattributes",
+      "file": "original48/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\addendum-and-seal.py",
+      "file": "original48/addendum-and-seal.py",
+      "bytes": 9098,
+      "sha256": "864da8566e9b956bf3ad726e658f0dcac08ec60ea8afe00c1e42c206f1e29ec4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\B1-BOUNDARY-REPAIR-REASON-2026-09-13.md",
+      "file": "original48/B1-BOUNDARY-REPAIR-REASON-2026-09-13.md",
+      "bytes": 1932,
+      "sha256": "93df89f9e6305b00a0653284eb35fe086d71226fc53027a167c33a70660129e9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\B1-to-B2.patch.txt",
+      "file": "original48/B1-to-B2.patch.txt",
+      "bytes": 488,
+      "sha256": "8ef53508336ebe72d62913e364104e0316c977b15596d585c86d1c7147638e47"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\B2.py.txt",
+      "file": "original48/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\BRIEF.md",
+      "file": "original48/BRIEF.md",
+      "bytes": 2102,
+      "sha256": "dbbbe4343470c45dfdbe29ea5d39a839384400b2f491b226790a956e868e2b2e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\constructor-contracts.py.txt",
+      "file": "original48/constructor-contracts.py.txt",
+      "bytes": 7312,
+      "sha256": "1626224d43b10272661445aa8c03d8dd187c29a29cb5b9622ac31e4f52b4335f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\harness-changes.patch.txt",
+      "file": "original48/harness-changes.patch.txt",
+      "bytes": 2527,
+      "sha256": "1d9c87c02b60508fa6f4f6af5a0faf9812c688a98a09f170b24eb210a1261e81"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\harness.py",
+      "file": "original48/harness.py",
+      "bytes": 5749,
+      "sha256": "3bb6de18d61313e452e8a56e77098eb258c0951f8a19a9b5b6a07611e2e1ab39"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1-distribution-plan\\PLAN.md",
+      "file": "original48/inputs/B1-distribution-plan/PLAN.md",
+      "bytes": 8447,
+      "sha256": "7a672a3ebccb2c8d3f0454b0ed168fa66b0f839db9eb3cf82fa61161b6bb811c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1-distribution-plan\\proposed-distribution-text\\RECORD.csv.txt",
+      "file": "original48/inputs/B1-distribution-plan/proposed-distribution-text/RECORD.csv.txt",
+      "bytes": 1501,
+      "sha256": "daca224e1ccaa397affe3521e6d0167baf8653e371041def06ce79a916ddd901"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1-distribution-plan\\proposed-distribution-text\\UOINK-LOCALASSETS-NOTICE.txt",
+      "file": "original48/inputs/B1-distribution-plan/proposed-distribution-text/UOINK-LOCALASSETS-NOTICE.txt",
+      "bytes": 647,
+      "sha256": "7a8c9122ac17e080383b8c7297266efcf920b7edf9022c1368cdc13747e9ffeb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1-distribution-plan\\proposed-member-manifest.json",
+      "file": "original48/inputs/B1-distribution-plan/proposed-member-manifest.json",
+      "bytes": 5629,
+      "sha256": "542899767f3a4bbd0eb99d3d11a7b857125e7d1df8d218da0a9c2ddcde8030ea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1.patch.txt",
+      "file": "original48/inputs/B1.patch.txt",
+      "bytes": 1397,
+      "sha256": "ef6e3ea49d4a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c407b764"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\B1.py.txt",
+      "file": "original48/inputs/B1.py.txt",
+      "bytes": 82600,
+      "sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\companion-b-combined-review01-SHA256.json",
+      "file": "original48/inputs/companion-b-combined-review01-SHA256.json",
+      "bytes": 12927,
+      "sha256": "05620906f1d09b8afce3f7065798495c3e7f35666a17aa2948a992500d9530e9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\companion-b-distribution-plan01-SHA256.json",
+      "file": "original48/inputs/companion-b-distribution-plan01-SHA256.json",
+      "bytes": 9270,
+      "sha256": "765f515351a3a3e9f180adf63476137c90c8220acc2a6bf7f290dcce9be60011"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\companion-b-static-qualification01-SHA256.json",
+      "file": "original48/inputs/companion-b-static-qualification01-SHA256.json",
+      "bytes": 8099,
+      "sha256": "28d2d34c530e80716964b475244551340222dc7b8b2f39f77b8be9c490117fc5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\COUNCIL-REVIEW.md",
+      "file": "original48/inputs/COUNCIL-REVIEW.md",
+      "bytes": 10777,
+      "sha256": "514b92ccf9fd2c0bde62fcfb416add93fe480124a231f0eccd5ab6e34825e7af"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\original-harness.py.txt",
+      "file": "original48/inputs/original-harness.py.txt",
+      "bytes": 5501,
+      "sha256": "74a4e21b7dc41408d24fa0ec6aeba1b92db252c394b328aed90e6f9ce2f9d048"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\original-launch.py.txt",
+      "file": "original48/inputs/original-launch.py.txt",
+      "bytes": 2460,
+      "sha256": "e1488859dcfc98d56d43768ed58b5d62660dd2b62e0a20d954a052c7955a40b2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\original-six-contracts.py.txt",
+      "file": "original48/inputs/original-six-contracts.py.txt",
+      "bytes": 5054,
+      "sha256": "01e8d20863ca74aa855ac86b3a1609bf7212addc15032705e990b50a25064d04"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\runtime-asset-guard-proposal01-SHA256.json",
+      "file": "original48/inputs/runtime-asset-guard-proposal01-SHA256.json",
+      "bytes": 4295,
+      "sha256": "a32bb76d68d7939905b6538921f8915a0d78a47ab2e0c3f3c661c49036940237"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\inputs\\upstream-transcribe.py.txt",
+      "file": "original48/inputs/upstream-transcribe.py.txt",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b1-boundary01\\console.log",
+      "file": "original48/launch-b1-boundary01/console.log",
+      "bytes": 269,
+      "sha256": "e3fd8cb22a9ce2f6920cedc607352da6e6a170c3d7160dccaa443f0acf1ff40d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b1-boundary01\\plan.json",
+      "file": "original48/launch-b1-boundary01/plan.json",
+      "bytes": 1155,
+      "sha256": "7fd8c91218bc39859417af6d326647362ca368d327b71ecad21178caef7411b8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b1-boundary01\\result.json",
+      "file": "original48/launch-b1-boundary01/result.json",
+      "bytes": 98,
+      "sha256": "ede88bfa60b58cbe001478b24e0421b024b08e0cf86a6c829261cc843ec21b4d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b2-candidate01\\console.log",
+      "file": "original48/launch-b2-candidate01/console.log",
+      "bytes": 271,
+      "sha256": "9553ec342dea48e45e93c3cec4c099251bbc03d2a695df27b07603ba9af20ba6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b2-candidate01\\plan.json",
+      "file": "original48/launch-b2-candidate01/plan.json",
+      "bytes": 1156,
+      "sha256": "8018da748eacff745c5e105eaff019f7a685ec1ca274ebf7959cbf80c236a1f8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch-b2-candidate01\\result.json",
+      "file": "original48/launch-b2-candidate01/result.json",
+      "bytes": 98,
+      "sha256": "ab562a382be2fbfd9ab15afcf4b49f6f815273d8d988cc292dfad08eeebdb3e6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launch.py",
+      "file": "original48/launch.py",
+      "bytes": 2472,
+      "sha256": "d91a9643b1465bad6525b5e8c9769d9c4b68ee38d4d9d17248d956ad03e1ccb7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\launcher-changes.patch.txt",
+      "file": "original48/launcher-changes.patch.txt",
+      "bytes": 632,
+      "sha256": "0d36c178088890ad567223a96d3f05bb79977dc6faaf6cabf1eb6de485bf2fa3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\new-empty-buffer-contracts.py.txt",
+      "file": "original48/new-empty-buffer-contracts.py.txt",
+      "bytes": 2258,
+      "sha256": "deed148983988d9113837d5a30e836961c47c7d847a2aef04cf1b0b830e38859"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\preparation.json",
+      "file": "original48/preparation.json",
+      "bytes": 6580,
+      "sha256": "0ce83cd902b3ad12e3f3f5d759ad5fdff9dba31f7576bb51ed9fb4827eb52d54"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\prepare.py",
+      "file": "original48/prepare.py",
+      "bytes": 6995,
+      "sha256": "7dae3967107e4ee349772802cd3235fc8d2fec3d43cf50c4e82819be3cad544a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\proposed-B2-NOTICE.txt",
+      "file": "original48/proposed-B2-NOTICE.txt",
+      "bytes": 733,
+      "sha256": "f82a61fe4fa1dd443f24898c268282f96d1fb8a559c542ea1ab438ca2e34397e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\proposed-B2-RECORD.csv.txt",
+      "file": "original48/proposed-B2-RECORD.csv.txt",
+      "bytes": 1501,
+      "sha256": "2e30c0232d9b18e5576b26d09693268fcc8542608a03c977b25f5b71575e3086"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\proposed-member-manifest-B2.json",
+      "file": "original48/proposed-member-manifest-B2.json",
+      "bytes": 5867,
+      "sha256": "2f1816cf0f521339d8b6709bfa27b0b6a7762582a61939f3ac901d65cdb26296"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\protocol-addition.patch.txt",
+      "file": "original48/protocol-addition.patch.txt",
+      "bytes": 2682,
+      "sha256": "39924b184d9a902326ab0568c3c5c5810a13a6b9de5d8e8e6db4782de939825d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\QUALIFICATION-AND-DISTRIBUTION-ADDENDUM.md",
+      "file": "original48/QUALIFICATION-AND-DISTRIBUTION-ADDENDUM.md",
+      "bytes": 4879,
+      "sha256": "9b1a9906b8b92074e3ebbd0d115de4aedc969a504c51a53105132ec9347ae46d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\qualification-checks.json",
+      "file": "original48/qualification-checks.json",
+      "bytes": 1159,
+      "sha256": "b0fe1c09bfeb07a5a22c1356fa04651f39bfebc001e7b6deebd55a2a876b6695"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\runs\\b1-boundary01\\result.json",
+      "file": "original48/runs/b1-boundary01/result.json",
+      "bytes": 7680,
+      "sha256": "92232c918fc42ad777e164148ffefedc72f3020516ba289dba3343cbd9f2869b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\runs\\b1-boundary01\\tests.log",
+      "file": "original48/runs/b1-boundary01/tests.log",
+      "bytes": 6911,
+      "sha256": "4f79d1a74a82fd946962bcd43f969ac1503287c0c9dfa93ac82ceba15570e907"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\runs\\b2-candidate01\\result.json",
+      "file": "original48/runs/b2-candidate01/result.json",
+      "bytes": 3983,
+      "sha256": "69479231b7c508a0d10e464ebdfac8eb2b271a6a138d56b6626aabc4385e5998"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\runs\\b2-candidate01\\tests.log",
+      "file": "original48/runs/b2-candidate01/tests.log",
+      "bytes": 2017,
+      "sha256": "0f4c766d95f36d9a818de14cf8281a05545ee4f0593c42995d35e5278a36dbeb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\SHA256.json",
+      "file": "original48/SHA256.json",
+      "bytes": 8029,
+      "sha256": "cf00f826b16a6f223428e886c783d72397668df8fed646cad63be51806c1672b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\source-mapping.json",
+      "file": "original48/source-mapping.json",
+      "bytes": 363,
+      "sha256": "b75bc8c315961ff8a43992e2b77339bbb8fd5a8fe179de405ba608136974cf1b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\upstream-to-B2-normalized.patch.txt",
+      "file": "original48/upstream-to-B2-normalized.patch.txt",
+      "bytes": 1377,
+      "sha256": "57451db2279d34c1e5c60f9a9d2c59b3b4a2a921607b53103533bb19a5d8e970"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-empty-buffer01\\upstream-to-B2.patch.txt",
+      "file": "original48/upstream-to-B2.patch.txt",
+      "bytes": 166995,
+      "sha256": "85caa5860e0400d4f72c9860c7edea9537c2da55ff2c0ba6869be4055ee5109b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\B1-BOUNDARY-REPAIR-REASON-2026-09-13.md",
+      "file": "independent-root01/B1-BOUNDARY-REPAIR-REASON-2026-09-13.md",
+      "bytes": 1932,
+      "sha256": "93df89f9e6305b00a0653284eb35fe086d71226fc53027a167c33a70660129e9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\B1-to-B2.patch.txt",
+      "file": "independent-root01/B1-to-B2.patch.txt",
+      "bytes": 488,
+      "sha256": "8ef53508336ebe72d62913e364104e0316c977b15596d585c86d1c7147638e47"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\B2.py.txt",
+      "file": "independent-root01/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\BRIEF.md",
+      "file": "independent-root01/BRIEF.md",
+      "bytes": 2102,
+      "sha256": "dbbbe4343470c45dfdbe29ea5d39a839384400b2f491b226790a956e868e2b2e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\constructor-contracts.py.txt",
+      "file": "independent-root01/constructor-contracts.py.txt",
+      "bytes": 7312,
+      "sha256": "1626224d43b10272661445aa8c03d8dd187c29a29cb5b9622ac31e4f52b4335f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\harness.py",
+      "file": "independent-root01/harness.py",
+      "bytes": 5749,
+      "sha256": "3bb6de18d61313e452e8a56e77098eb258c0951f8a19a9b5b6a07611e2e1ab39"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\inputs\\B1.py.txt",
+      "file": "independent-root01/inputs/B1.py.txt",
+      "bytes": 82600,
+      "sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\launch-b2-candidate01\\console.log",
+      "file": "independent-root01/launch-b2-candidate01/console.log",
+      "bytes": 271,
+      "sha256": "9553ec342dea48e45e93c3cec4c099251bbc03d2a695df27b07603ba9af20ba6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\launch-b2-candidate01\\plan.json",
+      "file": "independent-root01/launch-b2-candidate01/plan.json",
+      "bytes": 1120,
+      "sha256": "3b5a21c1fe124d7b7ae4236d15ac74ca514087faa80484183aecda5d488226ba"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\launch-b2-candidate01\\result.json",
+      "file": "independent-root01/launch-b2-candidate01/result.json",
+      "bytes": 98,
+      "sha256": "d04c36cc16303c17485ed0f08f3a8008fa4758c6b1caa490a8f490f3f574f1cb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\launch.py",
+      "file": "independent-root01/launch.py",
+      "bytes": 2472,
+      "sha256": "d91a9643b1465bad6525b5e8c9769d9c4b68ee38d4d9d17248d956ad03e1ccb7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\ROOT-REVIEW.json",
+      "file": "independent-root01/ROOT-REVIEW.json",
+      "bytes": 1793,
+      "sha256": "c19b03262e60cd19c5686fdd4cdf743773d62ff36ed604359a5586ec7a932e3b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\runs\\b2-candidate01\\result.json",
+      "file": "independent-root01/runs/b2-candidate01/result.json",
+      "bytes": 3977,
+      "sha256": "051687f46c4a107bcf97860ff558821751a7685418c3a52a0abf37d39ebaa19a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\runs\\b2-candidate01\\tests.log",
+      "file": "independent-root01/runs/b2-candidate01/tests.log",
+      "bytes": 2017,
+      "sha256": "a503a4141601dfbedc6cc0dfaa5e4e33abb3968f537f44debf27a8d00d23a784"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b2-01\\source-mapping.json",
+      "file": "independent-root01/source-mapping.json",
+      "bytes": 363,
+      "sha256": "b75bc8c315961ff8a43992e2b77339bbb8fd5a8fe179de405ba608136974cf1b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\prepare_companion_b2_astra01.py",
+      "file": "root-preparation/prepare_companion_b2_astra01.py",
+      "bytes": 1744,
+      "sha256": "f3e4c328fcd1b41e8feafc5964c1ccf9d2671953379bbcb6d55977576ebf34a3"
+    }
+  ],
+  "original48_seal": "cf00f826b16a6f223428e886c783d72397668df8fed646cad63be51806c1672b",
+  "source_and_protocol_hashes_match": true,
+  "ordered_ten_case_ids_match": true,
+  "independent_child_and_launcher_exit": 0,
+  "no_new_tests": true
+}

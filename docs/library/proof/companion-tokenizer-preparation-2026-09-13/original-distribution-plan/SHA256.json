@@ -1,0 +1,266 @@
+{
+  "created_utc": "2026-09-13T12:52:30.125768+00:00",
+  "payload_count": 52,
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "BRIEF.md",
+      "bytes": 1485,
+      "sha256": "fcdf8026fd7b72fcc68ed5d6fb4e865f1e55ae53c052291bd2d2d7a037e6cd7a"
+    },
+    {
+      "file": "frozen-installer-lock-expectation.patch.txt",
+      "bytes": 462,
+      "sha256": "f1e4557a1cd67653d05903c5df6d9d63560675ad4e097ec5de2736e9d29d5501"
+    },
+    {
+      "file": "inputs/cache-key/file_cache.py.txt",
+      "bytes": 4117,
+      "sha256": "77cba9166cbfcf06829a56d61150652d715d76df19c3c739485a7178e66c75fc"
+    },
+    {
+      "file": "inputs/captured-primary/faster-whisper.json",
+      "bytes": 50466,
+      "sha256": "a12f14dd61adc6688e2baf70f9349a564ff244f9bf6a7c4346a9214ffb48317b"
+    },
+    {
+      "file": "inputs/captured-primary/faster-whisper.metadata",
+      "bytes": 16616,
+      "sha256": "b85622132a43897972924db98e024c0d40dcec19c577b1ee5640f1bc1b59aada"
+    },
+    {
+      "file": "inputs/captured-primary/fetch_summary.json",
+      "bytes": 161165,
+      "sha256": "d3720ee2aa2ffc4afb5e970d87072eb39f76fffc616cde146241614e4ddfab72"
+    },
+    {
+      "file": "inputs/current/build.ps1.txt",
+      "bytes": 46723,
+      "sha256": "cb66864300b0328eacc91b29222f2f96f27349c8f5315540e46ed8af8ca55491"
+    },
+    {
+      "file": "inputs/current/RELEASE-OWNER-DECISIONS.md",
+      "bytes": 3659,
+      "sha256": "9a9843dc1e9bc429a564e57c7fdac99b991fb7e4cb4ede12faa99d00d5b4b7b9"
+    },
+    {
+      "file": "inputs/current/requirements-installer-lock.txt",
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+    },
+    {
+      "file": "inputs/current/test_installer_dependency_lock.py.txt",
+      "bytes": 5202,
+      "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+    },
+    {
+      "file": "inputs/current/THIRD-PARTY-NOTICES.md",
+      "bytes": 13414,
+      "sha256": "3934fb8b4bab9ee8593c79fe16bbcc898cff91ced2275e08beb1a1711a09a3f7"
+    },
+    {
+      "file": "inputs/current/verify_installer_lock.py.txt",
+      "bytes": 3054,
+      "sha256": "d1f04ee7f82cda15a1903cbb1049edde921e18bce0a6eb110b22ba0130505bda"
+    },
+    {
+      "file": "inputs/precedent/build_nltk_pathsec_wheel.py.txt",
+      "bytes": 25377,
+      "sha256": "0f1d4116f5aa7b733e562f2d911ccedcedd69f7824fdf7462d343f6aa1ecfb34"
+    },
+    {
+      "file": "inputs/precedent/prepare_nltk_pathsec_backport.py.txt",
+      "bytes": 22608,
+      "sha256": "6a1540d8be9d2ecd3f63d803a92af9ea6dfd997b27b55f57057421fe2b04a5a3"
+    },
+    {
+      "file": "inputs/precedent/README.md",
+      "bytes": 2434,
+      "sha256": "0a9404e23fa6e0cc506f3b4a5a9dc8da4d1f11ef360b2f8aab12cfee5d7beb03"
+    },
+    {
+      "file": "inputs/precedent/test_nltk_local_wheel.py.txt",
+      "bytes": 21764,
+      "sha256": "4f0a0adc208b505607be5eb36c0f80a6af3074afd6f31548e91a4ec5513485e1"
+    },
+    {
+      "file": "inputs/precedent/test_nltk_wheel_boundaries.py.txt",
+      "bytes": 2882,
+      "sha256": "2e752d88ccbb27162bb8507f702f97587b4ce10ae1fbbbaaf48277a4fd5db588"
+    },
+    {
+      "file": "inputs/proposal/companion-B.patch.txt",
+      "bytes": 1397,
+      "sha256": "ef6e3ea49d4a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c407b764"
+    },
+    {
+      "file": "inputs/proposal/companion-B.py.txt",
+      "bytes": 82600,
+      "sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269"
+    },
+    {
+      "file": "inputs/proposal/original24-SHA256.json",
+      "bytes": 4295,
+      "sha256": "a32bb76d68d7939905b6538921f8915a0d78a47ab2e0c3f3c661c49036940237"
+    },
+    {
+      "file": "inputs/proposal/qualification46-SHA256.json",
+      "bytes": 8099,
+      "sha256": "28d2d34c530e80716964b475244551340222dc7b8b2f39f77b8be9c490117fc5"
+    },
+    {
+      "file": "inputs/proposal/root-review67-SHA256.json",
+      "bytes": 12927,
+      "sha256": "05620906f1d09b8afce3f7065798495c3e7f35666a17aa2948a992500d9530e9"
+    },
+    {
+      "file": "inputs/proposal/root-VERDICT.md",
+      "bytes": 2035,
+      "sha256": "844f3463059802bb365e9f48721d9feab1b6d01fd14e977fc5c515bfe671b66b"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/__init__.py.txt",
+      "bytes": 430,
+      "sha256": "5396c3a025a7b0cf81246fcd680c0bb7e384e2e587cc2e18f9518cef4c26d56c"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/assets/__init__.py.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/audio.py.txt",
+      "bytes": 3506,
+      "sha256": "60a1d8638f718cbf6d245aed3e5a5aa61c1f822a0b0fe9b48a7c928d47c23909"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/feature_extractor.py.txt",
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/tokenizer.py.txt",
+      "bytes": 8429,
+      "sha256": "614a96b6a9660096e4f4e9fbe8860cd75ad250dce8e85a847998a3d6d48165d2"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/transcribe.py.txt",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/utils.py.txt",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/vad.py.txt",
+      "bytes": 12543,
+      "sha256": "37a9c774aefdd3162d936b896c8dcf5571b2ed938d65bffecfd631770049a18d"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper/version.py.txt",
+      "bytes": 50,
+      "sha256": "70ee45276562706d9787f105fb3010417fa9621fe6a9e2fad01a209f3044d9c5"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper-1.2.1.dist-info/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper-1.2.1.dist-info/METADATA.txt",
+      "bytes": 16616,
+      "sha256": "b85622132a43897972924db98e024c0d40dcec19c577b1ee5640f1bc1b59aada"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper-1.2.1.dist-info/RECORD.txt",
+      "bytes": 1272,
+      "sha256": "e8310953652f87686fad83a18e07e4e8093c81260a738eb8ef3dab5157391d35"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper-1.2.1.dist-info/top_level.txt.txt",
+      "bytes": 15,
+      "sha256": "636865f23cdf2058d3db77b66d6d7f8d4154e9894fcf7700374dfb847b76b188"
+    },
+    {
+      "file": "inputs/upstream-wheel-text/faster_whisper-1.2.1.dist-info/WHEEL.txt",
+      "bytes": 92,
+      "sha256": "b59a1e1a3b56c5645f769944ec4ddde3954f94b3509ef6ca8989f1ee0c00cbc0"
+    },
+    {
+      "file": "install-receipt-extract.json",
+      "bytes": 820,
+      "sha256": "8470ecc3d61329586f0ca2f7b8c86780a07bc929458dc9eb26380a2c6b170cda"
+    },
+    {
+      "file": "inventory.json",
+      "bytes": 13491,
+      "sha256": "1c967cf91743fbbbb9ae8f8ccd5cd97d5afcbaa11f30a798f51248ac6a40c046"
+    },
+    {
+      "file": "inventory.py",
+      "bytes": 9322,
+      "sha256": "ca3bac372ddbebd343271c5844fe040a9ade550958a8bcc3945b21634a4a1ef5"
+    },
+    {
+      "file": "materialize-plan.py",
+      "bytes": 4753,
+      "sha256": "b348d6bce5e72af187994a41dae3aaccbb4fcee670550671f4cbb3617edbedbb"
+    },
+    {
+      "file": "PLAN.md",
+      "bytes": 8447,
+      "sha256": "7a672a3ebccb2c8d3f0454b0ed168fa66b0f839db9eb3cf82fa61161b6bb811c"
+    },
+    {
+      "file": "proposed-distribution-text/METADATA.txt",
+      "bytes": 16635,
+      "sha256": "0fdb45afb6a3a299b24cf9a03dc89d8863062308ccc5678b8ca2dba57b8a944e"
+    },
+    {
+      "file": "proposed-distribution-text/RECORD.csv.txt",
+      "bytes": 1501,
+      "sha256": "daca224e1ccaa397affe3521e6d0167baf8653e371041def06ce79a916ddd901"
+    },
+    {
+      "file": "proposed-distribution-text/UOINK-LOCALASSETS-NOTICE.txt",
+      "bytes": 647,
+      "sha256": "7a8c9122ac17e080383b8c7297266efcf920b7edf9022c1368cdc13747e9ffeb"
+    },
+    {
+      "file": "proposed-distribution-text/WHEEL.txt",
+      "bytes": 99,
+      "sha256": "30e4224f649e5b14681b14d5b6ea11e1b8dc9d7b1ab6a00417b22868e3acc8ee"
+    },
+    {
+      "file": "proposed-member-manifest.json",
+      "bytes": 5629,
+      "sha256": "542899767f3a4bbd0eb99d3d11a7b857125e7d1df8d218da0a9c2ddcde8030ea"
+    },
+    {
+      "file": "proposed-version.patch.txt",
+      "bytes": 175,
+      "sha256": "e3dc946f8412b5301dea0279bfd4b323776980df9ecd751fe84672f3e2cfeed1"
+    },
+    {
+      "file": "proposed-version.py.txt",
+      "bytes": 69,
+      "sha256": "de0f60699bec3dd135ee08449a5bfdd4267d2bba61e438354cbab03ffbbc68e8"
+    },
+    {
+      "file": "seal-checks.json",
+      "bytes": 1304,
+      "sha256": "b5053d20c8f3bf9220373ff289e84c51a37755a17cf79d327b35177c50e886f8"
+    },
+    {
+      "file": "verify-and-seal.py",
+      "bytes": 3853,
+      "sha256": "9b43291a954da1352dd9751ea5ed3b6154547c0df928d1714db850359003ac33"
+    }
+  ]
+}

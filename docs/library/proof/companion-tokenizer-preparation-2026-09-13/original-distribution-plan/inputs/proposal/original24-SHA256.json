@@ -1,0 +1,126 @@
+{
+  "created_utc": "2026-09-13T11:55:46.831465+00:00",
+  "payload_count": 24,
+  "payloads": [
+    {
+      "file": "BRIEF.md",
+      "bytes": 4971,
+      "sha256": "552a423e0fb64e719042d69147a881aab56a686feb56e351d44d6e24847f07c2"
+    },
+    {
+      "file": "build-proposal.py",
+      "bytes": 6135,
+      "sha256": "e44e3fc2277bda60689805e1796738505db1cbbab08ad5c3f43e246e113cd0de"
+    },
+    {
+      "file": "companion-B.patch.txt",
+      "bytes": 1397,
+      "sha256": "ef6e3ea49d4a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c407b764"
+    },
+    {
+      "file": "companion-B.py.txt",
+      "bytes": 82600,
+      "sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269"
+    },
+    {
+      "file": "input-bindings.json",
+      "bytes": 3663,
+      "sha256": "8f46f1ba9051d2d008f79e147d62dc0c398a620015dc9611ce8c2be677ec78e0"
+    },
+    {
+      "file": "inputs/docs/library/PHASE6-CONTRACT-2026-09-08.md",
+      "bytes": 77409,
+      "sha256": "5edf6aa5e63332dac4dfd6bc29e57e86f5afeb3a2ac25da8d0e62d5e2a7bcdd2"
+    },
+    {
+      "file": "inputs/docs/library/RELEASE-OWNER-DECISIONS-2026-09-12.md",
+      "bytes": 3659,
+      "sha256": "9a9843dc1e9bc429a564e57c7fdac99b991fb7e4cb4ede12faa99d00d5b4b7b9"
+    },
+    {
+      "file": "inputs/installer/staging/python/Lib/site-packages/faster_whisper/transcribe.py",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    {
+      "file": "inputs/installer/staging/python/Lib/site-packages/faster_whisper/utils.py",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    {
+      "file": "inputs/installer/staging/python/Lib/site-packages/huggingface_hub/_snapshot_download.py",
+      "bytes": 16166,
+      "sha256": "6fe37361072f92db008ab21f1902a0cd0c2ef30d12ea58414ef9c9e52eac6b0f"
+    },
+    {
+      "file": "inputs/tests/test_installer_dependency_lock.py",
+      "bytes": 5202,
+      "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+    },
+    {
+      "file": "inputs/tests/test_packaged_decoder_loader.py",
+      "bytes": 2354,
+      "sha256": "5c0f3e5c6906c1b1b286f016272c3acfcf95cfaa961dbf8d757355ca4f102a2e"
+    },
+    {
+      "file": "inputs/tests/test_phase6_evaluation.py",
+      "bytes": 109023,
+      "sha256": "971b12d08ec517b195865dbd4dcfde12baa23b6e406fd67cc9a35a1c7c0f24cb"
+    },
+    {
+      "file": "inputs/tests/test_podcast_background_jobs.py",
+      "bytes": 11793,
+      "sha256": "c9915bdb8e5523f7867e49e7cfd02db2bc5d72c10617dc5624bff7b2545b2c2d"
+    },
+    {
+      "file": "inputs/tests/test_podcast_watch.py",
+      "bytes": 16068,
+      "sha256": "674b8eafb100746b6ca0ef7771aa38593894684c1e8452ef7b19786cb2fb4b02"
+    },
+    {
+      "file": "inputs/tests/test_podcast_workflow_truth.py",
+      "bytes": 3143,
+      "sha256": "e71472253f30a23ce405296deba28ed4a415c87b79530363cfe5ad8a336dcd6d"
+    },
+    {
+      "file": "inputs/whisper_runner.py",
+      "bytes": 18957,
+      "sha256": "71bd744fd4bc4f44243a2642a918958426dd21f0c06d341cc2c758cb27ce1ef5"
+    },
+    {
+      "file": "product-A.patch.txt",
+      "bytes": 9247,
+      "sha256": "76ee9deca5530370ffaf856a5bd3cc72c22186f151a1cf4e91fcdb3c9eb1d8c0"
+    },
+    {
+      "file": "product-A.py.txt",
+      "bytes": 22899,
+      "sha256": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f"
+    },
+    {
+      "file": "runner-helpers.py.txt",
+      "bytes": 4889,
+      "sha256": "78d0cef7b31d4c64f46dbca1413cb89a693d98951a7572ede696c628568865f8"
+    },
+    {
+      "file": "tests-proposed.py.txt",
+      "bytes": 13879,
+      "sha256": "7f56696c56b71d6a44bbf542f1e7857655e53492c5779fc3b4db17e2992c2061"
+    },
+    {
+      "file": "validation.json",
+      "bytes": 431,
+      "sha256": "b9b97bc6ec3beb33cfbf52a2d115c3ec00223b5a9b4656cb8a202fa7d8410362"
+    },
+    {
+      "file": "VERDICT.md",
+      "bytes": 5366,
+      "sha256": "5023914e95dd29c8e6473c135efa9bee1616f7b848a6c9d50a7d585348acc2ff"
+    },
+    {
+      "file": "verify-and-seal.py",
+      "bytes": 3503,
+      "sha256": "e44c41a6f8c6090563f6dfc7596f40633d32cb2b4f9483f77e23759203d48e8c"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+--- a/inputs/original-harness.py.txt
++++ b/harness.py
+@@ -12,7 +12,7 @@
+ 
+ out = Path(__file__).resolve().parent
+ p = argparse.ArgumentParser()
+-p.add_argument("label", choices=("baseline01", "candidate01"))
++p.add_argument("label", choices=("b1-boundary01", "b2-candidate01"))
+ a = p.parse_args()
+ run = out / "runs" / a.label
+ run.mkdir(parents=True, exist_ok=False)
+@@ -55,7 +55,7 @@
+ 
+ sys.addaudithook(audit)
+ mapping = json.loads((out / "source-mapping.json").read_text(encoding="utf-8"))
+-source_key = "input" if a.label == "baseline01" else "derivative"
++source_key = "input" if a.label == "b1-boundary01" else "derivative"
+ source = out / mapping[source_key + "_relative_path"]
+ assert hashlib.sha256(source.read_bytes()).hexdigest() == mapping[source_key + "_sha256"]
+ tests = out / "constructor-contracts.py.txt"
+@@ -63,23 +63,24 @@
+ namespace = {"__name__": "companion_b_selected_contracts", "__file__": str(tests)}
+ exec(compile(tests.read_text(encoding="utf-8"), str(tests), "exec"), namespace)
+ namespace["FW_SOURCE"] = source
+-suite = unittest.defaultTestLoader.loadTestsFromTestCase(namespace["CompanionConstructorContracts"])
+-assert suite.countTestCases() == 6
++suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(namespace[name])
++    for name in ("CompanionConstructorContracts", "EmptyBufferContracts"))
++assert suite.countTestCases() == 10
+ observations = []
+ 
+ 
+ class Result(unittest.TextTestResult):
+     def addSuccess(self, test):
+         super().addSuccess(test)
+-        observations.append({"id": test.id(), "status": "passed"})
++        observations.append({"id": test.id(), "status": "passed", "boundary": getattr(test, "boundary_observation", None)})
+ 
+     def addFailure(self, test, error):
+         super().addFailure(test, error)
+-        observations.append({"id": test.id(), "status": "failed", "trace": self._exc_info_to_string(error, test)})
++        observations.append({"id": test.id(), "status": "failed", "trace": self._exc_info_to_string(error, test), "boundary": getattr(test, "boundary_observation", None)})
+ 
+     def addError(self, test, error):
+         super().addError(test, error)
+-        observations.append({"id": test.id(), "status": "error", "trace": self._exc_info_to_string(error, test)})
++        observations.append({"id": test.id(), "status": "error", "trace": self._exc_info_to_string(error, test), "boundary": getattr(test, "boundary_observation", None)})
+ 
+     def addSkip(self, test, reason):
+         super().addSkip(test, reason)

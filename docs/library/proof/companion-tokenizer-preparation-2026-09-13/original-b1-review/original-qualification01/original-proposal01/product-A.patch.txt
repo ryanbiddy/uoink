@@ -1,0 +1,202 @@
+--- a/whisper_runner.py
++++ b/whisper_runner.py
+@@ -40,6 +40,7 @@
+ import logging
+ import os
+ import inspect
++import re
+ import sys
+ from datetime import datetime
+ from pathlib import Path
+@@ -143,27 +144,120 @@
+     return _WHISPERX_AVAILABLE
+ 
+ 
++# Repository identities from the pinned faster-whisper 1.2.1 mapping.
++_MODEL_REPOSITORIES = {
++    "tiny": "Systran/faster-whisper-tiny",
++    "base": "Systran/faster-whisper-base",
++    "small": "Systran/faster-whisper-small",
++    "medium": "Systran/faster-whisper-medium",
++    "large": "Systran/faster-whisper-large-v3",
++    "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
++}
++_ASR_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
++
++
++def _model_cache_root(data_root: Path, model_size: str) -> Path:
++    """Return the private ASR cache root without creating it."""
++    root = Path(data_root).resolve()
++    cache = root / "whisper_models" / normalize_model(model_size)
++    if cache.resolve() != cache:
++        raise RuntimeError("Whisper cache directories must not be redirected")
++    return cache
++
++
++def _model_repo_root(data_root: Path, model_size: str) -> Path:
++    model_size = normalize_model(model_size)
++    repo_id = _MODEL_REPOSITORIES[model_size]
++    repo = _model_cache_root(data_root, model_size) / (
++        "models--" + repo_id.replace("/", "--"))
++    for directory in (repo, repo / "refs", repo / "snapshots", repo / "blobs"):
++        if directory.resolve() != directory:
++            raise RuntimeError("Whisper repository cache must not be redirected")
++    return repo
++
++
++def _checked_model_snapshot(data_root: Path, model_size: str,
++                            snapshot: Path) -> Path | None:
++    """Check minimum ASR cache structure, not model integrity or safety."""
++    try:
++        repo = _model_repo_root(data_root, model_size)
++        snapshot = Path(snapshot).absolute()
++        if (snapshot.parent != repo / "snapshots"
++                or re.fullmatch(r"[0-9a-f]{40}", snapshot.name) is None
++                or snapshot.resolve(strict=True) != snapshot
++                or not snapshot.is_dir()):
++            return None
++        for name in _ASR_CACHE_FILES:
++            asset = (snapshot / name).resolve(strict=True)
++            # Hub may link snapshot files to this repository's blob store.
++            if (not asset.is_relative_to(repo) or not asset.is_file()
++                    or asset.stat().st_size == 0):
++                return None
++        return snapshot
++    except (OSError, RuntimeError, ValueError):
++        return None
++
++
++def _cached_model_snapshot(data_root: Path, model_size: str) -> Path | None:
++    """Read the pinned helper's default Hub cache layout; never fetch or write."""
++    try:
++        repo = _model_repo_root(data_root, model_size)
++        reference = repo / "refs" / "main"
++        if reference.resolve(strict=True) != reference or not reference.is_file():
++            return None
++        with reference.open("rb") as stream:
++            raw_revision = stream.read(65)
++        if len(raw_revision) > 64:
++            return None
++        revision = raw_revision.decode("ascii").strip()
++        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
++            return None
++        return _checked_model_snapshot(
++            data_root, model_size, repo / "snapshots" / revision)
++    except (OSError, RuntimeError, ValueError):
++        return None
++
++
+ def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
+-    """Return true once the local Whisper model cache has any payload.
+-
+-    The first transcription still requires explicit user consent before
+-    WhisperX downloads the model. /health uses this as a read-only status
+-    bit, so it must not create the model directory as a side effect.
++    """Report minimum ASR files cached, without importing a runtime or writing.
++
++    This is structural readiness for consent/preflight, not artifact validation
++    or a claim that the model has loaded. Execution rechecks the snapshot.
+     """
+-    model_size = normalize_model(model_size)
+-    model_path = Path(data_root) / "whisper_models" / model_size
+-    if not model_path.exists() or not model_path.is_dir():
+-        return False
+-    try:
+-        return any(model_path.iterdir())
+-    except OSError:
+-        return False
++    return _cached_model_snapshot(data_root, normalize_model(model_size)) is not None
+ 
+ 
+ def _model_dir(data_root: Path, model_size: str) -> Path:
+-    p = Path(data_root) / "whisper_models" / model_size
++    p = _model_cache_root(data_root, model_size)
++    _model_repo_root(data_root, model_size)
+     p.mkdir(parents=True, exist_ok=True)
+     return p
++
++
++def _download_model_snapshot(model_size: str, cache_root: Path) -> Path:
++    """Use the existing helper and model scope only after explicit consent."""
++    from faster_whisper.utils import download_model
++    return Path(download_model(model_size, cache_dir=str(cache_root)))
++
++
++def _prepare_model_snapshot(data_root: Path, model_size: str, *,
++                            consent_given: bool) -> Path:
++    model_size = normalize_model(model_size)
++    snapshot = _cached_model_snapshot(data_root, model_size)
++    if snapshot is not None:
++        return snapshot
++    if not consent_given:
++        raise PermissionError(
++            f"Whisper model '{model_size}' is not fully cached; "
++            "explicit download consent is required.")
++    cache_root = _model_dir(data_root, model_size)
++    snapshot = _download_model_snapshot(model_size, cache_root)
++    checked = _checked_model_snapshot(data_root, model_size, snapshot)
++    if checked is None:
++        raise RuntimeError(
++            f"Whisper model '{model_size}' download did not provide the required "
++            "local ASR files (model.bin, config.json and tokenizer.json).")
++    return checked
+ 
+ 
+ def _runtime_device() -> str:
+@@ -297,10 +391,10 @@
+     Raises RuntimeError when whisperx is not importable -- the caller
+     surfaces a 503 with install hints.
+ 
+-    `consent_given` must be True for first-time model downloads. The
+-    flag is verified before the load_model call -- on first use the
+-    model dir is empty, and we refuse without consent. The dashboard
+-    consent dialog records the user's opt-in and re-issues the call."""
++    Missing or incomplete ASR caches require explicit download consent.
++    Resolution and minimum-file checks precede model construction. The
++    execution call receives a local snapshot and local_files_only=True;
++    this does not qualify the separate VAD loader or artifact integrity."""
+     audio_path = Path(audio_path)
+     if not audio_path.exists():
+         raise FileNotFoundError(f"audio file missing: {audio_path}")
+@@ -314,6 +408,8 @@
+             "whisperx is not installed or its runtime is broken. "
+             "Reinstall Uoink so the bundled WhisperX runtime is restored. "
+             "See the helper log for the underlying import error.")
++    model_path = _prepare_model_snapshot(
++        data_root, model_size, consent_given=consent_given)
+     try:
+         import whisperx  # type: ignore
+     except BaseException as e:  # noqa: BLE001 -- matches _probe_whisperx
+@@ -321,17 +417,6 @@
+             f"whisperx import failed at transcribe time: "
+             f"{type(e).__name__}: {e}"
+         ) from e
+-
+-    model_path = _model_dir(data_root, model_size)
+-    # If the model dir has no checkpoint files yet, this is a first
+-    # download. Verify the user consented before WhisperX hits the
+-    # internet for 200 MB - 2 GB.
+-    has_existing_checkpoint = any(model_path.iterdir())
+-    if not has_existing_checkpoint and not consent_given:
+-        raise PermissionError(
+-            f"Whisper model '{model_size}' has not been downloaded yet "
+-            f"and consent_given=False. The dashboard should prompt the "
+-            f"user before re-issuing the transcribe call with consent_given=True.")
+ 
+     # whisperx exposes a load_model + transcribe + align + diarize chain.
+     # Keep the call site narrow so a future WhisperX API rev doesn't
+@@ -343,9 +428,12 @@
+     # rebuild reuses it; a genuinely new execution gets a new one.
+     diarization_run: dict[str, Any] | None = None
+     try:
+-        model = whisperx.load_model(model_size, device=device,
++        if _checked_model_snapshot(data_root, model_size, model_path) is None:
++            raise RuntimeError('Local ASR snapshot changed before model construction')
++        model = whisperx.load_model(str(model_path), device=device,
+                                       compute_type=_compute_type(device),
+-                                      download_root=str(model_path))
++                                      download_root=str(_model_cache_root(data_root, model_size)),
++                                      local_files_only=True)
+         result = model.transcribe(str(audio_path),
+                                     language=language)
+         segments = result.get("segments") or []

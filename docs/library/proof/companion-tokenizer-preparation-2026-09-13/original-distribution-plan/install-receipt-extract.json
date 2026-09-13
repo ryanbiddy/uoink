@@ -1,0 +1,21 @@
+{
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\install-report.json",
+  "source_bytes": 2079145,
+  "source_sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303",
+  "faster_whisper_only": {
+    "download_info": {
+      "url": "https://files.pythonhosted.org/packages/05/99/49ee85903dee060d9f08297b4a342e5e0bcfca2f027a07b4ee0a38ab13f9/faster_whisper-1.2.1-py3-none-any.whl",
+      "archive_info": {
+        "hashes": {
+          "sha256": "79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7"
+        },
+        "hash": "sha256=79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7"
+      }
+    },
+    "requested": true,
+    "is_direct": false,
+    "is_yanked": false,
+    "name": "faster-whisper",
+    "version": "1.2.1"
+  }
+}

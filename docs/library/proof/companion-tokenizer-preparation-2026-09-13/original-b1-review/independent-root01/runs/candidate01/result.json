@@ -1,0 +1,56 @@
+{
+  "label": "candidate01",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-companion-b01\\original-proposal01\\companion-B.py.txt",
+  "source_sha256": "e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269",
+  "test_protocol_sha256": "01e8d20863ca74aa855ac86b3a1609bf7212addc15032705e990b50a25064d04",
+  "tests_run": 6,
+  "passed": 6,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "observations": [
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_explicit_nonlocal_fallback_is_preserved",
+      "status": "passed"
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_invalid_local_tokenizer_refuses_before_constructor",
+      "status": "passed"
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_missing_local_tokenizer_refuses_before_constructor",
+      "status": "passed"
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_supplied_tokenizer_bytes_precede_constructor",
+      "status": "passed"
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_tokenizer_disappearing_after_file_check_still_refuses_before_constructor",
+      "status": "passed"
+    },
+    {
+      "id": "companion_b_selected_contracts.CompanionConstructorContracts.test_valid_local_tokenizer_is_prepared_before_constructor",
+      "status": "passed"
+    }
+  ],
+  "exit": 0,
+  "scope": "Selected constructor prefix only; all model/tokenizer/download seams are inert fakes.",
+  "guard": {
+    "preloaded_heavy": [],
+    "postloaded_heavy": [],
+    "blocked_imports": [],
+    "blocked_audit_events": [],
+    "finder_installed_at_finish": true,
+    "valid": true
+  },
+  "whole_dependency_module_executed": false,
+  "real_tokenizer_or_model_executed": false,
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "flags": {
+    "isolated": 1,
+    "no_site": 1,
+    "dont_write_bytecode": 1
+  },
+  "finished_utc": "2026-09-13T12:39:25.261899+00:00"
+}
