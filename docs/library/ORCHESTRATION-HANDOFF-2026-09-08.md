@@ -108,8 +108,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace | Protocol and pipe contracts integrated at 9c40271 | Author and Astra each pass the same 54 generated-memory cases; all 65 proof payloads match Git/disk and preserve 87 logical files | Complete the generated-only real Windows child observation. No native model or release acceptance |
-| Local NLTK graph input | Exact metadata receipt integrated at e5b1ddd | Reader/native/outer exits zero; 3,245 metadata bytes bound to the exact accepted wheel. All 23 proof payloads match Git/disk | Qualify the explicit third local-artifact record and run the retained 144-pin graph; no runtime or security clearance |
+| Windows namespace | Protocol and pipe contracts integrated at 9c40271; native04 raw positive observed | Author and Astra each pass 54 generated-memory cases. Native04 controller/child/outer exit0; root verifies six sources, three controls, nine support inputs and child-only file protection | Seal native01–04 history and qualify timeout/forced-stop. No native model or release acceptance |
+| Local NLTK graph input | Exact metadata receipt at e5b1ddd; final graph at 4827288 | Three-record checker passes the same 59 cases in each root. Complete 144-pin/287-edge graph remains valid FAIL only for two missing wheels; all 26 graph and five integrator payloads match Git/disk | Verify the two existing cached wheel candidates and repair the artifact plan; no runtime or security clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -266,18 +266,33 @@ Read ASTRA-WINDOWS-NAMESPACE-VERDICT-2026-09-13.md. Author and Astra each pass
 the same 54 cases; both actual outer exits are zero, guards valid and nine
 inputs unchanged. All 65 proof payloads match Git/disk. Next qualify the
 connected generated-only Windows child, inherited pipe,
-child-held file guard and actual process/job shutdown. Native01 failed during
-ctypes structure setup before worker creation: actual84f5c9/native/outer exit1,
-unchanged inputs, stderr495 bytes. Preserve it. Review the fixed stdlib layout
-loader repair and new native02 brief before a fresh run. No model is involved.
+child-held file guard and actual process/job shutdown. Native04 now passes that
+narrow observation: actual7b331c exit0; controller/child/outer0; child-only guard
+denies write access with WinError32, and access succeeds without writing after
+the retained child exits0 and job active count reaches0. Root a58725 verifies
+six sources, three controls, nine support files and exact generated fixture.
+Native01 import refusal, native02 ctypes audit refusal and native03 erroneous
+32-binding assertion remain failures before worker creation. Native04 binds the
+actual31 functions. Seal the complete history, then qualify the prepared bounded
+timeout/forced-stop case and eight negative/positive handshake contracts. No
+model is involved; failure cleanup and actual loader adoption remain open.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
 after root source review; root verified62/0, valid guards, exact membership and
 362 unchanged inputs. NLTK metadata read01 is accepted at e5b1ddd; read
 ASTRA-NLTK-METADATA-VERDICT-2026-09-13.md. All23 proof payloads match Git/disk.
-Qualify the literal third local-wheel record. Neither the current 144-pin graph nor native
-models have run. Preserve all failures and keep model authority closed.
+The literal third local-wheel record and complete graph are integrated at
+4827288. Read ASTRA-RUNTIME-CANDIDATE03-GRAPH-VERDICT-2026-09-13.md. Author/root
+each pass59/0 with unchanged36 public cases plus23 new interface controls. The
+complete retained graph is valid FAIL:144pins,287edges, zero conflicts/missing
+targets/incomplete evidence, two missing wheels (ANTLR4.9.3, proxy-tools0.1.0).
+All313 captures and36 graph inputs remain unchanged. The26-payload proof maps
+2266 logical paths to532 inert ZIP members; all payloads match Git/disk.
+Preserve the final59 admission-file collision and late review honestly; never
+continue dependent execution after a preparation error. Existing cached wheels
+and historical origins are located; review bounded byte inspection before any
+artifact-plan repair. Native models have not run; their authority stays closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4890,3 +4905,31 @@ the complete current launcher. All native01 evidence remains unchanged.
 
 Production remains e8d058f. Website and marketing stay paused. The native,
 complete-graph, model, current-source tree/package and release gates remain open.
+
+### 2026-09-13 - Final local metadata graph integrated; two wheel candidates located
+
+Integration4827288 preserves final59/0 in each independent root and the valid
+complete144 FAIL:287 edges, no version conflicts/missing targets/incomplete
+metadata, two missing public wheels. Actual graph e7bf3f/native/outer exit1
+stays failed. Root a58725 rechecks all36 preparation and313 capture contents,
+recorded identities and raw outcome. Sealer5ce1df exits0; separate copied-proof
+verifier636c7a and Git/disk integrationfdd62c verify26 graph plus five integrator
+payloads. Graph seal793a1c4826eabc278b795d0d2fbc06c642dfb2ca1cdf42d73cc4bb8e4fb941ec
+maps2266 paths to532 distinct inert ZIP members. No test or graph reran to seal.
+
+Final59's admission-file collision remains documented; a failed preparation
+must stop dependent operations. The successful root invocation did not create
+a new dedicated pre-execution admission file. A documentary root check's unused
+fixture literal was corrected against the observed64 bytes before its first
+execution. Two routine guessed read-only filenames returned missing-file errors;
+subsequent inventory identified INPUT-HASHES.json and run_graph01.ps1. Those
+lookups ran no tests and changed no evidence. Use inventory before dependent reads.
+
+Existing cache paths contain ANTLR4.9.3 and proxy-tools0.1.0 wheel candidates.
+Historical origin/build text binds them to the exact retained sdists; actual
+wheel bytes and license contents remain to be checked under a bounded brief.
+No new download/build is needed if those candidates qualify. Native04 has a
+separately reviewed generated-only positive result; its combined proof and a
+real timeout/forced-stop test are next. Production remains e8d058f; no current
+runtime, installer, council release or market acceptance. Website/marketing
+remain paused. Backup35629 still waits at account selection (5de96c, no output).

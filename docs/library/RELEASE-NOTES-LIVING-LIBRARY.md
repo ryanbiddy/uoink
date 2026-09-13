@@ -86,11 +86,11 @@ all 99 evidence payloads match Git and disk. This is component agreement,
 not approval of the unfinished runtime, installation or market release.
 
 Windows protocol and pipe contracts are accepted at `9c40271`: 54 simulated
-cases pass independently in each root. The first actual Windows worker test
-stopped during ctypes startup before child creation; its failed result is
-retained and a narrow setup repair is in progress. Exact local NLTK metadata
-is accepted at `e5b1ddd` for the next dependency review. Neither result clears
-the complete runtime, current installer or release.
+cases pass independently in each root. The fourth actual Windows worker test
+passes its generated-data communication, inherited file protection and shutdown
+checks. Three earlier setup failures remain retained; failure cleanup and actual
+model behavior still need qualification. Exact local NLTK metadata is accepted
+at `e5b1ddd`. These observations do not clear the current installer or release.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
@@ -101,6 +101,12 @@ missing targets, but still fails five WhisperX caps and two source-only wheel
 checks. Its exact-version advisory observation has one raw entry/one alias
 group; that is an uninstalled proposal, not clean-security credit for the
 shipping runtime. See [the current security scope](ASTRA-RUNTIME-SECURITY-SCOPE-2026-09-13.md).
+Candidate03 at `4827288` removes those version conflicts using the exact local
+derivatives. Its complete graph remains **FAIL**: 144 pins, 287 active edges,
+zero conflicts or missing targets, and two source-only wheel gaps. Its final
+metadata interface passes the same 59 cases in each independent root. Existing
+cached ANTLR 4.9.3 and proxy-tools 0.1.0 wheels need byte/provenance verification
+before inclusion. See [the candidate03 verdict](ASTRA-RUNTIME-CANDIDATE03-GRAPH-VERDICT-2026-09-13.md).
 The last reviewed public GitHub release was v3.7.0; branch backup did not
 publish 3.8.0.
 
