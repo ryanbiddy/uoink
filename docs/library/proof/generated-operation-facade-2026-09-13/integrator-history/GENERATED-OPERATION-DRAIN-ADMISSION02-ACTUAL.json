@@ -1,0 +1,7 @@
+{
+  "chunk_id": "72420c",
+  "wall_time_seconds": 0.1168786,
+  "exit_code": 0,
+  "original_token_count": 50,
+  "output": "{\r\n  \"reviewed_preparation_files\": 20,\r\n  \"scope\": \"generated-operation-facade-only\",\r\n  \"mode\": \"drain\",\r\n  \"admission_sha256\": \"e24234fcf864df7ade282fa4421fe52dc0e0f12afd4d881a5373491ff51ee0af\"\r\n}\r\n"
+}

@@ -1,0 +1,57 @@
+{
+  "scope": "Ten exact supplemental documentary files; copy this manifest separately",
+  "payload_count": 10,
+  "payload_bytes": 89903,
+  "files": [
+    {
+      "path": "COPY-BYTES-CORRECTION.md",
+      "bytes": 904,
+      "sha256": "d580ccacde083d9954de53165d31411963fed98186b0ea1be673a920856ca8d3"
+    },
+    {
+      "path": "COPY-BYTES-CORRECTION01-ACTUAL.json",
+      "bytes": 299,
+      "sha256": "7fed1650d5a4b2b472289ac6dd0e9067d163a1d25a05541abdd55965b44f9f72"
+    },
+    {
+      "path": "COPY-PLAN.json",
+      "bytes": 32158,
+      "sha256": "613de79bf4eef74f18982925f2a85e3947cf63d457f8eb5003f164f52704dabe"
+    },
+    {
+      "path": "COPY-PLAN02.json",
+      "bytes": 32160,
+      "sha256": "97d9cfacadc77ea388caa9d658a0dcbe0b19a27029ec6347c30ce0e39d3c853a"
+    },
+    {
+      "path": "COPY-PROTOCOL.md",
+      "bytes": 2305,
+      "sha256": "04f388ad64717cb63893bb202e1d216451a029bdda9b754eae0f9af4cd2d0ef1"
+    },
+    {
+      "path": "correct_copy_bytes.ps1",
+      "bytes": 1434,
+      "sha256": "7a4fc200da078b955ac14a8e1b6b8a8b49bdb973a6b709d38f32fdd03eb19bb9"
+    },
+    {
+      "path": "prepare_plan.ps1",
+      "bytes": 14383,
+      "sha256": "863123d1d16285e203a56d91c4405b44a8d19ff39bf8f5e92eaebd0f09927fb2"
+    },
+    {
+      "path": "PREPARE-PLAN01-ACTUAL.json",
+      "bytes": 231,
+      "sha256": "06efc735133bbda5fbdfda1cd14e3524a4a052bf4a7ec7a2e42d45f1a6567fa3"
+    },
+    {
+      "path": "RECEIPT-REVIEW.json",
+      "bytes": 1973,
+      "sha256": "621a3c7b2107762a4608ccab9d5eadea48f55b9f900ed563a59eff806e40397f"
+    },
+    {
+      "path": "VERDICT.md",
+      "bytes": 4056,
+      "sha256": "b240195998c07c161fe94cc7334107059fd5e9786d2a7b57f864a3cca2f8a2d4"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+--- before-source-review01/generated_operation_flow.py
++++ generated_operation_flow.py
+@@ -24,6 +24,17 @@
+           "max_words": 1, "max_text_chars": sum(len(text) for text in TEXTS)}
+ 
+ 
++def _fixed(actual, expected):
++    """Exact fixed passive shape, including bool versus integer distinctions."""
++    if type(actual) is not type(expected):
++        return False
++    if type(expected) is dict:
++        return actual.keys() == expected.keys() and all(_fixed(actual[key], value) for key, value in expected.items())
++    if type(expected) is list:
++        return len(actual) == len(expected) and all(_fixed(a, b) for a, b in zip(actual, expected))
++    return type(expected) in (str, int, float, bool, type(None)) and actual == expected
++
++
+ def contract_payload(binding):
+     return {"media_id": MEDIA_ID, "generation": binding.generation_hex,
+             "manifest_sha256": binding.manifest_sha256,
+@@ -32,7 +43,8 @@
+ 
+ 
+ def fixed_options(request):
+-    _assert(type(request) is TranscribeRequest and request.language in (None, "en")
++    _assert(type(request) is TranscribeRequest and (request.language is None
++            or type(request.language) is str and request.language == "en")
+             and request.word_timestamps is False and request.vad_filter is False
+             and type(request.beam_size) is int and request.beam_size == 1
+             and type(request.best_of) is int and request.best_of == 1,
+@@ -109,7 +121,7 @@
+                     and self._contract is None and self._cursor_state == "new", "exact_generated_ticket")
+             self.pipes.write_bytes(self.pair, self.handshake.begin(), _remaining(self.pipes.clock))
+             operation, payload = self._exchange({"action": "admit_generated_media", "media_id": MEDIA_ID})
+-            _assert(operation == "done" and payload == contract_payload(self.channel.binding),
++            _assert(operation == "done" and _fixed(payload, contract_payload(self.channel.binding)),
+                     "worker_issued_generated_contract")
+             self._contract = MediaResultContract(permit, ticket, **BOUNDS)
+             return self._contract
+@@ -127,8 +139,8 @@
+             options = fixed_options(request)
+             operation, payload = self._exchange({"action": "begin_generated_transcription", "media_id": MEDIA_ID,
+                                                   "options": options})
+-            _assert(operation == "done" and payload == {"cursor_id": CURSOR_ID, "started": True,
+-                    "produced_segments": 0}, "lazy_generated_cursor_start")
++            _assert(operation == "done" and _fixed(payload, {"cursor_id": CURSOR_ID, "started": True,
++                    "produced_segments": 0}), "lazy_generated_cursor_start")
+             self._cursor = object()
+             self._cursor_state = "active"
+             return self._cursor
+@@ -140,12 +152,12 @@
+             operation, payload = self._exchange({"action": "next_generated_segment", "cursor_id": CURSOR_ID,
+                                                   "index": self._next_index})
+             if self._next_index == len(SEGMENTS):
+-                _assert(operation == "done" and payload == {"cursor_id": CURSOR_ID, "eof": True,
+-                        "produced_segments": len(SEGMENTS)}, "complete_generated_eof")
++                _assert(operation == "done" and _fixed(payload, {"cursor_id": CURSOR_ID, "eof": True,
++                        "produced_segments": len(SEGMENTS)}), "complete_generated_eof")
+                 self._cursor_state = "eof"
+                 return None
+             expected = {"cursor_id": CURSOR_ID, "index": self._next_index, "segment": SEGMENTS[self._next_index]}
+-            _assert(operation == "segment" and payload == expected, "fixed_generated_segment")
++            _assert(operation == "segment" and _fixed(payload, expected), "fixed_generated_segment")
+             value = payload["segment"]
+             self._next_index += 1
+             return Segment(value["start"], value["end"], value["text"], ())
+@@ -155,8 +167,8 @@
+             _assert(cursor is self._cursor and cursor is not None and self._cursor_state == "active",
+                     "active_generated_cursor_for_cancel")
+             operation, payload = self._exchange({"action": "cancel_generated_cursor", "cursor_id": CURSOR_ID})
+-            _assert(operation == "done" and payload == {"cursor_id": CURSOR_ID, "cancelled": True,
+-                    "produced_segments": self._next_index}, "generated_cursor_cancel_acknowledged")
++            _assert(operation == "done" and _fixed(payload, {"cursor_id": CURSOR_ID, "cancelled": True,
++                    "produced_segments": self._next_index}), "generated_cursor_cancel_acknowledged")
+             self._cursor_state = "cancelled"
+             return True
+ 
+@@ -238,6 +250,16 @@
+ def _worker_operations(pipes, pair, channel, adoption):
+     """Serial child dispatcher for fixed generated requests; no callable lookup."""
+     operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
++    if operation == "cancel":
++        _assert(payload == {} and adoption.status == "adopted"
++                and not adoption.materialization_started and not adoption.read_set.unconfirmed,
++                "close_before_generated_read_or_transcription")
++        _assert(adoption.primitives.release_read_set(adoption.read_set) is True
++                and adoption.read_set.released, "unread_child_handle_release")
++        adoption.status = "released"
++        pipes.write_bytes(pair, channel.encode("closed", {}), _remaining(pipes.clock))
++        return {"readback": None, "operation_events": [], "cursor_state": "not_started",
++                "produced_segments": 0, "generated_duration_only": True}
+     _assert(operation == "begin" and payload == {"manifest_sha256": channel.binding.manifest_sha256},
+             "generated_begin_manifest")
+     readback = adoption.materialize_generated()
+@@ -265,9 +287,9 @@
+             response_operation, response = "done", contract_payload(channel.binding)
+         elif action == "begin_generated_transcription":
+             options = payload.get("options")
+-            _assert(type(options) is dict and options in (
++            _assert(type(options) is dict and any(_fixed(options, fixed) for fixed in (
+                 {"language": None, "word_timestamps": False, "vad_filter": False, "beam_size": 1, "best_of": 1},
+-                {"language": "en", "word_timestamps": False, "vad_filter": False, "beam_size": 1, "best_of": 1}),
++                {"language": "en", "word_timestamps": False, "vad_filter": False, "beam_size": 1, "best_of": 1})),
+                 "worker_fixed_options")
+             _assert(state == "admitted" and payload == {"action": action, "media_id": MEDIA_ID, "options": options},
+                     "single_generated_transcription_start")

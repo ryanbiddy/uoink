@@ -1,0 +1,67 @@
+{
+  "scope": "Read-only independent retained-receipt triage; no native rerun or candidate import",
+  "observations": [
+    {
+      "mode": "drain",
+      "receipt_fields_present": true,
+      "segment_count": 2,
+      "cursor_state": "eof",
+      "actions": [
+        "admit_generated_media",
+        "begin_generated_transcription",
+        "next_generated_segment",
+        "next_generated_segment",
+        "next_generated_segment"
+      ],
+      "controller_seconds": 0.10796230001142249,
+      "child_seconds": 0.006359799997881055,
+      "actual_tool": {
+        "chunk_id": "8f8823",
+        "wall_time_seconds": 0.8314753,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      "dispatch_controller": 304,
+      "dispatch_child": 270,
+      "sources_and_controls": 12,
+      "recorded_support_and_fixtures": 14,
+      "support_files_reopened": false,
+      "native_model_scope": false
+    },
+    {
+      "mode": "cancel",
+      "receipt_fields_present": true,
+      "segment_count": 1,
+      "cursor_state": "cancelled",
+      "actions": [
+        "admit_generated_media",
+        "begin_generated_transcription",
+        "next_generated_segment",
+        "cancel_generated_cursor"
+      ],
+      "controller_seconds": 0.10750650000409223,
+      "child_seconds": 0.00634430002537556,
+      "actual_tool": {
+        "chunk_id": "752948",
+        "wall_time_seconds": 0.814529,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      "dispatch_controller": 289,
+      "dispatch_child": 255,
+      "sources_and_controls": 12,
+      "recorded_support_and_fixtures": 14,
+      "support_files_reopened": false,
+      "native_model_scope": false
+    }
+  ],
+  "missing_expected_fields": [],
+  "current_text_bindings_match": true,
+  "original_preparations_verified": [
+    16,
+    20
+  ],
+  "native_support_not_reopened": true
+}

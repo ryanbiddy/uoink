@@ -1,0 +1,88 @@
+{
+  "schema": "uoink.scratch-source-preparation.v1",
+  "payload_count": 16,
+  "payload_bytes": 100958,
+  "candidate_executions": 0,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "before-bootstrap-review02/generated_operation_flow.py",
+      "bytes": 20970,
+      "sha256": "2e80a2444a7a93180f5dc9e2526120fa356beb22837496c79b5712fed333e4c7"
+    },
+    {
+      "path": "before-bootstrap-review02/SOURCE-BINDINGS.json",
+      "bytes": 3420,
+      "sha256": "53826d42ce590ed3d468df16e798c6ebda04f0767ea1d65e314eb0350b34fbb8"
+    },
+    {
+      "path": "before-bootstrap-review02/source-review01.diff",
+      "bytes": 6881,
+      "sha256": "fe0e920d066981a4e62b836be4a3c63bf217debbd3a910d08cf223973e976f61"
+    },
+    {
+      "path": "before-source-review01/generated_operation_flow.py",
+      "bytes": 19598,
+      "sha256": "20c0cf74f402f63d1c2682cac1dc49fcffaebcb01a562096677ca5225e7e924e"
+    },
+    {
+      "path": "bootstrap-review02.diff",
+      "bytes": 353,
+      "sha256": "0067b12d82e78c311b696bd004fc9205c709b7e1e9ab80c47db71b9883e5d133"
+    },
+    {
+      "path": "BOOTSTRAP-REVIEW02.md",
+      "bytes": 740,
+      "sha256": "ca6ca18c2098145b1229dcb0be7f7f940a9c421029b4b1975587fbb797d795d9"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 2516,
+      "sha256": "b6d6515881e16c90d259ff4d2870c0109a35d8b91e9cd385299086ffb501c4ae"
+    },
+    {
+      "path": "FINAL-SOURCE-BINDINGS.json",
+      "bytes": 3648,
+      "sha256": "5a4efa6b91c7b8f2cc82b300bd95b4e4eaf6944c3d8abba3d2f2579a52fb30bd"
+    },
+    {
+      "path": "freeze_source.py",
+      "bytes": 2511,
+      "sha256": "834c55e544fd57f61962a2f1afa377fe669456141ccce3febc65bc87dbe336b1"
+    },
+    {
+      "path": "generated_operation_flow.py",
+      "bytes": 21022,
+      "sha256": "42b93c5455577d6efefd4406b83fb5d5e54eb943ea790d46e4075706dad33a8e"
+    },
+    {
+      "path": "prepare_bindings.py",
+      "bytes": 2507,
+      "sha256": "c89dec91cc485d25f999efe810352607b61f38c4b49e0192eea9a9956d3f06ec"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 3420,
+      "sha256": "53826d42ce590ed3d468df16e798c6ebda04f0767ea1d65e314eb0350b34fbb8"
+    },
+    {
+      "path": "source-review01.diff",
+      "bytes": 6881,
+      "sha256": "fe0e920d066981a4e62b836be4a3c63bf217debbd3a910d08cf223973e976f61"
+    },
+    {
+      "path": "SOURCE-REVIEW01.md",
+      "bytes": 1218,
+      "sha256": "64a890c3314f5267e6cdc2a1311ea2f9dab1e31a5b69aeabecb0fa97f180a02c"
+    },
+    {
+      "path": "WORKER-PROTOCOL.md",
+      "bytes": 5265,
+      "sha256": "b496dd806335c3855389230768e5f72ead54504e3e0a88e728ab24b95f1d1a1a"
+    }
+  ]
+}
