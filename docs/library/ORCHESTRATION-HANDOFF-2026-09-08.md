@@ -108,7 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace | Protocol/pipe contracts at 9c40271; native01–04 history and positive result at 668b08a | Native04 controller/child/outer exit0; root verifies six sources, three controls, nine support inputs and child-only file protection. All119 native and three integrator payloads match Git/disk | Qualify timeout/forced-stop and integrate the independently passing eight handshake cases. No native model or release acceptance |
+| Windows namespace | Protocol/pipe contracts at 9c40271; native positive at 668b08a; handshake at e98f4c2 | Native04 passes narrowly. Both roots pass eight handshake cases; all71 handshake payloads match Git/disk. Actual timeout01 FAIL: child stops, but completed broken-pipe I/O remains pending | Repair exact109 completion handling, qualify fresh timeout02 and child read-set adoption. No native model or release acceptance |
 | Local NLTK graph input | Exact metadata receipt at e5b1ddd; final graph at 4827288 | Three-record checker passes the same 59 cases in each root. Complete 144-pin/287-edge graph remains valid FAIL only for two missing wheels; all 26 graph and five integrator payloads match Git/disk | Verify the two existing cached wheel candidates and repair the artifact plan; no runtime or security clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -276,8 +276,13 @@ Native01 import refusal, native02 ctypes audit refusal and native03 erroneous
 actual31 functions. The complete history is integrated at668b08a; read
 ASTRA-GENERATED-WINDOWS-WORKER-VERDICT-2026-09-13.md. All119 native plus three
 integrator payloads match Git/disk. Qualify the prepared bounded timeout/forced-stop
-case. The eight negative/positive handshake contracts now pass in author and
-independent Astra roots (actual00f8b6 andd16104); raw review/sealing is next. No
+case. The eight negative/positive handshake contracts are integrated ate98f4c2:
+author/root8/0, actual00f8b6/d16104,71 payloads matching Git/disk. Read
+ASTRA-CONTROLLER-HANDSHAKE-VERDICT-2026-09-13.md. Timeout01c32937 fails with
+valid guards: exact child exits1/job0, but GetOverlappedResultFALSE/error109
+leaves the operation pending. The controller refuses teardown and exits1
+without Python finalization. Prepare exact terminal-broken-pipe handling and a
+fresh brief/run; preserve quarantine and all unknown-error refusals. No
 model is involved; failure cleanup and actual loader adoption remain open.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
@@ -295,7 +300,14 @@ All313 captures and36 graph inputs remain unchanged. The26-payload proof maps
 Preserve the final59 admission-file collision and late review honestly; never
 continue dependent execution after a preparation error. Existing cached wheels
 and historical origins are located; review bounded byte inspection before any
-artifact-plan repair. Native models have not run; their authority stays closed.
+artifact-plan repair. Inspection01 refused the extra ANTLR pygrun script;
+names-only diagnostic905eb7 identified its exact6275-byte member. Fresh
+inspection02b42903 passes byte inspection for both historical-pinned wheels:
+ANTLR61/61 RECORD members and proxy5/5. Both lack packaged license text and
+Requires-Python; keep those gaps explicit. Root has read pygrun's retained
+text; it is a CLI that imports user-selected parser modules, not an admitted
+runtime entry point. Independently verify/seal these results and prepare the
+exact five-record graph change. Native models remain unexecuted and closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4960,3 +4972,34 @@ independentrootd16104 both exit0; each reports eight passes, zero failures/skips
 and valid guards. Final raw checks and proof integration are next. Two existing
 cached wheels have exact historical origins; the read-only inspector is under
 review. Production remains e8d058f and website/marketing remain paused.
+
+### 2026-09-13 - Handshake contracts integrated; timeout exposes terminal-I/O defect
+
+Integratione98f4c2 records author/root8/0 with exactorderedcases and valid12metadata/
+25registry guards. Times .0011653999972622842/.0012442000152077526s; actual00f8b6/
+d16104/native/outer0. Rootsealer1e5ad0 andGitcheck710bd6 verify71payloads409294B,
+seal3ec265d93e7b7ecbaf4fae73165ddf4ff84bf9eda70b500ec5c0aa7d921ae971. Original
+unchecked-admission launcher and its pre-execution repair are preserved. No
+archived source executed during sealing.
+
+Timeout01actualc32937/native/outer1 is a failed measurement with valid guards.
+Observed250ms event wait258, exact-job termination, retained childexit1/job0,
+CancelIoExFALSE/1168, eventwait0, GetOverlappedResultFALSE/109. The frozen helper
+accepts only normal completion or995, so it retains an already completed broken
+pipe operation. Generated teardown correctly refuses; no read-set release or
+successful child task is claimed. Both endpoints now have an outer finalizer
+that exits immediately if native buffers remain, even if receipt construction
+or writing fails. Original draft/fixes are preserved. Microsoft GetOverlappedResult
+and CancelIoEx documentation supports the distinct pending/completed-error
+states; qualify a narrow109 repair, preserving unknown-error refusal and logical
+quarantine. Do not relabel timeout01 as passed.
+
+Wheelinspection01 validly refused an unexpected package root (native/launcher2,
+actualnestedouter1). Names-only905eb7 identifies the exactANTLR pygrun member.
+Inspection02b42903 exits0 after the documented exact-path text-only repair;
+ANTLR144613B/61members andproxy2943B/5members match historical hashes and every
+RECORD entry. No wheel was installed or imported. Both omit license text and
+Requires-Python, which remain unknown rather than guessed. Source claims and
+metadata graph acceptance are separate. Root is verifying/sealing the inspection
+and preparing the five-record graph. Production remains e8d058f; no release,
+website or marketing activity is accepted.
