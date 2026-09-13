@@ -1,0 +1,18 @@
+--- before/native-block.ps1.txt
++++ candidate/native-block.ps1.txt
+@@ -1,8 +1,8 @@
+ # Override any inherited native-error promotion at this invocation boundary.
+ $PSNativeCommandUseErrorActionPreference=$false
+-$LASTEXITCODE=$null
++$global:LASTEXITCODE=$null
+ & $taskPython -I -S -B (Join-Path $taskRun 'qualify_adapter.py') 1> $taskStdout 2> $taskStderr
+-$taskNativeExit=$LASTEXITCODE
++$taskNativeExit=$global:LASTEXITCODE
+ # Persist the completed-child outcome before any input or result postcheck.
+ $taskNativeReceipt=[ordered]@{schema='uoink.native-exit.v1';child_returned=$true;native_exit=$taskNativeExit}
+ $taskNativeBytes=[Text.UTF8Encoding]::new($false).GetBytes(($taskNativeReceipt | ConvertTo-Json -Compress))
+@@ -11,3 +11,4 @@
+     $taskNativeStream.Write($taskNativeBytes,0,$taskNativeBytes.Length)
+     $taskNativeStream.Flush($true)
+ }finally{$taskNativeStream.Dispose()}
++if($taskNativeExit -isnot [int]){throw 'Returned native exit was not captured as an integer'}

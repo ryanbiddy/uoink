@@ -1,0 +1,37 @@
+--- before/wrapper-missing01.ps1
++++ instrument02/wrapper-missing02.ps1
+@@ -2,7 +2,7 @@
+ # The function inherits true from this enclosing scope before the exact block.
+ $PSNativeCommandUseErrorActionPreference=$true
+ function Invoke-InertWrapper {
+-    $taskRun=Join-Path $PSScriptRoot 'runs\instrument01\missing01'
++    $taskRun=Join-Path $PSScriptRoot 'runs\instrument02\missing02'
+     if(Test-Path -LiteralPath $taskRun){throw 'Fresh instrument case required'}
+     New-Item -ItemType Directory -Path $taskRun -ErrorAction Stop | Out-Null
+     $taskPython='C:\Python314\python.exe'
+@@ -11,14 +11,14 @@
+     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'child-one.py') -Destination (Join-Path $taskRun 'qualify_adapter.py') -ErrorAction Stop
+     $taskExpected=@{'instrument.txt'='cebea3932b7139c83bb057b39e5900a476cae2de05060416e8a5255d80d4da82'}
+     $taskRecords=@([ordered]@{name='instrument.txt';source=(Join-Path $taskRun 'source.txt');sha256='cebea3932b7139c83bb057b39e5900a476cae2de05060416e8a5255d80d4da82'})
+-    [ordered]@{label='missing01';inherited_native_error_preference=$PSNativeCommandUseErrorActionPreference;missing_postcheck_expected=$true;asr_cases_executed=0} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRun 'setup.json') -Encoding utf8
++    [ordered]@{label='missing02';inherited_native_error_preference=$PSNativeCommandUseErrorActionPreference;missing_postcheck_expected=$true;asr_cases_executed=0} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRun 'setup.json') -Encoding utf8
+     if($PSNativeCommandUseErrorActionPreference -cne $true){throw 'True inherited preference required'}
+ # BEGIN EXACT NATIVE RECEIPT BLOCK
+ # Override any inherited native-error promotion at this invocation boundary.
+ $PSNativeCommandUseErrorActionPreference=$false
+-$LASTEXITCODE=$null
++$global:LASTEXITCODE=$null
+ & $taskPython -I -S -B (Join-Path $taskRun 'qualify_adapter.py') 1> $taskStdout 2> $taskStderr
+-$taskNativeExit=$LASTEXITCODE
++$taskNativeExit=$global:LASTEXITCODE
+ # Persist the completed-child outcome before any input or result postcheck.
+ $taskNativeReceipt=[ordered]@{schema='uoink.native-exit.v1';child_returned=$true;native_exit=$taskNativeExit}
+ $taskNativeBytes=[Text.UTF8Encoding]::new($false).GetBytes(($taskNativeReceipt | ConvertTo-Json -Compress))
+@@ -27,6 +27,7 @@
+     $taskNativeStream.Write($taskNativeBytes,0,$taskNativeBytes.Length)
+     $taskNativeStream.Flush($true)
+ }finally{$taskNativeStream.Dispose()}
++if($taskNativeExit -isnot [int]){throw 'Returned native exit was not captured as an integer'}
+ # END EXACT NATIVE RECEIPT BLOCK
+ $taskAfter=@()
+ $taskUnchanged=$true

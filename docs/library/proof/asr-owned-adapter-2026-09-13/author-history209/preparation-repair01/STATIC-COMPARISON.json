@@ -1,0 +1,17 @@
+{
+  "schema": "uoink.asr-instrument-static-comparison.v1",
+  "date": "2026-09-13",
+  "all_function_asts_identical": true,
+  "function_nodes": 66,
+  "all_assertion_asts_identical": true,
+  "assertion_nodes": 84,
+  "planned_case_count_unchanged": 58,
+  "runtime_cases_executed": 0,
+  "original_harness_sha256": "995199bc8b25129749f4558858cdb52d7d366ea602a4bb7e391a930344dbfa55",
+  "repaired_harness_sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545",
+  "original_runner_sha256": "e019886953150a95e51e0d8d0f07eb2558a85f8e0214a2440524d9225d54301d",
+  "repaired_runner_sha256": "e503ac0355ff8d59bad3a1ce3ff9bf1088f27999ed67ea82b0ea0c1e0e2b2a3d",
+  "adapter_sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900",
+  "resolver_sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+  "source_preparation_only": true
+}

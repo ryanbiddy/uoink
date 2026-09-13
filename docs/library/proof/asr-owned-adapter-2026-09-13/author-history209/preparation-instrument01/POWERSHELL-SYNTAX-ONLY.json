@@ -1,0 +1,23 @@
+[
+  {
+    "path": "wrapper-missing01.ps1",
+    "sha256": "185e506aebfc945142f9177729de58163acf900c41f23cad9d17d89dc1726157",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  },
+  {
+    "path": "wrapper-success01.ps1",
+    "sha256": "c075c651b2ca791683cc74bf656147af2b864a556af15c9d9017be6a771a24c1",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  },
+  {
+    "path": "run_instrument01.ps1",
+    "sha256": "0fcb3213e78042cff93619ffb438254a5fc2133795c5f49e94a81e3c752f7c47",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  }
+]

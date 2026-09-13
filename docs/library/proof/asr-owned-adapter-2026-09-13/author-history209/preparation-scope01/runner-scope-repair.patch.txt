@@ -1,0 +1,50 @@
+--- before/run_preflight02.ps1
++++ candidate/run_preflight03.ps1
+@@ -1,8 +1,8 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+ $taskBase='E:\AI\projects\uoink\checkouts\Yoink-library'
+-$taskProposal=Join-Path $taskBase '_scratch\asr-production-adapter-qualification-repair01'
+-$taskRun=Join-Path $taskProposal 'adapter-preflight02'
++$taskProposal=Join-Path $taskBase '_scratch\asr-native-exit-scope-repair01\candidate'
++$taskRun=Join-Path $taskProposal 'adapter-preflight03'
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh adapter qualification label required'}
+ $taskAdmission=Join-Path $taskProposal 'ROOT-ADMISSION.md'
+ if(-not (Test-Path -LiteralPath $taskAdmission -PathType Leaf)){throw 'Root exact-source admission record required before execution'}
+@@ -23,9 +23,9 @@
+     @('SOURCE-BINDINGS.json',(Join-Path $taskProposal 'SOURCE-BINDINGS.json')),
+     @('WAVEFORM-STARTUP-CORRECTION.md',(Join-Path $taskProposal 'WAVEFORM-STARTUP-CORRECTION.md')),
+     @('HARNESS-PREPARATION.md',(Join-Path $taskProposal 'HARNESS-PREPARATION.md')),
+-    @('QUALIFICATION02-PROTOCOL.md',(Join-Path $taskProposal 'QUALIFICATION02-PROTOCOL.md')),
++    @('QUALIFICATION03-PROTOCOL.md',(Join-Path $taskProposal 'QUALIFICATION03-PROTOCOL.md')),
+     @('adapter-addition.patch.txt',(Join-Path $taskProposal 'adapter-addition.patch.txt')),
+-    @('run_preflight02.ps1',(Join-Path $taskProposal 'run_preflight02.ps1')),
++    @('run_preflight03.ps1',(Join-Path $taskProposal 'run_preflight03.ps1')),
+     @('ROOT-ADMISSION.md',$taskAdmission)
+ )
+ $taskRecords=@()
+@@ -44,13 +44,13 @@
+ $taskPython=Join-Path $taskBase '_scratch\ig-native\Scripts\python.exe'
+ $taskStdout=Join-Path $taskRun 'stdout.json'
+ $taskStderr=Join-Path $taskRun 'stderr.log'
+-[ordered]@{label='adapter-preflight02';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=58} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++[ordered]@{label='adapter-preflight03';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=58} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
+ # BEGIN EXACT NATIVE RECEIPT BLOCK
+ # Override any inherited native-error promotion at this invocation boundary.
+ $PSNativeCommandUseErrorActionPreference=$false
+-$LASTEXITCODE=$null
++$global:LASTEXITCODE=$null
+ & $taskPython -I -S -B (Join-Path $taskRun 'qualify_adapter.py') 1> $taskStdout 2> $taskStderr
+-$taskNativeExit=$LASTEXITCODE
++$taskNativeExit=$global:LASTEXITCODE
+ # Persist the completed-child outcome before any input or result postcheck.
+ $taskNativeReceipt=[ordered]@{schema='uoink.native-exit.v1';child_returned=$true;native_exit=$taskNativeExit}
+ $taskNativeBytes=[Text.UTF8Encoding]::new($false).GetBytes(($taskNativeReceipt | ConvertTo-Json -Compress))
+@@ -59,6 +59,7 @@
+     $taskNativeStream.Write($taskNativeBytes,0,$taskNativeBytes.Length)
+     $taskNativeStream.Flush($true)
+ }finally{$taskNativeStream.Dispose()}
++if($taskNativeExit -isnot [int]){throw 'Returned native exit was not captured as an integer'}
+ # END EXACT NATIVE RECEIPT BLOCK
+ $taskAfter=@()
+ $taskUnchanged=$true

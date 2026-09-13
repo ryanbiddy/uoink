@@ -1,0 +1,66 @@
+--- original/runner-repair.patch.txt
++++ repair01/runner-repair.patch.txt
+@@ -1,15 +1,15 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+ $taskBase='E:\AI\projects\uoink\checkouts\Yoink-library'
+-$taskProposal=Join-Path $taskBase '_scratch\asr-production-adapter-proposal01'
+-$taskRun=Join-Path $taskProposal 'adapter-preflight01'
++$taskProposal=Join-Path $taskBase '_scratch\asr-production-adapter-qualification-repair01'
++$taskRun=Join-Path $taskProposal 'adapter-preflight02'
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh adapter qualification label required'}
+ $taskAdmission=Join-Path $taskProposal 'ROOT-ADMISSION.md'
+ if(-not (Test-Path -LiteralPath $taskAdmission -PathType Leaf)){throw 'Root exact-source admission record required before execution'}
+ $taskExpected=@{
+     'asr_loading_adapter.py'='03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900'
+     'trusted_asr_resolver.py'='16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833'
+-    'qualify_adapter.py'='995199bc8b25129749f4558858cdb52d7d366ea602a4bb7e391a930344dbfa55'
++    'qualify_adapter.py'='68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545'
+ }
+ $taskFiles=@(
+     @('asr_loading_adapter.py',(Join-Path $taskProposal 'asr_loading_adapter.py')),
+@@ -23,9 +23,9 @@
+     @('SOURCE-BINDINGS.json',(Join-Path $taskProposal 'SOURCE-BINDINGS.json')),
+     @('WAVEFORM-STARTUP-CORRECTION.md',(Join-Path $taskProposal 'WAVEFORM-STARTUP-CORRECTION.md')),
+     @('HARNESS-PREPARATION.md',(Join-Path $taskProposal 'HARNESS-PREPARATION.md')),
+-    @('QUALIFICATION01-PROTOCOL.md',(Join-Path $taskProposal 'QUALIFICATION01-PROTOCOL.md')),
++    @('QUALIFICATION02-PROTOCOL.md',(Join-Path $taskProposal 'QUALIFICATION02-PROTOCOL.md')),
+     @('adapter-addition.patch.txt',(Join-Path $taskProposal 'adapter-addition.patch.txt')),
+-    @('run_preflight01.ps1',(Join-Path $taskProposal 'run_preflight01.ps1')),
++    @('run_preflight02.ps1',(Join-Path $taskProposal 'run_preflight02.ps1')),
+     @('ROOT-ADMISSION.md',$taskAdmission)
+ )
+ $taskRecords=@()
+@@ -44,9 +44,22 @@
+ $taskPython=Join-Path $taskBase '_scratch\ig-native\Scripts\python.exe'
+ $taskStdout=Join-Path $taskRun 'stdout.json'
+ $taskStderr=Join-Path $taskRun 'stderr.log'
+-[ordered]@{label='adapter-preflight01';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=58} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++[ordered]@{label='adapter-preflight02';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=58} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++# BEGIN EXACT NATIVE RECEIPT BLOCK
++# Override any inherited native-error promotion at this invocation boundary.
++$PSNativeCommandUseErrorActionPreference=$false
++$LASTEXITCODE=$null
+ & $taskPython -I -S -B (Join-Path $taskRun 'qualify_adapter.py') 1> $taskStdout 2> $taskStderr
+ $taskNativeExit=$LASTEXITCODE
++# Persist the completed-child outcome before any input or result postcheck.
++$taskNativeReceipt=[ordered]@{schema='uoink.native-exit.v1';child_returned=$true;native_exit=$taskNativeExit}
++$taskNativeBytes=[Text.UTF8Encoding]::new($false).GetBytes(($taskNativeReceipt | ConvertTo-Json -Compress))
++$taskNativeStream=[IO.File]::Open((Join-Path $taskRun 'native-exit.json'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
++try{
++    $taskNativeStream.Write($taskNativeBytes,0,$taskNativeBytes.Length)
++    $taskNativeStream.Flush($true)
++}finally{$taskNativeStream.Dispose()}
++# END EXACT NATIVE RECEIPT BLOCK
+ $taskAfter=@()
+ $taskUnchanged=$true
+ foreach($taskRecord in $taskRecords){
+@@ -73,6 +86,8 @@
+         $taskResult.startup_binding_asserted -ceq $true -and $taskResult.torch_backend_autoload_disabled_before_startup -ceq $true -and
+         $taskResult.real_resolver_approval_unchanged_none -ceq $true -and $taskResult.real_resolver_functions_unchanged -ceq $true -and
+         $taskResult.adapter_globals_restored -ceq $true -and $taskResult.guard_valid -ceq $true -and
++        $taskResult.metadata_traps_installed -ceq $true -and $taskResult.metadata_trap_count -eq 11 -and
++        @($taskResult.metadata_trap_mismatches).Count -eq 0 -and
+         @($taskResult.guard_denials).Count -eq 0 -and @($taskResult.heavy_roots_loaded).Count -eq 0
+     )
+     foreach($taskName in $taskExpected.Keys){

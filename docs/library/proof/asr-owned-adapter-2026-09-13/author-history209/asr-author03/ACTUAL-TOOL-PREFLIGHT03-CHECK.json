@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bf225c",
+  "wall_time_seconds": 0.2041187,
+  "exit_code": 0,
+  "original_token_count": 108,
+  "output": "{\r\n  \"actual_cases\": 58,\r\n  \"passed\": 58,\r\n  \"failed\": 0,\r\n  \"child_elapsed_seconds\": 0.004348,\r\n  \"measured_native_exit\": 0,\r\n  \"recorded_launcher_exit\": 0,\r\n  \"actual_tool_exit\": 0,\r\n  \"actual_tool_chunk\": \"b5d5ae\",\r\n  \"actual_tool_seconds\": 0.3409318,\r\n  \"guard_valid\": true,\r\n  \"metadata_traps_installed\": 11,\r\n  \"real_approval_unchanged_none\": true,\r\n  \"inputs_unchanged\": true,\r\n  \"original55_payloads_unchanged\": true\r\n}\r\n"
+}

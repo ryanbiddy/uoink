@@ -1,0 +1,55 @@
+{
+  "schema": "uoink.asr-combined-documentary-preparation.v1",
+  "date": "2026-09-13",
+  "payload_count": 9,
+  "payload_bytes": 29434,
+  "builder_executed": false,
+  "verifier_executed": false,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1810,
+      "sha256": "78cc65543b06fe7b376f0669a4883f76e750ec2c1601f07fa85c20b2ff333080"
+    },
+    {
+      "path": "build_combined.py",
+      "bytes": 7565,
+      "sha256": "fe23e0a19306d7ca07ba2b57dbf8c88425eed8b6a79053893feabac5a4c49ff6"
+    },
+    {
+      "path": "HASH-INVENTORY-REPAIR.md",
+      "bytes": 657,
+      "sha256": "1c6a46cfaac2eb49cc3ca05c2afa75c992137028f57b5bebefb0544ddf2128e5"
+    },
+    {
+      "path": "PROTOCOL.md",
+      "bytes": 1744,
+      "sha256": "0e702444cfd6545ab448b643c0d0ed1119f59651e6573009d3dfd20994a81ab0"
+    },
+    {
+      "path": "ROOT-INPUTS-v2.json",
+      "bytes": 6458,
+      "sha256": "a3f7e75a10005f5ba5eb1ecf4bb4c8046d6c3b12b803d634d514c538b0c8d9df"
+    },
+    {
+      "path": "ROOT-INPUTS.json",
+      "bytes": 6456,
+      "sha256": "95e2a3011477b7704ef1a9a8ecf73fa94dbaa595768e2df5eacde8464e014fc4"
+    },
+    {
+      "path": "VERDICT.md",
+      "bytes": 1978,
+      "sha256": "4b8c4152e32e8f3994415a8f54718f5f05d15f9d62cfac6d7e6c461409a9ad5f"
+    },
+    {
+      "path": "verify_combined.py",
+      "bytes": 2758,
+      "sha256": "2d8b25f19604735b80a4ef00dfab8217308ddc53566e7d399cae131c30b0d99e"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "failed_source_preparer": {
+    "chunk_id": "750254",
+    "actual_exit_code": 1,
+    "wall_time_seconds": 0.0862317,
+    "error": "SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 228-229: truncated \\UXXXXXXXX escape",
+    "generated_code_executed": false
+  },
+  "repaired_source_preparer": {
+    "chunk_id": "4656e1",
+    "actual_exit_code": 0,
+    "wall_time_seconds": 0.0942106,
+    "generated_code_executed": false
+  },
+  "rejected_patch_submission": {
+    "error": "apply_patch verification failed: invalid hunk at line 25, 'ativepowershellpwsh.exe'' is not a valid hunk header",
+    "effect": "Submission rejected before file changes; resubmitted using a JavaScript raw string",
+    "qualification_failure": false
+  },
+  "prior_repair_static_verifier": {
+    "chunk_id": "9ddf43",
+    "actual_exit_code": 0,
+    "wall_time_seconds": 0.1296311,
+    "payloads_verified": 53,
+    "original_payloads_verified": 23,
+    "qualification_cases_executed": 0
+  }
+}

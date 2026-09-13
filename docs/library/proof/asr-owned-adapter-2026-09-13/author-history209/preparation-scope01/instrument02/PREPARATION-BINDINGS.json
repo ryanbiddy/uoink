@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-13",
+  "prior_seal_sha256": "34e4a40216547273f5813fa55dbf7affbc369173c68fd8e4e3e5c7b442a2817e",
+  "prior_53_payloads_verified": true,
+  "runner_sha256": "3b944b1ef68db540c1c7bf360b9362aebc2b07a15efcaae7bcad8ec03c264015",
+  "harness_sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545",
+  "native_block_sha256": "bd907f9bf3cc1fe58057d71f66325871c95b57e09588006ca17b333c8a4893a9",
+  "postchecks_sha256": "06cd4e2ade1aea7e9575f5deb6e520507d1b96865f8bc40d1ef8c8a938c95195",
+  "trap_installation_sha256": "b79cbe5735c156c23ad232dea85e0ff1b62330e02bbf4912720fbd3cf6184339",
+  "trap_final_sha256": "fd34594f63c1ac76f14c6daae14c07daf1fb63fa68569d423b87a5c190fba075",
+  "synthetic_text_sha256": "cebea3932b7139c83bb057b39e5900a476cae2de05060416e8a5255d80d4da82",
+  "planned_wrapper_outcomes": 2,
+  "planned_guard_checks": 4,
+  "asr_cases_executed": 0,
+  "any_generated_code_executed": false,
+  "previous_subset_failed": true,
+  "candidate_runner_sha256": "3b944b1ef68db540c1c7bf360b9362aebc2b07a15efcaae7bcad8ec03c264015",
+  "diagnostic_executed": false
+}

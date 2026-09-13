@@ -1,0 +1,10 @@
+{
+  "label": "global-function",
+  "chosen_capture": 1,
+  "unqualified_observed": null,
+  "global_observed": 1,
+  "local_variable_present": false,
+  "local_value": null,
+  "expected_child_exit": 1,
+  "asr_cases_executed": 0
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "uoink.asr-native-receipt-failed-outcome.v1",
+  "date": "2026-09-13",
+  "qualification_status": "FAILED",
+  "measured_native_exit": null,
+  "actual_outer_tool_exit": 1,
+  "success_wrapper_and_guards_executed": false,
+  "payload_count": 7,
+  "payload_bytes": 3488,
+  "files": [
+    {
+      "path": "ACTUAL-TOOL-MISSING01.json",
+      "bytes": 647,
+      "sha256": "9f6d6ae94120e201f888ac382d75f135c0b8c70ef35e3753d5ca7693f0bbb880"
+    },
+    {
+      "path": "FAILED-OUTCOME01.md",
+      "bytes": 1676,
+      "sha256": "e10a759c230145f685aad9e05b7e878fd93451a69076e0c5cc5b2aad74619d89"
+    },
+    {
+      "path": "missing01/native-exit.json",
+      "bytes": 74,
+      "sha256": "1046b510d5439a1fa7f0285a88ac3dfd56a32d07a2e35d799e02184c494942e9"
+    },
+    {
+      "path": "missing01/qualify_adapter.py",
+      "bytes": 893,
+      "sha256": "28e17420d511118e5afe2dfb998af0e66a0daa279d63844d5d7427697733ec8f"
+    },
+    {
+      "path": "missing01/setup.json",
+      "bytes": 143,
+      "sha256": "595ec05287d3e2e8bb6a2f3b2b24408ee8e5fb9aab799598498d6bab80ead5b3"
+    },
+    {
+      "path": "missing01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "missing01/stdout.json",
+      "bytes": 55,
+      "sha256": "9120a8faabd582cfc591a8a91e717b098ac46dcd714ae86dd8400d3af0d4f5a9"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-proposal01\\drafts\\qualify_adapter.initial-unexecuted.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-proposal01\\qualify_adapter.py"
+index 933c336..b981fe6 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-proposal01\\drafts\\qualify_adapter.initial-unexecuted.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-proposal01\\qualify_adapter.py"
+@@ -582,6 +582,7 @@ def private_seam():
+         assert "manifest" not in rig.events and not rig.constructed
+ 
+ 
++assert len(CASES) == 58
+ assert len({name for name, _ in CASES}) == len(CASES)
+ results = []
+ started = time.monotonic()
+@@ -596,13 +597,18 @@ for name, fn in CASES:
+ passed = sum(result["passed"] for result in results)
+ failed = len(results) - passed
+ heavy_loaded = sorted(HEAVY & {name.split(".")[0] for name in sys.modules})
++real_approval_closed = real_resolver.REAL_APPROVAL is None
++real_functions_unchanged = (real_resolver.load_manifest, real_resolver.admit_snapshot, real_resolver.bind_for_constructor) == ORIGINAL_REAL_FUNCTIONS
++adapter_globals_restored = adapter.resolver is real_resolver and all(getattr(adapter, field) is None for field in GLOBAL_NAMES)
++guard_valid = not DENIED and not heavy_loaded and real_approval_closed and real_functions_unchanged and adapter_globals_restored
+ result = {"schema": "uoink.inert-asr-adapter-qualification.v1", "passed": passed, "failed": failed,
+           "elapsed_seconds": round(time.monotonic() - started, 6), "cases": results,
+           "input_sha256": HASHES, "guard_denials": DENIED, "heavy_roots_loaded": heavy_loaded,
+-          "real_resolver_approval_unchanged_none": real_resolver.REAL_APPROVAL is None,
+-          "real_resolver_functions_unchanged": (real_resolver.load_manifest, real_resolver.admit_snapshot, real_resolver.bind_for_constructor) == ORIGINAL_REAL_FUNCTIONS,
+-          "actual_asset_reads": 0, "actual_model_constructors": 0,
++          "real_resolver_approval_unchanged_none": real_approval_closed,
++          "real_resolver_functions_unchanged": real_functions_unchanged,
++          "adapter_globals_restored": adapter_globals_restored, "guard_valid": guard_valid,
++          "scope": "Only pinned stdlib proposal modules and dummy ports; no asset fixtures or runtime factory",
+           "startup_binding_asserted": True, "torch_backend_autoload_disabled_before_startup": True,
+-          "qualification_exit": 0 if not failed and not DENIED and not heavy_loaded else 1}
++          "qualification_exit": 0 if not failed and guard_valid else 1}
+ print(json.dumps(result, indent=2))
+ sys.exit(result["qualification_exit"])

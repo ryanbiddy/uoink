@@ -1,0 +1,7 @@
+{
+  "chunk_id": "3ba99d",
+  "wall_time_seconds": 0.1269518,
+  "exit_code": 0,
+  "original_token_count": 82,
+  "output": "{\r\n  \"successful_wrapper_confirmed\": true,\r\n  \"measured_native_exit\": 0,\r\n  \"recorded_outer_exit\": 0,\r\n  \"actual_outer_tool_exit\": 0,\r\n  \"actual_tool_chunk\": \"7bb2ea\",\r\n  \"receipt_valid\": true,\r\n  \"inputs_unchanged\": true,\r\n  \"inherited_preference_true\": true,\r\n  \"fabricated_parser_rows\": 58,\r\n  \"asr_cases_executed\": 0\r\n}\r\n\r\n"
+}

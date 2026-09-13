@@ -1,0 +1,9 @@
+2026-09-13. Prepare the minimum instrument checks requested by root after source review of the ASR qualification repair. Do not execute them until root reviews the exact generated files and records admission.
+
+The proposed subset has two PowerShell wrapper outcomes: an inert child exiting 1 followed by a deliberately missing temporary postcheck file, and an inert child exiting 0 with internally consistent synthetic JSON and successful postchecks. Both begin with native-error promotion enabled and use the exact repaired invocation/persistence block, which disables promotion immediately before calling Python. Use the exact remaining postchecks from the repaired runner. The first wrapper must fail while preserving native-exit.json=1; the second must pass. Capture actual native and outer exits separately.
+
+Four separate guard checks execute only the exact selected metadata-trap installation and final identity statements against inert owner objects: complete registry, replaced attribute, removed attribute and missing registry entry. They do not execute the ASR harness or import the adapter/resolver. These four results are instrument evidence only.
+
+All existing 58 ASR behavior assertions remain unchanged in the sealed source proposal. Fabricated 58-name JSON tests the wrapper parser only and cannot count as executed ASR cases. The other scenarios in WRAPPER-OUTCOME-QUALIFICATION-PLAN.md remain planned and unmeasured.
+
+Use fresh scratch directories, the known C:\Python314\python.exe with -I -S -B, provider credentials removed without printing, and IG_FORBIDDEN_LIVE set lexically before startup. Only tiny generated scripts/text and receipts are permitted. No model/data fixtures, real D1 invocation, installed package imports, assets, acquisition, network, production files, frozen tests, staging or Git changes are part of this proposal. Preserve the previous 53-payload repair seal unchanged.

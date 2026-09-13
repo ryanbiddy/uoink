@@ -1,0 +1,16 @@
+def metadata_trap(*args, **kwargs):
+    DENIED.append("metadata")
+    raise AssertionError("No filesystem metadata operation is permitted in this harness")
+
+
+# All three exact input byte strings have already been read. Deny metadata as
+# well as content reads so accidentally reaching the real resolver cannot probe.
+METADATA_TRAPS = []
+for owner, names in ((Path, ("stat", "lstat", "resolve", "exists", "is_file", "is_dir")),
+                     (os, ("stat", "lstat", "fstat", "scandir", "listdir"))):
+    for name in names:
+        setattr(owner, name, metadata_trap)
+        METADATA_TRAPS.append((owner, name, metadata_trap, ("Path" if owner is Path else "os") + "." + name))
+METADATA_TRAPS = tuple(METADATA_TRAPS)
+
+

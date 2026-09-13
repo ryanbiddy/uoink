@@ -1,0 +1,30 @@
+[
+  {
+    "path": "diagnose_scope01.ps1",
+    "sha256": "bf0225df0151989d7b0937a763989297de0ef95e76468cfadff8a126b4a5585b",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  },
+  {
+    "path": "candidate\\run_preflight03.ps1",
+    "sha256": "3b944b1ef68db540c1c7bf360b9362aebc2b07a15efcaae7bcad8ec03c264015",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  },
+  {
+    "path": "instrument02\\wrapper-missing02.ps1",
+    "sha256": "9e7cf8a110e77e41ed6bc9500bcd64b1951571231e9a2ab8bcf2e4d53e1c4a70",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  },
+  {
+    "path": "instrument02\\wrapper-success02.ps1",
+    "sha256": "d3200ef1c3a92be4db1b0a91b0723a0ce668e3feaa6bc67819806fe47fc981e3",
+    "parse_errors": [],
+    "parse_error_count": 0,
+    "source_executed": false
+  }
+]

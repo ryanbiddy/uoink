@@ -1,0 +1,13 @@
+{
+  "both_native_blocks_byte_identical": true,
+  "both_postchecks_byte_identical": true,
+  "inherited_true_setup_before_function": true,
+  "generated_text_hash_matches_expected": true,
+  "python_syntax_parsed_only": [
+    "qualify_guards.py",
+    "child-one.py",
+    "child-zero.py"
+  ],
+  "generated_executions": 0,
+  "asr_cases_executed": 0
+}

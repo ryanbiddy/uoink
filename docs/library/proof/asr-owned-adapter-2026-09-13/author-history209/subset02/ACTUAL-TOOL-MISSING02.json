@@ -1,0 +1,7 @@
+{
+  "chunk_id": "65fcfc",
+  "wall_time_seconds": 0.2742698,
+  "exit_code": 1,
+  "original_token_count": 124,
+  "output": "Get-FileHash: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\instrument02\\wrapper-missing02.ps1:35\r\nLine |\r\n  35 |  … skCopyHash=(Get-FileHash -LiteralPath (Join-Path $taskRun $taskRecord …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Could not find file\r\n     | 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\instrument02\\runs\\instrument02\\missing02\\instrument.txt'.\r\n"
+}

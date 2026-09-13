@@ -1,0 +1,4 @@
+metadata_trap_mismatches = [label for owner, name, installed, label in METADATA_TRAPS
+                            if getattr(owner, name, None) is not installed]
+metadata_traps_installed = len(METADATA_TRAPS) == 11 and not metadata_trap_mismatches
+guard_valid = not DENIED and not heavy_loaded and real_approval_closed and real_functions_unchanged and adapter_globals_restored and metadata_traps_installed

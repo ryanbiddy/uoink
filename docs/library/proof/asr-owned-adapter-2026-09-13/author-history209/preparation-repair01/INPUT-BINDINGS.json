@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-13",
+  "execution_admitted": false,
+  "files": [
+    {
+      "path": "asr_loading_adapter.py",
+      "sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900",
+      "bytes": 10400
+    },
+    {
+      "path": "review-inputs/trusted_asr_resolver.py",
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "bytes": 13373
+    },
+    {
+      "path": "qualify_adapter.py",
+      "sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545",
+      "bytes": 29228
+    },
+    {
+      "path": "run_preflight02.ps1",
+      "sha256": "e503ac0355ff8d59bad3a1ce3ff9bf1088f27999ed67ea82b0ea0c1e0e2b2a3d",
+      "bytes": 7646
+    },
+    {
+      "path": "BRIEF.md",
+      "sha256": "90902361179501f493fdb94dd588679c181a443728a85233ff1f41398e4850a2",
+      "bytes": 2283
+    },
+    {
+      "path": "QUALIFICATION02-PROTOCOL.md",
+      "sha256": "098f3abbed2a86942a3a7b49c217dcd1b3ed83fad2b52b8c6fe944acdc791aa0",
+      "bytes": 4327
+    },
+    {
+      "path": "WRAPPER-OUTCOME-QUALIFICATION-PLAN.md",
+      "sha256": "01ab696d2de260034f55c6550cc2da6aea7f4d5870526f2022fa4ddff1b60a07",
+      "bytes": 4553
+    },
+    {
+      "path": "original-proposal/PREPARATION-SHA256.json",
+      "sha256": "0d67de2c97c3f2a8a90012f79fbb2efbf1566b07df640f9d32e2adf62499cdf0",
+      "bytes": 4230
+    },
+    {
+      "path": "NATIVE-RECEIPT-BLOCK.ps1.txt",
+      "sha256": "8f2283c00049110e77001f5922290d21bd9534e90b8f2de6dce8c9b7571e573f",
+      "bytes": 858
+    }
+  ]
+}

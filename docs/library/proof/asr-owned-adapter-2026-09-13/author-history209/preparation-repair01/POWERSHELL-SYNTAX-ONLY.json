@@ -1,0 +1,10 @@
+{
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-qualification-repair01\\run_preflight02.ps1",
+  "sha256": "e503ac0355ff8d59bad3a1ce3ff9bf1088f27999ed67ea82b0ea0c1e0e2b2a3d",
+  "parse_error_count": 0,
+  "errors": [],
+  "parsed_only": true,
+  "runner_executed": false,
+  "qualification_cases_executed": 0,
+  "powershell_version": "7.6.5"
+}

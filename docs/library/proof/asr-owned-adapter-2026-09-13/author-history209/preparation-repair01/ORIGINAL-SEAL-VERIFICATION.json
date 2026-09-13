@@ -1,0 +1,10 @@
+{
+  "schema": "uoink.asr-instrument-source-preservation.v1",
+  "date": "2026-09-13",
+  "manifest_sha256": "0d67de2c97c3f2a8a90012f79fbb2efbf1566b07df640f9d32e2adf62499cdf0",
+  "payload_count": 23,
+  "payload_bytes": 154370,
+  "all_payloads_verified": true,
+  "original_files_modified": false,
+  "execution": "None; text byte copy/hash only"
+}

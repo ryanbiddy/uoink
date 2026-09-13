@@ -1,0 +1,3 @@
+2026-09-13. The initial read-only inventory tool e23595 exited 0 but produced payload_bytes=null: Measure-Object did not sum the ordered-dictionary rows as intended. Preserve ROOT-INPUTS.json unchanged as that invalid aggregate. The 37 per-file paths, byte sizes and hashes remain usable as captured metadata.
+
+The corrected inventory uses an explicit integer accumulation over the same preserved rows and writes ROOT-INPUTS-v2.json. It does not reread or change source/receipt content. The builder will bind only the corrected inventory and recompute the total from its rows. No proof builder, verifier, test, model or package executed during this repair.

@@ -1,0 +1,80 @@
+[
+  {
+    "name": "asr_loading_adapter.py",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\asr_loading_adapter.py",
+    "source_sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900",
+    "copy_sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900"
+  },
+  {
+    "name": "qualify_adapter.py",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\qualify_adapter.py",
+    "source_sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545",
+    "copy_sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545"
+  },
+  {
+    "name": "BRIEF.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\BRIEF.md",
+    "source_sha256": "3b25fcce09157e3126c23d2fe76f152eec100f8940251f9f53d7690250d6521f",
+    "copy_sha256": "3b25fcce09157e3126c23d2fe76f152eec100f8940251f9f53d7690250d6521f"
+  },
+  {
+    "name": "PORT-CONTRACTS.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\PORT-CONTRACTS.md",
+    "source_sha256": "a49980fdec7219d9e1f7b7c8550110c1d0f5278a467674361205e3c9da8e5a54",
+    "copy_sha256": "a49980fdec7219d9e1f7b7c8550110c1d0f5278a467674361205e3c9da8e5a54"
+  },
+  {
+    "name": "TEST-PLAN.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\TEST-PLAN.md",
+    "source_sha256": "ba9fb34467e2d494305b756494551b80f800df9a42873e5a436f99d019a6136a",
+    "copy_sha256": "ba9fb34467e2d494305b756494551b80f800df9a42873e5a436f99d019a6136a"
+  },
+  {
+    "name": "REVIEW.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\REVIEW.md",
+    "source_sha256": "fa0ab036dc743dcde138324b5b7d481c787ab7927c4133e9edcb92791d675295",
+    "copy_sha256": "fa0ab036dc743dcde138324b5b7d481c787ab7927c4133e9edcb92791d675295"
+  },
+  {
+    "name": "CALL-SITE-SPLICES.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\CALL-SITE-SPLICES.md",
+    "source_sha256": "44548ba86da4f8a5d1be868d47f65b01c227b80589f55b306504cd8e9f8aa3a4",
+    "copy_sha256": "44548ba86da4f8a5d1be868d47f65b01c227b80589f55b306504cd8e9f8aa3a4"
+  },
+  {
+    "name": "SOURCE-BINDINGS.json",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\SOURCE-BINDINGS.json",
+    "source_sha256": "35932d2f70b420235d1674b5aa27e574fb302f1d098e07127457fe3718b7f89d",
+    "copy_sha256": "35932d2f70b420235d1674b5aa27e574fb302f1d098e07127457fe3718b7f89d"
+  },
+  {
+    "name": "WAVEFORM-STARTUP-CORRECTION.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\WAVEFORM-STARTUP-CORRECTION.md",
+    "source_sha256": "d5f41959201f2081d2000769f40a55b789315baa4bbd92789220e03f0ec785e6",
+    "copy_sha256": "d5f41959201f2081d2000769f40a55b789315baa4bbd92789220e03f0ec785e6"
+  },
+  {
+    "name": "HARNESS-PREPARATION.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\HARNESS-PREPARATION.md",
+    "source_sha256": "3499deb6246a05dfe3161f9d0a4fbb82046b98595a342c7fc52dcbe5c3fd87d9",
+    "copy_sha256": "3499deb6246a05dfe3161f9d0a4fbb82046b98595a342c7fc52dcbe5c3fd87d9"
+  },
+  {
+    "name": "QUALIFICATION03-PROTOCOL.md",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\QUALIFICATION03-PROTOCOL.md",
+    "source_sha256": "406fe304e27d7cd7a850acea9dc124ad80fdc0f7cd61eb553db7a010fdea898c",
+    "copy_sha256": "406fe304e27d7cd7a850acea9dc124ad80fdc0f7cd61eb553db7a010fdea898c"
+  },
+  {
+    "name": "adapter-addition.patch.txt",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\adapter-addition.patch.txt",
+    "source_sha256": "28f866102e42610a559dbc2bfdae0a3e43d72bf385976d20d8f1ad92f307b537",
+    "copy_sha256": "28f866102e42610a559dbc2bfdae0a3e43d72bf385976d20d8f1ad92f307b537"
+  },
+  {
+    "name": "run_preflight03.ps1",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-native-exit-scope-repair01\\candidate\\run_preflight03.ps1",
+    "source_sha256": "3b944b1ef68db540c1c7bf360b9362aebc2b07a15efcaae7bcad8ec03c264015",
+    "copy_sha256": "55403fff1ff1cfeb28b8896a586486b802b1c3c3d6425167cd3494eb7f27461c"
+  }
+]

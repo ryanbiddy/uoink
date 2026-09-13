@@ -1,0 +1,7 @@
+2026-09-13. The first native-receipt measurement failed. The current evidence is a null captured value, an actual outer wrapper exit of 1, and child stdout from the intentional failure path. The child's intended numeric exit must not be substituted for the value that was not captured.
+
+The candidate changes the reset to global:LASTEXITCODE and captures that same explicitly scoped variable. The new block still writes and flushes native-exit.json before any result/input postcheck. After the flush, it requires an integer capture; otherwise it throws while leaving the raw invalid receipt intact. This prevents a missing exit from flowing into the outer result. The global mechanism is a proposal until the four scope observations and two fresh wrappers qualify it.
+
+The candidate runner and both fresh wrappers share that exact block. Existing postchecks remain unchanged. Changes outside the block are only fresh paths/labels/protocol names. The 58-case harness is byte-identical to the prior repaired harness, including all behavior assertions and metadata-trap checks. The adapter and resolver are unchanged and real authority remains unavailable.
+
+The prior 53- and 26-payload seals were verified before preparation and remain untouched. This directory keeps their original manifests, exact before-source files and seven actual failure payloads. FAILED-OUTCOME01.md retains root's reported d9d929 and 68b58c outcomes; no separate raw files exist for those calls, and none are invented here.

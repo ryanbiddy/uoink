@@ -1,0 +1,9 @@
+2026-09-13. Prepare a documentary builder and verifier for root review. Do not execute either until root admits this source. No tests, diagnostic, model, package, kernel, network or product code may run as part of this proof assembly.
+
+Preserve the sealed author/history archive unchanged: _scratch/asr-native-exit-instrument-outcomes01, 209 payloads / 811,155 bytes, manifest 6b2afa0ffa02fee2facbd272ce53a328627065f6c0a1f0cbd96a6f3ad956c691. It already contains the original failure, source repairs, four scope observations, two repaired wrapper outcomes, four inert guard checks and the author 58-case fake-port qualification.
+
+Add only the named text inputs and receipts from _scratch/astra-asr-adapter-qualification03. Bind every file before copying. Verify all root copy bindings, the single launcher taskProposal path change, exact ordered case/result equality with the author, all native/launcher/actual tool exits, unchanged after-hashes, closed real approval and guard results. Keep fabricated wrapper rows separate from executed ASR cases.
+
+Build into the fresh fixed _scratch/asr-adapter-combined-proof01 directory. Preserve the old 209 manifest and payloads under a separate child; never reseal them. Add the independent receipt tree, a concise final verdict and a complete outer byte/hash manifest with * -text protection. The verifier may read only those documentary bytes and may not execute any copied source.
+
+The final claim is the same 58 distinct fake-port cases passing twice, with no independent model/runtime/installation/release credit. Preserve earlier failed measurements and distinguish root-reported preparation/check timings from actual saved tool objects. After documentary work, a separate brief is required before preparing the Windows snapshot lifecycle/owned-worker proposal.

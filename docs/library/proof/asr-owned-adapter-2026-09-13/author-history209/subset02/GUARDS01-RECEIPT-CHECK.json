@@ -1,0 +1,19 @@
+{
+  "guard_cases": 4,
+  "passed": 4,
+  "failed": 0,
+  "reported_native_exit": 0,
+  "actual_tool_exit": 0,
+  "actual_tool_chunk": "966950",
+  "case_ids": [
+    "complete",
+    "replaced",
+    "removed",
+    "missing_registry_entry"
+  ],
+  "guard_valid": true,
+  "heavy_imports": 0,
+  "guard_denials": 0,
+  "preparation_payloads_unchanged": 55,
+  "asr_cases_executed": 0
+}

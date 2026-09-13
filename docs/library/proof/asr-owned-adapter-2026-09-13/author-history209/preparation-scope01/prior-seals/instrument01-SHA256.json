@@ -1,0 +1,142 @@
+{
+  "schema": "uoink.asr-instrument-subset-preparation.v1",
+  "date": "2026-09-13",
+  "payload_count": 26,
+  "payload_bytes": 102697,
+  "qualification_executed": false,
+  "planned_wrapper_outcomes": 2,
+  "planned_guard_checks": 4,
+  "asr_cases_executed": 0,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1916,
+      "sha256": "56bc67ff006347073a768aaf3bd31ec43e2ca63ce06639179eacbdc5e20bf00e"
+    },
+    {
+      "path": "child-one.py",
+      "bytes": 893,
+      "sha256": "28e17420d511118e5afe2dfb998af0e66a0daa279d63844d5d7427697733ec8f"
+    },
+    {
+      "path": "child-zero.py",
+      "bytes": 4634,
+      "sha256": "861a7e3e6ecc762969a70bb23da68c81a3f22d4fe9ff41d2adf52fbafdf3f676"
+    },
+    {
+      "path": "COMMAND-BINDINGS.json",
+      "bytes": 2929,
+      "sha256": "aa4abd5df076a9295d5460c2afbb750696563d55e1f891b7ab960da510266a6a"
+    },
+    {
+      "path": "drafts/prepare_asr_instrument_subset01.before-string-repair.py",
+      "bytes": 6553,
+      "sha256": "8fd7c3a47c0bbde130452ae2b351f4fb761c83cfb0bacf3cd63e4541415e4ebd"
+    },
+    {
+      "path": "finalize_asr_instrument_subset01.py",
+      "bytes": 5835,
+      "sha256": "68a6bf466681a0f82534a88bf859de1c429dd481de12ce0a908afd7ff46c3379"
+    },
+    {
+      "path": "native-block.ps1.txt",
+      "bytes": 858,
+      "sha256": "8f2283c00049110e77001f5922290d21bd9534e90b8f2de6dce8c9b7571e573f"
+    },
+    {
+      "path": "postchecks.ps1.txt",
+      "bytes": 3012,
+      "sha256": "06cd4e2ade1aea7e9575f5deb6e520507d1b96865f8bc40d1ef8c8a938c95195"
+    },
+    {
+      "path": "POWERSHELL-SYNTAX-ONLY.json",
+      "bytes": 652,
+      "sha256": "b2458b229ff7ee48138f4a3639d8cec62b2e21d176ab70f65e3f5decd5ceffc7"
+    },
+    {
+      "path": "PREPARATION-BINDINGS.json",
+      "bytes": 928,
+      "sha256": "bca4aa08f07c03422c7bc337d7d7c95070b3c5356f9245737c15d426141d9025"
+    },
+    {
+      "path": "PREPARATION-TOOL-OUTCOMES.json",
+      "bytes": 999,
+      "sha256": "9d17c593e0e24edeed01bbc2298ab7bc4e9946b9d5f2b0fa15f95eb072d1ccbe"
+    },
+    {
+      "path": "prepare_asr_instrument_subset01.py",
+      "bytes": 6554,
+      "sha256": "03164fe1d410ca9b503435ae3696708990cb0fe2b2f756b5c76cd061071726be"
+    },
+    {
+      "path": "PREPARER-STRING-REPAIR.md",
+      "bytes": 960,
+      "sha256": "d2a3080aaf111582dbbf97de972ffa456c8da3a95b426143c48180987e46cbde"
+    },
+    {
+      "path": "preparer-string-repair.patch.txt",
+      "bytes": 404,
+      "sha256": "3ec8a5d4eb839fa9fb8321d77c74ec84248ad2d9c7872ef37703ff2478628452"
+    },
+    {
+      "path": "PROTOCOL.md",
+      "bytes": 3704,
+      "sha256": "361bef4134c5a3df5a5c3903269293c3a5a0b0dc8d3d73299609e080afade5fb"
+    },
+    {
+      "path": "qualify_guards.py",
+      "bytes": 4116,
+      "sha256": "b7b2b0887bb4850886e67516c124c97e554a5c4d32c3991528a608249dea7005"
+    },
+    {
+      "path": "ROOT-ADMISSION.md",
+      "bytes": 1546,
+      "sha256": "23e36c3c7d3d2c12ac6dc2b1830cea790331875842c1e2ec4a07f3cdbb790a96"
+    },
+    {
+      "path": "run_instrument01.ps1",
+      "bytes": 7000,
+      "sha256": "0fcb3213e78042cff93619ffb438254a5fc2133795c5f49e94a81e3c752f7c47"
+    },
+    {
+      "path": "sources/qualify_adapter.py",
+      "bytes": 29228,
+      "sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545"
+    },
+    {
+      "path": "sources/run_preflight02.ps1",
+      "bytes": 7646,
+      "sha256": "e503ac0355ff8d59bad3a1ce3ff9bf1088f27999ed67ea82b0ea0c1e0e2b2a3d"
+    },
+    {
+      "path": "STATIC-VERIFICATION.json",
+      "bytes": 345,
+      "sha256": "24ea1c6c315da653e69d12fd78a57c8642edf84d81bb5c31c8bac1539e0f6866"
+    },
+    {
+      "path": "trap-final.py.txt",
+      "bytes": 406,
+      "sha256": "fd34594f63c1ac76f14c6daae14c07daf1fb63fa68569d423b87a5c190fba075"
+    },
+    {
+      "path": "trap-installation.py.txt",
+      "bytes": 723,
+      "sha256": "b79cbe5735c156c23ad232dea85e0ff1b62330e02bbf4912720fbd3cf6184339"
+    },
+    {
+      "path": "wrapper-missing01.ps1",
+      "bytes": 5286,
+      "sha256": "185e506aebfc945142f9177729de58163acf900c41f23cad9d17d89dc1726157"
+    },
+    {
+      "path": "wrapper-success01.ps1",
+      "bytes": 5562,
+      "sha256": "c075c651b2ca791683cc74bf656147af2b864a556af15c9d9017be6a771a24c1"
+    }
+  ]
+}
