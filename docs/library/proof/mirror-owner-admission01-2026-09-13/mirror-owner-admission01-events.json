@@ -1,0 +1,27 @@
+[
+  {
+    "event": "acquire",
+    "thread": 10756
+  },
+  {
+    "event": "before_sweep",
+    "held": true,
+    "exclusive": 0,
+    "sessions": 0
+  },
+  {
+    "event": "release",
+    "thread": 10756
+  },
+  {
+    "event": "after_sweep",
+    "held": false,
+    "done": true
+  },
+  {
+    "event": "prepared",
+    "held": false,
+    "launching": true,
+    "sessions": 1
+  }
+]

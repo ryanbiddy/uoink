@@ -1,0 +1,11 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_new_admission_cannot_reap_owner_before_session_attachment ________
+_scratch\test_mirror_owner_admission_diagnostic.py:29: in test_new_admission_cannot_reap_owner_before_session_attachment
+    assert owner.held and not owner._done.is_set(), 'Prepared writer lost exclusion before attachment'
+E   AssertionError: Prepared writer lost exclusion before attachment
+E   assert (False)
+E    +  where False = <library_mirror._DestExclusionOwner object at 0x000001D05CA3F8C0>.held
+=========================== short test summary info ===========================
+FAILED _scratch/test_mirror_owner_admission_diagnostic.py::test_new_admission_cannot_reap_owner_before_session_attachment
+1 failed in 0.30s

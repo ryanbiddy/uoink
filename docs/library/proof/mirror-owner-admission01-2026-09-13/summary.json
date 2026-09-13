@@ -1,0 +1,8 @@
+{
+  "source": "b62aab325ef6b2dfde95e23b97b4b23e263e6e9a",
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0,
+  "kind": "controlled synthetic interleaving; fake kernel mutex only",
+  "original_full_tree_cause": "not established"
+}
