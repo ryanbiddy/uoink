@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Owner repair ff67b84 and process repair 747fb6b accepted; final Gemini review retained at 1e90e08 | 233 Phase 4 passes in each root; exact case sets match. Gemini found no actionable defect in the three reviewed authority boundaries. Astra's wording corrections and 11 review payloads are verified | Combine the independent cache-consent guard if it qualifies, then committed tree09. Tree08 cause remains unproved |
+| 4 | Owner repair ff67b84 and process repair 747fb6b accepted; final Gemini review retained at 1e90e08 | 233 Phase 4 passes in each root; exact case sets match. Gemini found no actionable defect in the three reviewed authority boundaries. Astra's wording corrections and 11 review payloads are verified | Cache guard b96dbd0 is integrated. Qualify subtest-aware receipts, then committed tree09. Tree08 cause remains unproved |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; candidate02 graph f22456c and security scope 14aa0df reviewed | Uninstalled candidate: 144 advisory queries, one raw entry / one group; separate upstream NLTK one/one. Source review confirms unsafe default VAD and incomplete-cache/tokenizer guards. All 111 new proof payloads match Git and disk. Graph still fails five caps | Build exact asset/loader and compatibility repairs; no runtime or installed clearance. Combined tree/package09 follow mirror repair; model qualification retains Ryan gates |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD and companion tokenizer loader remain open | Finish exact loader/compatibility proposal. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree08 at 9dd0cfb remains failed; process repair747fb6b qualifies in both roots; tree09 instruments reviewed at e8b5d8e | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Corrected partition validator: 53 synthetic passes in agent and Astra runs; abnormal shutdown is refused | Finish ordinary cache-consent guard qualification, then committed combined tree09 and package09. Package08 held; website/marketing paused |
+| Integration | Tree08 at 9dd0cfb remains failed; process repair 747fb6b and cache guard b96dbd0 qualify in both roots | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Existing 53 receipt tests stay unchanged; subtest-aware extension is being qualified before tree09 | Complete receipt review, then committed combined tree09 and package09. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -181,10 +181,12 @@ is complete but is not this goal's completion. Current queue:
    now concrete under _scratch/runtime-asset-guard-proposal01: preserve the six
    model options and explicit consent, require the minimum expected ASR files,
    resolve acquisition before construction and pass a local snapshot. Implement
-   and synthetically qualify A before the expensive combined tree. Worker agw02
-   and Astra's independent agv01 each pass 144 cases plus 13 subtests, with real
-   heavy imports blocked. Source and existing tests remain unchanged during
-   qualification; checkout integration/checks are next. This does not
+   and synthetically qualify A before the expensive combined tree. A is accepted
+   at b96dbd0 after raw worker diff / three-way apply. Astra's worker agv01 and
+   checkout agc01 each pass 144 cases plus 13 subtests, with --runxfail and real
+   heavy imports blocked in the pytest process. Existing tests remain unchanged.
+   Read ASTRA-ASSET-GUARD-A-VERDICT-2026-09-13.md; all 117 proof payloads match
+   Git and disk. The guard does not cover child-process imports. This does not
    establish a trusted model manifest or repair VAD. Faster-whisper companion B
    remains an inert exact source proposal under the model migration review.
    Prepare an exact derivative and protocol before Ryan's
@@ -225,9 +227,9 @@ is complete but is not this goal's completion. Current queue:
    long verifier label made the first temporary export path 256 characters,
    above the unchanged 240-character cap. The documented shorter label produces
    220 characters, with source and test bytes unchanged. The reviewed patch is
-   integrated at747fb6b by raw diff/three-way apply; checkout a3c01 passes all233
-   in113.20 s with identical case membership. Read ASTRA-AUTHORITY-REPAIR03-VERDICT
-   and its116-payload proof. Both outcomes and the path repair remain preserved.
+   integrated at 747fb6b by raw diff/three-way apply; checkout a3c01 passes all 233
+   in 113.20 s with identical case membership. Read ASTRA-AUTHORITY-REPAIR03-VERDICT
+   and its 116-payload proof. Both outcomes and the path repair remain preserved.
    The process patch now qualifies for committed combined tree09 after the
    independent ordinary cache-consent guard. Gemini final run
    6bbf0095-0d82-4afa-b523-db16db5bb5d2 completed source review with no actionable
@@ -250,6 +252,12 @@ is complete but is not this goal's completion. Current queue:
    failed phases for one case. Agent and Astra each record 53 synthetic passes;
    two deliberate smoke failures stay failed/refused. All archived tree08 counts
    remain unchanged. The three new seals total 201 payloads matching Git and disk.
+   The new cache tests expose a legitimate pytest 9 subtest reporting case:
+   144 collected cases produce 157 XML tests and 144 testcase elements. Qualify
+   the subtest-aware recorder/validator extension before tree09; keep top-level
+   cases and subtests separate. Preserve intentional failures and the instrument
+   I/O failure found during its synthetic qualification. No complete tree09 has
+   run. Include separate collection/main/media heavy-import guard receipts.
    Rebind the unused package09 instruments to that new qualified source before
    following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
    no new installed NLTK or signing credit exists.
@@ -3803,3 +3811,33 @@ do not edit tests or ignore failures to fit the old count assumption. The origin
 until that extension is reviewed. Static checkpoint-inventory reader preparation
 is also underway; no checkpoint bytes, models or downloads have been accessed.
 Website and marketing remain paused.
+
+### 2026-09-13 — Cache consent guard accepted; static inventory refused
+
+Production commit b96dbd0 integrates ordinary ASR cache guard A. Independent
+worker agv01 passed 144 cases plus 13 subtests in 9.97 s; checkout agc01 passed
+the same cases and subtests in 9.85 s. Both actual pytest/verifier exits are
+zero. The new guard requires a complete minimum local snapshot before model
+construction and preserves the six choices and explicit download consent.
+It does not close default VAD, prove model integrity or qualify companion B.
+
+The outer proof contains 117 payloads, all matching disk and Git. The original
+24/29-payload seals and failed/partial observations remain unchanged. Initial
+staging normalized CRLF evidence because the archive lacked * -text attributes;
+the byte verifier rejected it. Adding attributes required git add --renormalize
+to replace already-staged normalized bytes. This was an archive transport repair,
+not a product-test failure or a reason to repeat the measurements.
+
+The reviewed stdlib-only checkpoint reader completed 36 synthetic cases after
+its retained first result of 31 passed / two failed. One allowlisted static
+inspection, run01, hashed 17,719,103 bytes to
+0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea
+and then refused an unsupported ZIP directory header. The recorded reader exit
+is 2; the outer exec PowerShell command returned 1. No pickle inventory, object
+construction, model loading or inference occurred. A reporting-only reader
+repair is being prepared to identify the rejected numeric fields; no acceptance
+bound is relaxed and no further artifact read is authorized by that preparation.
+
+Complete-tree receipt qualification continues. Keep source frozen for the next
+committed combined run once the subtest extension is independently reviewed.
+Website, marketing, installer execution and model qualification remain pending.
