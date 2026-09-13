@@ -93,7 +93,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Owner repair ff67b84 and process repair747fb6b accepted for combined qualification | 233 Phase 4 passes in each root; exact case sets match. All 116 new proof payloads match disk and Git. The original long-label run remains 174 passed / 59 failed | Combine the independent cache-consent guard if it qualifies, then committed tree09. Tree08 cause remains unproved |
+| 4 | Owner repair ff67b84 and process repair 747fb6b accepted; final Gemini review retained at 1e90e08 | 233 Phase 4 passes in each root; exact case sets match. Gemini found no actionable defect in the three reviewed authority boundaries. Astra's wording corrections and 11 review payloads are verified | Combine the independent cache-consent guard if it qualifies, then committed tree09. Tree08 cause remains unproved |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; candidate02 graph f22456c and security scope 14aa0df reviewed | Uninstalled candidate: 144 advisory queries, one raw entry / one group; separate upstream NLTK one/one. Source review confirms unsafe default VAD and incomplete-cache/tokenizer guards. All 111 new proof payloads match Git and disk. Graph still fails five caps | Build exact asset/loader and compatibility repairs; no runtime or installed clearance. Combined tree/package09 follow mirror repair; model qualification retains Ryan gates |
@@ -181,7 +181,10 @@ is complete but is not this goal's completion. Current queue:
    now concrete under _scratch/runtime-asset-guard-proposal01: preserve the six
    model options and explicit consent, require the minimum expected ASR files,
    resolve acquisition before construction and pass a local snapshot. Implement
-   and synthetically qualify A before the expensive combined tree. This does not
+   and synthetically qualify A before the expensive combined tree. Worker agw02
+   and Astra's independent agv01 each pass 144 cases plus 13 subtests, with real
+   heavy imports blocked. Source and existing tests remain unchanged during
+   qualification; checkout integration/checks are next. This does not
    establish a trusted model manifest or repair VAD. Faster-whisper companion B
    remains an inert exact source proposal under the model migration review.
    Prepare an exact derivative and protocol before Ryan's
@@ -226,7 +229,11 @@ is complete but is not this goal's completion. Current queue:
    in113.20 s with identical case membership. Read ASTRA-AUTHORITY-REPAIR03-VERDICT
    and its116-payload proof. Both outcomes and the path repair remain preserved.
    The process patch now qualifies for committed combined tree09 after the
-   independent ordinary cache-consent guard. No full tree has run yet.
+   independent ordinary cache-consent guard. Gemini final run
+   6bbf0095-0d82-4afa-b523-db16db5bb5d2 completed source review with no actionable
+   finding; read ASTRA-AUTHORITY-COUNCIL-VERDICT-2026-09-13.md before the retained
+   worker report. Review is committed at 1e90e08, with 11 verified proof payloads.
+   It gives no full-release or new test credit. No full tree has run yet.
    The retained proposal and failed tests remain unaccepted product. Read
    ASTRA-AUTHORITY-C1008-REVIEW-2026-09-13.md. Owner admission is accepted at ff67b84 after raw
    diff/three-way integration and 12 focused plus 184 Phase 4 passes in each
@@ -3772,3 +3779,27 @@ third-party constructor-order repair B, trusted artifact manifest, unsafe defaul
 VAD and actual model trial remain separate, explicit migration work. Neither
 structural cache checks nor233 mirror passes grant runtime/release acceptance.
 Website and marketing remain paused; no new installer, model run or push.
+
+### 2026-09-13 — Gemini agrees on process scope; cache integration follows
+
+Gemini final review6bbf0095 is retained at1e90e08. It found no actionable defect
+in the three process-authority boundaries of747fb6b; Astra agrees within that
+scope. Source blob and normalized/raw hashes were independently verified. The
+11-payload archive matches disk and Git. Read Astra's accompanying verdict for
+three corrections to the report's method naming, lock description and cleanup
+guarantee. This is source review, not fresh tests or whole-release certification.
+
+Ordinary cache guard A now passes144 cases plus13 subtests in worker agw02 and
+Astra agv01. The latter explicitly includes --runxfail; the earlier worker
+launcher omitted it and its original outcomes remain retained. Checkout raw
+integration and the identical independent suite are next. The import blocker
+keeps actual model runtimes unavailable without substituting a fake runner.
+
+A preflight issue in the future complete-tree recorder is now concrete: pytest
+records144 top-level testcases but a JUnit tests attribute of157 for13 successful
+subtests. Extend the passive receipts and validator to retain subtest semantics;
+do not edit tests or ignore failures to fit the old count assumption. The original
+53 helper tests and all prior seals remain unchanged. No full-tree run follows
+until that extension is reviewed. Static checkpoint-inventory reader preparation
+is also underway; no checkpoint bytes, models or downloads have been accessed.
+Website and marketing remain paused.
