@@ -1,0 +1,14 @@
+--- drafts/qualify_reader-before-lexical-prefix-review.py
++++ qualify_reader.py
+@@ -55,7 +55,10 @@
+ WRAPPERS = {}
+ def check_metadata(path):
+     if isinstance(path,(str,bytes,os.PathLike)):
+-        name=ntpath.normcase(ntpath.abspath(os.fsdecode(path)))
++        text=os.fsdecode(path).replace('/', '\\')
++        if text.startswith('\\\\?\\'):text=text[4:]
++        elif text.startswith('\\??\\'):text=text[4:]
++        name=ntpath.normcase(ntpath.abspath(text))
+         if name == LIVE_PARENT or name.startswith(LIVE_PARENT+'\\'):
+             deny('live metadata')
+ for name,original in ORIGINALS.items():

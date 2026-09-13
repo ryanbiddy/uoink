@@ -1,0 +1,30 @@
+{
+  "verified_seals": [
+    {
+      "hash": "d2bf7531d5f89a50d80d7260e993954b81a56e4c6fa4457d08c770b8c728a0bf",
+      "count": 26,
+      "directory": "_scratch/vad-plain-state-reader-proposal01"
+    },
+    {
+      "hash": "89b90577f401955b4faa0d440118632b2b0cb2e4e7a1a976a702c85d7cbc008b",
+      "count": 22,
+      "directory": "_scratch/vad-plain-state-reader-vpr01-execution"
+    },
+    {
+      "hash": "6c79c477cec73ca3b104ab9e8917ce96166328474ab7373a86cb3fba22a72b8a",
+      "count": 25,
+      "directory": "_scratch/vad-plain-state-reader-proposal02"
+    }
+  ],
+  "all_payloads_verified": true,
+  "admission_sha256": "5eee4d1cfa81685e93c549c97b8c12f9a506b31234c456397e90d2a6410c045a",
+  "forbidden_live_binding_set": true,
+  "provider_parent_environment_scrubbed": true,
+  "provider_variable_names_removed": [],
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\run-root.ps1",
+    "-Admission",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ASTRA-VAD-READER-ADMISSION02.json"
+  ],
+  "started_utc": "2026-09-13T16:39:23.0400300Z"
+}

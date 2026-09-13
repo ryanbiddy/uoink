@@ -1,0 +1,42 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\qualify_reader.py"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04",
+  "environment_variable_names": [
+    "APPDATA",
+    "HF_DATASETS_OFFLINE",
+    "HF_HUB_OFFLINE",
+    "HOME",
+    "IG_FORBIDDEN_LIVE",
+    "LOCALAPPDATA",
+    "PYANNOTE_METRICS_ENABLED",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONIOENCODING",
+    "PYTHONUTF8",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "TRANSFORMERS_OFFLINE",
+    "USERPROFILE",
+    "WINDIR"
+  ],
+  "source_hashes": {
+    "plain_state_reader.py": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+    "qualify_reader.py": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "INPUTS.json": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d",
+    "launch.py": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03",
+    "BRIEF.md": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db",
+    "SOURCE-BINDINGS.json": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67",
+    "EXPECTED-CASES.json": "50c3e0357b2ef5598456e8b3456e315a6cacdff14d52b75ae3779f9bd5980c7e",
+    "context/fixed_converter.py.txt": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "context/fixed-factory.proposal.txt": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+  },
+  "started_utc": "2026-09-13T16:48:29.554424+00:00",
+  "scope": "Only generated synthetic bytes and exact reviewed text inputs; no model/native package import"
+}

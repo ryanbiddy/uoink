@@ -1,0 +1,1080 @@
+{
+  "files": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\.gitattributes",
+      "path": "preparation01/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\BRIEF.md",
+      "path": "preparation01/BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\CANONICAL-LAYOUT.json",
+      "path": "preparation01/CANONICAL-LAYOUT.json",
+      "bytes": 9466,
+      "sha256": "aa8ac80af0b2c9d472c4253e7ce5fbfed44a1539bcf4c843288ba3595428b374"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\context\\fixed-factory.proposal.txt",
+      "path": "preparation01/context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\context\\fixed_converter.py.txt",
+      "path": "preparation01/context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\context\\root-brief.md",
+      "path": "preparation01/context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\drafts\\plain_state_reader-before-profile-budget-review.py",
+      "path": "preparation01/drafts/plain_state_reader-before-profile-budget-review.py",
+      "bytes": 9608,
+      "sha256": "bb0466912b6987dacec3f824d7aa77956b34a2ff5df30e332914f0de0f636667"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\drafts\\qualify_reader-before-lexical-prefix-review.py",
+      "path": "preparation01/drafts/qualify_reader-before-lexical-prefix-review.py",
+      "bytes": 18273,
+      "sha256": "5032c366501458cccb3b2db002f814a238e2a2a98e2faacc883065bf393230b9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\EXPECTED-CASES.json",
+      "path": "preparation01/EXPECTED-CASES.json",
+      "bytes": 2317,
+      "sha256": "eeeb70989aa09d907e329146880bc9ca78d9a76dd0a7463f860c69696bc577e4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\fixed-plan.json",
+      "path": "preparation01/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\guard-prequalification.patch",
+      "path": "preparation01/guard-prequalification.patch",
+      "bytes": 612,
+      "sha256": "65e65b032564dec890620d960c1b4318a12edfdeeaeb2ae4f80b5c5d0b34a2b9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\INPUTS.json",
+      "path": "preparation01/INPUTS.json",
+      "bytes": 404,
+      "sha256": "dc46954ed1bb24d63de571342aae9e789c92bb286ffe0bc4721d7c5833d13664"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\launch.py",
+      "path": "preparation01/launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\plain_state_reader.py",
+      "path": "preparation01/plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\prepare_inputs.py",
+      "path": "preparation01/prepare_inputs.py",
+      "bytes": 6948,
+      "sha256": "dd795f739da78c6c4dee3eab79e48d2ac9ef6362845433398e9836a90381664b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\PREQUALIFICATION-GUARD-REPAIR02.md",
+      "path": "preparation01/PREQUALIFICATION-GUARD-REPAIR02.md",
+      "bytes": 374,
+      "sha256": "9d971da852de64c2f21415bf36c1a83df8781c24fdf129662adb1bd93ce1733d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\PREQUALIFICATION-REPAIR01.md",
+      "path": "preparation01/PREQUALIFICATION-REPAIR01.md",
+      "bytes": 510,
+      "sha256": "b4fea152b5cbdd9b03a3c6c293171758947208674340453618292183304e3530"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\qualify_reader.py",
+      "path": "preparation01/qualify_reader.py",
+      "bytes": 18415,
+      "sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\reader-prequalification.patch",
+      "path": "preparation01/reader-prequalification.patch",
+      "bytes": 1269,
+      "sha256": "054ddf80411a176f9163542af294845a19c0af2b923be77f8298ed22e9f31717"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\REVIEW.md",
+      "path": "preparation01/REVIEW.md",
+      "bytes": 3423,
+      "sha256": "06d32087f1925701d5cebe6d614f4283f46e661dbcc1e7934f057d4fe780b18b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\ROOT-ADMISSION.TEMPLATE.json",
+      "path": "preparation01/ROOT-ADMISSION.TEMPLATE.json",
+      "bytes": 1147,
+      "sha256": "ad5db64c480cf1c62103870316b620efd7df129cfa35f978ad58f8d71fed3042"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\ROOT-RUN-INSTRUCTIONS.md",
+      "path": "preparation01/ROOT-RUN-INSTRUCTIONS.md",
+      "bytes": 1489,
+      "sha256": "d40f4cd1af59281ab8a1c2632d4c6d1b9f39c9b56eaa39143ac6be19b2e41a07"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\run-root.ps1",
+      "path": "preparation01/run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\seal_preparation.py",
+      "path": "preparation01/seal_preparation.py",
+      "bytes": 1544,
+      "sha256": "69605cd83075984984ad1b839c10c932153d4d82eb4d2ed10c220e84aff86a80"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\SOURCE-BINDINGS.json",
+      "path": "preparation01/SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\STATIC-PREPARATION.json",
+      "path": "preparation01/STATIC-PREPARATION.json",
+      "bytes": 315,
+      "sha256": "7b430406b87c97673c45bd31ec85b3b80272acf3868efac2e69a621265593be7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal01\\SHA256.json",
+      "path": "preparation01/SHA256.json",
+      "bytes": 4354,
+      "sha256": "d2bf7531d5f89a50d80d7260e993954b81a56e4c6fa4457d08c770b8c728a0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\.gitattributes",
+      "path": "failure-vpr01/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\ACTUAL-EXIT.json",
+      "path": "failure-vpr01/ACTUAL-EXIT.json",
+      "bytes": 88,
+      "sha256": "8249272db8edd96b3cc46740327e43bc822a2b3d13d3bd47dc8a6d2994965807"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\archive_failure.py",
+      "path": "failure-vpr01/archive_failure.py",
+      "bytes": 2223,
+      "sha256": "cf6700949a9109085a35d99d8bff6b6056e8c094290677dc3dcd33e4b783927b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\DIAGNOSIS.md",
+      "path": "failure-vpr01/DIAGNOSIS.md",
+      "bytes": 1823,
+      "sha256": "9adbc63fcde63b016c31377be6ae2a7100a46bf49e0568df4568c5929c17a385"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\outer-vpr01\\actual-exit.json",
+      "path": "failure-vpr01/outer-vpr01/actual-exit.json",
+      "bytes": 83,
+      "sha256": "27a57d5f17942bcc35365e29cf2fd03f5fb5626616d8fb50cbcda15e0aea76ba"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\outer-vpr01\\command.json",
+      "path": "failure-vpr01/outer-vpr01/command.json",
+      "bytes": 344,
+      "sha256": "313bce4dbede96bd1d0e4518e1c4e2706f991293e1bb259c53b956a678dfb676"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\outer-vpr01\\stderr.log",
+      "path": "failure-vpr01/outer-vpr01/stderr.log",
+      "bytes": 998,
+      "sha256": "e35d96df38fd3787d54d2c7c336613ad3068bcadf556f0f170b0185eb891995d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\outer-vpr01\\stdout.log",
+      "path": "failure-vpr01/outer-vpr01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\POSTFAILURE-VERIFICATION.json",
+      "path": "failure-vpr01/POSTFAILURE-VERIFICATION.json",
+      "bytes": 246,
+      "sha256": "72af7a784656a116cb157061391ec5b1992e79b08a539318c2146620d7670149"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\PREFLIGHT.json",
+      "path": "failure-vpr01/PREFLIGHT.json",
+      "bytes": 702,
+      "sha256": "de0ac842d4ad0255e51e4f11bd66090ca447bca21ed24836aca381b0add50991"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\preparation-SHA256.json",
+      "path": "failure-vpr01/preparation-SHA256.json",
+      "bytes": 4354,
+      "sha256": "d2bf7531d5f89a50d80d7260e993954b81a56e4c6fa4457d08c770b8c728a0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\root-admission.json",
+      "path": "failure-vpr01/root-admission.json",
+      "bytes": 1212,
+      "sha256": "0881fe0456d662858442fc6630978a904cd48873c89adaa4b9b8701bab7cac59"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\root-admission.md",
+      "path": "failure-vpr01/root-admission.md",
+      "bytes": 1443,
+      "sha256": "082cebd9c04b8949b32624cea05c138edc93876db0382620bea620664c44a190"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\actual-exit.json",
+      "path": "failure-vpr01/run-vpr01/actual-exit.json",
+      "bytes": 51,
+      "sha256": "2f46e439c87e0794762160a6153776b69b37a6078489aea8c8d6c0a917d517b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\fixed-plan.json",
+      "path": "failure-vpr01/run-vpr01/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\INPUTS.json",
+      "path": "failure-vpr01/run-vpr01/INPUTS.json",
+      "bytes": 404,
+      "sha256": "dc46954ed1bb24d63de571342aae9e789c92bb286ffe0bc4721d7c5833d13664"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\launch-plan.json",
+      "path": "failure-vpr01/run-vpr01/launch-plan.json",
+      "bytes": 1835,
+      "sha256": "cc130a3d3b338a6668eb6dd75b44d8e616664c9040915a8e9cbc3e85657b7333"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\plain_state_reader.py",
+      "path": "failure-vpr01/run-vpr01/plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\qualify_reader.py",
+      "path": "failure-vpr01/run-vpr01/qualify_reader.py",
+      "bytes": 18415,
+      "sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\root-admission.json",
+      "path": "failure-vpr01/run-vpr01/root-admission.json",
+      "bytes": 1212,
+      "sha256": "0881fe0456d662858442fc6630978a904cd48873c89adaa4b9b8701bab7cac59"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\stderr.log",
+      "path": "failure-vpr01/run-vpr01/stderr.log",
+      "bytes": 795,
+      "sha256": "0e32d795758e1cdc79095e773e90ecd93311f6b6cccb35d9b80a7bf66afcac41"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\run-vpr01\\stdout.json",
+      "path": "failure-vpr01/run-vpr01/stdout.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr01-execution\\SHA256.json",
+      "path": "failure-vpr01/SHA256.json",
+      "bytes": 3673,
+      "sha256": "89b90577f401955b4faa0d440118632b2b0cb2e4e7a1a976a702c85d7cbc008b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\.gitattributes",
+      "path": "preparation02/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\before\\prepare_derivative-before-newline-repair.py",
+      "path": "preparation02/before/prepare_derivative-before-newline-repair.py",
+      "bytes": 3851,
+      "sha256": "b8d411ed9d1f1bcfcc3e548a44ffa682852cc01a557eb8b80ce365ad3ff943d3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\before\\qualify_reader.py",
+      "path": "preparation02/before/qualify_reader.py",
+      "bytes": 18415,
+      "sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\BRIEF.md",
+      "path": "preparation02/BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\CANONICAL-LAYOUT.json",
+      "path": "preparation02/CANONICAL-LAYOUT.json",
+      "bytes": 9466,
+      "sha256": "aa8ac80af0b2c9d472c4253e7ce5fbfed44a1539bcf4c843288ba3595428b374"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\context\\fixed-factory.proposal.txt",
+      "path": "preparation02/context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\context\\fixed_converter.py.txt",
+      "path": "preparation02/context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\context\\root-brief.md",
+      "path": "preparation02/context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\EXPECTED-CASES.json",
+      "path": "preparation02/EXPECTED-CASES.json",
+      "bytes": 2317,
+      "sha256": "eeeb70989aa09d907e329146880bc9ca78d9a76dd0a7463f860c69696bc577e4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\fixed-plan.json",
+      "path": "preparation02/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\HARNESS-REPAIR.patch",
+      "path": "preparation02/HARNESS-REPAIR.patch",
+      "bytes": 242,
+      "sha256": "f548dce584443d461154565a8c5d324de31c87a69378cf03fbce10d60f550575"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\INPUTS.json",
+      "path": "preparation02/INPUTS.json",
+      "bytes": 404,
+      "sha256": "fd5a29d254b67b4d8e408431ff16db3aff4563dbdbd76c59cf1fae59c7a4832d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\launch.py",
+      "path": "preparation02/launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\plain_state_reader.py",
+      "path": "preparation02/plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\PREPARATION-CHECK.json",
+      "path": "preparation02/PREPARATION-CHECK.json",
+      "bytes": 761,
+      "sha256": "185bec0f6c62b77a481122f8b7d4c93763d344f71847c2f02490c6b0678b7af9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\prepare_derivative.py",
+      "path": "preparation02/prepare_derivative.py",
+      "bytes": 3953,
+      "sha256": "79fba98560cd9080f87b9b46b8a8fe1049afdf6e4df79c87a7c57d9844002aff"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\PREPARER-FAILURE-AND-REPAIR.md",
+      "path": "preparation02/PREPARER-FAILURE-AND-REPAIR.md",
+      "bytes": 831,
+      "sha256": "22ae5a472a0a50617ba36755161a6e4dd76c7149779e19e17cec3f763b0cea18"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\PREPARER-FIRST-EXIT.json",
+      "path": "preparation02/PREPARER-FIRST-EXIT.json",
+      "bytes": 345,
+      "sha256": "289c097b62b6f17969d0bfb19e398df6d30895f38f074cbeaf045aa723d17e33"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\qualify_reader.py",
+      "path": "preparation02/qualify_reader.py",
+      "bytes": 18442,
+      "sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\REPAIR-BRIEF.md",
+      "path": "preparation02/REPAIR-BRIEF.md",
+      "bytes": 1666,
+      "sha256": "5f0b6161c536cc12d66e3062a93f554e618e316b3e55e724e8be6869ef6e9772"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\REVIEW.md",
+      "path": "preparation02/REVIEW.md",
+      "bytes": 1703,
+      "sha256": "9c1b85204f417b3d644d6f4fc342db7743568e60e4b488463b5b3f60e11bc1c7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\ROOT-ADMISSION.TEMPLATE.json",
+      "path": "preparation02/ROOT-ADMISSION.TEMPLATE.json",
+      "bytes": 1159,
+      "sha256": "9313fe7c206b674ae5db0db521483c667e1b8dc02030732f1934bd21014aebc3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\run-root.ps1",
+      "path": "preparation02/run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\seal_preparation.py",
+      "path": "preparation02/seal_preparation.py",
+      "bytes": 1544,
+      "sha256": "69605cd83075984984ad1b839c10c932153d4d82eb4d2ed10c220e84aff86a80"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\SOURCE-BINDINGS.json",
+      "path": "preparation02/SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal02\\SHA256.json",
+      "path": "preparation02/SHA256.json",
+      "bytes": 4132,
+      "sha256": "6c79c477cec73ca3b104ab9e8917ce96166328474ab7373a86cb3fba22a72b8a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\.gitattributes",
+      "path": "failure-vpr02/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\ACTUAL-EXIT.json",
+      "path": "failure-vpr02/ACTUAL-EXIT.json",
+      "bytes": 88,
+      "sha256": "19dcb51e056e9801ddbb44b438515548dc41cb52323ff093f53585f82c713c87"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\archive_failure.py",
+      "path": "failure-vpr02/archive_failure.py",
+      "bytes": 2267,
+      "sha256": "509559e234b4269f34cf03aabcc5f224ab5eae37d14e551c567b5e72512c0958"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\DIAGNOSIS.md",
+      "path": "failure-vpr02/DIAGNOSIS.md",
+      "bytes": 1484,
+      "sha256": "7a40110170f08f11734642bdb25f8221281f1846e768f993aff6a9276088ec9e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\outer-vpr02\\actual-exit.json",
+      "path": "failure-vpr02/outer-vpr02/actual-exit.json",
+      "bytes": 83,
+      "sha256": "7bba4229bcfeda4d882f1662f3e46df177f54a3625a2437625e777d102171844"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\outer-vpr02\\command.json",
+      "path": "failure-vpr02/outer-vpr02/command.json",
+      "bytes": 344,
+      "sha256": "8eb68b0f93f9a192444ba5e38725a54864b2f36a4cbf7caa3701de94b64bbec8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\outer-vpr02\\stderr.log",
+      "path": "failure-vpr02/outer-vpr02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\outer-vpr02\\stdout.log",
+      "path": "failure-vpr02/outer-vpr02/stdout.log",
+      "bytes": 110,
+      "sha256": "9f4d5b85b7accdec7ad488f4288c32e9e2489789570665761dd07d7fe90cd388"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\PREFLIGHT.json",
+      "path": "failure-vpr02/PREFLIGHT.json",
+      "bytes": 1152,
+      "sha256": "53d41383c3cf5ee11ecaed6704a5d3acc6555d26a2272cf32752353fb1848fe2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\preparation02-SHA256.json",
+      "path": "failure-vpr02/preparation02-SHA256.json",
+      "bytes": 4132,
+      "sha256": "6c79c477cec73ca3b104ab9e8917ce96166328474ab7373a86cb3fba22a72b8a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\root-admission.json",
+      "path": "failure-vpr02/root-admission.json",
+      "bytes": 1214,
+      "sha256": "5eee4d1cfa81685e93c549c97b8c12f9a506b31234c456397e90d2a6410c045a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\root-admission.md",
+      "path": "failure-vpr02/root-admission.md",
+      "bytes": 1214,
+      "sha256": "92b93dc31870e7da8522cd03d7e9eaebe60bfc25023dd74f7042e06df7c77314"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\actual-exit.json",
+      "path": "failure-vpr02/run-vpr02/actual-exit.json",
+      "bytes": 51,
+      "sha256": "2f46e439c87e0794762160a6153776b69b37a6078489aea8c8d6c0a917d517b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\checked-result.json",
+      "path": "failure-vpr02/run-vpr02/checked-result.json",
+      "bytes": 223,
+      "sha256": "6fddbb7338085c8ee78402862c8770d5919f70f99422c2fa0d6994f3fae8b373"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\fixed-plan.json",
+      "path": "failure-vpr02/run-vpr02/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\INPUTS.json",
+      "path": "failure-vpr02/run-vpr02/INPUTS.json",
+      "bytes": 404,
+      "sha256": "fd5a29d254b67b4d8e408431ff16db3aff4563dbdbd76c59cf1fae59c7a4832d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\launch-plan.json",
+      "path": "failure-vpr02/run-vpr02/launch-plan.json",
+      "bytes": 1835,
+      "sha256": "50b12551ef6cbf755c31e0e0f9433c3ac384595efe3660f36901727edd124178"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\plain_state_reader.py",
+      "path": "failure-vpr02/run-vpr02/plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\qualify_reader.py",
+      "path": "failure-vpr02/run-vpr02/qualify_reader.py",
+      "bytes": 18442,
+      "sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\root-admission.json",
+      "path": "failure-vpr02/run-vpr02/root-admission.json",
+      "bytes": 1214,
+      "sha256": "5eee4d1cfa81685e93c549c97b8c12f9a506b31234c456397e90d2a6410c045a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\stderr.log",
+      "path": "failure-vpr02/run-vpr02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\run-vpr02\\stdout.json",
+      "path": "failure-vpr02/run-vpr02/stdout.json",
+      "bytes": 7279,
+      "sha256": "26084b873c41feb376f4a21e7a74780dcde4c397c354565816fd178f894c6b9f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\TOOL-RESULT.json",
+      "path": "failure-vpr02/TOOL-RESULT.json",
+      "bytes": 251,
+      "sha256": "2fe799dc11890b990906ec894c7061a0b76163ea0301b2dae52de7ace0dd2602"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr02-execution\\SHA256.json",
+      "path": "failure-vpr02/SHA256.json",
+      "bytes": 3848,
+      "sha256": "771a592fe81078a18285253ddde50651ed54449dfab3202a00fadf659657c7dc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\.gitattributes",
+      "path": "preparation03/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\before\\EXPECTED-CASES.json",
+      "path": "preparation03/before/EXPECTED-CASES.json",
+      "bytes": 2317,
+      "sha256": "eeeb70989aa09d907e329146880bc9ca78d9a76dd0a7463f860c69696bc577e4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\before\\plain_state_reader.py",
+      "path": "preparation03/before/plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\before\\qualify_reader.py",
+      "path": "preparation03/before/qualify_reader.py",
+      "bytes": 18442,
+      "sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\BRIEF.md",
+      "path": "preparation03/BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\CANONICAL-LAYOUT.json",
+      "path": "preparation03/CANONICAL-LAYOUT.json",
+      "bytes": 9466,
+      "sha256": "aa8ac80af0b2c9d472c4253e7ce5fbfed44a1539bcf4c843288ba3595428b374"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\context\\fixed-factory.proposal.txt",
+      "path": "preparation03/context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\context\\fixed_converter.py.txt",
+      "path": "preparation03/context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\context\\root-brief.md",
+      "path": "preparation03/context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\EXPECTED-CASES.json",
+      "path": "preparation03/EXPECTED-CASES.json",
+      "bytes": 2662,
+      "sha256": "50c3e0357b2ef5598456e8b3456e315a6cacdff14d52b75ae3779f9bd5980c7e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\fixed-plan.json",
+      "path": "preparation03/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\INPUTS.json",
+      "path": "preparation03/INPUTS.json",
+      "bytes": 404,
+      "sha256": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\launch.py",
+      "path": "preparation03/launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\plain_state_reader.py",
+      "path": "preparation03/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\prepare_bindings.py",
+      "path": "preparation03/prepare_bindings.py",
+      "bytes": 4527,
+      "sha256": "07c2ca88830e95ecae098208e31058b51d5c9c88ad1ae975e8d0ceaefa3ba88f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\qualify_reader.py",
+      "path": "preparation03/qualify_reader.py",
+      "bytes": 20468,
+      "sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\READER-REPAIR.patch",
+      "path": "preparation03/READER-REPAIR.patch",
+      "bytes": 1656,
+      "sha256": "3705166bde9dbe6808aca3dd7077664383248f267066b555b50484079f35c4d8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\REPAIR-BRIEF.md",
+      "path": "preparation03/REPAIR-BRIEF.md",
+      "bytes": 1939,
+      "sha256": "dae14c23fef2bf1a7c47cf7307641318942ebef0ba25495f0e818cbb673775c6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\REPAIR-SOURCE-BINDINGS.json",
+      "path": "preparation03/REPAIR-SOURCE-BINDINGS.json",
+      "bytes": 1151,
+      "sha256": "fdfc73e5a0040e385a1dc11c5b91c411653142db5ba47052b1bb00d32d41032d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\REVIEW.md",
+      "path": "preparation03/REVIEW.md",
+      "bytes": 2515,
+      "sha256": "e5a66cc1903aabecb89a6ac448f082041fd1eb903b6ccba15d6df9082b2c95f0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\ROOT-ADMISSION.TEMPLATE.json",
+      "path": "preparation03/ROOT-ADMISSION.TEMPLATE.json",
+      "bytes": 1162,
+      "sha256": "b31f7413c5f74af27b30ff59d9b7b9989b9d89b921c1c9d7b49b1cb86297e3eb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\run-root.ps1",
+      "path": "preparation03/run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\SCANNER-CONTRACT-ADDITIONS.patch",
+      "path": "preparation03/SCANNER-CONTRACT-ADDITIONS.patch",
+      "bytes": 2373,
+      "sha256": "90f0b89507907309e320dc20eb19e0371deebe330e9570789278b5f0d73ae8fb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\seal_preparation.py",
+      "path": "preparation03/seal_preparation.py",
+      "bytes": 1544,
+      "sha256": "69605cd83075984984ad1b839c10c932153d4d82eb4d2ed10c220e84aff86a80"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\SOURCE-BINDINGS.json",
+      "path": "preparation03/SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-proposal03\\SHA256.json",
+      "path": "preparation03/SHA256.json",
+      "bytes": 4121,
+      "sha256": "236a86c300a180281dabcad46f8ba371daa28e42cbf3032735013eeedca2a397"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\.gitattributes",
+      "path": "author-vpr03/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\ACTUAL-EXIT.json",
+      "path": "author-vpr03/ACTUAL-EXIT.json",
+      "bytes": 88,
+      "sha256": "93fd95d36585d38bf288d5ae01c7488f42e9612fe91afaaa35562aa6e997a8e9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\archive_success.py",
+      "path": "author-vpr03/archive_success.py",
+      "bytes": 3308,
+      "sha256": "cdaff2f331c5881c09731a5419d2d1054742a4cbfa181031a402cbb482ccae86"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\AUTHOR-VERDICT.md",
+      "path": "author-vpr03/AUTHOR-VERDICT.md",
+      "bytes": 1515,
+      "sha256": "806cc3ecad835549a5bb22fe5422064c180adcae2511bcde7dc2073e7512585b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\INDEPENDENT-REPETITION.md",
+      "path": "author-vpr03/INDEPENDENT-REPETITION.md",
+      "bytes": 1306,
+      "sha256": "23bd2bf120b828e94705b4c4beb88295a74d980d9d68a9196e1e8142f3da9de8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\outer-vpr03\\actual-exit.json",
+      "path": "author-vpr03/outer-vpr03/actual-exit.json",
+      "bytes": 83,
+      "sha256": "df09da44e70c5968fd9a4154a2df7cd37afe36bc8859258ff9beca0155336669"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\outer-vpr03\\command.json",
+      "path": "author-vpr03/outer-vpr03/command.json",
+      "bytes": 344,
+      "sha256": "49c9d22f755541d6def0336b759d68471a062a9a0802e84cd20ff61a55ffc89a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\outer-vpr03\\stderr.log",
+      "path": "author-vpr03/outer-vpr03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\outer-vpr03\\stdout.log",
+      "path": "author-vpr03/outer-vpr03/stdout.log",
+      "bytes": 110,
+      "sha256": "f2ff7e9b2550ac09efce13f9e83f9ed1a81b66f8b4b5193908f1542687a42721"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\PREFLIGHT.json",
+      "path": "author-vpr03/PREFLIGHT.json",
+      "bytes": 969,
+      "sha256": "f78b4d5437a3b2905240668753bafb9681c2a6e70a3a8be0b867e26740142fda"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\preparation03-SHA256.json",
+      "path": "author-vpr03/preparation03-SHA256.json",
+      "bytes": 4121,
+      "sha256": "236a86c300a180281dabcad46f8ba371daa28e42cbf3032735013eeedca2a397"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\root-admission.json",
+      "path": "author-vpr03/root-admission.json",
+      "bytes": 1214,
+      "sha256": "96c20e48e863cc4ac23680f901523033d6848463174a01bea13352e2805ee6ae"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\root-admission.md",
+      "path": "author-vpr03/root-admission.md",
+      "bytes": 1320,
+      "sha256": "b5490ff97a0763dfdc02a9ac33542917a39e20130718d3e738b59604d984f15b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\actual-exit.json",
+      "path": "author-vpr03/run-vpr03/actual-exit.json",
+      "bytes": 51,
+      "sha256": "907fddb6ce65a9501d3630212d41337d6b95609e3705334c5366eee26ad5a022"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\checked-result.json",
+      "path": "author-vpr03/run-vpr03/checked-result.json",
+      "bytes": 223,
+      "sha256": "7722f244527e6393d8b61473d09b26e52d997da72c56c955cf8ecc5f3c945e2a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\fixed-plan.json",
+      "path": "author-vpr03/run-vpr03/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\INPUTS.json",
+      "path": "author-vpr03/run-vpr03/INPUTS.json",
+      "bytes": 404,
+      "sha256": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\launch-plan.json",
+      "path": "author-vpr03/run-vpr03/launch-plan.json",
+      "bytes": 1835,
+      "sha256": "45b732b584b144c3479376d54d3e79159971506741e822301e0c8f51d3efff33"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\plain_state_reader.py",
+      "path": "author-vpr03/run-vpr03/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\qualify_reader.py",
+      "path": "author-vpr03/run-vpr03/qualify_reader.py",
+      "bytes": 20468,
+      "sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\root-admission.json",
+      "path": "author-vpr03/run-vpr03/root-admission.json",
+      "bytes": 1214,
+      "sha256": "96c20e48e863cc4ac23680f901523033d6848463174a01bea13352e2805ee6ae"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\stderr.log",
+      "path": "author-vpr03/run-vpr03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\run-vpr03\\stdout.json",
+      "path": "author-vpr03/run-vpr03/stdout.json",
+      "bytes": 7801,
+      "sha256": "4496c8e0bc9b52f9051977c583150bb8a7cba4ec4489350648c6cc29a0239b6c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\TOOL-RESULT.json",
+      "path": "author-vpr03/TOOL-RESULT.json",
+      "bytes": 251,
+      "sha256": "f58608052108fbd6c2174584e21236d581afc45001ffdb4cb104e60106999742"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-plain-state-reader-vpr03-execution\\SHA256.json",
+      "path": "author-vpr03/SHA256.json",
+      "bytes": 4053,
+      "sha256": "2855097528e74a85f4f981777d513535fbbb9792b860eac9026ee929f1ffd9b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\BRIEF.md",
+      "path": "root-vpr04/BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\EXPECTED-CASES.json",
+      "path": "root-vpr04/EXPECTED-CASES.json",
+      "bytes": 2662,
+      "sha256": "50c3e0357b2ef5598456e8b3456e315a6cacdff14d52b75ae3779f9bd5980c7e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\fixed-plan.json",
+      "path": "root-vpr04/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\INPUTS.json",
+      "path": "root-vpr04/INPUTS.json",
+      "bytes": 404,
+      "sha256": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\launch.py",
+      "path": "root-vpr04/launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\outer-tool-result.json",
+      "path": "root-vpr04/outer-tool-result.json",
+      "bytes": 292,
+      "sha256": "8cb5788969bd456b36a95d71e200e6a9a13cd604e79868bbc8e83d1ab4ae9b36"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\plain_state_reader.py",
+      "path": "root-vpr04/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\qualify_reader.py",
+      "path": "root-vpr04/qualify_reader.py",
+      "bytes": 20468,
+      "sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\ROOT-ADMISSION.json",
+      "path": "root-vpr04/ROOT-ADMISSION.json",
+      "bytes": 1219,
+      "sha256": "b14d3983019ceac5a42316fbb72cbda26510be5838c22084a1e1174bf51aef58"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\ROOT-ADMISSION.md",
+      "path": "root-vpr04/ROOT-ADMISSION.md",
+      "bytes": 1320,
+      "sha256": "b5490ff97a0763dfdc02a9ac33542917a39e20130718d3e738b59604d984f15b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\run-root.ps1",
+      "path": "root-vpr04/run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\SOURCE-BINDINGS.json",
+      "path": "root-vpr04/SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\context\\fixed_converter.py.txt",
+      "path": "root-vpr04/context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\context\\fixed-factory.proposal.txt",
+      "path": "root-vpr04/context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\outer\\20260913T1648294852287Z\\actual-exit.json",
+      "path": "root-vpr04/outer/20260913T1648294852287Z/actual-exit.json",
+      "bytes": 83,
+      "sha256": "9d17a7d402526a5d273588a358fe382086fa15ae3fcffb1245db3e21ba5e1768"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\outer\\20260913T1648294852287Z\\command.json",
+      "path": "root-vpr04/outer/20260913T1648294852287Z/command.json",
+      "bytes": 355,
+      "sha256": "be974016792478e5498107e1c0c42a53615b77bfb3ccbd3e2eca6b7fb67598fa"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\outer\\20260913T1648294852287Z\\stderr.log",
+      "path": "root-vpr04/outer/20260913T1648294852287Z/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\outer\\20260913T1648294852287Z\\stdout.log",
+      "path": "root-vpr04/outer/20260913T1648294852287Z/stdout.log",
+      "bytes": 110,
+      "sha256": "577c7b0a8b63b88f0832e910cad658f41421ce26d65c0228c47c0d46dc858384"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\actual-exit.json",
+      "path": "root-vpr04/runs/vpr04/actual-exit.json",
+      "bytes": 51,
+      "sha256": "907fddb6ce65a9501d3630212d41337d6b95609e3705334c5366eee26ad5a022"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\checked-result.json",
+      "path": "root-vpr04/runs/vpr04/checked-result.json",
+      "bytes": 223,
+      "sha256": "7722f244527e6393d8b61473d09b26e52d997da72c56c955cf8ecc5f3c945e2a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\fixed-plan.json",
+      "path": "root-vpr04/runs/vpr04/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\INPUTS.json",
+      "path": "root-vpr04/runs/vpr04/INPUTS.json",
+      "bytes": 404,
+      "sha256": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\launch-plan.json",
+      "path": "root-vpr04/runs/vpr04/launch-plan.json",
+      "bytes": 1825,
+      "sha256": "eb16eaab0b1bb749d6c9262f9fc70cf17cb5c0371df53cf2140194351fbbd629"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\plain_state_reader.py",
+      "path": "root-vpr04/runs/vpr04/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\qualify_reader.py",
+      "path": "root-vpr04/runs/vpr04/qualify_reader.py",
+      "bytes": 20468,
+      "sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\root-admission.json",
+      "path": "root-vpr04/runs/vpr04/root-admission.json",
+      "bytes": 1219,
+      "sha256": "b14d3983019ceac5a42316fbb72cbda26510be5838c22084a1e1174bf51aef58"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\stderr.log",
+      "path": "root-vpr04/runs/vpr04/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-vad-reader-synthetic01\\runs\\vpr04\\stdout.json",
+      "path": "root-vpr04/runs/vpr04/stdout.json",
+      "bytes": 7800,
+      "sha256": "ea0055742d8b22c3c6f559aa62c1b30e39c1b2baa0b449ef3a31cee753e616d7"
+    }
+  ],
+  "copied_payload_count": 179,
+  "source_files_unchanged_and_copy_bytes_verified": true
+}

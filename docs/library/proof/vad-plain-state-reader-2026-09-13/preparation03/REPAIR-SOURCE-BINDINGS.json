@@ -1,0 +1,20 @@
+{
+  "previous_preparation_manifest_sha256": "6c79c477cec73ca3b104ab9e8917ce96166328474ab7373a86cb3fba22a72b8a",
+  "previous_preparation_payloads_verified": 25,
+  "vpr02_failure_manifest_sha256": "771a592fe81078a18285253ddde50651ed54449dfab3202a00fadf659657c7dc",
+  "reader_before_sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6",
+  "reader_after_sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+  "harness_before_sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7",
+  "harness_after_sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f",
+  "frozen_76_assertions_and_ids_unchanged": true,
+  "added_cases": [
+    "depth_scanner_accepts_exact_three_container_boundary",
+    "depth_scanner_refuses_four_before_json_loads",
+    "depth_scanner_ignores_string_brackets_quotes_and_backslashes",
+    "depth_scanner_detects_excess_after_escaped_string",
+    "depth_scanner_checks_deadline_during_bounded_scan",
+    "depth_scanner_refuses_unmatched_close_before_json_loads"
+  ],
+  "new_expected_case_count": 82,
+  "proposed_source_or_harness_executed": false
+}

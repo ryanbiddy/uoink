@@ -1,0 +1,140 @@
+{
+  "schema": "uoink.documentary-payload-manifest.v1",
+  "prepared_utc": "2026-09-13T16:27:23.226392+00:00",
+  "payload_count": 26,
+  "payload_bytes": 144195,
+  "qualification_executed": false,
+  "actual_artifact_access": false,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "path": "CANONICAL-LAYOUT.json",
+      "bytes": 9466,
+      "sha256": "aa8ac80af0b2c9d472c4253e7ce5fbfed44a1539bcf4c843288ba3595428b374"
+    },
+    {
+      "path": "context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "path": "context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "path": "context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a"
+    },
+    {
+      "path": "drafts/plain_state_reader-before-profile-budget-review.py",
+      "bytes": 9608,
+      "sha256": "bb0466912b6987dacec3f824d7aa77956b34a2ff5df30e332914f0de0f636667"
+    },
+    {
+      "path": "drafts/qualify_reader-before-lexical-prefix-review.py",
+      "bytes": 18273,
+      "sha256": "5032c366501458cccb3b2db002f814a238e2a2a98e2faacc883065bf393230b9"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 2317,
+      "sha256": "eeeb70989aa09d907e329146880bc9ca78d9a76dd0a7463f860c69696bc577e4"
+    },
+    {
+      "path": "fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "path": "guard-prequalification.patch",
+      "bytes": 612,
+      "sha256": "65e65b032564dec890620d960c1b4318a12edfdeeaeb2ae4f80b5c5d0b34a2b9"
+    },
+    {
+      "path": "INPUTS.json",
+      "bytes": 404,
+      "sha256": "dc46954ed1bb24d63de571342aae9e789c92bb286ffe0bc4721d7c5833d13664"
+    },
+    {
+      "path": "launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "path": "plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "path": "prepare_inputs.py",
+      "bytes": 6948,
+      "sha256": "dd795f739da78c6c4dee3eab79e48d2ac9ef6362845433398e9836a90381664b"
+    },
+    {
+      "path": "PREQUALIFICATION-GUARD-REPAIR02.md",
+      "bytes": 374,
+      "sha256": "9d971da852de64c2f21415bf36c1a83df8781c24fdf129662adb1bd93ce1733d"
+    },
+    {
+      "path": "PREQUALIFICATION-REPAIR01.md",
+      "bytes": 510,
+      "sha256": "b4fea152b5cbdd9b03a3c6c293171758947208674340453618292183304e3530"
+    },
+    {
+      "path": "qualify_reader.py",
+      "bytes": 18415,
+      "sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218"
+    },
+    {
+      "path": "reader-prequalification.patch",
+      "bytes": 1269,
+      "sha256": "054ddf80411a176f9163542af294845a19c0af2b923be77f8298ed22e9f31717"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 3423,
+      "sha256": "06d32087f1925701d5cebe6d614f4283f46e661dbcc1e7934f057d4fe780b18b"
+    },
+    {
+      "path": "ROOT-ADMISSION.TEMPLATE.json",
+      "bytes": 1147,
+      "sha256": "ad5db64c480cf1c62103870316b620efd7df129cfa35f978ad58f8d71fed3042"
+    },
+    {
+      "path": "ROOT-RUN-INSTRUCTIONS.md",
+      "bytes": 1489,
+      "sha256": "d40f4cd1af59281ab8a1c2632d4c6d1b9f39c9b56eaa39143ac6be19b2e41a07"
+    },
+    {
+      "path": "run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "path": "seal_preparation.py",
+      "bytes": 1544,
+      "sha256": "69605cd83075984984ad1b839c10c932153d4d82eb4d2ed10c220e84aff86a80"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    },
+    {
+      "path": "STATIC-PREPARATION.json",
+      "bytes": 315,
+      "sha256": "7b430406b87c97673c45bd31ec85b3b80272acf3868efac2e69a621265593be7"
+    }
+  ]
+}

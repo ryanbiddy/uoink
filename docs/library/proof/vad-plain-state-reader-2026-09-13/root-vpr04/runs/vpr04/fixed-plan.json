@@ -1,0 +1,936 @@
+{
+  "schema": "uoink.fixed-vad.converter-plan.v1",
+  "mapping_sha256": "b6ef4d932556a24e46661e5600e50b386f3243a3aeeb19fa0dad592e439fd5ca",
+  "recorded_storage_global": "torch FloatStorage",
+  "proposed_output_dtype": "F32",
+  "proposed_source_byte_order_requires_profile": true,
+  "rows": [
+    {
+      "key": "sincnet.wav_norm1d.weight",
+      "shape": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "0",
+      "offset_elements": 0,
+      "key_ref": 11,
+      "tensor_ref": 29,
+      "offset_ref": 20
+    },
+    {
+      "key": "sincnet.wav_norm1d.bias",
+      "shape": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "1",
+      "offset_elements": 0,
+      "key_ref": 30,
+      "tensor_ref": 45,
+      "offset_ref": 36
+    },
+    {
+      "key": "sincnet.conv1d.0.filterbank.low_hz_",
+      "shape": [
+        40,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "storage_key": "2",
+      "offset_elements": 0,
+      "key_ref": 46,
+      "tensor_ref": 63,
+      "offset_ref": 52
+    },
+    {
+      "key": "sincnet.conv1d.0.filterbank.band_hz_",
+      "shape": [
+        40,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "storage_key": "3",
+      "offset_elements": 0,
+      "key_ref": 64,
+      "tensor_ref": 81,
+      "offset_ref": 70
+    },
+    {
+      "key": "sincnet.conv1d.0.filterbank.window_",
+      "shape": [
+        125
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "4",
+      "offset_elements": 0,
+      "key_ref": 82,
+      "tensor_ref": 97,
+      "offset_ref": 88
+    },
+    {
+      "key": "sincnet.conv1d.0.filterbank.n_",
+      "shape": [
+        1,
+        125
+      ],
+      "stride": [
+        125,
+        1
+      ],
+      "storage_key": "5",
+      "offset_elements": 0,
+      "key_ref": 98,
+      "tensor_ref": 115,
+      "offset_ref": 104
+    },
+    {
+      "key": "sincnet.conv1d.1.weight",
+      "shape": [
+        60,
+        80,
+        5
+      ],
+      "stride": [
+        400,
+        5,
+        1
+      ],
+      "storage_key": "6",
+      "offset_elements": 0,
+      "key_ref": 116,
+      "tensor_ref": 135,
+      "offset_ref": 122
+    },
+    {
+      "key": "sincnet.conv1d.1.bias",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "7",
+      "offset_elements": 0,
+      "key_ref": 136,
+      "tensor_ref": 151,
+      "offset_ref": 142
+    },
+    {
+      "key": "sincnet.conv1d.2.weight",
+      "shape": [
+        60,
+        60,
+        5
+      ],
+      "stride": [
+        300,
+        5,
+        1
+      ],
+      "storage_key": "8",
+      "offset_elements": 0,
+      "key_ref": 152,
+      "tensor_ref": 171,
+      "offset_ref": 158
+    },
+    {
+      "key": "sincnet.conv1d.2.bias",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "9",
+      "offset_elements": 0,
+      "key_ref": 172,
+      "tensor_ref": 187,
+      "offset_ref": 178
+    },
+    {
+      "key": "sincnet.norm1d.0.weight",
+      "shape": [
+        80
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "10",
+      "offset_elements": 0,
+      "key_ref": 188,
+      "tensor_ref": 203,
+      "offset_ref": 194
+    },
+    {
+      "key": "sincnet.norm1d.0.bias",
+      "shape": [
+        80
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "11",
+      "offset_elements": 0,
+      "key_ref": 204,
+      "tensor_ref": 219,
+      "offset_ref": 210
+    },
+    {
+      "key": "sincnet.norm1d.1.weight",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "12",
+      "offset_elements": 0,
+      "key_ref": 220,
+      "tensor_ref": 235,
+      "offset_ref": 226
+    },
+    {
+      "key": "sincnet.norm1d.1.bias",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "13",
+      "offset_elements": 0,
+      "key_ref": 236,
+      "tensor_ref": 251,
+      "offset_ref": 242
+    },
+    {
+      "key": "sincnet.norm1d.2.weight",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "14",
+      "offset_elements": 0,
+      "key_ref": 252,
+      "tensor_ref": 267,
+      "offset_ref": 258
+    },
+    {
+      "key": "sincnet.norm1d.2.bias",
+      "shape": [
+        60
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "15",
+      "offset_elements": 0,
+      "key_ref": 268,
+      "tensor_ref": 283,
+      "offset_ref": 274
+    },
+    {
+      "key": "lstm.weight_ih_l0",
+      "shape": [
+        512,
+        60
+      ],
+      "stride": [
+        60,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 0,
+      "key_ref": 284,
+      "tensor_ref": 301,
+      "offset_ref": 290
+    },
+    {
+      "key": "lstm.weight_hh_l0",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 30720,
+      "key_ref": 302,
+      "tensor_ref": 318,
+      "offset_ref": 307
+    },
+    {
+      "key": "lstm.bias_ih_l0",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1372160,
+      "key_ref": 319,
+      "tensor_ref": 333,
+      "offset_ref": 324
+    },
+    {
+      "key": "lstm.bias_hh_l0",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1372672,
+      "key_ref": 334,
+      "tensor_ref": 348,
+      "offset_ref": 339
+    },
+    {
+      "key": "lstm.weight_ih_l0_reverse",
+      "shape": [
+        512,
+        60
+      ],
+      "stride": [
+        60,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 96256,
+      "key_ref": 349,
+      "tensor_ref": 365,
+      "offset_ref": 354
+    },
+    {
+      "key": "lstm.weight_hh_l0_reverse",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 126976,
+      "key_ref": 366,
+      "tensor_ref": 382,
+      "offset_ref": 371
+    },
+    {
+      "key": "lstm.bias_ih_l0_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1373184,
+      "key_ref": 383,
+      "tensor_ref": 397,
+      "offset_ref": 388
+    },
+    {
+      "key": "lstm.bias_hh_l0_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1373696,
+      "key_ref": 398,
+      "tensor_ref": 412,
+      "offset_ref": 403
+    },
+    {
+      "key": "lstm.weight_ih_l1",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 192512,
+      "key_ref": 413,
+      "tensor_ref": 429,
+      "offset_ref": 418
+    },
+    {
+      "key": "lstm.weight_hh_l1",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 323584,
+      "key_ref": 430,
+      "tensor_ref": 446,
+      "offset_ref": 435
+    },
+    {
+      "key": "lstm.bias_ih_l1",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1374208,
+      "key_ref": 447,
+      "tensor_ref": 461,
+      "offset_ref": 452
+    },
+    {
+      "key": "lstm.bias_hh_l1",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1374720,
+      "key_ref": 462,
+      "tensor_ref": 476,
+      "offset_ref": 467
+    },
+    {
+      "key": "lstm.weight_ih_l1_reverse",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 389120,
+      "key_ref": 477,
+      "tensor_ref": 493,
+      "offset_ref": 482
+    },
+    {
+      "key": "lstm.weight_hh_l1_reverse",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 520192,
+      "key_ref": 494,
+      "tensor_ref": 510,
+      "offset_ref": 499
+    },
+    {
+      "key": "lstm.bias_ih_l1_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1375232,
+      "key_ref": 511,
+      "tensor_ref": 525,
+      "offset_ref": 516
+    },
+    {
+      "key": "lstm.bias_hh_l1_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1375744,
+      "key_ref": 526,
+      "tensor_ref": 540,
+      "offset_ref": 531
+    },
+    {
+      "key": "lstm.weight_ih_l2",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 585728,
+      "key_ref": 541,
+      "tensor_ref": 557,
+      "offset_ref": 546
+    },
+    {
+      "key": "lstm.weight_hh_l2",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 716800,
+      "key_ref": 558,
+      "tensor_ref": 574,
+      "offset_ref": 563
+    },
+    {
+      "key": "lstm.bias_ih_l2",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1376256,
+      "key_ref": 575,
+      "tensor_ref": 589,
+      "offset_ref": 580
+    },
+    {
+      "key": "lstm.bias_hh_l2",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1376768,
+      "key_ref": 590,
+      "tensor_ref": 604,
+      "offset_ref": 595
+    },
+    {
+      "key": "lstm.weight_ih_l2_reverse",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 782336,
+      "key_ref": 605,
+      "tensor_ref": 621,
+      "offset_ref": 610
+    },
+    {
+      "key": "lstm.weight_hh_l2_reverse",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 913408,
+      "key_ref": 622,
+      "tensor_ref": 638,
+      "offset_ref": 627
+    },
+    {
+      "key": "lstm.bias_ih_l2_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1377280,
+      "key_ref": 639,
+      "tensor_ref": 653,
+      "offset_ref": 644
+    },
+    {
+      "key": "lstm.bias_hh_l2_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1377792,
+      "key_ref": 654,
+      "tensor_ref": 668,
+      "offset_ref": 659
+    },
+    {
+      "key": "lstm.weight_ih_l3",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 978944,
+      "key_ref": 669,
+      "tensor_ref": 685,
+      "offset_ref": 674
+    },
+    {
+      "key": "lstm.weight_hh_l3",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1110016,
+      "key_ref": 686,
+      "tensor_ref": 702,
+      "offset_ref": 691
+    },
+    {
+      "key": "lstm.bias_ih_l3",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1378304,
+      "key_ref": 703,
+      "tensor_ref": 717,
+      "offset_ref": 708
+    },
+    {
+      "key": "lstm.bias_hh_l3",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1378816,
+      "key_ref": 718,
+      "tensor_ref": 732,
+      "offset_ref": 723
+    },
+    {
+      "key": "lstm.weight_ih_l3_reverse",
+      "shape": [
+        512,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1175552,
+      "key_ref": 733,
+      "tensor_ref": 749,
+      "offset_ref": 738
+    },
+    {
+      "key": "lstm.weight_hh_l3_reverse",
+      "shape": [
+        512,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1306624,
+      "key_ref": 750,
+      "tensor_ref": 766,
+      "offset_ref": 755
+    },
+    {
+      "key": "lstm.bias_ih_l3_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1379328,
+      "key_ref": 767,
+      "tensor_ref": 781,
+      "offset_ref": 772
+    },
+    {
+      "key": "lstm.bias_hh_l3_reverse",
+      "shape": [
+        512
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "16",
+      "offset_elements": 1379840,
+      "key_ref": 782,
+      "tensor_ref": 796,
+      "offset_ref": 787
+    },
+    {
+      "key": "linear.0.weight",
+      "shape": [
+        128,
+        256
+      ],
+      "stride": [
+        256,
+        1
+      ],
+      "storage_key": "17",
+      "offset_elements": 0,
+      "key_ref": 797,
+      "tensor_ref": 814,
+      "offset_ref": 803
+    },
+    {
+      "key": "linear.0.bias",
+      "shape": [
+        128
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "18",
+      "offset_elements": 0,
+      "key_ref": 815,
+      "tensor_ref": 830,
+      "offset_ref": 821
+    },
+    {
+      "key": "linear.1.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "19",
+      "offset_elements": 0,
+      "key_ref": 831,
+      "tensor_ref": 848,
+      "offset_ref": 837
+    },
+    {
+      "key": "linear.1.bias",
+      "shape": [
+        128
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "20",
+      "offset_elements": 0,
+      "key_ref": 849,
+      "tensor_ref": 864,
+      "offset_ref": 855
+    },
+    {
+      "key": "classifier.weight",
+      "shape": [
+        3,
+        128
+      ],
+      "stride": [
+        128,
+        1
+      ],
+      "storage_key": "21",
+      "offset_elements": 0,
+      "key_ref": 865,
+      "tensor_ref": 882,
+      "offset_ref": 871
+    },
+    {
+      "key": "classifier.bias",
+      "shape": [
+        3
+      ],
+      "stride": [
+        1
+      ],
+      "storage_key": "22",
+      "offset_elements": 0,
+      "key_ref": 883,
+      "tensor_ref": 898,
+      "offset_ref": 889
+    }
+  ],
+  "storages": [
+    {
+      "key": "0",
+      "elements": 1,
+      "bytes": 4
+    },
+    {
+      "key": "1",
+      "elements": 1,
+      "bytes": 4
+    },
+    {
+      "key": "10",
+      "elements": 80,
+      "bytes": 320
+    },
+    {
+      "key": "11",
+      "elements": 80,
+      "bytes": 320
+    },
+    {
+      "key": "12",
+      "elements": 60,
+      "bytes": 240
+    },
+    {
+      "key": "13",
+      "elements": 60,
+      "bytes": 240
+    },
+    {
+      "key": "14",
+      "elements": 60,
+      "bytes": 240
+    },
+    {
+      "key": "15",
+      "elements": 60,
+      "bytes": 240
+    },
+    {
+      "key": "16",
+      "elements": 1380352,
+      "bytes": 5521408
+    },
+    {
+      "key": "17",
+      "elements": 32768,
+      "bytes": 131072
+    },
+    {
+      "key": "18",
+      "elements": 128,
+      "bytes": 512
+    },
+    {
+      "key": "19",
+      "elements": 16384,
+      "bytes": 65536
+    },
+    {
+      "key": "2",
+      "elements": 40,
+      "bytes": 160
+    },
+    {
+      "key": "20",
+      "elements": 128,
+      "bytes": 512
+    },
+    {
+      "key": "21",
+      "elements": 384,
+      "bytes": 1536
+    },
+    {
+      "key": "22",
+      "elements": 3,
+      "bytes": 12
+    },
+    {
+      "key": "3",
+      "elements": 40,
+      "bytes": 160
+    },
+    {
+      "key": "4",
+      "elements": 125,
+      "bytes": 500
+    },
+    {
+      "key": "5",
+      "elements": 125,
+      "bytes": 500
+    },
+    {
+      "key": "6",
+      "elements": 24000,
+      "bytes": 96000
+    },
+    {
+      "key": "7",
+      "elements": 60,
+      "bytes": 240
+    },
+    {
+      "key": "8",
+      "elements": 18000,
+      "bytes": 72000
+    },
+    {
+      "key": "9",
+      "elements": 60,
+      "bytes": 240
+    }
+  ],
+  "total_elements": 1472999,
+  "total_output_data_bytes": 5891996
+}

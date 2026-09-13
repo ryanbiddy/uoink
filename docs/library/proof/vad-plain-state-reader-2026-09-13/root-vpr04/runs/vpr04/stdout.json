@@ -1,0 +1,358 @@
+{
+  "scope": "synthetic fixed plain-state reader proposal only",
+  "cases": [
+    {
+      "case": "canonical_full_schema_and_converter_plan_binding",
+      "passed": true
+    },
+    {
+      "case": "immutable_snapshot_descriptors_and_checked_slices",
+      "passed": true
+    },
+    {
+      "case": "finite_signed_zero_subnormal_and_extreme_bits_preserved",
+      "passed": true
+    },
+    {
+      "case": "missing_approval_before_snapshot_or_interpretation",
+      "passed": true
+    },
+    {
+      "case": "real_approval_absent_before_snapshot_or_interpretation",
+      "passed": true
+    },
+    {
+      "case": "synthetic_profile_cannot_authorize_original_checkpoint",
+      "passed": true
+    },
+    {
+      "case": "wrong_size_refused_before_hash_or_parse",
+      "passed": true
+    },
+    {
+      "case": "wrong_hash_refused_before_header_parse",
+      "passed": true
+    },
+    {
+      "case": "immutable_input_rejects_bytearray",
+      "passed": true
+    },
+    {
+      "case": "immutable_input_rejects_memoryview",
+      "passed": true
+    },
+    {
+      "case": "immutable_input_rejects_path-string",
+      "passed": true
+    },
+    {
+      "case": "profile_purpose-type",
+      "passed": true
+    },
+    {
+      "case": "profile_purpose-unknown",
+      "passed": true
+    },
+    {
+      "case": "profile_id-unbound",
+      "passed": true
+    },
+    {
+      "case": "profile_sha-upper",
+      "passed": true
+    },
+    {
+      "case": "profile_evidence-missing",
+      "passed": true
+    },
+    {
+      "case": "profile_plan-wrong",
+      "passed": true
+    },
+    {
+      "case": "profile_size-bool",
+      "passed": true
+    },
+    {
+      "case": "profile_size-huge",
+      "passed": true
+    },
+    {
+      "case": "profile_size-over-cap",
+      "passed": true
+    },
+    {
+      "case": "header_length_zero",
+      "passed": true
+    },
+    {
+      "case": "header_length_over-cap",
+      "passed": true
+    },
+    {
+      "case": "header_length_unaligned",
+      "passed": true
+    },
+    {
+      "case": "header_length_uint64-max",
+      "passed": true
+    },
+    {
+      "case": "coverage_truncated-prefix",
+      "passed": true
+    },
+    {
+      "case": "coverage_truncated-data",
+      "passed": true
+    },
+    {
+      "case": "coverage_trailing-data",
+      "passed": true
+    },
+    {
+      "case": "json_malformed",
+      "passed": true
+    },
+    {
+      "case": "json_duplicate-top",
+      "passed": true
+    },
+    {
+      "case": "json_duplicate-inner",
+      "passed": true
+    },
+    {
+      "case": "json_utf8-invalid",
+      "passed": true
+    },
+    {
+      "case": "json_utf8-bom",
+      "passed": true
+    },
+    {
+      "case": "json_utf16",
+      "passed": true
+    },
+    {
+      "case": "json_leading-whitespace",
+      "passed": true
+    },
+    {
+      "case": "json_deep-nesting",
+      "passed": true
+    },
+    {
+      "case": "json_json-nan",
+      "passed": true
+    },
+    {
+      "case": "json_json-infinity",
+      "passed": true
+    },
+    {
+      "case": "json_json-float",
+      "passed": true
+    },
+    {
+      "case": "json_integer-overflow",
+      "passed": true
+    },
+    {
+      "case": "schema_missing",
+      "passed": true
+    },
+    {
+      "case": "schema_unknown",
+      "passed": true
+    },
+    {
+      "case": "schema_metadata",
+      "passed": true
+    },
+    {
+      "case": "schema_class-field",
+      "passed": true
+    },
+    {
+      "case": "schema_dtype",
+      "passed": true
+    },
+    {
+      "case": "schema_shape-wrong",
+      "passed": true
+    },
+    {
+      "case": "schema_shape-bool",
+      "passed": true
+    },
+    {
+      "case": "schema_shape-null",
+      "passed": true
+    },
+    {
+      "case": "schema_shape-zero",
+      "passed": true
+    },
+    {
+      "case": "schema_shape-negative",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-bool",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-negative",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-overflow",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-alias",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-gap",
+      "passed": true
+    },
+    {
+      "case": "schema_offset-overlap",
+      "passed": true
+    },
+    {
+      "case": "canonical_pretty-json",
+      "passed": true
+    },
+    {
+      "case": "canonical_reordered-keys",
+      "passed": true
+    },
+    {
+      "case": "canonical_escaped-ascii-key",
+      "passed": true
+    },
+    {
+      "case": "canonical_tab-padding",
+      "passed": true
+    },
+    {
+      "case": "canonical_extra-space-block",
+      "passed": true
+    },
+    {
+      "case": "data_positive-infinity",
+      "passed": true
+    },
+    {
+      "case": "data_negative-infinity",
+      "passed": true
+    },
+    {
+      "case": "data_quiet-nan",
+      "passed": true
+    },
+    {
+      "case": "data_signaling-nan",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_zero",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_negative",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_too-long",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_nan",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_infinity",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_bool",
+      "passed": true
+    },
+    {
+      "case": "deadline_argument_huge-integer",
+      "passed": true
+    },
+    {
+      "case": "deadline_refusal_during_hashing",
+      "passed": true
+    },
+    {
+      "case": "deadline_refusal_after_json_parse",
+      "passed": true
+    },
+    {
+      "case": "deadline_refusal_after_canonical_serialization",
+      "passed": true
+    },
+    {
+      "case": "deadline_refusal_during_data_scan",
+      "passed": true
+    },
+    {
+      "case": "deadline_refusal_after_final_result_creation",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_accepts_exact_three_container_boundary",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_refuses_four_before_json_loads",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_ignores_string_brackets_quotes_and_backslashes",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_detects_excess_after_escaped_string",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_checks_deadline_during_bounded_scan",
+      "passed": true
+    },
+    {
+      "case": "depth_scanner_refuses_unmatched_close_before_json_loads",
+      "passed": true
+    }
+  ],
+  "case_count": 82,
+  "passed": 82,
+  "failed": 0,
+  "skipped": 0,
+  "qualification_exit": 0,
+  "guard": {
+    "valid": true,
+    "unexpected_events": [],
+    "heavy_preloaded": [],
+    "heavy_after": [],
+    "inputs_unchanged": true,
+    "lexical_wrappers_installed": true
+  },
+  "input_sha256": {
+    "plain_state_reader.py": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+    "qualify_reader.py": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "INPUTS.json": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+  },
+  "canonical_fixture_bytes": 5896708,
+  "canonical_fixture_sha256": "31b6222a3c31569e81da0597dc3ef339511cdee543114001cd989b6fddfba1d1",
+  "elapsed_seconds": 0.73992,
+  "real_approval": false,
+  "actual_artifact_access": false,
+  "model_constructed": false
+}

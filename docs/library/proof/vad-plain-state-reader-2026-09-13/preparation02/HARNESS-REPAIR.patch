@@ -1,0 +1,10 @@
+--- proposal01/qualify_reader.py
++++ proposal02/qualify_reader.py
+@@ -3,6 +3,7 @@
+ from contextlib import contextmanager
+ import dataclasses
+ import encodings.utf_8_sig
++import encodings.utf_16_le
+ import hashlib
+ import inspect
+ import json

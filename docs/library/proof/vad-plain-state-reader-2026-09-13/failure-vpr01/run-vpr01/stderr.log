@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\vad-plain-state-reader-proposal01\runs\vpr01\qualify_reader.py", line 263, in <module>
+    ('utf16','{}'.encode('utf-16-le'), 'Malformed UTF-8 JSON'),
+  File "C:\Python314\Lib\encodings\__init__.py", line 100, in search_function
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\vad-plain-state-reader-proposal01\runs\vpr01\qualify_reader.py", line 45, in audit
+    deny('import:'+str(args[0]))
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\vad-plain-state-reader-proposal01\runs\vpr01\qualify_reader.py", line 35, in deny
+    raise AssertionError('Synthetic reader guard denied '+event)
+AssertionError: Synthetic reader guard denied import:encodings.utf_16_le

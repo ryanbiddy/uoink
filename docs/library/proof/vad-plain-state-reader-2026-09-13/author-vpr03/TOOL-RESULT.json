@@ -1,0 +1,7 @@
+{
+  "chunk_id": "673676",
+  "wall_time_seconds": 1.0813208,
+  "exit_code": 0,
+  "original_token_count": 28,
+  "output": "{\"label\": \"vpr03\", \"case_count\": 82, \"passed\": 82, \"failed\": 0, \"actual_child_exit\": 0, \"guard_valid\": true}\r\n"
+}

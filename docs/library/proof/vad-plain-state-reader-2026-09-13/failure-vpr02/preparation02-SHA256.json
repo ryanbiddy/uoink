@@ -1,0 +1,135 @@
+{
+  "schema": "uoink.documentary-payload-manifest.v1",
+  "prepared_utc": "2026-09-13T16:33:17.079732+00:00",
+  "payload_count": 25,
+  "payload_bytes": 133180,
+  "qualification_executed": false,
+  "actual_artifact_access": false,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "before/prepare_derivative-before-newline-repair.py",
+      "bytes": 3851,
+      "sha256": "b8d411ed9d1f1bcfcc3e548a44ffa682852cc01a557eb8b80ce365ad3ff943d3"
+    },
+    {
+      "path": "before/qualify_reader.py",
+      "bytes": 18415,
+      "sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 2269,
+      "sha256": "285443f2b464d07a0b20abb06efd98a992ce0642bc77621568addde05aa359db"
+    },
+    {
+      "path": "CANONICAL-LAYOUT.json",
+      "bytes": 9466,
+      "sha256": "aa8ac80af0b2c9d472c4253e7ce5fbfed44a1539bcf4c843288ba3595428b374"
+    },
+    {
+      "path": "context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "path": "context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b"
+    },
+    {
+      "path": "context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 2317,
+      "sha256": "eeeb70989aa09d907e329146880bc9ca78d9a76dd0a7463f860c69696bc577e4"
+    },
+    {
+      "path": "fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "path": "HARNESS-REPAIR.patch",
+      "bytes": 242,
+      "sha256": "f548dce584443d461154565a8c5d324de31c87a69378cf03fbce10d60f550575"
+    },
+    {
+      "path": "INPUTS.json",
+      "bytes": 404,
+      "sha256": "fd5a29d254b67b4d8e408431ff16db3aff4563dbdbd76c59cf1fae59c7a4832d"
+    },
+    {
+      "path": "launch.py",
+      "bytes": 5350,
+      "sha256": "251a6ab462ff3a17ae215c6fe1634fa5e0eb9c6a6bb8d212563f4f383e958a03"
+    },
+    {
+      "path": "plain_state_reader.py",
+      "bytes": 9649,
+      "sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6"
+    },
+    {
+      "path": "PREPARATION-CHECK.json",
+      "bytes": 761,
+      "sha256": "185bec0f6c62b77a481122f8b7d4c93763d344f71847c2f02490c6b0678b7af9"
+    },
+    {
+      "path": "prepare_derivative.py",
+      "bytes": 3953,
+      "sha256": "79fba98560cd9080f87b9b46b8a8fe1049afdf6e4df79c87a7c57d9844002aff"
+    },
+    {
+      "path": "PREPARER-FAILURE-AND-REPAIR.md",
+      "bytes": 831,
+      "sha256": "22ae5a472a0a50617ba36755161a6e4dd76c7149779e19e17cec3f763b0cea18"
+    },
+    {
+      "path": "PREPARER-FIRST-EXIT.json",
+      "bytes": 345,
+      "sha256": "289c097b62b6f17969d0bfb19e398df6d30895f38f074cbeaf045aa723d17e33"
+    },
+    {
+      "path": "qualify_reader.py",
+      "bytes": 18442,
+      "sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7"
+    },
+    {
+      "path": "REPAIR-BRIEF.md",
+      "bytes": 1666,
+      "sha256": "5f0b6161c536cc12d66e3062a93f554e618e316b3e55e724e8be6869ef6e9772"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 1703,
+      "sha256": "9c1b85204f417b3d644d6f4fc342db7743568e60e4b488463b5b3f60e11bc1c7"
+    },
+    {
+      "path": "ROOT-ADMISSION.TEMPLATE.json",
+      "bytes": 1159,
+      "sha256": "9313fe7c206b674ae5db0db521483c667e1b8dc02030732f1934bd21014aebc3"
+    },
+    {
+      "path": "run-root.ps1",
+      "bytes": 1155,
+      "sha256": "ea2d8e234cf1f1d94885cf0ac8e12e109b3e31058da760739ea023c73f037550"
+    },
+    {
+      "path": "seal_preparation.py",
+      "bytes": 1544,
+      "sha256": "69605cd83075984984ad1b839c10c932153d4d82eb4d2ed10c220e84aff86a80"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 1417,
+      "sha256": "a98333da6a5842f8f063c01a5212c3fe2b1782ad6970fc80931c5a131ad0ef67"
+    }
+  ]
+}

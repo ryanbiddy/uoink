@@ -32,6 +32,6 @@ Updated 2026-09-13. The latest production repair is e8d058f, with 53 focused
 passes and 13 passing subtests in each root. Complete tree09 at 56d9d4c predates
 that repair and remains 2,796 passed, one failed, three skipped, plus 13 subtests.
 Package 08 still represents b8e44fb; no current-source package or installation
-credit exists. The latest completed branch backup is 19d51a8. Preserve these
+credit exists. The latest completed branch backup is 901964c (2026-09-13). Preserve these
 separate identities until replacement build and qualification are complete.
 Website and marketing remain paused until council and integrator accept Uoink.

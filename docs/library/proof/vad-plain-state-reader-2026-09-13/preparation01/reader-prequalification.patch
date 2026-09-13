@@ -1,0 +1,23 @@
+--- drafts/plain_state_reader-before-profile-budget-review.py
++++ plain_state_reader.py
+@@ -103,8 +103,8 @@
+ 
+ class _Budget:
+     def __init__(self, seconds):
+-        _require(type(seconds) in (int, float) and math.isfinite(seconds)
+-            and 0 < seconds <= MAX_SECONDS, 'Cooperative deadline bound')
++        _require(type(seconds) in (int, float) and 0 < seconds <= MAX_SECONDS
++            and math.isfinite(seconds), 'Cooperative deadline bound')
+         self.started = time.monotonic()
+         self.expires = self.started + seconds
+         self.check()
+@@ -116,7 +116,8 @@
+ def _approved_profile(profile):
+     _require(type(profile) is ApprovalProfile, 'Explicit approval profile required')
+     # Real approval is deliberately refused before snapshot type/size/hash/parse.
+-    _require(profile.purpose == 'synthetic', 'Real plain-state approval remains absent')
++    _require(type(profile.purpose) is str and profile.purpose == 'synthetic',
++        'Real plain-state approval remains absent')
+     _require(type(profile.profile_id) is str and re.fullmatch(r'synthetic:[a-z0-9-]{1,80}', profile.profile_id),
+         'Reviewed synthetic profile ID required')
+     for digest in (profile.output_sha256, profile.evidence_sha256, profile.plan_sha256):

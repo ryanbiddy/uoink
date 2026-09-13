@@ -1,0 +1,35 @@
+{
+  "captured_utc": "2026-09-13T16:23:19.082767+00:00",
+  "sources": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-fixed-converter-proposal01\\fixed-plan.json",
+      "copy": "fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+      "executed": false
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-fixed-converter-proposal01\\fixed_converter.py",
+      "copy": "context/fixed_converter.py.txt",
+      "bytes": 20225,
+      "sha256": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+      "executed": false
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-selected-metadata-map01\\fixed-factory.proposal.txt",
+      "copy": "context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b",
+      "executed": false
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md",
+      "copy": "context/root-brief.md",
+      "bytes": 3019,
+      "sha256": "a22f53d82db8bad8c86b361f6c8ad5a4c2b0dbe8b3053e18133ad46020ebcf1a",
+      "executed": false
+    }
+  ],
+  "actual_asset_read": false,
+  "proposal_source_executed": false
+}

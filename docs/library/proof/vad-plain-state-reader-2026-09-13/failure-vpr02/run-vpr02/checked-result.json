@@ -1,0 +1,11 @@
+{
+  "case_count": 76,
+  "passed": 75,
+  "failed": 1,
+  "skipped": 0,
+  "actual_child_exit": 1,
+  "guard_valid": true,
+  "inputs_unchanged": true,
+  "complete_membership": true,
+  "real_artifact_or_model_qualified": false
+}

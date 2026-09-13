@@ -1,0 +1,135 @@
+{
+  "schema": "uoink.documentary-payload-manifest.v1",
+  "payload_count": 24,
+  "payload_bytes": 74662,
+  "cases": 82,
+  "passed": 82,
+  "failed": 0,
+  "skipped": 0,
+  "guard_valid": true,
+  "actual_child_exit": 0,
+  "actual_outer_exit": 0,
+  "preparation_payloads_unchanged": 25,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "ACTUAL-EXIT.json",
+      "bytes": 88,
+      "sha256": "93fd95d36585d38bf288d5ae01c7488f42e9612fe91afaaa35562aa6e997a8e9"
+    },
+    {
+      "path": "archive_success.py",
+      "bytes": 3308,
+      "sha256": "cdaff2f331c5881c09731a5419d2d1054742a4cbfa181031a402cbb482ccae86"
+    },
+    {
+      "path": "AUTHOR-VERDICT.md",
+      "bytes": 1515,
+      "sha256": "806cc3ecad835549a5bb22fe5422064c180adcae2511bcde7dc2073e7512585b"
+    },
+    {
+      "path": "INDEPENDENT-REPETITION.md",
+      "bytes": 1306,
+      "sha256": "23bd2bf120b828e94705b4c4beb88295a74d980d9d68a9196e1e8142f3da9de8"
+    },
+    {
+      "path": "outer-vpr03/actual-exit.json",
+      "bytes": 83,
+      "sha256": "df09da44e70c5968fd9a4154a2df7cd37afe36bc8859258ff9beca0155336669"
+    },
+    {
+      "path": "outer-vpr03/command.json",
+      "bytes": 344,
+      "sha256": "49c9d22f755541d6def0336b759d68471a062a9a0802e84cd20ff61a55ffc89a"
+    },
+    {
+      "path": "outer-vpr03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "outer-vpr03/stdout.log",
+      "bytes": 110,
+      "sha256": "f2ff7e9b2550ac09efce13f9e83f9ed1a81b66f8b4b5193908f1542687a42721"
+    },
+    {
+      "path": "PREFLIGHT.json",
+      "bytes": 969,
+      "sha256": "f78b4d5437a3b2905240668753bafb9681c2a6e70a3a8be0b867e26740142fda"
+    },
+    {
+      "path": "preparation03-SHA256.json",
+      "bytes": 4121,
+      "sha256": "236a86c300a180281dabcad46f8ba371daa28e42cbf3032735013eeedca2a397"
+    },
+    {
+      "path": "root-admission.json",
+      "bytes": 1214,
+      "sha256": "96c20e48e863cc4ac23680f901523033d6848463174a01bea13352e2805ee6ae"
+    },
+    {
+      "path": "root-admission.md",
+      "bytes": 1320,
+      "sha256": "b5490ff97a0763dfdc02a9ac33542917a39e20130718d3e738b59604d984f15b"
+    },
+    {
+      "path": "run-vpr03/actual-exit.json",
+      "bytes": 51,
+      "sha256": "907fddb6ce65a9501d3630212d41337d6b95609e3705334c5366eee26ad5a022"
+    },
+    {
+      "path": "run-vpr03/checked-result.json",
+      "bytes": 223,
+      "sha256": "7722f244527e6393d8b61473d09b26e52d997da72c56c955cf8ecc5f3c945e2a"
+    },
+    {
+      "path": "run-vpr03/fixed-plan.json",
+      "bytes": 17400,
+      "sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
+    },
+    {
+      "path": "run-vpr03/INPUTS.json",
+      "bytes": 404,
+      "sha256": "7e22954af6ce0dd0abc9e82d58c841bd2377ce372ec3acd4a9aab87bc3f8b74d"
+    },
+    {
+      "path": "run-vpr03/launch-plan.json",
+      "bytes": 1835,
+      "sha256": "45b732b584b144c3479376d54d3e79159971506741e822301e0c8f51d3efff33"
+    },
+    {
+      "path": "run-vpr03/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "run-vpr03/qualify_reader.py",
+      "bytes": 20468,
+      "sha256": "354bb3341b23dd37f8d04f3254fdbbbf4f715e7a08220abe6dbe04075924945f"
+    },
+    {
+      "path": "run-vpr03/root-admission.json",
+      "bytes": 1214,
+      "sha256": "96c20e48e863cc4ac23680f901523033d6848463174a01bea13352e2805ee6ae"
+    },
+    {
+      "path": "run-vpr03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "run-vpr03/stdout.json",
+      "bytes": 7801,
+      "sha256": "4496c8e0bc9b52f9051977c583150bb8a7cba4ec4489350648c6cc29a0239b6c"
+    },
+    {
+      "path": "TOOL-RESULT.json",
+      "bytes": 251,
+      "sha256": "f58608052108fbd6c2174584e21236d581afc45001ffdb4cb104e60106999742"
+    }
+  ]
+}

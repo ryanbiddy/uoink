@@ -1,0 +1,13 @@
+{
+  "original_preparation_manifest_sha256": "d2bf7531d5f89a50d80d7260e993954b81a56e4c6fa4457d08c770b8c728a0bf",
+  "original_preparation_payloads_verified": 26,
+  "failure_manifest_sha256": "89b90577f401955b4faa0d440118632b2b0cb2e4e7a1a976a702c85d7cbc008b",
+  "original_reader_unchanged": true,
+  "reader_sha256": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6",
+  "harness_before_sha256": "e8899b8d49806d15965a2bce01823484d0bab2e8cc9fcd5aba7b02aee35c5218",
+  "harness_after_sha256": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7",
+  "only_ast_change": "Import encodings.utf_16_le before guard closure",
+  "case_assertions_and_ids_unchanged": true,
+  "case_count": 76,
+  "reader_or_harness_executed_during_repair": false
+}
