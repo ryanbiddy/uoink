@@ -93,7 +93,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Package-08 note/media results remain historical; combined tree08 has 50 new mirror failures | Source 9dd0cfb fails initial export and later writer exclusion. Seven focused AV5m3 cases pass separately; root cause is not established | Follow MIRROR-TREE08-REPAIR-BRIEF before package09. Preserve Desktop and X limits |
+| 4 | Tree08 retains 50 mirror failures; two bounded product repairs are in progress | Owner handoff race reproduced and sealed at 92c0fde. Draft repair has 184 Phase 4 passes in its worktree. Gemini process-authority diagnosis reviewed at bd7fe7b | Integrate/retest owner repair, then repair process authority under the named briefs. Tree08 cause remains unproved; preserve Desktop and X limits |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
@@ -185,6 +185,13 @@ is complete but is not this goal's completion. Current queue:
    seven-case diagnostic passes. Mirror source is byte-identical to b8e44fb;
    the cause is not established. Astra investigates owner lifetime; a bounded
    Gemini assignment reviews process identity with synthetic probes only.
+   Gemini diagnostic 213914a5 is now reviewed at bd7fe7b: six observations in
+   both roots reproduce defects, not product passes. The report's unsupported
+   retention claim and missing early probe drafts are explicit in Astra's
+   verdict. Dispatch MIRROR-PROCESS-AUTHORITY-REPAIR-BRIEF-2026-09-13.md for a
+   concrete Gemini patch and inert tests only. Astra's separate owner-admission
+   repair has 12 focused and 184 Phase 4 passes in its worktree; integrate its
+   raw diff, rerun both suites in the checkout and seal the reviewed drafts.
    No competing real-mirror runs. Do not build or blindly repeat the full tree.
    Tree07's interrupted evidence remains at 784fb73. Preserve all original tests,
    guards and failed measurements. Integrate a reviewed product repair, verify
@@ -657,6 +664,47 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-13 - Combined failure retained; owner and process authority repairs
+
+The complete 9dd0cfb tree08 observation is sealed at 44e01ee: 2,675 passed,
+51 failed and three skipped, every one of 2,729 cases accounted for. Fifty
+failures concern mirror admission; the other is the historical AT6 receipt.
+The unchanged seven-case AV5m3 diagnostic passes separately. Neither that pass
+nor the following synthetic findings establishes the original cascade's cause.
+
+A controlled owner-acquisition/session-attachment interleaving fails once at
+b62aab3 and is sealed at 92c0fde. The first sealer launch was refused by the
+inherited audit guard because IG_FORBIDDEN_LIVE was missing; 79ec2f5 therefore
+contains only the repair brief. The corrected observer and refusal record are
+retained. The owner repair is in cc/mirror-owner-admission-repair at
+E:\AI\projects\uoink\worktrees\mirror-owner-admission-repair. An initial compound
+test-launch command was rejected by automatic approval review before execution.
+Separate preparation and a restricted guarded launcher resolved that refusal.
+Its first draft passed eleven cases, but independent review found recursive
+acquisition of the non-reentrant global guard. The corrected final draft passes
+twelve focused cases and all 184 selected Phase 4/new-owner cases. Review found
+no further actionable reservation defect. Checkout integration is next.
+
+Gemini run 213914a5 completed its report-only synthetic assignment. Its source
+authority findings are reviewed at bd7fe7b. Astra observes all six diagnostic
+outcomes in each root; the probes assert current defects and live outside the
+accepted tree. Worker attempts remain 4/2, 5/1 and 6/0. Earlier overwritten test
+drafts were not located. A globals/locals error invalidates its claimed cleanup
+flag observation; no real exclusion was held in that probe. Read Astra's verdict
+before the retained report. A concrete process-authority repair brief is ready.
+
+Raw git apply converted line endings in seven new proof copies before their
+new .gitattributes controlled materialization. The seal preflight caught this;
+the seven changed copies are retained. Only those copies were restored from
+the worker bytes already bound by its seal, then Git/disk equality was verified.
+For later proof integrations ensure byte-preserving materialization and verify
+both copies before claiming a seal. No test outcome was changed or repeated.
+
+Ryan explicitly pauses websites and marketing until product readiness is agreed
+by Astra and the council. Saved local drafts are unpublished, the site preview
+is closed and no marketing worker has started. Package08 remains held; no
+package09 build, installed security credit or fresh full-tree clearance exists.
 
 ### 2026-09-13 - Installer binding accepted; combined tree next
 
