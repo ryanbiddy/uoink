@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative and distribution preparation sealed at f0181f8: ten synthetic cases pass independently; derivative remains unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; a separate selected-root projection design is next. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; first actual wheel build at 576cd07 passes byte checks, remains uninstalled | Finish Python 3.13 packaging reproduction and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected-root projection is under review. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -194,10 +194,17 @@ is complete but is not this goal's completion. Current queue:
    and independent runs; B1 remains six pass / four fail on that protocol.
    Its complete review and distribution plan are sealed at f0181f8 (195
    payloads). Read ASTRA-COMPANION-B2-PREPARATION-VERDICT-2026-09-13.md.
-   Qualify the deterministic builder only with synthetic ZIPs until exact
-   code review; the current builder draft needs bounded input reads.
+   Builder qualification and the first actual package build are preserved at
+   576cd07. Read ASTRA-COMPANION-B2-FIRST-BUILD-VERDICT-2026-09-13.md.
+   Author and root each pass 62 synthetic cases; two earlier 61/1 attempts
+   remain failed. The reviewed py314-01 build exits zero and verifies all 16
+   members, RECORD, unchanged license and opaque ONNX bytes. Wheel size is
+   1,387,859 bytes; SHA256 d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883.
+   All 132 proof payloads match Git and disk. Prepare and review a private
+   stdlib-only Python 3.13 reproduction; do not launch the original embedded
+   interpreter with its site-enabled configuration. No runtime acceptance.
    Windows casing alone is not a Path inequality; reject the resolve-first
-   suggestion because it discards alias evidence. B2 is not built or installed.
+   suggestion because it discards alias evidence. B2 is built but not installed.
    Static VAD evidence and fixed-loader preparation are archived at 01163e1.
    Read ASTRA-VAD-STATIC-PREPARATION-VERDICT-2026-09-13.md. Inventory80,
    tail29 and proposal42 payloads match Git and disk; the original38 seal is
@@ -4026,3 +4033,19 @@ Python 3.13 reproducibility remains separate: the retained embedded _pth enables
 import site, and prior wheel receipts do not establish no-site flags. Do not
 launch it to test that assumption; prepare a private stdlib-only copy if needed.
 No wheel was built or installed, and the complete source tree is unchanged.
+
+### 2026-09-13 - First actual tokenizer companion build passed byte checks
+
+Commit 576cd07 preserves 132 payloads with exact Git/disk equality, including
+original builder100 and preparation21 seals. Root's reviewed py314-01 invocation
+returned child and outer exit zero. The wheel is 1,387,859 bytes, SHA256
+d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883. All 16 members,
+RECORD and deterministic ZIP metadata passed; license and opaque ONNX bytes
+remain unchanged. No model/package was imported or installed. Python 3.13
+reproduction remains pending a reviewed private stdlib-only runtime.
+
+The selected-root diagnostic is under independent review. A prequalification
+serialization deadline gap was found and repaired while preserving its draft;
+synthetic qualification is next. No additional checkpoint invocation occurred.
+Production source and the full-tree result are unchanged; release, website
+and marketing remain held.
