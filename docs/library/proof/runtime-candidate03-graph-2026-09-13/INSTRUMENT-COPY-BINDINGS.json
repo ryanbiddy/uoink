@@ -1,0 +1,74 @@
+[
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\before-path-and-copy-refinement\\seal.ps1",
+    "path": "before-path-and-copy-refinement/seal.ps1",
+    "bytes": 12261,
+    "sha256": "e16cc311a710b6f49fe209c9251db0236064db3e9a713277f5003d1bea9a7b44"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\BRIEF.md",
+    "path": "BRIEF.md",
+    "bytes": 1747,
+    "sha256": "e1cdd451a6e2cfce2c6b5cb41339b62bd65589dc71ec25678565b610fbf9be81"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\MANIFEST-BINDINGS.json",
+    "path": "MANIFEST-BINDINGS.json",
+    "bytes": 934557,
+    "sha256": "7fa21dabcd698240e8521d317830b4766246f58f5000a19714366536846cbe44"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\PREEXECUTION-REFINEMENTS.md",
+    "path": "PREEXECUTION-REFINEMENTS.md",
+    "bytes": 1333,
+    "sha256": "42456aebed482b3bcd65db07b5b5a1cda2525775ebcfb2b8fbe99ef6ed0114a4"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\PROTOCOL.md",
+    "path": "PROTOCOL.md",
+    "bytes": 4132,
+    "sha256": "d74e88f127cd8abce55c5322c78b0ec7abf3964853635833f64700cfdcd6b42b"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\seal.ps1",
+    "path": "seal.ps1",
+    "bytes": 12297,
+    "sha256": "525278d82bd59d9b6e318441582dc907fc4a9d7113e5da52c68c630ac0e73a77"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\SIZE-ANALYSIS.json",
+    "path": "SIZE-ANALYSIS.json",
+    "bytes": 6228,
+    "sha256": "e3b277156e7a3177fe5a5683d541be414a0c3bca7c790c7f745c35b2859ce740"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\SOURCE-PARSE-CHECK.json",
+    "path": "SOURCE-PARSE-CHECK.json",
+    "bytes": 344,
+    "sha256": "114f160280c53bb127d2124fb06f1ff4a859f2a801a51ef22846bcc50770f649"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\SOURCE-PLAN.json",
+    "path": "SOURCE-PLAN.json",
+    "bytes": 1148985,
+    "sha256": "68c1a0927b3154788372026488b8332e4e66f6239736ee357a70eeab781a35e6"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\VERDICT.md",
+    "path": "VERDICT.md",
+    "bytes": 3498,
+    "sha256": "75a0990565db51e5b73e526547a45a7dfca9181b984ac5c7a18bc955d83c36dc"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\verify_proof.ps1",
+    "path": "verify_proof.ps1",
+    "bytes": 8994,
+    "sha256": "139158eaaf52f73a8d5d16737375608b7ec06278474e29133329e19cbf2ea65e"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-graph-proof-proposal01\\PREPARATION-HASHES.json",
+    "path": "PREPARATION-HASHES.json",
+    "bytes": 1639,
+    "sha256": "09ce6baf469ddd95d8d2087c14368f0f29c52066ea87be298e81ac68ceb85191"
+  }
+]

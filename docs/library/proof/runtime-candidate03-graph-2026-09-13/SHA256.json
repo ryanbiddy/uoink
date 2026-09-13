@@ -1,0 +1,134 @@
+{
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "before-path-and-copy-refinement/seal.ps1",
+      "bytes": 12261,
+      "sha256": "e16cc311a710b6f49fe209c9251db0236064db3e9a713277f5003d1bea9a7b44"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1747,
+      "sha256": "e1cdd451a6e2cfce2c6b5cb41339b62bd65589dc71ec25678565b610fbf9be81"
+    },
+    {
+      "path": "INSTRUMENT-COPY-BINDINGS.json",
+      "bytes": 3503,
+      "sha256": "900125bf782833e61a62b79815a97b9bf859c7d2e292f46c19a81b2486f6e833"
+    },
+    {
+      "path": "MANIFEST-BINDINGS.json",
+      "bytes": 934557,
+      "sha256": "7fa21dabcd698240e8521d317830b4766246f58f5000a19714366536846cbe44"
+    },
+    {
+      "path": "payloads.zip",
+      "bytes": 22796343,
+      "sha256": "8dba369e6f9063af80ca46c725a4e41e7d893dc7cb0b7c2324feab838a4175ed"
+    },
+    {
+      "path": "PREEXECUTION-REFINEMENTS.md",
+      "bytes": 1333,
+      "sha256": "42456aebed482b3bcd65db07b5b5a1cda2525775ebcfb2b8fbe99ef6ed0114a4"
+    },
+    {
+      "path": "PREPARATION-HASHES.json",
+      "bytes": 1639,
+      "sha256": "09ce6baf469ddd95d8d2087c14368f0f29c52066ea87be298e81ac68ceb85191"
+    },
+    {
+      "path": "PROTOCOL.md",
+      "bytes": 4132,
+      "sha256": "d74e88f127cd8abce55c5322c78b0ec7abf3964853635833f64700cfdcd6b42b"
+    },
+    {
+      "path": "READABLE-BINDINGS.json",
+      "bytes": 3099,
+      "sha256": "b0959db52608b2c7ae3389b41a4d2a3181996a48df8b8dbaaf7488742ba52b07"
+    },
+    {
+      "path": "readable/00-graph01-result.json",
+      "bytes": 146848,
+      "sha256": "67ec9a18a6710056a9b84bd930e747b260ccbfe33c934ab437d2366868060a01"
+    },
+    {
+      "path": "readable/01-result.json",
+      "bytes": 293272,
+      "sha256": "b8bf3e84ce318578850adae0e215eb6c570ea162f23bef4cdcd89d4b5063816d"
+    },
+    {
+      "path": "readable/02-result.json",
+      "bytes": 291089,
+      "sha256": "ba283f79723a67fd560232fa9b990dc10325df7641787fddaa7d77c2f2e30de6"
+    },
+    {
+      "path": "readable/03-result.json",
+      "bytes": 279380,
+      "sha256": "5c78d989b0d0c54f496e424b06660c18a6553326f0af647895159e78a40e37ab"
+    },
+    {
+      "path": "readable/04-result.json",
+      "bytes": 279378,
+      "sha256": "1daae4a97079f780bacecf75c0a0330318a24601b9f87cbe5a0c5b6669104fd9"
+    },
+    {
+      "path": "readable/05-raw-graph.json",
+      "bytes": 142611,
+      "sha256": "eb56674b511a90b13685d1bb53b24d27c735fdd3fee068c9abd6d61c6d0b149e"
+    },
+    {
+      "path": "readable/06-invocation.json",
+      "bytes": 415074,
+      "sha256": "da9b393b592b6301ee4c70263cd073623b2b72c9ad74be1bd357d95082065d17"
+    },
+    {
+      "path": "readable/07-CANDIDATE03-FINAL59-INDEPENDENT-REVIEW.json",
+      "bytes": 1425,
+      "sha256": "6b596d48f1690dcfed3a178a6f8c119e4ef4c9b0d8ce6477583d6f2c6dfac4aa"
+    },
+    {
+      "path": "readable/08-COMPLETE144-AUTHOR-ACTUAL-2026-09-13.json",
+      "bytes": 124,
+      "sha256": "0cb35a5e4365bcc70a5ec7e6d0a4e4e89eaec483e5322eebf6913f60d3dbe0e8"
+    },
+    {
+      "path": "SEAL-CHECKS.json",
+      "bytes": 473,
+      "sha256": "3e84ae6ea05085d7e59cf2ba33639ad2baf03b6e57e1266c4aafb54eebb2997c"
+    },
+    {
+      "path": "seal.ps1",
+      "bytes": 12297,
+      "sha256": "525278d82bd59d9b6e318441582dc907fc4a9d7113e5da52c68c630ac0e73a77"
+    },
+    {
+      "path": "SIZE-ANALYSIS.json",
+      "bytes": 6228,
+      "sha256": "e3b277156e7a3177fe5a5683d541be414a0c3bca7c790c7f745c35b2859ce740"
+    },
+    {
+      "path": "SOURCE-PARSE-CHECK.json",
+      "bytes": 344,
+      "sha256": "114f160280c53bb127d2124fb06f1ff4a859f2a801a51ef22846bcc50770f649"
+    },
+    {
+      "path": "SOURCE-PLAN.json",
+      "bytes": 1148985,
+      "sha256": "68c1a0927b3154788372026488b8332e4e66f6239736ee357a70eeab781a35e6"
+    },
+    {
+      "path": "VERDICT.md",
+      "bytes": 3498,
+      "sha256": "75a0990565db51e5b73e526547a45a7dfca9181b984ac5c7a18bc955d83c36dc"
+    },
+    {
+      "path": "verify_proof.ps1",
+      "bytes": 8994,
+      "sha256": "139158eaaf52f73a8d5d16737375608b7ec06278474e29133329e19cbf2ea65e"
+    }
+  ]
+}
