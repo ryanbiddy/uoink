@@ -1,0 +1,113 @@
+# Shared by the build preflight and Inno's per-file signing callback.
+
+function Assert-UoinkSigningToken {
+    param([Parameter(Mandatory)][string]$Value, [Parameter(Mandatory)][string]$Name)
+    # Inno constructs a Windows command line. Permit spaces, not expansion,
+    # quotes, controls or command separators in configuration paths.
+    if ($Value -match '[\x00-\x1f"%!?&|<>$`^]') { throw "Unsafe character in $Name" }
+}
+
+function Assert-UoinkSigningConfiguration {
+    param(
+        [Parameter(Mandatory)][string]$CertificateThumbprint,
+        [Parameter(Mandatory)][string]$TimestampUrl,
+        [Parameter(Mandatory)][string]$SignToolPath
+    )
+    if ($CertificateThumbprint -notmatch '^[A-Fa-f0-9]{40}$') {
+        throw 'Specify the exact 40-hex certificate thumbprint; automatic selection is forbidden'
+    }
+    if ($TimestampUrl -cnotmatch '^https://[A-Za-z0-9.-]+(?::443)?(?:/[A-Za-z0-9._~/-]*)?$') {
+        throw 'TimestampUrl must be an explicit HTTPS RFC 3161 endpoint without credentials, query or fragment'
+    }
+    Assert-UoinkSigningToken $SignToolPath 'SignToolPath'
+    if ($SignToolPath -notmatch '^[A-Za-z]:[\\/]' -or
+        -not (Test-Path -LiteralPath $SignToolPath -PathType Leaf) -or
+        [IO.Path]::GetFileName($SignToolPath) -ine 'signtool.exe') {
+        throw 'SignToolPath must name an existing absolute Windows SDK signtool.exe'
+    }
+}
+
+function Assert-UoinkSigningCertificate {
+    param([Parameter(Mandatory)][string]$CertificateThumbprint)
+    if ($CertificateThumbprint -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Invalid certificate thumbprint' }
+    $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$CertificateThumbprint" -ErrorAction Stop
+    $now = [DateTime]::UtcNow
+    if (-not $certificate.HasPrivateKey -or
+        $certificate.NotBefore.ToUniversalTime() -gt $now -or
+        $certificate.NotAfter.ToUniversalTime() -le $now) {
+        throw 'Signing certificate needs an available private key and current validity'
+    }
+    $usages = @($certificate.EnhancedKeyUsageList | ForEach-Object { $_.ObjectId.Value })
+    if ($usages -notcontains '1.3.6.1.5.5.7.3.3') { throw 'Certificate lacks the code-signing EKU' }
+}
+
+function Invoke-UoinkSignTool {
+    param([string]$SignToolPath, [string[]]$Arguments)
+    & $SignToolPath @Arguments | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw "SignTool returned $LASTEXITCODE (warnings also reject the release)" }
+}
+
+
+function Assert-UoinkSignedFile {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string]$CertificateThumbprint,
+        [Parameter(Mandatory)][string]$SignToolPath
+    )
+    if ($CertificateThumbprint -notmatch '^[A-Fa-f0-9]{40}$') { throw 'Invalid certificate thumbprint' }
+    if (-not (Test-Path -LiteralPath $FilePath -PathType Leaf)) { throw 'Signed file does not exist' }
+    Invoke-UoinkSignTool $SignToolPath @('verify', '/pa', '/all', '/tw', $FilePath)
+    $signature = Get-AuthenticodeSignature -LiteralPath $FilePath -ErrorAction Stop
+    if ($signature.Status -ne 'Valid' -or $null -eq $signature.SignerCertificate -or
+        $signature.SignerCertificate.Thumbprint -ine $CertificateThumbprint) {
+        throw 'Signature must be trusted and match the selected publisher certificate'
+    }
+    if ($null -eq $signature.TimeStamperCertificate) { throw 'A verified timestamp is required' }
+    return [ordered]@{
+        path = [IO.Path]::GetFullPath($FilePath)
+        sha256 = (Get-FileHash -LiteralPath $FilePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        bytes = (Get-Item -LiteralPath $FilePath).Length
+        signer_subject = $signature.SignerCertificate.Subject
+        signer_thumbprint = $signature.SignerCertificate.Thumbprint
+        timestamp_thumbprint = $signature.TimeStamperCertificate.Thumbprint
+        verified_utc = [DateTime]::UtcNow.ToString('o')
+        signature_verified = $true
+        release_ready = $false
+    }
+}
+
+function Invoke-UoinkSignFile {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string]$CertificateThumbprint,
+        [Parameter(Mandatory)][string]$TimestampUrl,
+        [Parameter(Mandatory)][string]$SignToolPath
+    )
+    Assert-UoinkSigningConfiguration $CertificateThumbprint $TimestampUrl $SignToolPath
+    Assert-UoinkSigningCertificate $CertificateThumbprint
+    if (-not (Test-Path -LiteralPath $FilePath -PathType Leaf)) { throw 'File to sign does not exist' }
+    Invoke-UoinkSignTool $SignToolPath @('sign', '/sha1', $CertificateThumbprint,
+        '/s', 'My', '/fd', 'SHA256', '/tr', $TimestampUrl, '/td', 'SHA256', $FilePath)
+    return Assert-UoinkSignedFile $FilePath $CertificateThumbprint $SignToolPath
+}
+
+function Get-UoinkInnoSignCommand {
+    param(
+        [Parameter(Mandatory)][string]$PowerShellPath,
+        [Parameter(Mandatory)][string]$CallbackPath,
+        [Parameter(Mandatory)][string]$CertificateThumbprint,
+        [Parameter(Mandatory)][string]$TimestampUrl,
+        [Parameter(Mandatory)][string]$SignToolPath
+    )
+    Assert-UoinkSigningConfiguration $CertificateThumbprint $TimestampUrl $SignToolPath
+    foreach ($path in @($PowerShellPath, $CallbackPath)) {
+        Assert-UoinkSigningToken $path 'signing callback path'
+        if ($path -notmatch '^[A-Za-z]:[\\/]' -or -not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw 'Signing callback and PowerShell must be existing absolute files'
+        }
+    }
+    # $f and $q are Inno substitutions. No -Command, Invoke-Expression,
+    # arbitrary SignTool parameters or certificate passwords.
+    return ('/Suoinkrelease=$q{0}$q -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $q{1}$q -FilePath $f -CertificateThumbprint {2} -TimestampUrl {3} -SignToolPath $q{4}$q' -f
+        $PowerShellPath, $CallbackPath, $CertificateThumbprint, $TimestampUrl, $SignToolPath)
+}

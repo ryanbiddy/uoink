@@ -1,0 +1,12 @@
+﻿{
+    "started_utc":  "2026-09-13T04:56:11.6892111Z",
+    "finished_utc":  "2026-09-13T04:56:13.1874126Z",
+    "compiler":  "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    "compiler_sha256":  "0a8757031b33777e4c9cbffee40f11a5062b36d25cbe144c1db73b6102b80ad7",
+    "compiler_exit":  2,
+    "callback_command":  "/Suoinkrelease=$qC:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe$q -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $qE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing12-inno-wiring03\\observed callback.ps1$q -FilePath $f -CertificateThumbprint 0000000000000000000000000000000000000000 -TimestampUrl https://timestamp.example.test -SignToolPath $qE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing12-inno-wiring03\\Synthetic SDK with spaces\\signtool.exe$q",
+    "callback_invoked":  true,
+    "missing_certificate_refused":  true,
+    "installer_created":  false,
+    "actual_signature_credit":  false
+}

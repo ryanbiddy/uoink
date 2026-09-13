@@ -1,0 +1,40 @@
+{
+  "sealed_utc": "2026-09-13T04:58:38.535166+00:00",
+  "base_commit": "c5d33a4918e994c99d47be6bc7b92cca37393a9b",
+  "source_hashes": {
+    "build.ps1": "e13414fe0816d149628fcecba06b61f08723042d85d030d0c7760f59c0e4ac5f",
+    "installer/uoink.iss": "533bb3fb8af4935ecc236b6e3ed2683ca49f05cc78077fa9e5772c4f32fa5b40",
+    "scripts/installer_signing.ps1": "bbe3b2f8a12238be839c9f014f21113764a184000a35313ee6bf45e9d4293479",
+    "scripts/sign_installer.ps1": "52762d2cd6d789be7056504a0c6d675f6b5f715430fea9f93dd0ffd6c0a4feaf",
+    "tests/test_installer_signing.py": "98da74b7449a4c45741bb130062f8cc16d55384ead29a98f48277b224d3f21ac",
+    "docs/build-installer.md": "0e58f1f0f8bfacdb2adfa5cc88e663f496017986b7ee03b252377c5cc1434153",
+    "docs/library/RELEASE-SIGNING-REPAIR-BRIEF-2026-09-12.md": "5c269b528c191bd11ec826cc13d0a1577c730c8347fe9757ec8ae186dd9ea5b7"
+  },
+  "first_suite": {
+    "passed": 32,
+    "failed": 2,
+    "label": "signing12-checkout01"
+  },
+  "corrected_suite": {
+    "passed": 34,
+    "failed": 0,
+    "label": "signing12-checkout02"
+  },
+  "inno01": "Incomplete: wrapper stopped on expected native stderr before recording exit.",
+  "inno02": "Failed callback-evidence assertions: compiler output does not include callback output.",
+  "inno03": {
+    "started_utc": "2026-09-13T04:56:11.6892111Z",
+    "finished_utc": "2026-09-13T04:56:13.1874126Z",
+    "compiler": "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    "compiler_sha256": "0a8757031b33777e4c9cbffee40f11a5062b36d25cbe144c1db73b6102b80ad7",
+    "compiler_exit": 2,
+    "callback_command": "/Suoinkrelease=$qC:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe$q -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $qE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing12-inno-wiring03\\observed callback.ps1$q -FilePath $f -CertificateThumbprint 0000000000000000000000000000000000000000 -TimestampUrl https://timestamp.example.test -SignToolPath $qE:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing12-inno-wiring03\\Synthetic SDK with spaces\\signtool.exe$q",
+    "callback_invoked": true,
+    "missing_certificate_refused": true,
+    "installer_created": false,
+    "actual_signature_credit": false
+  },
+  "pre_repair_source_note": "Reconstructed from retained edit, not a contemporaneous full source snapshot.",
+  "actual_signature_credit": false,
+  "release_ready": false
+}

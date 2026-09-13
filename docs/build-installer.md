@@ -216,11 +216,34 @@ If the env var is missing, points at a non-existent path, or is not writable, Uo
 software may warn, block, or quarantine an unsigned candidate; behavior varies
 by machine, policy, reputation, and scanner.
 
-There is no signing step in `build.ps1` today. Any release-signing change needs
-an explicit release-owner decision, secure certificate/key handling,
-timestamping, and verification of the installer and shipped executables. Do
-not promise that a certificate will suppress every warning. Test the exact
-candidate on the supported Windows matrix and record what happened.
+`build.ps1 -ReleaseSigned` adds an optional signing path. It requires three
+explicit parameters: `-SigningCertificateThumbprint` (40 hex characters),
+`-TimestampUrl` (an HTTPS RFC 3161 service), and `-SignToolPath` (the absolute
+Windows SDK signtool.exe path). Ryan must choose the publisher certificate and
+service before an actual signed build. No certificate is created or purchased
+by this workflow, and actual signing has not yet been observed.
+
+The selected certificate must already exist in CurrentUser/My, have an available
+private key, be within its validity dates and include code-signing usage. The
+build passes its thumbprint, never a private key or password. Preflight failure
+stops before downloads or staging. Signing arguments without `-ReleaseSigned`
+are rejected, so a misspelled mode cannot silently produce an unsigned release.
+
+Inno signs Setup and its uninstaller through a fixed callback and uses a fresh
+uninstaller cache for each signed build. The callback requests SHA256 for both
+file and timestamp, rejects every nonzero SignTool result, and verifies the
+signature, timestamp and selected publisher. A final verification binds the
+installer hash in `build/Uoink-Setup-<VERSION>.exe.signature.json`. An unsigned
+build writes an explicitly unverified receipt, replacing any old signed receipt.
+Signing does not clear dependency or acceptance failures; the receipt therefore
+retains `release_ready=false`. Bundled third-party executables still require
+their separate provenance and security review.
+
+These commands follow [Microsoft's SignTool reference](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)
+and Inno's [SignTool](https://jrsoftware.org/ishelp/topic_setup_signtool.htm) and
+[SignedUninstaller](https://jrsoftware.org/ishelp/topic_setup_signeduninstaller.htm)
+options. A certificate does not guarantee that every security warning disappears.
+Test the exact candidate on the supported Windows matrix and record the result.
 
 ### Pip bootstrap pulls files we don't ship
 

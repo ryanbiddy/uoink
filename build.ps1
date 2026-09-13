@@ -27,7 +27,11 @@
 param(
     [switch]$Clean,
     [switch]$StageSourceOnly,
-    [string]$SourceStagePath
+    [string]$SourceStagePath,
+    [switch]$ReleaseSigned,
+    [string]$SigningCertificateThumbprint,
+    [string]$TimestampUrl,
+    [string]$SignToolPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -45,6 +49,21 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
+
+$signingArgs = @()
+if ($ReleaseSigned) {
+    if ($StageSourceOnly) { throw 'ReleaseSigned requires a complete installer build' }
+    . (Join-Path $RepoRoot 'scripts\installer_signing.ps1')
+    Assert-UoinkSigningConfiguration $SigningCertificateThumbprint $TimestampUrl $SignToolPath
+    Assert-UoinkSigningCertificate $SigningCertificateThumbprint
+    $signingArgs = @('/DReleaseSigning=1', (Get-UoinkInnoSignCommand `
+        -PowerShellPath (Join-Path $PSHOME 'powershell.exe') `
+        -CallbackPath (Join-Path $RepoRoot 'scripts\sign_installer.ps1') `
+        -CertificateThumbprint $SigningCertificateThumbprint `
+        -TimestampUrl $TimestampUrl -SignToolPath $SignToolPath))
+} elseif ($SigningCertificateThumbprint -or $TimestampUrl -or $SignToolPath) {
+    throw 'Signing parameters require -ReleaseSigned; refusing an accidental unsigned build'
+}
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
@@ -771,6 +790,14 @@ Write-Host "    normalized package timestamps to $($packageTimestampUtc.ToString
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
+if ($ReleaseSigned) {
+    # A fresh cache forces this build's uninstaller through the exact signer;
+    # Inno must not reuse a cached signature from another publisher or build.
+    $signedUninstallerDir = Join-Path $BuildDir ('signed-uninstallers\' + [Guid]::NewGuid().ToString('N'))
+    Assert-UoinkSigningToken $signedUninstallerDir 'SignedUninstallerDir'
+    New-Item -ItemType Directory -Path $signedUninstallerDir -ErrorAction Stop | Out-Null
+    $signingArgs += "/DReleaseSigningDir=$signedUninstallerDir"
+}
 $issTemplate = Join-Path $InstallerDir 'uoink.iss'
 $issGenerated = Join-Path $InstallerDir 'uoink.generated.iss'
 $issText = Get-Content -Raw $issTemplate
@@ -784,7 +811,7 @@ $issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"\r?$', "#define Ap
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($issGenerated, $issText, $utf8NoBom)
 try {
-    & $iscc /Q $issGenerated
+    & $iscc /Q @signingArgs $issGenerated
     if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
 } finally {
     Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
@@ -792,6 +819,21 @@ try {
 
 $exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
 if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }
+
+if ($ReleaseSigned) {
+    $signatureReceipt = Assert-UoinkSignedFile $exe $SigningCertificateThumbprint $SignToolPath
+    $signatureReceipt | ConvertTo-Json -Depth 4 |
+        Set-Content -LiteralPath "$exe.signature.json" -Encoding UTF8
+    Write-Host '    installer signature and timestamp verified; other release gates still apply'
+} else {
+    [ordered]@{
+        path = $exe
+        sha256 = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+        signature_verified = $false
+        release_ready = $false
+    } | ConvertTo-Json | Set-Content -LiteralPath "$exe.signature.json" -Encoding UTF8
+    Write-Host '    UNSIGNED REVIEW BUILD: not approved for public release' -ForegroundColor Yellow
+}
 
 $sizeMb = (Get-Item $exe).Length / 1MB
 Write-Host ''

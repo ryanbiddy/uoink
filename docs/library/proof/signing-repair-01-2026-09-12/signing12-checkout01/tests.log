@@ -1,0 +1,37 @@
+..........F.........F.............                                       [100%]
+================================== FAILURES ===================================
+_ test_signature_requires_trust_identity_and_timestamp[Valid-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-True-0] _
+tests\test_installer_signing.py:104: in test_signature_requires_trust_identity_and_timestamp
+    assert (result.returncode != 0) == bool(expected), result.stderr
+E   AssertionError: Assert-UoinkSignedFile : The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or 
+E     operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try 
+E     again.
+E     At E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\signing12-checkout01-0\t10\case.ps1:12 char:1
+E     + Assert-UoinkSignedFile 'E:\AI\projects\uoink\checkouts\Yoink-library\ ...
+E     + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E         + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [Assert-UoinkSignedFile], CommandNotFoundException
+E         + FullyQualifiedErrorId : CommandNotFoundException,Assert-UoinkSignedFile
+E      
+E     
+E   assert (1 != 0) == False
+E    +  where 1 = CompletedProcess(args=['C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe', '-NoProfile', '-NonInteractiv...edFile], CommandNotFoundException\n    + FullyQualifiedErrorId : CommandNotFoundException,Assert-UoinkSignedFile\n \n").returncode
+E    +  and   False = bool(0)
+________ test_sign_then_verify_has_explicit_algorithms_and_certificate ________
+tests\test_installer_signing.py:152: in test_sign_then_verify_has_explicit_algorithms_and_certificate
+    assert result.returncode == 0, result.stderr
+E   AssertionError: Assert-UoinkSignedFile : The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or 
+E     operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try 
+E     again.
+E     At E:\AI\projects\uoink\checkouts\Yoink-library\scripts\installer_signing.ps1:90 char:12
+E     +     return Assert-UoinkSignedFile $FilePath $CertificateThumbprint $S ...
+E     +            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E         + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [Assert-UoinkSignedFile], CommandNotFoundException
+E         + FullyQualifiedErrorId : CommandNotFoundException,Assert-UoinkSignedFile
+E      
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe', '-NoProfile', '-NonInteractiv...edFile], CommandNotFoundException\n    + FullyQualifiedErrorId : CommandNotFoundException,Assert-UoinkSignedFile\n \n").returncode
+=========================== short test summary info ===========================
+FAILED tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[Valid-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-True-0]
+FAILED tests/test_installer_signing.py::test_sign_then_verify_has_explicit_algorithms_and_certificate
+2 failed, 32 passed in 11.08s

@@ -67,6 +67,12 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; /CLOSEAPPLICATIONS, /FORCECLOSEAPPLICATIONS and /RESTARTAPPLICATIONS.
 CloseApplications=force
 ChangesEnvironment=no
+#ifdef ReleaseSigning
+SignTool=uoinkrelease
+SignedUninstaller=yes
+SignedUninstallerDir={#ReleaseSigningDir}
+SignToolRetryCount=0
+#endif
 
 [Messages]
 ; Net-new copy (WIZARD-COPY-AND-BITMAPS.md s1) to land the Uoink voice on the
