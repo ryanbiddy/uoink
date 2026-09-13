@@ -110,7 +110,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
-| Latest component council | Notice, operation and actual adapter brief frozen for Gemini | Three committed groups; 69 selected text files and three proof manifests match. No new verdict yet | Dispatch from the clean brief commit, review the complete report and integrate only its supported conclusions |
+| Latest component council | Gemini report retained as partial at 870fa00 | Run e30846da completed, but activity records show direct views of only30 of69 selected paths. Root verified all69 input bytes in both checkouts; this does not substitute for council review | Complete a focused supplement for omitted source, then reassess. No overall release acceptance |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -322,7 +322,12 @@ SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
 Its three groups are the notice product repair71d3e70, generated operations
 7fba83a and actual proposed-adapter observation7ced134. It names no suites:
 read the selected text sources and receipts only, then write the one report.
-All proof paths resolve under the assigned worker checkout. Root owns dispatch.
+All proof paths resolve under the assigned worker checkout. Run e30846da has
+completed and its original report is retained at870fa00 with Astra's verdict in
+ASTRA-NOTICES-OPERATIONS-ADAPTER-COUNCIL-VERDICT-2026-09-13.md. Review coverage
+is partial: only30 of69 selected paths have recorded direct views. A focused
+supplement must cover omitted source and correct the fixed-hash and line-reference
+claims. No rerun of the component measurements is requested.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5300,3 +5305,25 @@ are being prepared before execution. The runtime-owner plan also identifies
 missing PCM/filter issuance and the path-based WhisperX constructor connection;
 its next source unit will preserve the existing registry identity checks.
 These are active implementation items. Website and marketing remain paused.
+
+### 2026-09-13 - Partial council report retained; source supplement required
+
+Commit 870fa00 preserves Gemini run e30846da from 4f337f3 and Astra's disposition.
+The worker completed at 23:22:42.172Z and root tool d0886f returned0. Its report
+accepts all three groups with findings, but the retained activity only records
+views of30 of69 selected files;39 have neither a direct view nor an exact-file
+search. Do not claim the assigned review is complete. The next brief will cover
+omitted substantive source and explicitly separate source review from hashing.
+Root independently checked all69 selected files/716,129 bytes in both checkouts.
+
+The report also overstates fixed notice pins: two upstream licenses have fixed
+hashes; the index and README have source/copy consistency checks. Astra corrects
+its generator/Inno line references, cleanup wording and process-isolation scope.
+No new measured product defect follows from those documentary corrections.
+The12 proof payloads/204,438 bytes match Git and disk in fa76af, with seal
+3f9169b8ca9a0af10da145d6d78453ea6c7d4b52aa60925efb71d6f175fbd4f4.
+
+Independent recovery review found duplicate-exit finalization and a semantic-key
+token replacement bug. Both now have unexecuted repairs and negative cases.
+The full generated proposal has42 planned cases; root is reviewing its final
+launcher and input pins. Website and marketing remain paused.
