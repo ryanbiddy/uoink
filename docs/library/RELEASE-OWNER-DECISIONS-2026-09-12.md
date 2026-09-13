@@ -10,6 +10,7 @@ handoff reserves for Ryan. This document records proposals, not approvals.
 | Publisher signing | Select the publisher identity/certificate and HTTPS timestamp service. Use the repaired build's explicit certificate selector; do not buy a service, install trust roots or choose a certificate automatically. | SigningCertificateThumbprint, TimestampUrl and the approved signing mechanism. The existing SDK SignTool path is available; no Uoink signing certificate was found. Both installer and uninstaller must verify afterward. |
 | Claude Desktop isolation | Provide or authorize a fresh standard Windows account or VM, then complete its normal client sign-in. Do not reuse the failed profile-override technique. | Verify a different account/SID, fresh client configuration, no ordinary connectors or copied credentials, and access only to the test installation/profile. Inspect configuration before launch. No live-index/5179 probe is allowed. |
 | Historical AT6 evidence | Decide whether the original missing child-exit record blocks release or can be disclosed as an unrecoverable historical receipt gap. | Keep the original failing assertion, replacement receipts and failure count. A successful new run cannot recreate the old exit status. This decision gives no security or client acceptance. |
+| D1 static VAD inspection | Decide whether to inspect only two 500-byte buffers and two version bytes from the fixed existing checkpoint, using the reviewed adapter and fixed consistency basis. No model, pickle evaluation, conversion or network. | The concrete adapter is reviewed at 381985c with 54 synthetic passes in each root. See ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md. Real inspection remains disabled; any result requires review before a separate conversion decision. |
 | Model-stack migration | Review the exact future dependency/source patch and isolated model protocol before authorizing execution or frozen compatibility-test changes. No target stack is approved yet. | A compatible artifact manifest, loader and download-policy review, preserved original test expectations, proposed exact replacement assertions, and before/after quality criteria. The rejected Torch 2.10/Transformers 5.10 proposal cannot fill this role. |
 | Publication | Approve the final artifact set and public claims after technical qualification and the earlier decisions. | Final source/installer hashes, complete-tree counts, installed/client receipts, signing result, notes, upgrade/rollback steps, product-page preview and working links. Branch backup alone does not approve a release or main merge. |
 
@@ -27,7 +28,10 @@ Phase 2 suggestions-only scope, the 0.90 autonomous threshold, apply=false,
 the X blocked-link condition, no speaker claims and deferred Phase 5 Part B are
 already decided. Ryan does not need to approve them again.
 
-The latest completed branch backup is 19d51a8. The source repairs at 0b3629d,
-4aec8ff and 5e46f2f have focused verification, while package 08 still represents
-b8e44fb. The release notes must keep those identities separate until a replacement
-build and its qualification are complete.
+Updated 2026-09-13. The latest production repair is e8d058f, with 53 focused
+passes and 13 passing subtests in each root. Complete tree09 at 56d9d4c predates
+that repair and remains 2,796 passed, one failed, three skipped, plus 13 subtests.
+Package 08 still represents b8e44fb; no current-source package or installation
+credit exists. The latest completed branch backup is 19d51a8. Preserve these
+separate identities until replacement build and qualification are complete.
+Website and marketing remain paused until council and integrator accept Uoink.

@@ -1,0 +1,44 @@
+{
+  "label": "resolver-preflight01",
+  "inputs": [
+    {
+      "name": "trusted_asr_resolver.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\trusted_asr_resolver.py",
+      "sha256": "dab721bde82923010c47bc6ea9242b41a3befc7dd094bab2fb92b3cc1f13f407"
+    },
+    {
+      "name": "qualify_resolver.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\qualify_resolver.py",
+      "sha256": "d4843c142e6a79d1507fda25b21baf9de6198031d06b6c2b07c978332189a1ed"
+    },
+    {
+      "name": "six-model-plan.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-migration-owner-protocol01\\inputs\\six-model-plan.json",
+      "sha256": "cbd6e4c7d56b1dac1aa5f63f3e3b61a21137373d21bdd92e532fd0b5523e7850"
+    },
+    {
+      "name": "BRIEF.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\BRIEF.md",
+      "sha256": "6a391a35bd1c2e0d9c37d5134454a07fc9c6ac620b643b2bdab93578f44c1a62"
+    },
+    {
+      "name": "QUALIFICATION-PROTOCOL.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\QUALIFICATION-PROTOCOL.md",
+      "sha256": "fac721a80689308a70aa456e5c7a11b4c39d9e581f15a0a6d108323964fee1b3"
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\run_preflight01.ps1",
+      "sha256": "45753a6d115f31cd4aec76ec41c891ce0db8eb4437804c67aebeb2f3db44eea6"
+    }
+  ],
+  "startup_binding_set": true,
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "qualify_resolver.py"
+  ],
+  "generated_placeholder_files_only": true,
+  "real_approval_available": false
+}

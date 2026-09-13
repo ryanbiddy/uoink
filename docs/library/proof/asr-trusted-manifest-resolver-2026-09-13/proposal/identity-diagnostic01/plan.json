@@ -1,0 +1,44 @@
+{
+  "label": "identity-diagnostic01",
+  "inputs": [
+    {
+      "name": "diagnose_identity.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\diagnose_identity.py",
+      "sha256": "e2cab6f92965d4b4681f4fb2c35c944ff9266dfbb815769cf3d9b30f10b5d176"
+    },
+    {
+      "name": "run_identity_diagnostic01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\run_identity_diagnostic01.ps1",
+      "sha256": "210234edf551218bdbeed568444d7fa77868a9e15d417a7431ab5997e47d733f"
+    },
+    {
+      "name": "IDENTITY-DIAGNOSTIC01-BRIEF.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\IDENTITY-DIAGNOSTIC01-BRIEF.md",
+      "sha256": "c68efadeacdc6bc52b304e98f07157f09931c4e3b2bf7ffae1dfe3e5a465d953"
+    },
+    {
+      "name": "run01-plan.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\resolver-preflight01\\plan.json",
+      "sha256": "c58d26ca06a25d08c435fa9d123fa629a4d18e8da2361ba052bcab80d5b6e674"
+    },
+    {
+      "name": "run01-exit.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\resolver-preflight01\\exit.json",
+      "sha256": "74199d7ecee6ba00e741ef41b38d6a6430a9cbdb9023427aad0ce73872ff40ec"
+    },
+    {
+      "name": "run01-stdout.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\resolver-preflight01\\stdout.json",
+      "sha256": "08fb8079df2486d2e2227bd8791722cdb92073fb9a1a02bf8c25cc3c137e00ae"
+    }
+  ],
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "diagnose_identity.py"
+  ],
+  "startup_binding_set": true,
+  "fixed_retained_generated_files": 40,
+  "no_fixture_writes": true
+}

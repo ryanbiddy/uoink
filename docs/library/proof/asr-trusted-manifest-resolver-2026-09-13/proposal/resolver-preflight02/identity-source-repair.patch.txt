@@ -1,0 +1,68 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\drafts\\trusted_asr_resolver.pre-identity-repair.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\trusted_asr_resolver.py"
+index 6954ad6..f24555c 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\drafts\\trusted_asr_resolver.pre-identity-repair.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proposal01\\trusted_asr_resolver.py"
+@@ -79,6 +79,7 @@ class FileObservation:
+     size: int
+     sha256: str
+     identity: tuple
++    handle_identity: tuple
+ 
+ 
+ @dataclass(frozen=True)
+@@ -170,7 +171,19 @@ def _clock(started):
+ 
+ def _identity(observed):
+     return (observed.st_dev, observed.st_ino, observed.st_mode, observed.st_nlink,
+-            observed.st_size, observed.st_mtime_ns, observed.st_ctime_ns)
++            observed.st_size, observed.st_mtime_ns, observed.st_ctime_ns,
++            getattr(observed, "st_birthtime_ns", None))
++
++
++def _cross_api_identity(observed):
++    # Windows lstat/fstat can use different ctime namespaces. Retain both full
++    # same-API records; use exact required birthtime for the cross-API comparison.
++    if os.name == "nt":
++        birthtime = getattr(observed, "st_birthtime_ns", None)
++        require(type(birthtime) is int, "Required Windows birthtime unavailable")
++        return (observed.st_dev, observed.st_ino, observed.st_mode, observed.st_nlink,
++                observed.st_size, observed.st_mtime_ns, birthtime)
++    return _identity(observed)
+ 
+ 
+ def _unlinked_stat(path, *, directory):
+@@ -195,7 +208,8 @@ def _checked_chain(path, *, directory):
+     for count in range(len(parts) + 1):
+         current = anchor / Path(*parts[:count])
+         _unlinked_stat(current, directory=(directory or current != path))
+-    # Full ancestor refusal precedes resolution, so aliases cannot redirect reads.
++    # Refuse observed ancestor aliases before resolution. Later replacement is
++    # outside this check; callers must preserve the documented quiescent paths.
+     require(str(path.resolve(strict=True)) == str(path), "Path alias refused")
+     return _unlinked_stat(path, directory=directory)
+ 
+@@ -215,7 +229,7 @@ def _hash_asset(path, asset, synthetic, started):
+     digest, count, first = hashlib.sha256(), 0, b""
+     with path.open("rb") as stream:
+         opened = os.fstat(stream.fileno())
+-        require(_identity(opened) == _identity(before_path), "Asset changed before open")
++        require(_cross_api_identity(opened) == _cross_api_identity(before_path), "Asset changed before open")
+         while True:
+             _clock(started)
+             chunk = stream.read(min(CHUNK, asset.size - count + 1))
+@@ -228,12 +242,13 @@ def _hash_asset(path, asset, synthetic, started):
+             digest.update(chunk)
+         require(_identity(os.fstat(stream.fileno())) == _identity(opened), "Asset changed during read")
+     after_path = _checked_chain(path, directory=False)
+-    require(_identity(after_path) == _identity(opened), "Asset replaced after read")
++    require(_identity(after_path) == _identity(before_path)
++            and _cross_api_identity(after_path) == _cross_api_identity(opened), "Asset replaced after read")
+     require(count == asset.size and digest.hexdigest() == asset.sha256, "Asset size or SHA256 mismatch")
+     if synthetic:
+         require(first == SYNTHETIC_PREFIX, "Generated placeholder prefix required")
+     _clock(started)
+-    return FileObservation(asset.name, asset.size, asset.sha256, _identity(after_path))
++    return FileObservation(asset.name, asset.size, asset.sha256, _identity(after_path), _identity(opened))
+ 
+ 
+ def admit_snapshot(manifest, choice, private_root, snapshot):

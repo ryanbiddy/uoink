@@ -1,0 +1,2135 @@
+{
+  "schema": "uoink.synthetic-identity-diagnostic.v1",
+  "input_sha256": {
+    "diagnose_identity.py": "e2cab6f92965d4b4681f4fb2c35c944ff9266dfbb815769cf3d9b30f10b5d176",
+    "run01-plan.json": "c58d26ca06a25d08c435fa9d123fa629a4d18e8da2361ba052bcab80d5b6e674",
+    "run01-exit.json": "74199d7ecee6ba00e741ef41b38d6a6430a9cbdb9023427aad0ce73872ff40ec",
+    "run01-stdout.json": "08fb8079df2486d2e2227bd8791722cdb92073fb9a1a02bf8c25cc3c137e00ae"
+  },
+  "observed": 40,
+  "refused": 0,
+  "records": [
+    {
+      "path": "success-tiny\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880848,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962335900,
+        "st_birthtime_ns": 1789315548962335900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880848,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962335900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880848,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962335900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880848,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962335900,
+        "st_birthtime_ns": 1789315548962335900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-tiny\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880849,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880849,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880849,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880849,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-tiny\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880850,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880850,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880850,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880850,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548962838300,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-tiny\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880851,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548963339100,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880851,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548963339100,
+        "st_ctime_ns": 1789315548963339100,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880851,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548963339100,
+        "st_ctime_ns": 1789315548963339100,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880851,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548963339100,
+        "st_ctime_ns": 1789315548962838300,
+        "st_birthtime_ns": 1789315548962838300
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-medium\\medium\\08e178d48790749d25932bbc082711ddcfdfbc4f\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 61,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880869,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 61,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549008889100,
+        "st_birthtime_ns": 1789315549008889100
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880869,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 61,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549008889100
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880869,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 61,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549008889100
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880869,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 61,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549008889100,
+        "st_birthtime_ns": 1789315549008889100
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-medium\\medium\\08e178d48790749d25932bbc082711ddcfdfbc4f\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880870,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880870,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880870,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880870,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-medium\\medium\\08e178d48790749d25932bbc082711ddcfdfbc4f\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 64,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880871,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880871,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880871,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880871,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-medium\\medium\\08e178d48790749d25932bbc082711ddcfdfbc4f\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 64,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880872,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880872,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880872,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880872,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549009389600,
+        "st_ctime_ns": 1789315549009389600,
+        "st_birthtime_ns": 1789315549009389600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-large\\large\\edaa852ec7e145841d8ffdb056a99866b5f0a478\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 60,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880876,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 60,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880876,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 60,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880876,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 60,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880876,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 60,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-large\\large\\edaa852ec7e145841d8ffdb056a99866b5f0a478\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 58,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880877,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 58,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880877,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 58,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880877,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 58,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880877,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 58,
+        "st_mtime_ns": 1789315549014411400,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-large\\large\\edaa852ec7e145841d8ffdb056a99866b5f0a478\\preprocessor_config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 73,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880878,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 73,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880878,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 73,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880878,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 73,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880878,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 73,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014411400,
+        "st_birthtime_ns": 1789315549014411400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-large\\large\\edaa852ec7e145841d8ffdb056a99866b5f0a478\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 63,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880879,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 63,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880879,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 63,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880879,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 63,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880879,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 63,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-large\\large\\edaa852ec7e145841d8ffdb056a99866b5f0a478\\vocabulary.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 64,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880880,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880880,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880880,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880880,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 64,
+        "st_mtime_ns": 1789315549014913900,
+        "st_ctime_ns": 1789315549014913900,
+        "st_birthtime_ns": 1789315549014913900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-base\\base\\ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880855,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880855,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880855,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880855,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-base\\base\\ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880856,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880856,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880856,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880856,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-base\\base\\ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880857,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880857,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880857,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880857,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "success-base\\base\\ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880858,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880858,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880858,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880858,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315548968336600,
+        "st_ctime_ns": 1789315548968336600,
+        "st_birthtime_ns": 1789315548968336600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-hash\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880913,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549062958800,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880913,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549062958800,
+        "st_ctime_ns": 1789315549062958800,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880913,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549062958800,
+        "st_ctime_ns": 1789315549062958800,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880913,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549062958800,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-hash\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880914,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880914,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880914,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880914,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-hash\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880915,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880915,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880915,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880915,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549061953900,
+        "st_ctime_ns": 1789315549061953900,
+        "st_birthtime_ns": 1789315549061953900
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-hash\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880916,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549062459000,
+        "st_ctime_ns": 1789315549062459000,
+        "st_birthtime_ns": 1789315549062459000
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880916,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549062459000,
+        "st_ctime_ns": 1789315549062459000,
+        "st_birthtime_ns": 1789315549062459000
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880916,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549062459000,
+        "st_ctime_ns": 1789315549062459000,
+        "st_birthtime_ns": 1789315549062459000
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880916,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549062459000,
+        "st_ctime_ns": 1789315549062459000,
+        "st_birthtime_ns": 1789315549062459000
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-prefix\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880928,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549068960500,
+        "st_ctime_ns": 1789315549068960500,
+        "st_birthtime_ns": 1789315549068960500
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880928,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549068960500,
+        "st_ctime_ns": 1789315549068960500,
+        "st_birthtime_ns": 1789315549068960500
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880928,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549068960500,
+        "st_ctime_ns": 1789315549068960500,
+        "st_birthtime_ns": 1789315549068960500
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880928,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549068960500,
+        "st_ctime_ns": 1789315549068960500,
+        "st_birthtime_ns": 1789315549068960500
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-prefix\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880929,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880929,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880929,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880929,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "wrong-prefix\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880930,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880930,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880930,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880930,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549069460800,
+        "st_ctime_ns": 1789315549069460800,
+        "st_birthtime_ns": 1789315549069460800
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "earlier-file\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880997,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549099006400,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880997,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549099006400,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880997,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549099006400,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880997,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549099006400,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "earlier-file\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880998,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880998,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880998,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880998,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099006400,
+        "st_birthtime_ns": 1789315549099006400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "earlier-file\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880999,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880999,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880999,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978880999,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "earlier-file\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881000,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881000,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881000,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881000,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549099505700,
+        "st_ctime_ns": 1789315549099505700,
+        "st_birthtime_ns": 1789315549099505700
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "changed-between\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881004,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549102515600,
+        "st_birthtime_ns": 1789315549102515600
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881004,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549102515600
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881004,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549102515600
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881004,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549102515600,
+        "st_birthtime_ns": 1789315549102515600
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "changed-between\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881005,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881005,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881005,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881005,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "changed-between\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881006,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881006,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881006,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881006,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "changed-between\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881007,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881007,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881007,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881007,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549103019700,
+        "st_ctime_ns": 1789315549103019700,
+        "st_birthtime_ns": 1789315549103019700
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "replaced-same\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881011,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105015500,
+        "st_birthtime_ns": 1789315549105015500
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881011,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105015500
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881011,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105015500
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881011,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105015500,
+        "st_birthtime_ns": 1789315549105015500
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "replaced-same\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881012,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881012,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881012,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881012,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "replaced-same\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881013,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881013,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881013,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881013,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "replaced-same\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881014,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881014,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881014,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881014,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549105517400,
+        "st_ctime_ns": 1789315549105517400,
+        "st_birthtime_ns": 1789315549105517400
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "forged-admission\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\config.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 59,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881018,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549107517200,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881018,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549107517200,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881018,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549107517200,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881018,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 59,
+        "st_mtime_ns": 1789315549107517200,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "forged-admission\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\model.bin",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 57,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881019,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881019,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881019,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881019,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 57,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549107517200,
+        "st_birthtime_ns": 1789315549107517200
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [
+          "st_ctime_ns"
+        ],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [
+          "st_ctime_ns"
+        ],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "forged-admission\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\tokenizer.json",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881020,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881020,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881020,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881020,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    },
+    {
+      "path": "forged-admission\\tiny\\d90ca5fe260221311c53c58e660288d3deb8d356\\vocabulary.txt",
+      "status": "observed",
+      "prefix_verified": true,
+      "bytes_read": 62,
+      "lstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881021,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "fstat_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881021,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "fstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881021,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "lstat_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978881021,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 62,
+        "st_mtime_ns": 1789315549108017800,
+        "st_ctime_ns": 1789315549108017800,
+        "st_birthtime_ns": 1789315549108017800
+      },
+      "mismatched_fields": {
+        "lstat_before_vs_fstat_before": [],
+        "fstat_before_vs_fstat_after": [],
+        "fstat_after_vs_lstat_after": [],
+        "lstat_before_vs_lstat_after": []
+      }
+    }
+  ],
+  "elapsed_seconds": 0.063862,
+  "startup_binding_asserted": true,
+  "guard_denials": [],
+  "no_content_output": true,
+  "excluded_known_invalid_prefix": "wrong-prefix/tiny/d90ca5fe260221311c53c58e660288d3deb8d356/config.json",
+  "diagnostic_exit": 0
+}

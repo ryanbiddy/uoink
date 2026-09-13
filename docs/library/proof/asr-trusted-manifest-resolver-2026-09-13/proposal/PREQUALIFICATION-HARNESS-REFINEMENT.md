@@ -1,0 +1,3 @@
+2026-09-13. No execution has occurred. Preserve initial qualify_resolver.py as drafts/qualify_resolver.initial-unexecuted.py, SHA-256 e27bd2ae0e13cadea89dcd0af433e6dc7ea385b692e01e2a986329cde6368247.
+
+Add two aggregate byte-bound cases using only tighter test-local limits. Replace the final-deadline case's clock-call count with an expiry after the final file identity check; this verifies refusal immediately before admission without depending on the number of earlier clock calls. All existing behavior assertions remain unchanged in intent. An initial apply_patch tried an incorrect decorator context for the insertion and refused without writing a file; the subsequent patch uses the actual doc_negative line. This was a text-edit refusal, not a qualification outcome.

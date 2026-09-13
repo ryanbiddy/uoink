@@ -1,0 +1,2 @@
+UOINK-SYNTHETIC-ASR-ASSET
+tiny:vocabulary.txt:placeholder-only

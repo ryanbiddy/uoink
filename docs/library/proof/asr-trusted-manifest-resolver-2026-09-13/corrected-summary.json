@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-13",
+  "preliminary_manifest_sha256": "d6019311cb7e62b49148cfeb40e2aafc3c38c99c0e859d9df28a03eb3179274a",
+  "preliminary_sealer_exit": 0,
+  "preliminary_summary_incomplete": true,
+  "original_payloads_copied_unchanged": 134,
+  "original_payload_bytes": 1240989,
+  "original_file_hashes_verified": true,
+  "fixture_files": 415,
+  "fixture_directories": 312,
+  "fixture_uncompressed_bytes": 24861,
+  "fixture_archive_bytes": 181472,
+  "diagnostic_fixture_copies": 40,
+  "no_rerun_or_payload_edit": true
+}
