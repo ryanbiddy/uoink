@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Finish exact loader/conversion and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Finish exact loader/conversion and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Repair reliability consent/readiness and model-setting copy under brief44e69fc; continue VAD/dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -230,7 +230,15 @@ repair is independent of the reserved model migration decisions below.
    builds each exit0 with valid guards and identical 1,388,022-byte output,
    SHA256 97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4.
    B3 remains uninstalled. Do not rebuild without a new change or concern.
-   Continue fixed VAD conversion/provenance and retained Pipeline contracts;
+   ASR metadata and Pipeline contracts are archived at 2f8464a; read
+   ASTRA-ASR-METADATA-PIPELINE-VERDICT-2026-09-13.md. All 39/53 payloads
+   match Git and disk. Author/root each pass 23 synthetic contracts for the
+   shipped generator path; optional direct-empty-list IndexError remains.
+   Six immutable model plans support approximate size labels only. Six LFS
+   SHA256 records and 20 unknown auxiliary SHA256 values are not an accepted
+   manifest. The first failed capture and later diagnostic/canonical capture
+   remain distinct. No new Pipeline rerun is needed without a changed seam.
+   Continue fixed VAD conversion/provenance and runtime qualification;
    no migration, frozen-test, native-model or release acceptance follows.
    Windows casing alone is not a Path inequality; reject the resolve-first
    suggestion because it discards alias evidence. B2 is built but not installed.
@@ -4231,3 +4239,17 @@ remain. Astra's separate historical HTML-card web open returned no content
 because of a URL-safety/InternalError; it adds no evidence or access approval.
 No artifact was reopened. Full-tree and release status are unchanged. Grok
 0851b440 is repairing reliability consent/settings; website/marketing remain held.
+### 2026-09-13 - ASR metadata and generator contracts integrated
+
+2f8464a preserves the 39-payload ASR and 53-payload Pipeline proofs and Astra's
+verdict. All payloads match Git and disk. Root's metadata capture has six
+immutable model plans and independently checked selected-file totals, suitable
+for approximate settings labels. It does not approve model assets: six LFS
+hashes are advertised; 20 ordinary files still lack SHA256. The original
+11-request capture remains failed with exit1; separate redirect diagnostic
+and canonical two-request capture each exit0. No failed request became a pass.
+Author and root each pass the same 23 Pipeline contracts, all raw exits0 and
+guards valid. The direct-empty-list diagnostic remains IndexError outside those
+cases; the shipped audio-generator path handles no speech correctly. No native
+runtime, package, source, installed or full-tree result changed. Continue the
+consent/settings repair and VAD proposal. Website and marketing remain held.
