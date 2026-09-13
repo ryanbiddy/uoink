@@ -1,0 +1,17 @@
+{
+  "schema": "uoink.lifecycle-static-preservation.v1",
+  "executed_candidate_cases": 0,
+  "original_function_count": 50,
+  "changed_existing_functions": [
+    "audit"
+  ],
+  "preserved_behavior_function_count": 49,
+  "original_case_count": 44,
+  "added_case_count": 2,
+  "literal_expected_case_count": 46,
+  "inputs": {
+    "drafts/qualify_lifecycle.before-guard04.py": "2782aacc5cb9e0223f55f4475714e1e3cbe0e5a3f14a54eb0f5e1803f6242ade",
+    "qualify_lifecycle.py": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05",
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  }
+}

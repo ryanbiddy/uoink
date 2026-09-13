@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-windows-lifecycle-proposal01\runs\lcs01\qualify_lifecycle.py", line 21, in <module>
+    assert not HEAVY.intersection(name.split(".")[0] for name in sys.modules)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

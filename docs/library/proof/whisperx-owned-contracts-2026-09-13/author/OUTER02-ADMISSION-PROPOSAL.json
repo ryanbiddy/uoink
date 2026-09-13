@@ -1,0 +1,34 @@
+{
+  "status": "PROPOSED_NOT_ADMITTED_OR_EXECUTED",
+  "date": "2026-09-13",
+  "repair_brief_sha256": "94da01881970af0dd513fedf5267642a9e9d45c22236f95197d2ca5a2d99459f",
+  "command": [
+    "C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+    "-NoProfile",
+    "-File",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-builder-proposal01\\run_preflight01.ps1",
+    "-ExpectedManifestSha256",
+    "5602d0e46f91739c40799e0ce2592560274cc70c252421f856d3cf77133bcd9f"
+  ],
+  "launcher_sha256": "cab30add712b736f5cdb5c15d51b2fbebb43e7d45ec113bb4ff545480ea5041c",
+  "outer_result_path": "actual-outer-tool-result-host02.json",
+  "fresh_child_label": "qualification01",
+  "planned_cases": 50,
+  "source_and_assertion_changes": false,
+  "previous_outer": {
+    "tool_chunk": "bc920e",
+    "exit": 1,
+    "child_started": false,
+    "cases_run": 0,
+    "preserved_path": "actual-outer-tool-result.json"
+  },
+  "root_path_observation": {
+    "source": "Root message, transcribed tool facts rather than a raw tool object",
+    "tool_chunk": "8c8ac8",
+    "tool_exit": 0,
+    "tool_seconds": 0.0978913,
+    "shell": "PowerShell Core 7.6.5",
+    "matches_proposed_executable": true
+  },
+  "scope": "One inert qualification only. No actual wheel publication, native/model runtime, asset reads, install or broader rerun. Preserve failures and stop for diagnosis."
+}

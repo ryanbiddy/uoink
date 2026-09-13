@@ -1,0 +1,47 @@
+{
+  "status": "DOCUMENTARY_VERIFIED",
+  "source_payload_count": 207,
+  "source_bytes": 1539742,
+  "original_input_manifests_verified": 2,
+  "derivative_source_manifest_verified": true,
+  "complete_observations_equal": true,
+  "first_host_attempt": {
+    "tool": "bc920e",
+    "actual_exit": 1,
+    "cases_run": 0
+  },
+  "runs": [
+    {
+      "run": "author",
+      "passed": 50,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "subtests": 0,
+      "harness_seconds": 0.7117929999949411,
+      "actual_outer_seconds": 1.2507068000000001,
+      "child_exit": 0,
+      "native_exit": 0,
+      "actual_outer_exit": 0,
+      "result_sha256": "a82d979a4e34b29d9a46b0550f99811b9ac87e8be0fa837012f077a401889b6d"
+    },
+    {
+      "run": "root",
+      "passed": 50,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "subtests": 0,
+      "harness_seconds": 0.7267135000147391,
+      "actual_outer_seconds": 1.2380706,
+      "child_exit": 0,
+      "native_exit": 0,
+      "actual_outer_exit": 0,
+      "result_sha256": "c234beb5da965cab1357470eab81bd3d7abf8d9970fcaa639ebf5d6431f4f0c5"
+    }
+  ],
+  "tests_rerun": false,
+  "wheel_built_or_imported": false,
+  "model_or_native_runtime_executed": false,
+  "finished_utc": "2026-09-13T19:10:06.4671948Z"
+}

@@ -1,0 +1,187 @@
+[
+  {
+    "path": "ACTUAL-TOOL-LCS01.json",
+    "bytes": 124,
+    "sha256": "c8ab1a0a01bb6e90172a3ab8ec08f797eba574170a9ed6de2a37995dd672287c"
+  },
+  {
+    "path": "ADAPTER-INTEGRATION-GAP.md",
+    "bytes": 1642,
+    "sha256": "18a76e607d8c523fee43a8724c500c43dcf7dde33b4451e5192b14215923d759"
+  },
+  {
+    "path": "BRIEF.md",
+    "bytes": 2328,
+    "sha256": "5c8abf398e04dc1ed31dd73d27f8ce319b1a839cc9f9cac3aa21ef40a7869665"
+  },
+  {
+    "path": "EXPECTED-CASES.json",
+    "bytes": 2562,
+    "sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228"
+  },
+  {
+    "path": "PORT-CONTRACT.md",
+    "bytes": 5008,
+    "sha256": "83b53a1e9116d652afffce2a01c033cb39a1e412ab3b1b8ed13982390e945f95"
+  },
+  {
+    "path": "prepare_binding04.py",
+    "bytes": 2617,
+    "sha256": "72a03b48d219cebb8e6576d3cfe651015cf7914dda22801dcd6e6b7c4f7b4ed3"
+  },
+  {
+    "path": "PREQUALIFICATION-REPAIR01.md",
+    "bytes": 1164,
+    "sha256": "be611334e2c5a4d8b11e6562e133985a806376f3da51d776759d0a5b29e8e2de"
+  },
+  {
+    "path": "PREQUALIFICATION-REPAIR03.md",
+    "bytes": 940,
+    "sha256": "d9ab08cc35e61025d1d2326aed234c6ca60d3a53d0bc725554de38c3c07d6324"
+  },
+  {
+    "path": "PREQUALIFICATION-REPAIR04.md",
+    "bytes": 1400,
+    "sha256": "b7e53dd2867cd12be1922958ab5f5f754b20cfde0d71c83bfee3bc521ff8e333"
+  },
+  {
+    "path": "QUALIFICATION04-PROTOCOL.md",
+    "bytes": 3247,
+    "sha256": "dc979f86db7e40fcf21dc4397093811c2976079d64b1bcd03812853a6209579a"
+  },
+  {
+    "path": "qualify_lifecycle.py",
+    "bytes": 24246,
+    "sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05"
+  },
+  {
+    "path": "qualify_lifecycle.py.repair04.diff.txt",
+    "bytes": 10367,
+    "sha256": "fd3e15ba5926489e4e451f406fc48bc24cbb2c6455ca936c52ba7d0ceeb74a4e"
+  },
+  {
+    "path": "ROOT-ADMISSION-TEMPLATE.json",
+    "bytes": 3096,
+    "sha256": "4bf5b5e4aa6ae0e0c4e22ba16c2e44b3174b35ea0ad323bcd8871cd79b64725b"
+  },
+  {
+    "path": "ROOT-ADMISSION.json",
+    "bytes": 3474,
+    "sha256": "e0af8981bc0d371e8cb678bbe777454810969dd2e87e069c85ef8ab713cdf1a3"
+  },
+  {
+    "path": "ROOT-REVIEW-REPAIR02.md",
+    "bytes": 2110,
+    "sha256": "b08df71e072124ecf11a46cbb596b201484b644c1373ca752fb97db646e6cee7"
+  },
+  {
+    "path": "run_lifecycle01.ps1",
+    "bytes": 7911,
+    "sha256": "3a6a866a24af4e12740466422d44bbaf2746318376200e4f35abe59df2aa1eb3"
+  },
+  {
+    "path": "snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "snapshot_lifecycle.py.repair04.diff.txt",
+    "bytes": 3034,
+    "sha256": "9e1f65ba71b12a03746c604aee93e0d2f713228fe205df49bc4133964be4664f"
+  },
+  {
+    "path": "STATIC-PRESERVATION04.json",
+    "bytes": 654,
+    "sha256": "9a5ff984e991be9b7dd3e89d122f67020a3a9d3f948b8c77b424e4967c9da668"
+  },
+  {
+    "path": "SYNTHETIC-QUALIFICATION-PROTOCOL.md",
+    "bytes": 2456,
+    "sha256": "39d7718389333cf8e72d0db3ec5f31e3e8737021ccac4272f7224cf96291a95b"
+  },
+  {
+    "path": "WINDOWS-KERNEL-PROTOCOL-DRAFT.md",
+    "bytes": 3957,
+    "sha256": "e653ac768b0ca655d795368998a65894e63943ecc0b450b11fce3e46956ef270"
+  },
+  {
+    "path": "drafts/qualify_lifecycle.before-guard04.py",
+    "bytes": 18499,
+    "sha256": "2782aacc5cb9e0223f55f4475714e1e3cbe0e5a3f14a54eb0f5e1803f6242ade"
+  },
+  {
+    "path": "drafts/snapshot_lifecycle.before-publication04.py",
+    "bytes": 21243,
+    "sha256": "5f6d1d77ae8eacb78c9cb9dc7fe74f7f80c6d0eacd9372be78d7b17db56b8ae9"
+  },
+  {
+    "path": "drafts/snapshot_lifecycle.before-root-review02.py",
+    "bytes": 14837,
+    "sha256": "38adf9a8719048236379e72ee87ef79f436eff445bf0cb58af4e7e16d69ff8ed"
+  },
+  {
+    "path": "drafts/snapshot_lifecycle.before-stream-serialization03.py",
+    "bytes": 20538,
+    "sha256": "a1535e3997556af5b4cad0c70f64d33da1a8046225d8de9d970e2a8507b06388"
+  },
+  {
+    "path": "drafts/snapshot_lifecycle.initial-unexecuted.py",
+    "bytes": 14431,
+    "sha256": "c84a111c61f177b88226b9a05c89ae961c969fd8a91f11002a3b5828778e571d"
+  },
+  {
+    "path": "runs/lcs01/after.json",
+    "bytes": 1312,
+    "sha256": "794979980c184ab4c09c0ac6f3c7a4996489bdc0c18a3f57eaf365524fb4323b"
+  },
+  {
+    "path": "runs/lcs01/exit.json",
+    "bytes": 217,
+    "sha256": "0300bf25fa0f8475f824ad7688c690010b42579890fc376b1d8668635ef7899c"
+  },
+  {
+    "path": "runs/lcs01/EXPECTED-CASES.json",
+    "bytes": 2562,
+    "sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228"
+  },
+  {
+    "path": "runs/lcs01/native-exit.json",
+    "bytes": 71,
+    "sha256": "aeee035603a175bfaf303c739a8be6405b2a1a44ffea3256aa7a1612764b9ef5"
+  },
+  {
+    "path": "runs/lcs01/plan.json",
+    "bytes": 3884,
+    "sha256": "5030d89bac3846a81d5fa6f7f0e5e1188f260303d640fde02a426477edd1b96f"
+  },
+  {
+    "path": "runs/lcs01/qualify_lifecycle.py",
+    "bytes": 24246,
+    "sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05"
+  },
+  {
+    "path": "runs/lcs01/ROOT-ADMISSION.json",
+    "bytes": 3474,
+    "sha256": "e0af8981bc0d371e8cb678bbe777454810969dd2e87e069c85ef8ab713cdf1a3"
+  },
+  {
+    "path": "runs/lcs01/run_lifecycle01.ps1",
+    "bytes": 7911,
+    "sha256": "3a6a866a24af4e12740466422d44bbaf2746318376200e4f35abe59df2aa1eb3"
+  },
+  {
+    "path": "runs/lcs01/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "runs/lcs01/stderr.log",
+    "bytes": 361,
+    "sha256": "1c7754dc7401a7cd25973026a4642a09efe87e52388f5fb81aae495556d40c4b"
+  },
+  {
+    "path": "runs/lcs01/stdout.json",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

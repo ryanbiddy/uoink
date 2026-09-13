@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bc920e",
+  "wall_time_seconds": 0.1263347,
+  "exit_code": 1,
+  "original_token_count": 100,
+  "output": "&: \r\nLine |\r\n   2 |  & 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' -NoProfile -File 'E:\\AI\\pr …\r\n     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | The term 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n"
+}

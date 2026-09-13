@@ -1,0 +1,113 @@
+{
+  "release_commit": "3ccc17b8de34f305300f8a3fd3c9f76ba820c0d0",
+  "tree_response_sha256": "7764dd3110af64e2c4dba9735c76c4ff79d2385cdee0d55b260a107c07141ff4",
+  "selected_bindings": [
+    {
+      "path": "whisperx/__init__.py",
+      "sha256": "f509cd97d1b4e3c971862cfd5fef80d6980e0141224625ab4fa1bff2f2a71968",
+      "bytes": 1452,
+      "git_blob_sha1": "b8f93feccd2afbd857ae144df0ca82e769102516",
+      "matched": true
+    },
+    {
+      "path": "whisperx/asr.py",
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565",
+      "bytes": 17620,
+      "git_blob_sha1": "4011486471b5bc1cab3a074f31165d9547e7e1b7",
+      "matched": true
+    },
+    {
+      "path": "whisperx/audio.py",
+      "sha256": "b37154608b33369e7ca516862ef2fa0d0bd1e095fa5dd63a2a9014bf5f96ed36",
+      "bytes": 4926,
+      "git_blob_sha1": "63a53ca325c628619cb84e17c440be35af88da26",
+      "matched": true
+    },
+    {
+      "path": "whisperx/schema.py",
+      "sha256": "fb6a124b00eb28a1d77c164753a80c60b66b82acc2c780d1ee988f9d2d9baf82",
+      "bytes": 1839,
+      "git_blob_sha1": "e5287794ba164f24e35a7747f45c1d25dbf035a2",
+      "matched": true
+    },
+    {
+      "path": "whisperx/log_utils.py",
+      "sha256": "ee79c8cd2ed7171a13100962841ce0a27457ea7bfb4b357aa03ee8b49d899042",
+      "bytes": 1926,
+      "git_blob_sha1": "3015f5325dbaab587320ae02728e2afe08dc7b44",
+      "matched": true
+    },
+    {
+      "path": "whisperx/utils.py",
+      "sha256": "991409c66f31c30cc5d309f4e8ce39c9415825429c1277d65d62c045caa0e5d9",
+      "bytes": 15711,
+      "git_blob_sha1": "510fd9c876f673333939c79840909c28fad72b4a",
+      "matched": true
+    },
+    {
+      "path": "whisperx/vads/__init__.py",
+      "sha256": "817dfd888a38bacd0d89b97382e334b58646330c355aecd8d294f0a132ce439c",
+      "bytes": 147,
+      "git_blob_sha1": "834c794be6731f3555537728fb15e1c2eac17286",
+      "matched": true
+    },
+    {
+      "path": "whisperx/vads/vad.py",
+      "sha256": "f901c04d208abf64107ea88404c36341394c7f0b705f78210abe25bd4f25ae87",
+      "bytes": 1575,
+      "git_blob_sha1": "32521328e03069071e485019e3c2a1e8450e6efb",
+      "matched": true
+    },
+    {
+      "path": "whisperx/vads/pyannote.py",
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003",
+      "bytes": 9880,
+      "git_blob_sha1": "4e05101d262a45908d0a6d92ea2f33c214cf5eb3",
+      "matched": true
+    },
+    {
+      "path": "whisperx/vads/silero.py",
+      "sha256": "f054f968c757a2329efa8ad72c44d061b0596bfc92b2c8e47d1dc7d8ec877055",
+      "bytes": 3043,
+      "git_blob_sha1": "24a64d4f9ecd9bd3918c1cd02ebdda4d5666bb01",
+      "matched": true
+    },
+    {
+      "path": "whisperx/alignment.py",
+      "sha256": "cc3607dcc25e592ae218f74a6ca644d6ce1c77d9cee4672f01c751da8feb9aa7",
+      "bytes": 21696,
+      "git_blob_sha1": "12f123fd28624c84a274d4604dd4d9b4f64b07bc",
+      "matched": true
+    },
+    {
+      "path": "whisperx/diarize.py",
+      "sha256": "489d4f9ad7419cb2aed26409c5fd8c49ae2d57cb5647c621c8d4613bed1e7f85",
+      "bytes": 10438,
+      "git_blob_sha1": "b767416e69b92bbcd48d6db06580719c69925b84",
+      "matched": true
+    },
+    {
+      "path": "whisperx/__main__.py",
+      "sha256": "1255992c2f119863dc32a637da7bd5cdcc59c845335ba79770a942060f56eb5b",
+      "bytes": 9227,
+      "git_blob_sha1": "cd28112592ece578fad9e80d2cd1007762ecbc6a",
+      "matched": true
+    },
+    {
+      "path": "whisperx/transcribe.py",
+      "sha256": "c06056b54fab483980a835f7fafdcf2e1819545c558ec2d82228efea0f4a1084",
+      "bytes": 9006,
+      "git_blob_sha1": "7c8be6794da2d2afda6c27276a840b71ba3262b4",
+      "matched": true
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "aabe8d8b1c014dc8ab27ef1b0491b070c798a9a2e9c8facd3cec2c4a0977348d",
+      "bytes": 2328,
+      "git_blob_sha1": "0759abbbd1f2ab0249a18f1a0ad595aa9b5712ce",
+      "matched": true
+    }
+  ],
+  "missing_original_manifest": "MANIFEST.in body not captured",
+  "new_network": false
+}

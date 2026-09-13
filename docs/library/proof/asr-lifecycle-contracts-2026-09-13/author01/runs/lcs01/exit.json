@@ -1,0 +1,10 @@
+{
+  "native_exit": 1,
+  "outer_exit": 1,
+  "inputs_unchanged": true,
+  "receipt_valid": false,
+  "receipt_parse_error_type": null,
+  "stdout_bytes": 0,
+  "stderr_bytes": 361,
+  "startup_binding_set": true
+}

@@ -1,0 +1,6 @@
+{
+  "scope": "One module-name startup diagnostic only; zero lifecycle cases",
+  "source_sha256": "30b39e6d90adb086baa92e616f5c8938416d5fca617608de0dbf50c03624131d",
+  "root_reviewed": true,
+  "native_or_model_admitted": false
+}

@@ -1,0 +1,55 @@
+--- drafts/snapshot_lifecycle.before-publication04.py
++++ snapshot_lifecycle.py
+@@ -455,11 +455,16 @@
+         session = self._session
+         value = session._call(session._manager._kernel.next_segment, self._cursor)
+         if value is None:
+-            self._exhausted = True
+-            raise StopIteration
++            with session._manager._lock:
++                session._require_live()
++                if self._exhausted:
++                    raise SessionClosed("Stream was cancelled before completion publication")
++                self._exhausted = True
++                raise StopIteration
++        contract = self._contract
+         try:
+             value = _validate_segment(value)
+-            duration = self._contract.sample_count / self._contract.sample_rate
++            duration = contract.sample_count / contract.sample_rate
+             if value.start < self._last_end or value.end > duration:
+                 raise LifecycleUnavailable("Segment chronology or owned-media duration was violated")
+             word_end = value.start
+@@ -470,17 +475,27 @@
+             segments = self._segments + 1
+             words = self._words + len(value.words)
+             text_chars = self._text_chars + len(value.text) + sum(len(word.text) for word in value.words)
+-            if (segments > self._contract.max_segments or words > self._contract.max_words
+-                    or text_chars > self._contract.max_text_chars):
++            if (segments > contract.max_segments or words > contract.max_words
++                    or text_chars > contract.max_text_chars):
+                 raise LifecycleUnavailable("Owned transcript aggregate budget was exceeded")
+-            self._segments, self._words, self._text_chars = segments, words, text_chars
+-            self._last_end = value.end
+-            return value
+         except BaseException as exc:
+             self._exhausted = True
+             with session._manager._lock:
+                 session._manager._quarantine_preserving(session._record, "Worker output contract failed", exc)
+             raise
++        # Publication is linearized here with cancellation/session revocation.
++        # A passive result committed first may reach the caller after a later
++        # close; a close that wins this lock prevents the commit and counters.
++        with session._manager._lock:
++            session._require_live()
++            if self._exhausted:
++                raise SessionClosed("Stream was cancelled before result publication")
++            if self._contract is not contract:
++                session._manager._quarantine(self._session._record, "Issued result contract changed before publication")
++                raise LifecycleUnavailable("Issued result contract changed")
++            self._segments, self._words, self._text_chars = segments, words, text_chars
++            self._last_end = value.end
++            return value
+ 
+     def close(self):
+         session = self._session

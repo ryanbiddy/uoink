@@ -1,0 +1,290 @@
+{
+  "schema": "uoink.lifecycle-state-synthetic.v1",
+  "cases": [
+    {
+      "name": "real_port_absent_refuses_before_any_io",
+      "passed": true
+    },
+    {
+      "name": "plain_read_lease_holds_then_releases_once",
+      "passed": true
+    },
+    {
+      "name": "duplicate_reader_and_writer_refused_while_leased",
+      "passed": true
+    },
+    {
+      "name": "native_permit_is_single_use",
+      "passed": true
+    },
+    {
+      "name": "forged_or_foreign_permit_refused",
+      "passed": true
+    },
+    {
+      "name": "cannot_confirm_native_closed_before_join",
+      "passed": true
+    },
+    {
+      "name": "unowned_native_reservation_quarantines",
+      "passed": true
+    },
+    {
+      "name": "full_stream_lifetime_then_verified_release",
+      "passed": true
+    },
+    {
+      "name": "retained_facade_and_stream_refuse_after_close",
+      "passed": true
+    },
+    {
+      "name": "one_transcription_per_session_bounds_cursor_count",
+      "passed": true
+    },
+    {
+      "name": "unowned_media_ticket_refused_before_begin",
+      "passed": true
+    },
+    {
+      "name": "shape_valid_but_unissued_contract_refused",
+      "passed": true
+    },
+    {
+      "name": "acquire_exception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "acquire_baseexception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "start_exception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "start_baseexception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "join_exception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "join_baseexception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "quiet_exception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "quiet_baseexception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "release_exception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "release_baseexception_quarantines_preserving_error",
+      "passed": true
+    },
+    {
+      "name": "nontrue_join_false_retains_protection",
+      "passed": true
+    },
+    {
+      "name": "nontrue_join_none_retains_protection",
+      "passed": true
+    },
+    {
+      "name": "nontrue_join_integer1_retains_protection",
+      "passed": true
+    },
+    {
+      "name": "cancel_false_quarantines_and_revokes",
+      "passed": true
+    },
+    {
+      "name": "cancel_exception_quarantines_and_revokes",
+      "passed": true
+    },
+    {
+      "name": "cancel_baseexception_quarantines_and_revokes",
+      "passed": true
+    },
+    {
+      "name": "failed_quarantine_preserves_original_interruption",
+      "passed": true
+    },
+    {
+      "name": "release_interrupt_preserves_existing_context_error",
+      "passed": true
+    },
+    {
+      "name": "concurrent_quarantine_is_not_cleared_by_late_join",
+      "passed": true
+    },
+    {
+      "name": "inflight_operation_during_close_keeps_quarantine",
+      "passed": true
+    },
+    {
+      "name": "ordinary_operation_error_can_be_cleaned_and_released",
+      "passed": true
+    },
+    {
+      "name": "operation_interruption_quarantines_immediately",
+      "passed": true
+    },
+    {
+      "name": "concurrent_stream_next_refused_without_second_worker_call",
+      "passed": true
+    },
+    {
+      "name": "past_media_duration_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "negative_time_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "nonfinite_time_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "segment_backtrack_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "word_overlap_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "segment_count_budget_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "word_count_budget_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "aggregate_text_budget_refused_before_invalid_yield",
+      "passed": true
+    },
+    {
+      "name": "duration_and_aggregate_limits_accept_exact_boundary",
+      "passed": true
+    },
+    {
+      "name": "session_close_during_validation_refuses_publication",
+      "passed": true
+    },
+    {
+      "name": "stream_cancel_during_validation_refuses_publication",
+      "passed": true
+    }
+  ],
+  "passed": 46,
+  "failed": 0,
+  "input_sha256": {
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "qualify_lifecycle.py": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7"
+  },
+  "guard_denials": [],
+  "heavy_roots_loaded": [],
+  "metadata_traps_installed": true,
+  "metadata_trap_count": 12,
+  "content_reads_closed": true,
+  "baseline_winreg_identity_unchanged": true,
+  "registry_namespace_unchanged": true,
+  "registry_traps_installed": true,
+  "registry_trap_names": [
+    "CloseKey",
+    "ConnectRegistry",
+    "CreateKey",
+    "CreateKeyEx",
+    "DeleteKey",
+    "DeleteKeyEx",
+    "DeleteValue",
+    "DisableReflectionKey",
+    "EnableReflectionKey",
+    "EnumKey",
+    "EnumValue",
+    "ExpandEnvironmentStrings",
+    "FlushKey",
+    "HKEYType",
+    "LoadKey",
+    "OpenKey",
+    "OpenKeyEx",
+    "QueryInfoKey",
+    "QueryReflectionKey",
+    "QueryValue",
+    "QueryValueEx",
+    "SaveKey",
+    "SetValue",
+    "SetValueEx",
+    "error"
+  ],
+  "registry_trap_count": 25,
+  "registry_denials": [],
+  "captures_installed": true,
+  "capture_valid": true,
+  "stdout_capture": "",
+  "stderr_capture": "",
+  "guard_valid": true,
+  "native_exit": 0,
+  "count": 46,
+  "skipped": 0,
+  "elapsed_seconds": 0.0009119000169448555,
+  "expected_cases": [
+    "real_port_absent_refuses_before_any_io",
+    "plain_read_lease_holds_then_releases_once",
+    "duplicate_reader_and_writer_refused_while_leased",
+    "native_permit_is_single_use",
+    "forged_or_foreign_permit_refused",
+    "cannot_confirm_native_closed_before_join",
+    "unowned_native_reservation_quarantines",
+    "full_stream_lifetime_then_verified_release",
+    "retained_facade_and_stream_refuse_after_close",
+    "one_transcription_per_session_bounds_cursor_count",
+    "unowned_media_ticket_refused_before_begin",
+    "shape_valid_but_unissued_contract_refused",
+    "acquire_exception_quarantines_preserving_error",
+    "acquire_baseexception_quarantines_preserving_error",
+    "start_exception_quarantines_preserving_error",
+    "start_baseexception_quarantines_preserving_error",
+    "join_exception_quarantines_preserving_error",
+    "join_baseexception_quarantines_preserving_error",
+    "quiet_exception_quarantines_preserving_error",
+    "quiet_baseexception_quarantines_preserving_error",
+    "release_exception_quarantines_preserving_error",
+    "release_baseexception_quarantines_preserving_error",
+    "nontrue_join_false_retains_protection",
+    "nontrue_join_none_retains_protection",
+    "nontrue_join_integer1_retains_protection",
+    "cancel_false_quarantines_and_revokes",
+    "cancel_exception_quarantines_and_revokes",
+    "cancel_baseexception_quarantines_and_revokes",
+    "failed_quarantine_preserves_original_interruption",
+    "release_interrupt_preserves_existing_context_error",
+    "concurrent_quarantine_is_not_cleared_by_late_join",
+    "inflight_operation_during_close_keeps_quarantine",
+    "ordinary_operation_error_can_be_cleaned_and_released",
+    "operation_interruption_quarantines_immediately",
+    "concurrent_stream_next_refused_without_second_worker_call",
+    "past_media_duration_refused_before_invalid_yield",
+    "negative_time_refused_before_invalid_yield",
+    "nonfinite_time_refused_before_invalid_yield",
+    "segment_backtrack_refused_before_invalid_yield",
+    "word_overlap_refused_before_invalid_yield",
+    "segment_count_budget_refused_before_invalid_yield",
+    "word_count_budget_refused_before_invalid_yield",
+    "aggregate_text_budget_refused_before_invalid_yield",
+    "duration_and_aggregate_limits_accept_exact_boundary",
+    "session_close_during_validation_refuses_publication",
+    "stream_cancel_during_validation_refuses_publication"
+  ],
+  "scope": "In-memory fake ports only; no Windows or native model qualification"
+}

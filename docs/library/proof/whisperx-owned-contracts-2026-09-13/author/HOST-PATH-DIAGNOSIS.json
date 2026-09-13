@@ -1,0 +1,15 @@
+{
+  "source": "Read-only tool169d9e facts",
+  "shell_version": "7.6.5",
+  "command_source": "C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+  "launch_directory_exists": false,
+  "child_directory_exists": false,
+  "original_outer_exit": 1,
+  "original_outer_tool_chunk": "bc920e",
+  "tests_run": 0,
+  "diagnosis_tool_exit": 0,
+  "diagnosis_tool_wall_seconds": 0.1063981,
+  "manifest_sha256": "5602d0e46f91739c40799e0ce2592560274cc70c252421f856d3cf77133bcd9f",
+  "launcher_sha256": "cab30add712b736f5cdb5c15d51b2fbebb43e7d45ec113bb4ff545480ea5041c",
+  "facts_transcribed_from_tool": true
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "snapshot_lifecycle.py",
+    "before_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "copy_after_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "source_after_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "name": "qualify_lifecycle.py",
+    "before_sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05",
+    "copy_after_sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05",
+    "source_after_sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05"
+  },
+  {
+    "name": "EXPECTED-CASES.json",
+    "before_sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228",
+    "copy_after_sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228",
+    "source_after_sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228"
+  },
+  {
+    "name": "run_lifecycle01.ps1",
+    "before_sha256": "3a6a866a24af4e12740466422d44bbaf2746318376200e4f35abe59df2aa1eb3",
+    "copy_after_sha256": "3a6a866a24af4e12740466422d44bbaf2746318376200e4f35abe59df2aa1eb3",
+    "source_after_sha256": "3a6a866a24af4e12740466422d44bbaf2746318376200e4f35abe59df2aa1eb3"
+  }
+]

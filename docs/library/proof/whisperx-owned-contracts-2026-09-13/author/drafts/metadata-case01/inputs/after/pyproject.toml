@@ -1,0 +1,75 @@
+[project]
+urls = { repository = "https://github.com/m-bain/whisperx" }
+authors = [{ name = "Max Bain" }]
+name = "whisperx"
+version = "3.8.6+uoink.owned1"
+description = "Uoink-owned non-speaker WhisperX source proposal"
+readme = "README-UOINK.md"
+requires-python = ">=3.10, <3.14"
+license = { text = "BSD-2-Clause" }
+
+dependencies = [
+    "ctranslate2>=4.5.0",
+    "faster-whisper==1.2.1+uoink.localassets2",
+    "nltk>=3.9.1",
+    "numpy>=2.1.0",
+    "omegaconf>=2.3.0",
+    "pandas>=2.2.3",
+    "pyannote-audio>=4.0.0",
+    "huggingface-hub==1.31.0",
+    "torch==2.13.0",
+    "torchaudio==2.11.0",
+    "torchvision==0.28.0",
+    "torchcodec==0.16.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
+    "transformers>=4.48.0",
+    "triton>=3.3.0; sys_platform == 'linux' and platform_machine == 'x86_64'" # only install triton on x86_64 Linux
+]
+
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["whisperx*"]
+
+# torchcodec (transitive dep of pyannote-audio >=4) has no wheels for Linux aarch64
+[tool.uv]
+exclude-newer = "1 week"
+override-dependencies = [
+    "torchcodec==0.16.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
+]
+
+[tool.uv.pip]
+exclude-newer = "1 week"
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", marker = "sys_platform == 'darwin'" },
+  { index = "pytorch-cpu", marker = "platform_machine != 'x86_64' and sys_platform != 'darwin'" },
+  { index = "pytorch", marker = "platform_machine == 'x86_64' and sys_platform != 'darwin'" },
+]
+torchaudio = [
+  { index = "pytorch-cpu", marker = "sys_platform == 'darwin'" },
+  { index = "pytorch-cpu", marker = "platform_machine != 'x86_64' and sys_platform != 'darwin'" },
+  { index = "pytorch", marker = "platform_machine == 'x86_64' and sys_platform != 'darwin'" },
+]
+triton = [
+  { index = "pytorch", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

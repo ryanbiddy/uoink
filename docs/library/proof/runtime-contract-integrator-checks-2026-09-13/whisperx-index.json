@@ -1,0 +1,7 @@
+{
+  "chunk_id": "740636",
+  "wall_time_seconds": 6.1940612,
+  "exit_code": 0,
+  "original_token_count": 54,
+  "output": "{\"proof\": \"docs/library/proof/whisperx-owned-contracts-2026-09-13\", \"payloads_matching_disk_and_git\": 217, \"bytes\": 1644310, \"manifest_sha256\": \"144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd\"}\r\n"
+}

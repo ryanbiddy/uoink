@@ -1,0 +1,609 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/pyproject.toml" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/pyproject.toml"
+index 0759abb..3087c48 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/pyproject.toml"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/pyproject.toml"
+@@ -10,17 +10,17 @@ license = { text = "BSD-2-Clause" }
+ 
+ dependencies = [
+     "ctranslate2>=4.5.0",
+-    "faster-whisper>=1.2.0",
++    "faster-whisper==1.2.1+uoink.localassets2",
+     "nltk>=3.9.1",
+     "numpy>=2.1.0",
+     "omegaconf>=2.3.0",
+     "pandas>=2.2.3",
+     "pyannote-audio>=4.0.0",
+-    "huggingface-hub<1.0.0",
+-    "torch~=2.8.0",
+-    "torchaudio~=2.8.0",
+-    "torchvision~=0.23.0",
+-    "torchcodec>=0.6.0,<0.8.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
++    "huggingface-hub==1.31.0",
++    "torch==2.13.0",
++    "torchaudio==2.11.0",
++    "torchvision==0.28.0",
++    "torchcodec==0.16.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
+     "transformers>=4.48.0",
+     "triton>=3.3.0; sys_platform == 'linux' and platform_machine == 'x86_64'" # only install triton on x86_64 Linux
+ ]
+@@ -46,7 +46,7 @@ include = ["whisperx*"]
+ [tool.uv]
+ exclude-newer = "1 week"
+ override-dependencies = [
+-    "torchcodec>=0.6.0,<0.8.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
++    "torchcodec==0.16.0; (sys_platform == 'linux' and platform_machine == 'x86_64') or sys_platform == 'darwin' or sys_platform == 'win32'",
+ ]
+ 
+ [tool.uv.pip]
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/__init__.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/__init__.py"
+index b8f93fe..aaf2b83 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/__init__.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/__init__.py"
+@@ -1,5 +1,7 @@
+ import importlib
+ 
++from whisperx._uoink_owned import require_owned_runtime
++
+ 
+ def _lazy_import(name):
+     module = importlib.import_module(f"whisperx.{name}")
+@@ -7,28 +9,25 @@ def _lazy_import(name):
+ 
+ 
+ def load_align_model(*args, **kwargs):
+-    alignment = _lazy_import("alignment")
+-    return alignment.load_align_model(*args, **kwargs)
++    raise NotImplementedError("Alignment is unavailable in the owned non-speaker runtime")
+ 
+ 
+ def align(*args, **kwargs):
+-    alignment = _lazy_import("alignment")
+-    return alignment.align(*args, **kwargs)
++    raise NotImplementedError("Alignment is unavailable in the owned non-speaker runtime")
+ 
+ 
+ def load_model(*args, **kwargs):
++    require_owned_runtime()
+     asr = _lazy_import("asr")
+     return asr.load_model(*args, **kwargs)
+ 
+ 
+ def load_audio(*args, **kwargs):
+-    audio = _lazy_import("audio")
+-    return audio.load_audio(*args, **kwargs)
++    raise NotImplementedError("Use the owned validated waveform decoder")
+ 
+ 
+ def assign_word_speakers(*args, **kwargs):
+-    diarize = _lazy_import("diarize")
+-    return diarize.assign_word_speakers(*args, **kwargs)
++    raise NotImplementedError("Speaker attribution is unavailable in this runtime")
+ 
+ 
+ def setup_logging(*args, **kwargs):
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/__main__.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/__main__.py"
+index cd28112..f82c14f 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/__main__.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/__main__.py"
+@@ -1,3 +1,6 @@
++# Owned-subset refusal precedes every legacy import and default expression.
++raise NotImplementedError("The upstream CLI is unavailable; use the owned Uoink waveform entry point")
++
+ import argparse
+ import importlib.metadata
+ import platform
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/_uoink_owned.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/_uoink_owned.py"
+new file mode 100644
+index 0000000..68e5675
+--- /dev/null
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/_uoink_owned.py"
+@@ -0,0 +1,53 @@
++"""Closed integration port for the proposed Uoink-owned non-speaker runtime.
++
++This is not manifest approval. Only a future reviewed process bootstrap may
++provide this port after asset, import and lifetime qualification. It is absent
++in this source proposal; caller arguments and environment variables cannot
++enable it.
++"""
++
++import os
++
++
++_RUNTIME = None
++
++
++def require_owned_runtime():
++    runtime = _RUNTIME
++    if runtime is None:
++        raise RuntimeError("The owned WhisperX runtime is not available")
++    runtime.assert_active()
++    return runtime
++
++
++def require_owned_model(path, vad):
++    runtime = require_owned_runtime()
++    if type(path) is not str or not os.path.isabs(path):
++        raise ValueError("An admitted absolute local model path is required")
++    if vad is None:
++        raise ValueError("Owned fixed VAD injection is required")
++    # The real port must bind the exact admitted snapshot and VAD identity,
++    # revalidate admission and keep its lease through all native/lazy work.
++    runtime.assert_model_binding(path, vad)
++
++
++def validate_waveform(audio, *, owned_input=False):
++    runtime = require_owned_runtime()
++    # Import only after the closed process-level gate. No decoder is invoked.
++    import numpy as np
++
++    limit = runtime.max_audio_samples
++    if type(limit) is not int or limit <= 0:
++        raise RuntimeError("A qualified audio sample bound is required")
++    if (type(audio) is not np.ndarray or audio.dtype != np.dtype("float32")
++            or audio.ndim != 1 or not audio.flags.c_contiguous
++            or not 0 < audio.size <= limit):
++        raise ValueError("A bounded contiguous mono float32 waveform is required")
++    for start in range(0, audio.size, 262144):
++        if not np.isfinite(audio[start:start + 262144]).all():
++            raise ValueError("The waveform must contain only finite samples")
++    if owned_input:
++        # Shape cannot prove a sampling rate or decoding provenance. The owned
++        # decoder/session must attest 16 kHz and exclusive waveform lifetime.
++        runtime.assert_waveform_binding(audio, sample_rate=16000)
++    return audio
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/alignment.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/alignment.py"
+index 12f123f..ae9cdf1 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/alignment.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/alignment.py"
+@@ -1,3 +1,6 @@
++# Owned-subset refusal precedes every legacy import and default expression.
++raise NotImplementedError("Alignment and its model/Punkt downloads are unavailable in the owned non-speaker runtime")
++
+ """
+ Forced Alignment with Whisper
+ C. Max Bain
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/asr.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/asr.py"
+index 4011486..218d4f1 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/asr.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/asr.py"
+@@ -1,4 +1,8 @@
+ import os
++from whisperx._uoink_owned import require_owned_runtime, require_owned_model, validate_waveform
++
++require_owned_runtime()
++
+ from typing import List, Optional, Union
+ from dataclasses import replace
+ 
+@@ -11,9 +15,9 @@ from faster_whisper.transcribe import TranscriptionOptions, get_ctranslate2_stor
+ from transformers import Pipeline
+ from transformers.pipelines.pt_utils import PipelineIterator
+ 
+-from whisperx.audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
++from whisperx.audio import N_SAMPLES, SAMPLE_RATE, log_mel_spectrogram
+ from whisperx.schema import SingleSegment, TranscriptionResult, ProgressCallback
+-from whisperx.vads import Vad, Silero, Pyannote
++from whisperx.vads.pyannote import Pyannote, VoiceActivitySegmentation
+ from whisperx.log_utils import get_logger
+ 
+ logger = get_logger(__name__)
+@@ -196,7 +200,7 @@ class FasterWhisperPipeline(Pipeline):
+ 
+     def transcribe(
+         self,
+-        audio: Union[str, np.ndarray],
++        audio: np.ndarray,
+         batch_size: Optional[int] = None,
+         num_workers=0,
+         language: Optional[str] = None,
+@@ -207,8 +211,7 @@ class FasterWhisperPipeline(Pipeline):
+         verbose=False,
+         progress_callback: ProgressCallback = None,
+     ) -> TranscriptionResult:
+-        if isinstance(audio, str):
+-            audio = load_audio(audio)
++        audio = validate_waveform(audio, owned_input=True)
+ 
+         def data(audio, segments):
+             for seg in segments:
+@@ -217,14 +220,11 @@ class FasterWhisperPipeline(Pipeline):
+                 # print(f2-f1)
+                 yield {'inputs': audio[f1:f2]}
+ 
+-        # Pre-process audio and merge chunks as defined by the respective VAD child class 
+-        # In case vad_model is manually assigned (see 'load_model') follow the functionality of pyannote toolkit
+-        if issubclass(type(self.vad_model), Vad):
+-            waveform = self.vad_model.preprocess_audio(audio)
+-            merge_chunks =  self.vad_model.merge_chunks
+-        else:
+-            waveform = Pyannote.preprocess_audio(audio)
+-            merge_chunks = Pyannote.merge_chunks
++        # The owned factory injects this fixed segmentation pipeline. No VAD
++        # selection or construction is performed during transcription.
++        require_owned_runtime().assert_model_binding(self.model_path, self.vad_model)
++        waveform = Pyannote.preprocess_audio(audio)
++        merge_chunks = Pyannote.merge_chunks
+ 
+         vad_segments = self.vad_model({"waveform": waveform, "sample_rate": SAMPLE_RATE})
+         vad_segments = merge_chunks(
+@@ -298,6 +298,7 @@ class FasterWhisperPipeline(Pipeline):
+         return {"segments": segments, "language": language}
+ 
+     def detect_language(self, audio: np.ndarray) -> str:
++        audio = validate_waveform(audio)
+         if audio.shape[0] < N_SAMPLES:
+             logger.warning("Audio is shorter than 30s, language detection may be inaccurate")
+         model_n_mels = self.model.feat_kwargs.get("feature_size")
+@@ -319,34 +320,41 @@ def load_model(
+     compute_type="default",
+     asr_options: Optional[dict] = None,
+     language: Optional[str] = None,
+-    vad_model: Optional[Vad]= None,
+-    vad_method: Optional[str] = "pyannote",
++    vad_model: Optional[VoiceActivitySegmentation] = None,
++    vad_method: Optional[str] = None,
+     vad_options: Optional[dict] = None,
+     model: Optional[WhisperModel] = None,
+     task="transcribe",
+     download_root: Optional[str] = None,
+-    local_files_only=False,
++    local_files_only=True,
+     threads=4,
+     use_auth_token: Optional[Union[str, bool]] = None,
+ ) -> FasterWhisperPipeline:
+     """Load a Whisper model for inference.
+     Args:
+-        whisper_arch - The name of the Whisper model to load.
++        whisper_arch - The exact admitted absolute local model snapshot path.
+         device - The device to load the model on.
+         compute_type - The compute type to use for the model.
+             Use "default" to automatically select based on device (float16 for GPU, float32 for CPU).
+-        vad_model - The vad model to manually assign.
+-        vad_method - The vad method to use. vad_model has a higher priority if it is not None.
++        vad_model - The owned fixed VoiceActivitySegmentation instance.
++        vad_method - Must be None; automatic VAD selection is unavailable.
+         options - A dictionary of options to use for the model.
+         language - The language of the model. (use English for now)
+-        model - The WhisperModel instance to use.
+-        download_root - The root directory to download the model to.
+-        local_files_only - If `True`, avoid downloading the file and return the path to the local cached file if it exists.
++        model - Must be None; unbound constructor bypass is unavailable.
++        download_root - Must be None; acquisition belongs to the consent service.
++        local_files_only - Must be exactly True; no download or cache fallback.
+         threads - The number of cpu threads to use per worker, e.g. will be multiplied by num workers.
+     Returns:
+         A Whisper pipeline.
+     """
+ 
++    require_owned_model(whisper_arch, vad_model)
++    if type(vad_model) is not VoiceActivitySegmentation:
++        raise ValueError("The owned fixed segmentation pipeline is required")
++    if (local_files_only is not True or download_root is not None
++            or use_auth_token is not None or model is not None or vad_method is not None):
++        raise ValueError("Automatic loading, credentials and constructor bypass are unavailable")
++
+     if compute_type == "default":
+         compute_type = "float16" if device == "cuda" else "float32"
+         logger.info(f"Compute type not specified, defaulting to {compute_type} for device {device}")
+@@ -354,7 +362,7 @@ def load_model(
+     if whisper_arch.endswith(".en"):
+         language = "en"
+ 
+-    model = model or WhisperModel(whisper_arch,
++    model = WhisperModel(whisper_arch,
+                          device=device,
+                          device_index=device_index,
+                          compute_type=compute_type,
+@@ -415,23 +423,7 @@ def load_model(
+     if vad_options is not None:
+         default_vad_options.update(vad_options)
+ 
+-    # Note: manually assigned vad_model has higher priority than vad_method!
+-    if vad_model is not None:
+-        print("Use manually assigned vad_model. vad_method is ignored.")
+-        vad_model = vad_model
+-    else:
+-        if vad_method == "silero":
+-            vad_model = Silero(**default_vad_options)
+-        elif vad_method == "pyannote":
+-            if device == 'cuda':
+-                device_vad = f'cuda:{device_index}'
+-            else:
+-                device_vad = device
+-            vad_model = Pyannote(torch.device(device_vad), token=None, **default_vad_options)
+-        else:
+-            raise ValueError(f"Invalid vad_method: {vad_method}")
+-
+-    return FasterWhisperPipeline(
++    pipeline = FasterWhisperPipeline(
+         model=model,
+         vad=vad_model,
+         options=default_asr_options,
+@@ -440,3 +432,5 @@ def load_model(
+         suppress_numerals=suppress_numerals,
+         vad_params=default_vad_options,
+     )
++    pipeline.model_path = whisper_arch
++    return pipeline
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/audio.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/audio.py"
+index 63a53ca..8ec07de 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/audio.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/audio.py"
+@@ -1,6 +1,8 @@
+ import os
+-import subprocess
+-from functools import lru_cache
++from whisperx._uoink_owned import require_owned_runtime, validate_waveform
++
++require_owned_runtime()
++
+ from typing import Optional, Union
+ 
+ import numpy as np
+@@ -23,46 +25,7 @@ TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audi
+ 
+ 
+ def load_audio(file: str, sr: int = SAMPLE_RATE) -> np.ndarray:
+-    """
+-    Open an audio file and read as mono waveform, resampling as necessary
+-
+-    Parameters
+-    ----------
+-    file: str
+-        The audio file to open
+-
+-    sr: int
+-        The sample rate to resample the audio if necessary
+-
+-    Returns
+-    -------
+-    A NumPy array containing the audio waveform, in float32 dtype.
+-    """
+-    try:
+-        # Launches a subprocess to decode audio while down-mixing and resampling as necessary.
+-        # Requires the ffmpeg CLI to be installed.
+-        cmd = [
+-            "ffmpeg",
+-            "-nostdin",
+-            "-threads",
+-            "0",
+-            "-i",
+-            file,
+-            "-f",
+-            "s16le",
+-            "-ac",
+-            "1",
+-            "-acodec",
+-            "pcm_s16le",
+-            "-ar",
+-            str(sr),
+-            "-",
+-        ]
+-        out = subprocess.run(cmd, capture_output=True, check=True).stdout
+-    except subprocess.CalledProcessError as e:
+-        raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+-
+-    return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
++    raise NotImplementedError("Use the owned validated waveform decoder")
+ 
+ 
+ def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):
+@@ -91,26 +54,22 @@ def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):
+     return array
+ 
+ 
+-@lru_cache(maxsize=None)
+ def mel_filters(device, n_mels: int) -> torch.Tensor:
+-    """
+-    load the mel filterbank matrix for projecting STFT into a Mel spectrogram.
+-    Allows decoupling librosa dependency; saved using:
+-
+-        np.savez_compressed(
+-            "mel_filters.npz",
+-            mel_80=librosa.filters.mel(sr=16000, n_fft=400, n_mels=80),
+-        )
+-    """
+-    assert n_mels in [80, 128], f"Unsupported n_mels: {n_mels}"
+-    with np.load(
+-        os.path.join(os.path.dirname(__file__), "assets", "mel_filters.npz")
+-    ) as f:
+-        return torch.from_numpy(f[f"mel_{n_mels}"]).to(device)
++    """Use the runtime-owned, separately admitted filter bank; never load an NPZ."""
++    if type(n_mels) is not int or n_mels not in (80, 128):
++        raise ValueError("Only 80- and 128-band filter banks are supported")
++    matrix = require_owned_runtime().get_mel_filters(n_mels)
++    if (type(matrix) is not np.ndarray or matrix.dtype != np.dtype("float32")
++            or matrix.shape != (n_mels, N_FFT // 2 + 1)
++            or not matrix.flags.c_contiguous or not np.isfinite(matrix).all()):
++        raise ValueError("An admitted finite float32 filter bank is required")
++    # The runtime owns caching and tensor lifetime; no process-global cache
++    # may retain a prior session's asset or native object.
++    return torch.from_numpy(matrix).to(device)
+ 
+ 
+ def log_mel_spectrogram(
+-    audio: Union[str, np.ndarray, torch.Tensor],
++    audio: np.ndarray,
+     n_mels: int,
+     padding: int = 0,
+     device: Optional[Union[str, torch.device]] = None,
+@@ -120,8 +79,8 @@ def log_mel_spectrogram(
+ 
+     Parameters
+     ----------
+-    audio: Union[str, np.ndarray, torch.Tensor], shape = (*)
+-        The path to audio or either a NumPy array or Tensor containing the audio waveform in 16 kHz
++    audio: np.ndarray, shape = (samples,)
++        A validated mono float32 waveform at 16 kHz.
+ 
+     n_mels: int
+         The number of Mel-frequency filters, only 80 is supported
+@@ -137,10 +96,7 @@ def log_mel_spectrogram(
+     torch.Tensor, shape = (80, n_frames)
+         A Tensor that contains the Mel spectrogram
+     """
+-    if not torch.is_tensor(audio):
+-        if isinstance(audio, str):
+-            audio = load_audio(audio)
+-        audio = torch.from_numpy(audio)
++    audio = torch.from_numpy(validate_waveform(audio))
+ 
+     if device is not None:
+         audio = audio.to(device)
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/diarize.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/diarize.py"
+index b767416..e336569 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/diarize.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/diarize.py"
+@@ -1,3 +1,6 @@
++# Owned-subset refusal precedes every legacy import and default expression.
++raise NotImplementedError("Diarization and speaker attribution are unavailable in the owned non-speaker runtime")
++
+ import numpy as np
+ import pandas as pd
+ from pyannote.audio import Pipeline
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/transcribe.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/transcribe.py"
+index 7c8be67..01676b6 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/transcribe.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/transcribe.py"
+@@ -1,3 +1,6 @@
++# Owned-subset refusal precedes every legacy import and default expression.
++raise NotImplementedError("The upstream file transcription task is unavailable; use the owned Uoink waveform entry point")
++
+ import argparse
+ import gc
+ import os
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/__init__.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/__init__.py"
+index 834c794..f142446 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/__init__.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/__init__.py"
+@@ -1,3 +1 @@
+-from whisperx.vads.pyannote import Pyannote as Pyannote
+-from whisperx.vads.silero import Silero as Silero
+-from whisperx.vads.vad import Vad as Vad
++"""Owned VAD helpers are imported explicitly; no default engine is selected."""
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/pyannote.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/pyannote.py"
+index 4e05101..5d62312 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/pyannote.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/pyannote.py"
+@@ -1,4 +1,7 @@
+-import os
++from whisperx._uoink_owned import require_owned_runtime
++
++require_owned_runtime()
++
+ from typing import Callable, Text, Union
+ from typing import Optional
+ 
+@@ -7,46 +10,17 @@ import torch
+ from pyannote.audio import Model
+ from pyannote.audio.core.io import AudioFile
+ from pyannote.audio.pipelines import VoiceActivityDetection
+-from pyannote.audio.pipelines.utils import PipelineModel
+ from pyannote.core import Annotation, SlidingWindowFeature
+ from pyannote.core import Segment
+ 
+-from whisperx.diarize import Segment as SegmentX
+-from whisperx.vads.vad import Vad
++from whisperx.vads.vad import Vad, Segment as SegmentX
+ from whisperx.log_utils import get_logger
+ 
+ logger = get_logger(__name__)
+ 
+ 
+ def load_vad_model(device, vad_onset=0.500, vad_offset=0.363, token=None, model_fp=None):
+-    model_dir = torch.hub._get_torch_home()
+-
+-    main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+-
+-    os.makedirs(model_dir, exist_ok = True)
+-    if model_fp is None:
+-        # Dynamically resolve the path to the model file
+-        model_fp = os.path.join(main_dir, "assets", "pytorch_model.bin")
+-        model_fp = os.path.abspath(model_fp)  # Ensure the path is absolute
+-    else:
+-        model_fp = os.path.abspath(model_fp)  # Ensure any provided path is absolute
+-
+-    # Check if the resolved model file exists
+-    if not os.path.exists(model_fp):
+-        raise FileNotFoundError(f"Model file not found at {model_fp}")
+-
+-    if os.path.exists(model_fp) and not os.path.isfile(model_fp):
+-        raise RuntimeError(f"{model_fp} exists and is not a regular file")
+-
+-    vad_model = Model.from_pretrained(model_fp, token=token)
+-    hyperparameters = {"onset": vad_onset,
+-                    "offset": vad_offset,
+-                    "min_duration_on": 0.1,
+-                    "min_duration_off": 0.1}
+-    vad_pipeline = VoiceActivitySegmentation(segmentation=vad_model, device=torch.device(device))
+-    vad_pipeline.instantiate(hyperparameters)
+-
+-    return vad_pipeline
++    raise NotImplementedError("Legacy VAD loading is unavailable; inject the owned fixed model")
+ 
+ class Binarize:
+     """Binarize detection scores using hysteresis thresholding, with min-cut operation
+@@ -188,12 +162,14 @@ class Binarize:
+ class VoiceActivitySegmentation(VoiceActivityDetection):
+     def __init__(
+             self,
+-            segmentation: PipelineModel = "pyannote/segmentation",
++            segmentation: Model,
+             fscore: bool = False,
+             token: Union[Text, None] = None,
+             **inference_kwargs,
+     ):
+-
++        if not isinstance(segmentation, Model) or token is not None:
++            raise ValueError("An owned Model instance is required; names, paths and tokens are refused")
++        require_owned_runtime().assert_vad_model_binding(segmentation)
+         super().__init__(segmentation=segmentation, fscore=fscore, token=token, **inference_kwargs)
+ 
+     def apply(self, file: AudioFile, hook: Optional[Callable] = None) -> Annotation:
+@@ -233,9 +209,7 @@ class VoiceActivitySegmentation(VoiceActivityDetection):
+ class Pyannote(Vad):
+ 
+     def __init__(self, device, token=None, model_fp=None, **kwargs):
+-        logger.info("Performing voice activity detection using Pyannote...")
+-        super().__init__(kwargs['vad_onset'])
+-        self.vad_pipeline = load_vad_model(device, token=token, model_fp=model_fp)
++        raise NotImplementedError("Automatic VAD construction is unavailable")
+ 
+     def __call__(self, audio: AudioFile, **kwargs):
+         return self.vad_pipeline(audio)
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/silero.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/silero.py"
+index 24a64d4..ed86bed 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/silero.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/silero.py"
+@@ -1,3 +1,6 @@
++# Owned-subset refusal precedes every legacy import and default expression.
++raise NotImplementedError("Silero Hub loading is unavailable in the owned non-speaker runtime")
++
+ from io import IOBase
+ from pathlib import Path
+ from typing import Mapping, Text
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/vad.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/vad.py"
+index 3252132..9fad744 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\before/whisperx/vads/vad.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\whisperx-owned-derivative-proposal01\\after/whisperx/vads/vad.py"
+@@ -1,7 +1,13 @@
+ from typing import Optional
+ 
+-import pandas as pd
+-from pyannote.core import Annotation, Segment
++
++# Retained verbatim from whisperx.diarize: this data record does not require
++# importing the disabled diarization/model module.
++class Segment:
++    def __init__(self, start:int, end:int, speaker:Optional[str]=None):
++        self.start = start
++        self.end = end
++        self.speaker = speaker
+ 
+ 
+ class Vad:
+@@ -51,4 +57,3 @@ class Vad:
+         })
+ 
+         return merged_segments
+-

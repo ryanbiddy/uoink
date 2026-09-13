@@ -1,0 +1,13 @@
+{
+  "schema": "uoink.lifecycle-guard-static-preservation.v1",
+  "executed_candidate_cases": 0,
+  "all_original_functions_preserved": true,
+  "original_function_count": 58,
+  "new_function_count": 60,
+  "exact_case_sequence_preserved": true,
+  "case_count": 46,
+  "lifecycle_source_identical": true,
+  "expected_cases_file_identical": true,
+  "old_harness_sha256": "aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05",
+  "new_harness_sha256": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7"
+}

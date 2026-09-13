@@ -1,0 +1,7 @@
+{
+  "chunk_id": "386cdd",
+  "wall_time_seconds": 2.7615883,
+  "exit_code": 0,
+  "original_token_count": 53,
+  "output": "{\"proof\": \"docs/library/proof/asr-lifecycle-contracts-2026-09-13\", \"payloads_matching_disk_and_git\": 98, \"bytes\": 622502, \"manifest_sha256\": \"74129bbd376def3ae9451ef98025748c527539e94490d551dd01fa7c3761ffcf\"}\r\n"
+}

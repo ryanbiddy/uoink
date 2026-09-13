@@ -1,0 +1,19 @@
+2026-09-13. Proposed next source/qualification boundary, not executed Windows behavior. An exact implementation brief and local primary-header/API bindings are required before writing or admitting the kernel source. No kernel or process operation is authorized by this draft.
+
+The candidate implementation must have a real-approval gate that refuses before any artifact path or handle operation. It must not implement acquire_read as a mutex, marker file or successful metadata receipt. File/ancestor identity checks and actual write/delete/reparse exclusion are separate requirements.
+
+The proposed handle work uses fixed local Windows paths and fixed API operations, to be bound against installed SDK declarations before implementation: CreateFileW with explicit read/share modes, OPEN_EXISTING and reparse-aware opening; GetFileInformationByHandleEx and GetFinalPathNameByHandleW for identity; DuplicateHandle for owned-process protection; and explicit handle closure. Directory/ancestor protection must be demonstrated, not assumed from a read handle. In particular, holding approved file handles may still leave unapproved child-name creation, alternate names or later path resolution unresolved. If any required namespace boundary remains writable, the profile must refuse; it cannot fall back to the in-memory manager.
+
+The proposed worker control path uses an exact accepted interpreter/environment, suspended creation, explicit inherited-handle allowlisting and a job/supervisor ownership boundary established before resume. Job/termination APIs and flags must also be source-bound. Native imports begin only after TORCH_DEVICE_BACKEND_AUTOLOAD=0 and all accepted startup controls are set. Do not pass credentials, ordinary app handles, arbitrary commands or a user-selected interpreter. Decoder/runtime/model profile approval remains separate.
+
+Protection must outlive the last possible native reopen, including controller failure. Closing a controller's handles and merely requesting child termination may leave an interval of unconfirmed native use. The implementation must resolve that lifetime—potentially with retained/duplicated protection in a separate supervisor and owned worker—and prove the shutdown ordering under the kernel protocol. A process receipt or kill request is not completion. Restart recovery must refuse unknown epochs until actual owned process/handle state is reconciled; PID alone is not an identity.
+
+The eventual isolated kernel qualification uses only tiny generated text files and a dummy worker, with no model/assets or runtime imports. Its bounded matrix is:
+
+- Hold one approved file and its ancestor/snapshot identity; attempt write, replacement, deletion and rename from a second process while protected. Include an already-open writer before admission.
+- Attempt ancestor/snapshot redirection and unapproved child-name creation while protected. Test native-style reopen of the exact allowed names. Record every error/result without treating partial exclusion as success.
+- Verify explicit handle inheritance and refusal of an unlisted handle, child process escape and alternate executable request.
+- Hold a dummy operation open, close the UI/controller, interrupt shutdown and terminate the worker/supervisor in separate cases. Measure when protection becomes releasable and whether unknown epochs remain refused.
+- Exercise join timeout, unavailable process state, mismatched creation identity and incomplete cleanup. Require quarantine and no reuse/delete, not a “best effort” release.
+
+All targets must be fresh synthetic directories named in the later brief. Capture actual native exits, API return/error codes, process identities, input/output hashes and precise timing/order. One failed required boundary blocks the real profile. This source-only draft gives no authority to touch the live index, port 5179, actual snapshots, original checkpoint, native model libraries, credentials or network.

@@ -1,0 +1,43 @@
+--- proposal01/run_lifecycle01.ps1
++++ proposal02/run_lifecycle02.ps1
+@@ -1,16 +1,16 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-windows-lifecycle-proposal01'
+-$taskRun=Join-Path $taskProposal 'runs\lcs01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-windows-lifecycle-proposal02'
++$taskRun=Join-Path $taskProposal 'runs\lcs02'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
+ $taskAdmission=Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json
+-if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'lifecycle-fake-ports-46-only' -or $taskAdmission.label -cne 'lcs01'){throw 'Exact root admission required'}
++if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'lifecycle-fake-ports-46-only' -or $taskAdmission.label -cne 'lcs02'){throw 'Exact root admission required'}
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh qualification label required'}
+ $taskExpected=@{
+     'snapshot_lifecycle.py'='a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd'
+-    'qualify_lifecycle.py'='aa1e3719d83b774ca176ad3688acc43385ece6ff393592424a112699f4bbab05'
++    'qualify_lifecycle.py'='563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7'
+ }
+-$taskInputNames=@('snapshot_lifecycle.py','qualify_lifecycle.py','EXPECTED-CASES.json','run_lifecycle01.ps1')
++$taskInputNames=@('snapshot_lifecycle.py','qualify_lifecycle.py','EXPECTED-CASES.json','run_lifecycle02.ps1')
+ $taskRecords=@()
+ foreach($taskName in $taskInputNames){
+     $taskSource=Join-Path $taskProposal $taskName
+@@ -39,7 +39,7 @@
+ $taskPython='C:\Python314\python.exe'
+ $taskStdout=Join-Path $taskRun 'stdout.json'
+ $taskStderr=Join-Path $taskRun 'stderr.log'
+-[ordered]@{label='lcs01';inputs=$taskRecords;interpreter=$taskPython;arguments=@('-I','-S','-B','qualify_lifecycle.py');scope='46 in-memory fake-port cases only';no_native_or_model_activity=$true;planned_cases=$taskExpectedCases.ordered_cases;startup_binding_set=$true} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++[ordered]@{label='lcs02';inputs=$taskRecords;interpreter=$taskPython;arguments=@('-I','-S','-B','qualify_lifecycle.py');scope='46 in-memory fake-port cases only';no_native_or_model_activity=$true;planned_cases=$taskExpectedCases.ordered_cases;startup_binding_set=$true} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
+ # BEGIN EXACT NATIVE RECEIPT BLOCK
+ $PSNativeCommandUseErrorActionPreference=$false
+ $global:LASTEXITCODE=$null
+@@ -85,6 +85,9 @@
+         $taskResult.native_exit -eq $taskNativeExit -and $taskNativeExit -eq $taskCountExit -and
+         $taskResult.guard_valid -ceq $true -and $taskResult.metadata_traps_installed -ceq $true -and $taskResult.metadata_trap_count -eq 12 -and
+         $taskResult.content_reads_closed -ceq $true -and $taskResult.captures_installed -ceq $true -and $taskResult.capture_valid -ceq $true -and
++        $taskResult.baseline_winreg_identity_unchanged -ceq $true -and $taskResult.registry_namespace_unchanged -ceq $true -and
++        $taskResult.registry_traps_installed -ceq $true -and $taskResult.registry_trap_count -ge 1 -and $taskResult.registry_trap_count -le 64 -and
++        @($taskResult.registry_trap_names).Count -eq $taskResult.registry_trap_count -and @($taskResult.registry_denials).Count -eq 0 -and
+         @($taskResult.guard_denials).Count -eq 0 -and @($taskResult.heavy_roots_loaded).Count -eq 0 -and
+         $taskResult.stdout_capture -ceq '' -and $taskResult.stderr_capture -ceq ''
+     )

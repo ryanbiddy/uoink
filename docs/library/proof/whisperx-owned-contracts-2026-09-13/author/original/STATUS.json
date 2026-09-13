@@ -1,0 +1,21 @@
+{
+  "status": "SOURCE_ONLY_REVIEW_READY_NO_EXECUTION",
+  "release_before_files": 19,
+  "before_hashes_unchanged": true,
+  "fixed_recipe_members": 21,
+  "proposed_wheel_members": 22,
+  "fixed_text_bytes": 130120.0,
+  "recipe_hashes_verified": true,
+  "no_index_diff_exit": 1,
+  "model_imports": 0,
+  "tests_run": 0,
+  "builds_run": 0,
+  "network_requests": 0,
+  "production_edits": 0,
+  "frozen_test_edits": 0,
+  "runtime_gate": "None",
+  "files_changed_in_patch": 15,
+  "patch_sha256": "ebb3505ab7226ed1ac385a98b96c0dd1d3e7c2d967cf8e94ad27f2bbe2f4ff81",
+  "recipe_sha256": "0a97d3068a727d53ea8abce54d379e614de50cb6a7bcad049399d8b3e8e8729f",
+  "source_hashes_sha256": "f0a3d5eeb72f63b3e48885c750d5c3e8a01c1913e2399de5f36d6d63b5f329b8"
+}

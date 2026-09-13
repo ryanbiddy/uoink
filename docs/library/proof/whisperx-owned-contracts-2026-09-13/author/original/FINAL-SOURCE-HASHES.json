@@ -1,0 +1,112 @@
+[
+  {
+    "path": "after/LICENSE",
+    "bytes": 1297,
+    "sha256": "cddc25bce26226b4a04ed12839d9006b7a4403da9020ef6428ef7282a6567441"
+  },
+  {
+    "path": "after/pyproject.toml",
+    "bytes": 2304,
+    "sha256": "1ccec25444b881e61b31ee70f00c78aaba9444e067129b64f75c5e47cc5f982b"
+  },
+  {
+    "path": "after/README-UOINK.md",
+    "bytes": 1161,
+    "sha256": "17fe04cf95b25c114fcd943ac1f58d24ed6ea85f02d25f78ec16b41352dfd478"
+  },
+  {
+    "path": "after/README.md",
+    "bytes": 15550,
+    "sha256": "d68ee671da04b2f2c8a1242bb129f4ac72ab6e42f8eb6ba8ef3e53c6d2c03a11"
+  },
+  {
+    "path": "after/UOINK-NOTICE.txt",
+    "bytes": 1061,
+    "sha256": "98e96f962856c210cd465651b7c647497eba3bead13a71eb21794d6f78681584"
+  },
+  {
+    "path": "after/whisperx/__init__.py",
+    "bytes": 1520,
+    "sha256": "409e3e150ccf1ba44f742b6185bd0a6e217857a51ecae37cdaee9d50cc93e78e"
+  },
+  {
+    "path": "after/whisperx/__main__.py",
+    "bytes": 9407,
+    "sha256": "2eddb989e81b56b991c43c9343b068289f695893487b8f3a39f27b680a38ebb1"
+  },
+  {
+    "path": "after/whisperx/_uoink_owned.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "after/whisperx/alignment.py",
+    "bytes": 21891,
+    "sha256": "9436fc7882d0487fd7982b43ac0b9c5862877ea135e2855750e5e170f928d3c5"
+  },
+  {
+    "path": "after/whisperx/asr.py",
+    "bytes": 17608,
+    "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+  },
+  {
+    "path": "after/whisperx/audio.py",
+    "bytes": 3976,
+    "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152"
+  },
+  {
+    "path": "after/whisperx/conjunctions.py",
+    "bytes": 6314,
+    "sha256": "a52ff2eb19276d38bffe7ed108c1a851afa9074d731dbfbfe0c6ec7f52428062"
+  },
+  {
+    "path": "after/whisperx/diarize.py",
+    "bytes": 10629,
+    "sha256": "b12aaa680aa3c6d57a7d44cd9c67f59dbd20e6037563d8e8821f9c1d149fde99"
+  },
+  {
+    "path": "after/whisperx/log_utils.py",
+    "bytes": 1926,
+    "sha256": "ee79c8cd2ed7171a13100962841ce0a27457ea7bfb4b357aa03ee8b49d899042"
+  },
+  {
+    "path": "after/whisperx/schema.py",
+    "bytes": 1839,
+    "sha256": "fb6a124b00eb28a1d77c164753a80c60b66b82acc2c780d1ee988f9d2d9baf82"
+  },
+  {
+    "path": "after/whisperx/SubtitlesProcessor.py",
+    "bytes": 9408,
+    "sha256": "f83e552eea21c3ba55c96ec283260d015a74adf4ac1834270c0e996fefbe8652"
+  },
+  {
+    "path": "after/whisperx/transcribe.py",
+    "bytes": 9206,
+    "sha256": "a5ce4da4bfe38c73924c5b14dfa34ae2911eee2c3011a60a49a328bb95f86210"
+  },
+  {
+    "path": "after/whisperx/utils.py",
+    "bytes": 15711,
+    "sha256": "991409c66f31c30cc5d309f4e8ce39c9415825429c1277d65d62c045caa0e5d9"
+  },
+  {
+    "path": "after/whisperx/vads/__init__.py",
+    "bytes": 80,
+    "sha256": "a4dc4c9cb173da2384bbd75bf64278f07daa4e2ba983ad71cce682ceb1963ec6"
+  },
+  {
+    "path": "after/whisperx/vads/pyannote.py",
+    "bytes": 8854,
+    "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2"
+  },
+  {
+    "path": "after/whisperx/vads/silero.py",
+    "bytes": 3216,
+    "sha256": "835441243ca0448fcf0f7255b6939869fc501fcec2e7da1a6084b8c0695da4fb"
+  },
+  {
+    "path": "after/whisperx/vads/vad.py",
+    "bytes": 1805,
+    "sha256": "e09a0975506ac8af6e9fb9276bfe4d675f900ec80820b2e57e2b5a59d2f8a93b"
+  }
+]
