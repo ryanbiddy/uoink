@@ -1,0 +1,27 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_signing_receipts.py",
+      "tests/test_signing_host_selection.py",
+      "tests/test_installer_signing.py",
+      "tests/test_installer_dependency_lock.py",
+      "tests/test_build_guide_accuracy.py",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing-receipts12-checkout03-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing-receipts12-checkout03\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing-receipts12-checkout03\\tests.log"
+  }
+]

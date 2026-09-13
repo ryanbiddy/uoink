@@ -1,0 +1,8 @@
+{
+    "error":  "Cannot find path \u0027Cert:\\CurrentUser\\My\\0000000000000000000000000000000000000000\u0027 because it does not exist.",
+    "path":  "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\signing12-inno-wiring04\\cache with spaces\\uninst.e32.tmp",
+    "recorded_utc":  "2026-09-13T05:34:14.2823263Z",
+    "signature_verified":  false,
+    "status":  "failed",
+    "release_ready":  false
+}

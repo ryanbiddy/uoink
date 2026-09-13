@@ -51,13 +51,13 @@ $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
 
 $signingArgs = @()
+. (Join-Path $RepoRoot 'scripts\installer_signing.ps1')
 if ($ReleaseSigned) {
     if ($StageSourceOnly) { throw 'ReleaseSigned requires a complete installer build' }
-    . (Join-Path $RepoRoot 'scripts\installer_signing.ps1')
     Assert-UoinkSigningConfiguration $SigningCertificateThumbprint $TimestampUrl $SignToolPath
     Assert-UoinkSigningCertificate $SigningCertificateThumbprint
     $signingArgs = @('/DReleaseSigning=1', (Get-UoinkInnoSignCommand `
-        -PowerShellPath (Join-Path $PSHOME 'powershell.exe') `
+        -PowerShellPath (Get-UoinkSigningPowerShellPath) `
         -CallbackPath (Join-Path $RepoRoot 'scripts\sign_installer.ps1') `
         -CertificateThumbprint $SigningCertificateThumbprint `
         -TimestampUrl $TimestampUrl -SignToolPath $SignToolPath))
@@ -207,7 +207,7 @@ function Get-CachedFile($url, $dest) {
 }
 
 function Confirm-Hash($path, $expected, $label) {
-    $actual = (Get-FileHash -Path $path -Algorithm SHA256).Hash.ToLower()
+    $actual = Get-UoinkFileSha256 $path
     if (-not $expected) {
         Write-Warning "    $label has no locked SHA256. Computed: $actual"
         Write-Warning "    Lock it by setting the matching `$..._SHA256 in build.ps1, then rebuild."
@@ -790,6 +790,8 @@ Write-Host "    normalized package timestamps to $($packageTimestampUtc.ToString
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
+$exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
+$buildAttempt = New-UoinkBuildAttempt $exe
 if ($ReleaseSigned) {
     # A fresh cache forces this build's uninstaller through the exact signer;
     # Inno must not reuse a cached signature from another publisher or build.
@@ -797,6 +799,7 @@ if ($ReleaseSigned) {
     Assert-UoinkSigningToken $signedUninstallerDir 'SignedUninstallerDir'
     New-Item -ItemType Directory -Path $signedUninstallerDir -ErrorAction Stop | Out-Null
     $signingArgs += "/DReleaseSigningDir=$signedUninstallerDir"
+    $signingArgs[1] += (' -ReceiptDirectory $q{0}$q' -f $buildAttempt.callbacks)
 }
 $issTemplate = Join-Path $InstallerDir 'uoink.iss'
 $issGenerated = Join-Path $InstallerDir 'uoink.generated.iss'
@@ -813,26 +816,21 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 try {
     & $iscc /Q @signingArgs $issGenerated
     if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+    if (-not (Test-Path -LiteralPath $exe)) { throw "ISCC reported success but $exe is missing" }
+    if ($ReleaseSigned) {
+        $signatureDetails = Get-UoinkVerifiedBuildSignatures $buildAttempt $signedUninstallerDir $SigningCertificateThumbprint $SignToolPath
+        Set-UoinkBuildAttemptReceipt $buildAttempt 'verified' $signatureDetails
+        Write-Host '    installer and uninstaller signatures verified; other release gates still apply'
+    } else {
+        Set-UoinkBuildAttemptReceipt $buildAttempt 'unsigned' @{sha256=(Get-UoinkFileSha256 $exe)}
+        Write-Host '    UNSIGNED REVIEW BUILD: not approved for public release' -ForegroundColor Yellow
+    }
+} catch {
+    Set-UoinkBuildAttemptReceipt $buildAttempt 'failed' @{error=$_.Exception.Message}
+    Write-Host "    compile/signing diagnostics: $($buildAttempt.directory)"
+    throw
 } finally {
     Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
-}
-
-$exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
-if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }
-
-if ($ReleaseSigned) {
-    $signatureReceipt = Assert-UoinkSignedFile $exe $SigningCertificateThumbprint $SignToolPath
-    $signatureReceipt | ConvertTo-Json -Depth 4 |
-        Set-Content -LiteralPath "$exe.signature.json" -Encoding UTF8
-    Write-Host '    installer signature and timestamp verified; other release gates still apply'
-} else {
-    [ordered]@{
-        path = $exe
-        sha256 = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
-        signature_verified = $false
-        release_ready = $false
-    } | ConvertTo-Json | Set-Content -LiteralPath "$exe.signature.json" -Encoding UTF8
-    Write-Host '    UNSIGNED REVIEW BUILD: not approved for public release' -ForegroundColor Yellow
 }
 
 $sizeMb = (Get-Item $exe).Length / 1MB

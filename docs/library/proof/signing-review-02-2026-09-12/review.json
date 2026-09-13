@@ -1,0 +1,133 @@
+{
+  "base_commit": "02e06dbcbc75294e946a0bcd62fa0d96dcde7ae3",
+  "worker_reviewed_commit": "d24cc33",
+  "worker_run": "e922b3bf",
+  "counts_from_original_xml": {
+    "checkout/signing-host12-checkout01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "38",
+        "time": "11.868",
+        "timestamp": "2026-09-12T22:20:13.388810-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/signing-receipts12-checkout01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "4",
+        "skipped": "0",
+        "tests": "47",
+        "time": "19.375",
+        "timestamp": "2026-09-12T22:31:03.087063-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/signing-receipts12-checkout02": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "47",
+        "time": "15.391",
+        "timestamp": "2026-09-12T22:32:30.304343-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/signing-receipts12-checkout03": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "48",
+        "time": "23.116",
+        "timestamp": "2026-09-12T22:38:06.032067-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/signing-review12-checkout01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "34",
+        "time": "17.123",
+        "timestamp": "2026-09-12T22:36:57.765150-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worker/signing-review12-worker01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "39",
+        "time": "18.898",
+        "timestamp": "2026-09-12T22:27:40.137247-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worker/signing12-gemini-isolated-587a4d9d": [
+      {
+        "name": "pytest",
+        "errors": "27",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "34",
+        "time": "5.440",
+        "timestamp": "2026-09-12T22:12:25.309305-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worker/signing12-gemini-isolated-6cbb2cd7": [
+      {
+        "name": "pytest",
+        "errors": "27",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "34",
+        "time": "4.668",
+        "timestamp": "2026-09-12T22:12:01.516423-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worker/signing12-gemini-isolated01": [
+      {
+        "name": "pytest",
+        "errors": "27",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "34",
+        "time": "1.010",
+        "timestamp": "2026-09-12T22:10:05.049339-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worker/signing12-gemini-isolated03": [
+      {
+        "name": "pytest",
+        "errors": "27",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "34",
+        "time": "5.861",
+        "timestamp": "2026-09-12T22:11:30.145026-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ]
+  },
+  "existing_tests_modified": false,
+  "worker_probes_accepted": false,
+  "uoink_signing_observed": false,
+  "release_ready": false,
+  "wiring04_scope": "Direct production callback before the final diagnostic-list addition; compiler refusal, not signing success.",
+  "earlier_source_scope": "The receipt01 corrections are described below from the retained edit, not a contemporaneous pre-run source snapshot."
+}

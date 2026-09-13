@@ -1,0 +1,137 @@
+"""Reproduction tests for findings in optional installer signing review (2026-09-12).
+
+No production files or existing tests are modified by this suite.
+"""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import subprocess
+
+import pytest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+POWERSHELL = Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+pytestmark = pytest.mark.skipif(os.name != "nt", reason="Windows signing toolchain")
+THUMB = "A" * 40
+
+
+def ps_quote(value: object) -> str:
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def run_ps(tmp_path: Path, body: str) -> subprocess.CompletedProcess[str]:
+    script = tmp_path / "case.ps1"
+    script.write_text(
+        "$ErrorActionPreference = 'Stop'\n"
+        + ". " + ps_quote(ROOT / "scripts/installer_signing.ps1") + "\n"
+        + body + "\n", encoding="utf-8"
+    )
+    return subprocess.run(
+        [str(POWERSHELL), "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(script)],
+        cwd=ROOT, text=True, capture_output=True, timeout=30, check=False,
+    )
+
+
+def test_repro_inno_command_lacks_quotes_around_filepath_token(tmp_path: Path) -> None:
+    """Finding 1: Get-UoinkInnoSignCommand emits '-FilePath $f' without $q quotes."""
+    folder = tmp_path / "SDK"
+    folder.mkdir()
+    tool = folder / "signtool.exe"
+    tool.write_bytes(b"mock")
+
+    result = run_ps(tmp_path,
+        f"Get-UoinkInnoSignCommand {ps_quote(POWERSHELL)} "
+        f"{ps_quote(ROOT / 'scripts/sign_installer.ps1')} '{THUMB}' https://timestamp.example.test {ps_quote(tool)}")
+    assert result.returncode == 0, result.stderr
+    command = result.stdout.strip()
+
+    # The command currently contains unquoted '-FilePath $f'
+    assert " -FilePath $f " in command
+    # It fails to quote $f with Inno's $q substitution, unlike PowerShell and Callback paths
+    assert "-FilePath $q$f$q" not in command
+
+
+def test_repro_unquoted_filepath_with_spaces_fails_powershell_binding(tmp_path: Path) -> None:
+    """Finding 1 (behavioral): Unquoted path with spaces splits into multiple arguments."""
+    path_with_spaces = str(tmp_path / "build dir with spaces" / "unins.tmp.exe")
+    # Simulate Inno executing the command line when $f expands without $q quotes:
+    # powershell.exe -File sign_installer.ps1 -FilePath C:\path with spaces\... -CertificateThumbprint ...
+    raw_args = [
+        str(POWERSHELL), "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+        "-File", str(ROOT / "scripts/sign_installer.ps1"),
+        "-FilePath", *path_with_spaces.split(" "),
+        "-CertificateThumbprint", THUMB,
+        "-TimestampUrl", "https://timestamp.example.test",
+        "-SignToolPath", "C:/Windows/signtool.exe",
+    ]
+    proc = subprocess.run(raw_args, cwd=ROOT, text=True, capture_output=True, check=False)
+    # Fails parameter binding because spaces split into positional parameters
+    assert proc.returncode != 0
+    assert ("parameter" in proc.stderr.lower() or "positional" in proc.stderr.lower())
+
+
+def test_repro_pwsh_pshome_resolution_fails_in_powershell_7(tmp_path: Path) -> None:
+    """Finding 2: build.ps1 line 60 uses Join-Path $PSHOME 'powershell.exe' which does not exist in PowerShell 7."""
+    pwsh_home = Path("C:/Program Files/PowerShell/7")
+    assumed_path = pwsh_home / "powershell.exe"
+    # In PowerShell 7, the executable is pwsh.exe, not powershell.exe
+    assert not assumed_path.exists()
+
+
+def test_repro_assert_signed_file_does_not_verify_sha256_algorithm(tmp_path: Path) -> None:
+    """Finding 4: Assert-UoinkSignedFile does not inspect signature digest algorithm."""
+    tool = tmp_path / "signtool.exe"
+    tool.write_bytes(b"mock")
+    payload = tmp_path / "payload.exe"
+    payload.write_bytes(b"payload")
+
+    # Mock an authenticode signature that is Valid but uses SHA1 (SignatureType / DigestAlgorithm)
+    result = run_ps(tmp_path, f"""
+function Invoke-UoinkSignTool {{ param($SignToolPath, $Arguments) }}
+function Get-AuthenticodeSignature {{
+    param($LiteralPath, $ErrorAction)
+    [pscustomobject]@{{
+        Status = 'Valid'
+        SignerCertificate = [pscustomobject]@{{
+            Thumbprint = '{THUMB}'
+            Subject = 'CN=Test Publisher'
+            SignatureAlgorithm = [pscustomobject]@{{ FriendlyName = 'sha1RSA' }}
+        }}
+        TimeStamperCertificate = [pscustomobject]@{{
+            Thumbprint = '1234567890123456789012345678901234567890'
+            Subject = 'CN=Test TSA'
+        }}
+    }}
+}}
+Assert-UoinkSignedFile {ps_quote(payload)} '{THUMB}' {ps_quote(tool)} | ConvertTo-Json
+""")
+    assert result.returncode == 0, result.stderr
+    receipt = json.loads(result.stdout)
+    # The receipt reports signature_verified = True even though algorithm was sha1RSA
+    assert receipt["signature_verified"] is True
+
+
+def test_repro_assert_certificate_accepts_untrusted_certificate(tmp_path: Path) -> None:
+    """Finding 7: Assert-UoinkSigningCertificate does not verify trust chain in preflight."""
+    # Mock a certificate object in CurrentUser/My with private key and code signing EKU, but untrusted
+    result = run_ps(tmp_path, f"""
+function Get-Item {{
+    param($LiteralPath, $ErrorAction)
+    [pscustomobject]@{{
+        HasPrivateKey = $true
+        NotBefore = [DateTime]::UtcNow.AddDays(-1)
+        NotAfter = [DateTime]::UtcNow.AddDays(30)
+        EnhancedKeyUsageList = @([pscustomobject]@{{ ObjectId = [pscustomobject]@{{ Value = '1.3.6.1.5.5.7.3.3' }} }})
+        # Untrusted / self-signed certificate: Verify() would return $false
+        Verify = {{ return $false }}
+    }}
+}}
+Assert-UoinkSigningCertificate '{THUMB}'
+Write-Output 'PREFLIGHT_PASSED'
+""")
+    assert result.returncode == 0, result.stderr
+    # Passes preflight because Assert-UoinkSigningCertificate never calls .Verify() or checks trust
+    assert "PREFLIGHT_PASSED" in result.stdout
