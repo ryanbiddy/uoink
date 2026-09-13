@@ -1,0 +1,5 @@
+# Committed evidence and adapter expansion
+
+The initial three-question draft is preserved unchanged under before-committed-adapter-expansion, including its original three-payload seal. It was never dispatched. Root subsequently supplied graph commit616f670, adoption428707d, noticesd887f8a and adapterd58bebe. The revised brief combines timeout/adoption into group one, adds the six-case connected adapter as group two, and keeps graph/notices scope as group three. It replaces the unsealed graph-proposal reference with the committed proof and directly binds the readable committed receipts. No source, assertion or measurement changed.
+
+The input list has110 exact text files. It excludes whole archive/model/native-artifact reads and binds the relevant test/source files explicitly. The sole purpose of this revision is a bounded Gemini review; no Control Room dispatch has occurred here.

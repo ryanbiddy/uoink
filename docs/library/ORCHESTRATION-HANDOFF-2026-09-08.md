@@ -5148,3 +5148,19 @@ this connected adapter, and the five-record graph/notice scope. The new generate
 worker operation and notice packaging tests continue separately. Real runtime,
 model/asset decisions, durable recovery, signing, full corrected tree, and final
 isolated installation still govern release. Website/marketing stay paused.
+
+### 2026-09-13 - Three-group Gemini council brief ready
+
+The frozen brief in proof/windows-adapter-graph-council-brief-2026-09-13 covers
+Windows timeout/adoption, the six-case adapter connection, and the complete
+five-record graph plus notice claims. Root verified110 bound text inputs.
+The final brief hash is d0689bc5a252508609ef11b88e9a1c7106d1509862225a21992b9a0e0825dfa7.
+Root refined only worker/report instructions: assigned Control Room worktree,
+sole named report write, no subagents or commits, explicit verdict per group.
+No test, model, archive expansion or actual native execution is assigned.
+
+Control Room's current Gemini adapter uses Antigravity; configured model is
+gemini-3.8-flash-high at high effort. Provider API variables will be scrubbed
+before dispatch. This is the next queue action, not an accepted review yet.
+The generated worker operation source42b93c54 has been read by root and its
+bootstrap derivative is being prepared; native drain/cancel runs are unexecuted.

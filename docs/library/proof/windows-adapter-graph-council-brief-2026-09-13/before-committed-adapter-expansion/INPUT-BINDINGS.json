@@ -1,0 +1,464 @@
+[
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/LAUNCHER-MEMBERSHIP-REPAIR01.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\LAUNCHER-MEMBERSHIP-REPAIR01.md",
+    "bytes": 1701,
+    "sha256": "3159eed3fd23b9f698c4244ee40d3112d392679084c12a8edded494369b1dcb3"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/NATIVE-TIMEOUT02-PROTOCOL.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\NATIVE-TIMEOUT02-PROTOCOL.md",
+    "bytes": 2256,
+    "sha256": "c5924bbfcfa66d35f2eaf6c7d83c6225501c2de4c3d9eff2b3a26408c188985f"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/pipe-repair.diff",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\pipe-repair.diff",
+    "bytes": 1880,
+    "sha256": "8ee5e6e812ceadcb6f600712195fa942e285ce9cb016b4806cd5d2fb25db4f12"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/REPAIR-BRIEF.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\REPAIR-BRIEF.md",
+    "bytes": 3229,
+    "sha256": "49891734af2ffeaf30fd5855e1cd667f1e63ba526bd97cef545da1c910ca380c"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/REVIEW-PINS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\REVIEW-PINS.json",
+    "bytes": 1603,
+    "sha256": "7cd9e2d8f60f3eb945cb38cfc517f73564bc511fba4521e8447bd212f66cfd2a"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout-proposal02/SYNTHETIC-PROTOCOL.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\SYNTHETIC-PROTOCOL.md",
+    "bytes": 3226,
+    "sha256": "57db715b8ac7fe931d20da6c4de0bb746af9f930bbe8f1dd264c6778021b985d"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/after.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\after.json",
+    "bytes": 5807,
+    "sha256": "7cad476939860b0d2fd126fc337719828b707e4ad9847b531aedd22242efa35b"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/before.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\before.json",
+    "bytes": 4732,
+    "sha256": "4b2b077b62d98be2729e4301a12c3a36a673144d4e9de6b10421af471bd4dbe4"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/child-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\child-result.json",
+    "bytes": 6821,
+    "sha256": "2395016420a2ed0d740ca1dea80335363f4f0d530f1ac61bbe1b9fd1c765b739"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/controller-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\controller-result.json",
+    "bytes": 12072,
+    "sha256": "e37a4ade5360c3c098efd51092fef4d5d5f094d4cc2ea92ddd2e33fdd4927d6b"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\exit.json",
+    "bytes": 331,
+    "sha256": "5af9a0cc37839b1364ea036a1ad1509cd8a0aefa542cb10f2a10d24af1d85488"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/native-exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\native-exit.json",
+    "bytes": 71,
+    "sha256": "aeee035603a175bfaf303c739a8be6405b2a1a44ffea3256aa7a1612764b9ef5"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/SOURCE-INPUTS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\SOURCE-INPUTS.json",
+    "bytes": 3089,
+    "sha256": "cbafe89022be67b6f6e6516b6ccef4bcb972957d54b24eb14603eb9c12af9396"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout01/win32_private_pipe.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout01\\win32_private_pipe.py",
+    "bytes": 18199,
+    "sha256": "4a0cccc8d905f7dc9d93288d8c9187f7da846ee673a57e625e691e17bbed899c"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/after.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\after.json",
+    "bytes": 5807,
+    "sha256": "eaa49b52da648476cb4159800435b6d604bf60cfe4fff690879ab44e40ab4abf"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/before.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\before.json",
+    "bytes": 4736,
+    "sha256": "69a7b33fda54edee0de8df8496172f7e75672e7729c0ffab53583f971b53b7aa"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/child-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\child-result.json",
+    "bytes": 6820,
+    "sha256": "2c7fab992efa7ef9023e9bf37196e96ccef2db73f7b2e8517e7838b2dcfdd673"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/controller-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\controller-result.json",
+    "bytes": 11738,
+    "sha256": "c439ac520ba51e19693c0289b6ae5be669427e9e70c6c05d993963a93f406f5b"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/dummy_bootstrap.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\dummy_bootstrap.py",
+    "bytes": 28435,
+    "sha256": "b8472e0903c04fce5c00f3dcb7b55d15ca130aebc9691ddb14999fea889116f6"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\exit.json",
+    "bytes": 330,
+    "sha256": "648f3d77e6e43695cae58efef1576a3504c2037b71ac789f71122012bd5fc330"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/generated_worker_flow.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\generated_worker_flow.py",
+    "bytes": 23053,
+    "sha256": "6f60a4ec1b6cee76f46b3d98207e7772839b777dbab28468907891f8abd88088"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/native-exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\native-exit.json",
+    "bytes": 71,
+    "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/owned_generation_protocol.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\owned_generation_protocol.py",
+    "bytes": 19462,
+    "sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/run_timeout02.ps1",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\run_timeout02.ps1",
+    "bytes": 15938,
+    "sha256": "3bdb511a2f91e2caad2f522fafe7a0b887758dacaf76c5db52d06f26b45ae925"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/SOURCE-INPUTS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\SOURCE-INPUTS.json",
+    "bytes": 3093,
+    "sha256": "009624c4af18062c7d93424ddee1065f2903c7c74dab04aa0d483e0f1d7ac134"
+  },
+  {
+    "path": "_scratch/asr-dummy-worker-timeout02/win32_private_pipe.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout02\\win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "_scratch/astra-five-wheel68-qualification01/runs/qualification01/result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-five-wheel68-qualification01\\runs\\qualification01\\result.json",
+    "bytes": 298433,
+    "sha256": "8bc2766cdab410328ad7ede3d747b4b425be58c701fb23b5edf7aa1cac7d52a5"
+  },
+  {
+    "path": "_scratch/child-readset-adoption-proposal02/PROTOCOL.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal02\\PROTOCOL.md",
+    "bytes": 6842,
+    "sha256": "ac87f2f7f8c036bb6703686ce2ea7166f3f61b3d00eb83d5d3381c52b7111d27"
+  },
+  {
+    "path": "_scratch/child-readset-adoption-proposal02/REVISION-BRIEF.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal02\\REVISION-BRIEF.md",
+    "bytes": 1711,
+    "sha256": "be6ab53b96baa02d6b24912becb951808e8f37a48b88b3f6ba46a243db6ae717"
+  },
+  {
+    "path": "_scratch/child-readset-adoption-proposal02/SOURCE-INPUTS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal02\\SOURCE-INPUTS.json",
+    "bytes": 3495,
+    "sha256": "3869412b8ca34f865a58cef2407473a64c90176c9719b2695c4c398027624221"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/after.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\after.json",
+    "bytes": 7986,
+    "sha256": "028b34811e2792a8b1005783861ac7e65bed6fd3133ca2578932a187a6367926"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/before.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\before.json",
+    "bytes": 6312,
+    "sha256": "9d8e3232584959d38ea6861ed66715c6725c2975412c7698d2dfc43b42a68bb9"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/child-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\child-result.json",
+    "bytes": 10058,
+    "sha256": "5b273a4ac7791eb6e89a1b0593eb5a8abdbffd7bb96615ca37cce28710c05adf"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/controller-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\controller-result.json",
+    "bytes": 13046,
+    "sha256": "fe0a5468c9175527686cd1573b936d769daf5e7927db15aa800f7c8c636fc4dd"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/dummy_bootstrap.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\dummy_bootstrap.py",
+    "bytes": 30890,
+    "sha256": "83850d5426ae75a3b16ed5503a536a2202f541cb002929fa0dd52ef0c9cdfa06"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\exit.json",
+    "bytes": 322,
+    "sha256": "8fa1210bb3403fbeab2652d00ed22422230482e0e4bf0c1e8c75280882b1c509"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/generated_worker_flow.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\generated_worker_flow.py",
+    "bytes": 20326,
+    "sha256": "4409fb6bf169eda28beb66020066bb7ca1ee5927f51cadfcb9f57ba84c26bcee"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/inherited_readset.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/native-exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\native-exit.json",
+    "bytes": 71,
+    "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/owned_generation_protocol.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/pinned_buffer_namespace.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/run_adoption01.ps1",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\run_adoption01.ps1",
+    "bytes": 17436,
+    "sha256": "0bb77f068bdc1273abd0423ffb76904f919a0d6edb7f136871b35cee812bf10f"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/snapshot_lifecycle.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/SOURCE-INPUTS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\SOURCE-INPUTS.json",
+    "bytes": 3495,
+    "sha256": "3869412b8ca34f865a58cef2407473a64c90176c9719b2695c4c398027624221"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/win32_private_pipe.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "_scratch/child-readset-positive01/win32_worker_connection.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01\\win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/after.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\after.json",
+    "bytes": 8016,
+    "sha256": "eb18365e62f218f2fa6ee49332336023e4845d6ec05cab032064fc6143b3ff3d"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/before.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\before.json",
+    "bytes": 6354,
+    "sha256": "358bedb26d541f73a480fd7bf3fb75c7197fd02cbd441f65d5afa51f3371bf7c"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/child-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\child-result.json",
+    "bytes": 4840,
+    "sha256": "62ea169698026c44a43c90fa2a031fc4b39e54a636c0acc0ab412a37de8bca64"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/controller-result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\controller-result.json",
+    "bytes": 11751,
+    "sha256": "8adf965d521c6d9dab5d93a7fc1730c863efabdc84e72c8671e405b010ef2823"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\exit.json",
+    "bytes": 328,
+    "sha256": "4e298bc24c1ce3f584aa291082327a77822ddbfe7d74fd449161571c8bc372f6"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/native-exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\native-exit.json",
+    "bytes": 71,
+    "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+  },
+  {
+    "path": "_scratch/child-readset-wrong-identity01/SOURCE-INPUTS.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01\\SOURCE-INPUTS.json",
+    "bytes": 3495,
+    "sha256": "3869412b8ca34f865a58cef2407473a64c90176c9719b2695c4c398027624221"
+  },
+  {
+    "path": "_scratch/five-wheel-graph-proof-proposal01/PREPARATION-HASHES.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\five-wheel-graph-proof-proposal01\\PREPARATION-HASHES.json",
+    "bytes": 1488,
+    "sha256": "5d43c022eb8979ae13281a339b84f84ac0f7b530be5791de3d4fb311afc1a37d"
+  },
+  {
+    "path": "_scratch/five-wheel-graph-proof-proposal01/VERDICT.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\five-wheel-graph-proof-proposal01\\VERDICT.md",
+    "bytes": 2699,
+    "sha256": "c2c5f100ed11b22008b66dc9d52d60a8353833e3ce10666e7edda6b557756286"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/INPUT-HASHES.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\INPUT-HASHES.json",
+    "bytes": 7544,
+    "sha256": "66c284012b83a4d24fcc1a7627606e8bac7cce0e4445009eba5b61d660ff4048"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/launch-graph01/actual-native-exit.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\launch-graph01\\actual-native-exit.json",
+    "bytes": 129,
+    "sha256": "c269e2e56ceeb870521310e474e526f0f6fc58a8c457e4265c4bcb221d861363"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/launch-graph01/result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\launch-graph01\\result.json",
+    "bytes": 16594,
+    "sha256": "6ae5afd7ce30a356e37d903ce1db991518df8f8190be2b640cb3844333547778"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/PROTOCOL.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\PROTOCOL.md",
+    "bytes": 4679,
+    "sha256": "39a6ee49d928a68885acd319d7f04f0ac922185ec1017276c97cc6ecca4ca63b"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/results/graph01/invocation.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\results\\graph01\\invocation.json",
+    "bytes": 426331,
+    "sha256": "8552b404add0aabb72c3b512bb88b145d2cff71c1688e44ba156599bc97b8386"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/results/graph01/raw-graph.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\results\\graph01\\raw-graph.json",
+    "bytes": 143241,
+    "sha256": "28f25e7542de97c9ec4006781735cd97aa22b70b24a2e2d1c14698a8c3805dd3"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/run_graph.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\run_graph.py",
+    "bytes": 13454,
+    "sha256": "3022de8532e64eb9f7d9620846299b0780310b974ad901a787fc03cb9c36e03f"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-graph01/run_graph01.ps1",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-graph01\\run_graph01.ps1",
+    "bytes": 6482,
+    "sha256": "05388a0a2dca04f7a91d98306d62534937f1bb93d03e6b95a3ea6dbb48af8402"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-qualification01/EXPECTED-CASES.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-qualification01\\EXPECTED-CASES.json",
+    "bytes": 5488,
+    "sha256": "1669668a139614ecefd42c7cb4478072829149af1388af7431cbc69ef475414e"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-qualification01/INPUT-HASHES.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-qualification01\\INPUT-HASHES.json",
+    "bytes": 67238,
+    "sha256": "ccff7b35f8dbdd0c3fc466f48ca1bb7cdfd0975360ff83f4a3d4a88df80c1bd4"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-qualification01/inputs/check_runtime_graph_local.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-qualification01\\inputs\\check_runtime_graph_local.py",
+    "bytes": 52108,
+    "sha256": "1dd04b8e7cffc5448ea9e418d9e8653e99ff27c8d6a4cf7c9c251e81c17c9674"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-qualification01/runs/qualification01/result.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-qualification01\\runs\\qualification01\\result.json",
+    "bytes": 298436,
+    "sha256": "b634e6b0e6d0011a3281da88ae3e1b8790d80e2f26604cecb20a14ccc9ded657"
+  },
+  {
+    "path": "_scratch/runtime-candidate03-five-wheel-qualification01/test_five_wheel_branch.py",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-candidate03-five-wheel-qualification01\\test_five_wheel_branch.py",
+    "bytes": 9638,
+    "sha256": "8ea226c62ca986c7073ef344bbb9985bbb7d9fd1b821cd1fc274ef7e53f84dd6"
+  },
+  {
+    "path": "_scratch/two-wheel-license-notices01/REVIEW.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-license-notices01\\REVIEW.md",
+    "bytes": 3782,
+    "sha256": "a63ebb71a8609d8ba695a3f17b7dfc20fe777d26e440531466f1a9139b93b10a"
+  },
+  {
+    "path": "_scratch/two-wheel-license-notices01/SHA256.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-license-notices01\\SHA256.json",
+    "bytes": 8892,
+    "sha256": "5f6d0c52ef8e4080869ec0915d55ace294f186478520aa2222940288fb5a1475"
+  },
+  {
+    "path": "docs/library/ASTRA-CHILD-ADOPTION-VERDICT-2026-09-13.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\ASTRA-CHILD-ADOPTION-VERDICT-2026-09-13.md",
+    "bytes": 2689,
+    "sha256": "828184180c8281d01cd1f82bc7ef940921221bfc5822533f47cb7f011d8aa482"
+  },
+  {
+    "path": "docs/library/ASTRA-WINDOWS-TIMEOUT-REPAIR-VERDICT-2026-09-13.md",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\ASTRA-WINDOWS-TIMEOUT-REPAIR-VERDICT-2026-09-13.md",
+    "bytes": 4364,
+    "sha256": "0bc4a0588ffda241c15667c83d94fd3fb0dc5a93150473efaa073d73e22f9fbc"
+  },
+  {
+    "path": "docs/library/proof/child-adoption-2026-09-13/SHA256.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\child-adoption-2026-09-13\\SHA256.json",
+    "bytes": 16278,
+    "sha256": "220f7a23cca5255b8e7674a562e699899165447d2111ea226dc6903356eb9f6f"
+  },
+  {
+    "path": "docs/library/proof/child-adoption-2026-09-13/SOURCE-TREE.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\child-adoption-2026-09-13\\SOURCE-TREE.json",
+    "bytes": 29333,
+    "sha256": "f3601edc0536ad0d309ff763433727edf519640489c734790bc67eb657f3d545"
+  },
+  {
+    "path": "docs/library/proof/runtime-candidate03-graph-2026-09-13/SHA256.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-candidate03-graph-2026-09-13\\SHA256.json",
+    "bytes": 4281,
+    "sha256": "793a1c4826eabc278b795d0d2fbc06c642dfb2ca1cdf42d73cc4bb8e4fb941ec"
+  },
+  {
+    "path": "docs/library/proof/windows-timeout-repair-2026-09-13/SHA256.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\windows-timeout-repair-2026-09-13\\SHA256.json",
+    "bytes": 24310,
+    "sha256": "25ff14f8ee5b75a65caa3d711f8f22ee171dabd510454441a5b39f26797c895d"
+  },
+  {
+    "path": "docs/library/proof/windows-timeout-repair-2026-09-13/SOURCE-TREE.json",
+    "absolute_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\windows-timeout-repair-2026-09-13\\SOURCE-TREE.json",
+    "bytes": 53842,
+    "sha256": "dffc4e50a45b219d6276458effada99cdcebc681d6fc851f489dc85ac035944b"
+  }
+]
