@@ -1,0 +1,28 @@
+{
+  "verified_utc": "2026-09-13T15:09:38.721450+00:00",
+  "cases": 23,
+  "passed": 23,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "child_exit": 0,
+  "launcher_exit": 0,
+  "actual_outer_exit": 0,
+  "guard_valid": true,
+  "inputs_unchanged": true,
+  "case_ids_match_preflight": true,
+  "selected_bodies_executed": 18,
+  "captured_pipeline_initializer_executed": false,
+  "unaccepted_diagnostics": [
+    {
+      "input": "direct empty list",
+      "expected_if_supported": [],
+      "exception_type": "IndexError",
+      "message": "list index out of range",
+      "status": "UNACCEPTED_OPTIONAL_API_DEFECT",
+      "source": "base.py.txt",
+      "line": 1242
+    }
+  ],
+  "new_test_or_captured_execution_by_this_checker": false
+}

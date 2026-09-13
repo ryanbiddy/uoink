@@ -1,0 +1,137 @@
+{
+  "created_utc": "2026-09-13T15:09:38.727059+00:00",
+  "payload_count": 26,
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "BRIEF.md",
+      "bytes": 2675,
+      "sha256": "ff33d0a3c6ecacc1f884426f2c3724c8efb08e9a9ee634ae8b1783c4ed03e6ab"
+    },
+    {
+      "file": "inputs/asr.py.txt",
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    {
+      "file": "inputs/base.py.txt",
+      "bytes": 59516,
+      "sha256": "853e42ad66b34aed2b8b523450c822632d3f162f82a1d9e46f003d6963e98bf2"
+    },
+    {
+      "file": "inputs/commit-bindings.json",
+      "bytes": 1683,
+      "sha256": "261fc25124d26151a628cb216c1f97f4b156d4b3f8685c069dfeb6429c1eef87"
+    },
+    {
+      "file": "inputs/ORIGINAL-SOURCE-MANIFEST.json",
+      "bytes": 12844,
+      "sha256": "00dee8e9ecbbc0b187c3884349e2374ae90447f88c28bcd1a01fba10fdec32f3"
+    },
+    {
+      "file": "inputs/pt_utils.py.txt",
+      "bytes": 12816,
+      "sha256": "0ed35580ed6e7759f46d833025c94cbe7209aada0db3d69e75c5ee0af24bfd23"
+    },
+    {
+      "file": "inputs/REVIEW.md",
+      "bytes": 11945,
+      "sha256": "78d9319060e8887bde21e5005a3190ac7996ff19d144e41b8cdc018f2967c2ca"
+    },
+    {
+      "file": "launch-pc01/console.log",
+      "bytes": 555,
+      "sha256": "0cd2dc78d872cece43bbc43bbd46eca905fcc5b0d42c9b891557da14ce5f8eb4"
+    },
+    {
+      "file": "launch-pc01/plan.json",
+      "bytes": 1632,
+      "sha256": "295f95c9a6ff17e0cc4f493dacce7ec7298381bf68c812b970188843ca58f091"
+    },
+    {
+      "file": "launch-pc01/result.json",
+      "bytes": 133,
+      "sha256": "471632d811e742b7f2fe6aabfe2bfe6043e39d555b2957630bd6f735feaf0b10"
+    },
+    {
+      "file": "launch-pc01/root-outer-exit.json",
+      "bytes": 185,
+      "sha256": "168d55cc726412dffe6f7e6b48f96f8b892163dc6795b0636fc2eff0f13f308e"
+    },
+    {
+      "file": "launch.py",
+      "bytes": 2302,
+      "sha256": "5f349c9594b3db19dc635f3c7112ff170959691b8266c41a1208a4093fcdc829"
+    },
+    {
+      "file": "OPTIONAL-EMPTY-LIST-REPAIR-BRIEF.md",
+      "bytes": 1406,
+      "sha256": "14e145f7c3e40868ca67f15b8ad7a628171c1f71466696a37a826d271c1fc162"
+    },
+    {
+      "file": "prepare.py",
+      "bytes": 3199,
+      "sha256": "9973e9b04b252f3e5b228dcfade0b1fdc67fcd080432ae62598155943c7d80ee"
+    },
+    {
+      "file": "PREQUALIFICATION.json",
+      "bytes": 6534,
+      "sha256": "afe208ebb146812a4cb58085f29034d8cec2bdb25b0fde6016d85bd36be35eb3"
+    },
+    {
+      "file": "QUALIFICATION-CHECKS.json",
+      "bytes": 732,
+      "sha256": "598de997d9b361b0537c49993a0eea8074cd3714919217d1bd1b30eace4b645f"
+    },
+    {
+      "file": "run.py",
+      "bytes": 8836,
+      "sha256": "0bfb1960f492af846b20b9085065114c1c335b62e2743609f88a2c8c3660dbf0"
+    },
+    {
+      "file": "runs/pc01/result.json",
+      "bytes": 5734,
+      "sha256": "0370cb7a7977564e4013c4f76569ce185d8ed9a063d2f6d94093909561830d0d"
+    },
+    {
+      "file": "runs/pc01/tests.log",
+      "bytes": 3598,
+      "sha256": "c29d04fe15da050e794db64f65ba3a23c5bfec22491aaef8a1730601790068cd"
+    },
+    {
+      "file": "seams.py",
+      "bytes": 7818,
+      "sha256": "a649c31edf1584a8641c5e409d802da73264d0aaee1ff4b2231715183c252b09"
+    },
+    {
+      "file": "SOURCE-BINDINGS.json",
+      "bytes": 6951,
+      "sha256": "49a20d1ac33070240a3755fe7070494f5af3784b09b2b91a366dc8019fccd056"
+    },
+    {
+      "file": "static-preflight.py",
+      "bytes": 2943,
+      "sha256": "533d3f64dd782a201858c263ea37a7d31ba6dfd2d2d44fcee1714550d4264189"
+    },
+    {
+      "file": "tests.py",
+      "bytes": 13779,
+      "sha256": "c49215e080c1d6687f20b9e5128cce60e5ef543dab2d0c7985ca1ff44077ba63"
+    },
+    {
+      "file": "VERDICT.md",
+      "bytes": 5115,
+      "sha256": "4dad6f341178275c17ae36ac06a8d154aa6ca8debae07de8ef19a87d4b8eecc9"
+    },
+    {
+      "file": "verify-and-seal.py",
+      "bytes": 3673,
+      "sha256": "cd99febfc58bcd8777801b2e1b594d14c50b277dc8e4cc7d03a5f1615d9b7d9b"
+    }
+  ],
+  "scope": "Captured source text, synthetic AST contracts and exact receipts; no packages, model artifacts, binaries, source/pin/staging edits or runtime acceptance."
+}

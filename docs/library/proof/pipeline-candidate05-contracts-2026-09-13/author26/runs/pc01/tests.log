@@ -1,0 +1,28 @@
+test_batch_one_overrides_configured_batch_size (synthetic_pipeline_contracts.PipelineContracts.test_batch_one_overrides_configured_batch_size) ... ok
+test_batched_generator_preserves_first_order_and_partial_last (synthetic_pipeline_contracts.PipelineContracts.test_batched_generator_preserves_first_order_and_partial_last) ... ok
+test_constructor_device_forms (synthetic_pipeline_contracts.PipelineContracts.test_constructor_device_forms) ... ok
+test_constructor_preserves_bypass_and_fields (synthetic_pipeline_contracts.PipelineContracts.test_constructor_preserves_bypass_and_fields) ... ok
+test_empty_generator_no_preprocess_or_model (synthetic_pipeline_contracts.PipelineContracts.test_empty_generator_no_preprocess_or_model) ... ok
+test_exact_options_tokenizer_and_feature_size_forwarded (synthetic_pipeline_contracts.PipelineContracts.test_exact_options_tokenizer_and_feature_size_forwarded) ... ok
+test_generator_peeks_once_then_consumes_by_batch (synthetic_pipeline_contracts.PipelineContracts.test_generator_peeks_once_then_consumes_by_batch) ... ok
+test_missing_feature_size_uses_eighty (synthetic_pipeline_contracts.PipelineContracts.test_missing_feature_size_uses_eighty) ... ok
+test_model_error_propagates_and_contexts_close (synthetic_pipeline_contracts.PipelineContracts.test_model_error_propagates_and_contexts_close) ... ok
+test_none_uses_configured_batch_size (synthetic_pipeline_contracts.PipelineContracts.test_none_uses_configured_batch_size) ... ok
+test_none_without_config_means_batch_one_and_list_value (synthetic_pipeline_contracts.PipelineContracts.test_none_without_config_means_batch_one_and_list_value) ... ok
+test_nonempty_list_is_eager (synthetic_pipeline_contracts.PipelineContracts.test_nonempty_list_is_eager) ... ok
+test_worker_options_forward_without_changing_stored_default (synthetic_pipeline_contracts.PipelineContracts.test_worker_options_forward_without_changing_stored_default) ... ok
+test_nested_device_transfer_preserves_container_shapes (synthetic_pipeline_contracts.ParameterContracts.test_nested_device_transfer_preserves_container_shapes) ... ok
+test_single_input_forwards_all_stage_parameters (synthetic_pipeline_contracts.ParameterContracts.test_single_input_forwards_all_stage_parameters) ... ok
+test_stage_parameters_merge_override_without_stored_mutation (synthetic_pipeline_contracts.ParameterContracts.test_stage_parameters_merge_override_without_stored_mutation) ... ok
+test_batch_one_preserves_list_value_without_unwrapping (synthetic_pipeline_contracts.IteratorContracts.test_batch_one_preserves_list_value_without_unwrapping) ... ok
+test_dictionary_tensor_and_array_preserve_leading_dimension (synthetic_pipeline_contracts.IteratorContracts.test_dictionary_tensor_and_array_preserve_leading_dimension) ... ok
+test_iterator_is_lazy_before_first_next (synthetic_pipeline_contracts.IteratorContracts.test_iterator_is_lazy_before_first_next) ... ok
+test_iterator_propagates_exact_infer_error (synthetic_pipeline_contracts.IteratorContracts.test_iterator_propagates_exact_infer_error) ... ok
+test_none_batch_preserves_result_identity_and_params (synthetic_pipeline_contracts.IteratorContracts.test_none_batch_preserves_result_identity_and_params) ... ok
+test_partial_batch_strings_and_none_preserved (synthetic_pipeline_contracts.IteratorContracts.test_partial_batch_strings_and_none_preserved) ... ok
+test_tensor_batch_retains_leading_dimension (synthetic_pipeline_contracts.IteratorContracts.test_tensor_batch_retains_leading_dimension) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.009s
+
+OK

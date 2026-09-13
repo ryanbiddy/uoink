@@ -1,0 +1,31 @@
+diff --git a/_scratch/asr-asset-metadata01/collect.py b/_scratch/asr-asset-metadata01/collect-canonical-turbo.py
+index b503881..e9dddbd 100644
+--- a/_scratch/asr-asset-metadata01/collect.py
++++ b/_scratch/asr-asset-metadata01/collect-canonical-turbo.py
+@@ -14,7 +14,7 @@ import urllib.request
+ 
+ OUT = Path(__file__).absolute().parent
+ ROOT = OUT.parents[1]
+-RUN = OUT / "run01"
++RUN = OUT / "canonical-turbo01"
+ RUN.mkdir(exist_ok=False)
+ REPOS = {
+     "tiny": "Systran/faster-whisper-tiny",
+@@ -46,7 +46,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
+ opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+ 
+ def fetch(choice, repo, revision=None):
+-    if repo not in REPOS.values() or (revision is not None and re.fullmatch("[0-9a-f]{40}", revision) is None):
++    if (repo not in REPOS.values() and repo != "dropbox-dash/faster-whisper-large-v3-turbo") or (revision is not None and re.fullmatch("[0-9a-f]{40}", revision) is None):
+         raise ValueError("Unknown repository or invalid revision")
+     url = "https://huggingface.co/api/models/" + repo
+     if revision is not None:
+@@ -101,7 +101,7 @@ for rel, target in [
+         if len(assignments) != 1 or ast.literal_eval(assignments[0].value) != REPOS:
+             raise ValueError("Existing model scope changed")
+ 
+-for choice, repo in REPOS.items():
++for choice, repo in [("large-v3-turbo", "dropbox-dash/faster-whisper-large-v3-turbo")]:
+     try:
+         current = fetch(choice, repo)
+         pinned = fetch(choice, repo, current["sha"])

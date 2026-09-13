@@ -1,0 +1,9 @@
+# ASR asset plan: public metadata only
+
+2026-09-13. Prepare exact repository revisions, advertised file identities and acquisition sizes for the six model choices already present in whisper_runner.py. This fills the model-stack proposal's asset-plan gap. It does not acquire any model, tokenizer, configuration, audio or other repository file, accept provider terms, or approve loading.
+
+Read only public JSON from Hugging Face's model-info endpoint. For each of the six fixed repositories, request current metadata with blobs=true, then request the returned immutable 40-hex revision with the same flag. Record both raw replies and their hashes. Reject redirects, non-JSON replies, bodies above 256 KiB, excessive file lists or mismatching revisions. Use no credentials, environment proxy or provider SDK. Each request has a 12-second timeout; retain every failed observation without retry. No model/asset resolve/download URL is permitted.
+
+Record all advertised sibling metadata and a proposed allowlist limited to model.bin, config.json, tokenizer.json, preprocessor_config.json and vocabulary.json/txt. The first three are the current minimum structural requirements. Preserve LFS SHA-256 and ordinary Git blob OIDs as different identity types. An absent SHA-256 stays absent; this metadata plan is not a complete verified artifact manifest. License fields are provider metadata, not a new legal conclusion.
+
+The official Hub API documentation at https://huggingface.co/docs/hub/api describes its public information endpoints. The retained installed huggingface_hub/hf_api.py model_info implementation at lines2591–2663 supplies the revision route and blobs=true parameter; inspect it as text only. Bind that source and whisper_runner.py in the receipt. Fresh scratch text outputs only; no production, dependency, test, staging, user profile, website or marketing change. Runtime acquisition and execution remain under the later exact protocol decision.

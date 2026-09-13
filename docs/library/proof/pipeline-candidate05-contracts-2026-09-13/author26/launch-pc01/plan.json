@@ -1,0 +1,28 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\pipeline-candidate05-contracts01\\run.py",
+    "pc01"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\pipeline-candidate05-contracts01",
+  "input_hashes": {
+    "seams.py": "a649c31edf1584a8641c5e409d802da73264d0aaee1ff4b2231715183c252b09",
+    "tests.py": "c49215e080c1d6687f20b9e5128cce60e5ef543dab2d0c7985ca1ff44077ba63",
+    "run.py": "0bfb1960f492af846b20b9085065114c1c335b62e2743609f88a2c8c3660dbf0",
+    "launch.py": "5f349c9594b3db19dc635f3c7112ff170959691b8266c41a1208a4093fcdc829",
+    "BRIEF.md": "ff33d0a3c6ecacc1f884426f2c3724c8efb08e9a9ee634ae8b1783c4ed03e6ab",
+    "SOURCE-BINDINGS.json": "49a20d1ac33070240a3755fe7070494f5af3784b09b2b91a366dc8019fccd056",
+    "PREQUALIFICATION.json": "afe208ebb146812a4cb58085f29034d8cec2bdb25b0fde6016d85bd36be35eb3",
+    "inputs\\asr.py.txt": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565",
+    "inputs\\base.py.txt": "853e42ad66b34aed2b8b523450c822632d3f162f82a1d9e46f003d6963e98bf2",
+    "inputs\\commit-bindings.json": "261fc25124d26151a628cb216c1f97f4b156d4b3f8685c069dfeb6429c1eef87",
+    "inputs\\ORIGINAL-SOURCE-MANIFEST.json": "00dee8e9ecbbc0b187c3884349e2374ae90447f88c28bcd1a01fba10fdec32f3",
+    "inputs\\pt_utils.py.txt": "0ed35580ed6e7759f46d833025c94cbe7209aada0db3d69e75c5ee0af24bfd23",
+    "inputs\\REVIEW.md": "78d9319060e8887bde21e5005a3190ac7996ff19d144e41b8cdc018f2967c2ca"
+  },
+  "scrubbed_variable_names": [],
+  "started_utc": "2026-09-13T15:07:23.178913+00:00"
+}
