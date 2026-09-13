@@ -1,0 +1,76 @@
+diff --git a/docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md b/docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md
+new file mode 100644
+index 0000000..e933b1a
+--- /dev/null
++++ b/docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md
+@@ -0,0 +1,70 @@
++# Council review: cache consent and local tokenizer preparation — 2026-09-13
++
++## Identity and hash verification
++
++Candidate source HEAD in this isolated worktree is `56d9d4cf11f20ff4448b21db172dbf217d02c6d6`. The production cache repair commit under review is `b96dbd091c7634aa913a9e83386b87df4c2e41d8`.
++
++- [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py):
++  - Git blob hash: `e86cfa906664799c5fb934869828c02e5d238f26` (confirmed identical to `56d9d4cf11f20ff4448b21db172dbf217d02c6d6:whisper_runner.py`)
++  - File SHA-256: `6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f`
++- [tests/test_whisper_cache_consent.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/tests/test_whisper_cache_consent.py):
++  - Normalized checkout SHA-256: `2595fee1b281d77856918ddfd1fb8ef17e432313b6e1ea1e73c44db3d63f9ea3`
++  - Raw worker LF hash: `5a8f90dae1f4d711b8f3beab888afb15f8cbfd8611c632fae897288b5455c448`
++- Companion B proposal inputs in [_scratch/companion-b-static-qualification01](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01):
++  - Original source (`faster_whisper/transcribe.py`): `5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4`
++  - Proposed derivative ([companion-B.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.py.txt)): `e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269`
++  - Exact patch ([companion-B.patch.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.patch.txt)): `ef6e3ea49d4a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c407b764`
++  - Synthetic harness protocol bytes: `01e8d20863ca74aa855ac86b3a1609bf7212addc15032705e990b50a25064d04`
++
++## Core review questions
++
++### 1. Six model options and consent behavior
++
++All six model identifiers (`tiny`, `base`, `small`, `medium`, `large`, `large-v3-turbo`) remain defined in [`_MODELS`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L94-L97) and mapped to their Systran / Mobius Labs Hugging Face repositories in [`_MODEL_REPOSITORIES`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L148-L155). Unknown model inputs safely normalize to `base` via [`normalize_model`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L100-L105).
++
++Explicit consent enforcement is intact. In [`_prepare_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L243-L261), missing or structurally incomplete cache snapshots raise `PermissionError` when `consent_given=False`. The download helper [`_download_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L237-L240) executes only after verifying explicit opt-in, followed by structural verification via [`_checked_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L179-L199).
++
++### 2. Cache resolution and asset acquisition
++
++Cache resolution cannot unexpectedly acquire assets or reach external networks without consent. [`is_model_downloaded`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L221-L228) and [`_cached_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L201-L219) perform purely read-only checks: they read `refs/main`, inspect directory structure, verify that all three required files (`model.bin`, `config.json`, `tokenizer.json`) exist with non-zero size, and ensure targets stay strictly within the repository root. When unconsented, no directories are created and no download helpers are invoked.
++
++During execution in [`transcribe_audio`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L382-L490), the resolved snapshot path string is passed directly to `whisperx.load_model` along with `local_files_only=True`. Because the passed target is a local directory, faster-whisper selects its existing local directory branch (`elif os.path.isdir(model_size_or_path)`), bypassing its internal `download_model` path.
++
++### 3. Companion delta: tokenizer preparation and non-local fallback
++
++The companion delta in [companion-B.patch.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.patch.txt) correctly reorders tokenizer preparation ahead of native model instantiation:
++
++- In-memory `tokenizer_bytes` or on-disk `tokenizer_file` are parsed before calling `ctranslate2.models.Whisper`. If the file or buffer is malformed, failure occurs prior to native model allocation.
++- When `local_files_only=True` and no local tokenizer exists, lines 695–696 raise `FileNotFoundError("Local Whisper snapshot is missing tokenizer.json")` before model construction, eliminating the silent fallthrough to remote retrieval.
++- When `local_files_only=False` and the local file is absent, `prepared_tokenizer` remains `None`. CTranslate2 initializes normally, and the existing multilingual-aware fallback `tokenizers.Tokenizer.from_pretrained("openai/whisper-tiny" + ("" if self.model.is_multilingual else ".en"))` executes at lines 712–714.
++
++In the isolated synthetic harness ([constructor-contracts.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/constructor-contracts.py.txt)), the baseline source failed 5 of 6 contracts due to inverted construction order and missing `FileNotFoundError`. The proposed candidate passed all 6 contracts with zero errors. Neither run loaded heavy dependencies or executed a native model constructor.
++
++## Actionable findings
++
++### Finding 1: Empty in-memory tokenizer buffer bypasses buffer loading
++
++- **Call sequence:** A caller invokes `WhisperModel(model_path, files={"tokenizer.json": b""}, local_files_only=True)`.
++- **Consequence:** In Python, `bool(b"")` evaluates to `False`. The check `if tokenizer_bytes:` at line 691 of [companion-B.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.py.txt#L691) treats empty bytes as absent. It falls through to `elif os.path.isfile(tokenizer_file):`. If an ambient file exists at `model_path/tokenizer.json`, it loads the disk file instead of the caller's buffer. If no file exists, it raises `FileNotFoundError` claiming the local snapshot file is missing, rather than reporting an invalid buffer.
++- **Affected lines:** [companion-B.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.py.txt#L691-L696) lines 691–696 (and [companion-B.patch.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.patch.txt#L9) line 9).
++- **Smallest repair:** Replace `if tokenizer_bytes:` with `if tokenizer_bytes is not None:` so supplied buffers always route to `from_buffer`.
++
++### Finding 2: Identity check on Windows paths risks spurious download verification failure
++
++- **Call sequence:** `_prepare_model_snapshot` calls `_download_model_snapshot`, returning a `Path` from `huggingface_hub.snapshot_download`. The path is passed to `_checked_model_snapshot(data_root, model_size, snapshot)`.
++- **Consequence:** Line 187 of [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L187) tests `snapshot.resolve(strict=True) != snapshot`. On Windows, `snapshot = Path(snapshot).absolute()` retains the caller's input casing (e.g. lowercase drive `c:\`), while `resolve(strict=True)` normalizes drive letters to uppercase and resolves 8.3 short paths. If casing differs, the inequality evaluates to `True`, `_checked_model_snapshot` returns `None`, and line 257 raises a spurious `RuntimeError` claiming the download failed to provide required files.
++- **Affected lines:** [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L184-L188) lines 184 and 187.
++- **Smallest repair:** Normalize `snapshot = Path(snapshot).resolve(strict=True)` first, verify `snapshot.parent == (repo / "snapshots").resolve()`, and check `not snapshot.is_symlink()`.
++
++### Finding 3: Runtime local-only guarantee depends on unmerged Companion B
++
++- **Call sequence:** In the current runtime without Companion B applied, `transcribe_audio` calls `whisperx.load_model(..., local_files_only=True)`. A file replacement or deletion of `tokenizer.json` occurs after `_checked_model_snapshot` succeeds.
++- **Consequence:** Unpatched `faster_whisper.WhisperModel.__init__` allocates the CTranslate2 model, discovers `tokenizer.json` is missing on disk, and falls through to `tokenizers.Tokenizer.from_pretrained(...)`. Because unpatched faster-whisper does not forward `local_files_only` to `from_pretrained`, it initiates an unconsented remote network request to Hugging Face Hub, contradicting the local-only enforcement claim.
++- **Affected lines:** [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L433-L436) lines 433–436 vs unpatched `faster_whisper/transcribe.py` lines 700–708.
++- **Smallest repair:** Qualify and apply Companion B to the staged faster-whisper runtime so missing tokenizers raise `FileNotFoundError` before model allocation and block remote fallback.
++
++## Open scope and verdict
++
++Product A's cache consent repair in commit `b96dbd0` satisfies its stated structural boundary: it passed 144 cases and 13 subtests independently in worker and checkout environments. Companion B's inert proposal in candidate01 resolved all 5 baseline constructor contract failures.
++
++Neither change constitutes an artifact manifest, cryptographic checkpoint validation, or protection against post-check filesystem modification races. Unrestricted default VAD loading and full model-stack runtime qualification remain open scope. This source review approves the bounded logic and contracts as sound, but does not grant release or market approval.

@@ -1,0 +1,444 @@
+RUN PREFLIGHT — no worker has started yet
+Project:  uoink-library
+Mode:     work (isolated worktrees)
+Strategy: parallel
+Lead:     gemini
+Workers:
+  gemini  gemini-3.8-flash-high @ high effort
+Goal:
+Open E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/COUNCIL-ASSET-GUARD-REVIEW-BRIEF-2026-09-13.md first. Complete that bounded source review in your isolated worktree. Write the report early; source review only, no tests, parent checkout edits, subagents or commits.
+
+APPROVED — starting workers now. Live events follow.
+
+system  status  parallel work run started with gemini
+system  preflight gemini=gemini-3.8-flash-high@high
+system  preflight frozen-base=56d9d4cf11f20ff4448b21db172dbf217d02c6d6 · verified-inputs=0
+gemini  status  parallel: preparing
+gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  message Bounded
+gemini  message  source review of the production cac
+gemini  message he repair `b96dbd0` and 
+gemini  message companion proposal B has been comple
+gemini  message ted within the isolated worktree per [COUNCIL-AS
+gemini  message SET-GUARD-RE
+gemini  message VIEW-BRIEF-2026-09-13.md
+gemini  message ](file:///E:/AI/projects/uoink/checkouts/Yoink-l
+gemini  message ibrary/_scra
+gemini  message tch/COUNCIL-ASSET-GUARD-REVIEW-BRIEF-2026-09-13.
+gemini  message md). The re
+gemini  message port has been written early to [docs/library/COU
+gemini  message NCIL-ASSET-GUARD-REVIEW-
+gemini  message 2026-09-13.m
+gemini  message d](file:///C:/Users/hello/AppData/Local/AgentCon
+gemini  message trolRoom/wor
+gemini  message ktrees/uoink-library/131
+gemini  message e52c7-b6e/gemini/docs/library/COUNCIL-ASSET-GUAR
+gemini  message D-REVIEW-2026-0
+gemini  message 9-13.md). --- ### Core Review Asse
+gemini  message ssment 1. **Six Model O
+gemini  message ptions and Consent Behavior:** - 
+gemini  message All six model choices re
+gemini  message main defined
+gemini  message  in [`_MODELS`](file:///
+gemini  message C:/Users/hello/AppData/L
+gemini  message ocal/AgentControlRoom/worktrees/uoin
+gemini  message k-library/131e52c7-b6e
+gemini  message /gemini/whisper_runner.p
+gemini  message y#L94-L97) and mapped to
+gemini  message  official HF
+gemini  message  repositories
+gemini  message  in [`_MODEL_REPOSITORIE
+gemini  message S`](file:///C:/Users/hel
+gemini  message lo/AppData/Local/AgentControlRoom/wo
+gemini  message rktrees/uoink-library/13
+gemini  message 1e52c7-b6e/gemini/whisper_runner.py#L148-L155). 
+gemini  message  - In [`_prepare_model_snapshot`](
+gemini  message file:///C:/Users/hello/A
+gemini  message ppData/Local
+gemini  message /AgentControlRoom/worktrees/uoink-library/131e52
+gemini  message c7-b6e/gemini/whisper_ru
+gemini  message nner.py#L243
+gemini  message -
+gemini  message L261), unconsented execution (`conse
+gemini  message nt_given=False`) on a mi
+gemini  message ssing or incomplete cache snapshot r
+gemini  message aises an explicit `PermissionError`. 2. **Cache 
+gemini  message Resolution and Asset Acq
+gemini  message uisition:** - [`is_model_download
+gemini  message ed`](file:///C:/Users/he
+gemini  message llo/AppData/
+gemini  message Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/131e52c7-b6e/
+gemini  message gemini/whisper_runner.py
+gemini  message #L221-L228) and [`_cache
+gemini  message d_model_snapshot`](file:///C:/Users/
+gemini  message hello/AppData/Local/Agen
+gemini  message tControlRoom
+gemini  message /worktrees/uoink-library/131e52c7-b6
+gemini  message e/gemini/whisper_runner.
+gemini  message py#L201-L219) perform read-only filesystem valid
+gemini  message ation without directory 
+gemini  message creation or 
+gemini  message network calls. - In [`transcribe_audio`](file
+gemini  message :///C:/Users
+gemini  message /hello/AppData/Local/Age
+gemini  message ntControlRoom/worktrees/uoink-library/131e52c7-b
+gemini  message 6e/gemini/wh
+gemini  message isper_runner.py#L382-L49
+gemini  message 0), the reso
+gemini  message lved snapshot directory path is passed with `lo
+gemini  message cal_files_on
+gemini  message ly=True`, selecting fast
+gemini  message er-whisper's existing local directory branch (`o
+gemini  message s.path.isdir
+gemini  message `) without invoking remote downloads. 3. **Compa
+gemini  message nion Delta (
+gemini  message Local Tokenizer Preparat
+gemini  message ion & Non-local Fallback
+gemini  message ):** - In
+gemini  message  [companion-B.patch.txt](file:///E:/AI/projects/
+gemini  message uoink/checko
+gemini  message uts/Yoink-library/_scrat
+gemini  message ch/companion-b-static-qualification01/original-p
+gemini  message roposal01/companion-B.patch.txt), av
+gemini  message ailable tokenizers are p
+gemini  message arsed before
+gemini  message  CTranslate2 model alloc
+gemini  message ation. - 
+gemini  message When `local_files_only=True` and no local tokeni
+gemini  message zer exists, 
+gemini  message it raises `FileNotFoundE
+gemini  message rror` before model const
+gemini  message ruction. - When `local_files_only
+gemini  message =False` and the local fi
+gemini  message le is absent
+gemini  message , `prepared_tokenizer` remains `None`, preservin
+gemini  message g the downstream multili
+gemini  message ngual-aware fallback `tokenizers.Tok
+gemini  message enizer.from_pretrained(.
+gemini  message ..)`. --- 
+gemini  message ### Three Actionable Findings 1. **Supplied Emp
+gemini  message ty Tokenizer
+gemini  message  Buffer Bypasses Buffer 
+gemini  message Parsing:** - *Call sequence:* `WhisperModel(m
+gemini  message odel_path, f
+gemini  message iles={"tokenizer.json": 
+gemini  message b""}, local_files_only=True)` - *
+gemini  message Consequence:* `if tokeni
+gemini  message zer_bytes:` evaluates `b
+gemini  message ""` as `Fals
+gemini  message e`, falling through to disk checking. If an ambi
+gemini  message ent disk fil
+gemini  message e exists, it loads disk data instead of the buff
+gemini  message er; if absen
+gemini  message t, it raises a misleading `FileNotFoundError` cl
+gemini  message aiming the local file is
+gemini  message  missing. 
+gemini  message  - *Affected lines:* [co
+gemini  message mpanion-B.py.txt](file:///E:/AI/proj
+gemini  message ects/uoink/checkouts/Yoi
+gemini  message nk-library/_scratch/comp
+gemini  message anion-b-static-qualification01/origi
+gemini  message nal-proposal01/companion
+gemini  message -B.py.txt#L691-L696) lines 691–696
+gemini  message . - *Smallest repair:
+gemini  message * Replace `if tokenizer_bytes:` with `if tokeniz
+gemini  message er_bytes is 
+gemini  message not None:`. 2. **Snapsho
+gemini  message t Identity Comparison on Windows:** 
+gemini  message  - *Call sequence:* `_
+gemini  message prepare_mode
+gemini  message l_snapshot` receives a download path from Huggin
+gemini  message g Face Hub and checks it
+gemini  message  with [`_che
+gemini  message cked_model_snapshot`](file:///C:/Users/hello/App
+gemini  message Data/Local/A
+gemini  message gentControlRoom/worktrees/uoink-library/131e52c7
+gemini  message -b6e/gemini/whisper_runn
+gemini  message er.py#L179-L
+gemini  message 199). - *Consequence:* Line 187 checks `snaps
+gemini  message hot.resolve(
+gemini  message strict=True) != snapshot
+gemini  message `. On Windows, `snapshot = Path(snap
+gemini  message shot).absolute()` retain
+gemini  message s input path casing (e.g. lowercase drive letter
+gemini  message ), while `re
+gemini  message solve(strict=True)` norm
+gemini  message alizes casing to uppercase. This dis
+gemini  message crepancy evaluates to `T
+gemini  message rue`, return
+gemini  message ing `None` and spuriousl
+gemini  message y raising `RuntimeError`
+gemini  message  on valid do
+gemini  message wnloads. - *Affected lines:* [whisper_runner.
+gemini  message py](file:///C:/Users/hello/AppData/L
+gemini  message ocal/AgentControlRoom/wo
+gemini  message rktrees/uoink-library/131e52c7-b6e/g
+gemini  message emini/whisper_runner.py#
+gemini  message L184-L188) lines 184 and
+gemini  message  187. - *Smallest repair:* Normal
+gemini  message ize `snapshot = Path(sna
+gemini  message pshot).resol
+gemini  message ve(strict=True)` before 
+gemini  message checking parent and ensuring `not snapshot.is_sy
+gemini  message mlink()`. 3.
+gemini  message  **Local-Only Guarantee Relies on Un
+gemini  message applied Companion B:** 
+gemini  message  - *Call sequence:* In current runtime with unp
+gemini  message atched faste
+gemini  message r-whisper, a filesystem race deletes `tokenizer.
+gemini  message json` after [`_checked_m
+gemini  message odel_snapshot`](file:///C:/Users/hel
+gemini  message lo/AppData/Local/AgentCo
+gemini  message ntrolRoom/worktrees/uoink-library/13
+gemini  message 1e52c7-b6e/gemini/whispe
+gemini  message r_runner.py#L179-L199). 
+gemini  message  - *Consequence:* Unpatched `faste
+gemini  message r_whisper.WhisperModel._
+gemini  message _init__` con
+gemini  message structs CTranslate2, misses the tokenizer, and c
+gemini  message alls `from_pretrained(..
+gemini  message .)` without `local_files
+gemini  message _only`, breaching offline isolation.
+gemini  message  - *Affected lines:* [whisper_run
+gemini  message ner.py](file:///C:/Users
+gemini  message /hello/AppData/Local/AgentControlRoom/worktrees/
+gemini  message uoink-librar
+gemini  message y/131e52c7-b6e/gemini/wh
+gemini  message isper_runner.py#L433-L436) lines 433
+gemini  message –436 vs unpatched `fas
+gemini  message ter_whisper/
+gemini  message transcribe.py` lines 700–708. - *Smallest r
+gemini  message epair:* Qualify and appl
+gemini  message y Companion B to the sta
+gemini  message ged faster-whisper dependency. --- 
+gemini  message  ### Compact
+gemini  message  Handoff - **Status:** Complete (so
+gemini  message urce review only, no tests executed,
+gemini  message  no commits 
+gemini  message or branch merges). - **W
+gemini  message ork completed:** - Verified git bl
+gemini  message ob hash `e86cfa906664799
+gemini  message c5fb934869828c02e5d238f26` of [whisper_runner.py
+gemini  message ](file:///C:
+gemini  message /Users/hello/AppData/Local/AgentControlRoom/work
+gemini  message trees/uoink-
+gemini  message library/131e52c7-b6e/gem
+gemini  message ini/whisper_runner.py) against candidate source 
+gemini  message `56d9d4cf11f
+gemini  message 20ff4448b21db172dbf217d02c6d6:whispe
+gemini  message r_runner.py`. - Audite
+gemini  message d Product A cache consent repair logic against [
+gemini  message tests/test_w
+gemini  message hisper_cache_consent.py]
+gemini  message (file:///C:/Users/hello/AppData/Loca
+gemini  message l/AgentControlRoom/workt
+gemini  message rees/uoink-library/131e5
+gemini  message 2c7-b6e/gemini/tests/test_whisper_ca
+gemini  message che_consent.py) and [AST
+gemini  message RA-ASSET-GUARD-A-VERDICT
+gemini  message -2026-09-13.md](file:///C:/Users/hel
+gemini  message lo/AppData/Local/AgentCo
+gemini  message ntrolRoom/worktrees/uoink-library/13
+gemini  message 1e52c7-b6e/gemini/docs/l
+gemini  message ibrary/ASTRA-ASSET-GUARD-A-VERDICT-2
+gemini  message 026-09-13.md). - Audit
+gemini  message ed Companion B proposal [companion-B.patch.txt](
+gemini  message file:///E:/A
+gemini  message I/projects/uoink/checkouts/Yoink-library/_scratc
+gemini  message h/companion-
+gemini  message b-static-qualification01/original-proposal01/com
+gemini  message panion-B.patch.txt) and 
+gemini  message synthetic co
+gemini  message ntracts in [constructor-
+gemini  message contracts.py.txt](file:///E:/AI/proj
+gemini  message ects/uoink/checkouts/Yoi
+gemini  message nk-library/_scratch/companion-b-static-qualifica
+gemini  message tion01/const
+gemini  message ructor-contracts.py.txt)
+gemini  message . - Author
+gemini  message ed council review report [docs/library/COUNCIL-A
+gemini  message SSET-GUARD-REVIEW-2026-0
+gemini  message 9-13.md](file:///C:/Users/hello/AppD
+gemini  message ata/Local/AgentControlRo
+gemini  message om/worktrees/uoink-library/131e52c7-
+gemini  message b6e/gemini/docs/library/
+gemini  message COUNCIL-ASSET-GUARD-REVIEW-2026-09-1
+gemini  message 3.md). - **Evidence:** 
+gemini  message  - Candidate commit: `56d9d4cf11f20f
+gemini  message f4448b21db172dbf217d02c6
+gemini  message d6` - Blob hash: `e86c
+gemini  message fa906664799c5fb934869828c02e5d238f26
+gemini  message ` - Product A checkout SHA-256: `6
+gemini  message 586d9f19fea0d20054d6e317
+gemini  message b48b9914904e1126bbc7b788
+gemini  message ba255633251996f` - Com
+gemini  message panion B patch SHA-256: `ef6e3ea49d4
+gemini  message a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c40
+gemini  message 7b764` - Companion B derivative SH
+gemini  message A-256: `e500e12b0a58420c
+gemini  message e5f41b202ba7d942b901a9b9
+gemini  message 9c617d6ca3d3304b9493f269` - **Files 
+gemini  message changed:** - Created: 
+gemini  message `docs/librar
+gemini  message y/COUNCIL-ASSET-GUARD-RE
+gemini  message VIEW-
+gemini  message 2026-09-13.md` (untracked, uncommitt
+gemini  message ed) - **Open
+gemini  message  questions:** 
+gemini  message  - Will Ryan authorize applying the Companion B
+gemini  message  source deri
+gemini  message vative into the staged dependency tree? - How 
+gemini  message will the rem
+gemini  message aining open scope (unres
+gemini  message tricted PyAnnote VAD loa
+gemini  message ding `weights_only=False` and full dependency qu
+gemini  message alification) be phased b
+gemini  message efore release candidate packaging? 
+gemini  usage   232595 input / 49676 output / 39663 thinking tokens
+gemini  status  parallel: completed
+
+Run completed: 131e52c7-b6e7-4b69-bc74-1283f77391fa
+gemini: Bounded source review of the production cache repair `b96dbd0` and companion proposal B has been completed within the isolated worktree per [COUNCIL-ASSET-GUARD-REVIEW-BRIEF-2026-09-13.md](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/COUNCIL-ASSET-GUARD-REVIEW-BRIEF-2026-09-13.md).
+
+The report has been written early to [docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md).
+
+---
+
+### Core Review Assessment
+
+1. **Six Model Options and Consent Behavior:**
+   - All six model choices remain defined in [`_MODELS`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L94-L97) and mapped to official HF repositories in [`_MODEL_REPOSITORIES`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L148-L155).
+   - In [`_prepare_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L243-L261), unconsented execution (`consent_given=False`) on a missing or incomplete cache snapshot raises an explicit `PermissionError`.
+2. **Cache Resolution and Asset Acquisition:**
+   - [`is_model_downloaded`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L221-L228) and [`_cached_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L201-L219) perform read-only filesystem validation without directory creation or network calls.
+   - In [`transcribe_audio`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L382-L490), the resolved snapshot directory path is passed with `local_files_only=True`, selecting faster-whisper's existing local directory branch (`os.path.isdir`) without invoking remote downloads.
+3. **Companion Delta (Local Tokenizer Preparation & Non-local Fallback):**
+   - In [companion-B.patch.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.patch.txt), available tokenizers are parsed before CTranslate2 model allocation.
+   - When `local_files_only=True` and no local tokenizer exists, it raises `FileNotFoundError` before model construction.
+   - When `local_files_only=False` and the local file is absent, `prepared_tokenizer` remains `None`, preserving the downstream multilingual-aware fallback `tokenizers.Tokenizer.from_pretrained(...)`.
+
+---
+
+### Three Actionable Findings
+
+1. **Supplied Empty Tokenizer Buffer Bypasses Buffer Parsing:**
+   - *Call sequence:* `WhisperModel(model_path, files={"tokenizer.json": b""}, local_files_only=True)`
+   - *Consequence:* `if tokenizer_bytes:` evaluates `b""` as `False`, falling through to disk checking. If an ambient disk file exists, it loads disk data instead of the buffer; if absent, it raises a misleading `FileNotFoundError` claiming the local file is missing.
+   - *Affected lines:* [companion-B.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.py.txt#L691-L696) lines 691–696.
+   - *Smallest repair:* Replace `if tokenizer_bytes:` with `if tokenizer_bytes is not None:`.
+2. **Snapshot Identity Comparison on Windows:**
+   - *Call sequence:* `_prepare_model_snapshot` receives a download path from Hugging Face Hub and checks it with [`_checked_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L179-L199).
+   - *Consequence:* Line 187 checks `snapshot.resolve(strict=True) != snapshot`. On Windows, `snapshot = Path(snapshot).absolute()` retains input path casing (e.g. lowercase drive letter), while `resolve(strict=True)` normalizes casing to uppercase. This discrepancy evaluates to `True`, returning `None` and spuriously raising `RuntimeError` on valid downloads.
+   - *Affected lines:* [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L184-L188) lines 184 and 187.
+   - *Smallest repair:* Normalize `snapshot = Path(snapshot).resolve(strict=True)` before checking parent and ensuring `not snapshot.is_symlink()`.
+3. **Local-Only Guarantee Relies on Unapplied Companion B:**
+   - *Call sequence:* In current runtime with unpatched faster-whisper, a filesystem race deletes `tokenizer.json` after [`_checked_model_snapshot`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L179-L199).
+   - *Consequence:* Unpatched `faster_whisper.WhisperModel.__init__` constructs CTranslate2, misses the tokenizer, and calls `from_pretrained(...)` without `local_files_only`, breaching offline isolation.
+   - *Affected lines:* [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py#L433-L436) lines 433–436 vs unpatched `faster_whisper/transcribe.py` lines 700–708.
+   - *Smallest repair:* Qualify and apply Companion B to the staged faster-whisper dependency.
+
+---
+
+### Compact Handoff
+
+- **Status:** Complete (source review only, no tests executed, no commits or branch merges).
+- **Work completed:**
+  - Verified git blob hash `e86cfa906664799c5fb934869828c02e5d238f26` of [whisper_runner.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/whisper_runner.py) against candidate source `56d9d4cf11f20ff4448b21db172dbf217d02c6d6:whisper_runner.py`.
+  - Audited Product A cache consent repair logic against [tests/test_whisper_cache_consent.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/tests/test_whisper_cache_consent.py) and [ASTRA-ASSET-GUARD-A-VERDICT-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/docs/library/ASTRA-ASSET-GUARD-A-VERDICT-2026-09-13.md).
+  - Audited Companion B proposal [companion-B.patch.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/original-proposal01/companion-B.patch.txt) and synthetic contracts in [constructor-contracts.py.txt](file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/companion-b-static-qualification01/constructor-contracts.py.txt).
+  - Authored council review report [docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/131e52c7-b6e/gemini/docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md).
+- **Evidence:**
+  - Candidate commit: `56d9d4cf11f20ff4448b21db172dbf217d02c6d6`
+  - Blob hash: `e86cfa906664799c5fb934869828c02e5d238f26`
+  - Product A checkout SHA-256: `6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f`
+  - Companion B patch SHA-256: `ef6e3ea49d4a30279ec6a37dc5d737db5ea8d8d1191af25c578f6411c407b764`
+  - Companion B derivative SHA-256: `e500e12b0a58420ce5f41b202ba7d942b901a9b99c617d6ca3d3304b9493f269`
+- **Files changed:**
+  - Created: `docs/library/COUNCIL-ASSET-GUARD-REVIEW-2026-09-13.md` (untracked, uncommitted)
+- **Open questions:**
+  - Will Ryan authorize applying the Companion B source derivative into the staged dependency tree?
+  - How will the remaining open scope (unrestricted PyAnnote VAD loading `weights_only=False` and full dependency qualification) be phased before release candidate packaging?
+

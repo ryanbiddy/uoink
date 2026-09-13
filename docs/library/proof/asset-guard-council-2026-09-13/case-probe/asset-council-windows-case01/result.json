@@ -1,0 +1,13 @@
+{
+  "platform": "win32",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "scope": "Windows path equality only; no 8.3 alias, model, download or production execution",
+  "pure_drive_case_equal": true,
+  "pure_component_case_equal": true,
+  "absolute_path": "e:\\ai\\projects\\uoink\\checkouts\\yoink-library\\_scratch\\asset-council-windows-case01\\caseprobe.txt",
+  "resolved_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asset-council-windows-case01\\CaseProbe.txt",
+  "string_spelling_differs": true,
+  "absolute_path_equal_resolved": true,
+  "source_sha256": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f",
+  "probe_sha256": "000367b87b925700a6adc6ac1a47491027b631c3a67985630576ade48c0a8588"
+}

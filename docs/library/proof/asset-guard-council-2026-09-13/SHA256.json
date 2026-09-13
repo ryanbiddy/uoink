@@ -1,0 +1,80 @@
+{
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "apply.log": {
+      "bytes": 38,
+      "sha256": "23762d63ca135c16b4671b9b5b5d0109f9ec60c0248a2b04a0cfeabb0ec0a660"
+    },
+    "astra-verdict.md": {
+      "bytes": 2384,
+      "sha256": "8c6dbc9c05c1074e92c459bdcf0d27fcdd70020d17ddfbae82bd176cda489386"
+    },
+    "integrator.py": {
+      "bytes": 6720,
+      "sha256": "db3bd24573927399c7efb85f82a6fe696cf82455e9d5601578af2ecfd98722a7"
+    },
+    "receipt.json": {
+      "bytes": 461,
+      "sha256": "66c15c7c1f20670a0807a96c4637ddf2f4580d38f8ad32cf2de5523e54c70f75"
+    },
+    "review-brief.md": {
+      "bytes": 2564,
+      "sha256": "cd64678e43628944d95c341a6f95ee99eda8629533c79bf7beaa52ec38af0b5a"
+    },
+    "whisper_runner.git.py": {
+      "bytes": 22356,
+      "sha256": "25b8481d1b468c1ae8efb5911da2fb4ee65d6d25dbe36e7373bcc75cf659cd19"
+    },
+    "whisper_runner.worker.py": {
+      "bytes": 22899,
+      "sha256": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f"
+    },
+    "worker-report-original.md": {
+      "bytes": 10777,
+      "sha256": "514b92ccf9fd2c0bde62fcfb416add93fe480124a231f0eccd5ab6e34825e7af"
+    },
+    "worker.patch": {
+      "bytes": 11105,
+      "sha256": "5a21ec0741d3cbf00ccaf817ebbfed97bdeaa9e3f4acbc2ff167a1412189d8ca"
+    },
+    "case-probe/probe_asset_council_windows_case01.py": {
+      "bytes": 1456,
+      "sha256": "000367b87b925700a6adc6ac1a47491027b631c3a67985630576ade48c0a8588"
+    },
+    "dispatch/command.json": {
+      "bytes": 480,
+      "sha256": "611de9df51f79b674d49591328c45b709423c373c88fdc40c7f9ebf94613c5db"
+    },
+    "dispatch/dispatch.log": {
+      "bytes": 23462,
+      "sha256": "135f57c0a2c3b1650ffa6b59eaaac8dfee1be01a68aa1f62d17cc3d16256bebd"
+    },
+    "dispatch/exit.json": {
+      "bytes": 13,
+      "sha256": "267aefd78a72c9453478263faba0b4430d9c3bd7f3b3f027154ac04225645a88"
+    },
+    "independent-b2/ROOT-REVIEW.json": {
+      "bytes": 1793,
+      "sha256": "c19b03262e60cd19c5686fdd4cdf743773d62ff36ed604359a5586ec7a932e3b"
+    },
+    "independent-b2/launch-b2-candidate01/result.json": {
+      "bytes": 98,
+      "sha256": "d04c36cc16303c17485ed0f08f3a8008fa4758c6b1caa490a8f490f3f574f1cb"
+    },
+    "independent-b2/runs/b2-candidate01/result.json": {
+      "bytes": 3977,
+      "sha256": "051687f46c4a107bcf97860ff558821751a7685418c3a52a0abf37d39ebaa19a"
+    },
+    "case-probe/asset-council-windows-case01/CaseProbe.txt": {
+      "bytes": 43,
+      "sha256": "357ee466e151e4f854e64180041baecd8d506cd6134eedffc57ce510c950a538"
+    },
+    "case-probe/asset-council-windows-case01/result.json": {
+      "bytes": 803,
+      "sha256": "8832379456684e920541f7b9cb14624949fb3d41c7e72613bd761459898f471d"
+    }
+  }
+}
