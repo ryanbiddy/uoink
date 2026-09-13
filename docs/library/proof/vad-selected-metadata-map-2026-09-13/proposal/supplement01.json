@@ -1,0 +1,789 @@
+{
+  "status": "receipt_declaration_arithmetic_and_source_text_only",
+  "storage_groups": [
+    {
+      "storage_key_literal": "0",
+      "tensor_entries": 1,
+      "declared_elements": 1,
+      "advertised_member_bytes": 4,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.wav_norm1d.weight",
+          "key_ref": 11,
+          "tensor_ref": 29,
+          "persistent_ref": 19,
+          "offset_ref": 20,
+          "start_element": 0,
+          "end_element_exclusive": 1,
+          "shape_product": 1
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "1",
+      "tensor_entries": 1,
+      "declared_elements": 1,
+      "advertised_member_bytes": 4,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.wav_norm1d.bias",
+          "key_ref": 30,
+          "tensor_ref": 45,
+          "persistent_ref": 35,
+          "offset_ref": 36,
+          "start_element": 0,
+          "end_element_exclusive": 1,
+          "shape_product": 1
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "10",
+      "tensor_entries": 1,
+      "declared_elements": 80,
+      "advertised_member_bytes": 320,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.0.weight",
+          "key_ref": 188,
+          "tensor_ref": 203,
+          "persistent_ref": 193,
+          "offset_ref": 194,
+          "start_element": 0,
+          "end_element_exclusive": 80,
+          "shape_product": 80
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "11",
+      "tensor_entries": 1,
+      "declared_elements": 80,
+      "advertised_member_bytes": 320,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.0.bias",
+          "key_ref": 204,
+          "tensor_ref": 219,
+          "persistent_ref": 209,
+          "offset_ref": 210,
+          "start_element": 0,
+          "end_element_exclusive": 80,
+          "shape_product": 80
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "12",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.1.weight",
+          "key_ref": 220,
+          "tensor_ref": 235,
+          "persistent_ref": 225,
+          "offset_ref": 226,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "13",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.1.bias",
+          "key_ref": 236,
+          "tensor_ref": 251,
+          "persistent_ref": 241,
+          "offset_ref": 242,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "14",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.2.weight",
+          "key_ref": 252,
+          "tensor_ref": 267,
+          "persistent_ref": 257,
+          "offset_ref": 258,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "15",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.norm1d.2.bias",
+          "key_ref": 268,
+          "tensor_ref": 283,
+          "persistent_ref": 273,
+          "offset_ref": 274,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "16",
+      "tensor_entries": 32,
+      "declared_elements": 1380352,
+      "advertised_member_bytes": 5521408,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "lstm.weight_ih_l0",
+          "key_ref": 284,
+          "tensor_ref": 301,
+          "persistent_ref": 289,
+          "offset_ref": 290,
+          "start_element": 0,
+          "end_element_exclusive": 30720,
+          "shape_product": 30720
+        },
+        {
+          "key": "lstm.weight_hh_l0",
+          "key_ref": 302,
+          "tensor_ref": 318,
+          "persistent_ref": 306,
+          "offset_ref": 307,
+          "start_element": 30720,
+          "end_element_exclusive": 96256,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l0_reverse",
+          "key_ref": 349,
+          "tensor_ref": 365,
+          "persistent_ref": 353,
+          "offset_ref": 354,
+          "start_element": 96256,
+          "end_element_exclusive": 126976,
+          "shape_product": 30720
+        },
+        {
+          "key": "lstm.weight_hh_l0_reverse",
+          "key_ref": 366,
+          "tensor_ref": 382,
+          "persistent_ref": 370,
+          "offset_ref": 371,
+          "start_element": 126976,
+          "end_element_exclusive": 192512,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l1",
+          "key_ref": 413,
+          "tensor_ref": 429,
+          "persistent_ref": 417,
+          "offset_ref": 418,
+          "start_element": 192512,
+          "end_element_exclusive": 323584,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l1",
+          "key_ref": 430,
+          "tensor_ref": 446,
+          "persistent_ref": 434,
+          "offset_ref": 435,
+          "start_element": 323584,
+          "end_element_exclusive": 389120,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l1_reverse",
+          "key_ref": 477,
+          "tensor_ref": 493,
+          "persistent_ref": 481,
+          "offset_ref": 482,
+          "start_element": 389120,
+          "end_element_exclusive": 520192,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l1_reverse",
+          "key_ref": 494,
+          "tensor_ref": 510,
+          "persistent_ref": 498,
+          "offset_ref": 499,
+          "start_element": 520192,
+          "end_element_exclusive": 585728,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l2",
+          "key_ref": 541,
+          "tensor_ref": 557,
+          "persistent_ref": 545,
+          "offset_ref": 546,
+          "start_element": 585728,
+          "end_element_exclusive": 716800,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l2",
+          "key_ref": 558,
+          "tensor_ref": 574,
+          "persistent_ref": 562,
+          "offset_ref": 563,
+          "start_element": 716800,
+          "end_element_exclusive": 782336,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l2_reverse",
+          "key_ref": 605,
+          "tensor_ref": 621,
+          "persistent_ref": 609,
+          "offset_ref": 610,
+          "start_element": 782336,
+          "end_element_exclusive": 913408,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l2_reverse",
+          "key_ref": 622,
+          "tensor_ref": 638,
+          "persistent_ref": 626,
+          "offset_ref": 627,
+          "start_element": 913408,
+          "end_element_exclusive": 978944,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l3",
+          "key_ref": 669,
+          "tensor_ref": 685,
+          "persistent_ref": 673,
+          "offset_ref": 674,
+          "start_element": 978944,
+          "end_element_exclusive": 1110016,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l3",
+          "key_ref": 686,
+          "tensor_ref": 702,
+          "persistent_ref": 690,
+          "offset_ref": 691,
+          "start_element": 1110016,
+          "end_element_exclusive": 1175552,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.weight_ih_l3_reverse",
+          "key_ref": 733,
+          "tensor_ref": 749,
+          "persistent_ref": 737,
+          "offset_ref": 738,
+          "start_element": 1175552,
+          "end_element_exclusive": 1306624,
+          "shape_product": 131072
+        },
+        {
+          "key": "lstm.weight_hh_l3_reverse",
+          "key_ref": 750,
+          "tensor_ref": 766,
+          "persistent_ref": 754,
+          "offset_ref": 755,
+          "start_element": 1306624,
+          "end_element_exclusive": 1372160,
+          "shape_product": 65536
+        },
+        {
+          "key": "lstm.bias_ih_l0",
+          "key_ref": 319,
+          "tensor_ref": 333,
+          "persistent_ref": 323,
+          "offset_ref": 324,
+          "start_element": 1372160,
+          "end_element_exclusive": 1372672,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l0",
+          "key_ref": 334,
+          "tensor_ref": 348,
+          "persistent_ref": 338,
+          "offset_ref": 339,
+          "start_element": 1372672,
+          "end_element_exclusive": 1373184,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l0_reverse",
+          "key_ref": 383,
+          "tensor_ref": 397,
+          "persistent_ref": 387,
+          "offset_ref": 388,
+          "start_element": 1373184,
+          "end_element_exclusive": 1373696,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l0_reverse",
+          "key_ref": 398,
+          "tensor_ref": 412,
+          "persistent_ref": 402,
+          "offset_ref": 403,
+          "start_element": 1373696,
+          "end_element_exclusive": 1374208,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l1",
+          "key_ref": 447,
+          "tensor_ref": 461,
+          "persistent_ref": 451,
+          "offset_ref": 452,
+          "start_element": 1374208,
+          "end_element_exclusive": 1374720,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l1",
+          "key_ref": 462,
+          "tensor_ref": 476,
+          "persistent_ref": 466,
+          "offset_ref": 467,
+          "start_element": 1374720,
+          "end_element_exclusive": 1375232,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l1_reverse",
+          "key_ref": 511,
+          "tensor_ref": 525,
+          "persistent_ref": 515,
+          "offset_ref": 516,
+          "start_element": 1375232,
+          "end_element_exclusive": 1375744,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l1_reverse",
+          "key_ref": 526,
+          "tensor_ref": 540,
+          "persistent_ref": 530,
+          "offset_ref": 531,
+          "start_element": 1375744,
+          "end_element_exclusive": 1376256,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l2",
+          "key_ref": 575,
+          "tensor_ref": 589,
+          "persistent_ref": 579,
+          "offset_ref": 580,
+          "start_element": 1376256,
+          "end_element_exclusive": 1376768,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l2",
+          "key_ref": 590,
+          "tensor_ref": 604,
+          "persistent_ref": 594,
+          "offset_ref": 595,
+          "start_element": 1376768,
+          "end_element_exclusive": 1377280,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l2_reverse",
+          "key_ref": 639,
+          "tensor_ref": 653,
+          "persistent_ref": 643,
+          "offset_ref": 644,
+          "start_element": 1377280,
+          "end_element_exclusive": 1377792,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l2_reverse",
+          "key_ref": 654,
+          "tensor_ref": 668,
+          "persistent_ref": 658,
+          "offset_ref": 659,
+          "start_element": 1377792,
+          "end_element_exclusive": 1378304,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l3",
+          "key_ref": 703,
+          "tensor_ref": 717,
+          "persistent_ref": 707,
+          "offset_ref": 708,
+          "start_element": 1378304,
+          "end_element_exclusive": 1378816,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l3",
+          "key_ref": 718,
+          "tensor_ref": 732,
+          "persistent_ref": 722,
+          "offset_ref": 723,
+          "start_element": 1378816,
+          "end_element_exclusive": 1379328,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_ih_l3_reverse",
+          "key_ref": 767,
+          "tensor_ref": 781,
+          "persistent_ref": 771,
+          "offset_ref": 772,
+          "start_element": 1379328,
+          "end_element_exclusive": 1379840,
+          "shape_product": 512
+        },
+        {
+          "key": "lstm.bias_hh_l3_reverse",
+          "key_ref": 782,
+          "tensor_ref": 796,
+          "persistent_ref": 786,
+          "offset_ref": 787,
+          "start_element": 1379840,
+          "end_element_exclusive": 1380352,
+          "shape_product": 512
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "17",
+      "tensor_entries": 1,
+      "declared_elements": 32768,
+      "advertised_member_bytes": 131072,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "linear.0.weight",
+          "key_ref": 797,
+          "tensor_ref": 814,
+          "persistent_ref": 802,
+          "offset_ref": 803,
+          "start_element": 0,
+          "end_element_exclusive": 32768,
+          "shape_product": 32768
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "18",
+      "tensor_entries": 1,
+      "declared_elements": 128,
+      "advertised_member_bytes": 512,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "linear.0.bias",
+          "key_ref": 815,
+          "tensor_ref": 830,
+          "persistent_ref": 820,
+          "offset_ref": 821,
+          "start_element": 0,
+          "end_element_exclusive": 128,
+          "shape_product": 128
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "19",
+      "tensor_entries": 1,
+      "declared_elements": 16384,
+      "advertised_member_bytes": 65536,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "linear.1.weight",
+          "key_ref": 831,
+          "tensor_ref": 848,
+          "persistent_ref": 836,
+          "offset_ref": 837,
+          "start_element": 0,
+          "end_element_exclusive": 16384,
+          "shape_product": 16384
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "2",
+      "tensor_entries": 1,
+      "declared_elements": 40,
+      "advertised_member_bytes": 160,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.0.filterbank.low_hz_",
+          "key_ref": 46,
+          "tensor_ref": 63,
+          "persistent_ref": 51,
+          "offset_ref": 52,
+          "start_element": 0,
+          "end_element_exclusive": 40,
+          "shape_product": 40
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "20",
+      "tensor_entries": 1,
+      "declared_elements": 128,
+      "advertised_member_bytes": 512,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "linear.1.bias",
+          "key_ref": 849,
+          "tensor_ref": 864,
+          "persistent_ref": 854,
+          "offset_ref": 855,
+          "start_element": 0,
+          "end_element_exclusive": 128,
+          "shape_product": 128
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "21",
+      "tensor_entries": 1,
+      "declared_elements": 384,
+      "advertised_member_bytes": 1536,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "classifier.weight",
+          "key_ref": 865,
+          "tensor_ref": 882,
+          "persistent_ref": 870,
+          "offset_ref": 871,
+          "start_element": 0,
+          "end_element_exclusive": 384,
+          "shape_product": 384
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "22",
+      "tensor_entries": 1,
+      "declared_elements": 3,
+      "advertised_member_bytes": 12,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "classifier.bias",
+          "key_ref": 883,
+          "tensor_ref": 898,
+          "persistent_ref": 888,
+          "offset_ref": 889,
+          "start_element": 0,
+          "end_element_exclusive": 3,
+          "shape_product": 3
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "3",
+      "tensor_entries": 1,
+      "declared_elements": 40,
+      "advertised_member_bytes": 160,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.0.filterbank.band_hz_",
+          "key_ref": 64,
+          "tensor_ref": 81,
+          "persistent_ref": 69,
+          "offset_ref": 70,
+          "start_element": 0,
+          "end_element_exclusive": 40,
+          "shape_product": 40
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "4",
+      "tensor_entries": 1,
+      "declared_elements": 125,
+      "advertised_member_bytes": 500,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.0.filterbank.window_",
+          "key_ref": 82,
+          "tensor_ref": 97,
+          "persistent_ref": 87,
+          "offset_ref": 88,
+          "start_element": 0,
+          "end_element_exclusive": 125,
+          "shape_product": 125
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "5",
+      "tensor_entries": 1,
+      "declared_elements": 125,
+      "advertised_member_bytes": 500,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.0.filterbank.n_",
+          "key_ref": 98,
+          "tensor_ref": 115,
+          "persistent_ref": 103,
+          "offset_ref": 104,
+          "start_element": 0,
+          "end_element_exclusive": 125,
+          "shape_product": 125
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "6",
+      "tensor_entries": 1,
+      "declared_elements": 24000,
+      "advertised_member_bytes": 96000,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.1.weight",
+          "key_ref": 116,
+          "tensor_ref": 135,
+          "persistent_ref": 121,
+          "offset_ref": 122,
+          "start_element": 0,
+          "end_element_exclusive": 24000,
+          "shape_product": 24000
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "7",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.1.bias",
+          "key_ref": 136,
+          "tensor_ref": 151,
+          "persistent_ref": 141,
+          "offset_ref": 142,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "8",
+      "tensor_entries": 1,
+      "declared_elements": 18000,
+      "advertised_member_bytes": 72000,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.2.weight",
+          "key_ref": 152,
+          "tensor_ref": 171,
+          "persistent_ref": 157,
+          "offset_ref": 158,
+          "start_element": 0,
+          "end_element_exclusive": 18000,
+          "shape_product": 18000
+        }
+      ]
+    },
+    {
+      "storage_key_literal": "9",
+      "tensor_entries": 1,
+      "declared_elements": 60,
+      "advertised_member_bytes": 240,
+      "declaration_intervals_contiguous_nonoverlapping_cover_storage": true,
+      "intervals": [
+        {
+          "key": "sincnet.conv1d.2.bias",
+          "key_ref": 172,
+          "tensor_ref": 187,
+          "persistent_ref": 177,
+          "offset_ref": 178,
+          "start_element": 0,
+          "end_element_exclusive": 60,
+          "shape_product": 60
+        }
+      ]
+    }
+  ],
+  "distinct_storage_keys": 23,
+  "distinct_advertised_storage_bytes": 5891996.0,
+  "declared_shape_product_total": 1472999.0,
+  "all_group_intervals_cover_without_overlap": true,
+  "sources": [
+    {
+      "key": "TORCH_INIT",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\torch\\__init__.py",
+      "saved_file": "additional-source/torch-init.py",
+      "bytes": 105826,
+      "sha256": "6d6c92d0b1091fc8f437cfe8228e9c9ad088dc0faf8446b1df8738f61c0834f2",
+      "before_after_copied_equal": true,
+      "executed": false
+    },
+    {
+      "key": "TORCH_RNN",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\torch\\nn\\modules\\rnn.py",
+      "saved_file": "additional-source/torch-rnn.py",
+      "bytes": 76334,
+      "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb",
+      "before_after_copied_equal": true,
+      "executed": false
+    },
+    {
+      "key": "TORCH_UTILS",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\torch\\_utils.py",
+      "saved_file": "additional-source/torch-utils.py",
+      "bytes": 41529,
+      "sha256": "a74c433f12e3f0867e4b9911d3fb071205198ee946f78ef7dbcfa438bdadd6cb",
+      "before_after_copied_equal": true,
+      "executed": false
+    }
+  ],
+  "checkpoint_read": false,
+  "tensors_constructed": false,
+  "persistent_ids_resolved": false,
+  "exit": 0
+}

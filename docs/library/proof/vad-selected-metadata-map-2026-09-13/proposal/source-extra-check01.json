@@ -1,0 +1,16 @@
+[
+  {
+    "key": "VADPIPE",
+    "path": "_scratch\\vad-fixed-loader-proposal01\\source\\pyannote\\audio\\pipelines\\voice_activity_detection.py",
+    "sha256": "24f4234c84f934f400f3a23da15d36104c1c04eb0453f6af9ca4ff2c3bd51fbb",
+    "matches_original_binding": true,
+    "executed": false
+  },
+  {
+    "key": "PARAMS",
+    "path": "_scratch\\vad-fixed-loader-proposal01\\source\\pyannote\\audio\\utils\\params.py",
+    "sha256": "e33654afd8fba201d7bed24d579573a74044e3154ac5b3bb14269fcdcde53e43",
+    "matches_original_binding": true,
+    "executed": false
+  }
+]

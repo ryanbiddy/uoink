@@ -1,0 +1,9195 @@
+{
+  "scope": "bounded static and inert symbolic metadata inventory only",
+  "started_utc": "2026-09-13T14:18:42.878113+00:00",
+  "architecture_claim": null,
+  "model_load_authorized": false,
+  "conversion_authorized": false,
+  "inference_authorized": false,
+  "release_acceptance": false,
+  "artifact": {
+    "allowlisted_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\whisperx\\assets\\pytorch_model.bin",
+    "bytes": 17719103,
+    "sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea"
+  },
+  "zip_directory": {
+    "zip64": true,
+    "members": 131,
+    "central_directory_bytes": 8011,
+    "central_directory_offset": 17710994
+  },
+  "members": [
+    {
+      "name": "archive/data.pkl",
+      "compressed_bytes": 21882,
+      "uncompressed_bytes": 21882,
+      "compression": 0,
+      "crc32": "2743d132"
+    },
+    {
+      "name": "archive/data/0",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "c02e38c6"
+    },
+    {
+      "name": "archive/data/1",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "402e35f8"
+    },
+    {
+      "name": "archive/data/10",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "47050acf"
+    },
+    {
+      "name": "archive/data/100",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "5c4f75d2"
+    },
+    {
+      "name": "archive/data/101",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "53b0d3d8"
+    },
+    {
+      "name": "archive/data/102",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "28226727"
+    },
+    {
+      "name": "archive/data/103",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "7b5eb519"
+    },
+    {
+      "name": "archive/data/104",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "eea907ec"
+    },
+    {
+      "name": "archive/data/105",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "9e96a341"
+    },
+    {
+      "name": "archive/data/106",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "dbe599de"
+    },
+    {
+      "name": "archive/data/107",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "9e96a341"
+    },
+    {
+      "name": "archive/data/108",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "dbe599de"
+    },
+    {
+      "name": "archive/data/109",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "1edf8451"
+    },
+    {
+      "name": "archive/data/11",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "703c8d90"
+    },
+    {
+      "name": "archive/data/110",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "6f4bf1f5"
+    },
+    {
+      "name": "archive/data/111",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "35d4f810"
+    },
+    {
+      "name": "archive/data/112",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "d3e0f6c9"
+    },
+    {
+      "name": "archive/data/113",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "c9fb9720"
+    },
+    {
+      "name": "archive/data/114",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "e7117a43"
+    },
+    {
+      "name": "archive/data/115",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "c9fb9720"
+    },
+    {
+      "name": "archive/data/116",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "e7117a43"
+    },
+    {
+      "name": "archive/data/117",
+      "compressed_bytes": 131072,
+      "uncompressed_bytes": 131072,
+      "compression": 0,
+      "crc32": "580c5fde"
+    },
+    {
+      "name": "archive/data/118",
+      "compressed_bytes": 131072,
+      "uncompressed_bytes": 131072,
+      "compression": 0,
+      "crc32": "351d434b"
+    },
+    {
+      "name": "archive/data/119",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "cefe7712"
+    },
+    {
+      "name": "archive/data/12",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "d9c9966e"
+    },
+    {
+      "name": "archive/data/120",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "007e73dd"
+    },
+    {
+      "name": "archive/data/121",
+      "compressed_bytes": 65536,
+      "uncompressed_bytes": 65536,
+      "compression": 0,
+      "crc32": "3e2379f2"
+    },
+    {
+      "name": "archive/data/122",
+      "compressed_bytes": 65536,
+      "uncompressed_bytes": 65536,
+      "compression": 0,
+      "crc32": "a64fd2de"
+    },
+    {
+      "name": "archive/data/123",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "876d26af"
+    },
+    {
+      "name": "archive/data/124",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "1ac720b7"
+    },
+    {
+      "name": "archive/data/125",
+      "compressed_bytes": 1536,
+      "uncompressed_bytes": 1536,
+      "compression": 0,
+      "crc32": "c179382f"
+    },
+    {
+      "name": "archive/data/126",
+      "compressed_bytes": 1536,
+      "uncompressed_bytes": 1536,
+      "compression": 0,
+      "crc32": "2f606dd7"
+    },
+    {
+      "name": "archive/data/127",
+      "compressed_bytes": 12,
+      "uncompressed_bytes": 12,
+      "compression": 0,
+      "crc32": "94b4e89e"
+    },
+    {
+      "name": "archive/data/128",
+      "compressed_bytes": 12,
+      "uncompressed_bytes": 12,
+      "compression": 0,
+      "crc32": "d494439c"
+    },
+    {
+      "name": "archive/data/13",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "5bf44ddb"
+    },
+    {
+      "name": "archive/data/14",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "c7191dd7"
+    },
+    {
+      "name": "archive/data/15",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "4f3d4715"
+    },
+    {
+      "name": "archive/data/16",
+      "compressed_bytes": 5521408,
+      "uncompressed_bytes": 5521408,
+      "compression": 0,
+      "crc32": "d798f46c"
+    },
+    {
+      "name": "archive/data/17",
+      "compressed_bytes": 131072,
+      "uncompressed_bytes": 131072,
+      "compression": 0,
+      "crc32": "88d55e57"
+    },
+    {
+      "name": "archive/data/18",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "c23a8238"
+    },
+    {
+      "name": "archive/data/19",
+      "compressed_bytes": 65536,
+      "uncompressed_bytes": 65536,
+      "compression": 0,
+      "crc32": "504e3a3b"
+    },
+    {
+      "name": "archive/data/2",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "b0a120fb"
+    },
+    {
+      "name": "archive/data/20",
+      "compressed_bytes": 512,
+      "uncompressed_bytes": 512,
+      "compression": 0,
+      "crc32": "0902aa73"
+    },
+    {
+      "name": "archive/data/21",
+      "compressed_bytes": 1536,
+      "uncompressed_bytes": 1536,
+      "compression": 0,
+      "crc32": "ccc1f781"
+    },
+    {
+      "name": "archive/data/22",
+      "compressed_bytes": 12,
+      "uncompressed_bytes": 12,
+      "compression": 0,
+      "crc32": "29f38da5"
+    },
+    {
+      "name": "archive/data/23",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "09588310"
+    },
+    {
+      "name": "archive/data/24",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "09588310"
+    },
+    {
+      "name": "archive/data/25",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "340f6bba"
+    },
+    {
+      "name": "archive/data/26",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "0df02897"
+    },
+    {
+      "name": "archive/data/27",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "bbf2c282"
+    },
+    {
+      "name": "archive/data/28",
+      "compressed_bytes": 4,
+      "uncompressed_bytes": 4,
+      "compression": 0,
+      "crc32": "567415db"
+    },
+    {
+      "name": "archive/data/29",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "94f30170"
+    },
+    {
+      "name": "archive/data/3",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "53c4f8b7"
+    },
+    {
+      "name": "archive/data/30",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "5f4cc37a"
+    },
+    {
+      "name": "archive/data/31",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "b619433f"
+    },
+    {
+      "name": "archive/data/32",
+      "compressed_bytes": 160,
+      "uncompressed_bytes": 160,
+      "compression": 0,
+      "crc32": "8b1ccc19"
+    },
+    {
+      "name": "archive/data/33",
+      "compressed_bytes": 96000,
+      "uncompressed_bytes": 96000,
+      "compression": 0,
+      "crc32": "0d5dbe68"
+    },
+    {
+      "name": "archive/data/34",
+      "compressed_bytes": 96000,
+      "uncompressed_bytes": 96000,
+      "compression": 0,
+      "crc32": "12b7ca77"
+    },
+    {
+      "name": "archive/data/35",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "29a45b23"
+    },
+    {
+      "name": "archive/data/36",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "791573df"
+    },
+    {
+      "name": "archive/data/37",
+      "compressed_bytes": 72000,
+      "uncompressed_bytes": 72000,
+      "compression": 0,
+      "crc32": "da98ba7e"
+    },
+    {
+      "name": "archive/data/38",
+      "compressed_bytes": 72000,
+      "uncompressed_bytes": 72000,
+      "compression": 0,
+      "crc32": "b8d53567"
+    },
+    {
+      "name": "archive/data/39",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "3b4a4aff"
+    },
+    {
+      "name": "archive/data/4",
+      "compressed_bytes": 500,
+      "uncompressed_bytes": 500,
+      "compression": 0,
+      "crc32": "cc4d75aa"
+    },
+    {
+      "name": "archive/data/40",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "5088a70b"
+    },
+    {
+      "name": "archive/data/41",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "ca89f9c1"
+    },
+    {
+      "name": "archive/data/42",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "056c63b4"
+    },
+    {
+      "name": "archive/data/43",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "fc1adac6"
+    },
+    {
+      "name": "archive/data/44",
+      "compressed_bytes": 320,
+      "uncompressed_bytes": 320,
+      "compression": 0,
+      "crc32": "e1834592"
+    },
+    {
+      "name": "archive/data/45",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "97ea2608"
+    },
+    {
+      "name": "archive/data/46",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "ddabc8be"
+    },
+    {
+      "name": "archive/data/47",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "2d66c1f5"
+    },
+    {
+      "name": "archive/data/48",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "5d49baa6"
+    },
+    {
+      "name": "archive/data/49",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "6ca3a25e"
+    },
+    {
+      "name": "archive/data/5",
+      "compressed_bytes": 500,
+      "uncompressed_bytes": 500,
+      "compression": 0,
+      "crc32": "6c5b49a5"
+    },
+    {
+      "name": "archive/data/50",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "35526556"
+    },
+    {
+      "name": "archive/data/51",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "f5e0c7d5"
+    },
+    {
+      "name": "archive/data/52",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "198998a9"
+    },
+    {
+      "name": "archive/data/53",
+      "compressed_bytes": 122880,
+      "uncompressed_bytes": 122880,
+      "compression": 0,
+      "crc32": "e652a159"
+    },
+    {
+      "name": "archive/data/54",
+      "compressed_bytes": 122880,
+      "uncompressed_bytes": 122880,
+      "compression": 0,
+      "crc32": "b1ef0e93"
+    },
+    {
+      "name": "archive/data/55",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "42311d76"
+    },
+    {
+      "name": "archive/data/56",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "e856e7a6"
+    },
+    {
+      "name": "archive/data/57",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "ac3b2f47"
+    },
+    {
+      "name": "archive/data/58",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "7393788b"
+    },
+    {
+      "name": "archive/data/59",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "ac3b2f47"
+    },
+    {
+      "name": "archive/data/6",
+      "compressed_bytes": 96000,
+      "uncompressed_bytes": 96000,
+      "compression": 0,
+      "crc32": "4e17fc0e"
+    },
+    {
+      "name": "archive/data/60",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "7393788b"
+    },
+    {
+      "name": "archive/data/61",
+      "compressed_bytes": 122880,
+      "uncompressed_bytes": 122880,
+      "compression": 0,
+      "crc32": "75a8b9bd"
+    },
+    {
+      "name": "archive/data/62",
+      "compressed_bytes": 122880,
+      "uncompressed_bytes": 122880,
+      "compression": 0,
+      "crc32": "b2c21d23"
+    },
+    {
+      "name": "archive/data/63",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "3f61acb1"
+    },
+    {
+      "name": "archive/data/64",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "480d9c51"
+    },
+    {
+      "name": "archive/data/65",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "09631401"
+    },
+    {
+      "name": "archive/data/66",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "d81c5ad6"
+    },
+    {
+      "name": "archive/data/67",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "09631401"
+    },
+    {
+      "name": "archive/data/68",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "d81c5ad6"
+    },
+    {
+      "name": "archive/data/69",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "bb6cf0ad"
+    },
+    {
+      "name": "archive/data/7",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "08bd5e90"
+    },
+    {
+      "name": "archive/data/70",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "e922c1c0"
+    },
+    {
+      "name": "archive/data/71",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "9f571c6a"
+    },
+    {
+      "name": "archive/data/72",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "901c89fe"
+    },
+    {
+      "name": "archive/data/73",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "befe744d"
+    },
+    {
+      "name": "archive/data/74",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "372c8b12"
+    },
+    {
+      "name": "archive/data/75",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "befe744d"
+    },
+    {
+      "name": "archive/data/76",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "372c8b12"
+    },
+    {
+      "name": "archive/data/77",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "e95e6dbe"
+    },
+    {
+      "name": "archive/data/78",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "29135aca"
+    },
+    {
+      "name": "archive/data/79",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "54235fc0"
+    },
+    {
+      "name": "archive/data/8",
+      "compressed_bytes": 72000,
+      "uncompressed_bytes": 72000,
+      "compression": 0,
+      "crc32": "d894709f"
+    },
+    {
+      "name": "archive/data/80",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "ea976e36"
+    },
+    {
+      "name": "archive/data/81",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "a8db7471"
+    },
+    {
+      "name": "archive/data/82",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "35c0e122"
+    },
+    {
+      "name": "archive/data/83",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "d7e652dd"
+    },
+    {
+      "name": "archive/data/84",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "281d5c79"
+    },
+    {
+      "name": "archive/data/85",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "4753976d"
+    },
+    {
+      "name": "archive/data/86",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "c33d5970"
+    },
+    {
+      "name": "archive/data/87",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "ec41d9d8"
+    },
+    {
+      "name": "archive/data/88",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "2ea37669"
+    },
+    {
+      "name": "archive/data/89",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "5acdc7a8"
+    },
+    {
+      "name": "archive/data/9",
+      "compressed_bytes": 240,
+      "uncompressed_bytes": 240,
+      "compression": 0,
+      "crc32": "670ab6d5"
+    },
+    {
+      "name": "archive/data/90",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "41816db0"
+    },
+    {
+      "name": "archive/data/91",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "5acdc7a8"
+    },
+    {
+      "name": "archive/data/92",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "41816db0"
+    },
+    {
+      "name": "archive/data/93",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "615a8469"
+    },
+    {
+      "name": "archive/data/94",
+      "compressed_bytes": 524288,
+      "uncompressed_bytes": 524288,
+      "compression": 0,
+      "crc32": "1918b929"
+    },
+    {
+      "name": "archive/data/95",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "e420138e"
+    },
+    {
+      "name": "archive/data/96",
+      "compressed_bytes": 262144,
+      "uncompressed_bytes": 262144,
+      "compression": 0,
+      "crc32": "a51df220"
+    },
+    {
+      "name": "archive/data/97",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "7c066d8e"
+    },
+    {
+      "name": "archive/data/98",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "5c4f75d2"
+    },
+    {
+      "name": "archive/data/99",
+      "compressed_bytes": 2048,
+      "uncompressed_bytes": 2048,
+      "compression": 0,
+      "crc32": "7c066d8e"
+    },
+    {
+      "name": "archive/version",
+      "compressed_bytes": 2,
+      "uncompressed_bytes": 2,
+      "compression": 0,
+      "crc32": "55679ed1"
+    }
+  ],
+  "advertised_uncompressed_bytes": 17695880,
+  "status": "refused",
+  "reason": "Reference cycle refused",
+  "refusal_context": {
+    "reference_cycle": {
+      "status": "cycle_refusal_diagnostic",
+      "cycle_node_count": 5,
+      "path_prefix": [
+        {
+          "node_ref": 2867,
+          "kind": "newobj"
+        },
+        {
+          "node_ref": 2868,
+          "kind": "dict"
+        },
+        {
+          "node_ref": 2898,
+          "kind": "list"
+        },
+        {
+          "node_ref": 2901,
+          "kind": "newobj"
+        },
+        {
+          "node_ref": 2902,
+          "kind": "dict"
+        }
+      ],
+      "path_edges": [
+        {
+          "from_ref": 2867,
+          "to_ref": 2868,
+          "edge_index": 2,
+          "role": "newobj.recorded_operation"
+        },
+        {
+          "from_ref": 2868,
+          "to_ref": 2898,
+          "edge_index": 5,
+          "role": "dict.content_field_value"
+        },
+        {
+          "from_ref": 2898,
+          "to_ref": 2901,
+          "edge_index": 0,
+          "role": "list.item"
+        },
+        {
+          "from_ref": 2901,
+          "to_ref": 2902,
+          "edge_index": 2,
+          "role": "newobj.recorded_operation"
+        }
+      ],
+      "closing_edge": {
+        "from_ref": 2902,
+        "to_ref": 2867,
+        "edge_index": 3,
+        "role": "dict.parent_field_value",
+        "from_kind": "dict",
+        "to_kind": "newobj"
+      },
+      "path_truncated": false,
+      "path_node_limit": 12,
+      "byte_limit": 4096,
+      "detected_entry_path": {
+        "category": "known_training_root"
+      },
+      "entry_path_is_exclusive_ownership": false,
+      "closing_edge_is_separate_from_truncated_prefix": true,
+      "values_or_global_names_included": false
+    },
+    "selected_root_projection": {
+      "status": "partial_untrusted_selected_root_projection",
+      "protocol": 2,
+      "selected_root_associations": [
+        {
+          "key": "state_dict",
+          "value_ref": 10
+        },
+        {
+          "key": "hyper_parameters",
+          "value_ref": 3022
+        },
+        {
+          "key": "pyannote.audio",
+          "value_ref": 3052
+        }
+      ],
+      "nodes": [
+        {
+          "id": 8,
+          "kind": "global",
+          "literal": "collections OrderedDict"
+        },
+        {
+          "id": 9,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 10,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 9,
+          "operations": [
+            {
+              "opcode": "SETITEMS",
+              "entries": [
+                [
+                  11,
+                  29
+                ],
+                [
+                  30,
+                  45
+                ],
+                [
+                  46,
+                  63
+                ],
+                [
+                  64,
+                  81
+                ],
+                [
+                  82,
+                  97
+                ],
+                [
+                  98,
+                  115
+                ],
+                [
+                  116,
+                  135
+                ],
+                [
+                  136,
+                  151
+                ],
+                [
+                  152,
+                  171
+                ],
+                [
+                  172,
+                  187
+                ],
+                [
+                  188,
+                  203
+                ],
+                [
+                  204,
+                  219
+                ],
+                [
+                  220,
+                  235
+                ],
+                [
+                  236,
+                  251
+                ],
+                [
+                  252,
+                  267
+                ],
+                [
+                  268,
+                  283
+                ],
+                [
+                  284,
+                  301
+                ],
+                [
+                  302,
+                  318
+                ],
+                [
+                  319,
+                  333
+                ],
+                [
+                  334,
+                  348
+                ],
+                [
+                  349,
+                  365
+                ],
+                [
+                  366,
+                  382
+                ],
+                [
+                  383,
+                  397
+                ],
+                [
+                  398,
+                  412
+                ],
+                [
+                  413,
+                  429
+                ],
+                [
+                  430,
+                  446
+                ],
+                [
+                  447,
+                  461
+                ],
+                [
+                  462,
+                  476
+                ],
+                [
+                  477,
+                  493
+                ],
+                [
+                  494,
+                  510
+                ],
+                [
+                  511,
+                  525
+                ],
+                [
+                  526,
+                  540
+                ],
+                [
+                  541,
+                  557
+                ],
+                [
+                  558,
+                  574
+                ],
+                [
+                  575,
+                  589
+                ],
+                [
+                  590,
+                  604
+                ],
+                [
+                  605,
+                  621
+                ],
+                [
+                  622,
+                  638
+                ],
+                [
+                  639,
+                  653
+                ],
+                [
+                  654,
+                  668
+                ],
+                [
+                  669,
+                  685
+                ],
+                [
+                  686,
+                  702
+                ],
+                [
+                  703,
+                  717
+                ],
+                [
+                  718,
+                  732
+                ],
+                [
+                  733,
+                  749
+                ],
+                [
+                  750,
+                  766
+                ],
+                [
+                  767,
+                  781
+                ],
+                [
+                  782,
+                  796
+                ],
+                [
+                  797,
+                  814
+                ],
+                [
+                  815,
+                  830
+                ],
+                [
+                  831,
+                  848
+                ],
+                [
+                  849,
+                  864
+                ],
+                [
+                  865,
+                  882
+                ],
+                [
+                  883,
+                  898
+                ]
+              ]
+            },
+            {
+              "opcode": "BUILD",
+              "state_ref": 899
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "kind": "str",
+          "value": "sincnet.wav_norm1d.weight"
+        },
+        {
+          "id": 12,
+          "kind": "global",
+          "literal": "torch._utils _rebuild_tensor_v2"
+        },
+        {
+          "id": 13,
+          "kind": "str",
+          "value": "storage"
+        },
+        {
+          "id": 14,
+          "kind": "global",
+          "literal": "torch FloatStorage"
+        },
+        {
+          "id": 15,
+          "kind": "str",
+          "value": "0"
+        },
+        {
+          "id": 16,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 17,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 18,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            15,
+            16,
+            17
+          ]
+        },
+        {
+          "id": 19,
+          "kind": "persistent_id",
+          "operand_ref": 18
+        },
+        {
+          "id": 20,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 21,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 22,
+          "kind": "tuple",
+          "items": [
+            21
+          ]
+        },
+        {
+          "id": 23,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 24,
+          "kind": "tuple",
+          "items": [
+            23
+          ]
+        },
+        {
+          "id": 25,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 26,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 27,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 26,
+          "operations": []
+        },
+        {
+          "id": 28,
+          "kind": "tuple",
+          "items": [
+            19,
+            20,
+            22,
+            24,
+            25,
+            27
+          ]
+        },
+        {
+          "id": 29,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 28,
+          "operations": []
+        },
+        {
+          "id": 30,
+          "kind": "str",
+          "value": "sincnet.wav_norm1d.bias"
+        },
+        {
+          "id": 31,
+          "kind": "str",
+          "value": "1"
+        },
+        {
+          "id": 32,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 33,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 34,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            31,
+            32,
+            33
+          ]
+        },
+        {
+          "id": 35,
+          "kind": "persistent_id",
+          "operand_ref": 34
+        },
+        {
+          "id": 36,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 37,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 38,
+          "kind": "tuple",
+          "items": [
+            37
+          ]
+        },
+        {
+          "id": 39,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 40,
+          "kind": "tuple",
+          "items": [
+            39
+          ]
+        },
+        {
+          "id": 41,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 42,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 43,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 42,
+          "operations": []
+        },
+        {
+          "id": 44,
+          "kind": "tuple",
+          "items": [
+            35,
+            36,
+            38,
+            40,
+            41,
+            43
+          ]
+        },
+        {
+          "id": 45,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 44,
+          "operations": []
+        },
+        {
+          "id": 46,
+          "kind": "str",
+          "value": "sincnet.conv1d.0.filterbank.low_hz_"
+        },
+        {
+          "id": 47,
+          "kind": "str",
+          "value": "2"
+        },
+        {
+          "id": 48,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 49,
+          "kind": "int",
+          "value": 40
+        },
+        {
+          "id": 50,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            47,
+            48,
+            49
+          ]
+        },
+        {
+          "id": 51,
+          "kind": "persistent_id",
+          "operand_ref": 50
+        },
+        {
+          "id": 52,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 53,
+          "kind": "int",
+          "value": 40
+        },
+        {
+          "id": 54,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 55,
+          "kind": "tuple",
+          "items": [
+            53,
+            54
+          ]
+        },
+        {
+          "id": 56,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 57,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 58,
+          "kind": "tuple",
+          "items": [
+            56,
+            57
+          ]
+        },
+        {
+          "id": 59,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 60,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 61,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 60,
+          "operations": []
+        },
+        {
+          "id": 62,
+          "kind": "tuple",
+          "items": [
+            51,
+            52,
+            55,
+            58,
+            59,
+            61
+          ]
+        },
+        {
+          "id": 63,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 62,
+          "operations": []
+        },
+        {
+          "id": 64,
+          "kind": "str",
+          "value": "sincnet.conv1d.0.filterbank.band_hz_"
+        },
+        {
+          "id": 65,
+          "kind": "str",
+          "value": "3"
+        },
+        {
+          "id": 66,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 67,
+          "kind": "int",
+          "value": 40
+        },
+        {
+          "id": 68,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            65,
+            66,
+            67
+          ]
+        },
+        {
+          "id": 69,
+          "kind": "persistent_id",
+          "operand_ref": 68
+        },
+        {
+          "id": 70,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 71,
+          "kind": "int",
+          "value": 40
+        },
+        {
+          "id": 72,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 73,
+          "kind": "tuple",
+          "items": [
+            71,
+            72
+          ]
+        },
+        {
+          "id": 74,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 75,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 76,
+          "kind": "tuple",
+          "items": [
+            74,
+            75
+          ]
+        },
+        {
+          "id": 77,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 78,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 79,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 78,
+          "operations": []
+        },
+        {
+          "id": 80,
+          "kind": "tuple",
+          "items": [
+            69,
+            70,
+            73,
+            76,
+            77,
+            79
+          ]
+        },
+        {
+          "id": 81,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 80,
+          "operations": []
+        },
+        {
+          "id": 82,
+          "kind": "str",
+          "value": "sincnet.conv1d.0.filterbank.window_"
+        },
+        {
+          "id": 83,
+          "kind": "str",
+          "value": "4"
+        },
+        {
+          "id": 84,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 85,
+          "kind": "int",
+          "value": 125
+        },
+        {
+          "id": 86,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            83,
+            84,
+            85
+          ]
+        },
+        {
+          "id": 87,
+          "kind": "persistent_id",
+          "operand_ref": 86
+        },
+        {
+          "id": 88,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 89,
+          "kind": "int",
+          "value": 125
+        },
+        {
+          "id": 90,
+          "kind": "tuple",
+          "items": [
+            89
+          ]
+        },
+        {
+          "id": 91,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 92,
+          "kind": "tuple",
+          "items": [
+            91
+          ]
+        },
+        {
+          "id": 93,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 94,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 95,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 94,
+          "operations": []
+        },
+        {
+          "id": 96,
+          "kind": "tuple",
+          "items": [
+            87,
+            88,
+            90,
+            92,
+            93,
+            95
+          ]
+        },
+        {
+          "id": 97,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 96,
+          "operations": []
+        },
+        {
+          "id": 98,
+          "kind": "str",
+          "value": "sincnet.conv1d.0.filterbank.n_"
+        },
+        {
+          "id": 99,
+          "kind": "str",
+          "value": "5"
+        },
+        {
+          "id": 100,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 101,
+          "kind": "int",
+          "value": 125
+        },
+        {
+          "id": 102,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            99,
+            100,
+            101
+          ]
+        },
+        {
+          "id": 103,
+          "kind": "persistent_id",
+          "operand_ref": 102
+        },
+        {
+          "id": 104,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 105,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 106,
+          "kind": "int",
+          "value": 125
+        },
+        {
+          "id": 107,
+          "kind": "tuple",
+          "items": [
+            105,
+            106
+          ]
+        },
+        {
+          "id": 108,
+          "kind": "int",
+          "value": 125
+        },
+        {
+          "id": 109,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 110,
+          "kind": "tuple",
+          "items": [
+            108,
+            109
+          ]
+        },
+        {
+          "id": 111,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 112,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 113,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 112,
+          "operations": []
+        },
+        {
+          "id": 114,
+          "kind": "tuple",
+          "items": [
+            103,
+            104,
+            107,
+            110,
+            111,
+            113
+          ]
+        },
+        {
+          "id": 115,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 114,
+          "operations": []
+        },
+        {
+          "id": 116,
+          "kind": "str",
+          "value": "sincnet.conv1d.1.weight"
+        },
+        {
+          "id": 117,
+          "kind": "str",
+          "value": "6"
+        },
+        {
+          "id": 118,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 119,
+          "kind": "int",
+          "value": 24000
+        },
+        {
+          "id": 120,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            117,
+            118,
+            119
+          ]
+        },
+        {
+          "id": 121,
+          "kind": "persistent_id",
+          "operand_ref": 120
+        },
+        {
+          "id": 122,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 123,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 124,
+          "kind": "int",
+          "value": 80
+        },
+        {
+          "id": 125,
+          "kind": "int",
+          "value": 5
+        },
+        {
+          "id": 126,
+          "kind": "tuple",
+          "items": [
+            123,
+            124,
+            125
+          ]
+        },
+        {
+          "id": 127,
+          "kind": "int",
+          "value": 400
+        },
+        {
+          "id": 128,
+          "kind": "int",
+          "value": 5
+        },
+        {
+          "id": 129,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 130,
+          "kind": "tuple",
+          "items": [
+            127,
+            128,
+            129
+          ]
+        },
+        {
+          "id": 131,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 132,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 133,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 132,
+          "operations": []
+        },
+        {
+          "id": 134,
+          "kind": "tuple",
+          "items": [
+            121,
+            122,
+            126,
+            130,
+            131,
+            133
+          ]
+        },
+        {
+          "id": 135,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 134,
+          "operations": []
+        },
+        {
+          "id": 136,
+          "kind": "str",
+          "value": "sincnet.conv1d.1.bias"
+        },
+        {
+          "id": 137,
+          "kind": "str",
+          "value": "7"
+        },
+        {
+          "id": 138,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 139,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 140,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            137,
+            138,
+            139
+          ]
+        },
+        {
+          "id": 141,
+          "kind": "persistent_id",
+          "operand_ref": 140
+        },
+        {
+          "id": 142,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 143,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 144,
+          "kind": "tuple",
+          "items": [
+            143
+          ]
+        },
+        {
+          "id": 145,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 146,
+          "kind": "tuple",
+          "items": [
+            145
+          ]
+        },
+        {
+          "id": 147,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 148,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 149,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 148,
+          "operations": []
+        },
+        {
+          "id": 150,
+          "kind": "tuple",
+          "items": [
+            141,
+            142,
+            144,
+            146,
+            147,
+            149
+          ]
+        },
+        {
+          "id": 151,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 150,
+          "operations": []
+        },
+        {
+          "id": 152,
+          "kind": "str",
+          "value": "sincnet.conv1d.2.weight"
+        },
+        {
+          "id": 153,
+          "kind": "str",
+          "value": "8"
+        },
+        {
+          "id": 154,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 155,
+          "kind": "int",
+          "value": 18000
+        },
+        {
+          "id": 156,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            153,
+            154,
+            155
+          ]
+        },
+        {
+          "id": 157,
+          "kind": "persistent_id",
+          "operand_ref": 156
+        },
+        {
+          "id": 158,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 159,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 160,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 161,
+          "kind": "int",
+          "value": 5
+        },
+        {
+          "id": 162,
+          "kind": "tuple",
+          "items": [
+            159,
+            160,
+            161
+          ]
+        },
+        {
+          "id": 163,
+          "kind": "int",
+          "value": 300
+        },
+        {
+          "id": 164,
+          "kind": "int",
+          "value": 5
+        },
+        {
+          "id": 165,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 166,
+          "kind": "tuple",
+          "items": [
+            163,
+            164,
+            165
+          ]
+        },
+        {
+          "id": 167,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 168,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 169,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 168,
+          "operations": []
+        },
+        {
+          "id": 170,
+          "kind": "tuple",
+          "items": [
+            157,
+            158,
+            162,
+            166,
+            167,
+            169
+          ]
+        },
+        {
+          "id": 171,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 170,
+          "operations": []
+        },
+        {
+          "id": 172,
+          "kind": "str",
+          "value": "sincnet.conv1d.2.bias"
+        },
+        {
+          "id": 173,
+          "kind": "str",
+          "value": "9"
+        },
+        {
+          "id": 174,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 175,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 176,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            173,
+            174,
+            175
+          ]
+        },
+        {
+          "id": 177,
+          "kind": "persistent_id",
+          "operand_ref": 176
+        },
+        {
+          "id": 178,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 179,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 180,
+          "kind": "tuple",
+          "items": [
+            179
+          ]
+        },
+        {
+          "id": 181,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 182,
+          "kind": "tuple",
+          "items": [
+            181
+          ]
+        },
+        {
+          "id": 183,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 184,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 185,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 184,
+          "operations": []
+        },
+        {
+          "id": 186,
+          "kind": "tuple",
+          "items": [
+            177,
+            178,
+            180,
+            182,
+            183,
+            185
+          ]
+        },
+        {
+          "id": 187,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 186,
+          "operations": []
+        },
+        {
+          "id": 188,
+          "kind": "str",
+          "value": "sincnet.norm1d.0.weight"
+        },
+        {
+          "id": 189,
+          "kind": "str",
+          "value": "10"
+        },
+        {
+          "id": 190,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 191,
+          "kind": "int",
+          "value": 80
+        },
+        {
+          "id": 192,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            189,
+            190,
+            191
+          ]
+        },
+        {
+          "id": 193,
+          "kind": "persistent_id",
+          "operand_ref": 192
+        },
+        {
+          "id": 194,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 195,
+          "kind": "int",
+          "value": 80
+        },
+        {
+          "id": 196,
+          "kind": "tuple",
+          "items": [
+            195
+          ]
+        },
+        {
+          "id": 197,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 198,
+          "kind": "tuple",
+          "items": [
+            197
+          ]
+        },
+        {
+          "id": 199,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 200,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 201,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 200,
+          "operations": []
+        },
+        {
+          "id": 202,
+          "kind": "tuple",
+          "items": [
+            193,
+            194,
+            196,
+            198,
+            199,
+            201
+          ]
+        },
+        {
+          "id": 203,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 202,
+          "operations": []
+        },
+        {
+          "id": 204,
+          "kind": "str",
+          "value": "sincnet.norm1d.0.bias"
+        },
+        {
+          "id": 205,
+          "kind": "str",
+          "value": "11"
+        },
+        {
+          "id": 206,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 207,
+          "kind": "int",
+          "value": 80
+        },
+        {
+          "id": 208,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            205,
+            206,
+            207
+          ]
+        },
+        {
+          "id": 209,
+          "kind": "persistent_id",
+          "operand_ref": 208
+        },
+        {
+          "id": 210,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 211,
+          "kind": "int",
+          "value": 80
+        },
+        {
+          "id": 212,
+          "kind": "tuple",
+          "items": [
+            211
+          ]
+        },
+        {
+          "id": 213,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 214,
+          "kind": "tuple",
+          "items": [
+            213
+          ]
+        },
+        {
+          "id": 215,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 216,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 217,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 216,
+          "operations": []
+        },
+        {
+          "id": 218,
+          "kind": "tuple",
+          "items": [
+            209,
+            210,
+            212,
+            214,
+            215,
+            217
+          ]
+        },
+        {
+          "id": 219,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 218,
+          "operations": []
+        },
+        {
+          "id": 220,
+          "kind": "str",
+          "value": "sincnet.norm1d.1.weight"
+        },
+        {
+          "id": 221,
+          "kind": "str",
+          "value": "12"
+        },
+        {
+          "id": 222,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 223,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 224,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            221,
+            222,
+            223
+          ]
+        },
+        {
+          "id": 225,
+          "kind": "persistent_id",
+          "operand_ref": 224
+        },
+        {
+          "id": 226,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 227,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 228,
+          "kind": "tuple",
+          "items": [
+            227
+          ]
+        },
+        {
+          "id": 229,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 230,
+          "kind": "tuple",
+          "items": [
+            229
+          ]
+        },
+        {
+          "id": 231,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 232,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 233,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 232,
+          "operations": []
+        },
+        {
+          "id": 234,
+          "kind": "tuple",
+          "items": [
+            225,
+            226,
+            228,
+            230,
+            231,
+            233
+          ]
+        },
+        {
+          "id": 235,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 234,
+          "operations": []
+        },
+        {
+          "id": 236,
+          "kind": "str",
+          "value": "sincnet.norm1d.1.bias"
+        },
+        {
+          "id": 237,
+          "kind": "str",
+          "value": "13"
+        },
+        {
+          "id": 238,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 239,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 240,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            237,
+            238,
+            239
+          ]
+        },
+        {
+          "id": 241,
+          "kind": "persistent_id",
+          "operand_ref": 240
+        },
+        {
+          "id": 242,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 243,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 244,
+          "kind": "tuple",
+          "items": [
+            243
+          ]
+        },
+        {
+          "id": 245,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 246,
+          "kind": "tuple",
+          "items": [
+            245
+          ]
+        },
+        {
+          "id": 247,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 248,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 249,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 248,
+          "operations": []
+        },
+        {
+          "id": 250,
+          "kind": "tuple",
+          "items": [
+            241,
+            242,
+            244,
+            246,
+            247,
+            249
+          ]
+        },
+        {
+          "id": 251,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 250,
+          "operations": []
+        },
+        {
+          "id": 252,
+          "kind": "str",
+          "value": "sincnet.norm1d.2.weight"
+        },
+        {
+          "id": 253,
+          "kind": "str",
+          "value": "14"
+        },
+        {
+          "id": 254,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 255,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 256,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            253,
+            254,
+            255
+          ]
+        },
+        {
+          "id": 257,
+          "kind": "persistent_id",
+          "operand_ref": 256
+        },
+        {
+          "id": 258,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 259,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 260,
+          "kind": "tuple",
+          "items": [
+            259
+          ]
+        },
+        {
+          "id": 261,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 262,
+          "kind": "tuple",
+          "items": [
+            261
+          ]
+        },
+        {
+          "id": 263,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 264,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 265,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 264,
+          "operations": []
+        },
+        {
+          "id": 266,
+          "kind": "tuple",
+          "items": [
+            257,
+            258,
+            260,
+            262,
+            263,
+            265
+          ]
+        },
+        {
+          "id": 267,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 266,
+          "operations": []
+        },
+        {
+          "id": 268,
+          "kind": "str",
+          "value": "sincnet.norm1d.2.bias"
+        },
+        {
+          "id": 269,
+          "kind": "str",
+          "value": "15"
+        },
+        {
+          "id": 270,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 271,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 272,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            269,
+            270,
+            271
+          ]
+        },
+        {
+          "id": 273,
+          "kind": "persistent_id",
+          "operand_ref": 272
+        },
+        {
+          "id": 274,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 275,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 276,
+          "kind": "tuple",
+          "items": [
+            275
+          ]
+        },
+        {
+          "id": 277,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 278,
+          "kind": "tuple",
+          "items": [
+            277
+          ]
+        },
+        {
+          "id": 279,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 280,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 281,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 280,
+          "operations": []
+        },
+        {
+          "id": 282,
+          "kind": "tuple",
+          "items": [
+            273,
+            274,
+            276,
+            278,
+            279,
+            281
+          ]
+        },
+        {
+          "id": 283,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 282,
+          "operations": []
+        },
+        {
+          "id": 284,
+          "kind": "str",
+          "value": "lstm.weight_ih_l0"
+        },
+        {
+          "id": 285,
+          "kind": "str",
+          "value": "16"
+        },
+        {
+          "id": 286,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 287,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 288,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            286,
+            287
+          ]
+        },
+        {
+          "id": 289,
+          "kind": "persistent_id",
+          "operand_ref": 288
+        },
+        {
+          "id": 290,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 291,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 292,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 293,
+          "kind": "tuple",
+          "items": [
+            291,
+            292
+          ]
+        },
+        {
+          "id": 294,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 295,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 296,
+          "kind": "tuple",
+          "items": [
+            294,
+            295
+          ]
+        },
+        {
+          "id": 297,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 298,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 299,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 298,
+          "operations": []
+        },
+        {
+          "id": 300,
+          "kind": "tuple",
+          "items": [
+            289,
+            290,
+            293,
+            296,
+            297,
+            299
+          ]
+        },
+        {
+          "id": 301,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 300,
+          "operations": []
+        },
+        {
+          "id": 302,
+          "kind": "str",
+          "value": "lstm.weight_hh_l0"
+        },
+        {
+          "id": 303,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 304,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 305,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            303,
+            304
+          ]
+        },
+        {
+          "id": 306,
+          "kind": "persistent_id",
+          "operand_ref": 305
+        },
+        {
+          "id": 307,
+          "kind": "int",
+          "value": 30720
+        },
+        {
+          "id": 308,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 309,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 310,
+          "kind": "tuple",
+          "items": [
+            308,
+            309
+          ]
+        },
+        {
+          "id": 311,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 312,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 313,
+          "kind": "tuple",
+          "items": [
+            311,
+            312
+          ]
+        },
+        {
+          "id": 314,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 315,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 316,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 315,
+          "operations": []
+        },
+        {
+          "id": 317,
+          "kind": "tuple",
+          "items": [
+            306,
+            307,
+            310,
+            313,
+            314,
+            316
+          ]
+        },
+        {
+          "id": 318,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 317,
+          "operations": []
+        },
+        {
+          "id": 319,
+          "kind": "str",
+          "value": "lstm.bias_ih_l0"
+        },
+        {
+          "id": 320,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 321,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 322,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            320,
+            321
+          ]
+        },
+        {
+          "id": 323,
+          "kind": "persistent_id",
+          "operand_ref": 322
+        },
+        {
+          "id": 324,
+          "kind": "int",
+          "value": 1372160
+        },
+        {
+          "id": 325,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 326,
+          "kind": "tuple",
+          "items": [
+            325
+          ]
+        },
+        {
+          "id": 327,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 328,
+          "kind": "tuple",
+          "items": [
+            327
+          ]
+        },
+        {
+          "id": 329,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 330,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 331,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 330,
+          "operations": []
+        },
+        {
+          "id": 332,
+          "kind": "tuple",
+          "items": [
+            323,
+            324,
+            326,
+            328,
+            329,
+            331
+          ]
+        },
+        {
+          "id": 333,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 332,
+          "operations": []
+        },
+        {
+          "id": 334,
+          "kind": "str",
+          "value": "lstm.bias_hh_l0"
+        },
+        {
+          "id": 335,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 336,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 337,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            335,
+            336
+          ]
+        },
+        {
+          "id": 338,
+          "kind": "persistent_id",
+          "operand_ref": 337
+        },
+        {
+          "id": 339,
+          "kind": "int",
+          "value": 1372672
+        },
+        {
+          "id": 340,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 341,
+          "kind": "tuple",
+          "items": [
+            340
+          ]
+        },
+        {
+          "id": 342,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 343,
+          "kind": "tuple",
+          "items": [
+            342
+          ]
+        },
+        {
+          "id": 344,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 345,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 346,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 345,
+          "operations": []
+        },
+        {
+          "id": 347,
+          "kind": "tuple",
+          "items": [
+            338,
+            339,
+            341,
+            343,
+            344,
+            346
+          ]
+        },
+        {
+          "id": 348,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 347,
+          "operations": []
+        },
+        {
+          "id": 349,
+          "kind": "str",
+          "value": "lstm.weight_ih_l0_reverse"
+        },
+        {
+          "id": 350,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 351,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 352,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            350,
+            351
+          ]
+        },
+        {
+          "id": 353,
+          "kind": "persistent_id",
+          "operand_ref": 352
+        },
+        {
+          "id": 354,
+          "kind": "int",
+          "value": 96256
+        },
+        {
+          "id": 355,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 356,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 357,
+          "kind": "tuple",
+          "items": [
+            355,
+            356
+          ]
+        },
+        {
+          "id": 358,
+          "kind": "int",
+          "value": 60
+        },
+        {
+          "id": 359,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 360,
+          "kind": "tuple",
+          "items": [
+            358,
+            359
+          ]
+        },
+        {
+          "id": 361,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 362,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 363,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 362,
+          "operations": []
+        },
+        {
+          "id": 364,
+          "kind": "tuple",
+          "items": [
+            353,
+            354,
+            357,
+            360,
+            361,
+            363
+          ]
+        },
+        {
+          "id": 365,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 364,
+          "operations": []
+        },
+        {
+          "id": 366,
+          "kind": "str",
+          "value": "lstm.weight_hh_l0_reverse"
+        },
+        {
+          "id": 367,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 368,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 369,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            367,
+            368
+          ]
+        },
+        {
+          "id": 370,
+          "kind": "persistent_id",
+          "operand_ref": 369
+        },
+        {
+          "id": 371,
+          "kind": "int",
+          "value": 126976
+        },
+        {
+          "id": 372,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 373,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 374,
+          "kind": "tuple",
+          "items": [
+            372,
+            373
+          ]
+        },
+        {
+          "id": 375,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 376,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 377,
+          "kind": "tuple",
+          "items": [
+            375,
+            376
+          ]
+        },
+        {
+          "id": 378,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 379,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 380,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 379,
+          "operations": []
+        },
+        {
+          "id": 381,
+          "kind": "tuple",
+          "items": [
+            370,
+            371,
+            374,
+            377,
+            378,
+            380
+          ]
+        },
+        {
+          "id": 382,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 381,
+          "operations": []
+        },
+        {
+          "id": 383,
+          "kind": "str",
+          "value": "lstm.bias_ih_l0_reverse"
+        },
+        {
+          "id": 384,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 385,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 386,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            384,
+            385
+          ]
+        },
+        {
+          "id": 387,
+          "kind": "persistent_id",
+          "operand_ref": 386
+        },
+        {
+          "id": 388,
+          "kind": "int",
+          "value": 1373184
+        },
+        {
+          "id": 389,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 390,
+          "kind": "tuple",
+          "items": [
+            389
+          ]
+        },
+        {
+          "id": 391,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 392,
+          "kind": "tuple",
+          "items": [
+            391
+          ]
+        },
+        {
+          "id": 393,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 394,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 395,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 394,
+          "operations": []
+        },
+        {
+          "id": 396,
+          "kind": "tuple",
+          "items": [
+            387,
+            388,
+            390,
+            392,
+            393,
+            395
+          ]
+        },
+        {
+          "id": 397,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 396,
+          "operations": []
+        },
+        {
+          "id": 398,
+          "kind": "str",
+          "value": "lstm.bias_hh_l0_reverse"
+        },
+        {
+          "id": 399,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 400,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 401,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            399,
+            400
+          ]
+        },
+        {
+          "id": 402,
+          "kind": "persistent_id",
+          "operand_ref": 401
+        },
+        {
+          "id": 403,
+          "kind": "int",
+          "value": 1373696
+        },
+        {
+          "id": 404,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 405,
+          "kind": "tuple",
+          "items": [
+            404
+          ]
+        },
+        {
+          "id": 406,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 407,
+          "kind": "tuple",
+          "items": [
+            406
+          ]
+        },
+        {
+          "id": 408,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 409,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 410,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 409,
+          "operations": []
+        },
+        {
+          "id": 411,
+          "kind": "tuple",
+          "items": [
+            402,
+            403,
+            405,
+            407,
+            408,
+            410
+          ]
+        },
+        {
+          "id": 412,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 411,
+          "operations": []
+        },
+        {
+          "id": 413,
+          "kind": "str",
+          "value": "lstm.weight_ih_l1"
+        },
+        {
+          "id": 414,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 415,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 416,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            414,
+            415
+          ]
+        },
+        {
+          "id": 417,
+          "kind": "persistent_id",
+          "operand_ref": 416
+        },
+        {
+          "id": 418,
+          "kind": "int",
+          "value": 192512
+        },
+        {
+          "id": 419,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 420,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 421,
+          "kind": "tuple",
+          "items": [
+            419,
+            420
+          ]
+        },
+        {
+          "id": 422,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 423,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 424,
+          "kind": "tuple",
+          "items": [
+            422,
+            423
+          ]
+        },
+        {
+          "id": 425,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 426,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 427,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 426,
+          "operations": []
+        },
+        {
+          "id": 428,
+          "kind": "tuple",
+          "items": [
+            417,
+            418,
+            421,
+            424,
+            425,
+            427
+          ]
+        },
+        {
+          "id": 429,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 428,
+          "operations": []
+        },
+        {
+          "id": 430,
+          "kind": "str",
+          "value": "lstm.weight_hh_l1"
+        },
+        {
+          "id": 431,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 432,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 433,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            431,
+            432
+          ]
+        },
+        {
+          "id": 434,
+          "kind": "persistent_id",
+          "operand_ref": 433
+        },
+        {
+          "id": 435,
+          "kind": "int",
+          "value": 323584
+        },
+        {
+          "id": 436,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 437,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 438,
+          "kind": "tuple",
+          "items": [
+            436,
+            437
+          ]
+        },
+        {
+          "id": 439,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 440,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 441,
+          "kind": "tuple",
+          "items": [
+            439,
+            440
+          ]
+        },
+        {
+          "id": 442,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 443,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 444,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 443,
+          "operations": []
+        },
+        {
+          "id": 445,
+          "kind": "tuple",
+          "items": [
+            434,
+            435,
+            438,
+            441,
+            442,
+            444
+          ]
+        },
+        {
+          "id": 446,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 445,
+          "operations": []
+        },
+        {
+          "id": 447,
+          "kind": "str",
+          "value": "lstm.bias_ih_l1"
+        },
+        {
+          "id": 448,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 449,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 450,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            448,
+            449
+          ]
+        },
+        {
+          "id": 451,
+          "kind": "persistent_id",
+          "operand_ref": 450
+        },
+        {
+          "id": 452,
+          "kind": "int",
+          "value": 1374208
+        },
+        {
+          "id": 453,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 454,
+          "kind": "tuple",
+          "items": [
+            453
+          ]
+        },
+        {
+          "id": 455,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 456,
+          "kind": "tuple",
+          "items": [
+            455
+          ]
+        },
+        {
+          "id": 457,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 458,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 459,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 458,
+          "operations": []
+        },
+        {
+          "id": 460,
+          "kind": "tuple",
+          "items": [
+            451,
+            452,
+            454,
+            456,
+            457,
+            459
+          ]
+        },
+        {
+          "id": 461,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 460,
+          "operations": []
+        },
+        {
+          "id": 462,
+          "kind": "str",
+          "value": "lstm.bias_hh_l1"
+        },
+        {
+          "id": 463,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 464,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 465,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            463,
+            464
+          ]
+        },
+        {
+          "id": 466,
+          "kind": "persistent_id",
+          "operand_ref": 465
+        },
+        {
+          "id": 467,
+          "kind": "int",
+          "value": 1374720
+        },
+        {
+          "id": 468,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 469,
+          "kind": "tuple",
+          "items": [
+            468
+          ]
+        },
+        {
+          "id": 470,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 471,
+          "kind": "tuple",
+          "items": [
+            470
+          ]
+        },
+        {
+          "id": 472,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 473,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 474,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 473,
+          "operations": []
+        },
+        {
+          "id": 475,
+          "kind": "tuple",
+          "items": [
+            466,
+            467,
+            469,
+            471,
+            472,
+            474
+          ]
+        },
+        {
+          "id": 476,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 475,
+          "operations": []
+        },
+        {
+          "id": 477,
+          "kind": "str",
+          "value": "lstm.weight_ih_l1_reverse"
+        },
+        {
+          "id": 478,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 479,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 480,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            478,
+            479
+          ]
+        },
+        {
+          "id": 481,
+          "kind": "persistent_id",
+          "operand_ref": 480
+        },
+        {
+          "id": 482,
+          "kind": "int",
+          "value": 389120
+        },
+        {
+          "id": 483,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 484,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 485,
+          "kind": "tuple",
+          "items": [
+            483,
+            484
+          ]
+        },
+        {
+          "id": 486,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 487,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 488,
+          "kind": "tuple",
+          "items": [
+            486,
+            487
+          ]
+        },
+        {
+          "id": 489,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 490,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 491,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 490,
+          "operations": []
+        },
+        {
+          "id": 492,
+          "kind": "tuple",
+          "items": [
+            481,
+            482,
+            485,
+            488,
+            489,
+            491
+          ]
+        },
+        {
+          "id": 493,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 492,
+          "operations": []
+        },
+        {
+          "id": 494,
+          "kind": "str",
+          "value": "lstm.weight_hh_l1_reverse"
+        },
+        {
+          "id": 495,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 496,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 497,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            495,
+            496
+          ]
+        },
+        {
+          "id": 498,
+          "kind": "persistent_id",
+          "operand_ref": 497
+        },
+        {
+          "id": 499,
+          "kind": "int",
+          "value": 520192
+        },
+        {
+          "id": 500,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 501,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 502,
+          "kind": "tuple",
+          "items": [
+            500,
+            501
+          ]
+        },
+        {
+          "id": 503,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 504,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 505,
+          "kind": "tuple",
+          "items": [
+            503,
+            504
+          ]
+        },
+        {
+          "id": 506,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 507,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 508,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 507,
+          "operations": []
+        },
+        {
+          "id": 509,
+          "kind": "tuple",
+          "items": [
+            498,
+            499,
+            502,
+            505,
+            506,
+            508
+          ]
+        },
+        {
+          "id": 510,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 509,
+          "operations": []
+        },
+        {
+          "id": 511,
+          "kind": "str",
+          "value": "lstm.bias_ih_l1_reverse"
+        },
+        {
+          "id": 512,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 513,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 514,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            512,
+            513
+          ]
+        },
+        {
+          "id": 515,
+          "kind": "persistent_id",
+          "operand_ref": 514
+        },
+        {
+          "id": 516,
+          "kind": "int",
+          "value": 1375232
+        },
+        {
+          "id": 517,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 518,
+          "kind": "tuple",
+          "items": [
+            517
+          ]
+        },
+        {
+          "id": 519,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 520,
+          "kind": "tuple",
+          "items": [
+            519
+          ]
+        },
+        {
+          "id": 521,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 522,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 523,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 522,
+          "operations": []
+        },
+        {
+          "id": 524,
+          "kind": "tuple",
+          "items": [
+            515,
+            516,
+            518,
+            520,
+            521,
+            523
+          ]
+        },
+        {
+          "id": 525,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 524,
+          "operations": []
+        },
+        {
+          "id": 526,
+          "kind": "str",
+          "value": "lstm.bias_hh_l1_reverse"
+        },
+        {
+          "id": 527,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 528,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 529,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            527,
+            528
+          ]
+        },
+        {
+          "id": 530,
+          "kind": "persistent_id",
+          "operand_ref": 529
+        },
+        {
+          "id": 531,
+          "kind": "int",
+          "value": 1375744
+        },
+        {
+          "id": 532,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 533,
+          "kind": "tuple",
+          "items": [
+            532
+          ]
+        },
+        {
+          "id": 534,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 535,
+          "kind": "tuple",
+          "items": [
+            534
+          ]
+        },
+        {
+          "id": 536,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 537,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 538,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 537,
+          "operations": []
+        },
+        {
+          "id": 539,
+          "kind": "tuple",
+          "items": [
+            530,
+            531,
+            533,
+            535,
+            536,
+            538
+          ]
+        },
+        {
+          "id": 540,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 539,
+          "operations": []
+        },
+        {
+          "id": 541,
+          "kind": "str",
+          "value": "lstm.weight_ih_l2"
+        },
+        {
+          "id": 542,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 543,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 544,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            542,
+            543
+          ]
+        },
+        {
+          "id": 545,
+          "kind": "persistent_id",
+          "operand_ref": 544
+        },
+        {
+          "id": 546,
+          "kind": "int",
+          "value": 585728
+        },
+        {
+          "id": 547,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 548,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 549,
+          "kind": "tuple",
+          "items": [
+            547,
+            548
+          ]
+        },
+        {
+          "id": 550,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 551,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 552,
+          "kind": "tuple",
+          "items": [
+            550,
+            551
+          ]
+        },
+        {
+          "id": 553,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 554,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 555,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 554,
+          "operations": []
+        },
+        {
+          "id": 556,
+          "kind": "tuple",
+          "items": [
+            545,
+            546,
+            549,
+            552,
+            553,
+            555
+          ]
+        },
+        {
+          "id": 557,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 556,
+          "operations": []
+        },
+        {
+          "id": 558,
+          "kind": "str",
+          "value": "lstm.weight_hh_l2"
+        },
+        {
+          "id": 559,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 560,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 561,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            559,
+            560
+          ]
+        },
+        {
+          "id": 562,
+          "kind": "persistent_id",
+          "operand_ref": 561
+        },
+        {
+          "id": 563,
+          "kind": "int",
+          "value": 716800
+        },
+        {
+          "id": 564,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 565,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 566,
+          "kind": "tuple",
+          "items": [
+            564,
+            565
+          ]
+        },
+        {
+          "id": 567,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 568,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 569,
+          "kind": "tuple",
+          "items": [
+            567,
+            568
+          ]
+        },
+        {
+          "id": 570,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 571,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 572,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 571,
+          "operations": []
+        },
+        {
+          "id": 573,
+          "kind": "tuple",
+          "items": [
+            562,
+            563,
+            566,
+            569,
+            570,
+            572
+          ]
+        },
+        {
+          "id": 574,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 573,
+          "operations": []
+        },
+        {
+          "id": 575,
+          "kind": "str",
+          "value": "lstm.bias_ih_l2"
+        },
+        {
+          "id": 576,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 577,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 578,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            576,
+            577
+          ]
+        },
+        {
+          "id": 579,
+          "kind": "persistent_id",
+          "operand_ref": 578
+        },
+        {
+          "id": 580,
+          "kind": "int",
+          "value": 1376256
+        },
+        {
+          "id": 581,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 582,
+          "kind": "tuple",
+          "items": [
+            581
+          ]
+        },
+        {
+          "id": 583,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 584,
+          "kind": "tuple",
+          "items": [
+            583
+          ]
+        },
+        {
+          "id": 585,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 586,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 587,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 586,
+          "operations": []
+        },
+        {
+          "id": 588,
+          "kind": "tuple",
+          "items": [
+            579,
+            580,
+            582,
+            584,
+            585,
+            587
+          ]
+        },
+        {
+          "id": 589,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 588,
+          "operations": []
+        },
+        {
+          "id": 590,
+          "kind": "str",
+          "value": "lstm.bias_hh_l2"
+        },
+        {
+          "id": 591,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 592,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 593,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            591,
+            592
+          ]
+        },
+        {
+          "id": 594,
+          "kind": "persistent_id",
+          "operand_ref": 593
+        },
+        {
+          "id": 595,
+          "kind": "int",
+          "value": 1376768
+        },
+        {
+          "id": 596,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 597,
+          "kind": "tuple",
+          "items": [
+            596
+          ]
+        },
+        {
+          "id": 598,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 599,
+          "kind": "tuple",
+          "items": [
+            598
+          ]
+        },
+        {
+          "id": 600,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 601,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 602,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 601,
+          "operations": []
+        },
+        {
+          "id": 603,
+          "kind": "tuple",
+          "items": [
+            594,
+            595,
+            597,
+            599,
+            600,
+            602
+          ]
+        },
+        {
+          "id": 604,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 603,
+          "operations": []
+        },
+        {
+          "id": 605,
+          "kind": "str",
+          "value": "lstm.weight_ih_l2_reverse"
+        },
+        {
+          "id": 606,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 607,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 608,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            606,
+            607
+          ]
+        },
+        {
+          "id": 609,
+          "kind": "persistent_id",
+          "operand_ref": 608
+        },
+        {
+          "id": 610,
+          "kind": "int",
+          "value": 782336
+        },
+        {
+          "id": 611,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 612,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 613,
+          "kind": "tuple",
+          "items": [
+            611,
+            612
+          ]
+        },
+        {
+          "id": 614,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 615,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 616,
+          "kind": "tuple",
+          "items": [
+            614,
+            615
+          ]
+        },
+        {
+          "id": 617,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 618,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 619,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 618,
+          "operations": []
+        },
+        {
+          "id": 620,
+          "kind": "tuple",
+          "items": [
+            609,
+            610,
+            613,
+            616,
+            617,
+            619
+          ]
+        },
+        {
+          "id": 621,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 620,
+          "operations": []
+        },
+        {
+          "id": 622,
+          "kind": "str",
+          "value": "lstm.weight_hh_l2_reverse"
+        },
+        {
+          "id": 623,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 624,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 625,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            623,
+            624
+          ]
+        },
+        {
+          "id": 626,
+          "kind": "persistent_id",
+          "operand_ref": 625
+        },
+        {
+          "id": 627,
+          "kind": "int",
+          "value": 913408
+        },
+        {
+          "id": 628,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 629,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 630,
+          "kind": "tuple",
+          "items": [
+            628,
+            629
+          ]
+        },
+        {
+          "id": 631,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 632,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 633,
+          "kind": "tuple",
+          "items": [
+            631,
+            632
+          ]
+        },
+        {
+          "id": 634,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 635,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 636,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 635,
+          "operations": []
+        },
+        {
+          "id": 637,
+          "kind": "tuple",
+          "items": [
+            626,
+            627,
+            630,
+            633,
+            634,
+            636
+          ]
+        },
+        {
+          "id": 638,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 637,
+          "operations": []
+        },
+        {
+          "id": 639,
+          "kind": "str",
+          "value": "lstm.bias_ih_l2_reverse"
+        },
+        {
+          "id": 640,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 641,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 642,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            640,
+            641
+          ]
+        },
+        {
+          "id": 643,
+          "kind": "persistent_id",
+          "operand_ref": 642
+        },
+        {
+          "id": 644,
+          "kind": "int",
+          "value": 1377280
+        },
+        {
+          "id": 645,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 646,
+          "kind": "tuple",
+          "items": [
+            645
+          ]
+        },
+        {
+          "id": 647,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 648,
+          "kind": "tuple",
+          "items": [
+            647
+          ]
+        },
+        {
+          "id": 649,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 650,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 651,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 650,
+          "operations": []
+        },
+        {
+          "id": 652,
+          "kind": "tuple",
+          "items": [
+            643,
+            644,
+            646,
+            648,
+            649,
+            651
+          ]
+        },
+        {
+          "id": 653,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 652,
+          "operations": []
+        },
+        {
+          "id": 654,
+          "kind": "str",
+          "value": "lstm.bias_hh_l2_reverse"
+        },
+        {
+          "id": 655,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 656,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 657,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            655,
+            656
+          ]
+        },
+        {
+          "id": 658,
+          "kind": "persistent_id",
+          "operand_ref": 657
+        },
+        {
+          "id": 659,
+          "kind": "int",
+          "value": 1377792
+        },
+        {
+          "id": 660,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 661,
+          "kind": "tuple",
+          "items": [
+            660
+          ]
+        },
+        {
+          "id": 662,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 663,
+          "kind": "tuple",
+          "items": [
+            662
+          ]
+        },
+        {
+          "id": 664,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 665,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 666,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 665,
+          "operations": []
+        },
+        {
+          "id": 667,
+          "kind": "tuple",
+          "items": [
+            658,
+            659,
+            661,
+            663,
+            664,
+            666
+          ]
+        },
+        {
+          "id": 668,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 667,
+          "operations": []
+        },
+        {
+          "id": 669,
+          "kind": "str",
+          "value": "lstm.weight_ih_l3"
+        },
+        {
+          "id": 670,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 671,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 672,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            670,
+            671
+          ]
+        },
+        {
+          "id": 673,
+          "kind": "persistent_id",
+          "operand_ref": 672
+        },
+        {
+          "id": 674,
+          "kind": "int",
+          "value": 978944
+        },
+        {
+          "id": 675,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 676,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 677,
+          "kind": "tuple",
+          "items": [
+            675,
+            676
+          ]
+        },
+        {
+          "id": 678,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 679,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 680,
+          "kind": "tuple",
+          "items": [
+            678,
+            679
+          ]
+        },
+        {
+          "id": 681,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 682,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 683,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 682,
+          "operations": []
+        },
+        {
+          "id": 684,
+          "kind": "tuple",
+          "items": [
+            673,
+            674,
+            677,
+            680,
+            681,
+            683
+          ]
+        },
+        {
+          "id": 685,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 684,
+          "operations": []
+        },
+        {
+          "id": 686,
+          "kind": "str",
+          "value": "lstm.weight_hh_l3"
+        },
+        {
+          "id": 687,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 688,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 689,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            687,
+            688
+          ]
+        },
+        {
+          "id": 690,
+          "kind": "persistent_id",
+          "operand_ref": 689
+        },
+        {
+          "id": 691,
+          "kind": "int",
+          "value": 1110016
+        },
+        {
+          "id": 692,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 693,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 694,
+          "kind": "tuple",
+          "items": [
+            692,
+            693
+          ]
+        },
+        {
+          "id": 695,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 696,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 697,
+          "kind": "tuple",
+          "items": [
+            695,
+            696
+          ]
+        },
+        {
+          "id": 698,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 699,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 700,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 699,
+          "operations": []
+        },
+        {
+          "id": 701,
+          "kind": "tuple",
+          "items": [
+            690,
+            691,
+            694,
+            697,
+            698,
+            700
+          ]
+        },
+        {
+          "id": 702,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 701,
+          "operations": []
+        },
+        {
+          "id": 703,
+          "kind": "str",
+          "value": "lstm.bias_ih_l3"
+        },
+        {
+          "id": 704,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 705,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 706,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            704,
+            705
+          ]
+        },
+        {
+          "id": 707,
+          "kind": "persistent_id",
+          "operand_ref": 706
+        },
+        {
+          "id": 708,
+          "kind": "int",
+          "value": 1378304
+        },
+        {
+          "id": 709,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 710,
+          "kind": "tuple",
+          "items": [
+            709
+          ]
+        },
+        {
+          "id": 711,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 712,
+          "kind": "tuple",
+          "items": [
+            711
+          ]
+        },
+        {
+          "id": 713,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 714,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 715,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 714,
+          "operations": []
+        },
+        {
+          "id": 716,
+          "kind": "tuple",
+          "items": [
+            707,
+            708,
+            710,
+            712,
+            713,
+            715
+          ]
+        },
+        {
+          "id": 717,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 716,
+          "operations": []
+        },
+        {
+          "id": 718,
+          "kind": "str",
+          "value": "lstm.bias_hh_l3"
+        },
+        {
+          "id": 719,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 720,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 721,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            719,
+            720
+          ]
+        },
+        {
+          "id": 722,
+          "kind": "persistent_id",
+          "operand_ref": 721
+        },
+        {
+          "id": 723,
+          "kind": "int",
+          "value": 1378816
+        },
+        {
+          "id": 724,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 725,
+          "kind": "tuple",
+          "items": [
+            724
+          ]
+        },
+        {
+          "id": 726,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 727,
+          "kind": "tuple",
+          "items": [
+            726
+          ]
+        },
+        {
+          "id": 728,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 729,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 730,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 729,
+          "operations": []
+        },
+        {
+          "id": 731,
+          "kind": "tuple",
+          "items": [
+            722,
+            723,
+            725,
+            727,
+            728,
+            730
+          ]
+        },
+        {
+          "id": 732,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 731,
+          "operations": []
+        },
+        {
+          "id": 733,
+          "kind": "str",
+          "value": "lstm.weight_ih_l3_reverse"
+        },
+        {
+          "id": 734,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 735,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 736,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            734,
+            735
+          ]
+        },
+        {
+          "id": 737,
+          "kind": "persistent_id",
+          "operand_ref": 736
+        },
+        {
+          "id": 738,
+          "kind": "int",
+          "value": 1175552
+        },
+        {
+          "id": 739,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 740,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 741,
+          "kind": "tuple",
+          "items": [
+            739,
+            740
+          ]
+        },
+        {
+          "id": 742,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 743,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 744,
+          "kind": "tuple",
+          "items": [
+            742,
+            743
+          ]
+        },
+        {
+          "id": 745,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 746,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 747,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 746,
+          "operations": []
+        },
+        {
+          "id": 748,
+          "kind": "tuple",
+          "items": [
+            737,
+            738,
+            741,
+            744,
+            745,
+            747
+          ]
+        },
+        {
+          "id": 749,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 748,
+          "operations": []
+        },
+        {
+          "id": 750,
+          "kind": "str",
+          "value": "lstm.weight_hh_l3_reverse"
+        },
+        {
+          "id": 751,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 752,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 753,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            751,
+            752
+          ]
+        },
+        {
+          "id": 754,
+          "kind": "persistent_id",
+          "operand_ref": 753
+        },
+        {
+          "id": 755,
+          "kind": "int",
+          "value": 1306624
+        },
+        {
+          "id": 756,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 757,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 758,
+          "kind": "tuple",
+          "items": [
+            756,
+            757
+          ]
+        },
+        {
+          "id": 759,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 760,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 761,
+          "kind": "tuple",
+          "items": [
+            759,
+            760
+          ]
+        },
+        {
+          "id": 762,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 763,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 764,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 763,
+          "operations": []
+        },
+        {
+          "id": 765,
+          "kind": "tuple",
+          "items": [
+            754,
+            755,
+            758,
+            761,
+            762,
+            764
+          ]
+        },
+        {
+          "id": 766,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 765,
+          "operations": []
+        },
+        {
+          "id": 767,
+          "kind": "str",
+          "value": "lstm.bias_ih_l3_reverse"
+        },
+        {
+          "id": 768,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 769,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 770,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            768,
+            769
+          ]
+        },
+        {
+          "id": 771,
+          "kind": "persistent_id",
+          "operand_ref": 770
+        },
+        {
+          "id": 772,
+          "kind": "int",
+          "value": 1379328
+        },
+        {
+          "id": 773,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 774,
+          "kind": "tuple",
+          "items": [
+            773
+          ]
+        },
+        {
+          "id": 775,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 776,
+          "kind": "tuple",
+          "items": [
+            775
+          ]
+        },
+        {
+          "id": 777,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 778,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 779,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 778,
+          "operations": []
+        },
+        {
+          "id": 780,
+          "kind": "tuple",
+          "items": [
+            771,
+            772,
+            774,
+            776,
+            777,
+            779
+          ]
+        },
+        {
+          "id": 781,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 780,
+          "operations": []
+        },
+        {
+          "id": 782,
+          "kind": "str",
+          "value": "lstm.bias_hh_l3_reverse"
+        },
+        {
+          "id": 783,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 784,
+          "kind": "int",
+          "value": 1380352
+        },
+        {
+          "id": 785,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            783,
+            784
+          ]
+        },
+        {
+          "id": 786,
+          "kind": "persistent_id",
+          "operand_ref": 785
+        },
+        {
+          "id": 787,
+          "kind": "int",
+          "value": 1379840
+        },
+        {
+          "id": 788,
+          "kind": "int",
+          "value": 512
+        },
+        {
+          "id": 789,
+          "kind": "tuple",
+          "items": [
+            788
+          ]
+        },
+        {
+          "id": 790,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 791,
+          "kind": "tuple",
+          "items": [
+            790
+          ]
+        },
+        {
+          "id": 792,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 793,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 794,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 793,
+          "operations": []
+        },
+        {
+          "id": 795,
+          "kind": "tuple",
+          "items": [
+            786,
+            787,
+            789,
+            791,
+            792,
+            794
+          ]
+        },
+        {
+          "id": 796,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 795,
+          "operations": []
+        },
+        {
+          "id": 797,
+          "kind": "str",
+          "value": "linear.0.weight"
+        },
+        {
+          "id": 798,
+          "kind": "str",
+          "value": "17"
+        },
+        {
+          "id": 799,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 800,
+          "kind": "int",
+          "value": 32768
+        },
+        {
+          "id": 801,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            798,
+            799,
+            800
+          ]
+        },
+        {
+          "id": 802,
+          "kind": "persistent_id",
+          "operand_ref": 801
+        },
+        {
+          "id": 803,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 804,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 805,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 806,
+          "kind": "tuple",
+          "items": [
+            804,
+            805
+          ]
+        },
+        {
+          "id": 807,
+          "kind": "int",
+          "value": 256
+        },
+        {
+          "id": 808,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 809,
+          "kind": "tuple",
+          "items": [
+            807,
+            808
+          ]
+        },
+        {
+          "id": 810,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 811,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 812,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 811,
+          "operations": []
+        },
+        {
+          "id": 813,
+          "kind": "tuple",
+          "items": [
+            802,
+            803,
+            806,
+            809,
+            810,
+            812
+          ]
+        },
+        {
+          "id": 814,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 813,
+          "operations": []
+        },
+        {
+          "id": 815,
+          "kind": "str",
+          "value": "linear.0.bias"
+        },
+        {
+          "id": 816,
+          "kind": "str",
+          "value": "18"
+        },
+        {
+          "id": 817,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 818,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 819,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            816,
+            817,
+            818
+          ]
+        },
+        {
+          "id": 820,
+          "kind": "persistent_id",
+          "operand_ref": 819
+        },
+        {
+          "id": 821,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 822,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 823,
+          "kind": "tuple",
+          "items": [
+            822
+          ]
+        },
+        {
+          "id": 824,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 825,
+          "kind": "tuple",
+          "items": [
+            824
+          ]
+        },
+        {
+          "id": 826,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 827,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 828,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 827,
+          "operations": []
+        },
+        {
+          "id": 829,
+          "kind": "tuple",
+          "items": [
+            820,
+            821,
+            823,
+            825,
+            826,
+            828
+          ]
+        },
+        {
+          "id": 830,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 829,
+          "operations": []
+        },
+        {
+          "id": 831,
+          "kind": "str",
+          "value": "linear.1.weight"
+        },
+        {
+          "id": 832,
+          "kind": "str",
+          "value": "19"
+        },
+        {
+          "id": 833,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 834,
+          "kind": "int",
+          "value": 16384
+        },
+        {
+          "id": 835,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            832,
+            833,
+            834
+          ]
+        },
+        {
+          "id": 836,
+          "kind": "persistent_id",
+          "operand_ref": 835
+        },
+        {
+          "id": 837,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 838,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 839,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 840,
+          "kind": "tuple",
+          "items": [
+            838,
+            839
+          ]
+        },
+        {
+          "id": 841,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 842,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 843,
+          "kind": "tuple",
+          "items": [
+            841,
+            842
+          ]
+        },
+        {
+          "id": 844,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 845,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 846,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 845,
+          "operations": []
+        },
+        {
+          "id": 847,
+          "kind": "tuple",
+          "items": [
+            836,
+            837,
+            840,
+            843,
+            844,
+            846
+          ]
+        },
+        {
+          "id": 848,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 847,
+          "operations": []
+        },
+        {
+          "id": 849,
+          "kind": "str",
+          "value": "linear.1.bias"
+        },
+        {
+          "id": 850,
+          "kind": "str",
+          "value": "20"
+        },
+        {
+          "id": 851,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 852,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 853,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            850,
+            851,
+            852
+          ]
+        },
+        {
+          "id": 854,
+          "kind": "persistent_id",
+          "operand_ref": 853
+        },
+        {
+          "id": 855,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 856,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 857,
+          "kind": "tuple",
+          "items": [
+            856
+          ]
+        },
+        {
+          "id": 858,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 859,
+          "kind": "tuple",
+          "items": [
+            858
+          ]
+        },
+        {
+          "id": 860,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 861,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 862,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 861,
+          "operations": []
+        },
+        {
+          "id": 863,
+          "kind": "tuple",
+          "items": [
+            854,
+            855,
+            857,
+            859,
+            860,
+            862
+          ]
+        },
+        {
+          "id": 864,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 863,
+          "operations": []
+        },
+        {
+          "id": 865,
+          "kind": "str",
+          "value": "classifier.weight"
+        },
+        {
+          "id": 866,
+          "kind": "str",
+          "value": "21"
+        },
+        {
+          "id": 867,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 868,
+          "kind": "int",
+          "value": 384
+        },
+        {
+          "id": 869,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            866,
+            867,
+            868
+          ]
+        },
+        {
+          "id": 870,
+          "kind": "persistent_id",
+          "operand_ref": 869
+        },
+        {
+          "id": 871,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 872,
+          "kind": "int",
+          "value": 3
+        },
+        {
+          "id": 873,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 874,
+          "kind": "tuple",
+          "items": [
+            872,
+            873
+          ]
+        },
+        {
+          "id": 875,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 876,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 877,
+          "kind": "tuple",
+          "items": [
+            875,
+            876
+          ]
+        },
+        {
+          "id": 878,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 879,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 880,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 879,
+          "operations": []
+        },
+        {
+          "id": 881,
+          "kind": "tuple",
+          "items": [
+            870,
+            871,
+            874,
+            877,
+            878,
+            880
+          ]
+        },
+        {
+          "id": 882,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 881,
+          "operations": []
+        },
+        {
+          "id": 883,
+          "kind": "str",
+          "value": "classifier.bias"
+        },
+        {
+          "id": 884,
+          "kind": "str",
+          "value": "22"
+        },
+        {
+          "id": 885,
+          "kind": "str",
+          "value": "cuda:0"
+        },
+        {
+          "id": 886,
+          "kind": "int",
+          "value": 3
+        },
+        {
+          "id": 887,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            884,
+            885,
+            886
+          ]
+        },
+        {
+          "id": 888,
+          "kind": "persistent_id",
+          "operand_ref": 887
+        },
+        {
+          "id": 889,
+          "kind": "int",
+          "value": 0
+        },
+        {
+          "id": 890,
+          "kind": "int",
+          "value": 3
+        },
+        {
+          "id": 891,
+          "kind": "tuple",
+          "items": [
+            890
+          ]
+        },
+        {
+          "id": 892,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 893,
+          "kind": "tuple",
+          "items": [
+            892
+          ]
+        },
+        {
+          "id": 894,
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "id": 895,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 896,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 895,
+          "operations": []
+        },
+        {
+          "id": 897,
+          "kind": "tuple",
+          "items": [
+            888,
+            889,
+            891,
+            893,
+            894,
+            896
+          ]
+        },
+        {
+          "id": 898,
+          "kind": "reduce",
+          "target_ref": 12,
+          "arguments_ref": 897,
+          "operations": []
+        },
+        {
+          "id": 899,
+          "kind": "dict",
+          "entries": [
+            [
+              900,
+              902
+            ]
+          ]
+        },
+        {
+          "id": 900,
+          "kind": "str",
+          "value": "_metadata"
+        },
+        {
+          "id": 901,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 902,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 901,
+          "operations": [
+            {
+              "opcode": "SETITEMS",
+              "entries": [
+                [
+                  903,
+                  904
+                ],
+                [
+                  907,
+                  908
+                ],
+                [
+                  910,
+                  911
+                ],
+                [
+                  913,
+                  914
+                ],
+                [
+                  916,
+                  917
+                ],
+                [
+                  919,
+                  920
+                ],
+                [
+                  922,
+                  923
+                ],
+                [
+                  925,
+                  926
+                ],
+                [
+                  928,
+                  929
+                ],
+                [
+                  931,
+                  932
+                ],
+                [
+                  934,
+                  935
+                ],
+                [
+                  937,
+                  938
+                ],
+                [
+                  940,
+                  941
+                ],
+                [
+                  943,
+                  944
+                ],
+                [
+                  946,
+                  947
+                ],
+                [
+                  949,
+                  950
+                ],
+                [
+                  952,
+                  953
+                ],
+                [
+                  955,
+                  956
+                ],
+                [
+                  958,
+                  959
+                ],
+                [
+                  961,
+                  962
+                ],
+                [
+                  964,
+                  965
+                ],
+                [
+                  967,
+                  968
+                ],
+                [
+                  970,
+                  971
+                ],
+                [
+                  973,
+                  974
+                ],
+                [
+                  976,
+                  977
+                ],
+                [
+                  979,
+                  980
+                ],
+                [
+                  982,
+                  983
+                ],
+                [
+                  985,
+                  986
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": 903,
+          "kind": "str",
+          "value": ""
+        },
+        {
+          "id": 904,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              906
+            ]
+          ]
+        },
+        {
+          "id": 905,
+          "kind": "str",
+          "value": "version"
+        },
+        {
+          "id": 906,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 907,
+          "kind": "str",
+          "value": "sincnet"
+        },
+        {
+          "id": 908,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              909
+            ]
+          ]
+        },
+        {
+          "id": 909,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 910,
+          "kind": "str",
+          "value": "sincnet.wav_norm1d"
+        },
+        {
+          "id": 911,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              912
+            ]
+          ]
+        },
+        {
+          "id": 912,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 913,
+          "kind": "str",
+          "value": "sincnet.conv1d"
+        },
+        {
+          "id": 914,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              915
+            ]
+          ]
+        },
+        {
+          "id": 915,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 916,
+          "kind": "str",
+          "value": "sincnet.conv1d.0"
+        },
+        {
+          "id": 917,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              918
+            ]
+          ]
+        },
+        {
+          "id": 918,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 919,
+          "kind": "str",
+          "value": "sincnet.conv1d.0.filterbank"
+        },
+        {
+          "id": 920,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              921
+            ]
+          ]
+        },
+        {
+          "id": 921,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 922,
+          "kind": "str",
+          "value": "sincnet.conv1d.1"
+        },
+        {
+          "id": 923,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              924
+            ]
+          ]
+        },
+        {
+          "id": 924,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 925,
+          "kind": "str",
+          "value": "sincnet.conv1d.2"
+        },
+        {
+          "id": 926,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              927
+            ]
+          ]
+        },
+        {
+          "id": 927,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 928,
+          "kind": "str",
+          "value": "sincnet.pool1d"
+        },
+        {
+          "id": 929,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              930
+            ]
+          ]
+        },
+        {
+          "id": 930,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 931,
+          "kind": "str",
+          "value": "sincnet.pool1d.0"
+        },
+        {
+          "id": 932,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              933
+            ]
+          ]
+        },
+        {
+          "id": 933,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 934,
+          "kind": "str",
+          "value": "sincnet.pool1d.1"
+        },
+        {
+          "id": 935,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              936
+            ]
+          ]
+        },
+        {
+          "id": 936,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 937,
+          "kind": "str",
+          "value": "sincnet.pool1d.2"
+        },
+        {
+          "id": 938,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              939
+            ]
+          ]
+        },
+        {
+          "id": 939,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 940,
+          "kind": "str",
+          "value": "sincnet.norm1d"
+        },
+        {
+          "id": 941,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              942
+            ]
+          ]
+        },
+        {
+          "id": 942,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 943,
+          "kind": "str",
+          "value": "sincnet.norm1d.0"
+        },
+        {
+          "id": 944,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              945
+            ]
+          ]
+        },
+        {
+          "id": 945,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 946,
+          "kind": "str",
+          "value": "sincnet.norm1d.1"
+        },
+        {
+          "id": 947,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              948
+            ]
+          ]
+        },
+        {
+          "id": 948,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 949,
+          "kind": "str",
+          "value": "sincnet.norm1d.2"
+        },
+        {
+          "id": 950,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              951
+            ]
+          ]
+        },
+        {
+          "id": 951,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 952,
+          "kind": "str",
+          "value": "lstm"
+        },
+        {
+          "id": 953,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              954
+            ]
+          ]
+        },
+        {
+          "id": 954,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 955,
+          "kind": "str",
+          "value": "linear"
+        },
+        {
+          "id": 956,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              957
+            ]
+          ]
+        },
+        {
+          "id": 957,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 958,
+          "kind": "str",
+          "value": "linear.0"
+        },
+        {
+          "id": 959,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              960
+            ]
+          ]
+        },
+        {
+          "id": 960,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 961,
+          "kind": "str",
+          "value": "linear.1"
+        },
+        {
+          "id": 962,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              963
+            ]
+          ]
+        },
+        {
+          "id": 963,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 964,
+          "kind": "str",
+          "value": "classifier"
+        },
+        {
+          "id": 965,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              966
+            ]
+          ]
+        },
+        {
+          "id": 966,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 967,
+          "kind": "str",
+          "value": "activation"
+        },
+        {
+          "id": 968,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              969
+            ]
+          ]
+        },
+        {
+          "id": 969,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 970,
+          "kind": "str",
+          "value": "validation_metric"
+        },
+        {
+          "id": 971,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              972
+            ]
+          ]
+        },
+        {
+          "id": 972,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 973,
+          "kind": "str",
+          "value": "validation_metric.OptimalDiarizationErrorRate"
+        },
+        {
+          "id": 974,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              975
+            ]
+          ]
+        },
+        {
+          "id": 975,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 976,
+          "kind": "str",
+          "value": "validation_metric.OptimalDiarizationErrorRateThreshold"
+        },
+        {
+          "id": 977,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              978
+            ]
+          ]
+        },
+        {
+          "id": 978,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 979,
+          "kind": "str",
+          "value": "validation_metric.OptimalSpeakerConfusionRate"
+        },
+        {
+          "id": 980,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              981
+            ]
+          ]
+        },
+        {
+          "id": 981,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 982,
+          "kind": "str",
+          "value": "validation_metric.OptimalMissedDetectionRate"
+        },
+        {
+          "id": 983,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              984
+            ]
+          ]
+        },
+        {
+          "id": 984,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 985,
+          "kind": "str",
+          "value": "validation_metric.OptimalFalseAlarmRate"
+        },
+        {
+          "id": 986,
+          "kind": "dict",
+          "entries": [
+            [
+              905,
+              987
+            ]
+          ]
+        },
+        {
+          "id": 987,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 3022,
+          "kind": "dict",
+          "entries": [
+            [
+              3023,
+              3024
+            ],
+            [
+              3025,
+              3026
+            ],
+            [
+              3027,
+              3028
+            ],
+            [
+              3033,
+              3034
+            ],
+            [
+              3047,
+              3048
+            ]
+          ]
+        },
+        {
+          "id": 3023,
+          "kind": "str",
+          "value": "sample_rate"
+        },
+        {
+          "id": 3024,
+          "kind": "int",
+          "value": 16000
+        },
+        {
+          "id": 3025,
+          "kind": "str",
+          "value": "num_channels"
+        },
+        {
+          "id": 3026,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 3027,
+          "kind": "str",
+          "value": "sincnet"
+        },
+        {
+          "id": 3028,
+          "kind": "dict",
+          "entries": [
+            [
+              3029,
+              3030
+            ],
+            [
+              3031,
+              3032
+            ]
+          ]
+        },
+        {
+          "id": 3029,
+          "kind": "str",
+          "value": "stride"
+        },
+        {
+          "id": 3030,
+          "kind": "int",
+          "value": 10
+        },
+        {
+          "id": 3031,
+          "kind": "str",
+          "value": "sample_rate"
+        },
+        {
+          "id": 3032,
+          "kind": "int",
+          "value": 16000
+        },
+        {
+          "id": 3033,
+          "kind": "str",
+          "value": "lstm"
+        },
+        {
+          "id": 3034,
+          "kind": "dict",
+          "entries": [
+            [
+              3035,
+              3036
+            ],
+            [
+              3037,
+              3038
+            ],
+            [
+              3039,
+              3040
+            ],
+            [
+              3041,
+              3042
+            ],
+            [
+              3043,
+              3044
+            ],
+            [
+              3045,
+              3046
+            ]
+          ]
+        },
+        {
+          "id": 3035,
+          "kind": "str",
+          "value": "hidden_size"
+        },
+        {
+          "id": 3036,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 3037,
+          "kind": "str",
+          "value": "num_layers"
+        },
+        {
+          "id": 3038,
+          "kind": "int",
+          "value": 4
+        },
+        {
+          "id": 3039,
+          "kind": "str",
+          "value": "bidirectional"
+        },
+        {
+          "id": 3040,
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "id": 3041,
+          "kind": "str",
+          "value": "monolithic"
+        },
+        {
+          "id": 3042,
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "id": 3043,
+          "kind": "str",
+          "value": "dropout"
+        },
+        {
+          "id": 3044,
+          "kind": "float",
+          "value": 0.5
+        },
+        {
+          "id": 3045,
+          "kind": "str",
+          "value": "batch_first"
+        },
+        {
+          "id": 3046,
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "id": 3047,
+          "kind": "str",
+          "value": "linear"
+        },
+        {
+          "id": 3048,
+          "kind": "dict",
+          "entries": [
+            [
+              3035,
+              3049
+            ],
+            [
+              3037,
+              3050
+            ]
+          ]
+        },
+        {
+          "id": 3049,
+          "kind": "int",
+          "value": 128
+        },
+        {
+          "id": 3050,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 3051,
+          "kind": "str",
+          "value": "pyannote.audio"
+        },
+        {
+          "id": 3052,
+          "kind": "dict",
+          "entries": [
+            [
+              3053,
+              3054
+            ],
+            [
+              3061,
+              3062
+            ],
+            [
+              3067,
+              3070
+            ],
+            [
+              3083,
+              3086
+            ]
+          ]
+        },
+        {
+          "id": 3053,
+          "kind": "str",
+          "value": "versions"
+        },
+        {
+          "id": 3054,
+          "kind": "dict",
+          "entries": [
+            [
+              3055,
+              3059
+            ],
+            [
+              3051,
+              3060
+            ]
+          ]
+        },
+        {
+          "id": 3055,
+          "kind": "str",
+          "value": "torch"
+        },
+        {
+          "id": 3056,
+          "kind": "global",
+          "literal": "torch.torch_version TorchVersion"
+        },
+        {
+          "id": 3057,
+          "kind": "str",
+          "value": "1.10.0+cu102"
+        },
+        {
+          "id": 3058,
+          "kind": "tuple",
+          "items": [
+            3057
+          ]
+        },
+        {
+          "id": 3059,
+          "kind": "newobj",
+          "target_ref": 3056,
+          "arguments_ref": 3058,
+          "operations": []
+        },
+        {
+          "id": 3060,
+          "kind": "str",
+          "value": "0.0.1"
+        },
+        {
+          "id": 3061,
+          "kind": "str",
+          "value": "architecture"
+        },
+        {
+          "id": 3062,
+          "kind": "dict",
+          "entries": [
+            [
+              3063,
+              3064
+            ],
+            [
+              3065,
+              3066
+            ]
+          ]
+        },
+        {
+          "id": 3063,
+          "kind": "str",
+          "value": "module"
+        },
+        {
+          "id": 3064,
+          "kind": "str",
+          "value": "pyannote.audio.models.segmentation.PyanNet"
+        },
+        {
+          "id": 3065,
+          "kind": "str",
+          "value": "class"
+        },
+        {
+          "id": 3066,
+          "kind": "str",
+          "value": "PyanNet"
+        },
+        {
+          "id": 3067,
+          "kind": "str",
+          "value": "introspection"
+        },
+        {
+          "id": 3068,
+          "kind": "global",
+          "literal": "pyannote.audio.core.model Introspection"
+        },
+        {
+          "id": 3069,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 3070,
+          "kind": "newobj",
+          "target_ref": 3068,
+          "arguments_ref": 3069,
+          "operations": [
+            {
+              "opcode": "BUILD",
+              "state_ref": 3071
+            }
+          ]
+        },
+        {
+          "id": 3071,
+          "kind": "dict",
+          "entries": [
+            [
+              3072,
+              3073
+            ],
+            [
+              3074,
+              3075
+            ],
+            [
+              3076,
+              3077
+            ],
+            [
+              3078,
+              3079
+            ],
+            [
+              3080,
+              3081
+            ],
+            [
+              3023,
+              3082
+            ]
+          ]
+        },
+        {
+          "id": 3072,
+          "kind": "str",
+          "value": "min_num_samples"
+        },
+        {
+          "id": 3073,
+          "kind": "int",
+          "value": 1261
+        },
+        {
+          "id": 3074,
+          "kind": "str",
+          "value": "min_num_frames"
+        },
+        {
+          "id": 3075,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 3076,
+          "kind": "str",
+          "value": "inc_num_samples"
+        },
+        {
+          "id": 3077,
+          "kind": "int",
+          "value": 270
+        },
+        {
+          "id": 3078,
+          "kind": "str",
+          "value": "inc_num_frames"
+        },
+        {
+          "id": 3079,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 3080,
+          "kind": "str",
+          "value": "dimension"
+        },
+        {
+          "id": 3081,
+          "kind": "int",
+          "value": 3
+        },
+        {
+          "id": 3082,
+          "kind": "int",
+          "value": 16000
+        },
+        {
+          "id": 3083,
+          "kind": "str",
+          "value": "specifications"
+        },
+        {
+          "id": 3084,
+          "kind": "global",
+          "literal": "pyannote.audio.core.task Specifications"
+        },
+        {
+          "id": 3085,
+          "kind": "tuple",
+          "items": []
+        },
+        {
+          "id": 3086,
+          "kind": "newobj",
+          "target_ref": 3084,
+          "arguments_ref": 3085,
+          "operations": [
+            {
+              "opcode": "BUILD",
+              "state_ref": 3087
+            }
+          ]
+        },
+        {
+          "id": 3087,
+          "kind": "dict",
+          "entries": [
+            [
+              3088,
+              3092
+            ],
+            [
+              3093,
+              3097
+            ],
+            [
+              3098,
+              3099
+            ],
+            [
+              3100,
+              3103
+            ],
+            [
+              3104,
+              3105
+            ],
+            [
+              3109,
+              3110
+            ]
+          ]
+        },
+        {
+          "id": 3088,
+          "kind": "str",
+          "value": "problem"
+        },
+        {
+          "id": 3089,
+          "kind": "global",
+          "literal": "pyannote.audio.core.task Problem"
+        },
+        {
+          "id": 3090,
+          "kind": "int",
+          "value": 2
+        },
+        {
+          "id": 3091,
+          "kind": "tuple",
+          "items": [
+            3090
+          ]
+        },
+        {
+          "id": 3092,
+          "kind": "reduce",
+          "target_ref": 3089,
+          "arguments_ref": 3091,
+          "operations": []
+        },
+        {
+          "id": 3093,
+          "kind": "str",
+          "value": "resolution"
+        },
+        {
+          "id": 3094,
+          "kind": "global",
+          "literal": "pyannote.audio.core.task Resolution"
+        },
+        {
+          "id": 3095,
+          "kind": "int",
+          "value": 1
+        },
+        {
+          "id": 3096,
+          "kind": "tuple",
+          "items": [
+            3095
+          ]
+        },
+        {
+          "id": 3097,
+          "kind": "reduce",
+          "target_ref": 3094,
+          "arguments_ref": 3096,
+          "operations": []
+        },
+        {
+          "id": 3098,
+          "kind": "str",
+          "value": "duration"
+        },
+        {
+          "id": 3099,
+          "kind": "float",
+          "value": 5.0
+        },
+        {
+          "id": 3100,
+          "kind": "str",
+          "value": "warm_up"
+        },
+        {
+          "id": 3101,
+          "kind": "float",
+          "value": 0.0
+        },
+        {
+          "id": 3102,
+          "kind": "float",
+          "value": 0.0
+        },
+        {
+          "id": 3103,
+          "kind": "tuple",
+          "items": [
+            3101,
+            3102
+          ]
+        },
+        {
+          "id": 3104,
+          "kind": "str",
+          "value": "classes"
+        },
+        {
+          "id": 3105,
+          "kind": "list",
+          "items": [
+            3106,
+            3107,
+            3108
+          ]
+        },
+        {
+          "id": 3106,
+          "kind": "str",
+          "value": "speaker#1"
+        },
+        {
+          "id": 3107,
+          "kind": "str",
+          "value": "speaker#2"
+        },
+        {
+          "id": 3108,
+          "kind": "str",
+          "value": "speaker#3"
+        },
+        {
+          "id": 3109,
+          "kind": "str",
+          "value": "permutation_invariant"
+        },
+        {
+          "id": 3110,
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "tensor_reducer_descriptors": [
+        {
+          "node_ref": 29,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 28,
+          "argument_refs": {
+            "storage": 19,
+            "storage_offset": 20,
+            "size": 22,
+            "stride": 24,
+            "requires_grad": 25,
+            "backward_hooks": 27
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 45,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 44,
+          "argument_refs": {
+            "storage": 35,
+            "storage_offset": 36,
+            "size": 38,
+            "stride": 40,
+            "requires_grad": 41,
+            "backward_hooks": 43
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 63,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 62,
+          "argument_refs": {
+            "storage": 51,
+            "storage_offset": 52,
+            "size": 55,
+            "stride": 58,
+            "requires_grad": 59,
+            "backward_hooks": 61
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 81,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 80,
+          "argument_refs": {
+            "storage": 69,
+            "storage_offset": 70,
+            "size": 73,
+            "stride": 76,
+            "requires_grad": 77,
+            "backward_hooks": 79
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 97,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 96,
+          "argument_refs": {
+            "storage": 87,
+            "storage_offset": 88,
+            "size": 90,
+            "stride": 92,
+            "requires_grad": 93,
+            "backward_hooks": 95
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 115,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 114,
+          "argument_refs": {
+            "storage": 103,
+            "storage_offset": 104,
+            "size": 107,
+            "stride": 110,
+            "requires_grad": 111,
+            "backward_hooks": 113
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 135,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 134,
+          "argument_refs": {
+            "storage": 121,
+            "storage_offset": 122,
+            "size": 126,
+            "stride": 130,
+            "requires_grad": 131,
+            "backward_hooks": 133
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 151,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 150,
+          "argument_refs": {
+            "storage": 141,
+            "storage_offset": 142,
+            "size": 144,
+            "stride": 146,
+            "requires_grad": 147,
+            "backward_hooks": 149
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 171,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 170,
+          "argument_refs": {
+            "storage": 157,
+            "storage_offset": 158,
+            "size": 162,
+            "stride": 166,
+            "requires_grad": 167,
+            "backward_hooks": 169
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 187,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 186,
+          "argument_refs": {
+            "storage": 177,
+            "storage_offset": 178,
+            "size": 180,
+            "stride": 182,
+            "requires_grad": 183,
+            "backward_hooks": 185
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 203,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 202,
+          "argument_refs": {
+            "storage": 193,
+            "storage_offset": 194,
+            "size": 196,
+            "stride": 198,
+            "requires_grad": 199,
+            "backward_hooks": 201
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 219,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 218,
+          "argument_refs": {
+            "storage": 209,
+            "storage_offset": 210,
+            "size": 212,
+            "stride": 214,
+            "requires_grad": 215,
+            "backward_hooks": 217
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 235,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 234,
+          "argument_refs": {
+            "storage": 225,
+            "storage_offset": 226,
+            "size": 228,
+            "stride": 230,
+            "requires_grad": 231,
+            "backward_hooks": 233
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 251,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 250,
+          "argument_refs": {
+            "storage": 241,
+            "storage_offset": 242,
+            "size": 244,
+            "stride": 246,
+            "requires_grad": 247,
+            "backward_hooks": 249
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 267,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 266,
+          "argument_refs": {
+            "storage": 257,
+            "storage_offset": 258,
+            "size": 260,
+            "stride": 262,
+            "requires_grad": 263,
+            "backward_hooks": 265
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 283,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 282,
+          "argument_refs": {
+            "storage": 273,
+            "storage_offset": 274,
+            "size": 276,
+            "stride": 278,
+            "requires_grad": 279,
+            "backward_hooks": 281
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 301,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 300,
+          "argument_refs": {
+            "storage": 289,
+            "storage_offset": 290,
+            "size": 293,
+            "stride": 296,
+            "requires_grad": 297,
+            "backward_hooks": 299
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 318,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 317,
+          "argument_refs": {
+            "storage": 306,
+            "storage_offset": 307,
+            "size": 310,
+            "stride": 313,
+            "requires_grad": 314,
+            "backward_hooks": 316
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 333,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 332,
+          "argument_refs": {
+            "storage": 323,
+            "storage_offset": 324,
+            "size": 326,
+            "stride": 328,
+            "requires_grad": 329,
+            "backward_hooks": 331
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 348,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 347,
+          "argument_refs": {
+            "storage": 338,
+            "storage_offset": 339,
+            "size": 341,
+            "stride": 343,
+            "requires_grad": 344,
+            "backward_hooks": 346
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 365,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 364,
+          "argument_refs": {
+            "storage": 353,
+            "storage_offset": 354,
+            "size": 357,
+            "stride": 360,
+            "requires_grad": 361,
+            "backward_hooks": 363
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 382,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 381,
+          "argument_refs": {
+            "storage": 370,
+            "storage_offset": 371,
+            "size": 374,
+            "stride": 377,
+            "requires_grad": 378,
+            "backward_hooks": 380
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 397,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 396,
+          "argument_refs": {
+            "storage": 387,
+            "storage_offset": 388,
+            "size": 390,
+            "stride": 392,
+            "requires_grad": 393,
+            "backward_hooks": 395
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 412,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 411,
+          "argument_refs": {
+            "storage": 402,
+            "storage_offset": 403,
+            "size": 405,
+            "stride": 407,
+            "requires_grad": 408,
+            "backward_hooks": 410
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 429,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 428,
+          "argument_refs": {
+            "storage": 417,
+            "storage_offset": 418,
+            "size": 421,
+            "stride": 424,
+            "requires_grad": 425,
+            "backward_hooks": 427
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 446,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 445,
+          "argument_refs": {
+            "storage": 434,
+            "storage_offset": 435,
+            "size": 438,
+            "stride": 441,
+            "requires_grad": 442,
+            "backward_hooks": 444
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 461,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 460,
+          "argument_refs": {
+            "storage": 451,
+            "storage_offset": 452,
+            "size": 454,
+            "stride": 456,
+            "requires_grad": 457,
+            "backward_hooks": 459
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 476,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 475,
+          "argument_refs": {
+            "storage": 466,
+            "storage_offset": 467,
+            "size": 469,
+            "stride": 471,
+            "requires_grad": 472,
+            "backward_hooks": 474
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 493,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 492,
+          "argument_refs": {
+            "storage": 481,
+            "storage_offset": 482,
+            "size": 485,
+            "stride": 488,
+            "requires_grad": 489,
+            "backward_hooks": 491
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 510,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 509,
+          "argument_refs": {
+            "storage": 498,
+            "storage_offset": 499,
+            "size": 502,
+            "stride": 505,
+            "requires_grad": 506,
+            "backward_hooks": 508
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 525,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 524,
+          "argument_refs": {
+            "storage": 515,
+            "storage_offset": 516,
+            "size": 518,
+            "stride": 520,
+            "requires_grad": 521,
+            "backward_hooks": 523
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 540,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 539,
+          "argument_refs": {
+            "storage": 530,
+            "storage_offset": 531,
+            "size": 533,
+            "stride": 535,
+            "requires_grad": 536,
+            "backward_hooks": 538
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 557,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 556,
+          "argument_refs": {
+            "storage": 545,
+            "storage_offset": 546,
+            "size": 549,
+            "stride": 552,
+            "requires_grad": 553,
+            "backward_hooks": 555
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 574,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 573,
+          "argument_refs": {
+            "storage": 562,
+            "storage_offset": 563,
+            "size": 566,
+            "stride": 569,
+            "requires_grad": 570,
+            "backward_hooks": 572
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 589,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 588,
+          "argument_refs": {
+            "storage": 579,
+            "storage_offset": 580,
+            "size": 582,
+            "stride": 584,
+            "requires_grad": 585,
+            "backward_hooks": 587
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 604,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 603,
+          "argument_refs": {
+            "storage": 594,
+            "storage_offset": 595,
+            "size": 597,
+            "stride": 599,
+            "requires_grad": 600,
+            "backward_hooks": 602
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 621,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 620,
+          "argument_refs": {
+            "storage": 609,
+            "storage_offset": 610,
+            "size": 613,
+            "stride": 616,
+            "requires_grad": 617,
+            "backward_hooks": 619
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 638,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 637,
+          "argument_refs": {
+            "storage": 626,
+            "storage_offset": 627,
+            "size": 630,
+            "stride": 633,
+            "requires_grad": 634,
+            "backward_hooks": 636
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 653,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 652,
+          "argument_refs": {
+            "storage": 643,
+            "storage_offset": 644,
+            "size": 646,
+            "stride": 648,
+            "requires_grad": 649,
+            "backward_hooks": 651
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 668,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 667,
+          "argument_refs": {
+            "storage": 658,
+            "storage_offset": 659,
+            "size": 661,
+            "stride": 663,
+            "requires_grad": 664,
+            "backward_hooks": 666
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 685,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 684,
+          "argument_refs": {
+            "storage": 673,
+            "storage_offset": 674,
+            "size": 677,
+            "stride": 680,
+            "requires_grad": 681,
+            "backward_hooks": 683
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 702,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 701,
+          "argument_refs": {
+            "storage": 690,
+            "storage_offset": 691,
+            "size": 694,
+            "stride": 697,
+            "requires_grad": 698,
+            "backward_hooks": 700
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 717,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 716,
+          "argument_refs": {
+            "storage": 707,
+            "storage_offset": 708,
+            "size": 710,
+            "stride": 712,
+            "requires_grad": 713,
+            "backward_hooks": 715
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 732,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 731,
+          "argument_refs": {
+            "storage": 722,
+            "storage_offset": 723,
+            "size": 725,
+            "stride": 727,
+            "requires_grad": 728,
+            "backward_hooks": 730
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 749,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 748,
+          "argument_refs": {
+            "storage": 737,
+            "storage_offset": 738,
+            "size": 741,
+            "stride": 744,
+            "requires_grad": 745,
+            "backward_hooks": 747
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 766,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 765,
+          "argument_refs": {
+            "storage": 754,
+            "storage_offset": 755,
+            "size": 758,
+            "stride": 761,
+            "requires_grad": 762,
+            "backward_hooks": 764
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 781,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 780,
+          "argument_refs": {
+            "storage": 771,
+            "storage_offset": 772,
+            "size": 774,
+            "stride": 776,
+            "requires_grad": 777,
+            "backward_hooks": 779
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 796,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 795,
+          "argument_refs": {
+            "storage": 786,
+            "storage_offset": 787,
+            "size": 789,
+            "stride": 791,
+            "requires_grad": 792,
+            "backward_hooks": 794
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 814,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 813,
+          "argument_refs": {
+            "storage": 802,
+            "storage_offset": 803,
+            "size": 806,
+            "stride": 809,
+            "requires_grad": 810,
+            "backward_hooks": 812
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 830,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 829,
+          "argument_refs": {
+            "storage": 820,
+            "storage_offset": 821,
+            "size": 823,
+            "stride": 825,
+            "requires_grad": 826,
+            "backward_hooks": 828
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 848,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 847,
+          "argument_refs": {
+            "storage": 836,
+            "storage_offset": 837,
+            "size": 840,
+            "stride": 843,
+            "requires_grad": 844,
+            "backward_hooks": 846
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 864,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 863,
+          "argument_refs": {
+            "storage": 854,
+            "storage_offset": 855,
+            "size": 857,
+            "stride": 859,
+            "requires_grad": 860,
+            "backward_hooks": 862
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 882,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 881,
+          "argument_refs": {
+            "storage": 870,
+            "storage_offset": 871,
+            "size": 874,
+            "stride": 877,
+            "requires_grad": 878,
+            "backward_hooks": 880
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        },
+        {
+          "node_ref": 898,
+          "kind": "symbolic_tensor_reducer_arguments",
+          "target_literal": "torch._utils _rebuild_tensor_v2",
+          "arguments_ref": 897,
+          "argument_refs": {
+            "storage": 888,
+            "storage_offset": 889,
+            "size": 891,
+            "stride": 893,
+            "requires_grad": 894,
+            "backward_hooks": 896
+          },
+          "metadata_argument_present": false,
+          "tensor_constructed": false,
+          "shape_or_storage_validated": false
+        }
+      ],
+      "selected_node_count": 1069,
+      "examined_edge_count_including_root_entries": 1344,
+      "depth_includes_original_root": true,
+      "limits": {
+        "input_bytes": 2097152,
+        "opcodes": 250000,
+        "nodes": 20000,
+        "edges": 100000,
+        "stack": 4096,
+        "marks": 128,
+        "memo": 16384,
+        "collection": 4096,
+        "depth": 64,
+        "string_bytes": 65536,
+        "total_string_bytes": 2097152,
+        "global_bytes": 512,
+        "descriptors": 256,
+        "output_bytes": 1048576,
+        "time_ms": 30000
+      },
+      "artifact_remains_refused": true,
+      "whole_artifact_graph_accepted": false,
+      "selected_closure_acyclic": true,
+      "partial_and_untrusted": true,
+      "aliases_may_share_values_with_omitted_roots": true,
+      "semantic_ownership_verified": false,
+      "provenance_verified": false,
+      "architecture_verified": false,
+      "configuration_verified": false,
+      "model_compatibility_verified": false,
+      "objects_or_tensors_constructed": false,
+      "globals_resolved": false,
+      "persistent_ids_resolved": false,
+      "note": "Selected final reference graph only; no global event order, historical argument snapshots, evaluated constructor/BUILD state, inferred defaults or loader authority"
+    }
+  },
+  "reader_exit": 2,
+  "elapsed_seconds": 0.034605
+}
