@@ -1,0 +1,9 @@
+{
+  "same_payloads": true,
+  "same_member_count": 512,
+  "different_compressed_sizes": 488,
+  "hashes": [
+    "11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0",
+    "4f79f74350875032473e710c7c715417ea8d65e5263e3c6180afaa27d73f7502"
+  ]
+}

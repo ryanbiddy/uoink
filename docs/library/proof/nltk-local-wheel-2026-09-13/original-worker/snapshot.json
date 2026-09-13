@@ -1,0 +1,13 @@
+{
+  "scope": "Snapshot after print timeout and completed Control Room transport; provider terminal success was not established.",
+  "worker": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a332397f-bac\\gemini",
+  "detached_takeover": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13",
+  "report_delivered": false,
+  "file_hashes": {
+    "scripts/build_nltk_pathsec_wheel.py": "e870824a1908a7458611af84c0cb98d4fc0cebbd6223d6c982bdc54d71ff336d",
+    "tests/test_nltk_local_wheel.py": "6b6ad8b998ea2a63b3e0aa3c2e74c8cf85609f2fe0e2d5d03e9fdc4372c4b56f",
+    "vendor/nltk-pathsec/dist/nltk-3.10.3+uoink.pathsec1-py3-none-any.whl": "11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0",
+    "vendor/nltk-pathsec/dist/nltk-3.10.3+uoink.pathsec1-py3-none-any.whl.provenance.json": "95ce500f7a7561792c31fa159ab576b3c5695310f023107041f342250aed6886",
+    "vendor/nltk-pathsec/dist/provenance.json": "95ce500f7a7561792c31fa159ab576b3c5695310f023107041f342250aed6886"
+  }
+}

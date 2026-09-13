@@ -1,0 +1,73 @@
+{
+  "base_commit": "4c0a1133701caafe83d5780813514072334aac22",
+  "counts_from_xml": {
+    "takeover/nltk-wheel-astra13-worker01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "2",
+        "skipped": "0",
+        "tests": "43",
+        "time": "12.043",
+        "timestamp": "2026-09-12T23:59:20.437048-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "takeover/nltk-wheel-astra13-worker02": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "43",
+        "time": "12.003",
+        "timestamp": "2026-09-13T00:00:45.194054-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/nltk-wheel13-checkout01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "43",
+        "time": "11.678",
+        "timestamp": "2026-09-13T00:02:02.574400-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "negative/original01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "7",
+        "skipped": "0",
+        "tests": "9",
+        "time": "0.117",
+        "timestamp": "2026-09-12T23:59:19.722692-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "negative/original02": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "7",
+        "skipped": "0",
+        "tests": "9",
+        "time": "0.102",
+        "timestamp": "2026-09-13T00:00:44.505861-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ]
+  },
+  "provider_status": "PARTIAL: print timeout, failed test and missing review; transport completed/zero is not acceptance",
+  "patch_instrument_initial_attempt": "No source written: preflight expected earlier out_dir.parent temp block; final snapshot used repo_scratch. Corrected instrument matches preserved source.",
+  "wheel_sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8",
+  "wheel_bytes": 6597605,
+  "cross_python_wheel_bytes_equal": true,
+  "production_pins_changed": false,
+  "models_loaded": false,
+  "release_ready": false
+}

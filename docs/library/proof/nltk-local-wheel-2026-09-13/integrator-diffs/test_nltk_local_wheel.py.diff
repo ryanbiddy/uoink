@@ -1,0 +1,33 @@
+--- worker/tests/test_nltk_local_wheel.py
++++ astra/tests/test_nltk_local_wheel.py
+@@ -403,8 +403,10 @@
+ 
+ 
+ def test_nltk_not_imported() -> None:
+-    """Invariant: NLTK module must never be imported in memory."""
+-    assert "nltk" not in sys.modules, "NLTK module unexpectedly imported in test session"
++    """Observe this utility in a fresh child, independent of other test imports."""
++    import subprocess
++    code = "import importlib.util,sys; s=importlib.util.spec_from_file_location('wheel_builder',sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert 'nltk' not in sys.modules"
++    subprocess.run([sys.executable, '-I', '-S', '-B', '-c', code, str(BUILD_SCRIPT)], check=True)
+ 
+ 
+ # ==============================================================================
+@@ -433,7 +435,7 @@
+     assert out_wheel.is_file()
+ 
+     # Known bit-for-bit reproducible wheel hash
+-    expected_output_sha256 = "11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0"
++    expected_output_sha256 = "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8"
+     actual_sha256 = sha256_file(out_wheel)
+     assert actual_sha256 == expected_output_sha256, (
+         f"Output wheel hash mismatch: expected {expected_output_sha256}, got {actual_sha256}"
+@@ -491,7 +493,7 @@
+     loaded_prov = json.loads(prov_file.read_text(encoding="utf-8"))
+     assert loaded_prov["status"] == "SUCCESS"
+     assert loaded_prov["output_wheel"]["sha256"] == expected_output_sha256
+-    assert loaded_prov["output_wheel"]["size"] == 1799214
++    assert loaded_prov["output_wheel"]["size"] == 6597605
+ 
+ 
+ def test_deterministic_packaging_repeated_build(

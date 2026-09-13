@@ -1,0 +1,19 @@
+...........................F......                                       [100%]
+================================== FAILURES ===================================
+_____________ test_upstream_artifact_packaging_full_qualification _____________
+tests\test_nltk_local_wheel.py:438: in test_upstream_artifact_packaging_full_qualification
+    assert actual_sha256 == expected_output_sha256, (
+E   AssertionError: Output wheel hash mismatch: expected 11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0, got 4f79f74350875032473e710c7c715417ea8d65e5263e3c6180afaa27d73f7502
+E   assert '4f79f7435087...faa27d73f7502' == '11c885646a44...a6bc5ead1ccb0'
+E     
+E     - 11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0
+E     + 4f79f74350875032473e710c7c715417ea8d65e5263e3c6180afaa27d73f7502
+============================== warnings summary ===============================
+tests/test_nltk_local_wheel.py::test_archive_duplicate_member_rejected
+  C:\Python314\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'nltk/VERSION'
+    return self._open_to_write(zinfo, force_zip64=force_zip64)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_nltk_local_wheel.py::test_upstream_artifact_packaging_full_qualification
+1 failed, 33 passed, 1 warning in 31.31s
