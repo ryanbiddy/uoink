@@ -1,0 +1,113 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\before\\read_symbolic_inventory.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\read_symbolic_inventory.py"
+index 4b021f4..380f9ad 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\before\\read_symbolic_inventory.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\read_symbolic_inventory.py"
+@@ -24,10 +24,14 @@ DEFAULT_LIMITS = {
+ TENSOR_LITERAL = "torch._utils _rebuild_tensor_v2"
+ TENSOR_ARGUMENT_NAMES = ("storage", "storage_offset", "size", "stride", "requires_grad", "backward_hooks", "metadata")
+ MARK = -1
++CYCLE_WITNESS_NODE_LIMIT = 12
++CYCLE_WITNESS_BYTE_LIMIT = 4096
+ 
+ 
+ class TraceRefusal(Exception):
+-    pass
++    def __init__(self, reason, *, cycle_witness=None):
++        super().__init__(reason)
++        self.cycle_witness = cycle_witness
+ 
+ 
+ def trace_require(condition, reason):
+@@ -246,7 +250,59 @@ class _Trace:
+         else:
+             raise TraceRefusal("Opcode has no supported grammar rule")
+ 
+-    def validate_graph(self):
++    def cycle_edge(self, parent, child, index):
++        node = self.nodes[parent]
++        kind = node["kind"]
++        role = "reference"
++        if kind in ("list", "tuple"):
++            role = kind + ".item"
++        elif kind == "dict":
++            role = "dict.key" if index % 2 == 0 else "dict.value"
++            if index % 2:
++                key = self.nodes[node["entries"][index // 2][0]]
++                if key["kind"] == "str" and key["value"] == "_parent":
++                    role = "dict.parent_field_value"
++                elif key["kind"] == "str" and key["value"] == "_content":
++                    role = "dict.content_field_value"
++        elif kind in ("reduce", "newobj"):
++            role = kind + (".target" if index == 0 else ".arguments" if index == 1 else ".recorded_operation")
++        elif kind == "persistent_id":
++            role = "persistent_id.operand"
++        return {"from_ref": parent, "to_ref": child, "edge_index": index, "role": role}
++
++    def cycle_witness(self, frames, child, root):
++        first = next(index for index, frame in enumerate(frames) if frame[0] == child)
++        cycle_frames = frames[first:]
++        kept = cycle_frames[:CYCLE_WITNESS_NODE_LIMIT]
++        path = [{"node_ref": frame[0], "kind": self.nodes[frame[0]]["kind"]} for frame in kept]
++        path_edges = [self.cycle_edge(left[0], right[0], left[1] - 1) for left, right in zip(kept, kept[1:])]
++        closing_parent, closing_index = frames[-1][0], frames[-1][1] - 1
++        closing = self.cycle_edge(closing_parent, child, closing_index)
++        closing["from_kind"] = self.nodes[closing_parent]["kind"]
++        closing["to_kind"] = self.nodes[child]["kind"]
++        entry = {"category": "unavailable"}
++        if frames[0][0] == root and len(frames) > 1:
++            root_edge = frames[0][1] - 1
++            if root_edge % 2:
++                key = self.nodes[self.nodes[root]["entries"][root_edge // 2][0]]
++                entry = {"category": "other_omitted_root"}
++                if key["kind"] == "str" and key["value"] in SELECTED_ROOTS:
++                    entry = {"category": "selected_metadata_root", "selected_root": key["value"]}
++                elif key["kind"] == "str" and key["value"] in ("optimizer_states", "lr_schedulers", "callbacks", "loops"):
++                    entry = {"category": "known_training_root"}
++        result = {"status": "cycle_refusal_diagnostic", "cycle_node_count": len(cycle_frames),
++                  "path_prefix": path, "path_edges": path_edges, "closing_edge": closing,
++                  "path_truncated": len(kept) != len(cycle_frames), "path_node_limit": CYCLE_WITNESS_NODE_LIMIT,
++                  "byte_limit": CYCLE_WITNESS_BYTE_LIMIT, "detected_entry_path": entry,
++                  "entry_path_is_exclusive_ownership": False,
++                  "closing_edge_is_separate_from_truncated_prefix": True,
++                  "values_or_global_names_included": False}
++        encoded = json.dumps(result, ensure_ascii=True, allow_nan=False, separators=(",", ":")).encode("utf-8")
++        if len(encoded) > CYCLE_WITNESS_BYTE_LIMIT:
++            return {"status": "truncated", "reason": "cycle_witness_byte_limit"}
++        return result
++
++    def validate_graph(self, root):
+         colours = [0] * len(self.nodes)
+         heights = [0] * len(self.nodes)
+         for first in range(len(self.nodes)):
+@@ -261,7 +317,12 @@ class _Trace:
+                 if index < len(self.edges[ref]):
+                     child = self.edges[ref][index]
+                     frames[-1][1] += 1
+-                    trace_require(colours[child] != 1, "Reference cycle refused")
++                    if colours[child] == 1:
++                        try:
++                            witness = self.cycle_witness(frames, child, root)
++                        except Exception:
++                            witness = {"status": "unavailable", "reason": "cycle_witness_generation_error"}
++                        raise TraceRefusal("Reference cycle refused", cycle_witness=witness)
+                     if not colours[child]:
+                         colours[child] = 1
+                         frames.append([child, 0])
+@@ -356,7 +417,7 @@ def trace_pickle_metadata(payload, *, tight_limits=None):
+     except (ValueError, UnicodeError, OverflowError) as exc:
+         raise TraceRefusal("Malformed pickle syntax: " + type(exc).__name__) from None
+     trace_require(stopped, "STOP missing")
+-    trace.validate_graph()
++    trace.validate_graph(root)
+     return trace.output(root)
+ 
+ # Fixed inventory reader with bounded in-memory symbolic handoff.
+@@ -691,6 +752,8 @@ def main():
+         result["reason"] = str(exc)[:240]
+         if isinstance(exc, Refusal) and exc.directory_entry is not None:
+             result["refusal_context"] = {"zip_directory_entry": exc.directory_entry}
++        if isinstance(exc, TraceRefusal) and exc.cycle_witness is not None:
++            result["refusal_context"] = {"reference_cycle": exc.cycle_witness}
+     except Exception as exc:
+         code = 3
+         result["status"] = "reader_error"

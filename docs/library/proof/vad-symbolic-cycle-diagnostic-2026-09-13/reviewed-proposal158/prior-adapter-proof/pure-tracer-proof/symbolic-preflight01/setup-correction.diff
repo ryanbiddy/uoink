@@ -1,0 +1,14 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\preflight-setup-draft01\\qualify_symbolic.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\qualify_symbolic.py"
+index 6cd90a5..d6864a1 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\preflight-setup-draft01\\qualify_symbolic.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\qualify_symbolic.py"
+@@ -231,7 +231,8 @@ cases.extend([
+ 
+ basic = document(D([]))
+ add_refusal("unsupported_opcode", document(b"\x8f"), "Unsupported opcode")
+-add_refusal("missing_initial_protocol", b"}.", "initial PROTO 2")
++add_refusal("too_short_input", b"}.", "Input byte limit exceeded or input too short")
++add_refusal("missing_initial_protocol", b"}N.", "initial PROTO 2")
+ add_refusal("wrong_protocol", b"\x80\x03}.", "initial PROTO 2")
+ add_refusal("repeated_protocol", b"\x80\x02\x80\x02}.", "Repeated protocol")
+ add_refusal("post_stop_bytes", basic + b"extra", "Trailing bytes")

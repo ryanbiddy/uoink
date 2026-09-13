@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle01-launch\\read_symbolic_inventory.py",
+    "--inspect",
+    "--run-id",
+    "symbolic-cycle01"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "source_sha256": "15b9d339be34358dfecc2142a960cc524fe6e4620e0ec1716114027cac216ddd",
+  "started_utc": "2026-09-13T13:54:42.905032+00:00",
+  "removed_variable_names": [],
+  "scope": "One fixed-hash static cycle-refusal diagnostic; no object, tensor, model or converter execution",
+  "IG_FORBIDDEN_LIVE_set_before_startup": true
+}

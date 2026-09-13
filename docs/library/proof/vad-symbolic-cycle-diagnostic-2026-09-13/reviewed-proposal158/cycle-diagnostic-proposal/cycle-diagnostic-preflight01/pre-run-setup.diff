@@ -1,0 +1,199 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\before\\qualify_adapter.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\qualify_cycle.py"
+index c46e095..204f2f1 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\before\\qualify_adapter.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-cycle-diagnostic-proposal01\\qualify_cycle.py"
+@@ -121,7 +121,11 @@ def case(name):
+     return register
+ 
+ 
+-@case("exact_permitted_ast_composition")
++def original_composition_not_applicable(operation):
++    return operation
++
++
++@original_composition_not_applicable
+ def ast_composition():
+     before_tree = ast.parse(before_bytes)
+     tracer_tree = ast.parse(tracer_bytes)
+@@ -439,6 +443,181 @@ def imports_boundary():
+             assert name not in prohibited
+ 
+ 
++@case("exact_reporting_only_ast_delta")
++def reporting_delta():
++    original = ast.parse((HERE / "before/read_symbolic_inventory.py").read_bytes())
++    current = ast.parse(source_bytes)
++    assert hashlib.sha256((HERE / "before/read_symbolic_inventory.py").read_bytes()).hexdigest() == "0b5e786b1721dd63c84d9cd12eabf23af2c856790d6bdcabd6b270288e0049fc"
++    old_class = next(node for node in original.body if isinstance(node, ast.ClassDef) and node.name == "TraceRefusal")
++    modified = copy.deepcopy(current)
++    modified.body = [node for node in modified.body if not (isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name) and node.targets[0].id in ("CYCLE_WITNESS_NODE_LIMIT", "CYCLE_WITNESS_BYTE_LIMIT"))]
++    for index, node in enumerate(modified.body):
++        if isinstance(node, ast.ClassDef) and node.name == "TraceRefusal":
++            modified.body[index] = copy.deepcopy(old_class)
++        elif isinstance(node, ast.ClassDef) and node.name == "_Trace":
++            node.body = [item for item in node.body if not (isinstance(item, ast.FunctionDef) and item.name in ("cycle_edge", "cycle_witness"))]
++            validation = next(item for item in node.body if isinstance(item, ast.FunctionDef) and item.name == "validate_graph")
++            assert [arg.arg for arg in validation.args.args] == ["self", "root"]
++            validation.args.args.pop()
++            class RestoreCycle(ast.NodeTransformer):
++                def visit_If(self, item):
++                    if ast.dump(item.test, include_attributes=False) == ast.dump(ast.parse("colours[child] == 1", mode="eval").body, include_attributes=False):
++                        return ast.parse('trace_require(colours[child] != 1, "Reference cycle refused")').body[0]
++                    return self.generic_visit(item)
++            RestoreCycle().visit(validation)
++        elif isinstance(node, ast.FunctionDef) and node.name == "trace_pickle_metadata":
++            calls = [item for item in ast.walk(node) if isinstance(item, ast.Call) and isinstance(item.func, ast.Attribute) and item.func.attr == "validate_graph"]
++            assert len(calls) == 1 and len(calls[0].args) == 1
++            calls[0].args.clear()
++        elif isinstance(node, ast.FunctionDef) and node.name == "main":
++            for item in ast.walk(node):
++                if isinstance(item, ast.ExceptHandler) and isinstance(item.type, ast.Tuple):
++                    last = item.body[-1]
++                    assert isinstance(last, ast.If)
++                    assert ast.dump(last.test, include_attributes=False) == ast.dump(ast.parse("isinstance(exc, TraceRefusal) and exc.cycle_witness is not None", mode="eval").body, include_attributes=False)
++                    item.body.pop()
++    assert ast.dump(modified, include_attributes=False) == ast.dump(original, include_attributes=False)
++    assert new.CYCLE_WITNESS_NODE_LIMIT == 12 and new.CYCLE_WITNESS_BYTE_LIMIT == 4096
++
++
++def captured_cycle(payload):
++    try:
++        new.trace_pickle_metadata(payload)
++    except new.TraceRefusal as exc:
++        assert str(exc) == "Reference cycle refused"
++        assert exc.cycle_witness is not None
++        return exc
++    raise AssertionError("Expected unchanged cycle refusal")
++
++
++def witness(payload):
++    return captured_cycle(payload).cycle_witness
++
++
++@case("self_loop_occurrence_and_selected_entry")
++def self_loop():
++    observed = witness(document(b"]q\x00h\x00a"))
++    assert observed["cycle_node_count"] == 1 and len(observed["path_prefix"]) == 1
++    closing = observed["closing_edge"]
++    assert closing["from_ref"] == closing["to_ref"]
++    assert closing["edge_index"] == 0 and closing["role"] == "list.item"
++    assert observed["detected_entry_path"] == {"category": "selected_metadata_root", "selected_root": "hyper_parameters"}
++    assert not observed["path_truncated"]
++
++
++@case("two_node_cycle_keeps_actual_path_and_closing_edge")
++def two_node_cycle():
++    observed = witness(document(b"]q\x00]h\x00aa"))
++    assert observed["cycle_node_count"] == 2 and len(observed["path_edges"]) == 1
++    edge, closing = observed["path_edges"][0], observed["closing_edge"]
++    assert edge["from_ref"] == closing["to_ref"] and edge["to_ref"] == closing["from_ref"]
++
++
++@case("fixed_parent_role_without_key_or_value_disclosure")
++def parent_role():
++    payload = document(b"}q\x00" + S("SECRET_FIELD") + S("SECRET_VALUE") + b"s" + S("_parent") + b"h\x00s")
++    observed = witness(payload)
++    assert observed["closing_edge"]["role"] == "dict.parent_field_value"
++    text = json.dumps(observed)
++    assert "SECRET_FIELD" not in text and "SECRET_VALUE" not in text and "_parent" not in text
++
++
++@case("edge_role_helper_uses_given_duplicate_occurrence")
++def edge_occurrence_helper():
++    # Direct data-record helper check, not a claim that DFS reaches the second duplicate.
++    trace = new._Trace(None)
++    trace.nodes = [{"kind": "dict", "entries": [[1, 3], [2, 3]]},
++                   {"kind": "str", "value": "_parent"}, {"kind": "str", "value": "_content"}, {"kind": "list", "items": []}]
++    assert trace.cycle_edge(0, 3, 1)["role"] == "dict.parent_field_value"
++    assert trace.cycle_edge(0, 3, 3)["role"] == "dict.content_field_value"
++    assert trace.cycle_edge(0, 3, 3)["edge_index"] == 3
++
++
++@case("cycle_prefix_truncation_and_separate_closing_edge")
++def prefix_truncation():
++    payload = document(b"]q\x00" + b"]" * 19 + b"h\x00" + b"a" * 20)
++    observed = witness(payload)
++    assert observed["cycle_node_count"] == 20 and len(observed["path_prefix"]) == 12
++    assert len(observed["path_edges"]) == 11 and observed["path_truncated"]
++    assert observed["closing_edge_is_separate_from_truncated_prefix"]
++    assert observed["closing_edge"]["from_ref"] != observed["path_prefix"][-1]["node_ref"]
++    assert len(json.dumps(observed, separators=(",", ":")).encode()) <= 4096
++
++
++@case("tightened_witness_byte_cap_keeps_refusal")
++def byte_cap():
++    original = new.CYCLE_WITNESS_BYTE_LIMIT
++    try:
++        new.CYCLE_WITNESS_BYTE_LIMIT = 128
++        observed = witness(document(b"]q\x00h\x00a"))
++        assert observed == {"status": "truncated", "reason": "cycle_witness_byte_limit"}
++        assert len(json.dumps(observed, separators=(",", ":")).encode()) <= 128
++    finally:
++        new.CYCLE_WITNESS_BYTE_LIMIT = original
++
++
++@case("root_self_loop_context_is_unavailable")
++def unavailable_root():
++    observed = witness(b"\x80\x02}q\x00" + S("hyper_parameters") + b"h\x00s.")
++    assert observed["detected_entry_path"] == {"category": "unavailable"}
++
++
++@case("training_entry_with_selected_alias_is_nonexclusive")
++def alias_category():
++    payload = b"\x80\x02" + D([("optimizer_states", b"]q\x00h\x00a"), ("hyper_parameters", b"h\x00")]) + b"."
++    observed = witness(payload)
++    assert observed["detected_entry_path"] == {"category": "known_training_root"}
++    assert not observed["entry_path_is_exclusive_ownership"]
++    assert "optimizer_states" not in json.dumps(observed)
++
++
++@case("unknown_omitted_root_name_is_not_disclosed")
++def omitted_root():
++    payload = b"\x80\x02" + D([("SECRET_ROOT_NAME", b"]q\x00h\x00a"), ("hyper_parameters", b"}")]) + b"."
++    observed = witness(payload)
++    assert observed["detected_entry_path"] == {"category": "other_omitted_root"}
++    assert "SECRET_ROOT_NAME" not in json.dumps(observed)
++
++
++@case("witness_generation_error_preserves_cycle_refusal")
++def witness_error():
++    original = new._Trace.cycle_witness
++    def broken(*args): raise ValueError("SECRET_DIAGNOSTIC_ERROR")
++    try:
++        new._Trace.cycle_witness = broken
++        observed = witness(document(b"]q\x00h\x00a"))
++        assert observed == {"status": "unavailable", "reason": "cycle_witness_generation_error"}
++        assert "SECRET" not in json.dumps(observed)
++    finally:
++        new._Trace.cycle_witness = original
++
++
++@case("refused_graph_never_calls_output_or_descriptors")
++def no_output_after_refusal():
++    original_output, original_descriptors = new._Trace.output, new._Trace.descriptors
++    called = []
++    def forbidden(*args):
++        called.append(True)
++        raise AssertionError("Refused graph output was called")
++    try:
++        new._Trace.output = new._Trace.descriptors = forbidden
++        witness(document(b"]q\x00h\x00a"))
++        assert called == []
++    finally:
++        new._Trace.output, new._Trace.descriptors = original_output, original_descriptors
++
++
++@case("inert_main_records_cycle_context_and_refusal_two")
++def main_cycle_context():
++    refusal_value = captured_cycle(document(b"]q\x00h\x00a"))
++    def fail(result): raise refusal_value
++    code, result, *_ = inert_main(fail)
++    assert code == result["reader_exit"] == 2 and result["status"] == "refused"
++    assert result["reason"] == "Reference cycle refused"
++    assert result["refusal_context"] == {"reference_cycle": refusal_value.cycle_witness}
++    assert "pickle_static_inventory" not in result and not result["release_acceptance"]
++
++
+ started = time.monotonic()
+ results = []
+ for name, operation in cases:
