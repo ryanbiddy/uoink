@@ -1,0 +1,45 @@
+{
+  "base_commit": "d0c98350f2a1c3f0bf39784174c1c7191f8cc4eb",
+  "counts": {
+    "worktree/nltk-binding13-worker01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "0",
+        "time": "0.002",
+        "timestamp": "2026-09-13T00:07:39.383202-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "worktree/nltk-binding13-worker02": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "51",
+        "time": "12.885",
+        "timestamp": "2026-09-13T00:08:11.872748-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ],
+    "checkout/nltk-binding13-checkout01": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "51",
+        "time": "12.451",
+        "timestamp": "2026-09-13T00:09:20.533879-07:00",
+        "hostname": "Ryan-PC"
+      }
+    ]
+  },
+  "fixed_build_hash_matches_vendor_wheel": true,
+  "installer_built": false,
+  "installed": false,
+  "release_ready": false
+}

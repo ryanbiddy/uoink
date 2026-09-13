@@ -19,6 +19,11 @@ installer-lock pin and notices identifying the local patch and upstream licence.
 Retain all other pins, including the frozen Torch and WhisperX expectations.
 Do not add a fallback to unpatched upstream NLTK or a caller-supplied hash override.
 The existing no-build-isolation and build-tool pin assertions stay unchanged.
+Run tests/test_installer_dependency_lock.py, test_runtime_setuptools_notices.py,
+test_installer_signing.py, test_signing_host_selection.py, test_signing_receipts.py
+and test_build_guide_accuracy.py. The first binding observer named a nonexistent
+test_build_guide_typo.py and exited 4 with zero tests run. Preserve that launcher
+failure; the corrected filename is verified from the tree and uses a fresh label.
 Record the local wheel's upstream URL/hash, patch hash, changed files and licence
 in the build documentation. No metadata-only graph pass clears an advisory.
 

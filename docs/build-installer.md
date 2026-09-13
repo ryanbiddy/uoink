@@ -11,6 +11,22 @@ The script downloads and caches the pinned runtime dependency set under
 `build\cache\`, stages the install layout, and compiles
 `build\Uoink-Setup-<VERSION>.exe`.
 
+The Living Library candidate also uses the committed local wheel
+`vendor/nltk-pathsec/dist/nltk-3.10.3+uoink.pathsec1-py3-none-any.whl`.
+Before dependency installation, the build verifies SHA256
+`969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8`
+and passes that file explicitly to pip under the matching lock constraint.
+It does not substitute upstream NLTK if this artifact is absent or changed.
+Read [the wheel review](library/NLTK-LOCAL-WHEEL-REVIEW-2026-09-12.md) for the
+512-member comparison, retained licence, source patch and qualification limits.
+The reviewed input wheel came from the captured PyPI files.pythonhosted.org URL,
+SHA256 `ff9598a8e20518ee0d557745890cc4435b9578489e2dcbc69c4f81fa060caf7c`.
+The source patch is fixed at
+`56d70eece6711a52d0082b066f79ff1388c1cbe6db19d3eb09bf98b5ae11f71b`.
+The offline builder uses ZIP_STORED with fixed metadata and preserves its working
+files for review. The labelled wheel is build input; installed qualification is
+recorded separately from source preparation.
+
 To wipe everything and rebuild from scratch:
 
 ```powershell

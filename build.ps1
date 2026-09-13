@@ -49,6 +49,8 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
+$NltkPathsecWheel = Join-Path $RepoRoot 'vendor\nltk-pathsec\dist\nltk-3.10.3+uoink.pathsec1-py3-none-any.whl'
+$NLTK_PATHSEC_SHA256 = '969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8'
 
 $signingArgs = @()
 . (Join-Path $RepoRoot 'scripts\installer_signing.ps1')
@@ -373,6 +375,7 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
 
 # ---- 1. Download dependencies ------------------------------------------
 Write-Step 'Fetching dependencies'
+Confirm-Hash $NltkPathsecWheel $NLTK_PATHSEC_SHA256 'NLTK local path-policy wheel'
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
 $ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
 $ffmpegSharedZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_SHARED_VERSION-win64-lgpl-shared.zip"
@@ -426,6 +429,7 @@ Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mc
 & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
     --constraint $InstallerLock `
+    $NltkPathsecWheel `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
 

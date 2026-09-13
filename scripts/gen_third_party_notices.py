@@ -150,6 +150,13 @@ def main() -> int:
         lic = (row.get("License") or "UNKNOWN").replace("|", "/")
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
+    if any(row.get("Name", "").lower() == "nltk" and
+           row.get("Version") == "3.10.3+uoink.pathsec1" for row in rows):
+        lines += ["", "NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream "
+                  "3.10.3. Its Apache 2.0 licence is retained. The exact patch, original "
+                  "source and build provenance are in vendor/nltk-pathsec in the source "
+                  "repository. This modification does not qualify model loading or "
+                  "clear unrelated dependency advisories."]
     lines += ["", FFMPEG_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")

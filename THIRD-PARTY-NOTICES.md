@@ -3,6 +3,11 @@
 Uoink is MIT-licensed. It bundles the third-party components below.
 This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-12; regenerate with `python scripts/gen_third_party_notices.py`.
 
+The NLTK row is updated for the next candidate build's reviewed local wheel;
+replacement staging and installed qualification are pending. The local patch
+retains NLTK's Apache 2.0 licence. Its source, original files and provenance are
+in vendor/nltk-pathsec. The existing package-08 notices remain in its sealed kit.
+
 SPDX expressions below fill the generator's UNKNOWN fields only where the
 exact packaged wheel declares License-Expression. This September 12 review
 does not infer missing metadata or replace the packaged license files.
@@ -71,7 +76,7 @@ does not infer missing metadata or replace the packaged license files.
 | multidict | 6.7.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
 | narwhals | 2.24.0 | MIT | https://github.com/narwhals-dev/narwhals |
 | networkx | 3.6.1 | BSD-3-Clause | https://networkx.org/ |
-| nltk | 3.10.3 | Apache Software License | https://www.nltk.org/ |
+| nltk | 3.10.3+uoink.pathsec1 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
 | onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |

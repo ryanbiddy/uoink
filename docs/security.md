@@ -2,6 +2,14 @@
 
 Status: launch-facing for the current helper and extension
 
+The Living Library candidate build selects a verified local NLTK path-policy
+backport, `3.10.3+uoink.pathsec1`. The fixed wheel, original source, patch and
+provenance are retained under vendor/nltk-pathsec. At this source checkpoint,
+replacement staging and installation are still pending; package 08 contains
+upstream 3.10.3. Keep the original advisory observation alongside any later
+installed backport disposition. This patch does not qualify model loading or
+resolve the retained Torch and Transformers findings.
+
 > Compatibility note: the canonical auth header is `X-Uoink-Token` and the
 > `/token` gate is `X-Uoink-Client: uoink-extension`. The shipped extension
 > still has compatibility paths that emit `X-Yoink-Token` or
