@@ -1,0 +1,20 @@
+{
+  "source": "8a81250766af6f2048d9f1125f09dc56c1dcb1cd",
+  "brief_sha256": "46ef67faab2d578f8c1be471e01d383c2cee898e9556ffc324fde1c4941bf651",
+  "command": [
+    "node",
+    "bin/control-room.mjs",
+    "run",
+    "uoink-library",
+    "Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md first and read its companion COVERAGE.json and the catalog it names. Resolve all selected repository-relative proof roots under your assigned worktree. Complete all 39 omitted file reads in the three bounded source/receipt review groups. Write docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md early and complete it; this is the only allowed write. No subagents, tests, code/native/model execution, artifact/archive reads, network, source edits, staging, commits or pushes. Give a verdict for the observed scope of each group, concrete findings and a 39-file read checklist. Aim for about 1000 words plus the checklist; state any unread sections. Website/marketing remain paused; no overall release acceptance.",
+    "--mode",
+    "work",
+    "--strategy",
+    "parallel",
+    "--agents",
+    "gemini",
+    "--lead",
+    "gemini",
+    "--approve"
+  ]
+}

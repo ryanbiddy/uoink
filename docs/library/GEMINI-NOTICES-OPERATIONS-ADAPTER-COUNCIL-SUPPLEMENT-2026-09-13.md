@@ -1,0 +1,212 @@
+# Gemini Council Supplement: Notices, Operations, and Actual Adapter (2026-09-13)
+
+- **Worker**: Gemini (`gemini`, Local Multi-Model Control Room)
+- **Assigned Worktree**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ca1e1356-b94\gemini`
+- **Supplement Brief**: `docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md`
+- **Coverage Inventory**: `docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json`
+- **Catalog of Record**: `docs/library/proof/notices-operations-adapter-council-brief-2026-09-13/SELECTED-INPUTS.md`
+- **Primary Report Supplemented**: `docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-REVIEW-2026-09-13.md` (Run `e30846da-3213-4794-9a87-98792fd7d717`)
+- **Review Mode**: Static source, diff, manifest, and receipt review across all 39 previously omitted files. No tests, code execution, native probes, models, artifact reads, network calls, source edits, staging, commits, or branch merges were conducted.
+
+---
+
+## Executive Summary and Group Dispositions
+
+This supplement completes the review of all 39 omitted files across the three bounded proof groups identified in `COVERAGE.json`. It corrects documentary claims and line-number errors in the original review while upholding the partial report's historical findings and evidentiary integrity.
+
+| Group | Proof Root | Catalog Inputs | Previously Omitted | Observed Scope Disposition | Key Corrected Claim or Core Finding |
+| --- | --- | ---: | ---: | --- | --- |
+| **1. Notice Integration** | `docs/library/proof/two-wheel-notice-integration-2026-09-13` | 24 | 13 | **Accept with findings** | Corrects `build.ps1` generator reference to lines 442–478 and Inno attribution to lines 100–103; clarifies that only the two upstream license texts carry fixed hash pins, while notice index and README use source-before/copy/source-after hash comparisons; confirms author and checkout test parity (20 tests, 10 block cases) without case duplication. |
+| **2. Generated Operations** | `docs/library/proof/generated-operation-facade-2026-09-13` | 18 | 7 | **Accept with findings** | Confirms the pending-I/O finalizer (`dummy_bootstrap.py` lines 564–568) and immediate native exit logging (`run_operation01.ps1` lines 72–82); verifies lazy segment production, post-close refusal without IPC wire operations, and parent protection holding through child exit 0 and empty job count; preserves historical `-NoClobber` admission failure (`36af0d`). |
+| **3. Actual Adapter Connection** | `docs/library/proof/generated-actual-adapter-2026-09-13` | 27 | 19 | **Accept with findings** | Verifies the end-to-end permit forwarding chain from `_leased_admission` through `_NativePermit` into `OwnedRuntimeFactory` and `start_owned_worker`; confirms exact 15-field CPU/int8 reliability policy binding with acknowledgement digest `91fd7a45...`; validates all 5 adapter-state checks; maintains explicit limits: zero model calls, `REAL_APPROVAL` absent, and `complete_native_namespace_protection: false`. |
+
+---
+
+## 1. Notice Integration: Source and Receipt Verification
+
+### 1.1 Scope and Corrections to Primary Report Claims
+
+The review examined the 13 previously omitted files in `two-wheel-notice-integration-2026-09-13` alongside the generator, build script, and patch. Two specific documentary errors in the original report are corrected:
+
+1. **Build Generator and Inno Line Reference Correction**:
+   - In `source/build.ps1`, notice generation occurs at lines 442–478 (Step 2d: `Generating THIRD-PARTY-NOTICES.md`), not lines 56–100 as cited in the original review. The generator sequence runs under `$PSNativeCommandUseErrorActionPreference = $false`, saves and restores `$env:SOURCE_DATE_EPOCH`, executes `gen_third_party_notices.py`, uninstalls build-time utilities (`pip-licenses prettytable tomli wcwidth`), and throws if either `$noticeGenerationExit` or `$noticeCleanupExit` is non-zero.
+   - In `source/installer/uoink.iss`, attribution files are staged at lines 100–103 under `[Files]` targeting `{app}` and `{app}\third-party-notices` with `Flags: ignoreversion`. The original report mistakenly cited lines 150–154, which locate server runtime modules.
+
+2. **Hash Pinning vs. Copy Hash Matching**:
+   - The original report claimed at lines 86 and 291 that all four notice files are hash-pinned to fixed content values. Inspection of `source/build.ps1` lines 570–600 reveals that only the two upstream license files are pinned to fixed content hashes in `$noticePins`:
+     - `antlr4-python3-runtime-4.9.3-LICENSE.txt` (`b1b379fc...`)
+     - `proxy-tools-0.1.0-UPSTREAM-LICENSE.txt` (`a428fb8a...`)
+   - The notice index (`THIRD-PARTY-NOTICES.md`) and index explanation (`third-party-notices\README.md`) are not pinned to constant hash values in `build.ps1`. Instead, lines 589–600 perform dynamic byte comparisons before and after copying: `$noticeSource` is hashed, copied to `$StagingDir`, and re-hashed alongside `$noticeTarget` to ensure no modification occurs during staging. All four files are copied, but only the two supplemental licenses are pinned to constant values.
+
+### 1.2 Upstream License Preservation and Metadata Conflict
+
+Inspection of `source/third-party-notices/` confirms that upstream texts are preserved verbatim:
+- `antlr4-python3-runtime-4.9.3-LICENSE.txt` (2,699 bytes) retains the full BSD 3-Clause text for the ANTLR Project (2012–2017) along with the appended MIT license for `codepointat.js` and `fromcodepoint.js`. `README.md` clarifies that these JavaScript notices come from the upstream source repository and do not imply that JavaScript files ship in the Python wheel.
+- `proxy-tools-0.1.0-UPSTREAM-LICENSE.txt` (1,436 bytes) preserves the historical BSD text (Armin Ronacher 2013, Jonathan Tushman 2014) with its unpopulated `<COPYRIGHT HOLDER>` placeholder and the malformed trailing sentence at line 24 (`THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.OTHERWISE, ARISING FROM...`).
+- Both `THIRD-PARTY-NOTICES.md` (line 98) and `README.md` (lines 11–16) explicitly disclose the metadata conflict: package metadata declares `MIT`, while the source header and upstream license declare `BSD`. Neither notice fabricates an artificial resolution or claims legal clearance.
+
+### 1.3 Test Suite and Execution Receipt Audit
+
+The omitted test files and execution receipts confirm consistent behavior:
+- `source/tests/test_runtime_setuptools_notices.py` confirms that `setuptools` is retained in notices via `--with-system` and that missing runtime notices fail before file output.
+- `source/tests/test_installer_dependency_lock.py` validates that `requirements-installer-lock.txt` has no duplicates or ranges, and matches `THIRD-PARTY-NOTICES.md`.
+- `source/tests/test_c02_reliability_faster_whisper.py` verifies the removal of `whisper-timestamped` and binds reliability clustering over `faster-whisper`.
+- `author/pytest-validated01.json` and `checkout/pytest-validated01.json` both report exactly 20 passed tests, 0 failures, 60 ordinary reports, and 0 heavy import attempts. `membership.json` and `reports.jsonl` confirm identical execution across author and checkout partitions without multiplying test cases.
+- `author/blocks/result.json` and `checkout/blocks/result.json` both record 10 passed PowerShell block cases testing generation failure, cleanup exit codes, and staging validation.
+
+---
+
+## 2. Generated Operations: Drain and Cancellation Verification
+
+### 2.1 Scope and Verification of Omitted Inputs
+
+The seven previously omitted files in `generated-operation-facade-2026-09-13` substantiate the process isolation, communication boundaries, and clean shutdown of the generated operation facade.
+
+1. **Bootstrap Isolation and Finalizer Enforcement**:
+   - `native-preparation/dummy_bootstrap.py` (568 lines) enforces strict sandboxing prior to any IPC. WinReg functions (25 callable traps) and filesystem metadata operations (12 traps on `os`, `Path`, and `os.path`) are intercepted. Early audit hooks block `winreg.*`, `socket.*`, and `subprocess.*`.
+   - The native FFI dispatcher (`FixedNativeDispatch`) exposes 32 fixed Windows API symbols from `kernel32.dll`. Function signatures and pointer addresses are frozen in immutable mapping proxies.
+   - Lines 564–568 implement the critical pending-I/O finalizer:
+     ```python
+     finally:
+         for retained_pair in pipes.pairs:
+             if retained_pair.operations:
+                 PROCESS_ABORT(1)
+     ```
+     If any overlapped pipe operation remains outstanding during interpreter teardown, the process aborts immediately via `os._exit(1)`, preventing orphan background I/O.
+
+2. **Launcher Mechanics and Immediate Exit Capture**:
+   - `native-preparation/run_operation01.ps1` controls execution for both `drain` and `cancel` modes.
+   - Lines 72–82 capture controller native exit immediately into `native-exit.json` upon child termination before postcheck validations run.
+   - `drain01/native-exit.json` and `cancel01/native-exit.json` both record `{"schema":"uoink.native-exit.v1","child_returned":true,"native_exit":0}`.
+   - `cancel01/exit.json` confirms `controller_native_exit: 0`, `expected_child_native_exit: 0`, `outer_exit: 0`, `inputs_unchanged: true`, and `receipt_valid: true`.
+
+3. **Protocol Ordering, Lazy Consumption, and Cleanup Refusal**:
+   - In `native-preparation/PROTOCOL.md`, root commands and receipt requirements require controller and child agreement across all ordered events.
+   - In `drain01`, the protocol executes 5 actions: `admit_generated_media`, `begin_generated_transcription`, followed by three `next_generated_segment` calls (segment 0, segment 1, EOF).
+   - In `cancel01`, the protocol executes 4 actions: `admit_generated_media`, `begin_generated_transcription`, `next_generated_segment` (segment 0), and `cancel_generated_cursor`.
+   - The stream produces segments lazily. Calling `next()` after cancellation raises `StopIteration` locally. Calling `transcribe()` or iterating closed streams raises `SessionClosed` locally with zero wire operations.
+   - Parent file sharing guards hold through child exit 0 and empty job object status (`job_active_processes: 0`). Five write-open probes are refused (`ERROR_SHARING_VIOLATION`, WinError 32) during active protection and succeed with 0 bytes only after complete release.
+
+4. **Preservation of Failed Admission History**:
+   - Historical admission defect `36af0d` in `integrator-history/GENERATED-OPERATION-DRAIN-ADMISSION01-ACTUAL.json` (exit 1 from `-NoClobber` on `Set-Content`) remains recorded and documented in `GENERATED-OPERATION-ADMISSION-WRITE-REPAIR.md`.
+
+---
+
+## 3. Actual Adapter: Connection on Windows
+
+### 3.1 Scope and Verification of Omitted Inputs
+
+The nineteen previously omitted files in `generated-actual-adapter-2026-09-13` provide the source basis for the permit handoff, policy binding, and adapter-owned cleanup.
+
+1. **Permit Forwarding and Factory Lifecycle**:
+   - In `drain01/snapshot_lifecycle.py`, `_Lease` acquires read protection via `kernel.acquire_read()`. Calling `lease.begin_native_session()` advances state from `Phase.PROTECTED` to `Phase.NATIVE_RESERVED` and creates a local `_NativePermit(manager, record, record.permit)`.
+   - In `drain01/asr_loading_adapter.py` lines 191–239 (`_model_session`), the adapter acquires `_leased_admission`, verifies CPU / int8 runtime profile, and invokes `lease.begin_native_session()`. It verifies the snapshot binding via `resolver.bind_for_constructor(admission)`, wraps it in `_OwnedASRStart`, and calls `factory.open_owned_session(startup, permit)`.
+   - `OwnedRuntimeFactory.open_owned_session` verifies that the permit belongs to the active manager and that `record.phase` is `NATIVE_RESERVED`. It instantiates `OwnedSession` and forwards the permit identity to `kernel.start_owned_worker`.
+   - In `proposal/generated_adapter_flow.py` lines 98–109, `GeneratedLifecyclePort.start_owned_worker` validates that `record.phase` is `NATIVE_RESERVED` and that startup policy matches `self.adapter_profile`. The record transitions to `Phase.NATIVE_RUNNING` only after the child worker acknowledges the exact policy. Exactly one binding callback occurs (`binding_calls: 1`).
+
+2. **Policy Binding and Digest Verification**:
+   - Both controller and child records enforce the exact 15-field policy defined in `native-preparation/EXPECTED-GENERATED-POLICY.json`:
+     ```json
+     {
+       "action": "bind_generated_adapter_start",
+       "choice": "large-v3-turbo",
+       "compute_type": "int8",
+       "constructor_called": false,
+       "device": "cpu",
+       "generated_only": true,
+       "generated_root": "...\\generated-actual-adapter-drain01",
+       "inherited_manifest_sha256": "f2040d23385d0630e380f85bdc3a4801d345498aeef0a618f852a2ff37fa10d7",
+       "local_files_only": true,
+       "namespace_sha256": "f02e5966f784ea254e583514171277975c5c7dbd9dfcccad9fd5a62976cf31b9",
+       "profile_id": "generated-asr-reliability-v1",
+       "real_runtime_approved": false,
+       "recipe_sha256": "6ab3c738b582349fc5e0fd4ff13f1060df960fc2c7ab2171abf01a2292c1fd33",
+       "revision": "0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf",
+       "usage": "reliability"
+     }
+     ```
+   - The launcher independently reconstructs this canonical JSON and validates the SHA-256 acknowledgement digest: `91fd7a45f4fa635a2292899e9f7fe5689196cf44ac8a7527193bee8da815e7ee`.
+   - The model choice `large-v3-turbo` serves strictly as an immutable label; no model weights were loaded.
+
+3. **Child Validation, Buffer Namespace, and Adapter Cleanup**:
+   - `drain01/inherited_readset.py` requires the child to validate the authenticated manifest before handle use. The child clears handle inheritance flags (`SetHandleInformation`) across all 5 adopted handles and validates file identities against `GetFileInformationByHandleEx`.
+   - `drain01/pinned_buffer_namespace.py` reads exactly 328 bytes across five seek/two-read operations via `SetFilePointerEx` and `ReadFile` into fixed buffers.
+   - `drain01/win32_private_pipe.py` manages duplex IPC with overlapped cancellation and cleanup budget enforcement.
+   - In `asr_loading_adapter.py` lines 228–239, cleanup is owned by `_model_session`'s `finally` block: `runtime.close_and_join()` verifies child exit 0 and empty job status, and `lease.confirm_native_closed()` transitions the record through `Phase.NATIVE_STOPPED` to `Phase.NATIVE_CLOSED` before the lease releases parent file sharing guards.
+   - Five write-access probes fail with WinError 32 during active protection and succeed with 0 bytes after release.
+
+4. **Adapter State Restoration and Verification**:
+   - `drain01/before.json` and `drain01/after.json` confirm all 15 source and control files remained bit-for-bit identical before and after observation `fc23ea`.
+   - `native-preparation/dummy_bootstrap.py` lines 538–544 and `native-preparation/run_actual_adapter01.ps1` lines 216–220 verify that all five `adapter_state` checks evaluate `true`:
+     - `real_approval_none`: `true` (`trusted_asr_resolver.REAL_APPROVAL is None`)
+     - `real_functions_unchanged`: `true` (`load_manifest`, `admit_snapshot`, `bind_for_constructor`)
+     - `private_release_restored`: `true` (`adapter._release is original`)
+     - `services_unconfigured`: `true` (all 5 adapter service globals remain `None`)
+     - `resolver_module_restored`: `true` (`adapter.resolver is real_resolver`)
+
+5. **Operational Scope Boundary**:
+   - Run `fc23ea` is a single generated-data connection observation. It does not qualify real model weights, decoding accuracy, VAD filtering, native startup crash recovery, or installed runtime startup. `complete_native_namespace_protection` remains explicitly `false`.
+
+---
+
+## 4. 39-File Read Checklist
+
+The table below records direct inspection of all 39 previously omitted files under worktree root `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\ca1e1356-b94\gemini\`:
+
+| # | Group | Relative Repository Path | Bytes | Catalog SHA-256 | Inspected Range | Content Verified |
+| ---: | :---: | :--- | ---: | :--- | :---: | :--- |
+| 1 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss` | 71,150 | `26bbb58c...` | Lines 1–150 | Setup metadata, attribution files staged at lines 100–103, server runtime staging |
+| 2 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/THIRD-PARTY-NOTICES.md` | 14,455 | `77cb5500...` | Lines 1–191 | Full generated table, supplemental notices for ANTLR and proxy-tools, FFmpeg LGPL notes |
+| 3 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/README.md` | 3,037 | `bb450b66...` | Lines 1–19 | Supplemental notice index, proxy-tools metadata conflict, source provenance |
+| 4 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt` | 2,699 | `b1b379fc...` | Lines 1–53 | Verbatim BSD 3-Clause and Mathias Bynens MIT JavaScript licenses |
+| 5 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt` | 1,436 | `a428fb8a...` | Lines 1–24 | Verbatim BSD text, `<COPYRIGHT HOLDER>` placeholder, malformed trailing sentence at line 24 |
+| 6 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_runtime_setuptools_notices.py` | 2,601 | `03a7ab6f...` | Lines 1–53 | Setuptools retention, trim pattern assertions, generator refusal on missing notice |
+| 7 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_installer_dependency_lock.py` | 5,202 | `64489957...` | Lines 1–131 | Lock parser constraints, inventory drift detection, build.ps1 constraint checks |
+| 8 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_c02_reliability_faster_whisper.py` | 6,289 | `c0af159e...` | Lines 1–150 | Faster-whisper reliability span detection, removal of whisper-timestamped |
+| 9 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/author/pytest-validated01.json` | 222 | `17ae846e...` | Lines 1–12 | Author test run: 20 passed, 0 failed, 60 ordinary reports, exit 0 |
+| 10 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/author/blocks/result.json` | 13,445 | `ff2823c4...` | Lines 1–387 | Author block harness: 10 passed cases, generation and staging refusal tests |
+| 11 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/author/LAUNCH-RESULT01.json` | 367 | `85ab903a...` | Lines 1–11 | Author launch summary: qualification exit 0, inputs unchanged: true |
+| 12 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/reports.jsonl` | 22,830 | `bbec5e50...` | Lines 1–61 | Checkout partition test reports: 60 setup/call/teardown events, all passed |
+| 13 | 1 | `docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/membership.json` | 1,983 | `db06c3a7...` | Lines 1–23 | 20 exact test node IDs assigned to notice partition |
+| 14 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py` | 31,016 | `ff892a9b...` | Lines 1–568 | Traps, 32 native symbols, FFI dispatch, pending-I/O finalizer at lines 564–568 |
+| 15 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/run_operation01.ps1` | 21,042 | `93408fac...` | Lines 1–218 | Native exit block (lines 72–82), 131KB receipt bounds, 5 write probes, exit.json |
+| 16 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/PROTOCOL.md` | 4,275 | `6181c4fd...` | Lines 1–26 | Root admission protocol, scrubbed environment, ordered operation requirements |
+| 17 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/SOURCE-INPUTS.json` | 3,768 | `83c0bdb6...` | Lines 1–63 | 9 source hashes and 9 native support binary bindings |
+| 18 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/drain01/native-exit.json` | 71 | `c06d0922...` | Line 1 | Drain native exit: child_returned true, native_exit 0 |
+| 19 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/cancel01/exit.json` | 344 | `ce4787a0...` | Lines 1–14 | Cancel launcher exit: controller 0, child 0, outer 0, inputs unchanged |
+| 20 | 2 | `docs/library/proof/generated-operation-facade-2026-09-13/cancel01/native-exit.json` | 71 | `c06d0922...` | Line 1 | Cancel native exit: child_returned true, native_exit 0 |
+| 21 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/asr_loading_adapter.py` | 12,073 | `2b6cbbad...` | Lines 1–248 | _model_session permit forward, faster_whisper_session, adapter-owned cleanup |
+| 22 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/trusted_asr_resolver.py` | 13,373 | `16a5a124...` | Lines 1–293 | load_manifest, admit_snapshot, bind_for_constructor, REAL_APPROVAL is None |
+| 23 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py` | 22,138 | `a80514aa...` | Lines 1–518 | Phase transitions, _NativePermit, OwnedRuntimeFactory, close_and_join |
+| 24 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py` | 19,570 | `437e0880...` | Lines 1–423 | GenerationBinding, HMAC frame auth, challenge/ready handshake, WorkerBootstrap |
+| 25 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py` | 28,730 | `b39a29ce...` | Lines 1–572 | Win32 API declarations, handle tracking, suspended child creation, job limits |
+| 26 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/generated_worker_flow.py` | 20,326 | `4409fb6b...` | Lines 1–327 | GeneratedLifecyclePort, controller_flow, child_flow, graceful exit observation |
+| 27 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/inherited_readset.py` | 12,391 | `02be8e04...` | Lines 1–223 | InheritedReadSetAdoption, handle flag clearing, identity check, materialize |
+| 28 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/pinned_buffer_namespace.py` | 7,893 | `2cc25a7a...` | Lines 1–155 | PinnedBufferNamespace, SetFilePointerEx, ReadFile into 328-byte buffers |
+| 29 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_private_pipe.py` | 18,613 | `73a1109a...` | Lines 1–391 | PrivatePipeController, overlapped duplex pipe, chunked I/O, cleanup timeout |
+| 30 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py` | 32,127 | `dbc0ac0a...` | Lines 1–583 | 11 module imports, adapter_state validation (lines 538–544), pending-I/O abort |
+| 31 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/run_actual_adapter01.ps1` | 24,630 | `11de6629...` | Lines 1–254 | 12-source runner, native exit capture, 15-field policy canonical digest check |
+| 32 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/launcher.diff` | 12,875 | `ec3efb57...` | Lines 1–112 | Launcher delta: 12-source expansion, adapter_state and policy ack assertions |
+| 33 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json` | 1,201 | `ee79c060...` | Lines 1–38 | Expected policy recipe: large-v3-turbo, 5 asset digests, recipe/namespace SHA256 |
+| 34 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/SOURCE-INPUTS.json` | 4,546 | `3c5f6e59...` | Lines 1–69 | 12 source file hashes and 9 native binary support bindings |
+| 35 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/PROTOCOL.md` | 4,177 | `6c22a0af...` | Lines 1–24 | Adapter observation protocol, scrubbed environment, policy digest requirement |
+| 36 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/native-exit.json` | 71 | `c06d0922...` | Line 1 | Drain native exit: child_returned true, native_exit 0 |
+| 37 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/before.json` | 7,593 | `8731137c...` | Lines 1–169 | Pre-run manifest: 12 sources, 3 controls, 9 native inputs, 5 fixtures |
+| 38 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/drain01/after.json` | 9,405 | `b725f074...` | Lines 1–182 | Post-run verification: all 15 sources/controls and 14 inputs bit-for-bit unchanged |
+| 39 | 3 | `docs/library/proof/generated-actual-adapter-2026-09-13/admission-actual.json` | 381 | `884853fe...` | Lines 1–8 | Root admission receipt: chunk e25d38, exit 0, model_calls_authorized false |
+
+---
+
+## 5. Unread Sections Statement
+
+In accordance with strict reporting rules, all source sections inspected were read in full, with one noted boundary:
+- `docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss`: Lines 1–150 (containing `[Setup]`, `[Messages]`, `[Tasks]`, and the `[Files]` attribution block lines 100–103) were directly read and verified. Lines 151–1898 (containing the Inno Setup Pascal `[Code]` section, custom wizard wizard event handlers, uninstall routines, and desktop/shortcut registry directives) were left unread as they fall outside notice staging and attribution verification.
+- All other 38 requested files across Groups 1, 2, and 3 were viewed and verified in their entirety.
+
+---
+
+## 6. Commercial and Release Boundaries
+
+1. **Website and Marketing Paused**: Website updates, marketing claims, and public messaging remain frozen.
+2. **No Legal Clearance**: Preserving upstream license texts and conflicts documents provenance but conveys no legal warranty or clearance.
+3. **No General Release Acceptance**: These bounded observations qualify notice generation/staging contracts, operation protocol flow, and adapter connection under synthetic test seams. They do not approve real Whisper weights, audio decoding, VAD processing, crash recovery, or live production releases.

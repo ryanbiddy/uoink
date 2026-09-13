@@ -1,0 +1,1049 @@
+{
+  "scope": "Read-only Control Room source-access event metadata; not an OS audit or complete displayed-source record",
+  "run": {
+    "id": "ca1e1356-b943-4a8a-bee4-6a3016a7ee64",
+    "status": "completed",
+    "started_at": "2026-09-13T23:41:10.590Z",
+    "finished_at": "2026-09-13T23:44:12.448Z"
+  },
+  "workers": [
+    {
+      "id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "model": "gemini-3.8-flash-high",
+      "status": "completed",
+      "worktree_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ca1e1356-b94\\gemini",
+      "error": "",
+      "started_at": "2026-09-13T23:41:10.599Z",
+      "finished_at": "2026-09-13T23:44:12.444Z"
+    }
+  ],
+  "tools": [
+    {
+      "id": 51805,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":2,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md\"}}}}",
+      "created_at": "2026-09-13T23:41:31.736Z"
+    },
+    {
+      "id": 51806,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":2,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0400184,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md\"},\"output\":\"46 lines, 6824 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:31.761Z"
+    },
+    {
+      "id": 51807,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":4,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"}}}}",
+      "created_at": "2026-09-13T23:41:33.085Z"
+    },
+    {
+      "id": 51808,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":4,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0780021,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"},\"output\":\"1011 lines, 37817 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:33.088Z"
+    },
+    {
+      "id": 51809,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":6,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"}}}}",
+      "created_at": "2026-09-13T23:41:34.459Z"
+    },
+    {
+      "id": 51810,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":6,\"state\":\"ERROR\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0389998,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"},\"error\":{\"type\":\"TOOL_ERROR\",\"message\":\"ContentOffset 29700 exceeds line range size 7670\"}}}}",
+      "created_at": "2026-09-13T23:41:34.462Z"
+    },
+    {
+      "id": 51811,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":8,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"}}}}",
+      "created_at": "2026-09-13T23:41:35.605Z"
+    },
+    {
+      "id": 51812,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":8,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0434932,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json\"},\"output\":\"1011 lines, 37817 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:35.630Z"
+    },
+    {
+      "id": 51813,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":10,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-brief-2026-09-13/SELECTED-INPUTS.md\"}}}}",
+      "created_at": "2026-09-13T23:41:37.436Z"
+    },
+    {
+      "id": 51814,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":10,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0545492,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-brief-2026-09-13/SELECTED-INPUTS.md\"},\"output\":\"102 lines, 9640 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:37.439Z"
+    },
+    {
+      "id": 51815,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":12,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:\\\\AI\\\\skills\\\\writing-craft - Copy\\\\SKILL.md\"}}}}",
+      "created_at": "2026-09-13T23:41:40.082Z"
+    },
+    {
+      "id": 51816,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":12,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0470017,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:\\\\AI\\\\skills\\\\writing-craft - Copy\\\\SKILL.md\"},\"output\":\"83 lines, 8851 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:40.085Z"
+    },
+    {
+      "id": 51817,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":14,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:\\\\AI\\\\skills\\\\writing-craft - Copy\\\\references\\\\anti-slop-general.md\"}}}}",
+      "created_at": "2026-09-13T23:41:41.151Z"
+    },
+    {
+      "id": 51818,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":14,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0454982,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"E:\\\\AI\\\\skills\\\\writing-craft - Copy\\\\references\\\\anti-slop-general.md\"},\"output\":\"76 lines, 9412 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:41.154Z"
+    },
+    {
+      "id": 51819,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":16,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-REVIEW-2026-09-13.md\"}}}}",
+      "created_at": "2026-09-13T23:41:47.940Z"
+    },
+    {
+      "id": 51820,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":16,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0519995,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-REVIEW-2026-09-13.md\"},\"output\":\"384 lines, 35593 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:47.966Z"
+    },
+    {
+      "id": 51821,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":18,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss\"}}}}",
+      "created_at": "2026-09-13T23:41:55.543Z"
+    },
+    {
+      "id": 51822,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":18,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0553098,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss\"},\"output\":\"1898 lines, 71150 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:55.545Z"
+    },
+    {
+      "id": 51823,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":20,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/THIRD-PARTY-NOTICES.md\"}}}}",
+      "created_at": "2026-09-13T23:41:58.535Z"
+    },
+    {
+      "id": 51824,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":20,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0593345,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/THIRD-PARTY-NOTICES.md\"},\"output\":\"191 lines, 14455 bytes\"}}}",
+      "created_at": "2026-09-13T23:41:58.560Z"
+    },
+    {
+      "id": 51825,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":22,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/README.md\"}}}}",
+      "created_at": "2026-09-13T23:42:00.335Z"
+    },
+    {
+      "id": 51826,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":22,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0818092,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/README.md\"},\"output\":\"19 lines, 3037 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:00.338Z"
+    },
+    {
+      "id": 51827,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":24,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt\"}}}}",
+      "created_at": "2026-09-13T23:42:02.133Z"
+    },
+    {
+      "id": 51828,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":24,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0643811,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt\"},\"output\":\"53 lines, 2699 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:02.159Z"
+    },
+    {
+      "id": 51829,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":26,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt\"}}}}",
+      "created_at": "2026-09-13T23:42:03.729Z"
+    },
+    {
+      "id": 51830,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":26,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0517403,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt\"},\"output\":\"24 lines, 1436 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:03.755Z"
+    },
+    {
+      "id": 51831,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":28,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_runtime_setuptools_notices.py\"}}}}",
+      "created_at": "2026-09-13T23:42:05.963Z"
+    },
+    {
+      "id": 51832,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":28,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0685112,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_runtime_setuptools_notices.py\"},\"output\":\"53 lines, 2601 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:05.966Z"
+    },
+    {
+      "id": 51833,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":30,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_installer_dependency_lock.py\"}}}}",
+      "created_at": "2026-09-13T23:42:07.436Z"
+    },
+    {
+      "id": 51834,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":30,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0635082,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_installer_dependency_lock.py\"},\"output\":\"131 lines, 5202 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:07.439Z"
+    },
+    {
+      "id": 51835,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":32,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_c02_reliability_faster_whisper.py\"}}}}",
+      "created_at": "2026-09-13T23:42:09.062Z"
+    },
+    {
+      "id": 51836,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":32,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0645012,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_c02_reliability_faster_whisper.py\"},\"output\":\"150 lines, 6289 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:09.088Z"
+    },
+    {
+      "id": 51837,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":34,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/pytest-validated01.json\"}}}}",
+      "created_at": "2026-09-13T23:42:10.383Z"
+    },
+    {
+      "id": 51838,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":34,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0504968,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/pytest-validated01.json\"},\"output\":\"12 lines, 222 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:10.408Z"
+    },
+    {
+      "id": 51839,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":36,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/blocks/result.json\"}}}}",
+      "created_at": "2026-09-13T23:42:11.785Z"
+    },
+    {
+      "id": 51840,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":36,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0565023,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/blocks/result.json\"},\"output\":\"387 lines, 13445 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:11.811Z"
+    },
+    {
+      "id": 51841,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":38,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/LAUNCH-RESULT01.json\"}}}}",
+      "created_at": "2026-09-13T23:42:13.236Z"
+    },
+    {
+      "id": 51842,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":38,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.090016,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/author/LAUNCH-RESULT01.json\"},\"output\":\"11 lines, 367 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:13.239Z"
+    },
+    {
+      "id": 51843,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":40,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/reports.jsonl\"}}}}",
+      "created_at": "2026-09-13T23:42:14.790Z"
+    },
+    {
+      "id": 51844,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":40,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0475008,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/reports.jsonl\"},\"output\":\"61 lines, 22830 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:14.815Z"
+    },
+    {
+      "id": 51845,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":42,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/membership.json\"}}}}",
+      "created_at": "2026-09-13T23:42:16.725Z"
+    },
+    {
+      "id": 51846,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":42,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0550014,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/membership.json\"},\"output\":\"23 lines, 1983 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:16.729Z"
+    },
+    {
+      "id": 51847,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":44,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1\"}}}}",
+      "created_at": "2026-09-13T23:42:18.661Z"
+    },
+    {
+      "id": 51848,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":44,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0569975,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1\"},\"output\":\"892 lines, 49362 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:18.664Z"
+    },
+    {
+      "id": 51849,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":46,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1\"}}}}",
+      "created_at": "2026-09-13T23:42:20.265Z"
+    },
+    {
+      "id": 51850,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":46,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0521135,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1\"},\"output\":\"892 lines, 49362 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:20.268Z"
+    },
+    {
+      "id": 51851,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":48,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py\"}}}}",
+      "created_at": "2026-09-13T23:42:23.549Z"
+    },
+    {
+      "id": 51852,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":48,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0579999,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py\"},\"output\":\"568 lines, 31016 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:23.574Z"
+    },
+    {
+      "id": 51853,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":50,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py\"}}}}",
+      "created_at": "2026-09-13T23:42:25.807Z"
+    },
+    {
+      "id": 51854,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":50,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0602302,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py\"},\"output\":\"568 lines, 31016 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:25.832Z"
+    },
+    {
+      "id": 51855,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":52,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/run_operation01.ps1\"}}}}",
+      "created_at": "2026-09-13T23:42:27.533Z"
+    },
+    {
+      "id": 51856,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":52,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0569503,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/run_operation01.ps1\"},\"output\":\"218 lines, 21042 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:27.559Z"
+    },
+    {
+      "id": 51857,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":54,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/PROTOCOL.md\"}}}}",
+      "created_at": "2026-09-13T23:42:29.836Z"
+    },
+    {
+      "id": 51858,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":54,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0548155,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/PROTOCOL.md\"},\"output\":\"26 lines, 4275 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:29.861Z"
+    },
+    {
+      "id": 51859,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":56,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/SOURCE-INPUTS.json\"}}}}",
+      "created_at": "2026-09-13T23:42:31.303Z"
+    },
+    {
+      "id": 51860,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":56,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0585114,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/SOURCE-INPUTS.json\"},\"output\":\"63 lines, 3768 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:31.329Z"
+    },
+    {
+      "id": 51861,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":58,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/drain01/native-exit.json\"}}}}",
+      "created_at": "2026-09-13T23:42:32.976Z"
+    },
+    {
+      "id": 51862,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":58,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0489785,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/drain01/native-exit.json\"},\"output\":\"1 lines, 71 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:33.002Z"
+    },
+    {
+      "id": 51863,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":60,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/cancel01/exit.json\"}}}}",
+      "created_at": "2026-09-13T23:42:34.392Z"
+    },
+    {
+      "id": 51864,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":60,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.047199,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/cancel01/exit.json\"},\"output\":\"14 lines, 344 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:34.395Z"
+    },
+    {
+      "id": 51865,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":62,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/cancel01/native-exit.json\"}}}}",
+      "created_at": "2026-09-13T23:42:35.605Z"
+    },
+    {
+      "id": 51866,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":62,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0623567,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/cancel01/native-exit.json\"},\"output\":\"1 lines, 71 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:35.630Z"
+    },
+    {
+      "id": 51867,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":64,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/asr_loading_adapter.py\"}}}}",
+      "created_at": "2026-09-13T23:42:38.520Z"
+    },
+    {
+      "id": 51868,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":64,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.054517,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/asr_loading_adapter.py\"},\"output\":\"248 lines, 12073 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:38.546Z"
+    },
+    {
+      "id": 51869,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":66,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/trusted_asr_resolver.py\"}}}}",
+      "created_at": "2026-09-13T23:42:40.647Z"
+    },
+    {
+      "id": 51870,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":66,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0924301,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/trusted_asr_resolver.py\"},\"output\":\"293 lines, 13373 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:40.649Z"
+    },
+    {
+      "id": 51871,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":68,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py\"}}}}",
+      "created_at": "2026-09-13T23:42:43.457Z"
+    },
+    {
+      "id": 51872,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":68,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.054,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py\"},\"output\":\"518 lines, 22138 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:43.482Z"
+    },
+    {
+      "id": 51873,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":70,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py\"}}}}",
+      "created_at": "2026-09-13T23:42:44.977Z"
+    },
+    {
+      "id": 51874,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":70,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0497086,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py\"},\"output\":\"518 lines, 22138 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:44.979Z"
+    },
+    {
+      "id": 51875,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":72,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py\"}}}}",
+      "created_at": "2026-09-13T23:42:47.103Z"
+    },
+    {
+      "id": 51876,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":72,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0479074,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py\"},\"output\":\"423 lines, 19570 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:47.128Z"
+    },
+    {
+      "id": 51877,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":74,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py\"}}}}",
+      "created_at": "2026-09-13T23:42:48.646Z"
+    },
+    {
+      "id": 51878,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":74,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0544285,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py\"},\"output\":\"423 lines, 19570 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:48.649Z"
+    },
+    {
+      "id": 51879,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":76,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py\"}}}}",
+      "created_at": "2026-09-13T23:42:50.192Z"
+    },
+    {
+      "id": 51880,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":76,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0525362,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py\"},\"output\":\"572 lines, 28730 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:50.218Z"
+    },
+    {
+      "id": 51881,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":78,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py\"}}}}",
+      "created_at": "2026-09-13T23:42:51.711Z"
+    },
+    {
+      "id": 51882,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":78,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0544871,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py\"},\"output\":\"572 lines, 28730 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:51.713Z"
+    },
+    {
+      "id": 51883,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":80,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/generated_worker_flow.py\"}}}}",
+      "created_at": "2026-09-13T23:42:53.329Z"
+    },
+    {
+      "id": 51884,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":80,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0620657,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/generated_worker_flow.py\"},\"output\":\"327 lines, 20326 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:53.355Z"
+    },
+    {
+      "id": 51885,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":82,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/inherited_readset.py\"}}}}",
+      "created_at": "2026-09-13T23:42:54.900Z"
+    },
+    {
+      "id": 51886,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":82,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0562157,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/inherited_readset.py\"},\"output\":\"223 lines, 12391 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:54.925Z"
+    },
+    {
+      "id": 51887,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":84,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/pinned_buffer_namespace.py\"}}}}",
+      "created_at": "2026-09-13T23:42:56.444Z"
+    },
+    {
+      "id": 51888,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":84,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0517272,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/pinned_buffer_namespace.py\"},\"output\":\"155 lines, 7893 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:56.470Z"
+    },
+    {
+      "id": 51889,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":86,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_private_pipe.py\"}}}}",
+      "created_at": "2026-09-13T23:42:57.987Z"
+    },
+    {
+      "id": 51890,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":86,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.08563,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_private_pipe.py\"},\"output\":\"391 lines, 18613 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:58.012Z"
+    },
+    {
+      "id": 51891,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":88,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py\"}}}}",
+      "created_at": "2026-09-13T23:42:59.756Z"
+    },
+    {
+      "id": 51892,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":88,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.1297308,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py\"},\"output\":\"583 lines, 32127 bytes\"}}}",
+      "created_at": "2026-09-13T23:42:59.759Z"
+    },
+    {
+      "id": 51893,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":90,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py\"}}}}",
+      "created_at": "2026-09-13T23:43:01.275Z"
+    },
+    {
+      "id": 51894,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":90,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.059488,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py\"},\"output\":\"583 lines, 32127 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:01.277Z"
+    },
+    {
+      "id": 51895,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":92,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/run_actual_adapter01.ps1\"}}}}",
+      "created_at": "2026-09-13T23:43:04.516Z"
+    },
+    {
+      "id": 51896,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":92,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0581936,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/run_actual_adapter01.ps1\"},\"output\":\"254 lines, 24630 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:04.541Z"
+    },
+    {
+      "id": 51897,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":94,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/launcher.diff\"}}}}",
+      "created_at": "2026-09-13T23:43:06.139Z"
+    },
+    {
+      "id": 51898,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":94,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0991778,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/launcher.diff\"},\"output\":\"112 lines, 12875 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:06.165Z"
+    },
+    {
+      "id": 51899,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":96,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json\"}}}}",
+      "created_at": "2026-09-13T23:43:07.629Z"
+    },
+    {
+      "id": 51900,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":96,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0566526,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json\"},\"output\":\"38 lines, 1201 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:07.654Z"
+    },
+    {
+      "id": 51901,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":98,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json\"}}}}",
+      "created_at": "2026-09-13T23:43:09.325Z"
+    },
+    {
+      "id": 51902,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":98,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0570267,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json\"},\"output\":\"38 lines, 1201 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:09.328Z"
+    },
+    {
+      "id": 51903,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":100,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/SOURCE-INPUTS.json\"}}}}",
+      "created_at": "2026-09-13T23:43:11.079Z"
+    },
+    {
+      "id": 51904,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":100,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0748198,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/SOURCE-INPUTS.json\"},\"output\":\"69 lines, 4546 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:11.105Z"
+    },
+    {
+      "id": 51905,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":102,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/PROTOCOL.md\"}}}}",
+      "created_at": "2026-09-13T23:43:12.677Z"
+    },
+    {
+      "id": 51906,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":102,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0677527,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/PROTOCOL.md\"},\"output\":\"24 lines, 4177 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:12.679Z"
+    },
+    {
+      "id": 51907,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":104,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/native-exit.json\"}}}}",
+      "created_at": "2026-09-13T23:43:14.526Z"
+    },
+    {
+      "id": 51908,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":104,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0541657,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/native-exit.json\"},\"output\":\"1 lines, 71 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:14.551Z"
+    },
+    {
+      "id": 51909,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":106,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/before.json\"}}}}",
+      "created_at": "2026-09-13T23:43:16.099Z"
+    },
+    {
+      "id": 51910,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":106,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0584989,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/before.json\"},\"output\":\"169 lines, 7593 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:16.125Z"
+    },
+    {
+      "id": 51911,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":108,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/after.json\"}}}}",
+      "created_at": "2026-09-13T23:43:17.668Z"
+    },
+    {
+      "id": 51912,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":108,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0594446,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/after.json\"},\"output\":\"182 lines, 9405 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:17.670Z"
+    },
+    {
+      "id": 51913,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":110,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/admission-actual.json\"}}}}",
+      "created_at": "2026-09-13T23:43:19.234Z"
+    },
+    {
+      "id": 51914,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":110,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0510881,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/admission-actual.json\"},\"output\":\"8 lines, 381 bytes\"}}}",
+      "created_at": "2026-09-13T23:43:19.259Z"
+    },
+    {
+      "id": 51915,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "write_to_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":112,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"write_to_file\",\"tool_info\":{\"name\":\"write_to_file\",\"parameters\":{\"TargetFile\":\"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\ca1e1356-b94\\\\gemini\\\\docs\\\\library\\\\GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md\"}}}}",
+      "created_at": "2026-09-13T23:43:57.682Z"
+    },
+    {
+      "id": 51916,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "write_to_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":112,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"write_to_file\",\"duration_seconds\":0.0458705,\"tool_info\":{\"name\":\"write_to_file\",\"parameters\":{\"TargetFile\":\"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\ca1e1356-b94\\\\gemini\\\\docs\\\\library\\\\GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md\"}}}}",
+      "created_at": "2026-09-13T23:43:57.708Z"
+    },
+    {
+      "id": 51917,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":114,\"state\":\"ACTIVE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md\"}}}}",
+      "created_at": "2026-09-13T23:44:00.295Z"
+    },
+    {
+      "id": 51918,
+      "agent_run_id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+      "agent": "gemini",
+      "type": "tool",
+      "message": "view_file",
+      "payload_json": "{\"event\":\"step_update\",\"step_update\":{\"conversation_id\":\"0df50a22-94ca-4c85-917c-bc498776a850\",\"step_index\":114,\"state\":\"DONE\",\"step_type\":\"tool\",\"tool_name\":\"view_file\",\"duration_seconds\":0.0582749,\"tool_info\":{\"name\":\"view_file\",\"parameters\":{\"AbsolutePath\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md\"},\"output\":\"213 lines, 26175 bytes\"}}}",
+      "created_at": "2026-09-13T23:44:00.320Z"
+    }
+  ]
+}

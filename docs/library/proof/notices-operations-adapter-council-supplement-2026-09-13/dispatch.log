@@ -1,0 +1,465 @@
+RUN PREFLIGHT — no worker has started yet
+Project:  uoink-library
+Mode:     work (isolated worktrees)
+Strategy: parallel
+Lead:     gemini
+Workers:
+  gemini  gemini-3.8-flash-high @ high effort
+Goal:
+Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md first and read its companion COVERAGE.json and the catalog it names. Resolve all selected repository-relative proof roots under your assigned worktree. Complete all 39 omitted file reads in the three bounded source/receipt review groups. Write docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md early and complete it; this is the only allowed write. No subagents, tests, code/native/model execution, artifact/archive reads, network, source edits, staging, commits or pushes. Give a verdict for the observed scope of each group, concrete findings and a 39-file read checklist. Aim for about 1000 words plus the checklist; state any unread sections. Website/marketing remain paused; no overall release acceptance.
+
+APPROVED — starting workers now. Live events follow.
+
+system  status  parallel work run started with gemini
+system  preflight gemini=gemini-3.8-flash-high@high
+system  preflight frozen-base=8a81250766af6f2048d9f1125f09dc56c1dcb1cd · verified-inputs=2
+gemini  status  parallel: preparing
+gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  message # Gemini Council Supplement: Notices
+gemini  message , Operations
+gemini  message , and Actual Adapter (2
+gemini  message 026-09-13) The omitted source and receipt revie
+gemini  message w has been c
+gemini  message ompleted across all three bounded proof groups i
+gemini  message n the dedica
+gemini  message ted worktree. All 39 pre
+gemini  message viously unread files marked in [`COVERAGE.json`]
+gemini  message (file:///E:/
+gemini  message AI/projects/uoink/checkouts/Yoink-library/docs/l
+gemini  message ibrary/proof
+gemini  message /notices-operations-adapter-council-supplement-b
+gemini  message rief-2026-09-13/COVERAGE.json) were 
+gemini  message resolved and directly vi
+gemini  message ewed under [`C:/Users/he
+gemini  message llo/AppData/Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/c
+gemini  message a1e1356-b94/gemini`](file:///C:/User
+gemini  message s/hello/AppData/Local/Ag
+gemini  message entControlRoom/worktrees/uoink-library/ca1e1356-
+gemini  message b94/gemini).
+gemini  message  The sole permitted file write was completed at
+gemini  message : [`docs/library/GEMINI-
+gemini  message NOTICES-OPERATIONS-ADAPTER-COUNCIL-S
+gemini  message UPPLEMENT-20
+gemini  message 26-09-13.md`](file:///C:
+gemini  message /Users/hello/AppData/Local/AgentControlRoom/work
+gemini  message trees/uoink-
+gemini  message library/ca1e1356-b94/gem
+gemini  message ini/docs/library/GEMINI-NOTICES-OPER
+gemini  message ATIONS-ADAPTER-COUNCIL-S
+gemini  message UPPLEMENT-2026-09-13.md) --- ## Group Verdicts
+gemini  message  and Summary
+gemini  message  Findings 1. **Notice Integration (`two-wheel-n
+gemini  message otice-integr
+gemini  message ation-2026-09-13`) — A
+gemini  message ccept with f
+gemini  message indings** - **Line Reference Corrections**: I
+gemini  message n [`source/build.ps1`](f
+gemini  message ile:///C:/Us
+gemini  message ers/hello/AppData/Local/
+gemini  message AgentControlRoom/worktrees/uoink-lib
+gemini  message rary/ca1e1356-b94/gemini/docs/library/proof/two-
+gemini  message wheel-notice
+gemini  message -integration-2026-09-13/source/build.ps1#L442-L4
+gemini  message 78), notice generation a
+gemini  message nd cleanup e
+gemini  message xecute at lines 442–47
+gemini  message 8 (not 56–100). In [`source/instal
+gemini  message ler/uoink.iss`](file:///C:/Users/hello/AppData/L
+gemini  message ocal/AgentControlRoom/wo
+gemini  message rktrees/uoink-library/ca1e1356-b94/g
+gemini  message emini/docs/library/proof
+gemini  message /two-wheel-n
+gemini  message otice-integration-2026-09-13/source/installer/uo
+gemini  message ink.iss#L100-L103), the 
+gemini  message four attribu
+gemini  message tion files are declared under `[Files]` at lines
+gemini  message  100–103 (
+gemini  message not 150–154). - **Hash Pinning vs. Copy Ver
+gemini  message ification**:
+gemini  message  In `build.ps1` lines 573–600, only the two su
+gemini  message pplemental upstream lice
+gemini  message nse files ([`antlr4-python3-runtime-
+gemini  message 4.9.3-LICENSE.txt`](file
+gemini  message :///C:/Users/hello/AppData/Local/Age
+gemini  message ntControlRoom/worktrees/
+gemini  message uoink-library/ca1e1356-b94/gemini/do
+gemini  message cs/library/proof/two-whe
+gemini  message el-notice-integration-20
+gemini  message 26-09-13/sou
+gemini  message rce/third-party-notices/antlr4-python3-runtime-4
+gemini  message .9.3-LICENSE
+gemini  message .txt) and [`proxy-tools-0.1.0-UPSTREAM-LICENSE.t
+gemini  message xt`](file:///C:/Users/hello/AppData/Local/AgentC
+gemini  message ontrolRoom/w
+gemini  message orktrees/uoink-library/c
+gemini  message a1e1356-b94/gemini/docs/library/proo
+gemini  message f/two-wheel-notice-integration-2026-
+gemini  message 09-13/source/third-party
+gemini  message -notices/proxy-tools-0.1
+gemini  message .0-UPSTREAM-LICENSE.txt)) have fixed expected SH
+gemini  message A-256 hashes
+gemini  message  pinned in `$noticePins`
+gemini  message . The notice index ([`THIRD-PARTY-NO
+gemini  message TICES.md`](file:///C:/Us
+gemini  message ers/hello/AppData/Local/AgentControlRoom/worktre
+gemini  message es/uoink-library/ca1e1356-b94/gemini
+gemini  message /docs/library/proof/two-
+gemini  message wheel-notice-integration-2026-09-13/
+gemini  message source/THIRD-PARTY-NOTIC
+gemini  message ES.md)) and [`third-party-notices/RE
+gemini  message ADME.md`](file:///C:/Use
+gemini  message rs/hello/AppData/Local/A
+gemini  message gentControlR
+gemini  message oom/worktrees/uoink-library/ca1e1356-b94/gemini/
+gemini  message docs/library
+gemini  message /proof/two-wheel-notice-integration-2026-09-13/s
+gemini  message ource/third-
+gemini  message party-notices/README.md)
+gemini  message  use dynamic source-befo
+gemini  message re/target/source-after hash equality
+gemini  message  comparisons. All four f
+gemini  message iles are cop
+gemini  message ied, but they are not all pinned to constant has
+gemini  message h values. - **Author 
+gemini  message and Checkout
+gemini  message  Parity**: Both partitions execute the same 20 p
+gemini  message ytest cases 
+gemini  message (60 reports) and 10 bloc
+gemini  message k cases without case mul
+gemini  message tiplication. The MIT-metadata vs. BS
+gemini  message D-source conflict for `proxy-tools` is documente
+gemini  message d with its upstream plac
+gemini  message eholder and trailing syntax at line 
+gemini  message 24. Full ins
+gemini  message taller compile (`ISCC.exe`), install
+gemini  message ed inventory checks, and legal clear
+gemini  message ance remain 
+gemini  message outside these observatio
+gemini  message ns. 2. **Generated Operations (`gen
+gemini  message erated-operation-facade-
+gemini  message 2026-09-13`)
+gemini  message  — Accept with findings** - **Pending-I/O F
+gemini  message inalizer and Sandbox**: 
+gemini  message [`dummy_boot
+gemini  message strap.py`](file:///C:/Users/hello/AppData/Local/
+gemini  message AgentControlRoom/worktrees/uoink-lib
+gemini  message rary/ca1e1356-b94/gemini/docs/librar
+gemini  message y/proof/generated-operation-facade-2
+gemini  message 026-09-13/na
+gemini  message tive-preparation/dummy_bootstrap.py#L564-L568) l
+gemini  message ocks down 25
+gemini  message  WinReg callables, 12 fi
+gemini  message lesystem met
+gemini  message adata functions, and enforces `PROCESS_ABORT(1)`
+gemini  message  in its `finally` block 
+gemini  message if any pipe 
+gemini  message operation remains pending. - **Launcher and E
+gemini  message xit Capture*
+gemini  message *: [`run_operation01.ps1
+gemini  message `](file:///C:/Users/hello/AppData/Lo
+gemini  message cal/AgentControlRoom/wor
+gemini  message ktrees/uoink-library/ca1
+gemini  message e1356-b94/ge
+gemini  message mini/docs/library/proof/generated-operation-faca
+gemini  message de-2026-09-1
+gemini  message 3/native-preparation/run
+gemini  message _operation01
+gemini  message .ps1#L72-L82) captures the native exit immediate
+gemini  message ly in `native-exit.json`
+gemini  message  (exit 0 for both `drain01` and `can
+gemini  message cel01`). Streams produce
+gemini  message  lazily; can
+gemini  message celled and closed streams raise `StopIteration` 
+gemini  message or `SessionClosed` local
+gemini  message ly with zero
+gemini  message  wire use. - **Process Guarding**: Parent fil
+gemini  message e sharing pr
+gemini  message otection holds through child exit 0 and verified
+gemini  message  0 active pr
+gemini  message ocesses in the Win32 job
+gemini  message  object; five write prob
+gemini  message es fail (WinError 32) during executi
+gemini  message on and succeed with 0 by
+gemini  message tes after release. Histo
+gemini  message rical admission failure `36af0d` (Po
+gemini  message werShell `-N
+gemini  message oClobber` incompatibility) remains documented. N
+gemini  message o model decoding, weight
+gemini  message s, or durabl
+gemini  message e crash recovery are claimed. 3. **Actual Adapt
+gemini  message er Connectio
+gemini  message n (`generated-actual-ada
+gemini  message pter-2026-09-13`) — Accept with findings** 
+gemini  message - **Permit H
+gemini  message andoff and Lifecycle Seq
+gemini  message uencing**: [`asr_loading
+gemini  message _adapter.py`](file:///C:/Users/hello
+gemini  message /AppData/Local/AgentCont
+gemini  message rolRoom/worktrees/uoink-library/ca1e
+gemini  message 1356-b94/gemini/docs/lib
+gemini  message rary/proof/g
+gemini  message enerated-actual-adapter-2026-09-13/drain01/asr_l
+gemini  message oading_adapt
+gemini  message er.py#L191-L239) acquire
+gemini  message s `_leased_admission`, verifies CPU / int8 profi
+gemini  message le, issues `_NativePermit` through `
+gemini  message lease.begin_native_sessi
+gemini  message on()`, binds
+gemini  message  the snapshot via `resolver.bind_for_constructor
+gemini  message (admission)`
+gemini  message , and passes `startup` t
+gemini  message o `OwnedRuntimeFactory.open_owned_session`. -
+gemini  message  **Policy Bi
+gemini  message nding and Digest Verific
+gemini  message ation**: The
+gemini  message  port verifies phase tra
+gemini  message nsitions (`PROTECTED` -> `NATIVE_RESERVED` -> `N
+gemini  message ATIVE_RUNNING` after ack), binding t
+gemini  message he exact 15-field CPU/int8 reliability policy wi
+gemini  message th acknowled
+gemini  message gement digest `91fd7a45f4fa635a22928
+gemini  message 99e9f7fe5689196cf44ac8a7527193bee8da
+gemini  message 815e7ee`. 
+gemini  message  - **Adapter Cleanup and State Integrity**: `_mo
+gemini  message del_session` owns cleanu
+gemini  message p; all 5 adapter state checks evalua
+gemini  message te `true` (`
+gemini  message real_approval_none`, `re
+gemini  message al_functions_unchanged`, `private_re
+gemini  message lease_restored`, `services_unconfigu
+gemini  message red`, `resolver_module_restored`). O
+gemini  message bservation `fc23ea` uses generated f
+gemini  message ixture files; `REAL_APPR
+gemini  message OVAL` remains `None`, model calls re
+gemini  message main zero, and `complete_native_name
+gemini  message space_protection: false` remains an 
+gemini  message explicit limitation. --
+gemini  message - ## Unread Sections Statement - I
+gemini  message n [`docs/library/proof/two-wheel-not
+gemini  message ice-integration-2026-09-13/source/installer/uoin
+gemini  message k.iss`](file:///C:/Users
+gemini  message /hello/AppData/Local/AgentControlRoo
+gemini  message m/worktrees/uoink-librar
+gemini  message y/ca1e1356-b94/gemini/do
+gemini  message cs/library/proof/two-wheel-notice-in
+gemini  message tegration-2026-09-13/source/installe
+gemini  message r/uoink.iss), lines 1–
+gemini  message 150 (encompassing `[Setu
+gemini  message p]`, `[Messa
+gemini  message ges]`, `[Tasks]`, and the `[Files]` notice decla
+gemini  message rations at lines 100–103) were dir
+gemini  message ectly inspected and veri
+gemini  message fied. Lines 151–1898 (
+gemini  message Inno Setup Pascal script logic, cust
+gemini  message om wizard pages, uninsta
+gemini  message ll cleanup, and shortcut registry co
+gemini  message nfiguration) were left u
+gemini  message nread as the
+gemini  message y fall outside notice st
+gemini  message aging and attribution verification. - All other 
+gemini  message 38 requested
+gemini  message  files across Groups 1, 
+gemini  message 2, and 3 were viewed and verified in
+gemini  message  their entirety. --- #
+gemini  message # Compact Handoff - **Status**: Com
+gemini  message pleted. - **Work Complet
+gemini  message ed**: - Read [`SUPPLEM
+gemini  message ENT-BRIEF.md
+gemini  message `](file:///E:/AI/project
+gemini  message s/uoink/chec
+gemini  message kouts/Yoink-library/docs
+gemini  message /library/proof/notices-o
+gemini  message perations-adapter-council-supplement
+gemini  message -brief-2026-09-13/SUPPLE
+gemini  message MENT-BRIEF.md), [`COVERAGE.json`](fi
+gemini  message le:///E:/AI/projects/uoi
+gemini  message nk/checkouts/Yoink-libra
+gemini  message ry/docs/libr
+gemini  message ary/proof/notices-operations-adapter-council-sup
+gemini  message plement-brie
+gemini  message f-2026-09-13/COVERAGE.json), and [`SELECTED-INPU
+gemini  message TS.md`](file
+gemini  message :///E:/AI/projects/uoink/checkouts/Yoink-library
+gemini  message /docs/library/proof/noti
+gemini  message ces-operatio
+gemini  message ns-adapter-council-brief-2026-09-13/SELECTED-INP
+gemini  message UTS.md). -
+gemini  message  Completed direct line r
+gemini  message eads for all 39 omitted 
+gemini  message files across Group 1 (13 files), Gro
+gemini  message up 2 (7 files), and Grou
+gemini  message p 3 (19 file
+gemini  message s) under the assigned worktree. - Written and verified the
+gemini  message  complete su
+gemini  message pplement report at [`doc
+gemini  message s/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/doc
+gemini  usage   872201 input / 36102 output / 17904 thinking tokens
+gemini  status  parallel: completed
+
+Run completed: ca1e1356-b943-4a8a-bee4-6a3016a7ee64
+gemini: # Gemini Council Supplement: Notices, Operations, and Actual Adapter (2026-09-13)
+
+The omitted source and receipt review has been completed across all three bounded proof groups in the dedicated worktree. All 39 previously unread files marked in [`COVERAGE.json`](file:///E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json) were resolved and directly viewed under [`C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini).
+
+The sole permitted file write was completed at:
+[`docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md)
+
+---
+
+## Group Verdicts and Summary Findings
+
+1. **Notice Integration (`two-wheel-notice-integration-2026-09-13`) — Accept with findings**
+   - **Line Reference Corrections**: In [`source/build.ps1`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1#L442-L478), notice generation and cleanup execute at lines 442–478 (not 56–100). In [`source/installer/uoink.iss`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss#L100-L103), the four attribution files are declared under `[Files]` at lines 100–103 (not 150–154).
+   - **Hash Pinning vs. Copy Verification**: In `build.ps1` lines 573–600, only the two supplemental upstream license files ([`antlr4-python3-runtime-4.9.3-LICENSE.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt) and [`proxy-tools-0.1.0-UPSTREAM-LICENSE.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt)) have fixed expected SHA-256 hashes pinned in `$noticePins`. The notice index ([`THIRD-PARTY-NOTICES.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/THIRD-PARTY-NOTICES.md)) and [`third-party-notices/README.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/README.md) use dynamic source-before/target/source-after hash equality comparisons. All four files are copied, but they are not all pinned to constant hash values.
+   - **Author and Checkout Parity**: Both partitions execute the same 20 pytest cases (60 reports) and 10 block cases without case multiplication. The MIT-metadata vs. BSD-source conflict for `proxy-tools` is documented with its upstream placeholder and trailing syntax at line 24. Full installer compile (`ISCC.exe`), installed inventory checks, and legal clearance remain outside these observations.
+
+2. **Generated Operations (`generated-operation-facade-2026-09-13`) — Accept with findings**
+   - **Pending-I/O Finalizer and Sandbox**: [`dummy_bootstrap.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py#L564-L568) locks down 25 WinReg callables, 12 filesystem metadata functions, and enforces `PROCESS_ABORT(1)` in its `finally` block if any pipe operation remains pending.
+   - **Launcher and Exit Capture**: [`run_operation01.ps1`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/run_operation01.ps1#L72-L82) captures the native exit immediately in `native-exit.json` (exit 0 for both `drain01` and `cancel01`). Streams produce lazily; cancelled and closed streams raise `StopIteration` or `SessionClosed` locally with zero wire use.
+   - **Process Guarding**: Parent file sharing protection holds through child exit 0 and verified 0 active processes in the Win32 job object; five write probes fail (WinError 32) during execution and succeed with 0 bytes after release. Historical admission failure `36af0d` (PowerShell `-NoClobber` incompatibility) remains documented. No model decoding, weights, or durable crash recovery are claimed.
+
+3. **Actual Adapter Connection (`generated-actual-adapter-2026-09-13`) — Accept with findings**
+   - **Permit Handoff and Lifecycle Sequencing**: [`asr_loading_adapter.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/generated-actual-adapter-2026-09-13/drain01/asr_loading_adapter.py#L191-L239) acquires `_leased_admission`, verifies CPU / int8 profile, issues `_NativePermit` through `lease.begin_native_session()`, binds the snapshot via `resolver.bind_for_constructor(admission)`, and passes `startup` to `OwnedRuntimeFactory.open_owned_session`.
+   - **Policy Binding and Digest Verification**: The port verifies phase transitions (`PROTECTED` -> `NATIVE_RESERVED` -> `NATIVE_RUNNING` after ack), binding the exact 15-field CPU/int8 reliability policy with acknowledgement digest `91fd7a45f4fa635a2292899e9f7fe5689196cf44ac8a7527193bee8da815e7ee`.
+   - **Adapter Cleanup and State Integrity**: `_model_session` owns cleanup; all 5 adapter state checks evaluate `true` (`real_approval_none`, `real_functions_unchanged`, `private_release_restored`, `services_unconfigured`, `resolver_module_restored`). Observation `fc23ea` uses generated fixture files; `REAL_APPROVAL` remains `None`, model calls remain zero, and `complete_native_namespace_protection: false` remains an explicit limitation.
+
+---
+
+## Unread Sections Statement
+
+- In [`docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss), lines 1–150 (encompassing `[Setup]`, `[Messages]`, `[Tasks]`, and the `[Files]` notice declarations at lines 100–103) were directly inspected and verified. Lines 151–1898 (Inno Setup Pascal script logic, custom wizard pages, uninstall cleanup, and shortcut registry configuration) were left unread as they fall outside notice staging and attribution verification.
+- All other 38 requested files across Groups 1, 2, and 3 were viewed and verified in their entirety.
+
+---
+
+## Compact Handoff
+
+- **Status**: Completed.
+- **Work Completed**:
+  - Read [`SUPPLEMENT-BRIEF.md`](file:///E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md), [`COVERAGE.json`](file:///E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json), and [`SELECTED-INPUTS.md`](file:///E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-brief-2026-09-13/SELECTED-INPUTS.md).
+  - Completed direct line reads for all 39 omitted files across Group 1 (13 files), Group 2 (7 files), and Group 3 (19 files) under the assigned worktree.
+  - Written and verified the complete supplement report at [`docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md).
+- **Evidence**:
+  - Verified `build.ps1` notice generator at lines 442–478 and Inno attribution at lines 100–103.
+  - Verified that `$noticePins` only contains the two upstream license files, with notice index and README verified via dynamic copy comparisons.
+  - Verified `dummy_bootstrap.py` pending-I/O finalizer (`lines 564–568`) and immediate exit capture in `run_operation01.ps1` (`lines 72–82`).
+  - Verified permit forwarding through `_model_session` and `OwnedRuntimeFactory`, policy acknowledgement digest `91fd7a45...`, and all 5 adapter state checks.
+- **Files Changed**:
+  - `docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md` (new file; sole permitted write).
+- **Open Questions**: None for this supplement. Website and marketing remain paused; no overall release acceptance is granted.
+

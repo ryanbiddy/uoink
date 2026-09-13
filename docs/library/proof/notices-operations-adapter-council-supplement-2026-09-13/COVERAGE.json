@@ -1,0 +1,992 @@
+{
+  "scope": "Read-only event metadata comparison; no code/test/native execution or OS audit",
+  "run": {
+    "id": "ca1e1356-b943-4a8a-bee4-6a3016a7ee64",
+    "status": "completed",
+    "started_at": "2026-09-13T23:41:10.59Z",
+    "finished_at": "2026-09-13T23:44:12.448Z"
+  },
+  "worker": {
+    "id": "c63c7e34-61e5-4c18-a63b-349585caea9e",
+    "agent": "gemini",
+    "model": "gemini-3.8-flash-high",
+    "status": "completed",
+    "worktree_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ca1e1356-b94\\gemini",
+    "error": "",
+    "started_at": "2026-09-13T23:41:10.599Z",
+    "finished_at": "2026-09-13T23:44:12.444Z"
+  },
+  "sources": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\COUNCIL-SUPPLEMENT01-SOURCE-OBSERVATIONS.json",
+      "sha256": "6e0f4904567763390f6fd3b68575baf201fa1a7856491e9d5e8dc0b36160af62"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\council-notices-operations-adapter-supplement01\\COVERAGE.json",
+      "sha256": "9a3fd0ea19c8ac51b6813ee06d25141f1ff1707a511e159176394aeb82ef2f14"
+    },
+    {
+      "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ca1e1356-b94\\gemini\\docs\\library\\GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md",
+      "sha256": "fa7b269cae5427fd31ca7005cef2b8bc598d0d6719fc8e840b0474bab907c3cd"
+    }
+  ],
+  "counts": {
+    "raw_rows": 114,
+    "active": 57,
+    "done": 56,
+    "error": 1,
+    "done_views": 55,
+    "done_writes": 1,
+    "omitted_paths": 39,
+    "omitted_paths_with_exact_done_view": 39,
+    "omitted_done_view_calls": 45,
+    "repeat_omitted_calls": 6,
+    "other_done_views": 10,
+    "exact_file_grep_calls": 0,
+    "range_verified_files": 0,
+    "worker_claims_full_files": 38,
+    "worker_declares_partial_files": 1,
+    "worker_declared_unread_lines": 1748
+  },
+  "groups": [
+    {
+      "group": 1,
+      "paths": 13,
+      "done_view_calls": 13
+    },
+    {
+      "group": 2,
+      "paths": 7,
+      "done_view_calls": 8
+    },
+    {
+      "group": 3,
+      "paths": 19,
+      "done_view_calls": 24
+    }
+  ],
+  "files": [
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/installer/uoink.iss",
+      "catalog_sha256": "26bbb58c67fe6ff3c32fca270366ec7c731f5182457d9c3faae36cf66d02f373",
+      "bytes": 71150,
+      "done_view_events": [
+        51822
+      ],
+      "view_output_total_lines": 1898,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 158,
+        "start": 1,
+        "end": 150,
+        "declared_bytes": 71150,
+        "catalog_prefix": "26bbb58c"
+      },
+      "worker_declared_unread": [
+        {
+          "start": 151,
+          "end": 1898,
+          "lines": 1748,
+          "basis": "Worker-declared unread range only"
+        }
+      ],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/THIRD-PARTY-NOTICES.md",
+      "catalog_sha256": "77cb55003529e9340b547b0d99c92213ed61e0de38feb4d69068394e719a5a68",
+      "bytes": 14455,
+      "done_view_events": [
+        51824
+      ],
+      "view_output_total_lines": 191,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 159,
+        "start": 1,
+        "end": 191,
+        "declared_bytes": 14455,
+        "catalog_prefix": "77cb5500"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/README.md",
+      "catalog_sha256": "bb450b669ef1e518920ca2da192bd6b783aed9507f6f2879f74e41675f8ae3df",
+      "bytes": 3037,
+      "done_view_events": [
+        51826
+      ],
+      "view_output_total_lines": 19,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 160,
+        "start": 1,
+        "end": 19,
+        "declared_bytes": 3037,
+        "catalog_prefix": "bb450b66"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt",
+      "catalog_sha256": "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a",
+      "bytes": 2699,
+      "done_view_events": [
+        51828
+      ],
+      "view_output_total_lines": 53,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 161,
+        "start": 1,
+        "end": 53,
+        "declared_bytes": 2699,
+        "catalog_prefix": "b1b379fc"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+      "catalog_sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4",
+      "bytes": 1436,
+      "done_view_events": [
+        51830
+      ],
+      "view_output_total_lines": 24,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 162,
+        "start": 1,
+        "end": 24,
+        "declared_bytes": 1436,
+        "catalog_prefix": "a428fb8a"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_runtime_setuptools_notices.py",
+      "catalog_sha256": "03a7ab6fc172323c446e9b12ddf88321c529cf2a871589b82f6ce70c081120b5",
+      "bytes": 2601,
+      "done_view_events": [
+        51832
+      ],
+      "view_output_total_lines": 53,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 163,
+        "start": 1,
+        "end": 53,
+        "declared_bytes": 2601,
+        "catalog_prefix": "03a7ab6f"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_installer_dependency_lock.py",
+      "catalog_sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b",
+      "bytes": 5202,
+      "done_view_events": [
+        51834
+      ],
+      "view_output_total_lines": 131,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 164,
+        "start": 1,
+        "end": 131,
+        "declared_bytes": 5202,
+        "catalog_prefix": "64489957"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/source/tests/test_c02_reliability_faster_whisper.py",
+      "catalog_sha256": "c0af159e45879fe68ab3333d94dfc05320052942d01ef2a6924cbb873033ed97",
+      "bytes": 6289,
+      "done_view_events": [
+        51836
+      ],
+      "view_output_total_lines": 150,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 165,
+        "start": 1,
+        "end": 150,
+        "declared_bytes": 6289,
+        "catalog_prefix": "c0af159e"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/author/pytest-validated01.json",
+      "catalog_sha256": "17ae846e060558d28249d9b185bcb56c2ef6d27e556ac76c29b5a1e95c7aca71",
+      "bytes": 222,
+      "done_view_events": [
+        51838
+      ],
+      "view_output_total_lines": 12,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 166,
+        "start": 1,
+        "end": 12,
+        "declared_bytes": 222,
+        "catalog_prefix": "17ae846e"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/author/blocks/result.json",
+      "catalog_sha256": "ff2823c45a9c2c1f7cded90dde722aaea514c23d873144bee44b0a8890eff87b",
+      "bytes": 13445,
+      "done_view_events": [
+        51840
+      ],
+      "view_output_total_lines": 387,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 167,
+        "start": 1,
+        "end": 387,
+        "declared_bytes": 13445,
+        "catalog_prefix": "ff2823c4"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/author/LAUNCH-RESULT01.json",
+      "catalog_sha256": "85ab903a5a8833c55daa42490f01425ad2db7f665b29625cc8b40bcd4aadf89b",
+      "bytes": 367,
+      "done_view_events": [
+        51842
+      ],
+      "view_output_total_lines": 11,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 168,
+        "start": 1,
+        "end": 11,
+        "declared_bytes": 367,
+        "catalog_prefix": "85ab903a"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/reports.jsonl",
+      "catalog_sha256": "bbec5e503fb1a3c29f70f26f3e7993efc3af616ea9f003442ac4ab638a21a413",
+      "bytes": 22830,
+      "done_view_events": [
+        51844
+      ],
+      "view_output_total_lines": 61,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 169,
+        "start": 1,
+        "end": 61,
+        "declared_bytes": 22830,
+        "catalog_prefix": "bbec5e50"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 1,
+      "path": "docs/library/proof/two-wheel-notice-integration-2026-09-13/checkout/pytest/notice01-partition/membership.json",
+      "catalog_sha256": "db06c3a7c0d13eafb881669b9e0942e25ac462baa3706ff530bef6fbb60b4544",
+      "bytes": 1983,
+      "done_view_events": [
+        51846
+      ],
+      "view_output_total_lines": 23,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 170,
+        "start": 1,
+        "end": 23,
+        "declared_bytes": 1983,
+        "catalog_prefix": "db06c3a7"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/dummy_bootstrap.py",
+      "catalog_sha256": "ff892a9b7e6f7b099be5baa7e86994cd72fa330edcf5078c296f6a1a5feea375",
+      "bytes": 31016,
+      "done_view_events": [
+        51852,
+        51854
+      ],
+      "view_output_total_lines": 568,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 171,
+        "start": 1,
+        "end": 568,
+        "declared_bytes": 31016,
+        "catalog_prefix": "ff892a9b"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/run_operation01.ps1",
+      "catalog_sha256": "93408fac033823ef1db833d7886668e571aef4db968a9e9f76375a818b14dc07",
+      "bytes": 21042,
+      "done_view_events": [
+        51856
+      ],
+      "view_output_total_lines": 218,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 172,
+        "start": 1,
+        "end": 218,
+        "declared_bytes": 21042,
+        "catalog_prefix": "93408fac"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/PROTOCOL.md",
+      "catalog_sha256": "6181c4fd2270891e17631748d06bd1482f30d288be674be517549bebd84b0880",
+      "bytes": 4275,
+      "done_view_events": [
+        51858
+      ],
+      "view_output_total_lines": 26,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 173,
+        "start": 1,
+        "end": 26,
+        "declared_bytes": 4275,
+        "catalog_prefix": "6181c4fd"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/native-preparation/SOURCE-INPUTS.json",
+      "catalog_sha256": "83c0bdb626bac52cf3a09e5eb537801014eba9396f3018454841b3fa14f75006",
+      "bytes": 3768,
+      "done_view_events": [
+        51860
+      ],
+      "view_output_total_lines": 63,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 174,
+        "start": 1,
+        "end": 63,
+        "declared_bytes": 3768,
+        "catalog_prefix": "83c0bdb6"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/drain01/native-exit.json",
+      "catalog_sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa",
+      "bytes": 71,
+      "done_view_events": [
+        51862
+      ],
+      "view_output_total_lines": 1,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 175,
+        "start": 1,
+        "end": 1,
+        "declared_bytes": 71,
+        "catalog_prefix": "c06d0922"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/cancel01/exit.json",
+      "catalog_sha256": "ce4787a0996d3d628abbc54029d6a274856cc9fdcc9cfcfaff81b02b494f370a",
+      "bytes": 344,
+      "done_view_events": [
+        51864
+      ],
+      "view_output_total_lines": 14,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 176,
+        "start": 1,
+        "end": 14,
+        "declared_bytes": 344,
+        "catalog_prefix": "ce4787a0"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 2,
+      "path": "docs/library/proof/generated-operation-facade-2026-09-13/cancel01/native-exit.json",
+      "catalog_sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa",
+      "bytes": 71,
+      "done_view_events": [
+        51866
+      ],
+      "view_output_total_lines": 1,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 177,
+        "start": 1,
+        "end": 1,
+        "declared_bytes": 71,
+        "catalog_prefix": "c06d0922"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/asr_loading_adapter.py",
+      "catalog_sha256": "2b6cbbad24264423e520bac54b7c2fb4c40ae771e5c15b08381dac1d2228a63c",
+      "bytes": 12073,
+      "done_view_events": [
+        51868
+      ],
+      "view_output_total_lines": 248,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 178,
+        "start": 1,
+        "end": 248,
+        "declared_bytes": 12073,
+        "catalog_prefix": "2b6cbbad"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/trusted_asr_resolver.py",
+      "catalog_sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "bytes": 13373,
+      "done_view_events": [
+        51870
+      ],
+      "view_output_total_lines": 293,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 179,
+        "start": 1,
+        "end": 293,
+        "declared_bytes": 13373,
+        "catalog_prefix": "16a5a124"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/snapshot_lifecycle.py",
+      "catalog_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "bytes": 22138,
+      "done_view_events": [
+        51872,
+        51874
+      ],
+      "view_output_total_lines": 518,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 180,
+        "start": 1,
+        "end": 518,
+        "declared_bytes": 22138,
+        "catalog_prefix": "a80514aa"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/owned_generation_protocol.py",
+      "catalog_sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9",
+      "bytes": 19570,
+      "done_view_events": [
+        51876,
+        51878
+      ],
+      "view_output_total_lines": 423,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 181,
+        "start": 1,
+        "end": 423,
+        "declared_bytes": 19570,
+        "catalog_prefix": "437e0880"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_worker_connection.py",
+      "catalog_sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+      "bytes": 28730,
+      "done_view_events": [
+        51880,
+        51882
+      ],
+      "view_output_total_lines": 572,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 182,
+        "start": 1,
+        "end": 572,
+        "declared_bytes": 28730,
+        "catalog_prefix": "b39a29ce"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/generated_worker_flow.py",
+      "catalog_sha256": "4409fb6bf169eda28beb66020066bb7ca1ee5927f51cadfcb9f57ba84c26bcee",
+      "bytes": 20326,
+      "done_view_events": [
+        51884
+      ],
+      "view_output_total_lines": 327,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 183,
+        "start": 1,
+        "end": 327,
+        "declared_bytes": 20326,
+        "catalog_prefix": "4409fb6b"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/inherited_readset.py",
+      "catalog_sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "bytes": 12391,
+      "done_view_events": [
+        51886
+      ],
+      "view_output_total_lines": 223,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 184,
+        "start": 1,
+        "end": 223,
+        "declared_bytes": 12391,
+        "catalog_prefix": "02be8e04"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/pinned_buffer_namespace.py",
+      "catalog_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "bytes": 7893,
+      "done_view_events": [
+        51888
+      ],
+      "view_output_total_lines": 155,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 185,
+        "start": 1,
+        "end": 155,
+        "declared_bytes": 7893,
+        "catalog_prefix": "2cc25a7a"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/win32_private_pipe.py",
+      "catalog_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "bytes": 18613,
+      "done_view_events": [
+        51890
+      ],
+      "view_output_total_lines": 391,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 186,
+        "start": 1,
+        "end": 391,
+        "declared_bytes": 18613,
+        "catalog_prefix": "73a1109a"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/dummy_bootstrap.py",
+      "catalog_sha256": "dbc0ac0a28046e16a8c916c9dd45648132e2d167bf80bb2c4b504308ef3a268c",
+      "bytes": 32127,
+      "done_view_events": [
+        51892,
+        51894
+      ],
+      "view_output_total_lines": 583,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 187,
+        "start": 1,
+        "end": 583,
+        "declared_bytes": 32127,
+        "catalog_prefix": "dbc0ac0a"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/run_actual_adapter01.ps1",
+      "catalog_sha256": "11de6629e629ce54959fb237addb1f38f430fed2d74749fca08974e9ca551158",
+      "bytes": 24630,
+      "done_view_events": [
+        51896
+      ],
+      "view_output_total_lines": 254,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 188,
+        "start": 1,
+        "end": 254,
+        "declared_bytes": 24630,
+        "catalog_prefix": "11de6629"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/launcher.diff",
+      "catalog_sha256": "ec3efb5798f750717861653b7aa1b6addfd32e99eb3ef91369f546116f3b1fa9",
+      "bytes": 12875,
+      "done_view_events": [
+        51898
+      ],
+      "view_output_total_lines": 112,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 189,
+        "start": 1,
+        "end": 112,
+        "declared_bytes": 12875,
+        "catalog_prefix": "ec3efb57"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/EXPECTED-GENERATED-POLICY.json",
+      "catalog_sha256": "ee79c060ecd912076f5c3256b2db5d2606dab9485b04a0c63e9e792cb9086f81",
+      "bytes": 1201,
+      "done_view_events": [
+        51900,
+        51902
+      ],
+      "view_output_total_lines": 38,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 190,
+        "start": 1,
+        "end": 38,
+        "declared_bytes": 1201,
+        "catalog_prefix": "ee79c060"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/SOURCE-INPUTS.json",
+      "catalog_sha256": "3c5f6e5978f16cee0f6d3753a7acf21e855012955004528b96e73599b1cba44f",
+      "bytes": 4546,
+      "done_view_events": [
+        51904
+      ],
+      "view_output_total_lines": 69,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 191,
+        "start": 1,
+        "end": 69,
+        "declared_bytes": 4546,
+        "catalog_prefix": "3c5f6e59"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/native-preparation/PROTOCOL.md",
+      "catalog_sha256": "6c22a0afaa94fe1f155a8a1bb623766de6617bc8e1a26c73e5e74800e749a845",
+      "bytes": 4177,
+      "done_view_events": [
+        51906
+      ],
+      "view_output_total_lines": 24,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 192,
+        "start": 1,
+        "end": 24,
+        "declared_bytes": 4177,
+        "catalog_prefix": "6c22a0af"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/native-exit.json",
+      "catalog_sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa",
+      "bytes": 71,
+      "done_view_events": [
+        51908
+      ],
+      "view_output_total_lines": 1,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 193,
+        "start": 1,
+        "end": 1,
+        "declared_bytes": 71,
+        "catalog_prefix": "c06d0922"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/before.json",
+      "catalog_sha256": "8731137c84b28fb3e09c70a0aea48a7bb78b231549eb7f08f6a72f3f5cffbc29",
+      "bytes": 7593,
+      "done_view_events": [
+        51910
+      ],
+      "view_output_total_lines": 169,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 194,
+        "start": 1,
+        "end": 169,
+        "declared_bytes": 7593,
+        "catalog_prefix": "8731137c"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/drain01/after.json",
+      "catalog_sha256": "b725f074b6cdb3dd163de702ad032026e262124cac2646799f7dea328037d533",
+      "bytes": 9405,
+      "done_view_events": [
+        51912
+      ],
+      "view_output_total_lines": 182,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 195,
+        "start": 1,
+        "end": 182,
+        "declared_bytes": 9405,
+        "catalog_prefix": "b725f074"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    },
+    {
+      "group": 3,
+      "path": "docs/library/proof/generated-actual-adapter-2026-09-13/admission-actual.json",
+      "catalog_sha256": "884853fe803b9c9be9245db2da5f087c1d9d5724f1e344bb69f61bd8c2dc457f",
+      "bytes": 381,
+      "done_view_events": [
+        51914
+      ],
+      "view_output_total_lines": 8,
+      "retained_requested_ranges": null,
+      "retained_displayed_ranges": null,
+      "worker_claim": {
+        "report_line": 196,
+        "start": 1,
+        "end": 8,
+        "declared_bytes": 381,
+        "catalog_prefix": "884853fe"
+      },
+      "worker_declared_unread": [],
+      "range_verdict": "Exact file access recorded; displayed range and completeness unavailable"
+    }
+  ],
+  "other_views": [
+    {
+      "id": 51806,
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md",
+      "output": "46 lines, 6824 bytes"
+    },
+    {
+      "id": 51808,
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json",
+      "output": "1011 lines, 37817 bytes"
+    },
+    {
+      "id": 51812,
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json",
+      "output": "1011 lines, 37817 bytes"
+    },
+    {
+      "id": 51814,
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-brief-2026-09-13/SELECTED-INPUTS.md",
+      "output": "102 lines, 9640 bytes"
+    },
+    {
+      "id": 51816,
+      "path": "E:\\AI\\skills\\writing-craft - Copy\\SKILL.md",
+      "output": "83 lines, 8851 bytes"
+    },
+    {
+      "id": 51818,
+      "path": "E:\\AI\\skills\\writing-craft - Copy\\references\\anti-slop-general.md",
+      "output": "76 lines, 9412 bytes"
+    },
+    {
+      "id": 51820,
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-REVIEW-2026-09-13.md",
+      "output": "384 lines, 35593 bytes"
+    },
+    {
+      "id": 51848,
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1",
+      "output": "892 lines, 49362 bytes"
+    },
+    {
+      "id": 51850,
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/proof/two-wheel-notice-integration-2026-09-13/source/build.ps1",
+      "output": "892 lines, 49362 bytes"
+    },
+    {
+      "id": 51918,
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/ca1e1356-b94/gemini/docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md",
+      "output": "213 lines, 26175 bytes"
+    }
+  ],
+  "errors": [
+    {
+      "id": 51810,
+      "time": "2026-09-13T23:41:34.462Z",
+      "state": "ERROR",
+      "tool": "view_file",
+      "parameters": {
+        "AbsolutePath": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/notices-operations-adapter-council-supplement-brief-2026-09-13/COVERAGE.json"
+      },
+      "output": null,
+      "error": {
+        "type": "TOOL_ERROR",
+        "message": "ContentOffset 29700 exceeds line range size 7670"
+      }
+    }
+  ],
+  "writes": [
+    {
+      "id": 51916,
+      "time": "2026-09-13T23:43:57.708Z",
+      "state": "DONE",
+      "tool": "write_to_file",
+      "parameters": {
+        "TargetFile": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ca1e1356-b94\\gemini\\docs\\library\\GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md"
+      },
+      "output": null,
+      "error": null
+    }
+  ],
+  "observed_offscope_actions": [],
+  "limits": [
+    "Every view_file parameter record contains AbsolutePath only; outputs contain file totals only. No displayed source, requested line range, content offset or body is retained.",
+    "All 39 exact file access records are substantiated. The report table and its 38 full-file claims are not independent range evidence.",
+    "Inno lines151–1898 are explicitly worker-declared unread; further unread portions cannot be identified or excluded from this export.",
+    "Two build.ps1 context views, four brief/catalog/index views, two writing references, original report and own report views are retained separately.",
+    "The only recorded write targets the authorized supplemental report. No shell, test, native, network, model or DB operation appears in the export; this is not an OS-wide absence claim.",
+    "The coverage-index ERROR remains a failed metadata tool action and adds no access credit. No independent worker byte hashing is shown."
+  ]
+}
