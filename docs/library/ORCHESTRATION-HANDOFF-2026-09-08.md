@@ -98,7 +98,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD and companion tokenizer loader remain open | Finish exact loader/compatibility proposal. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Tree08 at 9dd0cfb remains failed; process repair 747fb6b and cache guard b96dbd0 qualify in both roots | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Existing 53 receipt tests stay unchanged; subtest-aware extension is being qualified before tree09 | Complete receipt review, then committed combined tree09 and package09. Package08 held; website/marketing paused |
+| Integration | Tree08 at 9dd0cfb remains failed; process repair 747fb6b and cache guard b96dbd0 qualify in both roots; subtest receipts accepted at b376c8d | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Receipt checks: 116 passed in each independent run; 309 proof payloads match Git and disk | Run committed combined tree09 under its updated brief. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -253,11 +253,13 @@ is complete but is not this goal's completion. Current queue:
    two deliberate smoke failures stay failed/refused. All archived tree08 counts
    remain unchanged. The three new seals total 201 payloads matching Git and disk.
    The new cache tests expose a legitimate pytest 9 subtest reporting case:
-   144 collected cases produce 157 XML tests and 144 testcase elements. Qualify
-   the subtest-aware recorder/validator extension before tree09; keep top-level
-   cases and subtests separate. Preserve intentional failures and the instrument
-   I/O failure found during its synthetic qualification. No complete tree09 has
-   run. Include separate collection/main/media heavy-import guard receipts.
+   144 collected cases produce 157 XML tests and 144 testcase elements. The
+   subtest-aware extension is accepted at b376c8d after 116 passes in each
+   independent run. All 309 proof payloads match Git and disk. Top-level cases,
+   subtests and raw/final failures stay separate. Intentional failures and the
+   incomplete instrument I/O attempt remain preserved. Run tree09 under
+   MIRROR-COMBINED-TREE09-BRIEF-2026-09-13.md with separate collection/main/media
+   heavy-import guard receipts. No complete tree09 has run at this entry.
    Rebind the unused package09 instruments to that new qualified source before
    following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
    no new installed NLTK or signing credit exists.
@@ -3841,3 +3843,25 @@ bound is relaxed and no further artifact read is authorized by that preparation.
 Complete-tree receipt qualification continues. Keep source frozen for the next
 committed combined run once the subtest extension is independently reviewed.
 Website, marketing, installer execution and model qualification remain pending.
+
+### 2026-09-13 — Complete-tree instruments accepted; combined run prepared
+
+Commit b376c8d preserves 309 proof payloads for the subtest-aware extension.
+Astra reviewed the pure validator, recorder, observer ordering and new synthetic
+cases, then independently observed 116 passed in 0.37 s; the agent's matching
+suite passed 116 in 0.40 s. Original 53 helper and 15 observer tests are unchanged.
+The deliberate final probe remains five passed / six failed / three errors with
+eight passed / eight failed / two skipped subtests. Unit02 remains incomplete.
+
+The next complete run uses the exact clean HEAD after this handoff, the unchanged
+durable supervisor, all original cases in the established two partitions and
+--runxfail. Only S21 remains excluded. No model execution or installed acceptance
+follows from it. Static path arithmetic puts the first AW unique temporary file
+at 203 characters in this checkout, below the unchanged 240-character cap; this
+is a setup calculation, not an observed export or explanation of tree08.
+
+Static inventory run02 deliberately preserves the same refusal with better
+diagnostics: the first directory entry declares version 0, stored compression,
+disk 0 and flags 2056. Both inspections observed the same size and hash. A narrow
+metadata-reader compatibility proposal is being prepared against those exact
+bytes; no deserialization, architecture or model-quality claim follows.
