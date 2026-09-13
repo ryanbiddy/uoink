@@ -1,0 +1,30 @@
+{
+  "worker_run": "c1008e0b-74f3-4662-ba89-ad4668775921",
+  "worker_base": "4b949e2c7c4073c756adab986b5c2b44a6d0b811",
+  "verified_original_payloads": 18,
+  "worker_attempts": [
+    {
+      "passed": 2,
+      "failed": 9
+    },
+    {
+      "passed": 10,
+      "failed": 1
+    },
+    {
+      "passed": 11,
+      "failed": 0
+    }
+  ],
+  "astra_worker_cases": {
+    "passed": 11,
+    "failed": 0
+  },
+  "astra_boundary_cases": {
+    "passed": 0,
+    "failed": 10
+  },
+  "product_accepted": false,
+  "real_process_tests_executed": false,
+  "tree08_cause_established": false
+}

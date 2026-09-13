@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="11" time="0.300" timestamp="2026-09-13T03:35:52.227082-07:00" hostname="Ryan-PC"><testcase classname="tests.test_library_mirror_process_authority" name="test_refuse_preexisting_orphan_child" time="0.001"><failure message="AssertionError: Older orphan must not be adopted into owned_pids&#10;assert 80002 not in [70001, 80002]">tests\test_library_mirror_process_authority.py:69: in test_refuse_preexisting_orphan_child
+    assert 80002 not in pids, "Older orphan must not be adopted into owned_pids"
+E   AssertionError: Older orphan must not be adopted into owned_pids
+E   assert 80002 not in [70001, 80002]</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_refuse_children_of_exited_parent" time="0.000"><failure message="AssertionError: Children of exited parent must not be adopted&#10;assert 80002 not in [70001, 80002]">tests\test_library_mirror_process_authority.py:97: in test_refuse_children_of_exited_parent
+    assert 80002 not in pids, "Children of exited parent must not be adopted"
+E   AssertionError: Children of exited parent must not be adopted
+E   assert 80002 not in [70001, 80002]</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_refuse_children_of_recycled_parent" time="0.000"><failure message="AssertionError: Children of recycled parent PID must not be adopted&#10;assert 80002 not in [70001, 80002]">tests\test_library_mirror_process_authority.py:134: in test_refuse_children_of_recycled_parent
+    assert 80002 not in pids, "Children of recycled parent PID must not be adopted"
+E   AssertionError: Children of recycled parent PID must not be adopted
+E   assert 80002 not in [70001, 80002]</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_refuse_unknown_creation_time_adoption" time="0.000"><failure message="AssertionError: Child with unknown creation time must not be adopted&#10;assert 80002 not in [70001, 80002]">tests\test_library_mirror_process_authority.py:153: in test_refuse_unknown_creation_time_adoption
+    assert 80002 not in pids, "Child with unknown creation time must not be adopted"
+E   AssertionError: Child with unknown creation time must not be adopted
+E   assert 80002 not in [70001, 80002]</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_valid_child_adoption_positive_control" time="0.000" /><testcase classname="tests.test_library_mirror_process_authority" name="test_previously_owned_child_survives_parent_exit" time="0.008"><failure message="AssertionError: Previously owned child must survive in owned_pids after parent exit&#10;assert 80002 in [70001]&#10; +  where [70001] = owned_pids()&#10; +    where owned_pids = &lt;library_mirror._VaultIoSession object at 0x000002F44F5D9940&gt;.owned_pids">tests\test_library_mirror_process_authority.py:204: in test_previously_owned_child_survives_parent_exit
+    assert 80002 in session.owned_pids(), "Previously owned child must survive in owned_pids after parent exit"
+E   AssertionError: Previously owned child must survive in owned_pids after parent exit
+E   assert 80002 in [70001]
+E    +  where [70001] = owned_pids()
+E    +    where owned_pids = &lt;library_mirror._VaultIoSession object at 0x000002F44F5D9940&gt;.owned_pids</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_death_followed_by_unknown_retains_definitive_death" time="0.000"><failure message="AssertionError: Definitive death must not revert to unknown&#10;assert 'unknown' == 'dead'&#10;  &#10;  - dead&#10;  + unknown">tests\test_library_mirror_process_authority.py:244: in test_death_followed_by_unknown_retains_definitive_death
+    assert session.physical_liveness() == "dead", "Definitive death must not revert to unknown"
+E   AssertionError: Definitive death must not revert to unknown
+E   assert 'unknown' == 'dead'
+E     
+E     - dead
+E     + unknown</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_exited_popen_plus_unknown_other_child_retains_exclusion" time="0.000" /><testcase classname="tests.test_library_mirror_process_authority" name="test_missing_or_mismatched_creation_time_refuses_kill_and_assignment" time="0.001"><failure message="assert True is False&#10; +  where True = &lt;function _win_terminate_pid at 0x000002F44F5E8930&gt;(70004, created_ms=None)&#10; +    where &lt;function _win_terminate_pid at 0x000002F44F5E8930&gt; = mirror._win_terminate_pid">tests\test_library_mirror_process_authority.py:282: in test_missing_or_mismatched_creation_time_refuses_kill_and_assignment
+    assert mirror._win_terminate_pid(70004, created_ms=None) is False
+E   assert True is False
+E    +  where True = &lt;function _win_terminate_pid at 0x000002F44F5E8930&gt;(70004, created_ms=None)
+E    +    where &lt;function _win_terminate_pid at 0x000002F44F5E8930&gt; = mirror._win_terminate_pid</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_matching_creation_time_positive_control_for_kill_and_assignment" time="0.001"><failure message="AssertionError: Kill must invoke TerminateProcess on matching handle&#10;assert [] == [22222]&#10;  &#10;  Right contains one more item: 22222&#10;  Use -v to get more diff">tests\test_library_mirror_process_authority.py:320: in test_matching_creation_time_positive_control_for_kill_and_assignment
+    assert recorder.terminated_handles == [22222], "Kill must invoke TerminateProcess on matching handle"
+E   AssertionError: Kill must invoke TerminateProcess on matching handle
+E   assert [] == [22222]
+E     
+E     Right contains one more item: 22222
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_library_mirror_process_authority" name="test_process_liveness_creation_query_failure_returns_unknown" time="0.001"><failure message="AssertionError: Expected 'unknown' when created_ms query fails, got 'alive'&#10;assert 'alive' == 'unknown'&#10;  &#10;  - unknown&#10;  + alive">tests\test_library_mirror_process_authority.py:345: in test_process_liveness_creation_query_failure_returns_unknown
+    assert result == "unknown", f"Expected 'unknown' when created_ms query fails, got '{result}'"
+E   AssertionError: Expected 'unknown' when created_ms query fails, got 'alive'
+E   assert 'alive' == 'unknown'
+E     
+E     - unknown
+E     + alive</failure></testcase></testsuite></testsuites>
