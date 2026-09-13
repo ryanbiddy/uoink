@@ -102,6 +102,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | Implement the concrete CPU tensor services and qualify them separately. Real entry point remains closed; no native or release credit |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
+| Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -213,10 +214,13 @@ The tensor bridge is qualified at 2b9068a: 61 generated/fake-port cases pass in
 both roots, with 59 proof payloads matching Git/disk. Read
 ASTRA-VAD-STATE-BRIDGE-VERDICT-2026-09-13.md. Native tensor services, the real ASR
 lifecycle and the owned WhisperX derivative remain implementation work.
-Dispatch GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-BRIEF-2026-09-13.md for a bounded
-source review of the ASR adapter, bridge and dormant D1 invocation. This is
-implementation review, not final market acceptance. Continue concrete services
-and the owned WhisperX source/whitelist proposal while it runs.
+Gemini run 028ec7d7 completed the bounded review of the ASR adapter, bridge and
+dormant D1 invocation; it is integrated at cf5614d. Read
+ASTRA-RUNTIME-ORCHESTRATION-COUNCIL-VERDICT-2026-09-13.md before the raw report.
+All 27 proof payloads match Git/disk. No tests reran for this source review.
+Continue concrete CPU tensor services, Windows lifecycle/worker and the owned
+WhisperX source/whitelist builder proposals. Their new source needs independent
+qualification; none inherits runtime or market acceptance from this council.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4553,3 +4557,26 @@ derivative are still being implemented. The new Gemini brief reviews these
 three qualified orchestration components; it cannot close native or release
 gates. The D1 question is pending; no owner approval or artifact access is
 inferred from elapsed time. Website and marketing stay paused.
+
+### 2026-09-13 - Gemini orchestration review integrated; real services continue
+
+Council run 028ec7d7-34ff-44d6-af77-366c7294709c completed through Antigravity
+with controller exit 0, frozen base 0cc636b. The review is integrated at
+cf5614d using raw Git diff and three-way application; the exact worker report
+is preserved. Its three groups accept the ASR adapter, bridge and dormant D1
+invocation for their existing synthetic/source scope. Astra corrects exception
+propagation, cleanup guarantees, buffered FileStream wording and expected
+nonzero child exits; native unpickling remains forbidden rather than a gap.
+All eight source/contract files match both checkouts and prior seals. The new
+27-payload proof matches Git/disk and retains all 350 events. No execution suite
+was named or run; no shell/test/network tool appears in the recorded events.
+
+Concrete CPU tensor-port code now exists as an unexecuted proposal. The owned
+WhisperX patch has 19 upstream text files matched to retained release Git blobs,
+an explicit 22-member source-only recipe and a closed runtime port. A small
+metadata-summary disagreement is being repaired before a byte build. Neither
+new proposal has runtime acceptance. Windows lifecycle/facade review found
+cancellation-exception, output-bound and interruption-handling gaps; repairs
+and their tests are being prepared. These are product implementation work,
+not Ryan blockers. D1 remains the separate pending decision. Production is
+unchanged at e8d058f; website and marketing remain paused.

@@ -51,6 +51,9 @@ runner repair is qualified at `f0602f8`, and bridge evidence is committed at
 `2b9068a`. The ASR runner's earlier null exit record remains failed, with its
 diagnosed repair and fresh results retained. Real Windows snapshot protection,
 owned runtime services and the WhisperX derivative are still being implemented.
+Gemini's follow-up source council is integrated at `cf5614d`; Astra accepts
+its three limited-scope verdicts with documented corrections. It adds no native
+execution, package, installation or market-readiness result.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
