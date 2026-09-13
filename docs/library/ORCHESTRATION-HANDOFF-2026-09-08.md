@@ -102,6 +102,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
+| VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini review of CPU/factory, lifecycle and owned WhisperX next; actual runtime bootstrap, native semantics and numerical behavior remain open |
 | Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Recompute captured compatibility graph with the exact built derivatives; real runtime remains closed |
 | ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
@@ -245,9 +246,15 @@ metadata of the 134,793-byte/22-member wheel. All 38 proof payloads match
 Git/disk. Prepare candidate03 metadata from retained evidence and the two exact
 built derivatives. Continue concrete factory registration and Windows
 namespace/bootstrap source; no real kernel, model, dependency installation or
-market clearance follows from this packaging. The 59-case factory first run
-is admitted after the context-cleanup and expired-retirement source repairs;
-preserve any failure and require a diagnosis/brief before a fresh run.
+market clearance follows from this packaging. The factory and registry are
+integrated at 803df4b after author/root each pass the same 59 cases. Read
+ASTRA-VAD-FACTORY-PORT-VERDICT-2026-09-13.md; all 65 proof payloads match
+Git/disk and map 119 original logical files. The context-cleanup, registration
+and expired-retirement repairs precede both runs. Dispatch the three-group
+GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-BRIEF-2026-09-13.md with text review
+only, no new execution suite. Continue the candidate03 graph adaptation and
+connected Windows worker source while council reviews; preserve all original
+failures and keep native authority closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4733,3 +4740,31 @@ Next: review raw factory results, repeat independently if valid; prepare the
 retained-metadata candidate03 graph; connect Windows namespace and authenticated
 worker lifetime. Production remains e8d058f. D1 and Git account selection remain
 pending. Website and marketing remain paused.
+
+### 2026-09-13 - Fixed factory and model registry independently qualified
+
+Commit 803df4b integrates factory2569853c and registry48567add after the same
+59 cases pass in author/root, 25.158389599993825/25.3547808000003 seconds.
+Both qualification, interpreter and final actual outer exits are zero. All ten
+guards, 31 pins, twelve executed copies and generated control/admission checks
+remain valid. Root copied exact inputs and unchanged launcher, with independent
+admission7572c61d; its actual final tooldb964d is preserved. The complete case
+objects match. No native factory or model ran.
+
+The 65-payload proof maps 119 logical files to 59 unique objects; seal is
+e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.
+Root fully read builderc91adef3 and inventorybbb21c48 before documentary tool
+606c98 returned zero; Git/disk check0b5128 verified every payload and original
+seal. No test reran during documentary sealing. Pre-execution drafts and their
+old status language stay historical; the final report records later outcomes.
+
+The next council brief covers three actual source groups: CPU/factory, lifecycle
+and owned WhisperX. It names no new execution suite and grants no native or
+market clearance. Candidate03 metadata preparation changes two derivative pins
+and retains 142 others; it has not run, and two missing wheels plus local NLTK
+provenance remain open. Its local-wheel checker branch needs inert qualification
+before the captured graph. New worker source implements framing, inherited pipe
+and handle-backed buffers; root found inbound numeric/budget/binding questions
+before its first test. Complete Windows and model qualification remain ahead.
+Production remains e8d058f; D1/Git account selection are still pending. No
+website, marketing, main merge or publication work started.
