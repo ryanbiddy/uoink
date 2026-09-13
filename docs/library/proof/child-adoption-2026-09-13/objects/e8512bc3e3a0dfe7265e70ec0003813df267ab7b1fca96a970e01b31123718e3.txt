@@ -1,0 +1,11 @@
+{
+  "root_reviewed": false,
+  "scope": "five-generated-inherited-files-only",
+  "case": "positive",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-positive01",
+  "source_inputs_sha256": "3869412b8ca34f865a58cef2407473a64c90176c9719b2695c4c398027624221",
+  "launcher_sha256": "0bb77f068bdc1273abd0423ffb76904f919a0d6edb7f136871b35cee812bf10f",
+  "expected_controller_native_exit": 0,
+  "expected_child_native_exit": 0,
+  "authority": "Template only. Root must review exact sources and record this case's admission separately."
+}

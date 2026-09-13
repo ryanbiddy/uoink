@@ -1,0 +1,7 @@
+{
+  "chunk_id": "37a129",
+  "wall_time_seconds": 0.4337517,
+  "exit_code": 0,
+  "original_token_count": 73,
+  "output": "{\"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\child-adoption-proof01\", \"payload_count\": 79, \"logical_members\": 103, \"distinct_objects\": 70, \"manifest_sha256\": \"220f7a23cca5255b8e7674a562e699899165447d2111ea226dc6903356eb9f6f\", \"tests_or_native_runs_executed\": 0}\r\n"
+}

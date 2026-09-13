@@ -1,0 +1,41 @@
+"""Preserve initial proposal bytes, then enrich passive receipts only."""
+from pathlib import Path
+import ast
+import difflib
+import hashlib
+import json
+
+HERE = Path(__file__).resolve().parent
+BEFORE = HERE / "before-receipt-review01"
+BEFORE.mkdir(exist_ok=False)
+targets = {
+    "inherited_readset.py": [
+        ('        self.identities_checked = 0\n', '        self.identities_checked = 0\n        self.observed_identities = []\n'),
+        ('                self.identities_checked += 1\n', '                self.identities_checked += 1\n                self.observed_identities.append(_identity_row(actual))\n'),
+        ('                "materialization_started": self.materialization_started,',
+         '                "observed_identities": list(self.observed_identities),\n                "materialization_started": self.materialization_started,')],
+    "generated_worker_flow.py": [
+        ('            "adoption_case": port.case, "adoption_response": port.adoption_response,',
+         '            "adoption_case": port.case, "adoption_response": port.adoption_response,\n'
+         '            "authenticated_manifest": port.adoption_payload, "manifest_sha256": port.manifest,')],
+}
+for name, edits in targets.items():
+    path = HERE / name
+    raw = path.read_bytes()
+    (BEFORE / name).write_bytes(raw)
+    old = raw.decode()
+    new = old
+    for old_text, new_text in edits:
+        assert new.count(old_text) == 1
+        new = new.replace(old_text, new_text)
+    ast.parse(new, filename=name)
+    path.write_bytes(new.encode())
+    (HERE / (name + ".receipt-review01.diff")).write_text("".join(difflib.unified_diff(old.splitlines(True), new.splitlines(True),
+        fromfile="before/" + name, tofile="after/" + name)), encoding="utf-8", newline="\n")
+mapping = json.loads((HERE / "SOURCE-INPUTS.json").read_text())
+(BEFORE / "SOURCE-INPUTS.json").write_bytes((HERE / "SOURCE-INPUTS.json").read_bytes())
+for name in targets:
+    mapping["source_sha256"][name] = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
+(HERE / "SOURCE-INPUTS.json").write_text(json.dumps(mapping, indent=2) + "\n", encoding="utf-8")
+print(json.dumps({"source_only": True, "candidate_executions": 0, "changed_source_sha256": {name: mapping["source_sha256"][name] for name in targets},
+    "source_map_sha256": hashlib.sha256((HERE / "SOURCE-INPUTS.json").read_bytes()).hexdigest()}, indent=2))

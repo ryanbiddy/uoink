@@ -1,0 +1,7 @@
+{
+  "chunk_id": "206ee6",
+  "wall_time_seconds": 0.1852165,
+  "exit_code": 0,
+  "original_token_count": 185,
+  "output": "{\"verified\": true, \"payload_count\": 79, \"logical_members\": 103, \"distinct_objects\": 70, \"manifest_sha256\": \"220f7a23cca5255b8e7674a562e699899165447d2111ea226dc6903356eb9f6f\", \"observations\": [{\"case\": \"positive\", \"controller_native_exit\": 0, \"observed_child_native_exit\": 0, \"actual_outer_exit\": 0, \"controller_elapsed_seconds\": 0.10104420001152903, \"child_elapsed_seconds\": 0.005221600004006177, \"case_contract_met\": true}, {\"case\": \"wrong_identity\", \"controller_native_exit\": 0, \"observed_child_native_exit\": 2, \"actual_outer_exit\": 0, \"controller_elapsed_seconds\": 0.09771949998685159, \"child_elapsed_seconds\": 0.003456000005826354, \"case_contract_met\": true}], \"tests_or_native_runs_executed\": 0, \"model_or_market_acceptance\": false}\r\n"
+}

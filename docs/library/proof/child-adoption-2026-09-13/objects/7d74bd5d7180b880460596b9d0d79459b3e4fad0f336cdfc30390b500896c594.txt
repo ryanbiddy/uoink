@@ -1,0 +1,11 @@
+{
+  "root_reviewed": false,
+  "scope": "five-generated-inherited-files-only",
+  "case": "wrong_identity",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-wrong-identity01",
+  "source_inputs_sha256": "435042b8fdf2c4dab5d4a9ca1d7748a4231f91eb013e569db26871db3a28e13e",
+  "launcher_sha256": "a91794692bfebd6cf65d338e7c56a9e7eaa93352d7814666f555a8707a548ffa",
+  "expected_controller_native_exit": 0,
+  "expected_child_native_exit": 2,
+  "authority": "Template only. Root must review exact sources and record this case's admission separately."
+}

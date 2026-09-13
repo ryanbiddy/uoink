@@ -1,0 +1,22 @@
+{
+  "schema": "uoink.proof-seal.v1",
+  "payload_count": 3,
+  "payload_bytes": 1372.0,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "CHILD-ADOPTION-PROOF-BUILD01-ACTUAL.json",
+      "bytes": 447,
+      "sha256": "9e60089c663235face5328c1333f2325c52ff307b8e2a316524f7db45852dab2"
+    },
+    {
+      "path": "CHILD-ADOPTION-PROOF-VERIFY01-ACTUAL.json",
+      "bytes": 917,
+      "sha256": "953b4e168f54bf939ddf00b8bf7d422b925a3657d0c2806cbaa2f2dd424aabba"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "case": "wrong_identity",
+  "controller_native_exit": 0,
+  "expected_child_native_exit": 2,
+  "outer_exit": 0,
+  "inputs_unchanged": true,
+  "receipt_valid": true,
+  "receipt_error_type": null,
+  "stdout_bytes": 0,
+  "stderr_bytes": 0,
+  "scope": "Generated inherited file data path only; no model acceptance"
+}

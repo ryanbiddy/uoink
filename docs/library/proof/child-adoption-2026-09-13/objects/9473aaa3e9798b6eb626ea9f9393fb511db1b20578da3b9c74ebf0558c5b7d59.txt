@@ -1,0 +1,206 @@
+"""Data-only derivative preparation. Never imports or runs proposal code."""
+from pathlib import Path
+import ast
+import difflib
+import hashlib
+import json
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+UPSTREAM = ROOT / "asr-dummy-worker-flow-proposal04" / "generated_worker_flow.py"
+PROTOCOL = ROOT / "asr-worker-namespace-proposal01" / "owned_generation_protocol.py"
+assert hashlib.sha256(UPSTREAM.read_bytes()).hexdigest() == "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0"
+assert hashlib.sha256(PROTOCOL.read_bytes()).hexdigest() == "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+
+old_protocol = PROTOCOL.read_text(encoding="utf-8")
+old_ops = '{"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error"}'
+new_ops = '{"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error", "adopt_readset", "readset_ready", "readset_rejected"}'
+assert old_protocol.count(old_ops) == 2
+new_protocol = old_protocol.replace(old_ops, new_ops)
+
+old = UPSTREAM.read_text(encoding="utf-8")
+new = old
+
+
+def replace_once(before, after):
+    global new
+    assert new.count(before) == 1, before[:100]
+    new = new.replace(before, after)
+
+
+replace_once('from snapshot_lifecycle import SnapshotLifecycle, OwnedRuntimeFactory, Phase',
+             'from snapshot_lifecycle import SnapshotLifecycle, OwnedRuntimeFactory, Phase\n'
+             'from inherited_readset import (NAMES, GENERATED, PAYLOAD_BYTES, AdoptionRefusal,\n'
+             '    InheritedReadSetAdoption, controller_manifest, manifest_digest, namespace_digest, fixed_paths)')
+replace_once('def _observe_graceful_exit(primitives, worker):', 'def _observe_graceful_exit(primitives, worker, expected_exit):')
+replace_once('    _assert(any(item is worker for item in primitives.workers) and worker.assigned',
+             '    _assert(type(expected_exit) is int and expected_exit in (0, 2), "fixed_generated_child_exit")\n'
+             '    _assert(any(item is worker for item in primitives.workers) and worker.assigned')
+replace_once('        _assert(exit_code.value == 0, "dummy_child_native_exit_nonzero")',
+             '        _assert(exit_code.value == expected_exit, "generated_child_exit_differs_from_fixed_case")')
+replace_once('                 namespace_sha256, child_source_sha256, master_key, pipe_name_material):',
+             '                 namespace_sha256, child_source_sha256, master_key, pipe_name_material, case):')
+replace_once('        _assert(type(expectations) is tuple and len(expectations) == 1, "one_generated_file_only")',
+             '        _assert(type(expectations) is tuple and len(expectations) == 5, "five_generated_files_only")\n'
+             '        _assert(tuple(path for path, identity in expectations) == fixed_paths(working_directory), "fixed_generated_paths")\n'
+             '        _assert(type(case) is str and case in ("positive", "wrong_identity"), "fixed_generated_case")\n'
+             '        _assert(namespace_sha256 == namespace_digest(), "fixed_generated_namespace")\n'
+             '        self.case = case\n'
+             '        self.expected_exit = 0 if case == "positive" else 2\n'
+             '        self.adoption_response = None\n'
+             '        self.adoption_payload = None')
+replace_once('        self.parent_guard_retirement = None', '        self.parent_guards_held_through_exit = False')
+replace_once('            binding = GenerationBinding(self.generation, self.manifest, self.namespace, self.source, self.worker.creation_time)',
+             '            self.adoption_payload = controller_manifest(self.primitives, protection, self.worker, self.cwd, self.case)\n'
+             '            self.manifest = manifest_digest(self.adoption_payload)\n'
+             '            binding = GenerationBinding(self.generation, self.manifest, self.namespace, self.source, self.worker.creation_time)')
+replace_once('            self.handshake.accept_ready(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))\n            return self.worker',
+             '            self.handshake.accept_ready(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))\n'
+             '            self.handshake._owned_phase(True)\n'
+             '            self.pipes.write_bytes(self.pair, self.channel.encode("adopt_readset", self.adoption_payload), _remaining(self.pipes.clock))\n'
+             '            operation, response = self.channel.decode(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))\n'
+             '            self.handshake._owned_phase(True)\n'
+             '            expected_operation = "readset_ready" if self.case == "positive" else "readset_rejected"\n'
+             '            _assert(operation == expected_operation and response == expected_adoption_response(self.case), "fixed_adoption_response")\n'
+             '            self.adoption_response = response\n'
+             '            return self.worker')
+start = new.index('    def probe_generated(self, worker, permit):')
+end = new.index('    def close_and_join(self, worker, permit):', start)
+new = new[:start] + '''    def probe_generated(self, worker, permit):
+        record = self._record(self.read_set, permit)
+        _assert(worker is self.worker and record.phase is Phase.NATIVE_RUNNING
+                and self.adoption_response == expected_adoption_response(self.case), "adoption_before_probe")
+        self.handshake._owned_phase(False)
+        if self.case == "positive":
+            self.pipes.write_bytes(self.pair, self.handshake.begin(), _remaining(self.pipes.clock))
+            self.pipes.write_bytes(self.pair, self.channel.encode("next", {"read_generated_namespace": True}), _remaining(self.pipes.clock))
+            operation, result = self.channel.decode(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))
+            _assert(operation == "done" and result == expected_readback(), "complete_child_generated_readback")
+        else:
+            # Expected refusal does not call begin, seek, materialize or a model.
+            _assert(not self.handshake._begun, "refused_adoption_cannot_begin")
+            result = {"expected_identity_refusal": True, "materialization_started": False}
+        self.handshake._owned_phase(False)
+        _assert(self.primitives.api.call("WaitForSingleObject", self.primitives._owned(worker.process), 0) == WAIT_TIMEOUT,
+                "child_not_alive_before_cancel")
+        _assert(len(self.read_set.members) == 5 and all(not handle.closed for handle in self.read_set.members)
+                and all(handle.closed for handle in worker.inherited_copies), "parent_guards_must_remain_held")
+        for path, expected in self.expectations:
+            self.observations.append(_write_access_probe(self.primitives, path, True))
+        return result
+
+''' + new[end:]
+replace_once('        self.exit_observation = _observe_graceful_exit(self.primitives, worker)',
+             '        _assert(all(not handle.closed for handle in self.read_set.members), "parent_guards_before_exit")\n'
+             '        self.exit_observation = _observe_graceful_exit(self.primitives, worker, self.expected_exit)\n'
+             '        self.parent_guards_held_through_exit = all(not handle.closed for handle in self.read_set.members)\n'
+             '        _assert(self.parent_guards_held_through_exit, "parent_guard_lifetime")')
+replace_once('return (self.exit_observation == {"child_native_exit": 0, "process_wait_observed": True, "job_active_processes": 0}',
+             'return (self.exit_observation == {"child_native_exit": self.expected_exit, "process_wait_observed": True, "job_active_processes": 0}')
+replace_once('    port.observations.append(_write_access_probe(port.primitives, port.expectations[0][0], False))',
+             '    for path, expected in port.expectations:\n'
+             '        port.observations.append(_write_access_probe(port.primitives, path, False))')
+replace_once('            "parent_guard_retirement": port.parent_guard_retirement,',
+             '            "parent_guards_held_through_exit": port.parent_guards_held_through_exit,\n'
+             '            "adoption_case": port.case, "adoption_response": port.adoption_response,')
+start = new.index('def child_flow(')
+new = new[:start] + '''def expected_adoption_response(case):
+    if case == "positive":
+        return {"case": case, "namespace_sha256": namespace_digest(), "owned_members": 5,
+                "inheritance_cleared": 5, "identities_checked": 5, "materialization_started": False}
+    _assert(case == "wrong_identity", "fixed_refusal_case")
+    return {"case": case, "reason": "inherited_file_identity_mismatch", "owned_members": 5,
+            "inheritance_cleared": 5, "identities_checked": 1, "materialization_started": False,
+            "read_set_unconfirmed": True}
+
+
+def expected_readback():
+    return {"namespace_sha256": namespace_digest(), "payload_bytes": PAYLOAD_BYTES,
+            "members": [{"name": name, "bytes": len(GENERATED[name]),
+                         "sha256": hashlib.sha256(GENERATED[name]).hexdigest()} for name in NAMES]}
+
+
+def child_flow(primitives, pipes, inherited_control_value, expected_child_source_sha256, fixed_root, fixed_case):
+    """Generated files only. No native loader, factory, registry or model call."""
+    _assert(type(fixed_case) is str and fixed_case in ("positive", "wrong_identity"), "fixed_child_case")
+    fixed_paths(fixed_root)
+    pair = pipes.adopt_inherited_client(inherited_control_value)
+    channel = None
+    adoption = InheritedReadSetAdoption(primitives)
+    try:
+        binding, key = decode_private_bootstrap(pipes.read_private_bootstrap(pair, _remaining(pipes.clock)))
+        _assert(binding.bootstrap_source_sha256 == expected_child_source_sha256
+                and binding.namespace_sha256 == namespace_digest(), "fixed_adoption_source_and_namespace")
+        current = primitives.api.call("GetCurrentProcess")
+        values = [primitives.api.structure("FILETIME") for _ in range(4)]
+        primitives.api.checked("GetProcessTimes", current, *(primitives.api.ffi.byref(value) for value in values))
+        creation = int(values[0].low) | int(values[0].high) << 32
+        _assert(creation == binding.process_creation_time, "child_creation_binding")
+        channel = GenerationChannel(binding, key, "worker")
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        expected = {"generation": binding.generation_hex, "namespace_sha256": binding.namespace_sha256}
+        _assert(operation == "challenge" and payload == expected, "adoption_challenge_binding")
+        pipes.write_bytes(pair, channel.encode("ready", expected), _remaining(pipes.clock))
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        _assert(operation == "adopt_readset", "adoption_before_begin")
+        refused = False
+        try:
+            adoption.adopt(payload, fixed_root, fixed_case, inherited_control_value, binding.manifest_sha256)
+        except AdoptionRefusal as error:
+            _assert(fixed_case == "wrong_identity" and str(error) == "inherited_file_identity_mismatch",
+                    "unexpected_adoption_failure")
+            _assert(adoption.status == "refused" and adoption.read_set is not None
+                    and len(adoption.read_set.members) == 5 and adoption.read_set.unconfirmed
+                    and not adoption.read_set.released and adoption.inheritance_cleared == 5
+                    and adoption.identities_checked == 1 and not adoption.materialization_started,
+                    "exact_identity_refusal_boundary")
+            refused = True
+        _assert(refused == (fixed_case == "wrong_identity"), "generated_case_outcome")
+        if refused:
+            pipes.write_bytes(pair, channel.encode("readset_rejected", expected_adoption_response(fixed_case)), _remaining(pipes.clock))
+        else:
+            _assert(adoption.status == "adopted" and adoption.inheritance_cleared == adoption.identities_checked == 5,
+                    "complete_inherited_adoption")
+            pipes.write_bytes(pair, channel.encode("readset_ready", expected_adoption_response(fixed_case)), _remaining(pipes.clock))
+            operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+            _assert(operation == "begin" and payload == {"manifest_sha256": binding.manifest_sha256}, "adoption_begin_binding")
+            operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+            _assert(operation == "next" and payload == {"read_generated_namespace": True}, "fixed_generated_read_request")
+            result = adoption.materialize_generated()
+            _assert(result == expected_readback(), "generated_result_binding")
+            pipes.write_bytes(pair, channel.encode("done", result), _remaining(pipes.clock))
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        _assert(operation == "cancel" and payload == {}, "adoption_cancel_required")
+        if not refused:
+            adoption.release_after_reads()
+        # The rejected set remains uncertain and open until this process exits.
+        # Its raw native exit2 is deliberate and must be independently recorded.
+        pipes.write_bytes(pair, channel.encode("closed", {}), _remaining(pipes.clock))
+        pipes.retire_endpoint(pair)
+        return {"child_flow_return": 2 if refused else 0, "adoption": adoption.receipt(),
+                "readback": None if refused else result, "model_calls": 0}
+    except BaseException:
+        if adoption.read_set is not None:
+            adoption.read_set.unconfirmed = True
+        pipes._quarantine(pair)
+        raise
+    finally:
+        if channel is not None:
+            channel.revoke()
+'''
+
+for name, before, after in (("owned_generation_protocol.py", old_protocol, new_protocol),
+                             ("generated_worker_flow.py", old, new)):
+    ast.parse(after, filename=name)
+    destination = HERE / name
+    assert not destination.exists(), str(destination)
+    destination.write_bytes(after.encode("utf-8"))
+    (HERE / (name + ".diff")).write_text("".join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
+        fromfile="qualified/" + name, tofile="proposed/" + name)), encoding="utf-8", newline="\n")
+rows = []
+for path in (UPSTREAM, PROTOCOL, HERE / "inherited_readset.py", HERE / "generated_worker_flow.py", HERE / "owned_generation_protocol.py"):
+    raw = path.read_bytes()
+    ast.parse(raw, filename=str(path))
+    rows.append({"path": str(path), "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()})
+(HERE / "INITIAL-SOURCE-BINDINGS.json").write_text(json.dumps({"source_only": True, "candidate_executions": 0, "files": rows}, indent=2) + "\n", encoding="utf-8")
+print(json.dumps({"source_preparation": "complete", "parsed_candidate_sources": 3, "candidate_executions": 0, "files": rows}, indent=2))

@@ -1,0 +1,20 @@
+--- qualified/owned_generation_protocol.py
++++ proposed/owned_generation_protocol.py
+@@ -205,7 +205,7 @@
+ 
+     def _encode(self, operation, payload):
+         self._live()
+-        _require(type(operation) is str and operation in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error"},
++        _require(type(operation) is str and operation in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error", "adopt_readset", "readset_ready", "readset_rejected"},
+                  "wire_operation")
+         _require(type(payload) is dict, "wire_payload")
+         _require(self._send_sequence < min(MAX_SEQUENCE, MAX_FRAMES), "send_sequence_limit")
+@@ -241,7 +241,7 @@
+             decoded = _bounded_json(body)
+             _require(set(decoded) == {"op", "payload"} and type(decoded["op"]) is str
+                      and type(decoded["payload"]) is dict, "wire_envelope")
+-            _require(decoded["op"] in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error"},
++            _require(decoded["op"] in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error", "adopt_readset", "readset_ready", "readset_rejected"},
+                      "wire_operation")
+             self._receive_sequence += 1
+             return decoded["op"], decoded["payload"]

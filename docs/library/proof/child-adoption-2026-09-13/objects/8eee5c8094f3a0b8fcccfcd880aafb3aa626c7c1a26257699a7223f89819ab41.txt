@@ -1,0 +1,19 @@
+--- proposal01/run_adoption01.ps1
++++ proposal02/run_adoption01.ps1
+@@ -1,7 +1,7 @@
+ param([Parameter(Mandatory=$true)][ValidateSet('positive','wrong_identity')][string]$taskCase)
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-adoption-proposal01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-adoption-proposal02'
+ $taskShared='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-worker-namespace-proposal01'
+ $taskRuns=@{positive='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-positive01';wrong_identity='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-wrong-identity01'}
+ $taskRun=$taskRuns[$taskCase]
+@@ -25,6 +25,7 @@
+ foreach($taskName in ($taskSharedNames+$taskOwnNames)){
+     $taskPath=Join-Path $taskProposal $taskName
+     if($taskName -in $taskSharedNames){$taskPath=Join-Path $taskShared $taskName}
++    if($taskName -ceq 'win32_private_pipe.py'){$taskPath='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-timeout-proposal02\win32_private_pipe.py'}
+     $taskHash=(Get-FileHash -LiteralPath $taskPath -Algorithm SHA256).Hash.ToLowerInvariant()
+     if($taskMap.source_paths.$taskName -cne $taskPath -or $taskMap.source_sha256.$taskName -cne $taskHash){throw 'Fixed source input differs'}
+     $taskSources += [ordered]@{name=$taskName;path=$taskPath;sha256=$taskHash}

@@ -1,0 +1,22 @@
+# Generated child read-set adoption: two contracts met
+
+2026-09-13. The positive observation read all five generated files through inherited handles. The negative observation rejected a deliberately changed file ID before any generated-file seek/read or controller begin. Both controllers returned 0. The child's native exit was 0 for positive readback and the predeclared 2 for wrong identity.
+
+| Saved run | Actual tool | Outer exit | Controller elapsed | Child elapsed | Dispatch/audit counts, controller; child |
+| --- | --- | --- | --- | --- | --- |
+| `child-readset-positive01` | `4e8051` | 0 | 0.10104420001152903 s | 0.005221600004006177 s | 245/245; 210/210 |
+| `child-readset-wrong-identity01` | `2abf39` | 0 | 0.09771949998685159 s | 0.003456000005826354 s | 225/225; 109/109 |
+
+These are one observation of each distinct contract, not two independent repetitions. Actual tool wall times were 0.8401357 s and 0.732925 s. Both launch receipts record unchanged inputs, valid receipts, and empty controller stdout/stderr. The four raw admission/run tool objects are preserved without reconstruction.
+
+The positive child checked five identities and cleared inheritance on all five handles before materialization. It sought once and read twice per generated file, returning 328 bytes total with the expected individual SHA-256 values and namespace digest `f02e5966f784ea254e583514171277975c5c7dbd9dfcccad9fd5a62976cf31b9`. It reported all five handles closed and its read set released. The controller observed child exit 0 and an empty job before releasing its original guards. Five write-open probes failed with error 32 while guards were held; all five succeeded afterward without writing bytes.
+
+For wrong identity, the authenticated manifest changed exactly bit 0 of the first expected file-ID byte. The child's observed identity disagreed at that field; other recorded identity fields matched. The child cleared inheritance on all five handles, checked the first identity, and refused with `inherited_file_identity_mismatch`. It recorded zero file seeks/reads, no materialization, five unclosed owned handles, an unconfirmed read set, and no release. The controller did not begin the handshake's work stage. It retained its guards until the exact child process exited 2 and the job was empty, then released the parent read set. That parent release does not validate or release the rejected child read set; child process death ended the retained child-handle lifetime.
+
+Both roles recorded intact bounded dispatch and audit checks: 32 fixed functions, 12 metadata traps, 25 registry traps, zero invalid contexts, denials or model imports/calls, and zero pending pipe operations. Source/control/support/fixture before/after records cover eight source files, three controls, nine installed support identities, and five fixtures. This documentary task reads only those saved support records, never the installed binaries. Each `model.bin` is the fixed 60-byte ASCII test sentence. Neither contains model weights.
+
+The executed sources are bound by `SOURCE-INPUTS.json` SHA-256 `3869412b8ca34f865a58cef2407473a64c90176c9719b2695c4c398027624221` and launcher SHA-256 `0bb77f068bdc1273abd0423ffb76904f919a0d6edb7f136871b35cee812bf10f`. The repaired pipe is `73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7`; child adoption, flow and bootstrap are respectively `02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3`, `4409fb6bf169eda28beb66020066bb7ca1ee5927f51cadfcb9f57ba84c26bcee`, and `83850d5426ae75a3b16ed5503a536a2202f541cb002929fa0dd52ef0c9cdfa06`. The full eight-entry map and copied bytes are retained.
+
+Proposal01's 30-payload preparation seal and proposal02's 18-payload preparation seal remain historical and unchanged. Proposal02 selected the previously repaired pipe; its four local candidate sources and case assertions were unchanged. Earlier preparation documents saying that no native case had run describe their pre-execution stage. The later raw receipts establish the two outcomes above. No native or test rerun occurred during documentary preparation.
+
+This supports the generated inherited-file data path and the recorded ownership ordering. The child still reports `complete_native_namespace_protection=false`. It does not qualify model decoding, tensor creation, real runtime imports, storage conversion, a complete native namespace, installed operation, crash recovery, or market readiness.

@@ -1,0 +1,10 @@
+--- before/generated_worker_flow.py
++++ after/generated_worker_flow.py
+@@ -237,6 +237,7 @@
+             "exit_observation": port.exit_observation, "write_access_observations": port.observations,
+             "parent_guards_held_through_exit": port.parent_guards_held_through_exit,
+             "adoption_case": port.case, "adoption_response": port.adoption_response,
++            "authenticated_manifest": port.adoption_payload, "manifest_sha256": port.manifest,
+             "controller_handshake_begun": port.handshake._begun, "model_calls": 0}
+ 
+ 

@@ -1,0 +1,342 @@
+--- native04/dummy_bootstrap.py
++++ proposed/dummy_bootstrap.py
+@@ -44,8 +44,17 @@
+ import encodings.utf_16_le
+ import warnings
+ 
++PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
++
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-EXPECTED_RUN = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native04"
++FIXED_RUNS = {
++    "positive": r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-positive01",
++    "wrong_identity": r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\child-readset-wrong-identity01",
++}
++LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
++CASE = next((case for case, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
++assert CASE is not None, "fixed_fresh_generated_run_directory"
++EXPECTED_RUN = FIXED_RUNS[CASE]
+ assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+ assert os.environ.get("IG_FORBIDDEN_LIVE") == FORBIDDEN
+ assert os.path.normcase(os.path.dirname(os.path.abspath(__file__))) == os.path.normcase(EXPECTED_RUN)
+@@ -60,8 +69,9 @@
+          "transformers", "tokenizers", "pyannote", "onnxruntime", "numpy", "subprocess", "socket"}
+ assert not HEAVY.intersection(name.split(".")[0] for name in sys.modules)
+ assert "ctypes" not in sys.modules and "_ctypes" not in sys.modules
+-FIXTURE = os.path.join(EXPECTED_RUN, "generated-guard.txt")
+-FIXTURE_BYTES = b"Uoink generated worker guard fixture. No model or library data.\n"
++GENERATED_NAMES = ("config.json", "model.bin", "preprocessor_config.json", "tokenizer.json", "vocabulary.json")
++GENERATED_BYTES = {name: ("Uoink generated adoption fixture: " + name + ". No model data.\n").encode("ascii") for name in GENERATED_NAMES}
++GENERATED_PATHS = tuple(os.path.join(EXPECTED_RUN, name) for name in GENERATED_NAMES)
+ RESULT_PATH = os.path.join(EXPECTED_RUN, ROLE + "-result.json")
+ KERNEL_PATH = r"C:\Windows\System32\kernel32.dll"
+ NATIVE = {
+@@ -76,10 +86,13 @@
+     r"C:\Python314\Lib\ctypes\_endian.py": (2635, "f2752ab2425dac9bfaff5aa1a3c6cd66aa342fee0db2f2a42de568fc59d5cbea"),
+ }
+ MODULES = ("snapshot_lifecycle", "owned_generation_protocol", "win32_worker_connection",
+-           "win32_private_pipe", "generated_worker_flow")
++           "win32_private_pipe", "pinned_buffer_namespace", "inherited_readset", "generated_worker_flow")
+ SETUP_NAMES = tuple(name + ".py" for name in MODULES) + ("dummy_bootstrap.py", "SOURCE-INPUTS.json", "ROOT-ADMISSION.json")
+ SETUP_READS = {os.path.normcase(os.path.join(EXPECTED_RUN, name)) for name in SETUP_NAMES}
+-SETUP_READS |= {os.path.normcase(path) for path in NATIVE} | {os.path.normcase(FIXTURE)}
++SETUP_READS |= {os.path.normcase(path) for path in NATIVE}
++# Neither controller nor child opens generated content through Python.
++# The exact outer writer records those bytes; native handle reads occur
++# only in the child after authenticated adoption. No path reopening.
+ CONTENT_OPEN = True
+ DLL_STAGE = "closed"
+ DLL_EVENTS = []
+@@ -142,7 +155,7 @@
+            "ResumeThread", "InitializeProcThreadAttributeList", "UpdateProcThreadAttribute", "DeleteProcThreadAttributeList",
+            "CreateProcessW", "CreateNamedPipeW", "ConnectNamedPipe", "CreateEventW", "ReadFile", "WriteFile",
+            "GetOverlappedResult", "CancelIoEx", "GetFileType", "GetHandleInformation", "SetHandleInformation",
+-           "GetExitCodeProcess", "GetModuleFileNameW"}
++           "GetExitCodeProcess", "GetModuleFileNameW", "SetFilePointerEx"}
+ sys.addaudithook(audit)
+ 
+ 
+@@ -155,7 +168,8 @@
+ 
+ source_map = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536))
+ admission = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "ROOT-ADMISSION.json"), 65536))
+-assert admission["root_reviewed"] is True and admission["scope"] == "generated-file-one-owned-dummy-worker-only"
++assert admission["root_reviewed"] is True and admission["scope"] == "five-generated-inherited-files-only"
++assert admission["case"] == CASE and admission["run_path"] == EXPECTED_RUN
+ assert admission["source_inputs_sha256"] == hashlib.sha256(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536)).hexdigest()
+ assert source_map["native_bindings"] == {path: {"bytes": size, "sha256": sha} for path, (size, sha) in NATIVE.items()}
+ RAW = {}
+@@ -169,7 +183,6 @@
+     assert len(raw) == size and hashlib.sha256(raw).hexdigest() == sha
+     if path.endswith(".py"):
+         CTYPES_RAW[path] = raw
+-assert read_bounded(FIXTURE, 1024) == FIXTURE_BYTES
+ CONTENT_OPEN = False
+ 
+ 
+@@ -223,7 +236,9 @@
+     module.__file__ = os.path.join(EXPECTED_RUN, name + ".py")
+     sys.modules[name] = module
+     exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+-K, W, FLOW = (sys.modules[name] for name in ("win32_worker_connection", "win32_private_pipe", "generated_worker_flow"))
++K, W, NS, ADOPTION, FLOW = (sys.modules[name] for name in ("win32_worker_connection", "win32_private_pipe",
++    "pinned_buffer_namespace", "inherited_readset", "generated_worker_flow"))
++assert ADOPTION.NAMES == GENERATED_NAMES and dict(ADOPTION.GENERATED) == GENERATED_BYTES
+ DLL_STAGE = "binding"
+ import ctypes
+ assert ctypes.__file__ == r"C:\Python314\Lib\ctypes\__init__.py"
+@@ -233,6 +248,7 @@
+ api = K.declare_bindings(ctypes, kernel32)
+ W.declare_pipe_calls(api, kernel32)
+ FLOW.declare_exit_call(api, kernel32)
++NS.declare_read_calls(api, kernel32)
+ module_name = kernel32.GetModuleFileNameW
+ module_name.restype = ctypes.c_uint32
+ module_name.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32]
+@@ -258,7 +274,7 @@
+         self.invalid_contexts = 0
+         self.binding_open = True
+         assert type(self.cast_address) is int and self.cast_address > 0
+-        assert set(self.bindings) == SYMBOLS - {"GetLastError"} and len(self.bindings) == 31
++        assert set(self.bindings) == SYMBOLS - {"GetLastError"} and len(self.bindings) == 32
+         for name, fn in self.bindings.items():
+             pointer = self._helper_cast(fn, ffi.c_void_p, binding=True)
+             assert type(pointer.value) is int and pointer.value > 0
+@@ -340,6 +356,7 @@
+         self.cleanup_started = None
+         self.cleanup_calls = []
+         self.cleanup_wait_caps = []
++        self.asset_io = {name: {"seeks": 0, "reads": 0, "bytes": 0} for name in GENERATED_NAMES}
+ 
+     def _cleanup_scope(self, name, args, now):
+         if self.cleanup_started is None:
+@@ -382,6 +399,46 @@
+         if not self.call(name, *args):
+             raise OSError(self.ffi.get_last_error(), "Fixed API failed: " + name)
+ 
++    def _generated_member(self, value):
++        assert self.primitives is not None
++        matches = [(read_set, index, handle) for read_set in self.primitives.read_sets
++                   for index, handle in enumerate(read_set.members)
++                   if handle.value == value and handle.kind == "adopted-generated-member" and not handle.closed]
++        assert len(matches) == 1, "exact_child_local_generated_member"
++        read_set, index, handle = matches[0]
++        assert len(read_set.members) == 5 and not handle.unconfirmed, "complete_partial_owner_required"
++        return read_set, index, handle
++
++    def _asset_scope(self, name, args):
++        if ROLE != "child":
++            assert name != "SetFilePointerEx", "only_child_generated_seek"
++            return None
++        if name in ("GetFileInformationByHandleEx", "GetFinalPathNameByHandleW", "SetFilePointerEx"):
++            read_set, index, handle = self._generated_member(args[0])
++            if name == "GetFileInformationByHandleEx":
++                assert args[1] in (1, 9, 18), "fixed_identity_information_classes"
++            elif name == "GetFinalPathNameByHandleW":
++                assert len(args) == 4 and args[2] == 32768 and args[3] == 0, "fixed_identity_path_query"
++            else:
++                assert CASE == "positive" and not read_set.unconfirmed and not read_set.released
++                assert len(args) == 4 and args[1] == args[3] == 0
++                assert type(getattr(args[2], "_obj", None)) is self.ffi.c_int64, "exact_seek_output"
++                asset_name = GENERATED_NAMES[index]
++                assert self.asset_io[asset_name]["seeks"] == 0, "one_seek_per_generated_file"
++                return asset_name
++        if name == "ReadFile" and args[4] is None:
++            read_set, index, handle = self._generated_member(args[0])
++            asset_name = GENERATED_NAMES[index]
++            state = self.asset_io[asset_name]
++            assert CASE == "positive" and not read_set.unconfirmed and not read_set.released
++            assert state["seeks"] == 1 and state["reads"] < 2, "seek_then_two_bounded_reads"
++            assert isinstance(args[1], self.ffi.Array) and args[1]._type_ is self.ffi.c_char
++            assert type(args[2]) is int and args[2] == len(GENERATED_BYTES[asset_name]) - state["bytes"] + 1
++            assert self.ffi.sizeof(args[1]) == args[2] and 0 < args[2] <= 256
++            assert type(getattr(args[3], "_obj", None)) is self.ffi.c_uint32, "exact_read_count_output"
++            return asset_name
++        return None
++
+     def call(self, name, *args):
+         assert name in self.originals, "fixed_native_symbol_required"
+         now = time.monotonic()
+@@ -391,15 +448,16 @@
+         if ROLE == "child":
+             assert name in {"CreateEventW", "GetFileType", "GetHandleInformation", "SetHandleInformation", "CloseHandle",
+                             "ReadFile", "WriteFile", "WaitForSingleObject", "GetOverlappedResult", "CancelIoEx",
+-                            "GetCurrentProcess", "GetProcessTimes"}
++                            "GetCurrentProcess", "GetProcessTimes", "SetFilePointerEx",
++                            "GetFileInformationByHandleEx", "GetFinalPathNameByHandleW"}
+         if name == "CreateNamedPipeW":
+             assert ROLE == "controller" and self.pipe_name is None
+             assert type(args[0]) is str and args[0].startswith("\\\\.\\pipe\\uoink-owned-")
+             assert len(args[0]) == len("\\\\.\\pipe\\uoink-owned-") + 64
+             self.pipe_name = args[0]
+         if name == "CreateFileW":
+-            assert ROLE == "controller" and args[0] in (FIXTURE, self.pipe_name)
+-            if args[0] == FIXTURE:
++            assert ROLE == "controller" and args[0] in (*GENERATED_PATHS, self.pipe_name)
++            if args[0] in GENERATED_PATHS:
+                 assert (args[1], args[2], args[4], args[5]) in ((0x80000000, 1, 3, 0x00200000), (0x40000000, 7, 3, 0x00200000))
+             else:
+                 assert (args[1], args[2], args[4], args[5]) == (0xC0000000, 0, 3, 0x40000000)
+@@ -408,12 +466,22 @@
+             worker = self.primitives.workers[-1]
+             expected = (r"C:\Python314\python.exe", "-I", "-S", "-B", __file__, "child", "--control-handle", str(worker.child_control_handle))
+             assert args[0] == expected[0] and args[1].value == " ".join(K._quote_argument(value) for value in expected)
++        asset_name = self._asset_scope(name, args)
+         self.calls.append(name)  # Never record buffers, secrets or API arguments.
+         if name == "InitializeProcThreadAttributeList" and args[0] is not None:
+             assert dispatch.attribute_buffer is None, "one_attribute_buffer"
+         if name == "DeleteProcThreadAttributeList":
+             assert args[0] is dispatch.attribute_buffer, "exact_attribute_buffer_retirement"
+         result = dispatch.call(name, *args)
++        if asset_name is not None and result:
++            if name == "SetFilePointerEx":
++                assert args[2]._obj.value == 0, "generated_seek_observation"
++                self.asset_io[asset_name]["seeks"] += 1
++            elif name == "ReadFile":
++                count = args[3]._obj.value
++                assert 0 <= count <= args[2], "generated_native_read_count"
++                self.asset_io[asset_name]["reads"] += 1
++                self.asset_io[asset_name]["bytes"] += count
+         if name == "InitializeProcThreadAttributeList" and args[0] is not None and result:
+             dispatch.attribute_buffer = args[0]
+         if name == "DeleteProcThreadAttributeList":
+@@ -425,66 +493,77 @@
+ primitives = K.OwnedWin32Primitives(monitor)
+ monitor.primitives = primitives
+ pipes = W.PrivatePipeController(primitives, time.monotonic)
+-port = None
+-started = time.perf_counter()
+-outcome, error_type, code = None, None, 1
+ try:
+-    if ROLE == "child":
+-        code = FLOW.child_flow(primitives, pipes, CONTROL, source_map["source_sha256"]["dummy_bootstrap.py"])
+-        outcome = {"child_flow_return": code}
+-    else:
+-        value = monitor.call("CreateFileW", FIXTURE, 0x80000000, 1, None, 3, 0x00200000, None)
+-        initial = primitives._retain(value, "dummy-identity-probe")
+-        identity = primitives.identity(initial)
+-        primitives._close(initial)
+-        assert identity.size == len(FIXTURE_BYTES) and identity.links == 1 and not identity.directory and initial.closed
+-        environment = {"SystemRoot": r"C:\Windows", "WINDIR": r"C:\Windows", "TEMP": EXPECTED_RUN, "TMP": EXPECTED_RUN,
+-                       "TORCH_DEVICE_BACKEND_AUTOLOAD": "0", "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
+-                       "PYANNOTE_METRICS_ENABLED": "0", "IG_FORBIDDEN_LIVE": FORBIDDEN}
+-        namespace_sha = hashlib.sha256(FIXTURE_BYTES).hexdigest()
+-        manifest_sha = hashlib.sha256(json.dumps(dataclasses.asdict(identity), default=lambda value: value.hex(), sort_keys=True).encode()).hexdigest()
+-        port = FLOW.GeneratedLifecyclePort(primitives, pipes, ((FIXTURE, identity),), r"C:\Python314\python.exe",
+-            ("-I", "-S", "-B", __file__, "child"), EXPECTED_RUN, environment,
+-            os.urandom(32).hex(), manifest_sha, namespace_sha, source_map["source_sha256"]["dummy_bootstrap.py"],
+-            os.urandom(32), os.urandom(32))
+-        outcome = FLOW.controller_flow(port)
+-        code = 0
+-except BaseException as error:
+-    error_type = type(error).__name__
+-    if port is not None:
+-        port.quarantine(port.key, port.read_set, port.permit, "dummy bootstrap failure")
+-elapsed = time.perf_counter() - started
+-registry_expected = dict(REGISTRY_NAMESPACE)
+-for name, original in REGISTRY_TRAPS:
+-    registry_expected[name] = deny_registry
+-guard = (dispatch.valid(monitor.functions) and not DENIALS and not CONTENT_OPEN and DLL_STAGE == "closed" and sys.meta_path[0] is FINDER
+-         and sys.modules.get("winreg") is BASELINE_WINREG
+-         and set(vars(BASELINE_WINREG)) == set(registry_expected)
+-         and all(vars(BASELINE_WINREG)[name] is value for name, value in registry_expected.items())
+-         and all(getattr(owner, name) is installed for owner, name, installed in METADATA_TRAPS)
+-         and all(monitor.functions[name] is value for name, value in monitor.originals.items())
+-         and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
+-if not guard:
+-    code = 1
+-receipt = {"schema": "uoink.generated-owned-worker.v1", "role": ROLE, "result": outcome, "error_type": error_type,
+-           "native_exit_planned": code, "elapsed_seconds": elapsed, "guard_valid": guard, "guard_denials": DENIALS,
+-           "metadata_traps": len(METADATA_TRAPS), "registry_traps": len(REGISTRY_TRAPS),
+-           "fixed_dispatch_valid": dispatch.valid(monitor.functions),
+-           "fixed_dispatch_function_count": len(dispatch.bindings),
+-           "fixed_dispatch_completed_calls": dispatch.completed_calls,
+-           "fixed_dispatch_audit_events": dispatch.call_events,
+-           "fixed_dispatch_invalid_contexts": dispatch.invalid_contexts,
+-           "fixed_attribute_cast_calls": dispatch.cast_calls,
+-           "native_api_calls": monitor.calls, "reserved_cleanup_calls": monitor.cleanup_calls,
+-           "reserved_cleanup_wait_caps": monitor.cleanup_wait_caps,
+-           "work_budget_closed": monitor.work_budget_closed,
+-           "kernel32_path_verified": True, "ctypes_bootstrap_loads": DLL_EVENTS,
+-           "source_sha256": source_map["source_sha256"], "model_imports": [], "model_calls": 0}
+-encoded = (json.dumps(receipt, indent=2) + "\n").encode()
+-assert len(encoded) <= 131072
+-with open(RESULT_PATH, "xb") as stream:
+-    stream.write(encoded)
+-    stream.flush()
+-    os.fsync(stream.fileno())
+-RESULT_WRITTEN = True
+-raise SystemExit(code)
++    port = None
++    started = time.perf_counter()
++    outcome, error_type, code = None, None, 1
++    try:
++        if ROLE == "child":
++            outcome = FLOW.child_flow(primitives, pipes, CONTROL, source_map["source_sha256"]["dummy_bootstrap.py"], EXPECTED_RUN, CASE)
++            code = outcome["child_flow_return"]
++        else:
++            expectations = []
++            for name, path in zip(GENERATED_NAMES, GENERATED_PATHS):
++                value = monitor.call("CreateFileW", path, 0x80000000, 1, None, 3, 0x00200000, None)
++                initial = primitives._retain(value, "generated-identity-probe")
++                identity = primitives.identity(initial)
++                primitives._close(initial)
++                assert identity.size == len(GENERATED_BYTES[name]) and identity.links == 1 and not identity.directory and initial.closed
++                expectations.append((path, identity))
++            environment = {"SystemRoot": r"C:\Windows", "WINDIR": r"C:\Windows", "TEMP": EXPECTED_RUN, "TMP": EXPECTED_RUN,
++                           "TORCH_DEVICE_BACKEND_AUTOLOAD": "0", "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
++                           "PYANNOTE_METRICS_ENABLED": "0", "IG_FORBIDDEN_LIVE": FORBIDDEN}
++            namespace_sha = ADOPTION.namespace_digest()
++            manifest_sha = "0" * 64  # Replaced before bootstrap by the exact inherited-handle map.
++            port = FLOW.GeneratedLifecyclePort(primitives, pipes, tuple(expectations), r"C:\Python314\python.exe",
++                ("-I", "-S", "-B", __file__, "child"), EXPECTED_RUN, environment,
++                os.urandom(32).hex(), manifest_sha, namespace_sha, source_map["source_sha256"]["dummy_bootstrap.py"],
++                os.urandom(32), os.urandom(32), CASE)
++            outcome = FLOW.controller_flow(port)
++            code = 0
++    except BaseException as error:
++        error_type = type(error).__name__
++        if port is not None:
++            port.quarantine(port.key, port.read_set, port.permit, "dummy bootstrap failure")
++    elapsed = time.perf_counter() - started
++    registry_expected = dict(REGISTRY_NAMESPACE)
++    for name, original in REGISTRY_TRAPS:
++        registry_expected[name] = deny_registry
++    guard = (dispatch.valid(monitor.functions) and not DENIALS and not CONTENT_OPEN and DLL_STAGE == "closed" and sys.meta_path[0] is FINDER
++             and sys.modules.get("winreg") is BASELINE_WINREG
++             and set(vars(BASELINE_WINREG)) == set(registry_expected)
++             and all(vars(BASELINE_WINREG)[name] is value for name, value in registry_expected.items())
++             and all(getattr(owner, name) is installed for owner, name, installed in METADATA_TRAPS)
++             and all(monitor.functions[name] is value for name, value in monitor.originals.items())
++             and os._exit is PROCESS_ABORT
++             and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
++    if not guard:
++        code = 1
++    receipt = {"schema": "uoink.generated-inherited-readset.v1", "role": ROLE, "case": CASE, "result": outcome, "error_type": error_type,
++               "native_exit_planned": code, "elapsed_seconds": elapsed, "guard_valid": guard, "guard_denials": DENIALS,
++               "metadata_traps": len(METADATA_TRAPS), "registry_traps": len(REGISTRY_TRAPS),
++               "fixed_dispatch_valid": dispatch.valid(monitor.functions),
++               "fixed_dispatch_function_count": len(dispatch.bindings),
++               "fixed_dispatch_completed_calls": dispatch.completed_calls,
++               "fixed_dispatch_audit_events": dispatch.call_events,
++               "fixed_dispatch_invalid_contexts": dispatch.invalid_contexts,
++               "fixed_attribute_cast_calls": dispatch.cast_calls,
++               "native_api_calls": monitor.calls, "generated_asset_io": monitor.asset_io,
++               "pending_pipe_operations": sum(len(pair.operations) for pair in pipes.pairs),
++               "reserved_cleanup_calls": monitor.cleanup_calls,
++               "reserved_cleanup_wait_caps": monitor.cleanup_wait_caps,
++               "work_budget_closed": monitor.work_budget_closed,
++               "kernel32_path_verified": True, "ctypes_bootstrap_loads": DLL_EVENTS,
++               "source_sha256": source_map["source_sha256"], "model_imports": [], "model_calls": 0}
++    encoded = (json.dumps(receipt, indent=2) + "\n").encode()
++    assert len(encoded) <= 131072
++    with open(RESULT_PATH, "xb") as stream:
++        stream.write(encoded)
++        stream.flush()
++        os.fsync(stream.fileno())
++    RESULT_WRITTEN = True
++    raise SystemExit(code)
++finally:
++    for retained_pair in pipes.pairs:
++        if retained_pair.operations:
++            PROCESS_ABORT(1)

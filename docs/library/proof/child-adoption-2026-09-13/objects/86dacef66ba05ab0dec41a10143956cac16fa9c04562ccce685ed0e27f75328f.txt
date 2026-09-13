@@ -1,0 +1,31 @@
+{
+  "source_only": true,
+  "candidate_executions": 0,
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-flow-proposal04\\generated_worker_flow.py",
+      "bytes": 15825,
+      "sha256": "7d9f4efef3641e08d2d2b1f5e57417b055d4b009e92da3c1d92a6896b3e3ced0"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-worker-namespace-proposal01\\owned_generation_protocol.py",
+      "bytes": 19462,
+      "sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal01\\inherited_readset.py",
+      "bytes": 12211,
+      "sha256": "56c1acf4cbf09f0ee3fb5fb61c1d83fd771507caa92f5850cb2c907c4a8d335c"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal01\\generated_worker_flow.py",
+      "bytes": 20231,
+      "sha256": "532220a7a59ebcf215b747b501bcc0db15656ed195db7611ba5142dd78344196"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\child-readset-adoption-proposal01\\owned_generation_protocol.py",
+      "bytes": 19570,
+      "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+    }
+  ]
+}

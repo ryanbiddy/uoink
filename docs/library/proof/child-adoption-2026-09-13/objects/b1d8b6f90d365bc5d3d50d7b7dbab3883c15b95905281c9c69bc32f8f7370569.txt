@@ -1,0 +1,22 @@
+"""Hash this proposal's existing text payloads; no candidate code execution."""
+from pathlib import Path
+import hashlib
+import json
+
+HERE = Path(__file__).resolve().parent
+manifest = HERE / "PREPARATION-MANIFEST.json"
+assert not manifest.exists()
+mapping = json.loads((HERE / "SOURCE-INPUTS.json").read_text())
+for name, path in mapping["source_paths"].items():
+    assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == mapping["source_sha256"][name]
+rows = []
+for path in sorted(HERE.rglob("*")):
+    if path.is_file() and path != manifest:
+        raw = path.read_bytes()
+        raw.decode("utf-8-sig")
+        rows.append({"path": path.relative_to(HERE).as_posix(), "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()})
+result = {"schema": "uoink.source-proposal-manifest.v1", "scope": "Text preparation only; no candidate/native execution",
+          "payload_count": len(rows), "payload_bytes": sum(row["bytes"] for row in rows), "files": rows}
+manifest.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+print(json.dumps({"manifest": str(manifest), "payload_count": len(rows), "payload_bytes": result["payload_bytes"],
+                  "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest()}, indent=2))

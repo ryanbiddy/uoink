@@ -1,0 +1,44 @@
+--- before/run_adoption01.ps1
++++ after/run_adoption01.ps1
+@@ -120,6 +120,41 @@
+     }
+     $taskAdoption=$taskChild.result.adoption
+     if($taskAdoption.owned_members -ne 5 -or $taskAdoption.inheritance_cleared -ne 5 -or @($taskAdoption.handles_closed).Count -ne 5 -or $taskAdoption.complete_native_namespace_protection -cne $false -or $taskAdoption.model_calls -ne 0){$taskValid=$false}
++    $taskManifest=$taskResult.authenticated_manifest
++    if($taskManifest.schema -cne 'uoink.generated-inherited-readset.v1' -or $taskManifest.case -cne $taskCase -or @($taskManifest.members).Count -ne 5){$taskValid=$false}
++    $taskCanonicalRows=@()
++    for($taskIndex=0;$taskIndex -lt 5;$taskIndex++){
++        $taskRow=$taskManifest.members[$taskIndex]
++        $taskIdentity=$taskRow.identity
++        if($taskRow.name -cne $taskFixtures[$taskIndex].name -or $taskRow.sha256 -cne $taskFixtures[$taskIndex].sha256 -or $taskIdentity.size -ne $taskFixtures[$taskIndex].bytes){$taskValid=$false}
++        $taskCanonicalIdentity=[ordered]@{directory=$taskIdentity.directory;file_id=$taskIdentity.file_id;final_path=$taskIdentity.final_path;links=$taskIdentity.links;size=$taskIdentity.size;volume_serial=$taskIdentity.volume_serial}
++        $taskCanonicalRows += [ordered]@{handle=$taskRow.handle;identity=$taskCanonicalIdentity;name=$taskRow.name;sha256=$taskRow.sha256}
++    }
++    $taskCanonical=[ordered]@{case=$taskManifest.case;members=$taskCanonicalRows;namespace_sha256=$taskManifest.namespace_sha256;schema=$taskManifest.schema} | ConvertTo-Json -Compress -Depth 8
++    $taskManifestHash=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::ASCII.GetBytes($taskCanonical))).ToLowerInvariant()
++    if($taskManifestHash -cne $taskResult.manifest_sha256){$taskValid=$false}
++    $taskExpectedIdentities=5
++    if($taskCase -ceq 'wrong_identity'){$taskExpectedIdentities=1}
++    if(@($taskAdoption.observed_identities).Count -ne $taskExpectedIdentities){$taskValid=$false}
++    for($taskIndex=0;$taskIndex -lt $taskExpectedIdentities;$taskIndex++){
++        $taskActualIdentity=$taskAdoption.observed_identities[$taskIndex]
++        $taskExpectedIdentity=$taskManifest.members[$taskIndex].identity
++        foreach($taskField in @('directory','final_path','links','size','volume_serial')){
++            if($taskActualIdentity.$taskField -cne $taskExpectedIdentity.$taskField){$taskValid=$false}
++        }
++        if($taskCase -ceq 'positive'){
++            if($taskActualIdentity.file_id -cne $taskExpectedIdentity.file_id){$taskValid=$false}
++        }else{
++            $taskActualId=[Convert]::FromHexString($taskActualIdentity.file_id)
++            $taskExpectedId=[Convert]::FromHexString($taskExpectedIdentity.file_id)
++            if($taskActualId.Length -ne 16 -or $taskExpectedId.Length -ne 16){$taskValid=$false}
++            for($taskByteIndex=0;$taskByteIndex -lt 16;$taskByteIndex++){
++                $taskExpectedByte=$taskActualId[$taskByteIndex]
++                if($taskByteIndex -eq 0){$taskExpectedByte=$taskExpectedByte -bxor 1}
++                if($taskExpectedId[$taskByteIndex] -ne $taskExpectedByte){$taskValid=$false}
++            }
++        }
++    }
+     foreach($taskFixture in $taskFixtures){
+         $taskName=$taskFixture.name
+         $taskChildIO=$taskChild.generated_asset_io.$taskName
