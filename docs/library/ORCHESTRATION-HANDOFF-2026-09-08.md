@@ -98,7 +98,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Finish exact loader/conversion and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
+| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Repair reliability consent/readiness and model-setting copy under brief44e69fc; continue VAD/dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -148,6 +148,17 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
+
+Current concrete product repair: read
+RELIABILITY-CONSENT-SETTINGS-REPAIR-BRIEF-2026-09-13.md (44e69fc) and
+RELIABILITY-CONSENT-GROK-CONTINUATION-BRIEF-2026-09-13.md. Ordinary confidence
+checks allow acquisition; a stale marker is treated as a ready cache; download
+size and turbo labels are misleading. Gemini d3d22723 is INCOMPLETE despite
+completed/exit0: a grep_search schema error was followed by empty SUCCESS,
+with a clean worktree and no report or tests. Preserve it. Continue via Grok's
+separate toolchain, then review and run the named focused union in both roots
+before integrating. No unguarded Python/server/model test launch. This product
+repair is independent of the reserved model migration decisions below.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4178,3 +4189,24 @@ package import or installation occurred. The release notes now distinguish B3
 packaging and the reviewed VAD factory from pending runtime acceptance. Product
 source and complete-tree counts remain unchanged. Next work is concrete VAD
 conversion/provenance and Pipeline compatibility, with website/marketing held.
+### 2026-09-13 - Reliability defects found; empty Gemini run rejected
+
+Public ASR metadata planning exposed a fixed150MB confirmation for all six
+choices and a duplicate dashboard label function that calls turbo Balanced.
+Source inspection also found detect_unreliable_spans using _load_model's
+local_files_only=False default, while model status trusts a stale text marker.
+These are product repairs under brief44e69fc, not Ryan blockers. Scope is local
+consent/readiness and honest settings copy; no acquisition/native trial or model
+version change is part of this repair. Current full-tree counts remain intact.
+
+Gemini Control Room run d3d22723-6e44-488f-9de4-ded941092040 used Antigravity
+subscription tooling and returned process0/completed. Its grep_search call
+failed for missing toolSummary/toolAction, then emitted SUCCESS with an empty
+response. Astra checked the worktree at44e69fc: zero diff, no new tests and no
+named report. Mark this INCOMPLETE. The CLI rendering and clean status are
+retained in _scratch/reliability-gemini-d3d22723. The initial export command used
+the worker cwd for its new directory and failed before writing evidence; the
+corrected absolute paths captured the rendering and status. No product test
+ran. The continuation brief changes worker toolchain to Grok, preserving all
+requirements and avoiding a blind retry. Control Room's terminal status is not
+artifact or review acceptance. Website and marketing remain held.
