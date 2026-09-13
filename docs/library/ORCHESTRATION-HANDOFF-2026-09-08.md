@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK source at 4aec8ff, reproducible local wheel at 52d9f7d; graph checker at 5e46f2f | Local wheel 43/0/0 in each root; 107 sealed payloads plus three vendor artifacts verified. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Bind the reviewed wheel in build/pins/notices, then qualify combined source and package. Runtime migration/model qualification retain Ryan gates |
+| Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -173,7 +173,8 @@ is complete but is not this goal's completion. Current queue:
    bytes under Python 3.13/3.14. SHA256 969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8;
    size 6,597,605 bytes. Gemini a332397f stays PARTIAL: print timeout, 33/1 and no
    review report despite completed/zero transport. Read the local-wheel verdict.
-   Update installer lock/build/notices and qualify it. Preserve pristine upstream NLTK
+   Installer lock/build/notices are bound at 07084fe, with 51 passes in each root
+   and 31 sealed proof payloads. Continue combined qualification; preserve pristine upstream NLTK
    and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
    Astra preserved 504 pristine files at _scratch/nltk-upstream-before-local13/nltk,
    with complete before/copy/after hash equality and a separate receipt.
@@ -641,6 +642,24 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-13 - Installer binding accepted; combined tree next
+
+07084fe verifies the reviewed wheel's fixed SHA256 before dependency installation
+and passes that local file explicitly to pip with the 3.10.3+uoink.pathsec1 lock.
+Other pins and all committed tests are unchanged. The notices identify the local
+patch and pending replacement staging. Build/signing/notices suites pass 51 in
+each root after raw diff / three-way integration; the 31-payload seal matches Git.
+A read-only PowerShell parse reports zero syntax errors. The first launcher exit
+4/zero tests is preserved: it named a nonexistent guide test, then used the actual
+test_build_guide_accuracy.py under a fresh label.
+
+Use _scratch/run_partitioned_repaired_tree.py for the next complete observation;
+the older run_partitioned_final_tree.py does not add --runxfail. Preserve the
+existing marks and use the repaired observer, as package 08 did. The launcher
+must provide UOINK_NLTK_BASE_SOURCE and UOINK_UPSTREAM_NLTK_WHEEL from the preserved
+fixtures and scrub provider overrides. Only S21 stays excluded. Do not change
+source during the committed-source observation. No new installer exists yet.
 
 ### 2026-09-13 - Local NLTK wheel accepted after provider timeout
 
