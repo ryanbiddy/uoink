@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e25d38",
+  "wall_time_seconds": 0.1281011,
+  "exit_code": 0,
+  "original_token_count": 57,
+  "output": "{\r\n  \"reviewed_files\": 18,\r\n  \"scope\": \"generated-actual-asr-adapter-only\",\r\n  \"mode\": \"drain\",\r\n  \"admission_sha256\": \"377767405c396c79860540d7d7acc563f7995ea6deeff7c9413ee28f1a5bbac3\",\r\n  \"model_calls_authorized\": false\r\n}\r\n"
+}

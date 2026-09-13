@@ -1,0 +1,9 @@
+# Actual adapter with a generated worker — source preparation, 2026-09-13
+
+Implement the small connection in `generated-adapter-connection-plan01/PLAN.md`. Enter the unchanged adapter's actual `faster_whisper_session`; use the actual `OwnedRuntimeFactory`, lease permit, `_OwnedASRStart`, facade and adapter-owned cleanup. The only worker output is generated text from the existing five-file fixture. Do not execute the proposal.
+
+The new bridge installs visible generated authority seams in a restoring context, matching the six connected cases. It never mutates real resolver functions or `REAL_APPROVAL`, never configures the release authority or acquisition service, and refuses a second admission. Bind one reliability/CPU/int8 profile, one supported choice/revision and the exact generated run root. The fixed choice `large-v3-turbo` supplies the matching five filenames; those fixture files contain ASCII sentences, not model data.
+
+The port validates exact `_OwnedASRStart`, profile/binding identity and lease key before process construction. After inherited handle adoption, send a fixed generated startup policy through the existing authenticated `next`/`done` channel while the record remains reserved. The child must validate and acknowledge it before accepting `begin`. Keep local object identities out of the wire protocol.
+
+Prepare one drain observation through the actual adapter. Preserve existing source and guards; the earlier native operation preparation is frozen separately. Reuse its connection/pipe/adoption/operation implementation, including exact OS quiescence and pending-I/O boundaries. No new native API, model permission, runtime import, network, assets, product source, frozen tests or generic harness. A later exact bootstrap/launcher derivative still requires root review before any invocation.
