@@ -1,0 +1,9 @@
+{
+  "approved": true,
+  "label": "reservation01",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "pins_sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf",
+  "review": "Astra source, final 42 cases, runner and launcher reviewed; no model, OS durability or worker-process qualification",
+  "prior_startup_evidence": "_scratch/asr-windows-lifecycle-proposal02/runs/lcs02/exit.json",
+  "rerun_authorized": false
+}

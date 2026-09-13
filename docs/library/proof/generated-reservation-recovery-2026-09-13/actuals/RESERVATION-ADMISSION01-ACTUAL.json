@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c8abba",
+  "wall_time_seconds": 0.1265164,
+  "exit_code": 0,
+  "original_token_count": 61,
+  "output": "{\r\n  \"input_rows\": 16,\r\n  \"pins_sha256\": \"e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf\",\r\n  \"admission_sha256\": \"eb45eb2b6e6d159a8b21809c7b5eb9c0cf072e804998aed060693750a79bcd28\",\r\n  \"approved_scope\": \"generated only\"\r\n}\r\n"
+}

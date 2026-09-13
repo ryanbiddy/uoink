@@ -1,0 +1,728 @@
+{
+  "schema": "uoink.reservation-fixed-copy-list.v1",
+  "count": 120,
+  "bytes": 955073,
+  "files": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-completing-draft\\reservation_file_port.py",
+      "destination": "author/before-completing-draft/reservation_file_port.py",
+      "bytes": 3515,
+      "sha256": "30f1c9a44ba5828b4a7c57cff101e38a4af494f2f952906cdb2fcd993f2d9331"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-completing-draft\\snapshot_reservations.py",
+      "destination": "author/before-completing-draft/snapshot_reservations.py",
+      "bytes": 13432,
+      "sha256": "6d5b2d2a8bc0b4b32449fdfde365120cf1802550ab1b94df59b44ea9f0296722"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review04\\durable_lifecycle.py",
+      "destination": "author/before-peer-review04/durable_lifecycle.py",
+      "bytes": 11333,
+      "sha256": "2754423bcaca8fecd76fc6ff707de13d900eb7c9bf244eb15806a88015395b1d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review04\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "author/before-peer-review04/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "c0acb7368d8128e9122943caf295c5d1a07bf3e55d15d59e2edfd3e7f345b33d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review04\\qualify_reservations.py",
+      "destination": "author/before-peer-review04/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "c76db9c1105260d1aeab4db5812cf95bad1e36e9360f83c6ffa5b57760e9a1ab"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review04\\test_reservations.py",
+      "destination": "author/before-peer-review04/test_reservations.py",
+      "bytes": 31624,
+      "sha256": "0b8a54305a80da6b0798112cf8980f36f24cb64302ce31549b5019bb8612df9b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review05\\durable_lifecycle.py",
+      "destination": "author/before-peer-review05/durable_lifecycle.py",
+      "bytes": 11522,
+      "sha256": "cfaccdf37829de9a2dccc5a9e526e3a093abe1ad8ff254123298554a17e581ef"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review05\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "author/before-peer-review05/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "3b2cce9e4144678d588fb9aa3f96045a7ecd9a03f4213e57096d2a69184d1af3"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review05\\qualify_reservations.py",
+      "destination": "author/before-peer-review05/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "583660d71206418550d6b9e56ecd3cb964697b70b87752c2246205c786011921"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-peer-review05\\test_reservations.py",
+      "destination": "author/before-peer-review05/test_reservations.py",
+      "bytes": 33141,
+      "sha256": "a1ab892ce03ad9f4ae65c5caf8d2feea9eca8a380d0d6d2538eed2dca7983ebe"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review01\\BRIEF.md",
+      "destination": "author/before-root-review01/BRIEF.md",
+      "bytes": 1617,
+      "sha256": "d3da16c5971a4e517bac8afd97adb8553e12ccb648ec77d766b9afab9d0cc39e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review01\\durable_lifecycle.py",
+      "destination": "author/before-root-review01/durable_lifecycle.py",
+      "bytes": 10535,
+      "sha256": "1f78ee0fb182d562e594dcf09a911ba4e89c59ecdda9b29ebfab2db9d2f9f322"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review01\\reservation_file_port.py",
+      "destination": "author/before-root-review01/reservation_file_port.py",
+      "bytes": 3579,
+      "sha256": "1a47f6b337f666125628193066133a01ed7dd77d145ad924bc4f350e61c71066"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review01\\snapshot_reservations.py",
+      "destination": "author/before-root-review01/snapshot_reservations.py",
+      "bytes": 19901,
+      "sha256": "d72abeeae030f6526827143f776a7e70617fb189951f7710e588990673055b55"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review01\\test_reservations.py",
+      "destination": "author/before-root-review01/test_reservations.py",
+      "bytes": 16233,
+      "sha256": "d035c6322f5922294c564acf2c801fec22cc245736af18f96766f744979b408b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review02\\durable_lifecycle.py",
+      "destination": "author/before-root-review02/durable_lifecycle.py",
+      "bytes": 10535,
+      "sha256": "1f78ee0fb182d562e594dcf09a911ba4e89c59ecdda9b29ebfab2db9d2f9f322"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review02\\snapshot_reservations.before-restart-renewal.py",
+      "destination": "author/before-root-review02/snapshot_reservations.before-restart-renewal.py",
+      "bytes": 23183,
+      "sha256": "af55bfd760a2f06340eb4827653e2543223ddbb1124eaa6d72f442edb27a0baf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review02\\snapshot_reservations.py",
+      "destination": "author/before-root-review02/snapshot_reservations.py",
+      "bytes": 22264,
+      "sha256": "a296fee27cae6d601a1b32defe337a12b5d596d2d5551f2d210ae9234c0f85cf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\before-root-review02\\test_reservations.py",
+      "destination": "author/before-root-review02/test_reservations.py",
+      "bytes": 23544,
+      "sha256": "649bd22d3bad3cf1ec4418733bba9e8b5402693d16622ce39de9364ea1ababcb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\BRIEF.md",
+      "destination": "author/BRIEF.md",
+      "bytes": 1617,
+      "sha256": "d3da16c5971a4e517bac8afd97adb8553e12ccb648ec77d766b9afab9d0cc39e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\durable_lifecycle.py",
+      "destination": "author/durable_lifecycle.py",
+      "bytes": 12753,
+      "sha256": "fb2c783b05e8af1a34dcd8da00a7c43bf5234eb36827ef02b43c8493a0c8cf46"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\EXPECTED-CASES.json",
+      "destination": "author/EXPECTED-CASES.json",
+      "bytes": 4071,
+      "sha256": "e1faafcc7311df44d1434adb9eda669949474ba57a5dd106a617b022d94e8fb0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\INTEGRATION-PORTS.md",
+      "destination": "author/INTEGRATION-PORTS.md",
+      "bytes": 3473,
+      "sha256": "3b1c027e086efa7ebf89b34a5968f6212abd3a9c17d2e2cc0bf3a1688e09a350"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\PEER-REVIEW04-REPAIR.md",
+      "destination": "author/PEER-REVIEW04-REPAIR.md",
+      "bytes": 794,
+      "sha256": "741499ffda4a233650f384c739ff87fde5e4e652ec695b03e29b2a573e9d6fca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\PEER-REVIEW05-REPAIR.md",
+      "destination": "author/PEER-REVIEW05-REPAIR.md",
+      "bytes": 1213,
+      "sha256": "daa247b3823608ad4d550be7b42d9077577aacb6e4d1bb6fc6943fe9bbe7adbd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\PINS.json",
+      "destination": "author/PINS.json",
+      "bytes": 2658,
+      "sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "author/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "8a06ab19cd7e3338827a26e90384610caf1aa96ec0b99ad2212ac4cb447eb743"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\qualify_reservations.py",
+      "destination": "author/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "a4e90f00b13f15c1e336bc99352e3ef928f71b5c65d4dbc9baf7a04bc4b8470c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation_file_port.py",
+      "destination": "author/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\BRIEF.md",
+      "destination": "author/reservation01/BRIEF.md",
+      "bytes": 1617,
+      "sha256": "d3da16c5971a4e517bac8afd97adb8553e12ccb648ec77d766b9afab9d0cc39e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\durable_lifecycle.py",
+      "destination": "author/reservation01/durable_lifecycle.py",
+      "bytes": 12753,
+      "sha256": "fb2c783b05e8af1a34dcd8da00a7c43bf5234eb36827ef02b43c8493a0c8cf46"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\exit.json",
+      "destination": "author/reservation01/exit.json",
+      "bytes": 341,
+      "sha256": "fb8b4d1276d0a40c02a86be05a410133558e21d2292619758f92d6e73fb7f190"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\EXPECTED-CASES.json",
+      "destination": "author/reservation01/EXPECTED-CASES.json",
+      "bytes": 4071,
+      "sha256": "e1faafcc7311df44d1434adb9eda669949474ba57a5dd106a617b022d94e8fb0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\input-check.json",
+      "destination": "author/reservation01/input-check.json",
+      "bytes": 6867,
+      "sha256": "df6cbdbd5238faf4736a03ab2ae29b0a2f7a6afded6840f42a7967937cc5c3bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\INTEGRATION-PORTS.md",
+      "destination": "author/reservation01/INTEGRATION-PORTS.md",
+      "bytes": 3473,
+      "sha256": "3b1c027e086efa7ebf89b34a5968f6212abd3a9c17d2e2cc0bf3a1688e09a350"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\native-exit.json",
+      "destination": "author/reservation01/native-exit.json",
+      "bytes": 114,
+      "sha256": "c7bc9cddc1c69c49bcc5f6ce1316c9642e3071d01b06411de95b4b592638725b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\PEER-REVIEW04-REPAIR.md",
+      "destination": "author/reservation01/PEER-REVIEW04-REPAIR.md",
+      "bytes": 794,
+      "sha256": "741499ffda4a233650f384c739ff87fde5e4e652ec695b03e29b2a573e9d6fca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\PEER-REVIEW05-REPAIR.md",
+      "destination": "author/reservation01/PEER-REVIEW05-REPAIR.md",
+      "bytes": 1213,
+      "sha256": "daa247b3823608ad4d550be7b42d9077577aacb6e4d1bb6fc6943fe9bbe7adbd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\PINS.json",
+      "destination": "author/reservation01/PINS.json",
+      "bytes": 2658,
+      "sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\plan.json",
+      "destination": "author/reservation01/plan.json",
+      "bytes": 3703,
+      "sha256": "1e50d219e8da96266a6ee3450502574ff7dad1e063b20b2ca2988fca1d31a770"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "author/reservation01/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "8a06ab19cd7e3338827a26e90384610caf1aa96ec0b99ad2212ac4cb447eb743"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\qualify_reservations.py",
+      "destination": "author/reservation01/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "a4e90f00b13f15c1e336bc99352e3ef928f71b5c65d4dbc9baf7a04bc4b8470c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\reservation_file_port.py",
+      "destination": "author/reservation01/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\ROOT-ADMISSION.json",
+      "destination": "author/reservation01/ROOT-ADMISSION.json",
+      "bytes": 448,
+      "sha256": "eb45eb2b6e6d159a8b21809c7b5eb9c0cf072e804998aed060693750a79bcd28"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\ROOT-REVIEW01-REPAIR.md",
+      "destination": "author/reservation01/ROOT-REVIEW01-REPAIR.md",
+      "bytes": 1762,
+      "sha256": "6b80cd80f0f4e6a59c0900e91251e14a5357ee25f7cc748116dfa0b28923e596"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\ROOT-REVIEW02-REPAIR.md",
+      "destination": "author/reservation01/ROOT-REVIEW02-REPAIR.md",
+      "bytes": 1864,
+      "sha256": "1603edfba01f5f8573f36fd252983a08b730aabc413f3558324b3b4a93e03726"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\ROOT-REVIEW03-RECOVERY.md",
+      "destination": "author/reservation01/ROOT-REVIEW03-RECOVERY.md",
+      "bytes": 1810,
+      "sha256": "4e64782fa133ad2d616d0c7337739017a2c71fefb62aec877b606136293aee68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\run_preflight01.ps1",
+      "destination": "author/reservation01/run_preflight01.ps1",
+      "bytes": 8805,
+      "sha256": "87936f699cc63d61b58bb2c7e4a7d253ddacd443e0ae95ef219f7142aa4a2225"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\snapshot_lifecycle.py",
+      "destination": "author/reservation01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\snapshot_reservations.py",
+      "destination": "author/reservation01/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\stderr.log",
+      "destination": "author/reservation01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\stdout.json",
+      "destination": "author/reservation01/stdout.json",
+      "bytes": 18685,
+      "sha256": "3c00ef1460e16915bc3bdec28616a05d974f6dabe06591f3da66b26fb88ffbc0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\reservation01\\test_reservations.py",
+      "destination": "author/reservation01/test_reservations.py",
+      "bytes": 37579,
+      "sha256": "f7e832ecd72341567f7049d91cee571cbd8eb2885e0d0532c0d7bd5a53d25bcd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\ROOT-ADMISSION.json",
+      "destination": "author/ROOT-ADMISSION.json",
+      "bytes": 448,
+      "sha256": "eb45eb2b6e6d159a8b21809c7b5eb9c0cf072e804998aed060693750a79bcd28"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\ROOT-REVIEW01-REPAIR.md",
+      "destination": "author/ROOT-REVIEW01-REPAIR.md",
+      "bytes": 1762,
+      "sha256": "6b80cd80f0f4e6a59c0900e91251e14a5357ee25f7cc748116dfa0b28923e596"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\ROOT-REVIEW02-REPAIR.md",
+      "destination": "author/ROOT-REVIEW02-REPAIR.md",
+      "bytes": 1864,
+      "sha256": "1603edfba01f5f8573f36fd252983a08b730aabc413f3558324b3b4a93e03726"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\ROOT-REVIEW03-RECOVERY.md",
+      "destination": "author/ROOT-REVIEW03-RECOVERY.md",
+      "bytes": 1810,
+      "sha256": "4e64782fa133ad2d616d0c7337739017a2c71fefb62aec877b606136293aee68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\run_preflight01.ps1",
+      "destination": "author/run_preflight01.ps1",
+      "bytes": 8805,
+      "sha256": "87936f699cc63d61b58bb2c7e4a7d253ddacd443e0ae95ef219f7142aa4a2225"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\snapshot_lifecycle.py",
+      "destination": "author/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\snapshot_reservations.py",
+      "destination": "author/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-implementation-proposal01\\test_reservations.py",
+      "destination": "author/test_reservations.py",
+      "bytes": 37579,
+      "sha256": "f7e832ecd72341567f7049d91cee571cbd8eb2885e0d0532c0d7bd5a53d25bcd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\BRIEF.md",
+      "destination": "independent/BRIEF.md",
+      "bytes": 1617,
+      "sha256": "d3da16c5971a4e517bac8afd97adb8553e12ccb648ec77d766b9afab9d0cc39e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\durable_lifecycle.py",
+      "destination": "independent/durable_lifecycle.py",
+      "bytes": 12753,
+      "sha256": "fb2c783b05e8af1a34dcd8da00a7c43bf5234eb36827ef02b43c8493a0c8cf46"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\EXPECTED-CASES.json",
+      "destination": "independent/EXPECTED-CASES.json",
+      "bytes": 4071,
+      "sha256": "e1faafcc7311df44d1434adb9eda669949474ba57a5dd106a617b022d94e8fb0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\INDEPENDENT-BRIEF.md",
+      "destination": "independent/INDEPENDENT-BRIEF.md",
+      "bytes": 644,
+      "sha256": "bc63cfd58e0dc3bee5e846fcd39edebc5d1fb86a38dae31f90d9a2ac289e31f0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\INTEGRATION-PORTS.md",
+      "destination": "independent/INTEGRATION-PORTS.md",
+      "bytes": 3473,
+      "sha256": "3b1c027e086efa7ebf89b34a5968f6212abd3a9c17d2e2cc0bf3a1688e09a350"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\PEER-REVIEW04-REPAIR.md",
+      "destination": "independent/PEER-REVIEW04-REPAIR.md",
+      "bytes": 794,
+      "sha256": "741499ffda4a233650f384c739ff87fde5e4e652ec695b03e29b2a573e9d6fca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\PEER-REVIEW05-REPAIR.md",
+      "destination": "independent/PEER-REVIEW05-REPAIR.md",
+      "bytes": 1213,
+      "sha256": "daa247b3823608ad4d550be7b42d9077577aacb6e4d1bb6fc6943fe9bbe7adbd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\PINS.json",
+      "destination": "independent/PINS.json",
+      "bytes": 2658,
+      "sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "independent/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "8a06ab19cd7e3338827a26e90384610caf1aa96ec0b99ad2212ac4cb447eb743"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\qualify_reservations.py",
+      "destination": "independent/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "a4e90f00b13f15c1e336bc99352e3ef928f71b5c65d4dbc9baf7a04bc4b8470c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation_file_port.py",
+      "destination": "independent/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\BRIEF.md",
+      "destination": "independent/reservation01/BRIEF.md",
+      "bytes": 1617,
+      "sha256": "d3da16c5971a4e517bac8afd97adb8553e12ccb648ec77d766b9afab9d0cc39e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\durable_lifecycle.py",
+      "destination": "independent/reservation01/durable_lifecycle.py",
+      "bytes": 12753,
+      "sha256": "fb2c783b05e8af1a34dcd8da00a7c43bf5234eb36827ef02b43c8493a0c8cf46"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\exit.json",
+      "destination": "independent/reservation01/exit.json",
+      "bytes": 341,
+      "sha256": "9e10a9e13211b5b8fc19a09f18d15fb734484ed079ca0ca0573f736f169cd195"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\EXPECTED-CASES.json",
+      "destination": "independent/reservation01/EXPECTED-CASES.json",
+      "bytes": 4071,
+      "sha256": "e1faafcc7311df44d1434adb9eda669949474ba57a5dd106a617b022d94e8fb0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\input-check.json",
+      "destination": "independent/reservation01/input-check.json",
+      "bytes": 6867,
+      "sha256": "8b15c80d41bdb2fe0df3d0994e14ec74b548db2f678f596b08d67f25e019ba6f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\INTEGRATION-PORTS.md",
+      "destination": "independent/reservation01/INTEGRATION-PORTS.md",
+      "bytes": 3473,
+      "sha256": "3b1c027e086efa7ebf89b34a5968f6212abd3a9c17d2e2cc0bf3a1688e09a350"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\native-exit.json",
+      "destination": "independent/reservation01/native-exit.json",
+      "bytes": 114,
+      "sha256": "88b35d614875b395480579d4dbc23cef6fcd0cb3a12909b1fd599b87e5698927"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\PEER-REVIEW04-REPAIR.md",
+      "destination": "independent/reservation01/PEER-REVIEW04-REPAIR.md",
+      "bytes": 794,
+      "sha256": "741499ffda4a233650f384c739ff87fde5e4e652ec695b03e29b2a573e9d6fca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\PEER-REVIEW05-REPAIR.md",
+      "destination": "independent/reservation01/PEER-REVIEW05-REPAIR.md",
+      "bytes": 1213,
+      "sha256": "daa247b3823608ad4d550be7b42d9077577aacb6e4d1bb6fc6943fe9bbe7adbd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\PINS.json",
+      "destination": "independent/reservation01/PINS.json",
+      "bytes": 2658,
+      "sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\plan.json",
+      "destination": "independent/reservation01/plan.json",
+      "bytes": 3691,
+      "sha256": "af17ba2200b572abb0a8e8743edcf82944267d93c7c21b7f56ea65fdd2059535"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\PREFLIGHT01-PROTOCOL.md",
+      "destination": "independent/reservation01/PREFLIGHT01-PROTOCOL.md",
+      "bytes": 2617,
+      "sha256": "8a06ab19cd7e3338827a26e90384610caf1aa96ec0b99ad2212ac4cb447eb743"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\qualify_reservations.py",
+      "destination": "independent/reservation01/qualify_reservations.py",
+      "bytes": 8938,
+      "sha256": "a4e90f00b13f15c1e336bc99352e3ef928f71b5c65d4dbc9baf7a04bc4b8470c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\reservation_file_port.py",
+      "destination": "independent/reservation01/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\ROOT-ADMISSION.json",
+      "destination": "independent/reservation01/ROOT-ADMISSION.json",
+      "bytes": 370,
+      "sha256": "6ea049cdd1afe512e4ed3ade28d697f53514d58c12b0fbda46eb1e6f5d17dde9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\ROOT-REVIEW01-REPAIR.md",
+      "destination": "independent/reservation01/ROOT-REVIEW01-REPAIR.md",
+      "bytes": 1762,
+      "sha256": "6b80cd80f0f4e6a59c0900e91251e14a5357ee25f7cc748116dfa0b28923e596"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\ROOT-REVIEW02-REPAIR.md",
+      "destination": "independent/reservation01/ROOT-REVIEW02-REPAIR.md",
+      "bytes": 1864,
+      "sha256": "1603edfba01f5f8573f36fd252983a08b730aabc413f3558324b3b4a93e03726"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\ROOT-REVIEW03-RECOVERY.md",
+      "destination": "independent/reservation01/ROOT-REVIEW03-RECOVERY.md",
+      "bytes": 1810,
+      "sha256": "4e64782fa133ad2d616d0c7337739017a2c71fefb62aec877b606136293aee68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\run_preflight01.ps1",
+      "destination": "independent/reservation01/run_preflight01.ps1",
+      "bytes": 8805,
+      "sha256": "87936f699cc63d61b58bb2c7e4a7d253ddacd443e0ae95ef219f7142aa4a2225"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\snapshot_lifecycle.py",
+      "destination": "independent/reservation01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\snapshot_reservations.py",
+      "destination": "independent/reservation01/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\stderr.log",
+      "destination": "independent/reservation01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\stdout.json",
+      "destination": "independent/reservation01/stdout.json",
+      "bytes": 18684,
+      "sha256": "9016f3db5510da6acdf4ae697163cb048c3d64be9869da81c43f358b784cf94c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\reservation01\\test_reservations.py",
+      "destination": "independent/reservation01/test_reservations.py",
+      "bytes": 37579,
+      "sha256": "f7e832ecd72341567f7049d91cee571cbd8eb2885e0d0532c0d7bd5a53d25bcd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\ROOT-ADMISSION.json",
+      "destination": "independent/ROOT-ADMISSION.json",
+      "bytes": 370,
+      "sha256": "6ea049cdd1afe512e4ed3ade28d697f53514d58c12b0fbda46eb1e6f5d17dde9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\ROOT-REVIEW01-REPAIR.md",
+      "destination": "independent/ROOT-REVIEW01-REPAIR.md",
+      "bytes": 1762,
+      "sha256": "6b80cd80f0f4e6a59c0900e91251e14a5357ee25f7cc748116dfa0b28923e596"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\ROOT-REVIEW02-REPAIR.md",
+      "destination": "independent/ROOT-REVIEW02-REPAIR.md",
+      "bytes": 1864,
+      "sha256": "1603edfba01f5f8573f36fd252983a08b730aabc413f3558324b3b4a93e03726"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\ROOT-REVIEW03-RECOVERY.md",
+      "destination": "independent/ROOT-REVIEW03-RECOVERY.md",
+      "bytes": 1810,
+      "sha256": "4e64782fa133ad2d616d0c7337739017a2c71fefb62aec877b606136293aee68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\run_preflight01.ps1",
+      "destination": "independent/run_preflight01.ps1",
+      "bytes": 8805,
+      "sha256": "87936f699cc63d61b58bb2c7e4a7d253ddacd443e0ae95ef219f7142aa4a2225"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\snapshot_lifecycle.py",
+      "destination": "independent/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\snapshot_reservations.py",
+      "destination": "independent/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-independent01\\test_reservations.py",
+      "destination": "independent/test_reservations.py",
+      "bytes": 37579,
+      "sha256": "f7e832ecd72341567f7049d91cee571cbd8eb2885e0d0532c0d7bd5a53d25bcd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\RESERVATION-ADMISSION01-ACTUAL.json",
+      "destination": "actuals/RESERVATION-ADMISSION01-ACTUAL.json",
+      "bytes": 393,
+      "sha256": "9edd569094bcba463e4d84d95408380a31457a61f4fd223103aa810c20a74209"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\RESERVATION-AUTHOR01-ACTUAL.json",
+      "destination": "actuals/RESERVATION-AUTHOR01-ACTUAL.json",
+      "bytes": 197,
+      "sha256": "05d35afc0eab8b2db2d4d85e632c911adf1d70cf5d0f39f189d3d04a84aaace5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\RESERVATION-INDEPENDENT01-ACTUAL.json",
+      "destination": "actuals/RESERVATION-INDEPENDENT01-ACTUAL.json",
+      "bytes": 197,
+      "sha256": "dc68e63e4c82f15562362bd4a5df8c84dd1249780adacc4219ddd6584bb01e28"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-recovery-proposal01\\BRIEF.md",
+      "destination": "context/initial-reservation-brief.md",
+      "bytes": 9378,
+      "sha256": "ee95397d2fb0d1ef999dff75d3a5ed2dd8325f90588640d4aa3911d89e64ac19"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\production-connection-next01\\NEXT-WORK.md",
+      "destination": "context/next-work-at-start.md",
+      "bytes": 7576,
+      "sha256": "d328ff3260166e0e6198a63cf53787bf8bb792974ac1d8ee6e19738d5fe80e2d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\ROOT-DIAGNOSTIC-ACTUAL-TOOL.json",
+      "destination": "context/prior-winreg/ROOT-DIAGNOSTIC-ACTUAL-TOOL.json",
+      "bytes": 265,
+      "sha256": "c4ca55fa6540ac18e9f5ff93fbe60074328e038546a7de912f4e23c9ff5d82f7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\REPAIR-BRIEF.md",
+      "destination": "context/prior-winreg/REPAIR-BRIEF.md",
+      "bytes": 1563,
+      "sha256": "d8bb7b4abd0edf00e38a0aa161bd1becfc28dac2d7bb907ad00a8e3a144216ea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\qualify_lifecycle.py",
+      "destination": "context/prior-winreg/qualify_lifecycle.py",
+      "bytes": 26872,
+      "sha256": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\run_lifecycle02.ps1",
+      "destination": "context/prior-winreg/run_lifecycle02.ps1",
+      "bytes": 8326,
+      "sha256": "d31b87ae38c0345eef4952999d7691af08aa2855cde5e04a6efd14ee029da375"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\runs\\lcs02\\stdout.json",
+      "destination": "context/prior-winreg/stdout.json",
+      "bytes": 8627,
+      "sha256": "58319f333a2599331742eb527755c358deac5709190fb014c19e1082ad6133de"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\runs\\lcs02\\exit.json",
+      "destination": "context/prior-winreg/exit.json",
+      "bytes": 217,
+      "sha256": "6bb0821561b910ecbc77e0d682571a071d011500a44d0e7c5b231265ff36b476"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\runs\\lcs02\\native-exit.json",
+      "destination": "context/prior-winreg/native-exit.json",
+      "bytes": 71,
+      "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\runs\\lcs02\\plan.json",
+      "destination": "context/prior-winreg/plan.json",
+      "bytes": 3884,
+      "sha256": "d1ba1d1da5eec28a50301340aa7f5dae1f562941e3a0cfac8345069fe961d9ca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\ACTUAL-TOOL-LCS02.json",
+      "destination": "context/prior-winreg/ACTUAL-TOOL-LCS02.json",
+      "bytes": 124,
+      "sha256": "84e37be4b0f0003250a4fa2cc00d7ea6c2014966f2a3ede0d1aa7eb68fb98e58"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-source-verdict01\\VERDICT.md",
+      "destination": "review/VERDICT.md",
+      "bytes": 3312,
+      "sha256": "683863619df758953d31eb82369dbbfb8a8e5e411cf307b109e7830755d9a757"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\snapshot-reservation-source-verdict01\\COPY-PLAN.md",
+      "destination": "review/COPY-PLAN.md",
+      "bytes": 1636,
+      "sha256": "1a16a345831e5b2ab4ad6b6715ef6815c3001c40e38497f4ca9105bba10bc078"
+    }
+  ],
+  "list_copy_instruction": "Copy COPY-LIST.json itself under review before the outer seal; not self-hashed here."
+}
