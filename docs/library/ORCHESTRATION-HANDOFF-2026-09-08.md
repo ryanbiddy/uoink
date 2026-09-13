@@ -97,7 +97,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | Gemini reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; separating verified Lightning patch leaves 18 / 14. No qualified replacement runtime | Hold remains; compatible runtime migration and model qualification need exact Ryan scope below |
-| Signing | Optional signing path integrated at d24cc33 | 34 focused passes; real Inno callback refuses a missing certificate. No successful signing credit | Independent Gemini review, then full candidate tree; actual certificate/service choice remains Ryan's |
+| Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -149,22 +149,32 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-1. Review d24cc33 through GEMINI-SIGNING-REVIEW-BRIEF-2026-09-12.md. The first
-   signing suite was 32/2; its documented code repair passes the same 34 cases.
-   Inno wiring03 confirms refusal after two preserved wrapper failures. The
-   34-payload signing proof seal matches staged Git bytes.
-2. Runtime graph run db13e13b finished; Astra reproduced 14 passes, but rejected
-   its verifier's integrity, tag, identity and extras gaps. Its report also
-   mislabels Torch 2.10 as a fixed target and metadata relaxation as capability
-   preservation. Follow RUNTIME-GRAPH-REPAIR-BRIEF-2026-09-12.md in a fresh run,
-   preserving the first worktree and all raw metadata. Do not integrate the
-   uncorrected checker or use its 281-edge count as complete closure.
-3. Integrate only reviewed fixes, update this State/Queue, then run the complete
+1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
+   ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
+   Astra recorded 39 worker cases, 34 checkout baseline cases and 48 final
+   focused passes. Five invalid worker probes are archived, not accepted tests.
+   Receipt01's four failures and four worker setup-error attempts remain in the
+   77-payload seal. Inno wiring04 is a direct refusal, not successful signing.
+2. Runtime graph repair 6c96f0a3 has 18 independent passes and preserves all 306
+   original evidence files exactly. It still drops root extras, accepts duplicate
+   JSON keys and accepts an empty-host URL; path/fallback gaps also remain.
+   Gemini 85ce8600 is running RUNTIME-GRAPH-BOUNDARY-REPAIR-BRIEF-2026-09-12.md.
+   Preserve both earlier workers and all raw metadata. No production pin changed.
+3. NLTK proposal 4a939c69 is not accepted. Its preparation utility hashes a patch
+   it does not apply, has receipt/link boundaries to fix, and its tests pollute
+   imports and consume synthetic weights rather than mock serialization. Do not
+   rerun that original suite unchanged. Gemini ecbf6acd is running
+   NLTK-PATHSEC-PREPARATION-REPAIR-BRIEF-2026-09-12.md, preserving the first output.
+4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
    Package 08 remains the unchanged held review artifact, not evidence for the
    newer build source. Prepare exact remaining owner decisions and release assets
    while working through the technical repairs. Public publication/main remain
    gated; only the completed branch backup is authorized.
+5. WEBSITE-RELEASE-INTEGRATION-BRIEF-2026-09-12.md records the read-only site and
+   public-release review. Public GitHub remains v3.7.0. HQ site source is 7d62d1e;
+   its uncommitted content-factory work was not changed. Prepare the final page,
+   artifact links, notes and demo from accepted evidence before publication.
 
 The completed earlier sequence below is retained as history.
 
@@ -567,9 +577,11 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 ## Blockers for Ryan
 
 - Actual release signing requires Ryan's publisher certificate and timestamp
-  service selection. The optional implementation is d24cc33; it has no successful
-  signing credit. Standard personal stores returned no code-signing certificate
-  and SignTool was not on PATH. Do not buy a service or change Windows trust.
+  service selection. The implementation is now 0b3629d; it has no successful
+  Uoink signing credit. Standard personal stores returned no code-signing
+  certificate. SignTool is absent from PATH but exists in Windows SDK
+  10.0.26100.0/x64; its Microsoft signature verifies with unchanged bytes.
+  Do not buy a service or change Windows trust.
 - This host is Windows 11 Home build 26200; WindowsSandbox.exe and vmconnect.exe
   are absent. Routine sign-in is now authorized by Ryan's AGENTS instructions,
   but the failed Desktop override remains forbidden. A separately verified clean
@@ -612,6 +624,39 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-12 - Signing repair sealed; two dependency repairs continue
+
+0b3629d integrates the Gemini signing report through raw diff/three-way apply,
+with Astra's corrections and 48 final focused passes. The build preserves a
+previous EXE/receipt before compilation, marks the current attempt unverified,
+retains callback errors/output and requires matching installer/uninstaller
+verification before recording signed success. PowerShell 7 host selection and
+early certificate trust/provider handling are corrected. No certificate or trust
+store was changed. All 77 proof payloads match Git and disk; existing tests remain
+unchanged. Four new-suite failures were repaired in code, not by changing their
+assertions. The final two new files add 14 cases to the established 34-case set.
+
+Reject Gemini's $f quoting claim: Inno substitutes a quoted filename. Reject its
+certificate SignatureAlgorithm probe as evidence of an executable digest.
+The original five probes/report and four worker attempts with 27 setup errors
+each are retained. The report omitted those failures; the XML governs. Real
+Inno wiring04 observes one durable certificate refusal and compiler exit 2,
+without a forwarding observer or output installer. Later diagnostic capture has
+its own new test. A read-only check of Microsoft's existing SDK SignTool also
+passes without byte changes; neither observation is successful Uoink signing.
+
+The graph repair has 18 independent passes, but three new negative probes show
+remaining acceptance gaps. All 306 copied original evidence files are unchanged.
+A reader's first launch failed before script execution because the verification
+venv needed IG_FORBIDDEN_LIVE; its documented -I -S -B metadata-only replacement
+completed. New run 85ce8600 owns exact boundaries and truthful report scope.
+NLTK run ecbf6acd repairs the unaccepted preparation/test proposal; no staged
+dependency, production lock, model or installed app has changed in this work.
+
+The personal-site and GitHub inspection is read-only. No publication, ordinary
+upgrade or new branch push occurred. Package 08 and its prior verified backup
+remain historical; newer source needs combined qualification before replacement.
 
 ### 2026-09-12 22:00 PDT - Release work resumes; signing path and graph review
 
