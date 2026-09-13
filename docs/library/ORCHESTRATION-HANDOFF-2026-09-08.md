@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root; its real basis remains undecided. Finish exact conversion protocol and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. Finish plain-state reader, ASR identity repair and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -161,8 +161,9 @@ by raw diff/three-way apply; Git's EOL conversion was checked and exact tested
 worker bytes restored. A staging-only failure omitted ignored receipts.zip;
 force-adding its unchanged sealed bytes repaired that failure. All19 payloads
 match Git/disk. Continue the concrete D1 adapter, ASR trusted-manifest resolver
-and VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md. D1 author/root54-case
-synthetic checks pass; final proof review is next. ASR first73-case run fails
+and VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md. D1 adapter is accepted
+as preparation at381985c: author/root54-case synthetic checks pass, all53 proof
+payloads match Git/disk; real inspection remains an owner decision. ASR first73-case run fails
 64/9; a separate40-file generated-data diagnostic identifies cross-API Windows
 ctime differences. Prepare the exact identity repair without time tolerance,
 retain original failures, and qualify before integration. No actual model or
@@ -805,6 +806,14 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
+- D1 is now a concrete optional static inspection decision: read
+  ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md (381985c). The reviewed adapter
+  would inspect one hash-bound existing17,719,103-byte checkpoint snapshot,
+  interpreting only the two500-byte buffers and two version bytes. It uses
+  the fixed eight-ULP consistency basis, with no pickle evaluation, model,
+  conversion or network. Both54-case synthetic runs pass; actual inspection
+  remains disabled. Accepting a consistent orientation would not authenticate
+  the writer or approve the separate D2 conversion and D4 runtime decisions.
 - Actual release signing requires Ryan's publisher certificate and timestamp
   service selection. The implementation is now 0b3629d; it has no successful
   Uoink signing credit. Standard personal stores returned no code-signing
@@ -4333,3 +4342,20 @@ diagnostic shows differing path/handle ctime namespaces on nine files. A strict
 identity repair is being prepared without tolerance or loss of same-API checks.
 The actual plain-state reader is assigned under the new source-only brief.
 Website/marketing remain paused until council and integrator accept the product.
+
+### 2026-09-13 - Concrete D1 adapter qualified; real inspection still disabled
+
+381985c preserves the fixed inspection adapter, both54-case synthetic runs and
+all53 proof payloads matching Git/disk. Author0.038318s and root0.037597s,
+all qualification/native/outer exits0, identical membership and unchanged
+inputs. The adapter binds131 members and interprets exactly1002 selected bytes
+in generated archives. Its real gate and the converter's real profile stayNone.
+ASCII3-newline remains a prediction for the real artifact. Neither orientation
+nor a synthetic pass grants conversion, native runtime or writer-authentication
+credit. The approved filesystem branch was not executed; audit scope is stated
+precisely in the proof. Read ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md.
+
+D1's optional owner decision is now listed above. Continue the ASR identity
+repair and fixed plain-state reader without actual artifact/model access.
+Production remains e8d058f; no new complete tree, package, install or website/
+marketing work occurred during this documentary integration.
