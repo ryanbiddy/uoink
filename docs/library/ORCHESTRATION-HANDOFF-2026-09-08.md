@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK source prepared at 4aec8ff; captured graph checker accepted at 5e46f2f | NLTK 37/0/1 in each root. Graph 36/0/0 in each root; both dependency selections still fail. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Gemini is preparing the local NLTK wheel; review/integrate it, update build/pins/notices and qualify. Runtime migration/model qualification retain Ryan gates |
+| Security | NLTK source at 4aec8ff, reproducible local wheel at 52d9f7d; graph checker at 5e46f2f | Local wheel 43/0/0 in each root; 107 sealed payloads plus three vendor artifacts verified. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Bind the reviewed wheel in build/pins/notices, then qualify combined source and package. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -168,9 +168,12 @@ is complete but is not this goal's completion. Current queue:
    before the retained worker reports. Hash-override, path/receipt and test
    isolation gaps were corrected; original proposals are archived. Final result
    is 37 pass / zero fail / one Windows symlink-permission skip in both roots.
-   Gemini a332397f local-wheel preparation is dispatched under NLTK-LOCAL-WHEEL-BRIEF.
-   Review its labelled wheel, verified RECORD/hash and provenance, then update
-   installer lock/build/notices and qualify it. Preserve pristine upstream NLTK
+   The local wheel is accepted at 52d9f7d after Astra takeover: 43 passes in each
+   root, 512 independently verified members, six expected changes and identical
+   bytes under Python 3.13/3.14. SHA256 969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8;
+   size 6,597,605 bytes. Gemini a332397f stays PARTIAL: print timeout, 33/1 and no
+   review report despite completed/zero transport. Read the local-wheel verdict.
+   Update installer lock/build/notices and qualify it. Preserve pristine upstream NLTK
    and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
    Astra preserved 504 pristine files at _scratch/nltk-upstream-before-local13/nltk,
    with complete before/copy/after hash equality and a separate receipt.
@@ -638,6 +641,34 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-13 - Local NLTK wheel accepted after provider timeout
+
+52d9f7d integrates the labelled local wheel and builder, with 43 passes in the
+detached takeover and checkout. The 107-payload seal and three vendor artifacts
+match Git and disk. Original compressed wheels have the same 512 payloads but
+488 different compressed sizes under Python 3.13/3.14. Fixed ZIP_STORED output
+now has the same 6,597,605 bytes in both. Independent review verifies all RECORD
+entries, the three accepted patch hashes, VERSION/METADATA and unchanged licence
+and dependency payloads. No installed repair or advisory clearance is claimed.
+
+The Control Room transport marked a332397f completed after a 20-minute print
+timeout returned partial output. Its worker result is 33 pass / one failed; no
+verdict was delivered. Astra preserved that workspace and copied its snapshot
+to _scratch/wheel-integrator13, a detached worktree, before finishing locally.
+Control Room's adapter currently treats a zero process exit without a terminal
+provider SUCCESS as success; a separate bounded adapter repair should close
+that status defect. Do not launch another identical packaging run.
+
+The original parser negatives remain seven failed / two passed. Astra's first
+43-case run has two failures: changed error wording and a new test that patched
+Path.lstat while the builder calls os.lstat. The production wording and the
+unaccepted probe receiver are corrected without changing the refusal assertion.
+Fresh original/repaired results remain separate. The unaccepted compressed golden
+hash/size and global-import probe were corrected with the documented artifact
+format and child-process observation. No previously committed test changed.
+The first patch-instrument preflight wrote no source because the worker had
+changed its temporary-directory block; that correction is also recorded.
 
 ### 2026-09-12 - Branch backup and release-copy preparation
 
