@@ -1,0 +1,42 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "before-worktree-path-review/BRIEF.md",
+    "bytes": 9139,
+    "sha256": "82c97d9ddb0d25dd3780efcbd298f50f37223c69cd560b3431aabcb4426d96b7"
+  },
+  {
+    "path": "before-worktree-path-review/SELECTED-INPUTS.md",
+    "bytes": 9708,
+    "sha256": "0886f403c0469c4ba15da7e521f138fa603a5a48ba5ab37d2743f8c344e5981c"
+  },
+  {
+    "path": "BRIEF.md",
+    "bytes": 9386,
+    "sha256": "1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149"
+  },
+  {
+    "path": "DISPATCH.py",
+    "bytes": 2594,
+    "sha256": "31e5f2b3e5edc4e7823fec024dc42e6eedb8a1a1c9415ff9e8782ec06a35fd62"
+  },
+  {
+    "path": "SELECTED-INPUTS.md",
+    "bytes": 9640,
+    "sha256": "b601b4ed7543f50f82784d832bc5527743d6b94c31b35bd28662725ac1d751d3"
+  },
+  {
+    "path": "SELECTED-TEXT-CHECK.json",
+    "bytes": 664,
+    "sha256": "e18f6759fb03878ed48c9ac35779a42dc5438569a1bc374278b2a070c7beede6"
+  },
+  {
+    "path": "WORKTREE-PATH-CORRECTION.md",
+    "bytes": 750,
+    "sha256": "be2ba362400cd768d9e892bedf410f653ad36cf228682b52d766c3e5463289be"
+  }
+]

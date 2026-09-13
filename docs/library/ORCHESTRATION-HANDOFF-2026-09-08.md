@@ -110,6 +110,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
+| Latest component council | Notice, operation and actual adapter brief frozen for Gemini | Three committed groups; 69 selected text files and three proof manifests match. No new verdict yet | Dispatch from the clean brief commit, review the complete report and integrate only its supported conclusions |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -315,6 +316,13 @@ path and adapter-owned cleanup, with explicit generated authority seams.
 Read ASTRA-GENERATED-ADAPTER-VERDICT-2026-09-13.md; all63 proof payloads match
 Git/disk. No real runtime authority was granted. Durable reservation/recovery
 and the worker-local runtime owner remain the next implementation work.
+The next Gemini source review is frozen in
+proof/notices-operations-adapter-council-brief-2026-09-13/BRIEF.md,
+SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
+Its three groups are the notice product repair71d3e70, generated operations
+7fba83a and actual proposed-adapter observation7ced134. It names no suites:
+read the selected text sources and receipts only, then write the one report.
+All proof paths resolve under the assigned worker checkout. Root owns dispatch.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5273,3 +5281,22 @@ readable CLEARED text alone cannot establish restart quiescence. Worker-local
 runtime owner contracts are being mapped independently. A three-group Gemini
 review of notice packaging, generated operations and this connection is next.
 Website and marketing remain paused.
+
+### 2026-09-13 - Council scope frozen; recovery repairs remain unexecuted
+
+The next Gemini review covers notices71d3e70, generated operations7fba83a and
+actual proposed-adapter connection7ced134. Its brief and eight proof payloads
+are frozen under proof/notices-operations-adapter-council-brief-2026-09-13.
+Root's direct check51b5e5 matched69 selected text files/716,129 bytes and three
+existing manifests. Disk/Git verification7e8b90 returned0 for8 payloads/41,889
+bytes, seal a617fe8751a373960666c3a3154e9018af38931640fa8926d38c024902059a82.
+No test or native execution is assigned to this review. Preserve the earlier
+absolute-path draft; the corrected brief restricts reads to the worker checkout.
+
+Source review of the recovery draft found absent-token admission, ordinary
+completion clearing quarantine, worker ownership lost during startup publication,
+and failure paths masking the first error. Repairs and focused negative cases
+are being prepared before execution. The runtime-owner plan also identifies
+missing PCM/filter issuance and the path-based WhisperX constructor connection;
+its next source unit will preserve the existing registry identity checks.
+These are active implementation items. Website and marketing remain paused.
