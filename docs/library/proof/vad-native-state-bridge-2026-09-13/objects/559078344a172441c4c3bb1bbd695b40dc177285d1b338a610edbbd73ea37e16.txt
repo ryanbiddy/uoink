@@ -1,0 +1,10 @@
+{
+  "scope": "Text comparison only; no qualification execution",
+  "case_count": 61,
+  "all_case_and_fixture_port_definitions_identical": true,
+  "block_utf8_bytes": 22260,
+  "block_sha256": "70520e9194c7a34bd63eef1ab286f144de7b6a4410c525a86ad85758cf7bc115",
+  "before_sha256": "a30ddbdbe970b37dbdc09a8f5a9dae9390465b07c8d884bfde4e9f8ac8ef8ea4",
+  "after_sha256": "2533c990e1396f5b8265e42d9073adc49e7bd035efda97098b8fbd3f4f22e389",
+  "bridge_sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+}

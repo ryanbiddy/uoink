@@ -1,0 +1,7 @@
+{
+  "verification_precedes_outer_seal": true,
+  "original_and_object_bytes_match": true,
+  "logical_sources": 83,
+  "unique_content_objects": 53,
+  "all_source_paths_recorded_in": "SOURCE-TREE.json"
+}

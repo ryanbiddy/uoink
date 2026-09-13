@@ -1,0 +1,22 @@
+# Bridge proposal ready for exact-source review
+
+2026-09-13. Source preparation is complete. No reader, bridge, harness, factory, native adapter or model has executed in this task. There is no ROOT-ADMISSION.json or run directory; the template is deliberately false. The planned qualification contains 61 cases, with no pass/fail measurement yet.
+
+| Review input | SHA-256 |
+| --- | --- |
+| `state_bridge.py` | `b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2` |
+| `qualify_bridge.py` | `2533c990e1396f5b8265e42d9073adc49e7bd035efda97098b8fbd3f4f22e389` |
+| `run_preflight01.ps1` | `2ccdc5723c45d24326c6fed2b95b142cb63323690cfaf3addf7c21e518dddd60` |
+| `PREFLIGHT01-PROTOCOL.md` | `cc3739fd492ca905f1762f4c671453a5e1a57683ec799619ba355d06be42b6d7` |
+| `PINS.json` | `c92f96a56524b3a8671b5e9f334d190f8b8661272e472a9a106537991dbbe9f1` |
+| `EXPECTED-CASES.json` | `eb7a97021628b38b6c4d2246cc5c167ae909cc5ca0289e6e5468e80786ce2acf` |
+| Qualified reference reader | `3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c` |
+| Reference fixed factory text | `69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b` |
+
+Read BRIEF.md and PORT-CONTRACT.md with the code. The bridge revalidates the immutable byte snapshot through the exact reader before callbacks, checks 54 descriptors, allocates owned synthetic CPU/F32 state, verifies interval non-overlap and bounded copied/readback bytes, then calls a trusted owning factory port. All returned temporary owners are cleaned on every outcome. The native entry is unconditionally closed; no implementation imports Torch or uses a deserializer.
+
+Root already read the initial bridge, all 61 case bodies and port contract. The requested final guard-integrity refinement is preserved in PREEXECUTION-GUARD-INTEGRITY-REPAIR01.md, both exact drafts and the two text diffs. GUARD-REPAIR-TEXT-VERIFICATION.json confirms the entire 22,260-byte fixture/port/case-definition block is unchanged, SHA-256 `70520e9194c7a34bd63eef1ab286f144de7b6a4410c525a86ad85758cf7bc115`. The final harness reports five guard-state booleans and their conjunction; failures affect qualification exit without inventing failed behavior cases. The launcher requires all fields.
+
+PREEXECUTION-NATIVE-EXIT-BINDING.md explains the explicit immediate `$global:LASTEXITCODE` capture. This launcher never resets LASTEXITCODE and writes NATIVE-RETURN.json before postchecks. No native exit probe was run during preparation. The original unexecuted launcher read remains in its retained draft.
+
+Qualification still requires root's exact pinned admission and one fresh invocation. The synthetic environment guard and faithful fake ports cannot establish real allocation, alias freedom, cleanup, module imports, factory behavior, native values or inference. Partial allocation/factory cleanup before a returned owner is explicitly the port's duty; a normal release return is the only confirmation observed by this bridge. A future real adapter and actual authority remain D4 work.

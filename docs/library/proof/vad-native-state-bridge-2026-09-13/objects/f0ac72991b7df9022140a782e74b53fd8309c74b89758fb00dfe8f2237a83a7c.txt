@@ -1,0 +1,8 @@
+{
+  "scope": "generated-bytes-and-fake-ports-only",
+  "label": "bridge-preflight01",
+  "pins_sha256": "REPLACE_ONLY_AFTER_ROOT_EXACT_SOURCE_REVIEW",
+  "admitted": false,
+  "native_or_model_approved": false,
+  "release_approved": false
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "227848",
+  "wall_time_seconds": 0.1673316,
+  "exit_code": 0,
+  "original_token_count": 84,
+  "output": "{\r\n  \"verification_exit\": 0,\r\n  \"input_checks\": 16,\r\n  \"cases\": 61,\r\n  \"verification_sha256\": \"47897b303b3693d0ae55eb5a1369d9799f3c7b8401cae40362aa64e8e7f54a76\",\r\n  \"stdout_sha256\": \"f89e23b1f30366c21fd0a3d7f4f3289c25f0c783cd72ab0cb5de89a2eac30ee8\",\r\n  \"seal_status\": \"unsealed pending independent root repeat and combined archive\"\r\n}\r\n"
+}

@@ -1,0 +1,12 @@
+{
+  "complete": true,
+  "passed": 61,
+  "failed": 0,
+  "qualification_exit": 0,
+  "native_exit": 0,
+  "elapsed_seconds": 3.874630900012562,
+  "stdout_sha256": "f89e23b1f30366c21fd0a3d7f4f3289c25f0c783cd72ab0cb5de89a2eac30ee8",
+  "inputs_unchanged": true,
+  "native_qualified": false,
+  "release_approved": false
+}

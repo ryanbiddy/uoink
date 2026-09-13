@@ -1,0 +1,23 @@
+{
+  "evidence_kind": "Fields reported by integrator /root in its task message; not a fabricated complete tool capture",
+  "root_preparation": {
+    "chunk_id": "08bdc1",
+    "exit_code": 0,
+    "wall_time_seconds": 0.187149,
+    "reported_operation": "Copied eleven exact pinned files, original PINS, COPY-BINDINGS and distinct ROOT-ADMISSION",
+    "raw_console_output": null
+  },
+  "root_documentary_check": {
+    "chunk_id": "32f93f",
+    "exit_code": 0,
+    "wall_time_seconds": 0.1116327,
+    "reported_operation": "Exact ordered case equality and all five guard fields confirmed",
+    "raw_console_output": null
+  },
+  "root_native_run": {
+    "raw_tool_capture": "root/bridge-preflight01/outer-tool-result.json",
+    "chunk_id": "0851ce",
+    "exit_code": 0,
+    "wall_time_seconds": 4.2795905
+  }
+}
