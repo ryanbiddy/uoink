@@ -26,8 +26,9 @@ Generated reservation recovery at `f9ab6fe` passes 42 cases in each independent
 copy, with zero failures or skips and 20 passing nested subtests. The component
 retains uncertain ownership and requires explicit reconciliation before reuse.
 These checks use fake workers and journals. Retained Windows handles, native
-recovery and real model qualification remain open. Gemini's latest review is
-partial at `870fa00`; a supplement is running to cover its omitted source files.
+recovery and real model qualification remain open. Gemini's partial report at
+`870fa00` is supplemented at `2339a09`. Astra accepts the three component verdicts
+with documented source and scope corrections; this is not market acceptance.
 
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source

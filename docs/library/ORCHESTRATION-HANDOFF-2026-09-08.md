@@ -110,7 +110,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
-| Latest component council | Gemini report retained as partial at 870fa00 | Run e30846da completed, but activity records show direct views of only30 of69 selected paths. Root verified all69 input bytes in both checkouts; this does not substitute for council review | Complete a focused supplement for omitted source, then reassess. No overall release acceptance |
+| Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -337,7 +337,12 @@ supplement must cover omitted source and correct the fixed-hash and line-referen
 claims. The supplement is frozen in
 proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md,
 SHA46ef67faab2d578f8c1be471e01d383c2cee898e9556ffc324fde1c4941bf651.
-Dispatch this source-only review next. No component measurement rerun is requested.
+Run ca1e1356 completed the source-only supplement and is integrated at2339a09.
+Read ASTRA-COUNCIL-SUPPLEMENT-VERDICT-2026-09-13.md. All39 omitted paths have
+recorded views; full-line coverage remains worker-reported and Inno151–1898
+is explicitly unread. Astra accepts the three scoped verdicts with sandbox,
+cleanup and state-transition corrections. All17 proof payloads match Git/disk.
+The original report stays partial. No component measurement was rerun.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5371,3 +5376,23 @@ journal bytes alone still cannot establish prior-worker quiescence.
 The council supplement was dispatched from8a81250 through the existing
 subscription Control Room path, session34207. Original partial review remains
 partial until omitted source is reviewed. Website and marketing remain paused.
+
+### 2026-09-13 - Council supplement integrated with bounded acceptance
+
+Commit2339a09 integrates Gemini ca1e1356 from8a81250 by worker diff/three-way
+apply. The completed source-only run has outer0 in3b847e and no assigned suites.
+Root54217e verified all69 selected files/716,129 bytes in both checkouts. All17
+supplement proof payloads/223,941 bytes match disk and Git in dc3df6; seal
+7cc58609adfdf8231bc39748f1b205cd244be26534eb83c0b8c72ccc09f404b2.
+
+The retained metadata records direct views of all39 omitted paths. It cannot
+independently verify displayed line ranges;38 full-file assertions belong to
+the worker, while Inno151–1898 is explicitly unread. One index-read ERROR is
+preserved separately and adds no coverage. Astra accepts notice/operation/adapter
+scope with corrections to sandbox wording, generator exceptions and shutdown
+state ownership. No new product defect or measured test result follows.
+
+Concrete Windows journal and startup integration source is being reviewed.
+The runtime-owner publication repair adds four negatives, for11 planned cases;
+none has executed yet. Backup session35629 still yields no output in9df01e;
+no duplicate push was started. Website and marketing remain paused.
