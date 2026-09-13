@@ -693,6 +693,10 @@ match. Do not assume one Git configuration switch preserves new proof bytes.
 
 MIRROR-PROCESS-AUTHORITY-REPAIR02-BRIEF-2026-09-13.md assigns Grok the four
 remaining groups with stable process identity and handle-lifetime controls.
+Its first dispatch from db94230 exited one before starting a worker because an
+abbreviated verifier path was interpreted as a missing frozen Git input. The
+brief now uses the full existing absolute verifier path; preserve the first
+preflight refusal. This is a dispatch-reference repair, not a product rerun.
 The next complete-tree instruments are prepared only: a fresh tree09 supervisor
 self-test exits zero with its inert print child. The passive mirror observer has
 14, then 15 synthetic passes after an explicit incomplete-session correction;

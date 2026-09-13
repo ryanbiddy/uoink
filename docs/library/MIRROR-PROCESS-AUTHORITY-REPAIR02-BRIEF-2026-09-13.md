@@ -65,10 +65,16 @@ existing committed test. If a boundary cannot be repaired safely, write the
 specific remaining defect and preserve the partial patch.
 
 Use E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe
-and the checkout's _scratch\integrator_verify.py by absolute path, --root your
+and E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py by absolute path, --root your
 worktree, fresh --label, --runxfail. Before native Python starts set
 IG_FORBIDDEN_LIVE=C:\Users\hello\AppData\Local\Uoink\index.db,
 PYTHONDONTWRITEBYTECODE=1, PHASE3_REQUIRE_IMPLEMENTATION=1 and scrub all provider
 keys, tokens and endpoint overrides. No live index, 5179, models, new fetch,
 paid API, credentials, Inno, installed state, website or marketing. No complete
 tree or release-readiness claim from these focused probes.
+
+Dispatch preflight01 from db9423053600e88589e795cea47ec83af079313f exited one
+before any worker started: the abbreviated verifier reference was interpreted
+as a required file absent from the frozen Git base. This revision gives the
+existing external verifier's full absolute path. Its original brief bytes remain
+in Git and in Astra's preserved preflight draft. No test or product attempt ran.
