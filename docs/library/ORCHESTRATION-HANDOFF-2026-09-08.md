@@ -108,7 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace | Protocol/pipe contracts at 9c40271; native positive at 668b08a; handshake at e98f4c2 | Exact109 repair passes67 cases in each root and native timeout02 returns valid0. Actual timeout01 remains FAIL; logical quarantine stays set in the fresh result | Seal timeout repair evidence, then qualify child read-set adoption. No native model or release acceptance |
+| Windows namespace | Native positive at 668b08a; handshake at e98f4c2; timeout repair at 0d93186 | Exact109 repair passes67 cases in each root and native timeout02 returns valid0; all120 proof payloads match Git/disk. Original timeout01 remains FAIL. Child adoption positive/refusal now return valid0 with actual child exits0/2 respectively | Seal child adoption, repair the adapter-to-session connection, then council review. Durable recovery and real runtime remain open |
 | Local NLTK graph input | Exact metadata receipt at e5b1ddd; graph at 4827288; cached-wheel inspection at 95a7f29 | Three-record checker passes59 cases in each root; complete144-pin/287-edge graph remains FAIL for two missing wheels. Both existing wheels now pass full byte/RECORD checks; all90 new proof payloads match Git/disk | Qualify the five-record metadata repair and complete missing license notices; no runtime or security clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -285,8 +285,15 @@ without Python finalization. Exact terminal-broken-pipe repair73a1109a now passe
 67 cases independently in each root, including all54 original cases unchanged.
 Fresh native timeout02 actual2624a3 returns valid0: the expected timeout and
 logical quarantine remain, exact child exits1/job0, completed109 I/O retires,
-and generated physical teardown completes. Seal both failed/fresh histories;
-then qualify child read-set adoption. No model is involved.
+and generated physical teardown completes. The repair is integrated at0d93186;
+read ASTRA-WINDOWS-TIMEOUT-REPAIR-VERDICT-2026-09-13.md. All117 timeout and three
+integrator payloads match Git/disk. Original timeout01 remains failed.
+Child adoption positive4e8051 and wrong-identity2abf39 now return valid0:
+five generated files/328B read only after authentication; the negative child
+refuses before reads/begin and exits2. Exact process/job observation precedes
+parent guard release in both cases. Seal the raw evidence. The adapter currently
+discards the lease permit and expects raw model methods absent from the new
+owned session; implement that concrete interface repair next. No model is involved.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -314,6 +321,10 @@ ASTRA-CACHED-WHEEL-VERDICT-2026-09-13.md. Independent .NET verifier4ea139 checks
 every wheel/member/RECORD and all28 before/after inputs. The88 inspection and
 two integrator proof payloads match Git/disk. Qualify the exact five-record
 graph change and complete notices. Native models remain unexecuted and closed.
+The five-record checker now passes all68 cases in each independent root
+(468c4b/36df84), with the original36 public cases unchanged and valid guards.
+All367 inputs are identical. Review a fresh complete144 driver next; the prior
+full graph remains FAIL until a separately recorded result establishes otherwise.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -5028,3 +5039,24 @@ Pending I/O reaches zero and generated teardown succeeds, while logical quaranti
 and ordinary-release refusal remain. Raw controller time .3549365999933798s,
 142 matching dispatch/audit calls and valid guards. Evidence sealing precedes
 integration. Production remains e8d058f; website and marketing remain paused.
+
+### 2026-09-13 - Timeout repair integrated; inherited file checks complete
+
+Commit0d93186 accepts the generated timeout cleanup repair. Builder8aa5a4,
+verifier7b4907 and index check5f574a verify117+3 payloads. Main seal25ff14f8ee5b75a65caa3d711f8f22ee171dabd510454441a5b39f26797c895d
+preserves184 logical text files, both67-case runs and the failed01/fresh02
+observations. No archived source executed during sealing. Unknown completion
+still retains buffers; error109 is terminal failure, not cancellation or success.
+
+Child adoption positive4e8051/native/outer0 reads all328 generated bytes from
+five inherited file handles; allfive identities match and inheritance clears.
+Wrong-identity2abf39/native/outer0 meets its predefined refusal contract: actual
+childexit2, one checked mismatch, no asset read/seek/begin, child uncertainty
+retained until exit. Both parents hold allfive guards through exact exit/job0;
+then release. These observations need their documentary integration and council
+review. They do not establish real model-loader behavior or durable recovery.
+
+Five-record graph qualification468c4b/36df84 passes68/0 in each root with valid
+guards and unchanged367 inputs. The complete144 graph still needs its separate
+measurement. Next actual source repair connects the adapter's lease permit and
+operation facade to the owned session. Website and marketing remain paused.
