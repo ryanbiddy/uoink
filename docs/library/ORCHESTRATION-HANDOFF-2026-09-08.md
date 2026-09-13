@@ -230,6 +230,13 @@ The Windows source's cancellation, output-budget and interruption repairs are
 under review; a later result-publication race was also repaired before testing.
 No real Torch/model code has run. D1 still awaits Ryan's separate answer.
 
+The owned WhisperX source now passes all 50 inert cases in both roots; the
+lifecycle state/facade passes all 46 cases in both roots after a documented
+startup-guard repair. Their combined documentary proofs are being prepared and
+are not yet integrated. Preserve the failed WhisperX outer invocation and
+failed lifecycle startup; both executed zero cases. Continue concrete factory
+registration and Windows primitives while those proofs are reviewed.
+
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
 but no successful remote result is recorded. Do not issue a duplicate push.
@@ -4618,3 +4625,39 @@ Concrete factory, Windows kernel/worker and real runtime work remain open.
 The D1 decision and Git account selection are pending user inputs. Backup
 session 35629 targets only cc/living-library at 01e22fb and has no success
 receipt yet. Website and marketing stay paused; production remains e8d058f.
+
+### 2026-09-13 - WhisperX and lifecycle independent cases complete; proofs pending
+
+Owned WhisperX author/root qualifications each record 50 passed, zero failures,
+errors, skips or subtests. Full-harness times are 0.7117929999949411 and
+0.7267135000147391 seconds; actual outer tools efe7be and 821d82 exit zero.
+All 46 input files plus the manifest, exact case order, metadata identities and
+guards are valid; stderr is empty. The optional direct-empty-list IndexError
+stays outside the accepted 50 cases. The first outer launch, bc920e, failed
+before the launcher/Python because its PowerShell executable path was wrong;
+zero cases ran. The repair used the observed Codex runtime PowerShell 7.6.5
+path, with a new root admission and unchanged source/assertions.
+
+Lifecycle lcs01 also executed zero cases: tool/native/outer exit one, empty
+stdout and 361-byte stderr at the preloaded-module assertion. A separately
+reviewed names-only diagnostic (7ff173, exit zero) found built-in winreg already
+present before setup imports. It ran no lifecycle or registry operations.
+The fresh lcs02 guard binds that existing module and namespace, replaces 25
+public callables with refusal wrappers and retains the audit prohibition.
+It does not permit registry reads. The lifecycle source and all 46 behavior
+assertions remain unchanged by this instrumentation repair.
+
+Author/root lcs02 each pass 46/0/0 in 0.0009116999863181263 and
+0.0009119000169448555 seconds. Tools 35aa07 and 89cfeb, actual native and
+recorded outer exits are zero. Exact case rows match; 12 metadata traps and
+25 registry wrappers remain intact, with no denied attempts, empty stderr
+and unchanged inputs. Root's only launcher change is its literal copy path.
+The two combined proof builders still need review, execution and Git sealing;
+these raw successes do not yet claim an integrated evidence package.
+
+Factory review found and repaired missing owned-model registration and a
+context-check cleanup gap before any factory tests. Its concrete registry and
+factory remain unexecuted. Windows handle/process primitives are source only;
+their environment must include the fixed Pyannote metrics setting. Complete
+namespace protection, authenticated worker coordination and native quiescence
+are not established by these proposals. Uoink remains held for market.
