@@ -327,7 +327,10 @@ completed and its original report is retained at870fa00 with Astra's verdict in
 ASTRA-NOTICES-OPERATIONS-ADAPTER-COUNCIL-VERDICT-2026-09-13.md. Review coverage
 is partial: only30 of69 selected paths have recorded direct views. A focused
 supplement must cover omitted source and correct the fixed-hash and line-reference
-claims. No rerun of the component measurements is requested.
+claims. The supplement is frozen in
+proof/notices-operations-adapter-council-supplement-brief-2026-09-13/SUPPLEMENT-BRIEF.md,
+SHA46ef67faab2d578f8c1be471e01d383c2cee898e9556ffc324fde1c4941bf651.
+Dispatch this source-only review next. No component measurement rerun is requested.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5327,3 +5330,17 @@ Independent recovery review found duplicate-exit finalization and a semantic-key
 token replacement bug. Both now have unexecuted repairs and negative cases.
 The full generated proposal has42 planned cases; root is reviewing its final
 launcher and input pins. Website and marketing remain paused.
+
+### 2026-09-13 - Omitted-source council supplement frozen
+
+The three-file supplement brief and coverage inventory identify the39 selected
+files without direct views in the original council activity. The original
+partial report stays unchanged. Dispatch the focused Gemini source/receipt
+review through Control Room from this clean commit; it assigns no execution.
+Its sole output is GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-SUPPLEMENT-2026-09-13.md.
+
+Generated reservation author70b48e and independentfd86f5 now each pass42 cases
+and20 nested subtests, with zero failures/skips and valid guards. Evidence
+integration follows. Runtime-owner review found result publication could outlive
+VAD retirement or replacement; its source repair remains unexecuted. Website
+and marketing remain paused.
