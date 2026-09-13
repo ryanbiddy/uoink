@@ -1,0 +1,193 @@
+{
+  "schema": "uoink.preparation-seal.v1",
+  "payload_count": 37,
+  "payload_bytes": 375869,
+  "candidate_executed": false,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "ADMISSION-TEMPLATE.json",
+      "bytes": 3736,
+      "sha256": "e13e1450a166854b70b57d00588739a30f666731ce85043f5f9421a6c77b0c7b"
+    },
+    {
+      "path": "bind_primary_sources.py",
+      "bytes": 3241,
+      "sha256": "e497396c413bd07057b644fd26ea3e13a5fdb4a48f80588b37c9bd30470a34ae"
+    },
+    {
+      "path": "BOUNDARY-REPAIR04.md",
+      "bytes": 2013,
+      "sha256": "7a62ef6c2d76365399abb35f8933f1b11fb68fec5fe2a75bfb51dbf860235bc0"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 2143,
+      "sha256": "e0648f8f073ffdeb4d9e72a0a0ee28c8acb2ffc6c196c39f540aad53f7e59659"
+    },
+    {
+      "path": "contract_cases.py",
+      "bytes": 27153,
+      "sha256": "419d9c10f03ee80167567f2332b70d1153f1e940ebf50269070d84aa7c7b5071"
+    },
+    {
+      "path": "drafts/contract_cases.before-peer-repair05.py",
+      "bytes": 25127,
+      "sha256": "d1ede6a30ee2e4c41b1d2a5f54753b3f097feed360bb33eb79fec7561e85db37"
+    },
+    {
+      "path": "drafts/owned_generation_protocol.before-boundary04.py",
+      "bytes": 16560,
+      "sha256": "76c0f65bee4c7bdd7f46ae221f404c57215dd4abe20e717d04c5d2c5af960234"
+    },
+    {
+      "path": "drafts/owned_generation_protocol.before-factory-serialization02.py",
+      "bytes": 14606,
+      "sha256": "eb4bf58f4ab8b87a941bf4428a626d8aaf2c372ecd19dd8fd2feb024896f80f1"
+    },
+    {
+      "path": "drafts/owned_generation_protocol.initial-unexecuted.py",
+      "bytes": 10941,
+      "sha256": "c07a01cc2abf895ebdca89b4c38efc7dcebc0f4c31fc8940878fe16491dd4999"
+    },
+    {
+      "path": "drafts/pinned_buffer_namespace.before-budget04.py",
+      "bytes": 7643,
+      "sha256": "d5827ef350c153d69585330bfc3a3446dddce024c24883bb9bb2b6e51ebe272a"
+    },
+    {
+      "path": "drafts/win32_private_pipe.before-peer-repair05.py",
+      "bytes": 16725,
+      "sha256": "2fb5c33f9afece050881538f7df2171254a090194558a13bcc8c7c0390eeba3b"
+    },
+    {
+      "path": "drafts/win32_private_pipe.initial-unexecuted.py",
+      "bytes": 11946,
+      "sha256": "91cac24802f0ea179082348a9378dc03854f0d1e2d8631c8f2d0c6214db30682"
+    },
+    {
+      "path": "drafts/win32_worker_connection.before-child-mapping03.py",
+      "bytes": 27609,
+      "sha256": "0a1aa653205a138228a37765c011bfa4233d95dfaa5fe8c5b0a67f84ca50e5c3"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 2807,
+      "sha256": "dd15736c9bafc7539d05e97e482600dc1338d274269f7e7b030bed32c6733d79"
+    },
+    {
+      "path": "FACTORY-SERIALIZATION-REPAIR02.md",
+      "bytes": 949,
+      "sha256": "979df19acde9294e4b3bbd155c1f5abb73e0960be498e1a8f50efde7b69def0f"
+    },
+    {
+      "path": "GUARD-BASELINE.py.txt",
+      "bytes": 26872,
+      "sha256": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7"
+    },
+    {
+      "path": "GUARD-SETUP.diff",
+      "bytes": 26028,
+      "sha256": "d77adbbb83924f956594fb5532639fce78bd59ca8ecd2dabf327a663215beb45"
+    },
+    {
+      "path": "INERT-QUALIFICATION-BRIEF.md",
+      "bytes": 2399,
+      "sha256": "8915bd9b87bc6eb6c7b29b4377f97adc0dc354bd67aca96d7d316ff5e1a328c1"
+    },
+    {
+      "path": "INHERITED-PIPE-BRIEF.md",
+      "bytes": 1634,
+      "sha256": "259cd6ce4d60d5aeee5e8c61088a99869f2e1aaf140052f16c6f27f22c7583e1"
+    },
+    {
+      "path": "owned_generation_protocol.py",
+      "bytes": 19462,
+      "sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+    },
+    {
+      "path": "pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "path": "PIPE-OWNERSHIP-REPAIR03.md",
+      "bytes": 1517,
+      "sha256": "2de1dc4a40b748084821d55433278fc4d5bd43175f15865f6a29be7556ff19ef"
+    },
+    {
+      "path": "PIPE-PEER-REPAIR05.md",
+      "bytes": 1674,
+      "sha256": "9b448f72f9546a8700ec7491fcb35f4eebea8b9ec5969f12f62c9ccfeddfe7a2"
+    },
+    {
+      "path": "PREPARATION-STATUS.md",
+      "bytes": 1162,
+      "sha256": "b57061aa6fe74970ad2328806da0aaeb85c4002e7179a01bcec809608e245228"
+    },
+    {
+      "path": "prepare_inert_harness.py",
+      "bytes": 6516,
+      "sha256": "5412dff222a05d1ed0bc0ed4cc4eed0c4c2c5fa3fbe5aaff5eac52ea7b6dd85e"
+    },
+    {
+      "path": "PREQUALIFICATION-REPAIR01.md",
+      "bytes": 1075,
+      "sha256": "816b7ae49d225863e0678780a51fd2f95985373e819f87aac893a994c992a499"
+    },
+    {
+      "path": "PRIMARY-SOURCE-BINDINGS.json",
+      "bytes": 4685,
+      "sha256": "cc0984dd74d2804e2d5233f5295cf7906bf72a542475a3d1b6069f30876ba36e"
+    },
+    {
+      "path": "qualify_namespace.py",
+      "bytes": 11079,
+      "sha256": "ce4b149a4b5920c370c45d0ea31bf96ec65fb1ddf714cde63ae012d4298125d9"
+    },
+    {
+      "path": "ROOT-ADMISSION.json",
+      "bytes": 4128,
+      "sha256": "e38bf42b63996a92149dc2b9a00d7fbf41e5acb8d054a5a8e89471070e21f962"
+    },
+    {
+      "path": "run_namespace01.ps1",
+      "bytes": 8985,
+      "sha256": "9bf9e632508df3e3d90a8a8d070b43d3efbcf5ccc58f155d2a169a5576f1fe4f"
+    },
+    {
+      "path": "SDK-PIPE-EXCERPTS.txt",
+      "bytes": 6175,
+      "sha256": "2d7a0e064765f9a8a33649eddc62dd17ec9b96e18ce6bd57add5d5c527fab9c0"
+    },
+    {
+      "path": "seal_preparation.py",
+      "bytes": 1015,
+      "sha256": "d9cc62e53427c4e3040161d292262c2940905f1b111deea2c12e6f9cd199a5b9"
+    },
+    {
+      "path": "snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "STATIC-PREPARATION.json",
+      "bytes": 1296,
+      "sha256": "9680b3a4f2c0d5f6cbf177ef166f649dd09ecc3b59077da9df697a898f038edb"
+    },
+    {
+      "path": "win32_private_pipe.py",
+      "bytes": 18199,
+      "sha256": "4a0cccc8d905f7dc9d93288d8c9187f7da846ee673a57e625e691e17bbed899c"
+    },
+    {
+      "path": "win32_worker_connection.py",
+      "bytes": 28730,
+      "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+    }
+  ]
+}

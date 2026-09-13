@@ -1,0 +1,5 @@
+2026-09-13. Review of the first unexecuted protocol source found two integration errors and an allocation gap. Preserve the first draft before changes. There are no candidate test or transport results.
+
+The lifecycle calls start_owned_worker while its record is NATIVE_RESERVED, then sets NATIVE_RUNNING only after return. The initial handshake incorrectly required the later state. Bind startup to the exact reserved record, owner, protection and kernel worker creation identity; require the live phase for the subsequent begin command. The worker must also refuse factory capability issuance until it receives that authenticated begin command, rather than treating ready as permission to construct models.
+
+Outbound JSON was serialized before its size check. Add an iterative exact-type, depth/node and conservative encoding-budget check before serialization. This rejects oversized/deep caller structures without first allocating a full encoded payload. Existing inbound size/HMAC checks remain before parsing. No new platform authority follows from these source changes.

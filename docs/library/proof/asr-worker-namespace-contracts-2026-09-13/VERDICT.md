@@ -1,0 +1,7 @@
+2026-09-13. The exact namespace proposal passed all 54 generated-memory contracts twice: author nsp01 in 0.017906299995956942 seconds and independent root nsp01 in 0.01751979999244213 seconds. Each has 0 failed and 0 skipped, actual child/launcher/tool exits 0, 12 metadata traps and 25 registry traps valid, no prohibited imports or denials, closed content reads, empty stderr and nine unchanged source/copy inputs. The ordered case/result rows match.
+
+Actual author tool 0a8066 exited 0 in 0.6375469 seconds; actual independent tool 91ffc7 exited 0 in 0.5615508 seconds. Both saved raw objects are retained. The root copy tool 8c0396 is retained separately. Root reported comparison c8b2e4; no saved raw object exists for it and none is fabricated here.
+
+The accepted scope is the exact Python protocol, namespace and pipe state handling under fake API seams. Source review led to inbound passive bounds, exact registry checks, serial operations, explicit payload-budget wording, ownership of partial pipe events and one bounded stop attempt on quarantine. All preceding drafts and repair reasons remain in the original preparation seal.
+
+There are 54 distinct cases repeated independently. ControllerHandshake's lifecycle/permit methods are source-reviewed only in this set. Real Windows invocation, inherited child-only file protection, child model read-set reconstruction, native CTranslate2 fallback and memory behavior, model loading, installation and release acceptance were not tested. The separate dummy-worker flow is not included in this acceptance.

@@ -1,0 +1,9 @@
+2026-09-13. Static preparation repair; no candidate or kernel test has run.
+
+The first pipe draft retained every completed buffer, permitted concurrent frame operations, and did not give the child its actual duplicated endpoint number. Those gaps would make a long session consume unnecessary memory and leave the bootstrap disconnected.
+
+Retire an operation only after completion and event closure are confirmed. Unknown cancellation keeps its exact buffer, event and OVERLAPPED object owned; cleanup is attempted once. Serialize each complete frame operation. Record actual child handle values before temporary parent duplicates close, and append only the fixed decimal control-handle argument inside suspended creation. Handle numbers are bootstrap routing data, not authentication by themselves.
+
+Add a worker-side adoption method for the one inherited pipe endpoint, checking pipe type and clearing further inheritance. The trusted, fixed child command establishes where this number came from; GetFileType alone does not establish that provenance. Add closure that requires no pending operations and, on the controller, observed process/job quiescence. The existing quarantine remains conservative after any interrupted or unconfirmed operation.
+
+The proposed generated-data dummy flow will exercise these mechanics separately. Neither its handshake nor a local receipt can stand in for observing the retained process handle and empty owned job. CTranslate2 remains unused and its files-reader closure unproved.

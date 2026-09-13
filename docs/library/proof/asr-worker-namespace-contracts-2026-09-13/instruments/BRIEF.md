@@ -1,0 +1,7 @@
+2026-09-13. Prepare one documentary seal of the namespace work. No candidate, fake-API, kernel or model run is requested. Root reviews this source before invoking the sealer.
+
+Include the original 37 preparation payloads and their unchanged manifest; all author nsp01 raw inputs/results; the independent root's input copies, admission, copy bindings and raw results; and the copy helper with its actual preparation tool receipt. Keep source drafts and all five source-review repairs. The root's comparison c8b2e4 has no separate saved tool object; describe that observation without inventing a raw file.
+
+Deduplicate exact bytes under objects/SHA256 and preserve a complete logical-path-to-object manifest. Every object remains byte-identical, including CRLF and the original nested manifest. An outer * -text attribute prevents Git normalization. The verifier checks every physical object and logical mapping, the original 37 seal, actual exits, nine-input before/after hashes, the permitted launcher path-only delta, and exact ordered 54-case equality. It does not execute archived source.
+
+Author and root passed the same 54 cases, not 108 distinct cases. These results qualify generated-memory fake API seams only. ControllerHandshake lifecycle/permit behavior, actual Win32 FFI/IPC/process behavior, native files-reader closure, model registry/factory behavior, peak model memory and runtime/market readiness remain outside this measurement.

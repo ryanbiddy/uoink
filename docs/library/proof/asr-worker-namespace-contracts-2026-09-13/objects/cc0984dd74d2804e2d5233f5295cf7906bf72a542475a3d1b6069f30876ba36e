@@ -1,0 +1,165 @@
+{
+  "collected_at_utc": "2026-09-13T19:43:36.092714+00:00",
+  "network_fetches": 0,
+  "sdk_version": "10.0.26100.0",
+  "sdk_headers": [
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\namedpipeapi.h",
+      "bytes": 5539,
+      "sha256": "37062eba19e35b391cf050519c9403e19c6782663ea644ff38b2b5eb71dfce6b",
+      "ranges": [
+        [
+          36,
+          44
+        ],
+        [
+          94,
+          108
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\ioapiset.h",
+      "bytes": 4791,
+      "sha256": "7c3f659f98b3f1748a314bd64106583d01649333e0419b66232b4f64b3f85b0c",
+      "ranges": [
+        [
+          101,
+          121
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\synchapi.h",
+      "bytes": 15696,
+      "sha256": "d962588974e5e100205f683160b351dee70ea100aa736e14d878b7a74577a9c5",
+      "ranges": [
+        [
+          443,
+          453
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\minwinbase.h",
+      "bytes": 13973,
+      "sha256": "7d1408f4b8eeba96ae45892209132258cde80cab6dab192b4cceea591972c78b",
+      "ranges": [
+        [
+          52,
+          64
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\handleapi.h",
+      "bytes": 2578,
+      "sha256": "c967fdf1a98e4ce8d501dae26b905f6452173b2be1c25e6aa2e5eeae415369cc",
+      "ranges": [
+        [
+          74,
+          90
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\fileapi.h",
+      "bytes": 40460,
+      "sha256": "f8927178c75de487c0e57f044a215e455522bf6eaa0b660421be09cd06ae05a1",
+      "ranges": [
+        [
+          689,
+          696
+        ],
+        [
+          989,
+          1000
+        ],
+        [
+          1097,
+          1107
+        ],
+        [
+          1151,
+          1162
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\WinBase.h",
+      "bytes": 271704,
+      "sha256": "ec538199f5ebe8cec2dfd4f1ba48316ef776c82d37277aed3a677965e494f192",
+      "ranges": [
+        [
+          138,
+          151
+        ],
+        [
+          322,
+          346
+        ],
+        [
+          812,
+          816
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\winnt.h",
+      "bytes": 876258,
+      "sha256": "bc603675b330e624fd6f3de9ed3497ed6101e4c56e12cf819a9ef7c41f1c78d8",
+      "ranges": [
+        [
+          10250,
+          10256
+        ]
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared\\winerror.h",
+      "bytes": 1622697,
+      "sha256": "607a0b5fb2ce91048147796f618cd1d408ffc603cfc3a34dc710be087e7d1a5c",
+      "ranges": [
+        [
+          6518,
+          6542
+        ],
+        [
+          7557,
+          7563
+        ]
+      ]
+    }
+  ],
+  "retained_source_bindings": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-kernel-port-proposal01\\win32_owned_primitives.py",
+      "bytes": 27115,
+      "sha256": "ab0c8cae37d7436043a313bd63417ebac782db9f09e5b5c08156f14d8b10b1f3",
+      "role": "primitive-baseline",
+      "executed_or_imported": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-owned-factory-port-proposal01\\model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+      "role": "registry-interface",
+      "executed_or_imported": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-owned-factory-port-proposal01\\owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+      "role": "factory-interface",
+      "executed_or_imported": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-security-scope-2026-09-13\\candidate03-source\\retained\\installer\\staging\\python\\Lib\\site-packages\\faster_whisper\\transcribe.py",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4",
+      "role": "retained-faster-whisper",
+      "executed_or_imported": false
+    }
+  ],
+  "limits": "Headers bind declarations/constants only; no API behavior or kernel execution observed."
+}
