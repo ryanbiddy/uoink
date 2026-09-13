@@ -1,0 +1,12 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\before-cp437-preload\\inspect_existing_wheels.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inspect_existing_wheels.py"
+index 18fc6b0..883fb3f 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\before-cp437-preload\\inspect_existing_wheels.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inspect_existing_wheels.py"
+@@ -4,6 +4,7 @@ import base64
+ import csv
+ import email.parser
+ import email.policy
++import encodings.cp437
+ import hashlib
+ import io
+ import json

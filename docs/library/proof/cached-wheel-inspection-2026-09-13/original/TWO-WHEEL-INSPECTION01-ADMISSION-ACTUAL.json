@@ -1,0 +1,7 @@
+{
+  "chunk_id": "fa81f4",
+  "wall_time_seconds": 0.1905858,
+  "exit_code": 0,
+  "original_token_count": 295,
+  "output": "{\r\n  \"download_info\": {\r\n    \"url\": \"https://files.pythonhosted.org/packages/f2/cf/77d3e19b7fabd03895caca7857ef51e4c409e0ca6b37ee6e9f7daa50b642/proxy_tools-0.1.0.tar.gz\",\r\n    \"archive_info\": {\r\n      \"hashes\": {\r\n        \"sha256\": \"ccb3751f529c047e2d8a58440d86b205303cf0fe8146f784d1cbcd94f0a28010\"\r\n      },\r\n      \"hash\": \"sha256=ccb3751f529c047e2d8a58440d86b205303cf0fe8146f784d1cbcd94f0a28010\"\r\n    }\r\n  },\r\n  \"is_direct\": false,\r\n  \"is_yanked\": false,\r\n  \"requested\": false,\r\n  \"metadata\": {\r\n    \"metadata_version\": \"2.4\",\r\n    \"name\": \"proxy_tools\",\r\n    \"version\": \"0.1.0\",\r\n    \"dynamic\": [\r\n      \"author\",\r\n      \"author-email\",\r\n      \"classifier\",\r\n      \"home-page\",\r\n      \"license\",\r\n      \"summary\"\r\n    ],\r\n    \"summary\": \"Proxy Implementation\",\r\n    \"home_page\": \"http://github.com/jtushman/proxy_tools\",\r\n    \"author\": \"Jonathan Tushman\",\r\n    \"author_email\": \"jonathan@zefr.com\",\r\n    \"license\": \"MIT\",\r\n    \"classifier\": [\r\n      \"Intended Audience :: Developers\",\r\n      \"License :: OSI Approved :: MIT License\",\r\n      \"Programming Language :: Python :: 2.7\",\r\n      \"Programming Language :: Python :: 3\"\r\n    ]\r\n  }\r\n}\r\nExact two-wheel read admitted.\r\n"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "two-sdist-wheel-repair-plan01/before-cp437-preload/PREPARATION-HASHES.json",
+    "sha256": "eee7ec569c027ec060b52e4ae811f8d8df1aefdc9b20951c9c1177011b65b0ca",
+    "members": 16,
+    "all_original_payload_hashes_present": true
+  },
+  {
+    "path": "two-sdist-wheel-repair-plan01/PREPARATION-HASHES.json",
+    "sha256": "57e8c6ba88efabf44f67eccd2cf214cd1c2f13d3d8278e9590325c7c28909d52",
+    "members": 20,
+    "all_original_payload_hashes_present": true
+  },
+  {
+    "path": "two-wheel-inspection02/before-cp437-preload/PREPARATION-HASHES.json",
+    "sha256": "eee7ec569c027ec060b52e4ae811f8d8df1aefdc9b20951c9c1177011b65b0ca",
+    "members": 16,
+    "all_original_payload_hashes_present": true
+  },
+  {
+    "path": "two-wheel-inspection02/before-inspection01/PREPARATION-HASHES.json",
+    "sha256": "57e8c6ba88efabf44f67eccd2cf214cd1c2f13d3d8278e9590325c7c28909d52",
+    "members": 20,
+    "all_original_payload_hashes_present": true
+  },
+  {
+    "path": "two-wheel-inspection02/PREPARATION-HASHES.json",
+    "sha256": "7ea8f1951bbbc7324bda36ab5528df19a864b45c0738a9a970235b704f465b42",
+    "members": 28,
+    "all_original_payload_hashes_present": true
+  }
+]

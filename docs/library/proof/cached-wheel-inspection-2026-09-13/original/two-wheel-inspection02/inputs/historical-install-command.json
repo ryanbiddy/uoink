@@ -1,0 +1,30 @@
+{
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\python.exe",
+    "-I",
+    "-B",
+    "-m",
+    "pip",
+    "install",
+    "--no-warn-script-location",
+    "--no-build-isolation",
+    "--no-compile",
+    "--report",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\install-report.json",
+    "--constraint",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\requirements-installer-lock.txt",
+    "yt-dlp==2026.07.04",
+    "Pillow==12.3.0",
+    "mcp==1.28.1",
+    "keyring==25.7.0",
+    "pystray==0.19.5",
+    "pywebview==5.4",
+    "pythonnet==3.0.5",
+    "faster-whisper==1.2.1",
+    "whisperx==3.8.6"
+  ],
+  "started_utc": "2026-09-10T05:26:17.751487+00:00",
+  "scope": "Disposable software dependencies only; no model or application execution",
+  "exit": 0,
+  "finished_utc": "2026-09-10T05:26:56.291163+00:00"
+}

@@ -1,0 +1,460 @@
+{
+  "roots": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01",
+      "files": 27
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02",
+      "files": 35
+    }
+  ],
+  "standalone": [
+    "TWO-WHEEL-INSPECTION01-ACTUAL.json",
+    "TWO-WHEEL-INSPECTION01-ADMISSION-ACTUAL.json",
+    "TWO-WHEEL-INSPECTION02-ACTUAL.json",
+    "TWO-WHEEL-INSPECTION02-ADMISSION-ACTUAL.json",
+    "TWO-WHEEL-REFUSAL-DIAGNOSTIC-ACTUAL.json",
+    "TWO-WHEEL-REFUSAL-DIAGNOSTIC-BRIEF.md",
+    "TWO-CACHED-WHEELS-READ01-ROOT-ADMISSION.json",
+    "TWO-CACHED-WHEELS-READ02-ROOT-ADMISSION.json",
+    "verify_cached_wheels_root02.ps1",
+    "TWO-WHEEL-ROOT-BYTE-VERIFY02-ACTUAL.json"
+  ],
+  "source_files": 72,
+  "source_bytes": 4554492,
+  "files": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-CACHED-WHEELS-READ01-ROOT-ADMISSION.json",
+      "path": "TWO-CACHED-WHEELS-READ01-ROOT-ADMISSION.json",
+      "bytes": 493,
+      "sha256": "700de0d3d128e78f58cea6656221e18f90a8668b380da2f6631151740c6330ea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-CACHED-WHEELS-READ02-ROOT-ADMISSION.json",
+      "path": "TWO-CACHED-WHEELS-READ02-ROOT-ADMISSION.json",
+      "bytes": 535,
+      "sha256": "b878eea7a9176fbdc87f49cf371261f0b87777a3851fbe7c3536c872ec91606a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\before-cp437-preload\\inspect_existing_wheels.py",
+      "path": "two-sdist-wheel-repair-plan01/before-cp437-preload/inspect_existing_wheels.py",
+      "bytes": 12656,
+      "sha256": "5850e3de4b33eccee654b8df51b1b2e074f06dd549f7b1d30d8c8c325f826218"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\before-cp437-preload\\PREPARATION-HASHES.json",
+      "path": "two-sdist-wheel-repair-plan01/before-cp437-preload/PREPARATION-HASHES.json",
+      "bytes": 2516,
+      "sha256": "eee7ec569c027ec060b52e4ae811f8d8df1aefdc9b20951c9c1177011b65b0ca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\before-publication-clock\\inspect_existing_wheels.py",
+      "path": "two-sdist-wheel-repair-plan01/before-publication-clock/inspect_existing_wheels.py",
+      "bytes": 12648,
+      "sha256": "756f9c190f4cc1bca90db2834f4cf18e65e18949f4619532d9a84e498fc2364f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\BRIEF.md",
+      "path": "two-sdist-wheel-repair-plan01/BRIEF.md",
+      "bytes": 1317,
+      "sha256": "7ad164a68909e8e51b0676da8dafe7a47cf96f2ef402a704f7d4d242a5e30a48"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\CP437-PRELOAD-REPAIR.md",
+      "path": "two-sdist-wheel-repair-plan01/CP437-PRELOAD-REPAIR.md",
+      "bytes": 794,
+      "sha256": "deaab9edc0c279461bac08459d0a343f1575cdf8de5dde113086382845440575"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\cp437-preload.patch.txt",
+      "path": "two-sdist-wheel-repair-plan01/cp437-preload.patch.txt",
+      "bytes": 733,
+      "sha256": "b83cd1e66864549e90876376e4102a45566c3ce7eb47694ed339691d21c6ef4c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\antlr-origin.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/antlr-origin.json",
+      "bytes": 344,
+      "sha256": "21b1ca13e0884e0c9dc3194c15b95afc28871f67362d415454f569734f2f0a68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\antlr-pypi.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/antlr-pypi.json",
+      "bytes": 28137,
+      "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\historical-commands.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/historical-commands.json",
+      "bytes": 1994,
+      "sha256": "0ea778fcaf1affa8808efa9ffe1bb8910e63588476bf3bb42a7f3a1141726e1b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\historical-install-command.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/historical-install-command.json",
+      "bytes": 948,
+      "sha256": "489cf804bdbc42c88460751d6515cfbe52e1e3e4206d1369024aecb92453105f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\historical-install-report.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/historical-install-report.json",
+      "bytes": 2079145,
+      "sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\historical-install.stdout.txt",
+      "path": "two-sdist-wheel-repair-plan01/inputs/historical-install.stdout.txt",
+      "bytes": 37666,
+      "sha256": "aec0733af2050bdb45bebcbf1a159ca5f5eead4fb87d8f2db055a414d597fd90"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\proxy-origin.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/proxy-origin.json",
+      "bytes": 333,
+      "sha256": "bcf6c01adc52c53a7598af78be2cb2826d1b70954f0144e1d4e2f89914838040"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inputs\\proxy-pypi.json",
+      "path": "two-sdist-wheel-repair-plan01/inputs/proxy-pypi.json",
+      "bytes": 3887,
+      "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inspect_existing_wheels.py",
+      "path": "two-sdist-wheel-repair-plan01/inspect_existing_wheels.py",
+      "bytes": 12679,
+      "sha256": "e8401878d352026fc56a2d5b3aa58637bfeb05c8365785deb8caa6a3ce5814d2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\INSPECTION-PROTOCOL.md",
+      "path": "two-sdist-wheel-repair-plan01/INSPECTION-PROTOCOL.md",
+      "bytes": 4026,
+      "sha256": "7838e6c80a2d8c02e4637eda0850d8f92500f149c94dd437c6365915f170879f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\inspection01.json",
+      "path": "two-sdist-wheel-repair-plan01/inspection01.json",
+      "bytes": 3818,
+      "sha256": "4f8dc819baa30f4a967d36bcdd84c04de63fcc3f9543efd15a152cb4b6c587b6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\launch-inspection01\\actual-native-exit.json",
+      "path": "two-sdist-wheel-repair-plan01/launch-inspection01/actual-native-exit.json",
+      "bytes": 110,
+      "sha256": "c3ba0a813cb4979f3cb7a403456f2cd46c311e80f27e5dd9ab06f36b89fcf315"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\launch-inspection01\\plan.json",
+      "path": "two-sdist-wheel-repair-plan01/launch-inspection01/plan.json",
+      "bytes": 3899,
+      "sha256": "1d611f5d335788ec26637151d7b8dcff77361141b4c7302afec543ee6bed1217"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\launch-inspection01\\result.json",
+      "path": "two-sdist-wheel-repair-plan01/launch-inspection01/result.json",
+      "bytes": 7301,
+      "sha256": "2064e96831f1fcac9ea553e53890b6abdfc950778fa9b2a027a7b01cf1db4699"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\launch-inspection01\\stderr.log",
+      "path": "two-sdist-wheel-repair-plan01/launch-inspection01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\launch-inspection01\\stdout.log",
+      "path": "two-sdist-wheel-repair-plan01/launch-inspection01/stdout.log",
+      "bytes": 91,
+      "sha256": "b27b3ae72af14c6e09d0b200539ae97c98caa95099b05ba36702c7cf71303f22"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\PREPARATION-HASHES.json",
+      "path": "two-sdist-wheel-repair-plan01/PREPARATION-HASHES.json",
+      "bytes": 3172,
+      "sha256": "57e8c6ba88efabf44f67eccd2cf214cd1c2f13d3d8278e9590325c7c28909d52"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\PREPUBLICATION-CLOCK-REFINEMENT.md",
+      "path": "two-sdist-wheel-repair-plan01/PREPUBLICATION-CLOCK-REFINEMENT.md",
+      "bytes": 529,
+      "sha256": "6d2e669e121818af7207386194621416bc35b899c8d1decbc96bb849c76a54f7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\REPAIR-PLAN.md",
+      "path": "two-sdist-wheel-repair-plan01/REPAIR-PLAN.md",
+      "bytes": 4993,
+      "sha256": "e63ee1ff3ed38182cf6249da90293653b8de52c1c8daac014335368a37711650"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\run_inspection01.ps1",
+      "path": "two-sdist-wheel-repair-plan01/run_inspection01.ps1",
+      "bytes": 5127,
+      "sha256": "1deeaf69ad7b910e2ca5fbe4f9b2534cf977859a77a27529dbd0f419acab4aec"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-sdist-wheel-repair-plan01\\SOURCE-BINDINGS.json",
+      "path": "two-sdist-wheel-repair-plan01/SOURCE-BINDINGS.json",
+      "bytes": 2421,
+      "sha256": "1986a4a9871f908a20f76f6c32d27e089687bbf5e46826b436c63765200aae69"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-INSPECTION01-ACTUAL.json",
+      "path": "TWO-WHEEL-INSPECTION01-ACTUAL.json",
+      "bytes": 124,
+      "sha256": "d3dbba76ea52ea535629b3043e142f435e3e1c109974dcee435798fa8fa5e94e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-INSPECTION01-ADMISSION-ACTUAL.json",
+      "path": "TWO-WHEEL-INSPECTION01-ADMISSION-ACTUAL.json",
+      "bytes": 1463,
+      "sha256": "ec34a72ad0ce721aae09093653f1337daa1f526a0145b6eb3c9d4c3ac47fc520"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-INSPECTION02-ACTUAL.json",
+      "path": "TWO-WHEEL-INSPECTION02-ACTUAL.json",
+      "bytes": 124,
+      "sha256": "5781f836af7b0317634c191b58193e8bb64b1a66cbbccb82ab57a38ef79163cb"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-INSPECTION02-ADMISSION-ACTUAL.json",
+      "path": "TWO-WHEEL-INSPECTION02-ADMISSION-ACTUAL.json",
+      "bytes": 167,
+      "sha256": "1015191bd203e911c87fd907c7f3570e9558147a65256570638eda79b9ef2e40"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\before-cp437-preload\\inspect_existing_wheels.py",
+      "path": "two-wheel-inspection02/before-cp437-preload/inspect_existing_wheels.py",
+      "bytes": 12656,
+      "sha256": "5850e3de4b33eccee654b8df51b1b2e074f06dd549f7b1d30d8c8c325f826218"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\before-cp437-preload\\PREPARATION-HASHES.json",
+      "path": "two-wheel-inspection02/before-cp437-preload/PREPARATION-HASHES.json",
+      "bytes": 2516,
+      "sha256": "eee7ec569c027ec060b52e4ae811f8d8df1aefdc9b20951c9c1177011b65b0ca"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\before-inspection01\\inspect_existing_wheels.py",
+      "path": "two-wheel-inspection02/before-inspection01/inspect_existing_wheels.py",
+      "bytes": 12679,
+      "sha256": "e8401878d352026fc56a2d5b3aa58637bfeb05c8365785deb8caa6a3ce5814d2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\before-inspection01\\PREPARATION-HASHES.json",
+      "path": "two-wheel-inspection02/before-inspection01/PREPARATION-HASHES.json",
+      "bytes": 3172,
+      "sha256": "57e8c6ba88efabf44f67eccd2cf214cd1c2f13d3d8278e9590325c7c28909d52"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\before-publication-clock\\inspect_existing_wheels.py",
+      "path": "two-wheel-inspection02/before-publication-clock/inspect_existing_wheels.py",
+      "bytes": 12648,
+      "sha256": "756f9c190f4cc1bca90db2834f4cf18e65e18949f4619532d9a84e498fc2364f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\BRIEF.md",
+      "path": "two-wheel-inspection02/BRIEF.md",
+      "bytes": 1317,
+      "sha256": "7ad164a68909e8e51b0676da8dafe7a47cf96f2ef402a704f7d4d242a5e30a48"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\CP437-PRELOAD-REPAIR.md",
+      "path": "two-wheel-inspection02/CP437-PRELOAD-REPAIR.md",
+      "bytes": 794,
+      "sha256": "deaab9edc0c279461bac08459d0a343f1575cdf8de5dde113086382845440575"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\cp437-preload.patch.txt",
+      "path": "two-wheel-inspection02/cp437-preload.patch.txt",
+      "bytes": 733,
+      "sha256": "b83cd1e66864549e90876376e4102a45566c3ce7eb47694ed339691d21c6ef4c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\antlr-origin.json",
+      "path": "two-wheel-inspection02/inputs/antlr-origin.json",
+      "bytes": 344,
+      "sha256": "21b1ca13e0884e0c9dc3194c15b95afc28871f67362d415454f569734f2f0a68"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\antlr-pypi.json",
+      "path": "two-wheel-inspection02/inputs/antlr-pypi.json",
+      "bytes": 28137,
+      "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\historical-commands.json",
+      "path": "two-wheel-inspection02/inputs/historical-commands.json",
+      "bytes": 1994,
+      "sha256": "0ea778fcaf1affa8808efa9ffe1bb8910e63588476bf3bb42a7f3a1141726e1b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\historical-install-command.json",
+      "path": "two-wheel-inspection02/inputs/historical-install-command.json",
+      "bytes": 948,
+      "sha256": "489cf804bdbc42c88460751d6515cfbe52e1e3e4206d1369024aecb92453105f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\historical-install-report.json",
+      "path": "two-wheel-inspection02/inputs/historical-install-report.json",
+      "bytes": 2079145,
+      "sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\historical-install.stdout.txt",
+      "path": "two-wheel-inspection02/inputs/historical-install.stdout.txt",
+      "bytes": 37666,
+      "sha256": "aec0733af2050bdb45bebcbf1a159ca5f5eead4fb87d8f2db055a414d597fd90"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\proxy-origin.json",
+      "path": "two-wheel-inspection02/inputs/proxy-origin.json",
+      "bytes": 333,
+      "sha256": "bcf6c01adc52c53a7598af78be2cb2826d1b70954f0144e1d4e2f89914838040"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inputs\\proxy-pypi.json",
+      "path": "two-wheel-inspection02/inputs/proxy-pypi.json",
+      "bytes": 3887,
+      "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inspect_existing_wheels.py",
+      "path": "two-wheel-inspection02/inspect_existing_wheels.py",
+      "bytes": 13311,
+      "sha256": "33489998f47ea9a445a8e60d17fca36d73df99a9c194741da276dd5e7cafd3e6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\INSPECTION-PROTOCOL.md",
+      "path": "two-wheel-inspection02/INSPECTION-PROTOCOL.md",
+      "bytes": 4026,
+      "sha256": "7838e6c80a2d8c02e4637eda0850d8f92500f149c94dd437c6365915f170879f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\INSPECTION02-PROTOCOL.md",
+      "path": "two-wheel-inspection02/INSPECTION02-PROTOCOL.md",
+      "bytes": 1939,
+      "sha256": "1a39cc6ec1f2dfd55ee9006066bee6e046fb0dc70c70211903b33463b43ff6b9"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\inspection02.json",
+      "path": "two-wheel-inspection02/inspection02.json",
+      "bytes": 38444,
+      "sha256": "950e4ff459397921765ad3aad43ae0120acd0d9efd27460c4560c12430948c0c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launch-inspection02\\actual-native-exit.json",
+      "path": "two-wheel-inspection02/launch-inspection02/actual-native-exit.json",
+      "bytes": 110,
+      "sha256": "211d228c5387edbd3f884bbda435a427fc2e60ca9c95f8a06d266a8a99ffebea"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launch-inspection02\\plan.json",
+      "path": "two-wheel-inspection02/launch-inspection02/plan.json",
+      "bytes": 5240,
+      "sha256": "7efcc70fc8153c7e24c98325ad5ed846ef5e3e1a94b654e719db2145d6e7a923"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launch-inspection02\\result.json",
+      "path": "two-wheel-inspection02/launch-inspection02/result.json",
+      "bytes": 9997,
+      "sha256": "6d3a7dfbe2afe92a7c7b8b9ac6548d98e087f60fc3a4dfd987c2af54252388dc"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launch-inspection02\\stderr.log",
+      "path": "two-wheel-inspection02/launch-inspection02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launch-inspection02\\stdout.log",
+      "path": "two-wheel-inspection02/launch-inspection02/stdout.log",
+      "bytes": 88,
+      "sha256": "897960053136d47ffb2f2e27978de91999a99db0ad58819e5c9aa0d5a5729a75"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\launcher-label.patch.txt",
+      "path": "two-wheel-inspection02/launcher-label.patch.txt",
+      "bytes": 2656,
+      "sha256": "ee9afb9d29c2a0489c92600b445eba160139a652ee79b5072ad9fda32d2931cd"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\PREPARATION-HASHES.json",
+      "path": "two-wheel-inspection02/PREPARATION-HASHES.json",
+      "bytes": 4440,
+      "sha256": "7ea8f1951bbbc7324bda36ab5528df19a864b45c0738a9a970235b704f465b42"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\PREPUBLICATION-CLOCK-REFINEMENT.md",
+      "path": "two-wheel-inspection02/PREPUBLICATION-CLOCK-REFINEMENT.md",
+      "bytes": 529,
+      "sha256": "6d2e669e121818af7207386194621416bc35b899c8d1decbc96bb849c76a54f7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\REPAIR-PLAN.md",
+      "path": "two-wheel-inspection02/REPAIR-PLAN.md",
+      "bytes": 4993,
+      "sha256": "e63ee1ff3ed38182cf6249da90293653b8de52c1c8daac014335368a37711650"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\REPAIR02-BRIEF.md",
+      "path": "two-wheel-inspection02/REPAIR02-BRIEF.md",
+      "bytes": 2197,
+      "sha256": "177989a321b6d8b56963e9eb02e4d7ec487850f3235045f6db0b06ec4cae7ce6"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\run_inspection01.ps1",
+      "path": "two-wheel-inspection02/run_inspection01.ps1",
+      "bytes": 5127,
+      "sha256": "1deeaf69ad7b910e2ca5fbe4f9b2534cf977859a77a27529dbd0f419acab4aec"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\run_inspection02.ps1",
+      "path": "two-wheel-inspection02/run_inspection02.ps1",
+      "bytes": 5127,
+      "sha256": "5ce46cdc706a44b3f94115d3ac322e43cdbd1f58a4da0450026014f56d87eda7"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\script-root-repair.patch.txt",
+      "path": "two-wheel-inspection02/script-root-repair.patch.txt",
+      "bytes": 6693,
+      "sha256": "33e457853ae65e1f52b9a8286d4c66c2ac09455208aa22c618aa582a09fb2172"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\SOURCE-BINDINGS.json",
+      "path": "two-wheel-inspection02/SOURCE-BINDINGS.json",
+      "bytes": 2421,
+      "sha256": "1986a4a9871f908a20f76f6c32d27e089687bbf5e46826b436c63765200aae69"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection02\\SOURCE-COPY-BINDINGS.json",
+      "path": "two-wheel-inspection02/SOURCE-COPY-BINDINGS.json",
+      "bytes": 5969,
+      "sha256": "55a1f3feaa8e7e246ef0055e944376f7ea2282242583e3dc83439ce989e809d8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-REFUSAL-DIAGNOSTIC-ACTUAL.json",
+      "path": "TWO-WHEEL-REFUSAL-DIAGNOSTIC-ACTUAL.json",
+      "bytes": 514,
+      "sha256": "1b94e0c2480288673f784b560d80e3fc66ab9cf3777fe463869b15407d3581c8"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-REFUSAL-DIAGNOSTIC-BRIEF.md",
+      "path": "TWO-WHEEL-REFUSAL-DIAGNOSTIC-BRIEF.md",
+      "bytes": 756,
+      "sha256": "90d4c90dd262b1117dd5b0a1383db0397de719984e50db85dd731fcddc705338"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\verify_cached_wheels_root02.ps1",
+      "path": "verify_cached_wheels_root02.ps1",
+      "bytes": 5690,
+      "sha256": "d500ca5831c5805d82061fbfeafda150c55b3c16b918e1c1e766b8230691c793"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\TWO-WHEEL-ROOT-BYTE-VERIFY02-ACTUAL.json",
+      "path": "TWO-WHEEL-ROOT-BYTE-VERIFY02-ACTUAL.json",
+      "bytes": 1066,
+      "sha256": "60c2c10749e0928a9a1ce6f1cac07f54d84b5146df84b8da2d04e464ee99859c"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "path": "before-publication-clock/inspect_existing_wheels.py",
+    "bytes": 12648,
+    "sha256": "756f9c190f4cc1bca90db2834f4cf18e65e18949f4619532d9a84e498fc2364f"
+  },
+  {
+    "path": "BRIEF.md",
+    "bytes": 1317,
+    "sha256": "7ad164a68909e8e51b0676da8dafe7a47cf96f2ef402a704f7d4d242a5e30a48"
+  },
+  {
+    "path": "inputs/antlr-origin.json",
+    "bytes": 344,
+    "sha256": "21b1ca13e0884e0c9dc3194c15b95afc28871f67362d415454f569734f2f0a68"
+  },
+  {
+    "path": "inputs/antlr-pypi.json",
+    "bytes": 28137,
+    "sha256": "f3f53611a3b5160738057d4b46b7a9d3a89c8655d16365a18257af6115668f15"
+  },
+  {
+    "path": "inputs/historical-commands.json",
+    "bytes": 1994,
+    "sha256": "0ea778fcaf1affa8808efa9ffe1bb8910e63588476bf3bb42a7f3a1141726e1b"
+  },
+  {
+    "path": "inputs/historical-install-command.json",
+    "bytes": 948,
+    "sha256": "489cf804bdbc42c88460751d6515cfbe52e1e3e4206d1369024aecb92453105f"
+  },
+  {
+    "path": "inputs/historical-install-report.json",
+    "bytes": 2079145,
+    "sha256": "fb5a4fe4aa652fdd4f9d07de2373a4dba2bc4061cd23fcd4b649642e61972303"
+  },
+  {
+    "path": "inputs/historical-install.stdout.txt",
+    "bytes": 37666,
+    "sha256": "aec0733af2050bdb45bebcbf1a159ca5f5eead4fb87d8f2db055a414d597fd90"
+  },
+  {
+    "path": "inputs/proxy-origin.json",
+    "bytes": 333,
+    "sha256": "bcf6c01adc52c53a7598af78be2cb2826d1b70954f0144e1d4e2f89914838040"
+  },
+  {
+    "path": "inputs/proxy-pypi.json",
+    "bytes": 3887,
+    "sha256": "2af8516a011b42c20188191bfc6e78829d01a0ec083d226c5961dce876b2dfd0"
+  },
+  {
+    "path": "inspect_existing_wheels.py",
+    "bytes": 12656,
+    "sha256": "5850e3de4b33eccee654b8df51b1b2e074f06dd549f7b1d30d8c8c325f826218"
+  },
+  {
+    "path": "INSPECTION-PROTOCOL.md",
+    "bytes": 4026,
+    "sha256": "7838e6c80a2d8c02e4637eda0850d8f92500f149c94dd437c6365915f170879f"
+  },
+  {
+    "path": "PREPUBLICATION-CLOCK-REFINEMENT.md",
+    "bytes": 529,
+    "sha256": "6d2e669e121818af7207386194621416bc35b899c8d1decbc96bb849c76a54f7"
+  },
+  {
+    "path": "REPAIR-PLAN.md",
+    "bytes": 4993,
+    "sha256": "e63ee1ff3ed38182cf6249da90293653b8de52c1c8daac014335368a37711650"
+  },
+  {
+    "path": "run_inspection01.ps1",
+    "bytes": 5127,
+    "sha256": "1deeaf69ad7b910e2ca5fbe4f9b2534cf977859a77a27529dbd0f419acab4aec"
+  },
+  {
+    "path": "SOURCE-BINDINGS.json",
+    "bytes": 2421,
+    "sha256": "1986a4a9871f908a20f76f6c32d27e089687bbf5e46826b436c63765200aae69"
+  }
+]

@@ -1,0 +1,26 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection-proof-proposal01\\before-independent-root-addition\\seal.ps1" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection-proof-proposal01\\seal.ps1"
+index 19d850e..7e39dab 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection-proof-proposal01\\before-independent-root-addition\\seal.ps1"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-inspection-proof-proposal01\\seal.ps1"
+@@ -13,7 +13,7 @@ if((Get-FileHash -LiteralPath $manifestPath).Hash.ToLowerInvariant() -cne $Expec
+ $preparation=@(Get-Content -LiteralPath $manifestPath -Raw|ConvertFrom-Json)
+ foreach($row in $preparation){Canonical $row.path;Check-File (Join-Path $base $row.path) $row}
+ $plan=Get-Content -LiteralPath (Join-Path $base 'SOURCE-PLAN.json') -Raw|ConvertFrom-Json
+-if($plan.source_files -ne 70 -or @($plan.files).Count -ne 70 -or $plan.source_bytes -ne 4547736){throw 'Fixed documentary plan differs'}
++if($plan.source_files -ne 72 -or @($plan.files).Count -ne 72 -or $plan.source_bytes -ne 4554492){throw 'Fixed documentary plan differs'}
+ $byPath=@{};$byHash=@{}
+ foreach($row in $plan.files){Canonical $row.path;if([IO.Path]::GetFullPath($row.source) -cne [IO.Path]::GetFullPath((Join-Path $scratch $row.path)) -or $byPath.ContainsKey($row.path) -or $row.sha256 -cnotmatch '^[0-9a-f]{64}$' -or [IO.Path]::GetExtension($row.path) -notin @('.json','.md','.py','.ps1','.txt','.log')){throw 'Source mapping scope differs'};$byPath[$row.path]=$row;$byHash[$row.sha256]=$row}
+ function Check-Sources {
+@@ -37,10 +37,10 @@ Check-Sources
+ foreach($row in $preparation){Check-File (Join-Path $base $row.path) $row}
+ if((Get-FileHash -LiteralPath $manifestPath).Hash.ToLowerInvariant() -cne $ExpectedPreparationSha256){throw 'Preparation manifest changed'}
+ Write-New (Join-Path $output 'PRESERVED-PREPARATIONS.json') (Json-Bytes $preserved)
+-Write-New (Join-Path $output 'COPY-CHECKS.json') (Json-Bytes ([ordered]@{source_files=70;source_bytes=4547736;source_hashes_checked_before_after=$true;copies_rehashed=70;inspection01_still_refused=$true;inspection02_valid_byte_result=$true;license_text_missing_both=$true;script_execution_approved=$false;artifacts_opened_or_tests_rerun=0}))
++Write-New (Join-Path $output 'COPY-CHECKS.json') (Json-Bytes ([ordered]@{source_files=72;source_bytes=4554492;source_hashes_checked_before_after=$true;copies_rehashed=72;inspection01_still_refused=$true;inspection02_valid_byte_result=$true;license_text_missing_both=$true;script_execution_approved=$false;artifacts_opened_or_tests_rerun=0}))
+ Write-New (Join-Path $output '.gitattributes') ([Text.Encoding]::ASCII.GetBytes("* -text`n"))
+ $proofRows=@(Get-ChildItem -Force -LiteralPath $output -File -Recurse|Sort-Object FullName|ForEach-Object{[ordered]@{path=[IO.Path]::GetRelativePath($output,$_.FullName).Replace([char]92,[char]47);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName).Hash.ToLowerInvariant()}})
+ Write-New (Join-Path $output 'SHA256.json') (Json-Bytes ([ordered]@{files=$proofRows}))
+ foreach($row in $proofRows){Check-File (Join-Path $output $row.path) $row}
+ if(@(Get-ChildItem -Force -LiteralPath $output -File -Recurse).Count -ne $proofRows.Count+1){throw 'Final membership differs'}
+-[ordered]@{proof=$output;payloads=$proofRows.Count;original_files=70;manifest_sha256=(Get-FileHash -LiteralPath (Join-Path $output 'SHA256.json')).Hash.ToLowerInvariant();verification='All copied hashes and exact membership verified';artifact_reads_or_reruns=0}|ConvertTo-Json
++[ordered]@{proof=$output;payloads=$proofRows.Count;original_files=72;manifest_sha256=(Get-FileHash -LiteralPath (Join-Path $output 'SHA256.json')).Hash.ToLowerInvariant();verification='All copied hashes and exact membership verified';artifact_reads_or_reruns=0}|ConvertTo-Json
