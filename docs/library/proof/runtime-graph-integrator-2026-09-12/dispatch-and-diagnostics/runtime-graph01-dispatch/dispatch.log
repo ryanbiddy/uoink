@@ -1,0 +1,826 @@
+RUN PREFLIGHT — no worker has started yet
+Project:  uoink-library
+Mode:     work (isolated worktrees)
+Strategy: parallel
+Lead:     gemini
+Workers:
+  gemini  gemini-3.8-flash-high @ high effort
+Goal:
+Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/SECURITY-RUNTIME-GRAPH-BRIEF-2026-09-12.md first and complete that exact bounded implementation in your isolated worktree. Write early. No subagents or commits.
+
+APPROVED — starting workers now. Live events follow.
+
+system  status  parallel work run started with gemini
+system  preflight gemini=gemini-3.8-flash-high@high
+system  preflight frozen-base=c5d33a4918e994c99d47be6bc7b92cca37393a9b · verified-inputs=0
+gemini  status  parallel: preparing
+gemini  warning The source project has uncommitted changes; the worktree starts from frozen base c5d33a4918e994c99d47be6bc7b92cca37393a9b and does not include them.
+gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the `git status` command to check the worktree state and will process the output as soon as it completes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the packaging tags check and will process its output when it completes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the check for PyPI PEP 658 metadata and will check the output once completed. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the JSON inspection command and will check the output shortly. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the check for wheel METADATA via `<url>.metadata` and will inspect its output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the chec
+gemini  message k for Torch 
+gemini  message 2.
+gemini  message 8.0 wheel metadata on PyPI and will 
+gemini  message view the result when ready.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the tag verification test and will check the output once done. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the test
+gemini  message  using `packaging.tags.s
+gemini  message ys_tags()` a
+gemini  message nd
+gemini  message  will review its result.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the tag builder test
+gemini  message  and will ve
+gemini  message rify
+gemini  message  the output.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the ABI3 tag support test and will check the output once it completes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the ABI3 tag support test and will check the output once it finishes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the package count check on `requirements-installer-lock.txt` and will view the result. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the line count check and will view the output once ready. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the check on `transformers.json` and will view the output once it finishes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the PEP 5
+gemini  message 08 marker test and will check the ou
+gemini  message tput once do
+gemini  message ne.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched `test_marker.py` and will view the results shortly. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched `scripts/check_runtime_graph.py --help` and will review its output shortly. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the candidate probing script and will inspect the output once it finishes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    schedule
+gemini  tool    schedule
+gemini  message I am waiting for the candidate probing script to finish fetching PyPI metadata. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the candidate version lookup and will review the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    schedule
+gemini  tool    schedule
+gemini  message I am waiting for task-174 to finish fetching candidate releases. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the check for base requirements of `transformers 5.10.0` and will view the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    schedule
+gemini  tool    schedule
+gemini  message I am waiting for the metadata capture script to fetch and hash the PyPI JSON and wheel METADATA. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  message I will wait for the background capture task to complete. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  message I will wait for the task to finish. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the check on `antlr4-python3-runtime` and `proxy-tools` PyPI files and will review the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the edge check for `proxy-tools` and `antlr4-python3-runtime` and will review the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the chec
+gemini  message k for dependencies requi
+gemini  message ring `proxy-
+gemini  message tools` and `antlr
+gemini  message 4` and will inspect the output.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the dependency inspection and will review the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the proposed fixed stack test and will review the output. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched `pytest tests/test_installer_dependency_lock.py` and will check the output once it completes. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched `python -m pytest tests/test_installer_dependency_lock.py` and will view the results shortly. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched the pytest run covering both test suites and will view the results shortly. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched `git status -
+gemini  message s` and will review the output.
+gemini  message  
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  message I have launched pytest and will check the output once done. 
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  message # Runtime Compatibility 
+gemini  message and Dependency Graph Ana
+gemini  message lysis The bounded implementation fo
+gemini  message r `SECURITY-RUNTIME-GRAP
+gemini  message H-BRIEF-2026-09-12.md` i
+gemini  message s complete i
+gemini  message n the isolated Gemini worktree (`C:\Users\hello\
+gemini  message AppData\Loca
+gemini  message l\AgentControlRoom\workt
+gemini  message rees\uoink-library\db13e13b-ff8\gemini`). Zero c
+gemini  message ommits were 
+gemini  message created, no subagents we
+gemini  message re launched, no existing production 
+gemini  message pins or tests were alter
+gemini  message ed, and no model code or
+gemini  message  checkpoint inference was executed. 
+gemini  message  --- ### Exact Commands
+gemini  message  and Counts 
+gemini  message  1. **New unit test suite and frozen installer l
+gemini  message ock test sui
+gemini  message te:** - **Command:** 
+gemini  message `python -m p
+gemini  message ytest tests/test_runtime_graph.py tests/test_ins
+gemini  message taller_dependency_lock.p
+gemini  message y -v` - **Result:** **14 passed i
+gemini  message n 2.99s** (0 failures, 0
+gemini  message  errors, 0 warnings, run
+gemini  message  completely offline) - `tests/t
+gemini  message est_runtime_graph.py`: 9
+gemini  message  passed - `tests/te
+gemini  message st_installer_dependency_lock.py`: 5 
+gemini  message passed (byte
+gemini  message -identical) 2. **Offlin
+gemini  message e runtime gr
+gemini  message aph evaluation on locked runtime inventory:** 
+gemini  message  - **Command:** `python 
+gemini  message scripts/chec
+gemini  message k_runtime_graph.py --selection requirements-inst
+gemini  message aller-lock.t
+gemini  message xt --evidence-dir docs/l
+gemini  message ibrary/proof
+gemini  message /runtime-graph-01-2026-09-12` - **Result:** *
+gemini  message *FAIL** (exit code 1; 14
+gemini  message 0 packages s
+gemini  message elected, 281 active edges evaluated, 0 missing p
+gemini  message ackages, 0 c
+gemini  message onflicting constraints, 
+gemini  message 138 compatible wheels validated, 2 packages lack
+gemini  message ing pre-buil
+gemini  message t PyPI wheels) 3. **Offline runtime graph evalu
+gemini  message ation on pro
+gemini  message posed security-fixed candidate stack:** - **I
+gemini  message nput:** Prop
+gemini  message osed stack bumping `torc
+gemini  message h==2.10.0`, `torchaudio=
+gemini  message =2.10.0`, `t
+gemini  message orchvision==0.25.0`, `torchcodec==0.9.0`, `trans
+gemini  message formers==5.1
+gemini  message 0.0`, `huggingface-hub==1.5.0` - 
+gemini  message **Result:** **FAIL** (exit code 1; 5
+gemini  message  direct cons
+gemini  message traint conflicts against `whisperx==3.8.6`) 4. 
+gemini  message **Captured proof inventory count:** 
+gemini  message  - Proof directory: [`
+gemini  message docs/library
+gemini  message /proof/runtime-graph-01-
+gemini  message 2026-09-12/`](file:///C:/Users/hello/AppData/Loc
+gemini  message al/AgentCont
+gemini  message rolRoom/worktrees/uoink-
+gemini  message library/db13e13b-ff8/gemini/docs/lib
+gemini  message rary/proof/runtime-graph
+gemini  message -01-2026-09-12/) - To
+gemini  message tal files se
+gemini  message aled: **304 files** (153 PyPI package JSON recor
+gemini  message ds, 149 whee
+gemini  message l `.metadata` payloads, 
+gemini  message verified against `SHA256.json`) ---
+gemini  message  ### Observed Graph Res
+gemini  message ults and Bottlenecks 1.
+gemini  message  **Current Locked Inventory Closure:
+gemini  message ** - All 140 pins in 
+gemini  message [`requiremen
+gemini  message ts-installer-lock.txt`](
+gemini  message file:///C:/Users/hello/AppData/Local/AgentContro
+gemini  message lRoom/worktr
+gemini  message ees/uoink-library/db13e13b-ff8/gemin
+gemini  message i/requirements-installer
+gemini  message -lock.txt) form a closed graph acros
+gemini  message s 281 active edges for W
+gemini  message indows x64 CPython 3.13 
+gemini  message (`extra=""`). Zero packages are missing, and zer
+gemini  message o version constraints conflict inter
+gemini  message nally. - However, off
+gemini  message icial PyPI d
+gemini  message istributes only source a
+gemini  message rchives (`.tar.gz`) for 
+gemini  message [`antlr4-pyt
+gemini  message hon3-runtime==4.9.3`](https://pypi.o
+gemini  message rg/project/antlr4-python
+gemini  message 3-runtime/4.9.3/) (requi
+gemini  message red by `omeg
+gemini  message aconf 2.3.1`) and [`prox
+gemini  message y-tools==0.1.0`](https:/
+gemini  message /pypi.org/project/proxy-tools/0.1.0/
+gemini  message ) (required by `pywebvie
+gemini  message w 5.4`). Neither package has a pre-b
+gemini  message uilt wheel on official P
+gemini  message yPI. Under an offline wheel-only pac
+gemini  message kaging requirement, the 
+gemini  message locked graph fails. 2. 
+gemini  message **WhisperX 3.8.6 Constraint Bottlene
+gemini  message ck:** - [`whisperx==3
+gemini  message .8.6`](https://pypi.org/
+gemini  message project/whisperx/3.8.6/) rigidly pin
+gemini  message s `torch~=2.
+gemini  message 8.0`, `torchaudio~=2.8.0
+gemini  message `, `torchvision~=0.23.0`
+gemini  message , `torchcodec<0.8.0,>=0.6.0`, and `h
+gemini  message uggingface-hub<1.0.0`. 
+gemini  message  - Upgradin
+gemini  message g Torch to 2.9+ or 2.10+ (to address Torch advi
+gemini  message sories) conflicts with `
+gemini  message whisperx`. - Upgrading Transfor
+gemini  message mers to 5.0+ (to address
+gemini  message  Transformers advisories
+gemini  message ) mandates `huggingface-hub >= 1.3.0
+gemini  message ` (or `>= 1.5.0` in 5.10+), which di
+gemini  message rectly violates WhisperX
+gemini  message 's `<1.0.0` ceiling. 
+gemini  message - Pre-release `whisperx==3.8.7rc1` r
+gemini  message elaxes `huggingface-hub` to `>=0.28.
+gemini  message 1` (resolving the Hub co
+gemini  message nflict), but preserves t
+gemini  message he exact `torch~=2.8.0`,
+gemini  message  `torchaudio
+gemini  message ~=2.8.0`, `torchvision~=0.
+gemini  message 23.0`, and `torchcodec<0
+gemini  message .8.0,>=0.6.0` locks. 3. **Torchaudi
+gemini  message o PyPI Relea
+gemini  message se Truncation:** - PyPI provides To
+gemini  message rch releases
+gemini  message  through 2.14.0, but Torchaudio on PyPI stops at
+gemini  message  2.11.0 (`torchaudio-2.1
+gemini  message 1.0-cp313-
+gemini  message cp313-win_amd64.whl`). N
+gemini  message o Torchaudio 2.12,
+gemini  message  2.13, or 2.14 release e
+gemini  message xists on PyPI. Any propo
+gemini  message sed Torch upgrade past 2.11.0 fails 
+gemini  message immediately on missing u
+gemini  message pstream Torc
+gemini  message haudio wheels. 4. **NLTK Unpatched Status:** 
+gemini  message  - [`nltk==3.10.3`](http
+gemini  message s://pypi.org/project/nltk/3.10.3/) r
+gemini  message emains the latest releas
+gemini  message e on PyPI. N
+gemini  message o `3.10.4` release exist
+gemini  message s, leaving GHSA-8mgp-746c-j5xp unpat
+gemini  message ched upstream. 5. **Con
+gemini  message crete Minimum Compatibil
+gemini  message ity Patch (Metadata-Only):** - In
+gemini  message  [`whisperx/pyproject.to
+gemini  message ml`](file:///C:/Users/he
+gemini  message llo/AppData/Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/d
+gemini  message b13e13b-ff8/
+gemini  message gem
+gemini  message ini/docs/library/RUNTIME
+gemini  message -GRAPH-01-2026-09-12.md#
+gemini  message L145-L160) (v3.8.6, commit `69e9d6d`
+gemini  message ), co-installabil
+gemini  message ity requires relaxing: 
+gemini  message  - `huggingface-hub>=0.28.1` 
+gemini  message  - `torch>=2.8.0,<2.12.0
+gemini  message ` - `torcha
+gemini  message udio>=2.8.0,<2.12.0` 
+gemini  message  - `torchvision>=0.
+gemini  message 23.0,<0.28.0` - `torchcodec>=0.
+gemini  message 7.0
+gemini  message ,<0.12.0` 
+gemini  message  - This proposal is strictly metadat
+gemini  message a-level; it does not qualify C++ DLL
+gemini  message  loading with bundled FF
+gemini  message mpeg 7 DLLs, checkpoint conversion, 
+gemini  message or transcription WER. -
+gemini  message -- ### File
+gemini  message s Changed (Uncommitted i
+gemini  message n Worktree) - [`scripts/check_runti
+gemini  message me_graph.py`](file:///C:
+gemini  message /Users/hello/AppData/Local/AgentCont
+gemini  message rolRoom/worktrees/uoink-
+gemini  message library/db13e13b-ff8/gemini/scripts/
+gemini  message check_runtime_graph.py):
+gemini  message  Offline PEP 508 and whe
+gemini  message el tag compatibility ins
+gemini  message pector. - [`tests/test_r
+gemini  message untime_graph.py`](file:///C:/Users/h
+gemini  message ello/AppData
+gemini  message /Local/AgentControlRoom/
+gemini  message worktrees/uoink-library/db13e13b-ff8
+gemini  message /gemini/tests/test_runtime_graph.py)
+gemini  message : Offline regression tests covering 
+gemini  message markers, ext
+gemini  message ras, conflicts, missing packages, wh
+gemini  message eel tags, yanked wheels,
+gemini  message  and manifest tampering.
+gemini  message  - [`docs/library/RUNTIM
+gemini  message E-GRAPH-01-2026-09-12.md`](file:///C
+gemini  message :/Users/hello/AppData/Lo
+gemini  message cal/AgentControlRoom/wor
+gemini  message ktrees/uoink-library/db13e13b-ff8/ge
+gemini  message mini/docs/li
+gemini  message brary/RUNTIME-GRAPH-01-2
+gemini  message 026-09-12.md): Analysis 
+gemini  message report written under writing-craft g
+gemini  message uidelines. - [`docs/libr
+gemini  message ary/proof/runtime-graph-01-2026-09-1
+gemini  message 2/`](file:///C:/Users/he
+gemini  message llo/AppData/Local/AgentC
+gemini  message ontrolRoom/w
+gemini  message orktrees/uoink-library/db13e13b-ff8/gemini/docs/
+gemini  message library/proo
+gemini  message f/runtime-graph-01-2026-
+gemini  message 09-1
+gemini  message 2/): Primary PyPI JSON, 
+gemini  message wheel `.metadata`, [`fetch_primary_m
+gemini  message etadata.py`](file:///C:/
+gemini  message Users/hello/AppData/Local/AgentContr
+gemini  message olRoom/worktrees/uoink-library/db13e
+gemini  message 13b-ff8/gemini/docs/libr
+gemini  message ary/proof/runtime-graph-
+gemini  message 01-2026-09-
+gemini  message 12/fetch_primary_metadat
+gemini  message a.py), [`fetch_summary.j
+gemini  message son`](file:///C:/Users/
+gemini  message hello/AppData/Local/AgentControlRoom
+gemini  message /worktrees/uoink-library
+gemini  message /db13e13b-ff8/gemini/docs/library/pr
+gemini  message oof/runtime-graph-01-202
+gemini  message 6-09-12/fetch_summ
+gemini  message ary.json), and [`SHA256.
+gemini  message json`](file:///C:/Users/
+gemini  message hello/AppData/Local/AgentCont
+gemini  message rolRoom/worktrees/uoink-
+gemini  message library/db13e13b-ff8/gem
+gemini  message ini/docs/library/proof/runtime-graph
+gemini  message -01-2026-09-1
+gemini  message 2/SHA256.json). --- ### Compact Ha
+gemini  message ndoff - **Status:** Com
+gemini  message plete. Workt
+gemini  message ree clean
+gemini  message  of commits; zero modifications to e
+gemini  message xisting production files
+gemini  message  or tests. - **Work comp
+gemini  message leted:** - Implemented [`scripts/c
+gemini  message heck_runtime_graph.py`](
+gemini  message file:///C:/Users/hello/A
+gemini  message ppData/Local
+gemini  message /AgentControlRoom/worktrees/uoink-li
+gemini  message brary/db13e13b-ff8/gemin
+gemini  message i/scripts/check_runtime_
+gemini  message graph.py) inspecting saved PyPI JSON
+gemini  message  and wheel `.metadata` w
+gemini  message ithout imports or build 
+gemini  message hooks. - I
+gemini  message mplemented
+gemini  message  [`tests/test_runtime_gr
+gemini  message aph.py`](file:///C:/User
+gemini  message s/hello/AppData/Local/Ag
+gemini  message entControlRoom/worktrees
+gemini  message /uoink-library/db13e13b-ff8/gemini/t
+gemini  message ests/test_ru
+gemini  message ntime_graph.py) covering
+gemini  message  marker/extr
+gemini  message as closure, conflicting pi
+gemini  message ns, missing/yanked/wrong-platform/wr
+gemini  message ong-Python w
+gemini  message heels, tampered evidence
+gemini  message , and truthful failure reporting. 
+gemini  message - Captured primary PyPI 
+gemini  message JSON and wheel `.metadat
+gemini  message a` for all 140 locked runtime packag
+gemini  message es and candidate version
+gemini  message s under [`docs/library/proof/runtime
+gemini  message -graph-01-2026-09-12/`](
+gemini  message file:///C:/U
+gemini  message sers/hello/AppData/Local/AgentContro
+gemini  message lRoom/worktrees/uoink-li
+gemini  message brary/db13e13b-ff8/gemin
+gemini  message i/docs/library/proof/run
+gemini  message time-graph-01-2026-09-12/) (304 file
+gemini  message s sealed by `SHA256.json
+gemini  message `). - Authored
+gemini  message  [`docs/library/RUNTIME-GRAPH-01-202
+gemini  message 6-09-12.md`](file:///C:/
+gemini  message Users/hello/AppData/Loca
+gemini  message l/AgentContr
+gemini  message olRoom/worktrees/uoink-library/db13e
+gemini  message 13b-ff8/gemini/docs/library/RUNTIME-
+gemini  message GRAPH-01-202
+gemini  message 6-09-12.md) detaili
+gemini  message ng current and proposed graph result
+gemini  message s, the 5 WhisperX confli
+gemini  message cts, and the minimum compatibility p
+gemini  message atch. - Verified suite
+gemini  message s: `python -m pytest tes
+gemini  message ts/test_runt
+gemini  message ime_graph.py tests/test_
+gemini  message installer_dependency_loc
+gemini  message k.py` -> 14 passed. - **Evidence:**
+gemini  message  [`docs/libr
+gemini  message ary/proof/runtime-graph-
+gemini  message 01-2026-09-12/`](file://
+gemini  message /C:/Users/he
+gemini  message llo/AppData/Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/d
+gemini  message b13e13b-ff8/gemini/docs/library/proo
+gemini  message f/runtime-graph-01-2026-09-12/), [`S
+gemini  message HA256.json`]
+gemini  message (file:///C:/Users/hello/
+gemini  message AppData/Local/AgentContr
+gemini  message olRoom/worktrees/uoink-library/db13e
+gemini  message 13b-ff8/gemini/docs/
+gemini  message library/proof/runtime-gr
+gemini  message aph-01-2026-09-1
+gemini  message 2/SHA256.json), [`fetch_summary.json
+gemini  message `](file:///C:/Users/hell
+gemini  message o/AppData/
+gemini  message Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/d
+gemini  message b13e13b-ff8/gemini/docs/library/proo
+gemini  message f/runtime-graph-01-2026-09-1
+gemini  message 2/fetch_summ
+gemini  message ary.json). - **Files changed:** `scr
+gemini  message ipts/check_r
+gemini  message untime_graph.py`, `tests/test_runtim
+gemini  message e_graph.py`, `docs/library/RUNTIME-G
+gemini  message RAPH-01-
+gemini  message 2026-09-12.md`, and `doc
+gemini  message s/library/proof/runtime-
+gemini  message graph-01-20
+gemini  message 26-09-12/*` (all newly c
+gemini  message reated; existing reposit
+gemini  message ory files are byte-ident
+gemini  message ical). - **Open questions:** 1. Do
+gemini  message es Ryan authorize buildi
+gemini  message ng/pre-packaging custom 
+gemini  message wheels for `
+gemini  message antlr4-python3-
+gemini  message runtime` and `proxy-tool
+gemini  message s` in a private wheelhouse, or will 
+gemini  message the installer build pipe
+gemini  message line continue to permit sdist wheel 
+gemini  message builds for those two pac
+gemini  message kages? 2. If a migrati
+gemini  message on from Torch 2.8 is sch
+gemini  message eduled in a dedicated ca
+gemini  message ndidate bran
+gemini  message ch, will Ryan authorize 
+gemini  message vendoring a patched Whis
+gemini  message perX distribution (capping Torch at 
+gemini  message `<2.12.0` due to Torchau
+gemini  message dio availability) alongs
+gemini  message ide a synthetic audio inference qualification run? 
+gemini  usage   652913 input / 77811 output / 39527 thinking tokens
+gemini  status  parallel: completed
+
+Run completed: db13e13b-ff81-4b50-aab9-0b523e8c40a8
+gemini: I have launched the `git status` command to check the worktree state and will process the output as soon as it completes.
+I have launched the packaging tags check and will process its output when it completes.
+I have launched the check for PyPI PEP 658 metadata and will check the output once completed.
+I have launched the JSON inspection command and will check the output shortly.
+I have launched the check for wheel METADATA via `<url>.metadata` and will inspect its output.
+I have launched the check for Torch 2.8.0 wheel metadata on PyPI and will view the result when ready.
+I have launched the tag verification test and will check the output once done.
+I have launched the test using `packaging.tags.sys_tags()` and will review its result.
+I have launched the tag builder test and will verify the output.
+I have launched the ABI3 tag support test and will check the output once it completes.
+I have launched the ABI3 tag support test and will check the output once it finishes.
+I have launched the package count check on `requirements-installer-lock.txt` and will view the result.
+I have launched the line count check and will view the output once ready.
+I have launched the check on `transformers.json` and will view the output once it finishes.
+I have launched the PEP 508 marker test and will check the output once done.
+I have launched `test_marker.py` and will view the results shortly.
+I have launched `scripts/check_runtime_graph.py --help` and will review its output shortly.
+I have launched the candidate probing script and will inspect the output once it finishes.
+I am waiting for the candidate probing script to finish fetching PyPI metadata.
+I have launched the candidate version lookup and will review the output.
+I am waiting for task-174 to finish fetching candidate releases.
+I have launched the check for base requirements of `transformers 5.10.0` and will view the output.
+I am waiting for the metadata capture script to fetch and hash the PyPI JSON and wheel METADATA.
+I will wait for the background capture task to complete.
+I will wait for the task to finish.
+I have launched the check on `antlr4-python3-runtime` and `proxy-tools` PyPI files and will review the output.
+I have launched the edge check for `proxy-tools` and `antlr4-python3-runtime` and will review the output.
+I have launched the check for dependencies requiring `proxy-tools` and `antlr4` and will inspect the output.
+I have launched the dependency inspection and will review the output.
+I have launched the proposed fixed stack test and will review the output.
+I have launched `pytest tests/test_installer_dependency_lock.py` and will check the output once it completes.
+I have launched `python -m pytest tests/test_installer_dependency_lock.py` and will view the results shortly.
+I have launched the pytest run covering both test suites and will view the results shortly.
+I have launched `git status -s` and will review the output.
+I have launched pytest and will check the output once done.
+# Runtime Compatibility and Dependency Graph Analysis
+
+The bounded implementation for `SECURITY-RUNTIME-GRAPH-BRIEF-2026-09-12.md` is complete in the isolated Gemini worktree (`C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\db13e13b-ff8\gemini`). Zero commits were created, no subagents were launched, no existing production pins or tests were altered, and no model code or checkpoint inference was executed.
+
+---
+
+### Exact Commands and Counts
+
+1. **New unit test suite and frozen installer lock test suite:**
+   - **Command:** `python -m pytest tests/test_runtime_graph.py tests/test_installer_dependency_lock.py -v`
+   - **Result:** **14 passed in 2.99s** (0 failures, 0 errors, 0 warnings, run completely offline)
+     - `tests/test_runtime_graph.py`: 9 passed
+     - `tests/test_installer_dependency_lock.py`: 5 passed (byte-identical)
+
+2. **Offline runtime graph evaluation on locked runtime inventory:**
+   - **Command:** `python scripts/check_runtime_graph.py --selection requirements-installer-lock.txt --evidence-dir docs/library/proof/runtime-graph-01-2026-09-12`
+   - **Result:** **FAIL** (exit code 1; 140 packages selected, 281 active edges evaluated, 0 missing packages, 0 conflicting constraints, 138 compatible wheels validated, 2 packages lacking pre-built PyPI wheels)
+
+3. **Offline runtime graph evaluation on proposed security-fixed candidate stack:**
+   - **Input:** Proposed stack bumping `torch==2.10.0`, `torchaudio==2.10.0`, `torchvision==0.25.0`, `torchcodec==0.9.0`, `transformers==5.10.0`, `huggingface-hub==1.5.0`
+   - **Result:** **FAIL** (exit code 1; 5 direct constraint conflicts against `whisperx==3.8.6`)
+
+4. **Captured proof inventory count:**
+   - Proof directory: [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/)
+   - Total files sealed: **304 files** (153 PyPI package JSON records, 149 wheel `.metadata` payloads, verified against `SHA256.json`)
+
+---
+
+### Observed Graph Results and Bottlenecks
+
+1. **Current Locked Inventory Closure:**
+   - All 140 pins in [`requirements-installer-lock.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/requirements-installer-lock.txt) form a closed graph across 281 active edges for Windows x64 CPython 3.13 (`extra=""`). Zero packages are missing, and zero version constraints conflict internally.
+   - However, official PyPI distributes only source archives (`.tar.gz`) for [`antlr4-python3-runtime==4.9.3`](https://pypi.org/project/antlr4-python3-runtime/4.9.3/) (required by `omegaconf 2.3.1`) and [`proxy-tools==0.1.0`](https://pypi.org/project/proxy-tools/0.1.0/) (required by `pywebview 5.4`). Neither package has a pre-built wheel on official PyPI. Under an offline wheel-only packaging requirement, the locked graph fails.
+
+2. **WhisperX 3.8.6 Constraint Bottleneck:**
+   - [`whisperx==3.8.6`](https://pypi.org/project/whisperx/3.8.6/) rigidly pins `torch~=2.8.0`, `torchaudio~=2.8.0`, `torchvision~=0.23.0`, `torchcodec<0.8.0,>=0.6.0`, and `huggingface-hub<1.0.0`.
+   - Upgrading Torch to 2.9+ or 2.10+ (to address Torch advisories) conflicts with `whisperx`.
+   - Upgrading Transformers to 5.0+ (to address Transformers advisories) mandates `huggingface-hub >= 1.3.0` (or `>= 1.5.0` in 5.10+), which directly violates WhisperX's `<1.0.0` ceiling.
+   - Pre-release `whisperx==3.8.7rc1` relaxes `huggingface-hub` to `>=0.28.1` (resolving the Hub conflict), but preserves the exact `torch~=2.8.0`, `torchaudio~=2.8.0`, `torchvision~=0.23.0`, and `torchcodec<0.8.0,>=0.6.0` locks.
+
+3. **Torchaudio PyPI Release Truncation:**
+   - PyPI provides Torch releases through 2.14.0, but Torchaudio on PyPI stops at 2.11.0 (`torchaudio-2.11.0-cp313-cp313-win_amd64.whl`). No Torchaudio 2.12, 2.13, or 2.14 release exists on PyPI. Any proposed Torch upgrade past 2.11.0 fails immediately on missing upstream Torchaudio wheels.
+
+4. **NLTK Unpatched Status:**
+   - [`nltk==3.10.3`](https://pypi.org/project/nltk/3.10.3/) remains the latest release on PyPI. No `3.10.4` release exists, leaving GHSA-8mgp-746c-j5xp unpatched upstream.
+
+5. **Concrete Minimum Compatibility Patch (Metadata-Only):**
+   - In [`whisperx/pyproject.toml`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md#L145-L160) (v3.8.6, commit `69e9d6d`), co-installability requires relaxing:
+     - `huggingface-hub>=0.28.1`
+     - `torch>=2.8.0,<2.12.0`
+     - `torchaudio>=2.8.0,<2.12.0`
+     - `torchvision>=0.23.0,<0.28.0`
+     - `torchcodec>=0.7.0,<0.12.0`
+   - This proposal is strictly metadata-level; it does not qualify C++ DLL loading with bundled FFmpeg 7 DLLs, checkpoint conversion, or transcription WER.
+
+---
+
+### Files Changed (Uncommitted in Worktree)
+
+- [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/scripts/check_runtime_graph.py): Offline PEP 508 and wheel tag compatibility inspector.
+- [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/tests/test_runtime_graph.py): Offline regression tests covering markers, extras, conflicts, missing packages, wheel tags, yanked wheels, and manifest tampering.
+- [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md): Analysis report written under writing-craft guidelines.
+- [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/): Primary PyPI JSON, wheel `.metadata`, [`fetch_primary_metadata.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/fetch_primary_metadata.py), [`fetch_summary.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/fetch_summary.json), and [`SHA256.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/SHA256.json).
+
+---
+
+### Compact Handoff
+
+- **Status:** Complete. Worktree clean of commits; zero modifications to existing production files or tests.
+- **Work completed:**
+  - Implemented [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/scripts/check_runtime_graph.py) inspecting saved PyPI JSON and wheel `.metadata` without imports or build hooks.
+  - Implemented [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/tests/test_runtime_graph.py) covering marker/extras closure, conflicting pins, missing/yanked/wrong-platform/wrong-Python wheels, tampered evidence, and truthful failure reporting.
+  - Captured primary PyPI JSON and wheel `.metadata` for all 140 locked runtime packages and candidate versions under [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/) (304 files sealed by `SHA256.json`).
+  - Authored [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md) detailing current and proposed graph results, the 5 WhisperX conflicts, and the minimum compatibility patch.
+  - Verified suites: `python -m pytest tests/test_runtime_graph.py tests/test_installer_dependency_lock.py` -> 14 passed.
+- **Evidence:** [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/), [`SHA256.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/SHA256.json), [`fetch_summary.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/db13e13b-ff8/gemini/docs/library/proof/runtime-graph-01-2026-09-12/fetch_summary.json).
+- **Files changed:** `scripts/check_runtime_graph.py`, `tests/test_runtime_graph.py`, `docs/library/RUNTIME-GRAPH-01-2026-09-12.md`, and `docs/library/proof/runtime-graph-01-2026-09-12/*` (all newly created; existing repository files are byte-identical).
+- **Open questions:**
+  1. Does Ryan authorize building/pre-packaging custom wheels for `antlr4-python3-runtime` and `proxy-tools` in a private wheelhouse, or will the installer build pipeline continue to permit sdist wheel builds for those two packages?
+  2. If a migration from Torch 2.8 is scheduled in a dedicated candidate branch, will Ryan authorize vendoring a patched WhisperX distribution (capping Torch at `<2.12.0` due to Torchaudio availability) alongside a synthetic audio inference qualification run?
+

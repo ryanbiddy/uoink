@@ -1,0 +1,80 @@
+FFFFFFFFFFFF.....F                                                       [100%]
+================================== FAILURES ===================================
+_________________ test_lock_root_extra_changes_required_edges _________________
+tests\test_runtime_graph_boundaries.py:41: in test_lock_root_extra_changes_required_edges
+    assert with_extra['passed'] is False
+E   assert True is False
+__________________ test_duplicate_selection_key_is_rejected ___________________
+tests\test_runtime_graph_boundaries.py:48: in test_duplicate_selection_key_is_rejected
+    with pytest.raises(ValueError, match='Duplicate'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_______________ test_duplicate_manifest_stops_dependent_reading _______________
+tests\test_runtime_graph_boundaries.py:59: in test_duplicate_manifest_stops_dependent_reading
+    result = graph.check_runtime_graph({'demo': '1.0.0'}, tmp_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\check_runtime_graph.py:720: in check_runtime_graph
+    pypi_path, pypi_json, pypi_errs = find_pypi_json_for_package(
+tests\test_runtime_graph_boundaries.py:57: in forbidden
+    pytest.fail('Dependent evidence was read after integrity failure')
+E   Failed: Dependent evidence was read after integrity failure
+_____________ test_invalid_artifact_urls_do_not_qualify[https://] _____________
+tests\test_runtime_graph_boundaries.py:73: in test_invalid_artifact_urls_do_not_qualify
+    assert result['passed'] is False and result['wheel_failures']
+E   assert (True is False)
+____ test_invalid_artifact_urls_do_not_qualify[http://example.test/x.whl] _____
+tests\test_runtime_graph_boundaries.py:73: in test_invalid_artifact_urls_do_not_qualify
+    assert result['passed'] is False and result['wheel_failures']
+E   assert (True is False)
+_ test_invalid_artifact_urls_do_not_qualify[https://user:secret@example.test/x.whl] _
+tests\test_runtime_graph_boundaries.py:73: in test_invalid_artifact_urls_do_not_qualify
+    assert result['passed'] is False and result['wheel_failures']
+E   assert (True is False)
+_ test_invalid_artifact_urls_do_not_qualify[https://example.test/x.whl#fragment] _
+tests\test_runtime_graph_boundaries.py:73: in test_invalid_artifact_urls_do_not_qualify
+    assert result['passed'] is False and result['wheel_failures']
+E   assert (True is False)
+___ test_invalid_artifact_urls_do_not_qualify[https://exam\nple.test/x.whl] ___
+tests\test_runtime_graph_boundaries.py:73: in test_invalid_artifact_urls_do_not_qualify
+    assert result['passed'] is False and result['wheel_failures']
+E   assert (True is False)
+_________ test_unbound_dist_info_metadata_is_not_exact_wheel_evidence _________
+tests\test_runtime_graph_boundaries.py:85: in test_unbound_dist_info_metadata_is_not_exact_wheel_evidence
+    assert result['passed'] is False and result['incomplete_evidence']
+E   assert (True is False)
+__________ test_metadata_change_after_manifest_check_is_not_consumed __________
+tests\test_runtime_graph_boundaries.py:97: in test_metadata_change_after_manifest_check_is_not_consumed
+    assert result['passed'] is False and result['incomplete_evidence']
+E   assert (True is False)
+________________ test_duplicate_singleton_metadata_is_rejected ________________
+tests\test_runtime_graph_boundaries.py:106: in test_duplicate_singleton_metadata_is_rejected
+    assert result['passed'] is False and result['incomplete_evidence']
+E   assert (True is False)
+____________ test_integrity_bypass_stops_before_any_dependent_read ____________
+tests\test_runtime_graph_boundaries.py:114: in test_integrity_bypass_stops_before_any_dependent_read
+    result = graph.check_runtime_graph({'demo': '1.0.0'}, tmp_path, verify_manifest=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\check_runtime_graph.py:720: in check_runtime_graph
+    pypi_path, pypi_json, pypi_errs = find_pypi_json_for_package(
+tests\test_runtime_graph_boundaries.py:112: in forbidden
+    pytest.fail('Integrity bypass still consumed evidence')
+E   Failed: Integrity bypass still consumed evidence
+___________ test_target_override_cannot_mix_markers_and_wheel_tags ____________
+tests\test_runtime_graph_boundaries.py:132: in test_target_override_cannot_mix_markers_and_wheel_tags
+    assert result['passed'] is False and result['selection_errors']
+E   assert (True is False)
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_graph_boundaries.py::test_lock_root_extra_changes_required_edges
+FAILED tests/test_runtime_graph_boundaries.py::test_duplicate_selection_key_is_rejected
+FAILED tests/test_runtime_graph_boundaries.py::test_duplicate_manifest_stops_dependent_reading
+FAILED tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://]
+FAILED tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[http://example.test/x.whl]
+FAILED tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://user:secret@example.test/x.whl]
+FAILED tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://example.test/x.whl#fragment]
+FAILED tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://exam\nple.test/x.whl]
+FAILED tests/test_runtime_graph_boundaries.py::test_unbound_dist_info_metadata_is_not_exact_wheel_evidence
+FAILED tests/test_runtime_graph_boundaries.py::test_metadata_change_after_manifest_check_is_not_consumed
+FAILED tests/test_runtime_graph_boundaries.py::test_duplicate_singleton_metadata_is_rejected
+FAILED tests/test_runtime_graph_boundaries.py::test_integrity_bypass_stops_before_any_dependent_read
+FAILED tests/test_runtime_graph_boundaries.py::test_target_override_cannot_mix_markers_and_wheel_tags
+13 failed, 5 passed in 3.18s

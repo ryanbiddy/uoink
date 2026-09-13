@@ -1,0 +1,854 @@
+RUN PREFLIGHT — no worker has started yet
+Project:  uoink-library
+Mode:     work (isolated worktrees)
+Strategy: parallel
+Lead:     gemini
+Workers:
+  gemini  gemini-3.8-flash-high @ high effort
+Goal:
+Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/RUNTIME-GRAPH-REPAIR-BRIEF-2026-09-12.md first and complete that exact bounded task. Write early. No subagents or commits.
+
+APPROVED — starting workers now. Live events follow.
+
+system  status  parallel work run started with gemini
+system  preflight gemini=gemini-3.8-flash-high@high
+system  preflight frozen-base=02e06dbcbc75294e946a0bcd62fa0d96dcde7ae3 · verified-inputs=0
+gemini  status  parallel: preparing
+gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    list_dir
+gemini  tool    list_dir
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    list_dir
+gemini  tool    list_dir
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    replace_file_content
+gemini  tool    replace_file_content
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    list_dir
+gemini  tool    list_dir
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    list_dir
+gemini  tool    list_dir
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    list_dir
+gemini  tool    list_dir
+gemini  tool    run_command
+gemini  tool    run_command
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  tool    manage_task
+gemini  message Completed the bounded ta
+gemini  message sk specified in
+gemini  message  [RUNTIME-GRAPH-REPAIR-BRIEF-2026-09
+gemini  message -12.md](file
+gemini  message :///E:/AI/projects/uoink
+gemini  message /checkouts/Yoink-library/docs/librar
+gemini  message y/RUNTIME-GRAPH-REPAIR-B
+gemini  message RIEF-2026-09-12.md). ### Summary of
+gemini  message  Completed Repairs 1. *
+gemini  message *Original Deliverables Archived & Preserved**: 
+gemini  message  - Preserve
+gemini  message d the unedited raw sourc
+gemini  message e, tests, and report in `_scratch/ru
+gemini  message ntime-graph-original/` (
+gemini  message [`check_runtime_graph.py`](file:///C:/Users/hell
+gemini  message o/AppData/Lo
+gemini  message cal/AgentControlRoom/worktrees/uoink-library/6c9
+gemini  message 6f0a3-c02/ge
+gemini  message mini/_scratch/runtime-gr
+gemini  message aph-original/check_runtime_graph.py), [`test_run
+gemini  message time_graph.p
+gemini  message y`](file:///C:/Users/hello/AppData/Local/AgentCo
+gemini  message ntrolRoom/wo
+gemini  message rktrees/uoink-library/6c96f0a3-c02/gemini/_scrat
+gemini  message ch/runtime-g
+gemini  message raph-original/test_runti
+gemini  message me_graph.py), and [`RUNTIME-GRAPH-01-2026-09-12.
+gemini  message md`](file://
+gemini  message /C:/Users/hello/AppData/Local/AgentControlRoom/w
+gemini  message orktrees/uoi
+gemini  message nk-library/6c96f0a3-c02/gemini/_scratch/runtime-
+gemini  message graph-origin
+gemini  message al/RUNTIME-GRAPH-01-2026-09-12.md)). - Kept r
+gemini  message aw evidence in `docs/lib
+gemini  message rary/proof/r
+gemini  message untime-graph-01-2026-09-
+gemini  message 12/` (306 fi
+gemini  message les) completely unmodifi
+gemini  message ed. 2. **Group 1: Evidence Complete
+gemini  message ness and Boundedness Rep
+gemini  message aired**: - Enforced S
+gemini  message HA256 validation (64-character hex s
+gemini  message trings) and manifest cov
+gemini  message erage for every JSON and METADATA fi
+gemini  message le consumed by [`scripts
+gemini  message /check_runtime_graph.py`
+gemini  message ](file:///C:
+gemini  message /Users/hello/AppData/Local/AgentControlRoom/work
+gemini  message trees/uoink-
+gemini  message library/6c96f0a3-c02/gemini/scripts/check_runtim
+gemini  message e_graph.py).
+gemini  message  - Enforced path sand
+gemini  message boxing: verified all target paths resolve strict
+gemini  message ly within th
+gemini  message e proof root before file
+gemini  message  access; rej
+gemini  message ected path traversal (`..`), absolute paths, sym
+gemini  message links, and duplicate nor
+gemini  message malized entr
+gemini  message ies. - Refused any integrity-bypass option (`
+gemini  message --no-manifes
+gemini  message t-check` / `verify_manif
+gemini  message est=False`) from returning `PASS`. 
+gemini  message  - Enforced strict thre
+gemini  message e-way matching: selected
+gemini  message  package/ver
+gemini  message sion, wheel filename package/version, and wheel 
+gemini  message METADATA `Na
+gemini  message me`/`Version`. - Refu
+gemini  message sed wildcard
+gemini  message s, fuzzy globs, or fallbacks to PyPI JSON `requi
+gemini  message res_dist`; read only exa
+gemini  message ct wheel MET
+gemini  message ADATA (`{wheel_filename}.metadata`). - Valida
+gemini  message ted wheel re
+gemini  message lease files for authenti
+gemini  message c SHA256 digests and HTTP/HTTPS URLs. 3. **Grou
+gemini  message p 2: Target Wheel Tags and Python Co
+gemini  message nstraints Repaired**: 
+gemini  message  - Replaced 
+gemini  message unconstrained tag generation with strictly Windo
+gemini  message ws x86-64 CP
+gemini  message ython 3.13 non-free-threaded tags (`cp313` ABI a
+gemini  message nd interpreter). - Ma
+gemini  message intained sta
+gemini  message ble ABI3 forward compati
+gemini  message bility (`cp32` through `cp313` with 
+gemini  message `abi3` ABI on `win_amd64
+gemini  message `). - Eliminated host
+gemini  message -default platform leakage and remove
+gemini  message d manual older interpret
+gemini  message er `none` ta
+gemini  message gs (e.g., `cp312-none`). - Added checks for b
+gemini  message oth JSON and
+gemini  message  METADATA `Requires-Pyth
+gemini  message on`, rejecti
+gemini  message ng malformed constraints and contrad
+gemini  message ictory ranges. 4. **Group 3: Fixed-
+gemini  message Point Extras
+gemini  message  Propagation & PEP 508 E
+gemini  message nforced**: 
+gemini  message  - Implemented fixed-point extras propagation s
+gemini  message upporting multi-step tra
+gemini  message nsitive depe
+gemini  message ndencies and circular dependencies w
+gemini  message ithout infinite loops. 
+gemini  message  - Propagated activated
+gemini  message  extras (e.g
+gemini  message ., `fsspec[http]` activating `aiohttp` and `requ
+gemini  message ests`, and `mcp` -> `pyj
+gemini  message wt[crypto]` 
+gemini  message activating `cryptography
+gemini  message `), increasi
+gemini  message ng active edge coverage from 281 to 283 active e
+gemini  message dges. - T
+gemini  message reated marker evaluation exceptions 
+gemini  message as explicit `marker_errors` rather t
+gemini  message han silently dropping edges. - Re
+gemini  message jected unsupported activ
+gemini  message e direct-URL requirements (`req.url`
+gemini  message ). - Validated select
+gemini  message ion package names, versi
+gemini  message ons, and dup
+gemini  message licate pins in both lock
+gemini  message files and JSON selections without si
+gemini  message lent overwriting; added 
+gemini  message support/validation for root extras. 
+gemini  message  5. **Group 4: Documenta
+gemini  message tion Corrected**: - Updated [`doc
+gemini  message s/library/RUNTIME-GRAPH-
+gemini  message 01-2026-09-12.md`](file:
+gemini  message ///C:/Users/hello/AppData/Local/Agen
+gemini  message tControlRoom/worktrees/u
+gemini  message oink-library/6c96f0a3-c02/gemini/doc
+gemini  message s/library/RUNTIME-GRAPH-
+gemini  message 01-2026-09-12.md): 
+gemini  message - Clarified that Torch 2.10 is an in
+gemini  message termediate step, not a f
+gemini  message ully fixed t
+gemini  message arget, as retained advisories extend through 2.1
+gemini  message 3.0. - Removed asse
+gemini  message rtions of "c
+gemini  message apability preservation" 
+gemini  message or "working alignment", explicitly s
+gemini  message tating that no source-le
+gemini  message vel migration is implemented. -
+gemini  message  Clarified that the whee
+gemini  message l-only scan's 2 missing 
+gemini  message upstream whe
+gemini  message els (`antlr4-python3-runtime` and `proxy-tools`)
+gemini  message  do not inva
+gemini  message lidate the prior install
+gemini  message ed graph, as those packa
+gemini  message ges were bui
+gemini  message lt from source under the existing `build.ps1` st
+gemini  message aging proces
+gemini  message s. - Documented Tor
+gemini  message chaudio PyPI
+gemini  message  truncation at 2.11.0 an
+gemini  message d wheel metadata couplin
+gemini  message g to matching Torch releases. -
+gemini  message  Removed unverified comm
+gemini  message it reference
+gemini  message s and stale qualificatio
+gemini  message n claims. - Clarifi
+gemini  message ed that NLTK 3.10.4 is absent on PyP
+gemini  message I and not an approved ta
+gemini  message rget. 6. **
+gemini  message Test Suite Corrected & Adversarial Coverage Adde
+gemini  message d**: - Up
+gemini  message dated [`tests/test_runtime_graph.py`
+gemini  message ](file:///C:/Users/hello/AppData/Loc
+gemini  message al/AgentCont
+gemini  message rolRoom/worktrees/uoink-
+gemini  message library/6c96f0a3-c02/gemini/tests/te
+gemini  message st_runtime_graph.py) wit
+gemini  message h authentic 64-character SHA256 hash
+gemini  message es (replacing synthetic 
+gemini  message short hashes). - Adde
+gemini  message d adversarial test coverage for mani
+gemini  message fest tampering, traversa
+gemini  message l, absolute paths, dupli
+gemini  message cate normalized entries, missing man
+gemini  message ifests, unmanifested con
+gemini  message sumed files, bypass denial, wheel UR
+gemini  message L/hash validation, tag l
+gemini  message eakage, `cp3
+gemini  message 12-none`, free-threaded 
+gemini  message tags, contradictory `Requires-Python
+gemini  message `, circular extras, and 
+gemini  message direct-URL rejection. 
+gemini  message  - Maintained committed 
+gemini  message frozen base tests in [`tests/test_in
+gemini  message staller_depe
+gemini  message ndency_lock.py`](file:///C:/Users/hello/AppData/
+gemini  message Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/6c96f0a3-c02/
+gemini  message gemini/tests/test_instal
+gemini  message ler_dependency_lock.py) without modi
+gemini  message fication. - Generated
+gemini  message  fresh JSON 
+gemini  message review artifacts and exe
+gemini  message cution summary under [`docs/library/proof/runtim
+gemini  message e-graph-revi
+gemini  message ew-2026-09-12/`](file://
+gemini  message /C:/Users/hello/AppData/Local/AgentC
+gemini  message ontrolRoom/worktrees/uoink-library/6c96f0a3-c02/
+gemini  message gemini/docs/
+gemini  message library/proof/runtime-gr
+gemini  message aph-review-2026-09-12/).
+gemini  message  --- ### Compact Handoff - **Stat
+gemini  message us**: Completed. All 18 
+gemini  message tests pass a
+gemini  message cross `tests/test_runtime_graph.py` and `tests/t
+gemini  message est_installe
+gemini  message r_dependency_lock.py`. -
+gemini  message  **Work completed**: -
+gemini  message  Repaired evidence integ
+gemini  message rity, bounded path handling, exact m
+gemini  message etadata matc
+gemini  message hing, non-free-threaded 
+gemini  message tag generation, fixed-point extras propagation, 
+gemini  message and marker e
+gemini  message rror handling in [`scripts/check_runtime_graph.p
+gemini  message y`](file:///C:/Users/hello/AppData/L
+gemini  message ocal/AgentControlRoom/wo
+gemini  message rktrees/uoink-library/6c96f0a3-c02/g
+gemini  message emini/scripts/check_runt
+gemini  message ime_graph.py). - Repai
+gemini  message red and expanded [`tests/test_runtim
+gemini  message e_graph.py`](file:///C:/
+gemini  message Users/hello/AppData/Loca
+gemini  message l/AgentControlRoom/worktrees/uoink-l
+gemini  message ibrary/6c96f0a3-c02/gemi
+gemini  message ni/tests/test_runtime_graph.py) with
+gemini  message  authentic hashes and ad
+gemini  message versarial cases. - Corrected techn
+gemini  message ical findings, limitations, and scop
+gemini  message e boundaries in [`docs/l
+gemini  message ibrary/RUNTIME-GRAPH-01-
+gemini  message 2026-09-12.md`](file:///C:/Users/hello/AppData/L
+gemini  message ocal/AgentCo
+gemini  message ntrolRoom/worktrees/uoin
+gemini  message k-library/6c96f0a3-c02/gemini/docs/l
+gemini  message ibrary/RUNTIME-GRAPH-01-
+gemini  message 2026-09-12.md). - Preserved origin
+gemini  message al deliverables under `_
+gemini  message scratch/runtime-graph-or
+gemini  message iginal/`. - Saved fresh outputs an
+gemini  message d execution metadata in 
+gemini  message `docs/library/proof/runt
+gemini  message ime-graph-re
+gemini  message view-2026-09-12/`. - **E
+gemini  message vidence**: - `pytest t
+gemini  message ests/test_runtime_graph.py tests/tes
+gemini  message t_installer_dependency_l
+gemini  message ock.py -v`: 18 passed in 4.72s. - 
+gemini  message `python scripts/check_ru
+gemini  message ntime_graph.
+gemini  message py --selection requirements-installe
+gemini  message r-lock.txt`: exit code 1 (truthfully
+gemini  message  reports FAI
+gemini  message L due to 2 unbuilt upstr
+gemini  message eam source packages in wheel-only sc
+gemini  message an: `antlr4-python3-runt
+gemini  message ime` and `proxy-tools`). - `python
+gemini  message  scripts/check_runtime_g
+gemini  message raph.py --selection docs
+gemini  message /library/proof/runtime-graph-review-
+gemini  message 2026-09-12/proposal_sele
+gemini  message ction.json`: exit code 1
+gemini  message  (truthfully reports FAIL due to 5 r
+gemini  message igid WhisperX constraint
+gemini  message  conflicts against Torch 2.10 / Hugg
+gemini  message ing Face Hub). - [`execution_summa
+gemini  message ry.json`](file:///C:/Use
+gemini  message rs/hello/AppData/Local/A
+gemini  message gentControlRoom/worktrees/uoink-libr
+gemini  message ary/6c96f0a3-c02/gemini/
+gemini  message docs/library/proof/runti
+gemini  message me-graph-review-2026-09-12/execution
+gemini  message _summary.json) captures 
+gemini  message command lines, exit codes, and outpu
+gemini  message t paths. - **Files changed**: - `_
+gemini  message scratch/runtime-graph-original/` (cr
+gemini  message eated archiv
+gemini  message e of original files) - [`scripts/c
+gemini  message heck_runtime_graph.py`](
+gemini  message file:///C:/Users/hello/A
+gemini  message ppData/Local/AgentControlRoom/worktr
+gemini  message ees/uoink-library/6c96f0
+gemini  message a3-c02/gemini/scripts/check_runtime_
+gemini  message graph.py) (repaired) -
+gemini  message  [`tests/test_runtime_gr
+gemini  message aph.py`](file:///C:/User
+gemini  message s/hello/AppData/Local/AgentControlRo
+gemini  message om/worktrees/uoink-libra
+gemini  message ry/6c96f0a3-c02/gemini/t
+gemini  message ests/test_runtime_graph.py) (repaire
+gemini  message d & expanded
+gemini  message ) - [`docs/library/RUNTIME-GRAPH-0
+gemini  message 1-2026-09-12.md`](file:/
+gemini  message //C:/Users/hello/AppData/Local/Agent
+gemini  message ControlRoom/worktrees/uoink-library/
+gemini  message 6c96f0a3-c02
+gemini  message /gemini/docs/library/RUNTIME-GRAPH-0
+gemini  message 1-2026-09-12.md) (correc
+gemini  message ted report) - [`docs/l
+gemini  message ibrary/proof/runtime-gra
+gemini  message ph-01-2026-09-12/`](file:///C:/Users
+gemini  message /hello/AppData/Local/Age
+gemini  message ntControlRoom/worktrees/uoink-librar
+gemini  message y/6c96f0a3-c02/gemini/do
+gemini  message cs/library/proof/runtime-graph-01-20
+gemini  message 26-09-12/) (copied 306-f
+gemini  message ile raw evidence directo
+gemini  message ry) - [`docs/library/p
+gemini  message roof/runtime-graph-review-2026-09-12
+gemini  message /`](file:///C:/Users/hel
+gemini  message lo/AppData/Local/AgentControlRoom/wo
+gemini  message rktrees/uoin
+gemini  message k-library/6c96f0a3-c02/g
+gemini  message emini/docs/library/proof/runtime-gra
+gemini  message ph-review-2026-09-12/) (
+gemini  message created fresh review out
+gemini  message puts and execution summa
+gemini  message ry) - **Unresolved constraints / Ope
+gemini  message n questions**: - Curre
+gemini  message nt lock fail
+gemini  message s a wheel-only scan because PyPI onl
+gemini  message y hosts source archives 
+gemini  message (`.tar.gz`) for `antlr4-
+gemini  message python3-runtime==4.9.3` 
+gemini  message and `proxy-tools==0.1.0` (which are 
+gemini  message built from source during
+gemini  message  installer c
+gemini  message reation). - Upstream `whisperx==3.
+gemini  message 8.6` strictly pins `torch~=2.8.0`, `
+gemini  message torchaudio~=2.8.0`, `tor
+gemini  message chvision~=0.23.0`, `torchcodec<0.8.0,>=0.6.0`, and `huggingface-hub<1.0.0`, blocking security upgrades to Torch 2.10+ and Transformers 5.x. - Retained Torch advisories extend throu
+gemini  message The test run has finishe
+gemini  message d with full pass status 
+gemini  message across both suites (18 p
+gemini  message assed in 4.72s). ### Compact
+gemini  message  Handoff - **Status**: 
+gemini  message Completed. A
+gemini  message ll 18 tests
+gemini  message  pass across [`tests/test_runtime_gr
+gemini  message aph.py`](fil
+gemini  message e:///C:/Users/hello/AppD
+gemini  message ata/Local/AgentControlRoom/worktrees
+gemini  message /uoink-library/6c96f0a3-
+gemini  message c02/gemini/t
+gemini  message ests/test_runtime_graph.py) (13 tests) and [`tes
+gemini  message ts/test_installer_depend
+gemini  message ency_lock.py`](file:///C:/Users/hell
+gemini  message o/AppData/Local/AgentControlRoom/worktrees/uoink
+gemini  message -library/6c9
+gemini  message 6f0a3-c02/gemini/tests/t
+gemini  message est_installe
+gemini  message r_dependency_lock.py) (5 tests). - **Work comple
+gemini  message ted**: - Repaired all four requirement groups 
+gemini  message in [`scripts
+gemini  message /check_runtime_graph.py`
+gemini  message ](file:///C:
+gemini  message /Users/hello/AppData/Loc
+gemini  message al/AgentControlRoom/worktrees/uoink-library/6c96
+gemini  message f0a3-c02/gem
+gemini  message ini/scripts/check_runtim
+gemini  message e_graph.py): evidence man
+gemini  message ifest completeness and b
+gemini  message oundary verification; Wi
+gemini  message ndows CPytho
+gemini  message n 3.13 non-free-threaded wheel tag generation; f
+gemini  message ixed-point extras propagation with c
+gemini  message ycle handling and marker
+gemini  message  error class
+gemini  message ification; and three-way package/wheel/METADATA 
+gemini  message exact matching without w
+gemini  message ildcards or 
+gemini  message fallback. - Rebuilt [`
+gemini  message tests/test_runtime_graph.py`](file:/
+gemini  message //C:/Users/hello/AppData/Local/AgentControlRoom/
+gemini  message worktrees/uo
+gemini  message ink-library/6c96f0a3-c02
+gemini  message /gemini/tests/test_runtime_graph.py) using authe
+gemini  message ntic 64-char
+gemini  message acter SHA256 digests and added comprehensive adv
+gemini  message ersarial tes
+gemini  message t cases. - Corrected [
+gemini  message `docs/library/RUNTIME-GRAPH-01-2026-
+gemini  message 09-12.md`](file:///C:/Us
+gemini  message ers/hello/AppData/Local/
+gemini  message AgentControl
+gemini  message Room/worktrees/uoink-lib
+gemini  message rary/6c96f0a3-c02/gemini/docs/librar
+gemini  message y/RUNTIME-GRAPH-01-2026-09-12.md) to
+gemini  message  reflect actual upstream realities, removed unve
+gemini  message rified claim
+gemini  message s of working alignment or capability preservatio
+gemini  message n, clarified
+gemini  message  source-build status of the two unbuilt wheels, 
+gemini  message and documented Torchaudi
+gemini  message o and NLTK b
+gemini  message oundaries. - Preserved
+gemini  message  original raw deliverables under `_s
+gemini  message cratch/runtime-graph-ori
+gemini  message ginal/`. -
+gemini  message  Saved fresh current and
+gemini  message  proposal JSON outputs a
+gemini  message long with actual command exit codes 
+gemini  message in [`docs/library/proof/
+gemini  message runtime-grap
+gemini  message h-review-2026-09-12/`](file:///C:/Users/hello/Ap
+gemini  message pData/Local/AgentControl
+gemini  message Room/worktrees/uoink-library/6c96f0a
+gemini  message 3-c02/gemini/docs/librar
+gemini  message y/proof/runt
+gemini  message ime-graph-review-2026-09-12/). - **Evidence**: 
+gemini  message  - `pytest tests/test_ru
+gemini  message ntime_graph.
+gemini  message py tests/test_installer_dependency_lock.py -v`: 
+gemini  message 18 passed in
+gemini  message  4.72s. - `python scri
+gemini  message pts/check_runtime_graph.py --selecti
+gemini  message on requirements-installer-lock.txt`:
+gemini  message  exit code 1 (FAIL due to 2 PyPI sdi
+gemini  message st-only packages in wheel-only evalu
+gemini  message ation: `antlr4-python3-r
+gemini  message untime` and `proxy-tools`). - `pyt
+gemini  message hon scripts/check_runtime_graph.py --selection d
+gemini  message ocs/library/proof/runtim
+gemini  message e-graph-revi
+gemini  message ew-2026-09-12/proposal_selection.json`: exit cod
+gemini  message e 1 (FAIL du
+gemini  message e to 5 rigid WhisperX constraint conflicts). -
+gemini  message  Review outp
+gemini  message uts recorded in [`execution_summary.json`](file:
+gemini  message ///C:/Users/hello/AppDat
+gemini  message a/Local/AgentControlRoom/worktrees/u
+gemini  message oink-library/6c96f0a3-c0
+gemini  message 2/gemini/docs/library/proof/runtime-
+gemini  message graph-review-2026-09-12/
+gemini  message execution_summary.json). - **Files changed**: 
+gemini  message - `_scratch/
+gemini  message runtime-graph-original/` (archived original deli
+gemini  message verables) 
+gemini  message - [`scripts/check_runtime_graph.py`](file:///C:/
+gemini  message Users/hello/
+gemini  message AppData/Local/AgentControlRoom/workt
+gemini  message rees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime
+gemini  message _graph.py) 
+gemini  message  - [`tests/test_runtime_graph.py`](file:///C:/Us
+gemini  message ers/hello/Ap
+gemini  message pData/Local/AgentControlRoom/worktrees/uoink-lib
+gemini  message rary/6c96f0a
+gemini  message 3-c02/gemini/tests/test_runtime_graph.py) - [`
+gemini  message docs/library/RUNTIME-GRA
+gemini  message PH-01-2026-0
+gemini  message 9-12.md`](file:///C:/Users/hello/AppData/Local/A
+gemini  message gentControlR
+gemini  message oom/worktrees/uoink-library/6c96f0a3-c02/gemini/
+gemini  message docs/library/RUNTIME-GRA
+gemini  message PH-01-2026-0
+gemini  message 9-12.md) - [`docs/library/proof/runtime-graph-
+gemini  message 01-2026-09-1
+gemini  message 2/`](file:///C:/Users/he
+gemini  message llo/AppData/Local/AgentControlRoom/w
+gemini  message orktrees/uoink-library/6
+gemini  message c96f0a3-c02/gemini/docs/
+gemini  message library/proof/runtime-graph-01-2026-
+gemini  message 09-12/) (copied proof di
+gemini  message rectory, raw files unmodified) - [
+gemini  message `docs/library/proof/runt
+gemini  message ime-graph-review-2026-09
+gemini  message -12/`](file:///C:/Users/
+gemini  message hello/AppData/Local/AgentControlRoom
+gemini  message /worktrees/uoink-library/6c96f0a3-c0
+gemini  message 2/gemini/docs/library/pr
+gemini  message oof/runtime-
+gemini  message graph-review-2026-09-12/) (fresh review director
+gemini  message y with JSON outputs and summary) - *
+gemini  message *Unresolved constraints 
+gemini  message / Open questions**: - 
+gemini  message Wheel-only e
+gemini  message valuation fails for `antlr4-python3-runtime` and
+gemini  message  `proxy-tool
+gemini  message s` as PyPI only provides `.tar.gz` sdist archive
+gemini  message s for those versions (bu
+gemini  message ilt from source during `build.ps1` s
+gemini  message taging). - Upstream `w
+gemini  message hisperx==3.8
+gemini  message .6` constrains `torch~=2.8.0`, `torchaudio~=2.8.
+gemini  message 0`, `torchvision~=0.23.0`, `torchcodec<0.8.0,>=0
+gemini  message .6.0`, and `
+gemini  message huggingface-hub<1.0.0`. 
+gemini  message  - Torch 2.10.0 does no
+gemini  message t resolve retained advisories extending through 2.13.0. - 
+gemini  message Upstream Tor
+gemini  message chaudio wheels on PyPI stop at 2.11.0. - NLTK 3.10.4 is absent upstream on PyPI; 3.10.3 remains unpatched. - The security hold remains active; no models or checkpoints were loaded,
+gemini  usage   587051 input / 107622 output / 59263 thinking tokens
+gemini  status  parallel: completed
+
+Run completed: 6c96f0a3-c02b-42f8-9fb8-35d8a2d2b25a
+gemini: Completed the bounded task specified in [RUNTIME-GRAPH-REPAIR-BRIEF-2026-09-12.md](file:///E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/RUNTIME-GRAPH-REPAIR-BRIEF-2026-09-12.md).
+
+### Summary of Completed Repairs
+
+1. **Original Deliverables Archived & Preserved**:
+   - Preserved the unedited raw source, tests, and report in `_scratch/runtime-graph-original/` ([`check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/_scratch/runtime-graph-original/check_runtime_graph.py), [`test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/_scratch/runtime-graph-original/test_runtime_graph.py), and [`RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/_scratch/runtime-graph-original/RUNTIME-GRAPH-01-2026-09-12.md)).
+   - Kept raw evidence in `docs/library/proof/runtime-graph-01-2026-09-12/` (306 files) completely unmodified.
+
+2. **Group 1: Evidence Completeness and Boundedness Repaired**:
+   - Enforced SHA256 validation (64-character hex strings) and manifest coverage for every JSON and METADATA file consumed by [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime_graph.py).
+   - Enforced path sandboxing: verified all target paths resolve strictly within the proof root before file access; rejected path traversal (`..`), absolute paths, symlinks, and duplicate normalized entries.
+   - Refused any integrity-bypass option (`--no-manifest-check` / `verify_manifest=False`) from returning `PASS`.
+   - Enforced strict three-way matching: selected package/version, wheel filename package/version, and wheel METADATA `Name`/`Version`.
+   - Refused wildcards, fuzzy globs, or fallbacks to PyPI JSON `requires_dist`; read only exact wheel METADATA (`{wheel_filename}.metadata`).
+   - Validated wheel release files for authentic SHA256 digests and HTTP/HTTPS URLs.
+
+3. **Group 2: Target Wheel Tags and Python Constraints Repaired**:
+   - Replaced unconstrained tag generation with strictly Windows x86-64 CPython 3.13 non-free-threaded tags (`cp313` ABI and interpreter).
+   - Maintained stable ABI3 forward compatibility (`cp32` through `cp313` with `abi3` ABI on `win_amd64`).
+   - Eliminated host-default platform leakage and removed manual older interpreter `none` tags (e.g., `cp312-none`).
+   - Added checks for both JSON and METADATA `Requires-Python`, rejecting malformed constraints and contradictory ranges.
+
+4. **Group 3: Fixed-Point Extras Propagation & PEP 508 Enforced**:
+   - Implemented fixed-point extras propagation supporting multi-step transitive dependencies and circular dependencies without infinite loops.
+   - Propagated activated extras (e.g., `fsspec[http]` activating `aiohttp` and `requests`, and `mcp` -> `pyjwt[crypto]` activating `cryptography`), increasing active edge coverage from 281 to 283 active edges.
+   - Treated marker evaluation exceptions as explicit `marker_errors` rather than silently dropping edges.
+   - Rejected unsupported active direct-URL requirements (`req.url`).
+   - Validated selection package names, versions, and duplicate pins in both lockfiles and JSON selections without silent overwriting; added support/validation for root extras.
+
+5. **Group 4: Documentation Corrected**:
+   - Updated [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md):
+     - Clarified that Torch 2.10 is an intermediate step, not a fully fixed target, as retained advisories extend through 2.13.0.
+     - Removed assertions of "capability preservation" or "working alignment", explicitly stating that no source-level migration is implemented.
+     - Clarified that the wheel-only scan's 2 missing upstream wheels (`antlr4-python3-runtime` and `proxy-tools`) do not invalidate the prior installed graph, as those packages were built from source under the existing `build.ps1` staging process.
+     - Documented Torchaudio PyPI truncation at 2.11.0 and wheel metadata coupling to matching Torch releases.
+     - Removed unverified commit references and stale qualification claims.
+     - Clarified that NLTK 3.10.4 is absent on PyPI and not an approved target.
+
+6. **Test Suite Corrected & Adversarial Coverage Added**:
+   - Updated [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py) with authentic 64-character SHA256 hashes (replacing synthetic short hashes).
+   - Added adversarial test coverage for manifest tampering, traversal, absolute paths, duplicate normalized entries, missing manifests, unmanifested consumed files, bypass denial, wheel URL/hash validation, tag leakage, `cp312-none`, free-threaded tags, contradictory `Requires-Python`, circular extras, and direct-URL rejection.
+   - Maintained committed frozen base tests in [`tests/test_installer_dependency_lock.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_installer_dependency_lock.py) without modification.
+   - Generated fresh JSON review artifacts and execution summary under [`docs/library/proof/runtime-graph-review-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/).
+
+---
+
+### Compact Handoff
+
+- **Status**: Completed. All 18 tests pass across `tests/test_runtime_graph.py` and `tests/test_installer_dependency_lock.py`.
+- **Work completed**:
+  - Repaired evidence integrity, bounded path handling, exact metadata matching, non-free-threaded tag generation, fixed-point extras propagation, and marker error handling in [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime_graph.py).
+  - Repaired and expanded [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py) with authentic hashes and adversarial cases.
+  - Corrected technical findings, limitations, and scope boundaries in [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md).
+  - Preserved original deliverables under `_scratch/runtime-graph-original/`.
+  - Saved fresh outputs and execution metadata in `docs/library/proof/runtime-graph-review-2026-09-12/`.
+- **Evidence**:
+  - `pytest tests/test_runtime_graph.py tests/test_installer_dependency_lock.py -v`: 18 passed in 4.72s.
+  - `python scripts/check_runtime_graph.py --selection requirements-installer-lock.txt`: exit code 1 (truthfully reports FAIL due to 2 unbuilt upstream source packages in wheel-only scan: `antlr4-python3-runtime` and `proxy-tools`).
+  - `python scripts/check_runtime_graph.py --selection docs/library/proof/runtime-graph-review-2026-09-12/proposal_selection.json`: exit code 1 (truthfully reports FAIL due to 5 rigid WhisperX constraint conflicts against Torch 2.10 / Hugging Face Hub).
+  - [`execution_summary.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/execution_summary.json) captures command lines, exit codes, and output paths.
+- **Files changed**:
+  - `_scratch/runtime-graph-original/` (created archive of original files)
+  - [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime_graph.py) (repaired)
+  - [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py) (repaired & expanded)
+  - [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md) (corrected report)
+  - [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-01-2026-09-12/) (copied 306-file raw evidence directory)
+  - [`docs/library/proof/runtime-graph-review-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/) (created fresh review outputs and execution summary)
+- **Unresolved constraints / Open questions**:
+  - Current lock fails a wheel-only scan because PyPI only hosts source archives (`.tar.gz`) for `antlr4-python3-runtime==4.9.3` and `proxy-tools==0.1.0` (which are built from source during installer creation).
+  - Upstream `whisperx==3.8.6` strictly pins `torch~=2.8.0`, `torchaudio~=2.8.0`, `torchvision~=0.23.0`, `torchcodec<0.8.0,>=0.6.0`, and `huggingface-hub<1.0.0`, blocking security upgrades to Torch 2.10+ and Transformers 5.x.
+  - Retained Torch advisories extend through 2.13.0; moving to 2.10.0 does not fully clear open advisories.
+  - Torchaudio wheels on PyPI stop at 2.11.0, capping any future Windows binary Torch upgrade at 2.11.0.
+  - NLTK 3.10.4 does not exist upstream on PyPI; NLTK 3.10.3 remains the latest release with an unpatched advisory.
+  - No model loading, inference, or source-level migration was performed; release security hold remains in place.
+The test run has finished with full pass status across both suites (18 passed in 4.72s).
+
+### Compact Handoff
+
+- **Status**: Completed. All 18 tests pass across [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py) (13 tests) and [`tests/test_installer_dependency_lock.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_installer_dependency_lock.py) (5 tests).
+- **Work completed**:
+  - Repaired all four requirement groups in [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime_graph.py): evidence manifest completeness and boundary verification; Windows CPython 3.13 non-free-threaded wheel tag generation; fixed-point extras propagation with cycle handling and marker error classification; and three-way package/wheel/METADATA exact matching without wildcards or fallback.
+  - Rebuilt [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py) using authentic 64-character SHA256 digests and added comprehensive adversarial test cases.
+  - Corrected [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md) to reflect actual upstream realities, removed unverified claims of working alignment or capability preservation, clarified source-build status of the two unbuilt wheels, and documented Torchaudio and NLTK boundaries.
+  - Preserved original raw deliverables under `_scratch/runtime-graph-original/`.
+  - Saved fresh current and proposal JSON outputs along with actual command exit codes in [`docs/library/proof/runtime-graph-review-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/).
+- **Evidence**:
+  - `pytest tests/test_runtime_graph.py tests/test_installer_dependency_lock.py -v`: 18 passed in 4.72s.
+  - `python scripts/check_runtime_graph.py --selection requirements-installer-lock.txt`: exit code 1 (FAIL due to 2 PyPI sdist-only packages in wheel-only evaluation: `antlr4-python3-runtime` and `proxy-tools`).
+  - `python scripts/check_runtime_graph.py --selection docs/library/proof/runtime-graph-review-2026-09-12/proposal_selection.json`: exit code 1 (FAIL due to 5 rigid WhisperX constraint conflicts).
+  - Review outputs recorded in [`execution_summary.json`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/execution_summary.json).
+- **Files changed**:
+  - `_scratch/runtime-graph-original/` (archived original deliverables)
+  - [`scripts/check_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/scripts/check_runtime_graph.py)
+  - [`tests/test_runtime_graph.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/tests/test_runtime_graph.py)
+  - [`docs/library/RUNTIME-GRAPH-01-2026-09-12.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/RUNTIME-GRAPH-01-2026-09-12.md)
+  - [`docs/library/proof/runtime-graph-01-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-01-2026-09-12/) (copied proof directory, raw files unmodified)
+  - [`docs/library/proof/runtime-graph-review-2026-09-12/`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/6c96f0a3-c02/gemini/docs/library/proof/runtime-graph-review-2026-09-12/) (fresh review directory with JSON outputs and summary)
+- **Unresolved constraints / Open questions**:
+  - Wheel-only evaluation fails for `antlr4-python3-runtime` and `proxy-tools` as PyPI only provides `.tar.gz` sdist archives for those versions (built from source during `build.ps1` staging).
+  - Upstream `whisperx==3.8.6` constrains `torch~=2.8.0`, `torchaudio~=2.8.0`, `torchvision~=0.23.0`, `torchcodec<0.8.0,>=0.6.0`, and `huggingface-hub<1.0.0`.
+  - Torch 2.10.0 does not resolve retained advisories extending through 2.13.0.
+  - Upstream Torchaudio wheels on PyPI stop at 2.11.0.
+  - NLTK 3.10.4 is absent upstream on PyPI; 3.10.3 remains unpatched.
+  - The security hold remains active; no models or checkpoints were loaded, and no inference was conducted.
+

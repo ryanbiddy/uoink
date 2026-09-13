@@ -1,0 +1,16 @@
+[
+  "node",
+  "bin/control-room.mjs",
+  "run",
+  "uoink-library",
+  "Open E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/SECURITY-RUNTIME-GRAPH-BRIEF-2026-09-12.md first and complete that exact bounded implementation in your isolated worktree. Write early. No subagents or commits.",
+  "--mode",
+  "work",
+  "--strategy",
+  "parallel",
+  "--agents",
+  "gemini",
+  "--lead",
+  "gemini",
+  "--approve"
+]

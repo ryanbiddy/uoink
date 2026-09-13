@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-12",
+  "review_directory": "docs/library/proof/runtime-graph-review-2026-09-12",
+  "evidence_source": "docs/library/proof/runtime-graph-01-2026-09-12",
+  "raw_manifest_unmodified": true,
+  "runs": [
+    {
+      "name": "current_installer_lock",
+      "command": "C:\\Users\\hello\\AppData\\Local\\Programs\\Python\\Python313\\python.exe scripts/check_runtime_graph.py --selection requirements-installer-lock.txt --evidence-dir docs/library/proof/runtime-graph-01-2026-09-12 --output-json docs\\library\\proof\\runtime-graph-review-2026-09-12\\current_runtime_graph.json",
+      "exit_code": 1,
+      "status": "FAIL",
+      "output_file": "docs\\library\\proof\\runtime-graph-review-2026-09-12\\current_runtime_graph.json",
+      "stdout_snippet": "=== RUNTIME GRAPH COMPATIBILITY REPORT: FAIL ===\nTarget Environment: Windows x86-64 CPython 3.13 (AMD64)\nSelected Packages: 140\nActive Edges Evaluated: 283\n\n[!] WHEEL REJECTIONS (2):\n  - antlr4-python3-runtime==4.9.3 [NO_WHEELS]: No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files\n  - proxy-tools==0.1.0 [NO_WHEELS]: No wheel distributions found for proxy-tools==0.1.0 in release files\n\nScope: Graph compatibility verifies PEP 508 constraints and wheel metadata only. A l"
+    },
+    {
+      "name": "proposed_security_upgrade",
+      "command": "C:\\Users\\hello\\AppData\\Local\\Programs\\Python\\Python313\\python.exe scripts/check_runtime_graph.py --selection docs\\library\\proof\\runtime-graph-review-2026-09-12\\proposal_selection.json --evidence-dir docs/library/proof/runtime-graph-01-2026-09-12 --output-json docs\\library\\proof\\runtime-graph-review-2026-09-12\\proposal_runtime_graph.json",
+      "exit_code": 1,
+      "status": "FAIL",
+      "output_file": "docs\\library\\proof\\runtime-graph-review-2026-09-12\\proposal_runtime_graph.json",
+      "stdout_snippet": "=== RUNTIME GRAPH COMPATIBILITY REPORT: FAIL ===\nTarget Environment: Windows x86-64 CPython 3.13 (AMD64)\nSelected Packages: 140\nActive Edges Evaluated: 275\n\n[!] WHEEL REJECTIONS (3):\n  - antlr4-python3-runtime==4.9.3 [NO_WHEELS]: No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files\n  - proxy-tools==0.1.0 [NO_WHEELS]: No wheel distributions found for proxy-tools==0.1.0 in release files\n  - transformers==5.10.0 [YANKED]: All available matching wheels for transformers==5."
+    }
+  ]
+}

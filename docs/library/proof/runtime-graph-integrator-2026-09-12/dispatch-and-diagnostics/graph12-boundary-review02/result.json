@@ -1,0 +1,32 @@
+{
+  "original_files": 306,
+  "repaired_files": 306,
+  "changed_original": {},
+  "added_files": [],
+  "root_extras_parsed": {
+    "demo": "1.0.0"
+  },
+  "duplicate_json_parsed": {
+    "demo": "2.0.0"
+  },
+  "malformed_url_result": {
+    "status": "OK",
+    "wheel": {
+      "filename": "demo-1.0.0-py3-none-any.whl",
+      "size": null,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "url": "https://",
+      "core_metadata": null,
+      "requires_python": null,
+      "is_yanked": false,
+      "yanked_reason": null,
+      "tag_match": true,
+      "py_match": true
+    },
+    "compatible_count": 1,
+    "incompatible_count": 0,
+    "yanked_count": 0,
+    "rejected_invalid": []
+  },
+  "scope": "Read-only metadata/instrument inspection. These observed acceptances are defects, not passed safety tests."
+}
