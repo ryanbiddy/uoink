@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -241,6 +241,15 @@ is complete but is not this goal's completion. Current queue:
    descriptors in a 190,182-byte partial/untrusted receipt. All 228 proof
    payloads match Git and disk. Map only this safe JSON to the fixed-loader
    configuration and schema proposal; no model or storage-member execution.
+   Mapping and concrete factory are now archived at de07dfe. Read
+   ASTRA-VAD-FIXED-FACTORY-VERDICT-2026-09-13.md. All 48 proof payloads match
+   Git and disk; independent review reconciles 54 declarations, 178 metadata
+   nodes, 23 storage groups and 15 source bindings. The proposed bridge is
+   explicit and unapproved. Next: implement and synthetically qualify the
+   non-pickle converter, research primary provenance/format evidence as text,
+   then finish the exact runtime migration and offline qualification protocol.
+   No model/storage read, conversion or runtime execution follows from this
+   documentary integration. Preserve the strict reader exit 2.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -4119,3 +4128,23 @@ exact recorded configuration and tensor descriptors. No additional checkpoint
 read, package build, model execution, installation or product test occurred.
 Production source and full-tree counts remain unchanged; market approval is
 still held, with website and marketing paused.
+
+### 2026-09-13 - Concrete VAD factory and state schema reviewed
+
+Astra integrated the safe-JSON mapping and fixed factory at de07dfe. All 48
+proof payloads match Git and disk, seal c67d091287456999f95ff9f93dd81d39ca96c2f98d35d678092b5c9fe72dd80d.
+The independent review checks all 54 tensor argument associations, 178 metadata
+nodes and 15 source bindings. Thirty-two LSTM views cover storage16 exactly;
+23 distinct declarations total 1,472,999 elements / 5,891,996 advertised bytes.
+Those are metadata facts, not observed tensor values. Table02 labels repeated
+whole-storage sizes; original table, drafts and reporting receipts stay intact.
+
+The factory specifies fixed imports/configuration, exact string keys and CPU/F32
+schema, strict state load and VAD instance injection. Absent Specifications
+fields, default LSTM bias/projection choices and dense storage conversion are
+explicit proposed migration decisions. They have no approval or runtime credit.
+The strict reader remains refused, exit2. Provenance, byte order, actual plain
+artifact, import/native compatibility and numerical/installed behavior remain
+open. A stdlib converter with synthetic fixtures and a separate primary-text
+provenance review are next. Production source and the complete-tree result are
+unchanged; website and marketing work remain paused.
