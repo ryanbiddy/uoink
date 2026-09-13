@@ -1,0 +1,72 @@
+{
+  "method": "POST",
+  "url": "https://api.osv.dev/v1/querybatch",
+  "headers": {
+    "User-Agent": "uoink-uninstalled-candidate-metadata-review/2026-09-13",
+    "Accept": "application/json",
+    "Accept-Encoding": "identity",
+    "Connection": "close",
+    "Content-Type": "application/json"
+  },
+  "request_body_bytes": 10473,
+  "request_body_sha256": "640381e0f80eeef653b95466b3dd263c040d88cd40c52b59f7302ea87969adc1",
+  "started_utc": "2026-09-13T11:36:07.688153+00:00",
+  "status": 200,
+  "error": null,
+  "redirects_followed": false,
+  "automatic_retries": 0,
+  "reason": "OK",
+  "response_headers": [
+    [
+      "content-type",
+      "application/json"
+    ],
+    [
+      "date",
+      "Sun, 13 Sep 2026 11:36:08 GMT"
+    ],
+    [
+      "server",
+      "Google Frontend"
+    ],
+    [
+      "x-cloud-trace-context",
+      "a404ddade3502d61dc72e391030fa9d4/2456249431217186677"
+    ],
+    [
+      "traceparent",
+      "00-a404ddade3502d61dc72e391030fa9d4-221659d80b74a775-00"
+    ],
+    [
+      "alt-svc",
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    [
+      "grpc-status",
+      "0"
+    ],
+    [
+      "grpc-message",
+      ""
+    ],
+    [
+      "Content-Length",
+      "524"
+    ],
+    [
+      "x-envoy-decorator-operation",
+      "ingress QueryAffectedBatch"
+    ],
+    [
+      "Connection",
+      "close"
+    ]
+  ],
+  "response_http_version": 11,
+  "finished_utc": "2026-09-13T11:36:08.547836+00:00",
+  "seconds": 0.8496512999990955,
+  "response_bytes": 524,
+  "response_sha256": "097a0b8c5b590ae2402667c93290b349b264823f94ade960efc844eb3cd2b237",
+  "request_wire_sha256": "dac4c36af1913edf88c3fcdc475691cc75adac357282a635ce1b6211a2154b74",
+  "request_wire_scope": "HTTP bytes handed to the TLS connection; not a packet capture or delivery acknowledgement"
+}

@@ -1,0 +1,10 @@
+{
+  "verified_utc": "2026-09-13T11:37:38.591020+00:00",
+  "source_bindings_verified": 39,
+  "raw_retrieval_bindings_verified": 19,
+  "release_commit_bindings_verified": 5,
+  "hash_mismatches": 0,
+  "captured_source_executed": false,
+  "product_tests_run": 0,
+  "network_requests_during_seal": 0
+}

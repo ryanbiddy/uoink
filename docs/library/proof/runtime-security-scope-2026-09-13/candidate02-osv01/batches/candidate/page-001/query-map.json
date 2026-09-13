@@ -1,0 +1,866 @@
+[
+  {
+    "original_index": 0,
+    "name": "aiohappyeyeballs",
+    "version": "2.7.1",
+    "page_token": null
+  },
+  {
+    "original_index": 1,
+    "name": "aiohttp",
+    "version": "3.14.3",
+    "page_token": null
+  },
+  {
+    "original_index": 2,
+    "name": "aiosignal",
+    "version": "1.4.0",
+    "page_token": null
+  },
+  {
+    "original_index": 3,
+    "name": "alembic",
+    "version": "1.18.5",
+    "page_token": null
+  },
+  {
+    "original_index": 4,
+    "name": "annotated-doc",
+    "version": "0.0.5",
+    "page_token": null
+  },
+  {
+    "original_index": 5,
+    "name": "annotated-types",
+    "version": "0.7.0",
+    "page_token": null
+  },
+  {
+    "original_index": 6,
+    "name": "antlr4-python3-runtime",
+    "version": "4.9.3",
+    "page_token": null
+  },
+  {
+    "original_index": 7,
+    "name": "anyio",
+    "version": "4.14.2",
+    "page_token": null
+  },
+  {
+    "original_index": 8,
+    "name": "asteroid-filterbanks",
+    "version": "0.4.0",
+    "page_token": null
+  },
+  {
+    "original_index": 9,
+    "name": "attrs",
+    "version": "26.1.0",
+    "page_token": null
+  },
+  {
+    "original_index": 10,
+    "name": "av",
+    "version": "18.0.0",
+    "page_token": null
+  },
+  {
+    "original_index": 11,
+    "name": "bottle",
+    "version": "0.13.4",
+    "page_token": null
+  },
+  {
+    "original_index": 12,
+    "name": "certifi",
+    "version": "2026.7.22",
+    "page_token": null
+  },
+  {
+    "original_index": 13,
+    "name": "cffi",
+    "version": "2.1.0",
+    "page_token": null
+  },
+  {
+    "original_index": 14,
+    "name": "charset-normalizer",
+    "version": "3.4.9",
+    "page_token": null
+  },
+  {
+    "original_index": 15,
+    "name": "click",
+    "version": "8.4.2",
+    "page_token": null
+  },
+  {
+    "original_index": 16,
+    "name": "clr-loader",
+    "version": "0.2.10",
+    "page_token": null
+  },
+  {
+    "original_index": 17,
+    "name": "colorama",
+    "version": "0.4.6",
+    "page_token": null
+  },
+  {
+    "original_index": 18,
+    "name": "colorlog",
+    "version": "6.11.0",
+    "page_token": null
+  },
+  {
+    "original_index": 19,
+    "name": "contourpy",
+    "version": "1.3.3",
+    "page_token": null
+  },
+  {
+    "original_index": 20,
+    "name": "cryptography",
+    "version": "50.0.1",
+    "page_token": null
+  },
+  {
+    "original_index": 21,
+    "name": "ctranslate2",
+    "version": "4.8.1",
+    "page_token": null
+  },
+  {
+    "original_index": 22,
+    "name": "cycler",
+    "version": "0.12.1",
+    "page_token": null
+  },
+  {
+    "original_index": 23,
+    "name": "defusedxml",
+    "version": "0.7.1",
+    "page_token": null
+  },
+  {
+    "original_index": 24,
+    "name": "einops",
+    "version": "0.8.2",
+    "page_token": null
+  },
+  {
+    "original_index": 25,
+    "name": "faster-whisper",
+    "version": "1.2.1",
+    "page_token": null
+  },
+  {
+    "original_index": 26,
+    "name": "filelock",
+    "version": "3.32.0",
+    "page_token": null
+  },
+  {
+    "original_index": 27,
+    "name": "flatbuffers",
+    "version": "25.12.19",
+    "page_token": null
+  },
+  {
+    "original_index": 28,
+    "name": "fonttools",
+    "version": "4.63.0",
+    "page_token": null
+  },
+  {
+    "original_index": 29,
+    "name": "frozenlist",
+    "version": "1.8.0",
+    "page_token": null
+  },
+  {
+    "original_index": 30,
+    "name": "fsspec",
+    "version": "2026.6.0",
+    "page_token": null
+  },
+  {
+    "original_index": 31,
+    "name": "googleapis-common-protos",
+    "version": "1.75.0",
+    "page_token": null
+  },
+  {
+    "original_index": 32,
+    "name": "greenlet",
+    "version": "3.5.4",
+    "page_token": null
+  },
+  {
+    "original_index": 33,
+    "name": "grpcio",
+    "version": "1.82.1",
+    "page_token": null
+  },
+  {
+    "original_index": 34,
+    "name": "h11",
+    "version": "0.16.0",
+    "page_token": null
+  },
+  {
+    "original_index": 35,
+    "name": "hf-xet",
+    "version": "1.6.0",
+    "page_token": null
+  },
+  {
+    "original_index": 36,
+    "name": "httpcore",
+    "version": "1.0.9",
+    "page_token": null
+  },
+  {
+    "original_index": 37,
+    "name": "httpx",
+    "version": "0.28.1",
+    "page_token": null
+  },
+  {
+    "original_index": 38,
+    "name": "httpx-sse",
+    "version": "0.4.3",
+    "page_token": null
+  },
+  {
+    "original_index": 39,
+    "name": "huggingface-hub",
+    "version": "1.31.0",
+    "page_token": null
+  },
+  {
+    "original_index": 40,
+    "name": "idna",
+    "version": "3.18",
+    "page_token": null
+  },
+  {
+    "original_index": 41,
+    "name": "jaraco-classes",
+    "version": "3.4.0",
+    "page_token": null
+  },
+  {
+    "original_index": 42,
+    "name": "jaraco-context",
+    "version": "6.1.2",
+    "page_token": null
+  },
+  {
+    "original_index": 43,
+    "name": "jaraco-functools",
+    "version": "4.6.0",
+    "page_token": null
+  },
+  {
+    "original_index": 44,
+    "name": "jinja2",
+    "version": "3.1.6",
+    "page_token": null
+  },
+  {
+    "original_index": 45,
+    "name": "joblib",
+    "version": "1.5.3",
+    "page_token": null
+  },
+  {
+    "original_index": 46,
+    "name": "jsonschema",
+    "version": "4.26.0",
+    "page_token": null
+  },
+  {
+    "original_index": 47,
+    "name": "jsonschema-specifications",
+    "version": "2025.9.1",
+    "page_token": null
+  },
+  {
+    "original_index": 48,
+    "name": "julius",
+    "version": "0.2.8",
+    "page_token": null
+  },
+  {
+    "original_index": 49,
+    "name": "keyring",
+    "version": "25.7.0",
+    "page_token": null
+  },
+  {
+    "original_index": 50,
+    "name": "kiwisolver",
+    "version": "1.5.0",
+    "page_token": null
+  },
+  {
+    "original_index": 51,
+    "name": "lightning",
+    "version": "2.6.6",
+    "page_token": null
+  },
+  {
+    "original_index": 52,
+    "name": "lightning-utilities",
+    "version": "0.15.3",
+    "page_token": null
+  },
+  {
+    "original_index": 53,
+    "name": "mako",
+    "version": "1.3.12",
+    "page_token": null
+  },
+  {
+    "original_index": 54,
+    "name": "markdown-it-py",
+    "version": "4.2.0",
+    "page_token": null
+  },
+  {
+    "original_index": 55,
+    "name": "markupsafe",
+    "version": "3.0.3",
+    "page_token": null
+  },
+  {
+    "original_index": 56,
+    "name": "matplotlib",
+    "version": "3.11.1",
+    "page_token": null
+  },
+  {
+    "original_index": 57,
+    "name": "mcp",
+    "version": "1.28.1",
+    "page_token": null
+  },
+  {
+    "original_index": 58,
+    "name": "mdurl",
+    "version": "0.1.2",
+    "page_token": null
+  },
+  {
+    "original_index": 59,
+    "name": "more-itertools",
+    "version": "11.1.0",
+    "page_token": null
+  },
+  {
+    "original_index": 60,
+    "name": "mpmath",
+    "version": "1.3.0",
+    "page_token": null
+  },
+  {
+    "original_index": 61,
+    "name": "multidict",
+    "version": "6.7.1",
+    "page_token": null
+  },
+  {
+    "original_index": 62,
+    "name": "narwhals",
+    "version": "2.24.0",
+    "page_token": null
+  },
+  {
+    "original_index": 63,
+    "name": "networkx",
+    "version": "3.6.1",
+    "page_token": null
+  },
+  {
+    "original_index": 64,
+    "name": "nltk",
+    "version": "3.10.3+uoink.pathsec1",
+    "page_token": null
+  },
+  {
+    "original_index": 65,
+    "name": "numpy",
+    "version": "2.4.6",
+    "page_token": null
+  },
+  {
+    "original_index": 66,
+    "name": "omegaconf",
+    "version": "2.3.1",
+    "page_token": null
+  },
+  {
+    "original_index": 67,
+    "name": "onnxruntime",
+    "version": "1.27.0",
+    "page_token": null
+  },
+  {
+    "original_index": 68,
+    "name": "opentelemetry-api",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 69,
+    "name": "opentelemetry-exporter-otlp",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 70,
+    "name": "opentelemetry-exporter-otlp-proto-common",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 71,
+    "name": "opentelemetry-exporter-otlp-proto-grpc",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 72,
+    "name": "opentelemetry-exporter-otlp-proto-http",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 73,
+    "name": "opentelemetry-proto",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 74,
+    "name": "opentelemetry-sdk",
+    "version": "1.44.0",
+    "page_token": null
+  },
+  {
+    "original_index": 75,
+    "name": "opentelemetry-semantic-conventions",
+    "version": "0.65b0",
+    "page_token": null
+  },
+  {
+    "original_index": 76,
+    "name": "optuna",
+    "version": "4.9.0",
+    "page_token": null
+  },
+  {
+    "original_index": 77,
+    "name": "packaging",
+    "version": "26.2",
+    "page_token": null
+  },
+  {
+    "original_index": 78,
+    "name": "pandas",
+    "version": "3.0.5",
+    "page_token": null
+  },
+  {
+    "original_index": 79,
+    "name": "pillow",
+    "version": "12.3.0",
+    "page_token": null
+  },
+  {
+    "original_index": 80,
+    "name": "primepy",
+    "version": "1.3",
+    "page_token": null
+  },
+  {
+    "original_index": 81,
+    "name": "propcache",
+    "version": "0.5.2",
+    "page_token": null
+  },
+  {
+    "original_index": 82,
+    "name": "protobuf",
+    "version": "7.35.1",
+    "page_token": null
+  },
+  {
+    "original_index": 83,
+    "name": "proxy-tools",
+    "version": "0.1.0",
+    "page_token": null
+  },
+  {
+    "original_index": 84,
+    "name": "pyannote-audio",
+    "version": "4.0.7",
+    "page_token": null
+  },
+  {
+    "original_index": 85,
+    "name": "pyannote-core",
+    "version": "6.0.1",
+    "page_token": null
+  },
+  {
+    "original_index": 86,
+    "name": "pyannote-database",
+    "version": "6.1.1",
+    "page_token": null
+  },
+  {
+    "original_index": 87,
+    "name": "pyannote-metrics",
+    "version": "4.1",
+    "page_token": null
+  },
+  {
+    "original_index": 88,
+    "name": "pyannote-pipeline",
+    "version": "4.0.0",
+    "page_token": null
+  },
+  {
+    "original_index": 89,
+    "name": "pyannoteai-sdk",
+    "version": "0.4.0",
+    "page_token": null
+  },
+  {
+    "original_index": 90,
+    "name": "pycparser",
+    "version": "3.0",
+    "page_token": null
+  },
+  {
+    "original_index": 91,
+    "name": "pydantic",
+    "version": "2.13.4",
+    "page_token": null
+  },
+  {
+    "original_index": 92,
+    "name": "pydantic-core",
+    "version": "2.46.4",
+    "page_token": null
+  },
+  {
+    "original_index": 93,
+    "name": "pydantic-settings",
+    "version": "2.14.2",
+    "page_token": null
+  },
+  {
+    "original_index": 94,
+    "name": "pygments",
+    "version": "2.20.0",
+    "page_token": null
+  },
+  {
+    "original_index": 95,
+    "name": "pyjwt",
+    "version": "2.13.0",
+    "page_token": null
+  },
+  {
+    "original_index": 96,
+    "name": "pyparsing",
+    "version": "3.3.2",
+    "page_token": null
+  },
+  {
+    "original_index": 97,
+    "name": "pystray",
+    "version": "0.19.5",
+    "page_token": null
+  },
+  {
+    "original_index": 98,
+    "name": "python-dateutil",
+    "version": "2.9.0.post0",
+    "page_token": null
+  },
+  {
+    "original_index": 99,
+    "name": "python-dotenv",
+    "version": "1.2.2",
+    "page_token": null
+  },
+  {
+    "original_index": 100,
+    "name": "python-multipart",
+    "version": "0.0.32",
+    "page_token": null
+  },
+  {
+    "original_index": 101,
+    "name": "pythonnet",
+    "version": "3.0.5",
+    "page_token": null
+  },
+  {
+    "original_index": 102,
+    "name": "pytorch-lightning",
+    "version": "2.6.6",
+    "page_token": null
+  },
+  {
+    "original_index": 103,
+    "name": "pytorch-metric-learning",
+    "version": "2.9.0",
+    "page_token": null
+  },
+  {
+    "original_index": 104,
+    "name": "pywebview",
+    "version": "5.4",
+    "page_token": null
+  },
+  {
+    "original_index": 105,
+    "name": "pywin32",
+    "version": "312",
+    "page_token": null
+  },
+  {
+    "original_index": 106,
+    "name": "pywin32-ctypes",
+    "version": "0.2.3",
+    "page_token": null
+  },
+  {
+    "original_index": 107,
+    "name": "pyyaml",
+    "version": "6.0.3",
+    "page_token": null
+  },
+  {
+    "original_index": 108,
+    "name": "referencing",
+    "version": "0.37.0",
+    "page_token": null
+  },
+  {
+    "original_index": 109,
+    "name": "regex",
+    "version": "2026.7.19",
+    "page_token": null
+  },
+  {
+    "original_index": 110,
+    "name": "requests",
+    "version": "2.34.2",
+    "page_token": null
+  },
+  {
+    "original_index": 111,
+    "name": "rich",
+    "version": "15.0.0",
+    "page_token": null
+  },
+  {
+    "original_index": 112,
+    "name": "rpds-py",
+    "version": "2026.6.3",
+    "page_token": null
+  },
+  {
+    "original_index": 113,
+    "name": "safetensors",
+    "version": "0.8.0",
+    "page_token": null
+  },
+  {
+    "original_index": 114,
+    "name": "scikit-learn",
+    "version": "1.9.0",
+    "page_token": null
+  },
+  {
+    "original_index": 115,
+    "name": "scipy",
+    "version": "1.17.1",
+    "page_token": null
+  },
+  {
+    "original_index": 116,
+    "name": "setuptools",
+    "version": "83.0.0",
+    "page_token": null
+  },
+  {
+    "original_index": 117,
+    "name": "shellingham",
+    "version": "1.5.4",
+    "page_token": null
+  },
+  {
+    "original_index": 118,
+    "name": "six",
+    "version": "1.17.0",
+    "page_token": null
+  },
+  {
+    "original_index": 119,
+    "name": "sortedcontainers",
+    "version": "2.4.0",
+    "page_token": null
+  },
+  {
+    "original_index": 120,
+    "name": "sqlalchemy",
+    "version": "2.0.51",
+    "page_token": null
+  },
+  {
+    "original_index": 121,
+    "name": "sse-starlette",
+    "version": "3.4.6",
+    "page_token": null
+  },
+  {
+    "original_index": 122,
+    "name": "starlette",
+    "version": "1.3.1",
+    "page_token": null
+  },
+  {
+    "original_index": 123,
+    "name": "sympy",
+    "version": "1.14.0",
+    "page_token": null
+  },
+  {
+    "original_index": 124,
+    "name": "threadpoolctl",
+    "version": "3.6.0",
+    "page_token": null
+  },
+  {
+    "original_index": 125,
+    "name": "tokenizers",
+    "version": "0.23.2",
+    "page_token": null
+  },
+  {
+    "original_index": 126,
+    "name": "torch",
+    "version": "2.13.0",
+    "page_token": null
+  },
+  {
+    "original_index": 127,
+    "name": "torch-audiomentations",
+    "version": "0.12.0",
+    "page_token": null
+  },
+  {
+    "original_index": 128,
+    "name": "torch-pitch-shift",
+    "version": "1.2.5",
+    "page_token": null
+  },
+  {
+    "original_index": 129,
+    "name": "torchaudio",
+    "version": "2.11.0",
+    "page_token": null
+  },
+  {
+    "original_index": 130,
+    "name": "torchcodec",
+    "version": "0.16.0",
+    "page_token": null
+  },
+  {
+    "original_index": 131,
+    "name": "torchmetrics",
+    "version": "1.9.0",
+    "page_token": null
+  },
+  {
+    "original_index": 132,
+    "name": "torchvision",
+    "version": "0.28.0",
+    "page_token": null
+  },
+  {
+    "original_index": 133,
+    "name": "tqdm",
+    "version": "4.69.0",
+    "page_token": null
+  },
+  {
+    "original_index": 134,
+    "name": "transformers",
+    "version": "5.17.0",
+    "page_token": null
+  },
+  {
+    "original_index": 135,
+    "name": "typer",
+    "version": "0.27.2",
+    "page_token": null
+  },
+  {
+    "original_index": 136,
+    "name": "typing-extensions",
+    "version": "4.16.0",
+    "page_token": null
+  },
+  {
+    "original_index": 137,
+    "name": "typing-inspection",
+    "version": "0.4.2",
+    "page_token": null
+  },
+  {
+    "original_index": 138,
+    "name": "tzdata",
+    "version": "2026.3",
+    "page_token": null
+  },
+  {
+    "original_index": 139,
+    "name": "urllib3",
+    "version": "2.7.0",
+    "page_token": null
+  },
+  {
+    "original_index": 140,
+    "name": "uvicorn",
+    "version": "0.51.0",
+    "page_token": null
+  },
+  {
+    "original_index": 141,
+    "name": "whisperx",
+    "version": "3.8.6",
+    "page_token": null
+  },
+  {
+    "original_index": 142,
+    "name": "yarl",
+    "version": "1.24.5",
+    "page_token": null
+  },
+  {
+    "original_index": 143,
+    "name": "yt-dlp",
+    "version": "2026.7.4",
+    "page_token": null
+  }
+]

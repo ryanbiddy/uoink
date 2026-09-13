@@ -1,0 +1,562 @@
+{
+  "created_utc": "2026-09-13T11:47:47.223751+00:00",
+  "scope": "Documentary archive only; excludes this root manifest",
+  "payload_count": 111,
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "candidate02-osv01/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-8mgp-746c-j5xp/exchange.json",
+      "bytes": 1833,
+      "sha256": "0f82de2ebee2b03639d744f668bceacda7777b8504cdee75f662b946a025a91a"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-8mgp-746c-j5xp/request-body.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-8mgp-746c-j5xp/request-wire.bin",
+      "bytes": 205,
+      "sha256": "9f36e88661aa13e4601ff172a99a39740a15f937eab9e8f811429f3a75e59c10"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-8mgp-746c-j5xp/request.json",
+      "bytes": 556,
+      "sha256": "7b8fb10f128c02fb7980a454908938158da7f94f2ae24a3fd58f75d27e7629bf"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-8mgp-746c-j5xp/response-body.json",
+      "bytes": 4877,
+      "sha256": "c489d359f203d5ecd90148e59601c63f4b057fe838604b68e607a3e3f1026a10"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-qqmf-gpg7-g8gw/exchange.json",
+      "bytes": 1833,
+      "sha256": "e2daa0b543dd8611d0e90e87347b9630c3222e1d82966be936c51dc32e1a26c1"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-qqmf-gpg7-g8gw/request-body.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-qqmf-gpg7-g8gw/request-wire.bin",
+      "bytes": 205,
+      "sha256": "74cef0c30031e96c8ab597830a162a15ab43d73e82565fa33fcdd9069e69e7ae"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-qqmf-gpg7-g8gw/request.json",
+      "bytes": 556,
+      "sha256": "5ca37242b1a37efe089a3de888bf23eeb224b09f4fb03bd6b491377eb9433fa3"
+    },
+    {
+      "file": "candidate02-osv01/advisories/GHSA-qqmf-gpg7-g8gw/response-body.json",
+      "bytes": 4790,
+      "sha256": "cbe6c81f3b32e14994abad6efe3fd2a606142383175ae9d26ad2e79e3c8eaf6c"
+    },
+    {
+      "file": "candidate02-osv01/advisory-index.json",
+      "bytes": 9280,
+      "sha256": "2fc9bf907d2c07f984c8ab3c18d2dd2719b4e2e5914029e527fa5bb8b649855d"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/exchange.json",
+      "bytes": 1867,
+      "sha256": "49dbb54c80d8daaa6f8caf8cf0649df16eb10babf82538406547adb8eb6abaf5"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/query-map.json",
+      "bytes": 16691,
+      "sha256": "5f8a0edd94fcdbc0859358c97b72a04017298ef79dd485c45f00af6c2b7110c7"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/request-body.json",
+      "bytes": 10473,
+      "sha256": "640381e0f80eeef653b95466b3dd263c040d88cd40c52b59f7302ea87969adc1"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/request-wire.bin",
+      "bytes": 10719,
+      "sha256": "dac4c36af1913edf88c3fcdc475691cc75adac357282a635ce1b6211a2154b74"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/request.json",
+      "bytes": 587,
+      "sha256": "88be3251829c17ed68ab60bf7d627c08e383601ab68dc1d54d8f331f4d16bd24"
+    },
+    {
+      "file": "candidate02-osv01/batches/candidate/page-001/response-body.json",
+      "bytes": 524,
+      "sha256": "097a0b8c5b590ae2402667c93290b349b264823f94ade960efc844eb3cd2b237"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/exchange.json",
+      "bytes": 1861,
+      "sha256": "12845ab6cdae013a8d6c244c57b3ce4acaa7c4571bbbd4ca5ca114adb6921364"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/query-map.json",
+      "bytes": 113,
+      "sha256": "34fc5a2b364bebc871e8b6d7ca6937abeaf609b6757720818c888a89c4ad2c76"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/request-body.json",
+      "bytes": 79,
+      "sha256": "64052d7aac1e209b7484b58e70cf9b988a9396a9d00bc575d3742c886c153444"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/request-wire.bin",
+      "bytes": 322,
+      "sha256": "1eb651ae8e94210d4e8a0c1e0cfbadf56952b9cf839ef1dc3d78fa3c22c006da"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/request.json",
+      "bytes": 584,
+      "sha256": "deed5cd8249efca686ad44435acdcd926f319af6f67a60c032b3e97f7b6fadf3"
+    },
+    {
+      "file": "candidate02-osv01/batches/upstream-nltk-comparison/page-001/response-body.json",
+      "bytes": 95,
+      "sha256": "a759ac9213bf18fdfee3bb200100c17f4673bb63b773d399c47729309c65f5dc"
+    },
+    {
+      "file": "candidate02-osv01/brief.md",
+      "bytes": 1877,
+      "sha256": "958dca72ee7f8b4cfb964a36b8790deccbe2df0240c69db6eeba4ff6c6c0fc64"
+    },
+    {
+      "file": "candidate02-osv01/candidate-query-results.json",
+      "bytes": 30793,
+      "sha256": "af83e2c9d8ddb6df5f49c2c3d54b8cbfbf4935a313bdcdbd66f684b85d05de2f"
+    },
+    {
+      "file": "candidate02-osv01/collector.py",
+      "bytes": 15119,
+      "sha256": "22c55598b4670ff15ed194ff7600efbd6a548e43ae2de7e4e98d69712306248a"
+    },
+    {
+      "file": "candidate02-osv01/ORIGINAL-CANDIDATE02-OSV-SHA256.json",
+      "bytes": 5122,
+      "sha256": "f6378453d1bc9ea432793b33ea6e2aa108b5ce868a740f9df9e79c3d79e29bf5"
+    },
+    {
+      "file": "candidate02-osv01/plan.json",
+      "bytes": 665,
+      "sha256": "ab086e4ad34ac065528a3028ee092d74a6d006551ffd0a6337bd146bab09113f"
+    },
+    {
+      "file": "candidate02-osv01/selection.json",
+      "bytes": 4295,
+      "sha256": "8628331233238ca4fc8af3b424e64b91906b5ece338ad6ce84226622c7187e50"
+    },
+    {
+      "file": "candidate02-osv01/summary.json",
+      "bytes": 30099,
+      "sha256": "419f0b5f186a848dd724fb67d60e117adccda783152635ae14c1c09d6c4a8d14"
+    },
+    {
+      "file": "candidate02-osv01/upstream-nltk-comparison-query-results.json",
+      "bytes": 409,
+      "sha256": "d7509bdc675e3116a0b5bef78bf0861ef3aec1c98e048c318f351a511af596f9"
+    },
+    {
+      "file": "candidate03-source/capture-summary.json",
+      "bytes": 343,
+      "sha256": "283f4abca91c2eb08ae14611febb237a31843801ed8ff1d59ce2a8afad964ab7"
+    },
+    {
+      "file": "candidate03-source/commit-bindings.json",
+      "bytes": 1683,
+      "sha256": "261fc25124d26151a628cb216c1f97f4b156d4b3f8685c069dfeb6429c1eef87"
+    },
+    {
+      "file": "candidate03-source/instruments/capture_runtime_candidate03_source.py",
+      "bytes": 8959,
+      "sha256": "ce8cb6ec33fa2c7451ac134b1b0797d4b11c3e6156d892e14e2509f8d3d9dd1c"
+    },
+    {
+      "file": "candidate03-source/instruments/RUNTIME-CANDIDATE03-SOURCE-BRIEF-2026-09-13.md",
+      "bytes": 1915,
+      "sha256": "bbae59661d01f775955eb5a0125207b88332038177ba2489b85b5cad9c7b29bc"
+    },
+    {
+      "file": "candidate03-source/instruments/seal_runtime_candidate03_source.py",
+      "bytes": 3700,
+      "sha256": "e46c1078b6edc08dce7736393c2cb6160c156895717cd7c451edf8444a913609"
+    },
+    {
+      "file": "candidate03-source/local-current/faster_whisper/utils.py",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    {
+      "file": "candidate03-source/local-current/pyannote/audio/__init__.py",
+      "bytes": 1379,
+      "sha256": "6c3452b14f7e4c440e0fd7d8cec2a95514789e56346d7ecb9e4222a88480e7da"
+    },
+    {
+      "file": "candidate03-source/local-current/pyannote/audio/core/io.py",
+      "bytes": 15897,
+      "sha256": "f3139af9bca0d7d7bdf200231435fda18e79e15eb73e6784c57184e7856e41bc"
+    },
+    {
+      "file": "candidate03-source/local-current/pyannote/audio/core/task.py",
+      "bytes": 32399,
+      "sha256": "e2b0cc845a1234fe2f211ba2a0084c3e9be43fbdb82e41e6ca775f4746bbe444"
+    },
+    {
+      "file": "candidate03-source/local-current/pyannote/audio/utils/hf_hub.py",
+      "bytes": 3696,
+      "sha256": "e32dbcdac724e73888fc040b42ae61a606dff2f1696b05e07822a8a42a20234f"
+    },
+    {
+      "file": "candidate03-source/local-current/torch_audiomentations/__init__.py",
+      "bytes": 1067,
+      "sha256": "ff515e9d4dc064c34cbfa19dab13cc25270aa42b971a6bb4d03e7bbab054b350"
+    },
+    {
+      "file": "candidate03-source/local-current/torch_audiomentations/augmentations/background_noise.py",
+      "bytes": 6361,
+      "sha256": "627bbe0b395161040e97f728de94d14238c29e375343288d910b36f5e5bb26b8"
+    },
+    {
+      "file": "candidate03-source/local-current/torch_audiomentations/core/transforms_interface.py",
+      "bytes": 23471,
+      "sha256": "0e54148cc075f189e20bad9ef14ec4dd1f1a9512004085c21eaaa13de5b63564"
+    },
+    {
+      "file": "candidate03-source/local-current/torch_audiomentations/utils/io.py",
+      "bytes": 8614,
+      "sha256": "6218dae4d95fcc3ea3fa196a1484d6bd6c32eb3d61a596d7a4fb8fdcf68bad0c"
+    },
+    {
+      "file": "candidate03-source/local-current/whisperx/__init__.py",
+      "bytes": 1452,
+      "sha256": "f509cd97d1b4e3c971862cfd5fef80d6980e0141224625ab4fa1bff2f2a71968"
+    },
+    {
+      "file": "candidate03-source/local-current/whisperx/diarize.py",
+      "bytes": 10438,
+      "sha256": "489d4f9ad7419cb2aed26409c5fd8c49ae2d57cb5647c621c8d4613bed1e7f85"
+    },
+    {
+      "file": "candidate03-source/local-current/whisperx/vads/__init__.py",
+      "bytes": 147,
+      "sha256": "817dfd888a38bacd0d89b97382e334b58646330c355aecd8d294f0a132ce439c"
+    },
+    {
+      "file": "candidate03-source/ORIGINAL-CANDIDATE03-SOURCE-SHA256.json",
+      "bytes": 12844,
+      "sha256": "00dee8e9ecbbc0b187c3884349e2374ae90447f88c28bcd1a01fba10fdec32f3"
+    },
+    {
+      "file": "candidate03-source/PROPOSED-COMPATIBILITY-DIFF.txt",
+      "bytes": 1166,
+      "sha256": "ab3d5756a92170e462ed98bcf353cfa7969bac3f38de2bf957171a673ada0fae"
+    },
+    {
+      "file": "candidate03-source/responses/001-commit.txt",
+      "bytes": 1129570,
+      "sha256": "97bdcf9e48c2d5873f679fd8efaed4af9bb65a03ef479f4ab97363db45268fb3"
+    },
+    {
+      "file": "candidate03-source/responses/002-source.txt",
+      "bytes": 59516,
+      "sha256": "853e42ad66b34aed2b8b523450c822632d3f162f82a1d9e46f003d6963e98bf2"
+    },
+    {
+      "file": "candidate03-source/responses/003-source.txt",
+      "bytes": 12816,
+      "sha256": "0ed35580ed6e7759f46d833025c94cbe7209aada0db3d69e75c5ee0af24bfd23"
+    },
+    {
+      "file": "candidate03-source/responses/004-source.txt",
+      "bytes": 119367,
+      "sha256": "53ffe4236eca38eea4142315c0b98bfebc18859812df620b136bac928723d6b5"
+    },
+    {
+      "file": "candidate03-source/responses/005-source.txt",
+      "bytes": 4105,
+      "sha256": "95adaf4e8398ca3d72570eba32925dcd964ed3b0027ef9abff1fd2454a96d559"
+    },
+    {
+      "file": "candidate03-source/responses/006-commit.txt",
+      "bytes": 4633,
+      "sha256": "45ccbd20cbe7a892c4051429cf3689cd55e4bd11af4ffb5ba05a09362ddff59a"
+    },
+    {
+      "file": "candidate03-source/responses/007-source.txt",
+      "bytes": 31197,
+      "sha256": "29c2316ec5d0862d0311b0a2cfd97cd39be636042073cef427279b4261893a93"
+    },
+    {
+      "file": "candidate03-source/responses/008-source.txt",
+      "bytes": 90378,
+      "sha256": "cad28ad787125f376fcdfbf044ed6cff89cdcf817b82b747c1e8525a54a866f4"
+    },
+    {
+      "file": "candidate03-source/responses/009-source.txt",
+      "bytes": 4129,
+      "sha256": "f3f0ed217f6fd4430002509a9ab876899f4b9c6b223cc5415a4fb58c7975790b"
+    },
+    {
+      "file": "candidate03-source/responses/010-commit.txt",
+      "bytes": 17735,
+      "sha256": "ef805d3530c5dec908b857d5f1434941871aac36bc2a710c9352304100d6de09"
+    },
+    {
+      "file": "candidate03-source/responses/011-source.txt",
+      "bytes": 7878,
+      "sha256": "f0e07710f18256217b2e0056cbf6d4c99505e872542296d323ca2e446c27ea55"
+    },
+    {
+      "file": "candidate03-source/responses/012-source.txt",
+      "bytes": 13424,
+      "sha256": "6754e938d72d6cbf340ee7ee5a12d18f8742d2b5618cabba84e61e82570bc2f5"
+    },
+    {
+      "file": "candidate03-source/responses/013-source.txt",
+      "bytes": 2745,
+      "sha256": "5f2f0d9889cac1370d047c0b4d38c78eb7dccd12ee42af1aebb10db753935573"
+    },
+    {
+      "file": "candidate03-source/responses/014-commit.txt",
+      "bytes": 28585,
+      "sha256": "f3037727f98774447cdf843ce196f276e71d0cb2153118b4ca7167386c79a560"
+    },
+    {
+      "file": "candidate03-source/responses/015-source.txt",
+      "bytes": 7415,
+      "sha256": "0fa3271149e2326060b6caef9dcb55cc984f70d51d2e8005d5a683fa7abbd59d"
+    },
+    {
+      "file": "candidate03-source/responses/016-source.txt",
+      "bytes": 12527,
+      "sha256": "9e8df9d6deea76cce7bb11408ce7cbd48b38728ace8799354c58f3b83325f56d"
+    },
+    {
+      "file": "candidate03-source/responses/017-source.txt",
+      "bytes": 767,
+      "sha256": "a6bd0166302953ab28f597c7f234fe84ec03b655f53b641bbd72d1f2ef12e8f6"
+    },
+    {
+      "file": "candidate03-source/responses/018-commit.txt",
+      "bytes": 4820,
+      "sha256": "f887cb0158c5479f9b42da043212e0580ea6f3708d0a382f04f742363c40996c"
+    },
+    {
+      "file": "candidate03-source/responses/019-source.txt",
+      "bytes": 2328,
+      "sha256": "aabe8d8b1c014dc8ab27ef1b0491b070c798a9a2e9c8facd3cec2c4a0977348d"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/faster_whisper/transcribe.py",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/lightning/fabric/utilities/cloud_io.py",
+      "bytes": 7088,
+      "sha256": "890ffcb7827a18831163c2dbb4e5d123404969d5f3863d2ce6608c23c77898c3"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/nltk/data.py",
+      "bytes": 68443,
+      "sha256": "cda75896c3639541f3c3b811d647354dc5829774c2f201a7c942896f5cb99dc8"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/pyannote/audio/core/model.py",
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/pyannote/audio/models/segmentation/PyanNet.py",
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/torch/nn/modules/rnn.py",
+      "bytes": 76334,
+      "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/whisperx/alignment.py",
+      "bytes": 21696,
+      "sha256": "cc3607dcc25e592ae218f74a6ca644d6ce1c77d9cee4672f01c751da8feb9aa7"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/whisperx/asr.py",
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/whisperx/vads/pyannote.py",
+      "bytes": 9880,
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003"
+    },
+    {
+      "file": "candidate03-source/retained/installer/staging/python/Lib/site-packages/whisperx/vads/silero.py",
+      "bytes": 3043,
+      "sha256": "f054f968c757a2329efa8ad72c44d061b0596bfc92b2c8e47d1dc7d8ec877055"
+    },
+    {
+      "file": "candidate03-source/retained/requirements-installer-lock.txt",
+      "bytes": 3703,
+      "sha256": "8c45bc8aeb5c008dadc6bd8bc58900ce5f8f48ea640a105a301021754c93c8ec"
+    },
+    {
+      "file": "candidate03-source/retained/tests/test_installer_dependency_lock.py",
+      "bytes": 5202,
+      "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+    },
+    {
+      "file": "candidate03-source/retained/whisper_runner.py",
+      "bytes": 18957,
+      "sha256": "71bd744fd4bc4f44243a2642a918958426dd21f0c06d341cc2c758cb27ce1ef5"
+    },
+    {
+      "file": "candidate03-source/retrievals.json",
+      "bytes": 12361,
+      "sha256": "851a5b4020b1f9df08bde46cba073f6ec5d6e1f31d471f6f662c1f87e0f214ca"
+    },
+    {
+      "file": "candidate03-source/REVIEW.md",
+      "bytes": 11945,
+      "sha256": "78d9319060e8887bde21e5005a3190ac7996ff19d144e41b8cdc018f2967c2ca"
+    },
+    {
+      "file": "candidate03-source/source-bindings.json",
+      "bytes": 18642,
+      "sha256": "be5e575d05768a8255dd5bc62665048a0f9ceb64caa98a4ba4d8e9bd5cac1f00"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--huggingface_hub/src/huggingface_hub/_snapshot_download.py",
+      "bytes": 31197,
+      "sha256": "29c2316ec5d0862d0311b0a2cfd97cd39be636042073cef427279b4261893a93"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--huggingface_hub/src/huggingface_hub/file_download.py",
+      "bytes": 90378,
+      "sha256": "cad28ad787125f376fcdfbf044ed6cff89cdcf817b82b747c1e8525a54a866f4"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--huggingface_hub/src/huggingface_hub/utils/__init__.py",
+      "bytes": 4129,
+      "sha256": "f3f0ed217f6fd4430002509a9ab876899f4b9c6b223cc5415a4fb58c7975790b"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--transformers/src/transformers/models/wav2vec2/processing_wav2vec2.py",
+      "bytes": 4105,
+      "sha256": "95adaf4e8398ca3d72570eba32925dcd964ed3b0027ef9abff1fd2454a96d559"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--transformers/src/transformers/pipelines/base.py",
+      "bytes": 59516,
+      "sha256": "853e42ad66b34aed2b8b523450c822632d3f162f82a1d9e46f003d6963e98bf2"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--transformers/src/transformers/pipelines/pt_utils.py",
+      "bytes": 12816,
+      "sha256": "0ed35580ed6e7759f46d833025c94cbe7209aada0db3d69e75c5ee0af24bfd23"
+    },
+    {
+      "file": "candidate03-source/upstream/huggingface--transformers/src/transformers/processing_utils.py",
+      "bytes": 119367,
+      "sha256": "53ffe4236eca38eea4142315c0b98bfebc18859812df620b136bac928723d6b5"
+    },
+    {
+      "file": "candidate03-source/upstream/m-bain--whisperX/pyproject.toml",
+      "bytes": 2328,
+      "sha256": "aabe8d8b1c014dc8ab27ef1b0491b070c798a9a2e9c8facd3cec2c4a0977348d"
+    },
+    {
+      "file": "candidate03-source/upstream/meta-pytorch--torchcodec/src/torchcodec/_core/_metadata.py",
+      "bytes": 12527,
+      "sha256": "9e8df9d6deea76cce7bb11408ce7cbd48b38728ace8799354c58f3b83325f56d"
+    },
+    {
+      "file": "candidate03-source/upstream/meta-pytorch--torchcodec/src/torchcodec/decoders/__init__.py",
+      "bytes": 767,
+      "sha256": "a6bd0166302953ab28f597c7f234fe84ec03b655f53b641bbd72d1f2ef12e8f6"
+    },
+    {
+      "file": "candidate03-source/upstream/meta-pytorch--torchcodec/src/torchcodec/decoders/_audio_decoder.py",
+      "bytes": 7415,
+      "sha256": "0fa3271149e2326060b6caef9dcb55cc984f70d51d2e8005d5a683fa7abbd59d"
+    },
+    {
+      "file": "candidate03-source/upstream/pytorch--audio/src/torchaudio/__init__.py",
+      "bytes": 7878,
+      "sha256": "f0e07710f18256217b2e0056cbf6d4c99505e872542296d323ca2e446c27ea55"
+    },
+    {
+      "file": "candidate03-source/upstream/pytorch--audio/src/torchaudio/_torchcodec.py",
+      "bytes": 13424,
+      "sha256": "6754e938d72d6cbf340ee7ee5a12d18f8742d2b5618cabba84e61e82570bc2f5"
+    },
+    {
+      "file": "candidate03-source/upstream/pytorch--audio/src/torchaudio/pipelines/__init__.py",
+      "bytes": 2745,
+      "sha256": "5f2f0d9889cac1370d047c0b4d38c78eb7dccd12ee42af1aebb10db753935573"
+    },
+    {
+      "file": "candidate03-source/verification.json",
+      "bytes": 307,
+      "sha256": "e43522a277eddf9ba3929ef63cf37f7106509f77c349b904951feda09484ed1f"
+    },
+    {
+      "file": "COPY-VERIFICATION.json",
+      "bytes": 50258,
+      "sha256": "dadf920117f77215f2d9f5fc549ec5c3a872daac2225f253dcd2c154b555bc70"
+    },
+    {
+      "file": "instruments/review_runtime_candidate02_osv01.py",
+      "bytes": 9094,
+      "sha256": "931a237e47625dbc9aae7f49553201046ecf6657338b96dae5b49a2c26babbf8"
+    },
+    {
+      "file": "instruments/seal_runtime_security_scope01.py",
+      "bytes": 6704,
+      "sha256": "973db620bb3c5b2404f3aea598f7eb10d1c9b4e38d11e7de53139ac277b96a1c"
+    },
+    {
+      "file": "instruments/verify_runtime_security_scope_seal.py",
+      "bytes": 9372,
+      "sha256": "30c3709e9d10d34ac81f71eab3ac3c0e7c31a07cfd1e6a99c2bbfee9ee4b38b6"
+    },
+    {
+      "file": "reader-results/runtime-candidate02-osv01-review.json",
+      "bytes": 2673,
+      "sha256": "50e470195249f47c4f1d67a22f7fb90bc5622a527ab516daac67a6016828e50a"
+    },
+    {
+      "file": "reader-results/runtime-candidate02-osv01-review.log",
+      "bytes": 2758,
+      "sha256": "47e128fab39f0b4f7508ec03b79bcf31ff71c5f93f6e63eda5d8aad5d5462685"
+    },
+    {
+      "file": "README.md",
+      "bytes": 2009,
+      "sha256": "5efb379813528d357dbf0acfafc65b651aa1c4b4b9012a33c57184a60c6f4466"
+    },
+    {
+      "file": "reviews/ASTRA-RUNTIME-SECURITY-SCOPE-2026-09-13.md",
+      "bytes": 4402,
+      "sha256": "2a058015b77474a2509feeb604557472711c385eb6fb9674042e8ea759b09e87"
+    },
+    {
+      "file": "reviews/RUNTIME-CANDIDATE02-OSV-REVIEW-2026-09-13.md",
+      "bytes": 4443,
+      "sha256": "433baa5b878baf21ab55b40e839ea7507594fb768511192d299b0161e0c565cb"
+    }
+  ]
+}

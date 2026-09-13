@@ -1,0 +1,7 @@
+GET /v1/vulns/GHSA-8mgp-746c-j5xp HTTP/1.1
+Host: api.osv.dev
+User-Agent: uoink-uninstalled-candidate-metadata-review/2026-09-13
+Accept: application/json
+Accept-Encoding: identity
+Connection: close
+

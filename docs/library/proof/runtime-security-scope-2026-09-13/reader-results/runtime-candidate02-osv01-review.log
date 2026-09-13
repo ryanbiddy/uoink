@@ -1,0 +1,85 @@
+{
+  "review_finished_utc": "2026-09-13T11:41:22.633508+00:00",
+  "reader_sha256": "931a237e47625dbc9aae7f49553201046ecf6657338b96dae5b49a2c26babbf8",
+  "verification_result": "PASS",
+  "scope": "Sealed metadata consistency only; no runtime or security approval",
+  "verified_payload_count": 31,
+  "manifest_sha256": "f6378453d1bc9ea432793b33ea6e2aa108b5ce868a740f9df9e79c3d79e29bf5",
+  "selection_sha256": "8628331233238ca4fc8af3b424e64b91906b5ece338ad6ce84226622c7187e50",
+  "exchanges": [
+    {
+      "path": "advisories/GHSA-8mgp-746c-j5xp/exchange.json",
+      "status": 200,
+      "request_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_sha256": "c489d359f203d5ecd90148e59601c63f4b057fe838604b68e607a3e3f1026a10"
+    },
+    {
+      "path": "advisories/GHSA-qqmf-gpg7-g8gw/exchange.json",
+      "status": 200,
+      "request_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_sha256": "cbe6c81f3b32e14994abad6efe3fd2a606142383175ae9d26ad2e79e3c8eaf6c"
+    },
+    {
+      "path": "batches/candidate/page-001/exchange.json",
+      "status": 200,
+      "request_sha256": "640381e0f80eeef653b95466b3dd263c040d88cd40c52b59f7302ea87969adc1",
+      "response_sha256": "097a0b8c5b590ae2402667c93290b349b264823f94ade960efc844eb3cd2b237"
+    },
+    {
+      "path": "batches/upstream-nltk-comparison/page-001/exchange.json",
+      "status": 200,
+      "request_sha256": "64052d7aac1e209b7484b58e70cf9b988a9396a9d00bc575d3742c886c153444",
+      "response_sha256": "a759ac9213bf18fdfee3bb200100c17f4673bb63b773d399c47729309c65f5dc"
+    }
+  ],
+  "counts": {
+    "candidate": {
+      "pins": 144,
+      "raw_entries": 1,
+      "alias_group_count": 1,
+      "aliases": [
+        [
+          "CVE-2026-58659",
+          "GHSA-qqmf-gpg7-g8gw",
+          "PYSEC-2026-3624",
+          "PYSEC-2026-3967"
+        ]
+      ],
+      "matches": [
+        {
+          "name": "lightning",
+          "version": "2.6.6",
+          "ids": [
+            "GHSA-qqmf-gpg7-g8gw"
+          ]
+        }
+      ]
+    },
+    "upstream_nltk_comparison": {
+      "pins": 1,
+      "raw_entries": 1,
+      "alias_group_count": 1,
+      "aliases": [
+        [
+          "CVE-2026-81726",
+          "GHSA-8mgp-746c-j5xp",
+          "PYSEC-2026-3740"
+        ]
+      ],
+      "matches": [
+        {
+          "name": "nltk",
+          "version": "3.10.3",
+          "ids": [
+            "GHSA-8mgp-746c-j5xp"
+          ]
+        }
+      ]
+    }
+  },
+  "pagination_tokens": 0,
+  "collection_failures": 0,
+  "local_nltk_zero_matches_is_clearance": false,
+  "original_audit_raw_entries": 19,
+  "original_audit_alias_groups": 15
+}

@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-09-13T11:36:07.685799+00:00",
+  "selection_sha256": "8628331233238ca4fc8af3b424e64b91906b5ece338ad6ce84226622c7187e50",
+  "candidate_pins": 144,
+  "separate_comparison": {
+    "nltk": "3.10.3"
+  },
+  "scope": "Public OSV metadata for an uninstalled candidate; no release/security-clearance claim",
+  "endpoints": [
+    "https://api.osv.dev/v1/querybatch",
+    "https://api.osv.dev/v1/vulns/{id}"
+  ],
+  "api_docs": [
+    "https://google.github.io/osv.dev/post-v1-querybatch/",
+    "https://google.github.io/osv.dev/get-v1-vulns/"
+  ],
+  "original_audit_unchanged": {
+    "raw_entries": 19,
+    "alias_groups": 15
+  }
+}

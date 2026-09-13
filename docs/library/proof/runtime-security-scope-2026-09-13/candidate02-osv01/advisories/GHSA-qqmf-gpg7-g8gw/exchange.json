@@ -1,0 +1,71 @@
+{
+  "method": "GET",
+  "url": "https://api.osv.dev/v1/vulns/GHSA-qqmf-gpg7-g8gw",
+  "headers": {
+    "User-Agent": "uoink-uninstalled-candidate-metadata-review/2026-09-13",
+    "Accept": "application/json",
+    "Accept-Encoding": "identity",
+    "Connection": "close"
+  },
+  "request_body_bytes": 0,
+  "request_body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "started_utc": "2026-09-13T11:36:08.855926+00:00",
+  "status": 200,
+  "error": null,
+  "redirects_followed": false,
+  "automatic_retries": 0,
+  "reason": "OK",
+  "response_headers": [
+    [
+      "content-type",
+      "application/json"
+    ],
+    [
+      "date",
+      "Sun, 13 Sep 2026 11:36:08 GMT"
+    ],
+    [
+      "server",
+      "Google Frontend"
+    ],
+    [
+      "traceparent",
+      "00-31ddd6a9f548ab6936ffa1ff43001a0d-d3495d069a092155-00"
+    ],
+    [
+      "x-cloud-trace-context",
+      "31ddd6a9f548ab6936ffa1ff43001a0d/15224802298238148949"
+    ],
+    [
+      "alt-svc",
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    [
+      "grpc-status",
+      "0"
+    ],
+    [
+      "grpc-message",
+      ""
+    ],
+    [
+      "Content-Length",
+      "4790"
+    ],
+    [
+      "x-envoy-decorator-operation",
+      "ingress GetVulnById"
+    ],
+    [
+      "Connection",
+      "close"
+    ]
+  ],
+  "response_http_version": 11,
+  "finished_utc": "2026-09-13T11:36:09.028084+00:00",
+  "seconds": 0.16107890001148917,
+  "response_bytes": 4790,
+  "response_sha256": "cbe6c81f3b32e14994abad6efe3fd2a606142383175ae9d26ad2e79e3c8eaf6c",
+  "request_wire_sha256": "74cef0c30031e96c8ab597830a162a15ab43d73e82565fa33fcdd9069e69e7ae",
+  "request_wire_scope": "HTTP bytes handed to the TLS connection; not a packet capture or delivery acknowledgement"
+}

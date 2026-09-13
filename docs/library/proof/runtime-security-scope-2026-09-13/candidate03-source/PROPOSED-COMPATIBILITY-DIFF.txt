@@ -1,0 +1,25 @@
+INERT SOURCE PROPOSAL — NOT APPLIED, NOT TESTED, NOT AN ACCEPTED DERIVATIVE
+
+Target is the captured faster-whisper 1.2.1 source:
+local-current/faster_whisper/utils.py, lines 106–108.
+The exact input SHA-256 is in source-bindings.json. Hub 1.31.0's
+snapshot_download implementation, bound to commit
+495b17c8529614759ae0f1ccf1ebe9a61c148b7c, has no
+local_dir_use_symlinks parameter or catch-all kwargs.
+
+--- a/faster_whisper/utils.py
++++ b/faster_whisper/utils.py
+@@ -106,6 +106,5 @@ def download_model(
+     if output_dir is not None:
+         kwargs["local_dir"] = output_dir
+-        kwargs["local_dir_use_symlinks"] = False
+ 
+     if cache_dir is not None:
+         kwargs["cache_dir"] = cache_dir
+
+This only removes the incompatible keyword in the optional output_dir path.
+It does not validate paths, authorize downloads, prove absence of symlinks,
+check artifact hashes or repair the default VAD/checkpoint path. The current
+Uoink call uses cache_dir, so no default-path failure is inferred from this
+keyword. A later isolated contract should call the helper with output_dir set,
+stub the downloader, and verify the exact supported kwargs without fetching.
