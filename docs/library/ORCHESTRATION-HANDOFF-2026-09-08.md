@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | Gemini reviews integrated at a6b9cf0 and 43b42bc | Raw scan 19 entries / 15 groups; separating verified Lightning patch leaves 18 / 14. No qualified replacement runtime | Hold remains; compatible runtime migration and model qualification need exact Ryan scope below |
+| Security | Gemini reviews at a6b9cf0/43b42bc; NLTK source backport prepared at 4aec8ff | NLTK 37 pass / zero fail / one skip in each root, 62 sealed payloads. It is not yet packaged. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Package/qualify NLTK; finish graph review. Runtime migration/model qualification retain the Ryan gates below |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -158,13 +158,17 @@ is complete but is not this goal's completion. Current queue:
 2. Runtime graph repair 6c96f0a3 has 18 independent passes and preserves all 306
    original evidence files exactly. It still drops root extras, accepts duplicate
    JSON keys and accepts an empty-host URL; path/fallback gaps also remain.
-   Gemini 85ce8600 is running RUNTIME-GRAPH-BOUNDARY-REPAIR-BRIEF-2026-09-12.md.
-   Preserve both earlier workers and all raw metadata. No production pin changed.
-3. NLTK proposal 4a939c69 is not accepted. Its preparation utility hashes a patch
-   it does not apply, has receipt/link boundaries to fix, and its tests pollute
-   imports and consume synthetic weights rather than mock serialization. Do not
-   rerun that original suite unchanged. Gemini ecbf6acd is running
-   NLTK-PATHSEC-PREPARATION-REPAIR-BRIEF-2026-09-12.md, preserving the first output.
+   Gemini 85ce8600 returned completed/exit zero but produced no deliverables;
+   retain INCOMPLETE. Astra's takeover brief assigns local repair in the preserved
+   6c96f0a3 worktree. The corrected checker has 30 focused passes; finish negative
+   baseline, raw outputs, reviewed integration and checkout qualification.
+3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
+   before the retained worker reports. Hash-override, path/receipt and test
+   isolation gaps were corrected; original proposals are archived. Final result
+   is 37 pass / zero fail / one Windows symlink-permission skip in both roots.
+   Build a labelled local wheel with verified RECORD/hash and provenance, update
+   installer lock/build/notices, and qualify it. Preserve pristine upstream NLTK
+   and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
 4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
    Package 08 remains the unchanged held review artifact, not evidence for the
@@ -624,6 +628,32 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-12 - NLTK source repair accepted; graph worker completion corrected
+
+4aec8ff adds a fixed-hash source backport and preparation utility, not an installed
+NLTK upgrade. Both roots have 37 passes / no failures / one symlink-privilege skip.
+The 62-payload seal retains six independent observations and matches Git/disk.
+The ten new boundary probes against the earlier proposal record eight failures
+and two passes; one is absence of the new whole-copy hash facility, not an exploit.
+All five original-worker files match their preserved archive. No model, package
+pin, installed runtime or scanner result changed. Existing tests are unchanged.
+
+Reject the worker's hash override and incomplete output check. The integrator
+requires the exact patch and all outputs, validates Windows path forms and
+ancestors, compares every copied file hash and keeps receipts inside the new
+destination. Child probes use matching embedded Python with direct audit guards
+and mocked serialization/training. Tests can use preserved upstream source via
+UOINK_NLTK_BASE_SOURCE after an installer update. The final blank-line whitespace
+correction changes no assertion; sealed tested source preserves the earlier spaces.
+
+Control Room 85ce8600 consumed its run while waiting on shell work and ended with
+no checker, tests, report or proof directory in its worktree. Its completed label
+and dispatcher exit zero are not task completion. Preserve INCOMPLETE and its
+log; do not redispatch the same task unchanged. Astra is finishing the four exact
+groups in 6c96f0a3 under RUNTIME-GRAPH-ASTRA-TAKEOVER-BRIEF-2026-09-12.md. Thirty
+focused cases pass after local repair. The new graph tests bind a captured lock,
+so this historical metadata fixture cannot freeze future production pins.
 
 ### 2026-09-12 - Signing repair sealed; two dependency repairs continue
 
