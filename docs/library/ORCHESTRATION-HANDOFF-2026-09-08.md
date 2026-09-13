@@ -102,7 +102,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
-| Owned WhisperX | Source/contracts integrated at 1935012 | Author and Astra each 50 passed / 0 failed / 0 errors / 0 skipped / 0 subtests; all 217 proof payloads match Git/disk. Original zero-case host failure and separate empty-list IndexError remain preserved | Exact-text byte build completed in worker; independently verify and seal it. Real runtime remains closed |
+| Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Recompute captured compatibility graph with the exact built derivatives; real runtime remains closed |
 | ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
@@ -238,12 +238,16 @@ ASTRA-ASR-LIFECYCLE-CONTRACT-VERDICT-2026-09-13.md. Both roots pass the same
 50 and 46 cases respectively; all 217 and 98 proof payloads match Git/disk.
 Eight additional integrator-check payloads retain actual documentary tool
 results. Preserve both zero-case setup failures and the unaccepted direct-list
-IndexError. Root has admitted one reviewed text-only wheel build under the
-existing private CPython 3.13.15 runtime; worker reports both native phases and
-actual outer exit zero, 134,793 bytes and 22 members. Independently verify the
-raw result and seal before crediting that build. Continue concrete factory
-registration and Windows namespace/bootstrap source; no real kernel, model,
-dependency installation or market clearance follows from these contracts.
+IndexError. The exact text-only wheel build is integrated at 93f4996; read
+ASTRA-OWNED-WHISPERX-BUILD-VERDICT-2026-09-13.md. Both private-3.13 native phases
+and actual outer exit are zero; root independently verified all bytes and
+metadata of the 134,793-byte/22-member wheel. All 38 proof payloads match
+Git/disk. Prepare candidate03 metadata from retained evidence and the two exact
+built derivatives. Continue concrete factory registration and Windows
+namespace/bootstrap source; no real kernel, model, dependency installation or
+market clearance follows from this packaging. The 59-case factory first run
+is admitted after the context-cleanup and expired-retirement source repairs;
+preserve any failure and require a diagnosis/brief before a fresh run.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4700,3 +4704,32 @@ The remaining factory generation, worker bootstrap and native boundaries must
 be connected and qualified before the next runtime council acceptance.
 Production remains e8d058f. D1 and Git account-selection questions remain
 pending; no duplicate push, website work or marketing was started.
+
+### 2026-09-13 - Exact owned WhisperX wheel independently verified
+
+Commit 93f4996 accepts packaging only. The exact wheel is 134,793 bytes,
+22 members and 22 RECORD rows, SHA-256
+0c23ec175b663eaafe9955ff93b1ccc6e93ed66a61665951baac5799a75c92d4.
+Author actual tool405e18, both private-3.13 native phases and root6edd74 returned
+zero. Root used the fully reviewed manual-layout verifier on actual wheel bytes,
+rechecked source/instrument hashes and raw guards/receipts, and compared the
+34 recorded runtime identities to their original plan without reading runtime
+binaries. All 64 bound files stayed unchanged. The 38-payload packaging proof
+has seal ff940a51677f2bb27d79c8642195914330d7676f3931965234613cfa23a96800;
+root documentary/index check d5eb26 returned zero. No wheel member was imported,
+installed or used for a model; prior source/contract failures remain preserved.
+
+Root also compared 544 retained Windows SDK excerpt lines against ten exact
+local header hashes (f16900, exit zero), then read the final primitive source
+deltas. This is source evidence, not an ABI or kernel measurement. The factory's
+expired weak-reference/None identity bug was repaired before first execution;
+its new 59-case run is admitted under pins bd7c9375 and ROOT-ADMISSION25035bd7.
+Factory calls require one serialized trusted caller; generation revocation is
+separate from native cancellation. The connected worker must enforce that.
+A guessed read-only qualify_owned.py search returned missing-file exit1; exact
+inventory located qualify.py. It executed no tests or model and changed no file.
+
+Next: review raw factory results, repeat independently if valid; prepare the
+retained-metadata candidate03 graph; connect Windows namespace and authenticated
+worker lifetime. Production remains e8d058f. D1 and Git account selection remain
+pending. Website and marketing remain paused.

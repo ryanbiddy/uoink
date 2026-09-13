@@ -69,6 +69,12 @@ proofs match Git and disk. These simulated checks cover ownership, output and
 cleanup behavior. Real Windows protection, model compatibility and installation
 remain open; this does not approve release or website/marketing work.
 
+The exact owned WhisperX text wheel is built and independently byte-verified
+at `93f4996`: 134,793 bytes, 22 members, both native build/verification exits
+zero. Its [packaging verdict](ASTRA-OWNED-WHISPERX-BUILD-VERDICT-2026-09-13.md)
+preserves the actual receipts. It has not been imported or installed and adds
+no native-model acceptance. The combined compatibility graph is next.
+
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different
