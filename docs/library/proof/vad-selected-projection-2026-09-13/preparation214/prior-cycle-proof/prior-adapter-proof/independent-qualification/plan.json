@@ -1,0 +1,21 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-symbolic-adapter01\\qualify_adapter.py",
+    "astra-adapter01"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-symbolic-adapter01",
+  "input_sha256": {
+    "read_symbolic_inventory.py": "0b5e786b1721dd63c84d9cd12eabf23af2c856790d6bdcabd6b270288e0049fc",
+    "qualify_adapter.py": "f665893556812d2f12915f51397895a59359588304363c691fe569748e1587a9",
+    "before/read_checkpoint_inventory.py": "67e9edd6c3f6845a8dd3fd21b0b471793b57db0222c56379c0dfce9fcf07c9e5",
+    "before/symbolic_trace.py": "f41ce88a2eceee565fcc9116e19f064723bf3339ffe4ca8669ae20bff6033127"
+  },
+  "started_utc": "2026-09-13T13:36:44.336998+00:00",
+  "removed_variable_names": [],
+  "scope": "Same 24 synthetic cases; no actual checkpoint or real main paths",
+  "IG_FORBIDDEN_LIVE_set_before_startup": true
+}

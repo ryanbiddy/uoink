@@ -1,0 +1,188 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-selected-root-projection-proposal01\\before\\read_symbolic_inventory.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-selected-root-projection-proposal01\\read_symbolic_inventory.py"
+index 380f9ad..840ff31 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-selected-root-projection-proposal01\\before\\read_symbolic_inventory.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-selected-root-projection-proposal01\\read_symbolic_inventory.py"
+@@ -32,6 +32,16 @@ class TraceRefusal(Exception):
+     def __init__(self, reason, *, cycle_witness=None):
+         super().__init__(reason)
+         self.cycle_witness = cycle_witness
++        self.selected_root_projection = None
++
++
++class ProjectionRefusal(Exception):
++    pass
++
++
++def projection_require(condition, code):
++    if not condition:
++        raise ProjectionRefusal(code)
+ 
+ 
+ def trace_require(condition, reason):
+@@ -332,6 +342,102 @@ class _Trace:
+                     colours[ref] = 2
+                     frames.pop()
+ 
++    def selected_projection(self, root, deadline):
++        try:
++            return self.build_selected_projection(root, deadline)
++        except ProjectionRefusal as exc:
++            return {"status": "projection_refused", "reason": str(exc)}
++        except TraceRefusal:
++            return {"status": "projection_refused", "reason": "original_trace_budget_exceeded"}
++        except Exception:
++            return {"status": "projection_refused", "reason": "projection_internal_error"}
++
++    def build_selected_projection(self, root, deadline):
++        projection_require(type(deadline) in (int, float) and -1.7976931348623157e308 <= deadline <= 1.7976931348623157e308,
++                           "missing_or_invalid_original_reader_deadline")
++
++        def tick():
++            self.tick()
++            projection_require(time.monotonic() <= deadline, "original_reader_deadline_exceeded")
++
++        selected = []
++        for key_ref, value_ref in self.nodes[root]["entries"]:
++            tick()
++            key = self.nodes[key_ref]
++            if key["kind"] == "str" and key["value"] in SELECTED_ROOTS:
++                selected.append({"key": key["value"], "value_ref": value_ref})
++        projection_require(selected, "no_selected_roots")
++        colours, heights = {}, {}
++        examined_edges = len(selected)
++        projection_require(examined_edges <= self.limits["edges"], "selected_edge_limit")
++        for entry in selected:
++            tick()
++            first = entry["value_ref"]
++            if colours.get(first):
++                continue
++            colours[first] = 1
++            projection_require(len(colours) + 1 <= self.limits["nodes"], "selected_node_limit")
++            frames = [[first, 0]]
++            while frames:
++                tick()
++                projection_require(len(frames) + 1 <= self.limits["depth"], "selected_depth_limit_including_root")
++                ref, index = frames[-1]
++                if index < len(self.edges[ref]):
++                    child = self.edges[ref][index]
++                    frames[-1][1] += 1
++                    examined_edges += 1
++                    projection_require(examined_edges <= self.limits["edges"], "selected_edge_limit")
++                    projection_require(colours.get(child) != 1, "selected_reference_cycle")
++                    if not colours.get(child):
++                        colours[child] = 1
++                        projection_require(len(colours) + 1 <= self.limits["nodes"], "selected_node_limit")
++                        frames.append([child, 0])
++                else:
++                    heights[ref] = 1 + max((heights[child] for child in self.edges[ref]), default=0)
++                    projection_require(heights[ref] + 1 <= self.limits["depth"], "selected_depth_limit_including_root")
++                    colours[ref] = 2
++                    frames.pop()
++
++        wanted = set(colours)
++        descriptors = []
++        for ref in sorted(wanted):
++            tick()
++            node = self.nodes[ref]
++            if node["kind"] != "reduce" or self.nodes[node["target_ref"]]["literal"] != TENSOR_LITERAL:
++                continue
++            arguments = self.nodes[node["arguments_ref"]]["items"]
++            projection_require(len(arguments) in (6, 7), "selected_tensor_descriptor_arity")
++            projection_require(len(descriptors) < self.limits["descriptors"], "selected_tensor_descriptor_limit")
++            descriptors.append({"node_ref": ref, "kind": "symbolic_tensor_reducer_arguments",
++                                "target_literal": TENSOR_LITERAL, "arguments_ref": node["arguments_ref"],
++                                "argument_refs": dict(zip(TENSOR_ARGUMENT_NAMES, arguments)),
++                                "metadata_argument_present": len(arguments) == 7,
++                                "tensor_constructed": False, "shape_or_storage_validated": False})
++        nodes = []
++        for ref in sorted(wanted):
++            tick()
++            nodes.append(self.nodes[ref])
++        result = {
++            "status": "partial_untrusted_selected_root_projection", "protocol": 2,
++            "selected_root_associations": selected, "nodes": nodes,
++            "tensor_reducer_descriptors": descriptors,
++            "selected_node_count": len(wanted), "examined_edge_count_including_root_entries": examined_edges,
++            "depth_includes_original_root": True, "limits": self.limits,
++            "artifact_remains_refused": True, "whole_artifact_graph_accepted": False,
++            "selected_closure_acyclic": True, "partial_and_untrusted": True,
++            "aliases_may_share_values_with_omitted_roots": True,
++            "semantic_ownership_verified": False, "provenance_verified": False,
++            "architecture_verified": False, "configuration_verified": False,
++            "model_compatibility_verified": False, "objects_or_tensors_constructed": False,
++            "globals_resolved": False, "persistent_ids_resolved": False,
++            "note": "Selected final reference graph only; no global event order, historical argument snapshots, evaluated constructor/BUILD state, inferred defaults or loader authority",
++        }
++        tick()
++        encoded = json.dumps(result, ensure_ascii=True, allow_nan=False, separators=(",", ":")).encode("utf-8")
++        projection_require(len(encoded) <= self.limits["output_bytes"], "selected_compact_output_limit")
++        tick()
++        return result
++
+     def descriptors(self):
+         result = []
+         for node in self.nodes:
+@@ -387,7 +493,7 @@ class _Trace:
+         return result
+ 
+ 
+-def trace_pickle_metadata(payload, *, tight_limits=None):
++def trace_pickle_metadata(payload, *, tight_limits=None, project_selected=False, projection_deadline=None):
+     trace_require(type(payload) is bytes, "Input must be plain immutable bytes")
+     trace = _Trace(tight_limits)
+     trace_require(3 <= len(payload) <= trace.limits["input_bytes"], "Input byte limit exceeded or input too short")
+@@ -417,7 +523,12 @@ def trace_pickle_metadata(payload, *, tight_limits=None):
+     except (ValueError, UnicodeError, OverflowError) as exc:
+         raise TraceRefusal("Malformed pickle syntax: " + type(exc).__name__) from None
+     trace_require(stopped, "STOP missing")
+-    trace.validate_graph(root)
++    try:
++        trace.validate_graph(root)
++    except TraceRefusal as exc:
++        if project_selected is True and str(exc) == "Reference cycle refused" and exc.cycle_witness is not None:
++            exc.selected_root_projection = trace.selected_projection(root, projection_deadline)
++        raise
+     return trace.output(root)
+ 
+ # Fixed inventory reader with bounded in-memory symbolic handoff.
+@@ -677,7 +788,7 @@ def parse_pickle(archive, member, started):
+                     del tail_samples[0]
+                 tail_samples.append(argument)
+     require(last_name == "STOP" and last_position + 1 == len(payload), "Pickle is truncated or has trailing data")
+-    symbolic = trace_pickle_metadata(payload)
++    symbolic = trace_pickle_metadata(payload, project_selected=True, projection_deadline=started + MAX_SECONDS)
+     clock_check(started)
+     return {"member": member.filename, "bytes": length, "sha256": hashlib.sha256(payload).hexdigest(),
+             "symbolic_metadata_trace": symbolic,
+@@ -754,6 +865,11 @@ def main():
+             result["refusal_context"] = {"zip_directory_entry": exc.directory_entry}
+         if isinstance(exc, TraceRefusal) and exc.cycle_witness is not None:
+             result["refusal_context"] = {"reference_cycle": exc.cycle_witness}
++        if isinstance(exc, TraceRefusal) and exc.selected_root_projection is not None:
++            projection = exc.selected_root_projection
++            if time.monotonic() - started > MAX_SECONDS:
++                projection = {"status": "projection_refused", "reason": "original_reader_deadline_exceeded"}
++            result["refusal_context"]["selected_root_projection"] = projection
+     except Exception as exc:
+         code = 3
+         result["status"] = "reader_error"
+@@ -763,6 +879,19 @@ def main():
+     try:
+         receipt = contained_unlinked(OUTPUT / (args.run_id + ".json"), existing=False)
+         encoded = (json.dumps(result, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
++        attached_projection = result.get("refusal_context", {}).get("selected_root_projection")
++        if isinstance(attached_projection, dict) and attached_projection.get("status") == "partial_untrusted_selected_root_projection" and time.monotonic() - started > MAX_SECONDS:
++            result["refusal_context"]["selected_root_projection"] = {"status": "projection_refused", "reason": "original_reader_deadline_exceeded"}
++            encoded = (json.dumps(result, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
++        if len(encoded) > MAX_OUTPUT and result.get("reason") == "Reference cycle refused" and "selected_root_projection" in result.get("refusal_context", {}):
++            projection_limit = {"status": "projection_refused", "reason": "final_receipt_byte_limit"}
++            result["refusal_context"]["selected_root_projection"] = projection_limit
++            encoded = (json.dumps(result, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
++            if len(encoded) > MAX_OUTPUT:
++                result = {"status": "refused", "reason": "Reference cycle refused", "reader_exit": 2,
++                          "scope": "bounded static and inert symbolic metadata inventory only", "release_acceptance": False,
++                          "refusal_context": {"selected_root_projection": projection_limit}}
++                encoded = (json.dumps(result, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
+         if len(encoded) > MAX_OUTPUT:
+             code = 2
+             result = {"status": "refused", "reason": "Inventory output exceeded its byte limit", "reader_exit": code,

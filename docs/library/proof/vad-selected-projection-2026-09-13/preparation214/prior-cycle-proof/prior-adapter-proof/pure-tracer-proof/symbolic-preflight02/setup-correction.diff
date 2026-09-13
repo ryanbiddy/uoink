@@ -1,0 +1,13 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\symbolic-preflight01\\qualify_symbolic.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\qualify_symbolic.py"
+index d6864a1..94942d0 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\symbolic-preflight01\\qualify_symbolic.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-metadata-proposal01\\qualify_symbolic.py"
+@@ -239,7 +239,7 @@ add_refusal("post_stop_bytes", basic + b"extra", "Trailing bytes")
+ add_refusal("missing_stop", basic[:-1], "Malformed pickle syntax")
+ add_refusal("incomplete_stop_stack", basic[:-1] + I(1) + b".", "STOP requires")
+ add_refusal("mark_used_as_tuple_value", b"\x80\x02(\x85.", "MARK used as value")
+-add_refusal("missing_mark", document(b"]e"), "MARK missing")
++add_refusal("missing_mark", b"\x80\x02]e.", "MARK missing")
+ add_refusal("odd_mapping_items", document(b"}(" + S("only_key") + b"u"), "Odd mapping")
+ add_refusal("unsupported_mapping_target", document(b"]" + S("x") + I(1) + b"s"), "Mapping mutation target")
+ add_refusal("unsupported_sequence_target", document(b"}" + I(1) + b"a"), "Sequence mutation target")

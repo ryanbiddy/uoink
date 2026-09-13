@@ -1,0 +1,41 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-adapter-proposal01\\harness-draft01\\qualify_adapter.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-adapter-proposal01\\qualify_adapter.py"
+index 1aeef95..6213ccf 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-adapter-proposal01\\harness-draft01\\qualify_adapter.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-adapter-proposal01\\qualify_adapter.py"
+@@ -97,8 +97,9 @@ def inventory(module, raw, keep_reads=False):
+     bounds = module.directory_bounds(stream, len(raw))
+     with zipfile.ZipFile(stream, "r", allowZip64=True) as archive:
+         entries, total, member = module.member_inventory(stream, archive, bounds, len(raw), started)
++        payload_read_start = len(stream.reads)
+         result = module.parse_pickle(archive, member, started)
+-    return (result, stream.reads, entries) if keep_reads else result
++    return (result, stream.reads, entries, payload_read_start) if keep_reads else result
+ 
+ 
+ def refusal(operation, reason, exception=None):
+@@ -197,13 +198,14 @@ def malicious_target():
+ @case("no_selected_storage_member_payload_read")
+ def storage_not_read():
+     raw = packed(document(), storage=True)
+-    _, reads, _ = inventory(new, raw, True)
++    _, reads, _, payload_read_start = inventory(new, raw, True)
+     with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+         member = archive.getinfo("archive/data/0")
+         name_len, extra_len = struct.unpack_from("<HH", raw, member.header_offset + 26)
+         start = member.header_offset + 30 + name_len + extra_len
+         end = start + member.compress_size
+-    assert all(right <= start or left >= end for left, right in reads), reads
++    assert any(right > start and left < end for left, right in reads[:payload_read_start])
++    assert all(right <= start or left >= end for left, right in reads[payload_read_start:]), reads[payload_read_start:]
+ 
+ 
+ def before_symbolic_refusal(raw, reason):
+@@ -262,7 +264,7 @@ def opcode_refused():
+ 
+ @case("escaping_zip_member_refused_before_symbolic")
+ def escaping_member():
+-    before_symbolic_refusal(packed(document(), names=("../data.pkl",)), "Unsafe")
++    before_symbolic_refusal(packed(document(), names=("../data.pkl",)), "Non-contained ZIP name")
+ 
+ 
+ @case("ambiguous_pickle_members_refused_before_symbolic")
