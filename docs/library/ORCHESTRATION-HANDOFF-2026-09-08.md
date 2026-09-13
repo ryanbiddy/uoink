@@ -108,8 +108,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace and ASR connection | Timeout repair at 0d93186; child adoption at 428707d; adapter at d58bebe | Exact109 repair passes67 cases per root; native timeout02 returns valid0. Child adoption positive/refusal returns valid0 with child exits0/2. Adapter passes6 connected cases in each root; all111 adapter proof payloads match Git/disk | Council review and generated facade-to-worker operation. Durable recovery and real runtime remain open |
-| Local wheel graph and notices | Fresh graph at 616f670; prior graph at 4827288; cached wheels at 95a7f29; source notices at d887f8a | Five-record checker passes68 cases in each root; fresh144-pin/287-edge metadata graph passes with unchanged inputs. All24 graph and58 notice proof payloads match Git/disk | Council review; qualify actual notice staging/installer repair and preserve proxy-tools metadata conflict. Native compatibility and release security remain open |
+| Windows namespace and ASR connection | Timeout repair at 0d93186; child adoption at 428707d; adapter at d58bebe; council at ca61046 | Gemini accepts the three reviewed groups with findings and Astra's three documentary corrections. Exact109 repair passes67 cases per root; adoption child exits0/2; adapter passes6 connected cases per root | Integrate generated facade-to-worker operation observations. Durable recovery and real runtime remain open |
+| Local wheel graph and notices | Fresh graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046 | Five-record checker passes68 cases per root; fresh144-pin/287-edge metadata graph passes. Council adds no wheel-signature gate; earlier byte proofs remain valid. All12 council proof payloads match Git/disk | Finish notice patch checkout verification and installer inclusion. Preserve proxy-tools metadata conflict; native compatibility and release security remain open |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -300,6 +300,14 @@ roots now pass6/0/0 in actualc59cdb/672a23; integrated atd58bebe. Read
 ASTRA-ASR-PERMIT-FACADE-VERDICT-2026-09-13.md. All111 proof payloads match Git/disk.
 Next connect the facade's five operations to the generated Windows worker;
 proposal generated-operation-facade-proposal01 is unexecuted. No model is involved.
+Council run7eee470b completed from b77bc56 using Gemini via Antigravity and is
+integrated atca61046. Read ASTRA-WINDOWS-ADAPTER-GRAPH-COUNCIL-VERDICT-2026-09-13.md.
+All three groups are accepted with findings for their measured scope only.
+Correct the report's conflicting_constraints field name and Requires-Python
+interpretation; reject its unsupported new wheel-signature requirement.
+The later generated-operation-native-proposal01 derivative now has drain8f8823
+and cancel752948 observations with valid outer0; proof review/integration is next.
+These use generated text and a sentinel profile, not the actual ASR adapter.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
@@ -5164,3 +5172,23 @@ gemini-3.8-flash-high at high effort. Provider API variables will be scrubbed
 before dispatch. This is the next queue action, not an accepted review yet.
 The generated worker operation source42b93c54 has been read by root and its
 bootstrap derivative is being prepared; native drain/cancel runs are unexecuted.
+
+### 2026-09-13 - Three-group council accepted within scope
+
+Commit ca61046 integrates Gemini run7eee470b's sole report by worker diff and
+three-way apply. Root read the full report; the source-only brief assigned no
+executable suite. All12 proof payloads match disk and Git (c42dbe). Gemini's
+nine findings map to existing work; three documentary corrections are recorded
+in Astra's verdict. Original report bytes remain archived unchanged.
+
+The installer notice patch passes20 Python cases and10 inert block cases in
+its proposal overlay. Its first integration byte check returned1 after a
+successful apply because Git expanded line endings. Diagnosticfe96ea confirms
+identical normalized text; repairfa439f restores the exact qualified bytes.
+No checkout test ran after the failed check. Actual checkout qualification is
+prepared separately and is next. Existing acceptance assertions are unchanged.
+
+Generated Windows drain/cancel observations return0 with valid receipts and
+unchanged inputs; their independent evidence review is in progress. Website
+and marketing remain paused. Real runtime, durable recovery, final combined
+tree, signing and current-source installation remain release gates.
