@@ -1,0 +1,68 @@
+[
+  {
+    "name": "snapshot_lifecycle.py",
+    "before_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "copy_after_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "source_after_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "name": "owned_generation_protocol.py",
+    "before_sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507",
+    "copy_after_sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507",
+    "source_after_sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+  },
+  {
+    "name": "pinned_buffer_namespace.py",
+    "before_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+    "copy_after_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+    "source_after_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "name": "win32_worker_connection.py",
+    "before_sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+    "copy_after_sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+    "source_after_sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "name": "win32_private_pipe.py",
+    "before_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+    "copy_after_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+    "source_after_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "name": "contract_cases.py",
+    "before_sha256": "419d9c10f03ee80167567f2332b70d1153f1e940ebf50269070d84aa7c7b5071",
+    "copy_after_sha256": "419d9c10f03ee80167567f2332b70d1153f1e940ebf50269070d84aa7c7b5071",
+    "source_after_sha256": "419d9c10f03ee80167567f2332b70d1153f1e940ebf50269070d84aa7c7b5071"
+  },
+  {
+    "name": "terminal_completion_cases.py",
+    "before_sha256": "e8da1e50def6627ce88ef15dcf322664ecd0a0645127d50fd147bdd070ecd401",
+    "copy_after_sha256": "e8da1e50def6627ce88ef15dcf322664ecd0a0645127d50fd147bdd070ecd401",
+    "source_after_sha256": "e8da1e50def6627ce88ef15dcf322664ecd0a0645127d50fd147bdd070ecd401"
+  },
+  {
+    "name": "qualify_namespace.py",
+    "before_sha256": "47d69ee52cf324933f4f56857dd2a9654c51e482960abebe13f14f2ad681969a",
+    "copy_after_sha256": "47d69ee52cf324933f4f56857dd2a9654c51e482960abebe13f14f2ad681969a",
+    "source_after_sha256": "47d69ee52cf324933f4f56857dd2a9654c51e482960abebe13f14f2ad681969a"
+  },
+  {
+    "name": "EXPECTED-CASES.json",
+    "before_sha256": "b1a680834386fda2b5b2d4750575430993054585688ab7f1f58853fb66f1c757",
+    "copy_after_sha256": "b1a680834386fda2b5b2d4750575430993054585688ab7f1f58853fb66f1c757",
+    "source_after_sha256": "b1a680834386fda2b5b2d4750575430993054585688ab7f1f58853fb66f1c757"
+  },
+  {
+    "name": "run_namespace01.ps1",
+    "before_sha256": "7f741f71952e39fe7792f00c524bf24b950cc212795ee28a20eeb28ce7881c5a",
+    "copy_after_sha256": "7f741f71952e39fe7792f00c524bf24b950cc212795ee28a20eeb28ce7881c5a",
+    "source_after_sha256": "7f741f71952e39fe7792f00c524bf24b950cc212795ee28a20eeb28ce7881c5a"
+  },
+  {
+    "name": "ROOT-ADMISSION.json",
+    "before_sha256": "cf5d99e60a85f24f25af2ee35ce2ecc6f9714ab6a94056b7300064a8ff016561",
+    "copy_after_sha256": "cf5d99e60a85f24f25af2ee35ce2ecc6f9714ab6a94056b7300064a8ff016561",
+    "source_after_sha256": "cf5d99e60a85f24f25af2ee35ce2ecc6f9714ab6a94056b7300064a8ff016561"
+  }
+]

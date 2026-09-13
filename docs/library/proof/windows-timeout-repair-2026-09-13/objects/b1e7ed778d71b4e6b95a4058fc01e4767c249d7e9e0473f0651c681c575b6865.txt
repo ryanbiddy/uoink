@@ -1,0 +1,13 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\pre-membership-repair-run_timeout02.ps1" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\run_timeout02.ps1"
+index f2e0f92..18457f8 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\pre-membership-repair-run_timeout02.ps1"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\run_timeout02.ps1"
+@@ -18,7 +18,7 @@ foreach($taskName in @('ROOT-ADMISSION.json','SOURCE-INPUTS.json','run_timeout02
+     if($taskName -ceq 'ROOT-ADMISSION.json' -and (Get-FileHash -LiteralPath $taskPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $taskAdmissionInitialHash){throw 'Admission changed after parse'}
+     $taskControls += [ordered]@{name=$taskName;path=$taskPath;sha256=(Get-FileHash -LiteralPath $taskPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+ }
+-$taskSourceNames=@('snapshot_lifecycle.py','owned_generation_protocol.py','win32_worker_connection.py','generated_worker_flow.py','dummy_bootstrap.py')
++$taskSourceNames=@('snapshot_lifecycle.py','owned_generation_protocol.py','win32_worker_connection.py','win32_private_pipe.py','generated_worker_flow.py','dummy_bootstrap.py')
+ $taskNativePaths=@('C:\Python314\python.exe','C:\Python314\python314.dll','C:\Python314\python3.dll','C:\Python314\DLLs\_ctypes.pyd','C:\Python314\DLLs\libffi-8.dll','C:\Windows\System32\kernel32.dll','C:\Python314\Lib\ctypes\__init__.py','C:\Python314\Lib\ctypes\_endian.py','C:\Python314\Lib\ctypes\_layout.py')
+ if(@($taskSourceMap.source_sha256.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.source_paths.PSObject.Properties).Count -ne 6 -or @($taskSourceMap.native_bindings.PSObject.Properties).Count -ne 9){throw 'Fixed input membership refused'}
+ $taskSources=@()

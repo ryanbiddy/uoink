@@ -1,0 +1,205 @@
+"""Extra inert boundaries; executed after the byte-unchanged 54-case source.
+
+Every case drives the real read_frame/_finish/_cancel_and_confirm path using
+the existing memory-only primitive types. No native module is imported.
+"""
+
+
+def terminal_rig(*, result=0, result_error=109, cancel=0, cancel_error=1168,
+                 completion_wait=0, completion_raises=None, close_fails=False):
+    p, control, pair = pipe()
+    read_set = K.ReadSet()
+    p.read_sets.append(read_set)
+    member = p._retain(900, "read-member")
+    read_set.members.append(member)
+    worker = K.WorkerRecord(read_set=read_set, assigned=True, creation_time=123)
+    p.workers.append(worker)
+    pair.worker, pair.read_set = worker, read_set
+    state = {"error": 0, "operation": None, "waits": 0, "stops": 0,
+             "result_queries": 0, "sequence": []}
+    p.api.ffi.get_last_error = lambda: state["error"]
+
+    def stop(exact, timeout):
+        assert exact is worker and timeout == 5000
+        state["sequence"].append("owned-stop")
+        state["stops"] += 1
+        return True
+    p._stop_partial_worker = stop
+    original_new = control._new_operation
+
+    def new_operation(exact_pair, handle, buffer=None):
+        assert exact_pair is pair and handle is pair.server
+        op = original_new(exact_pair, handle, buffer)
+        assert state["operation"] is None
+        state["operation"] = op
+        return op
+    control._new_operation = new_operation
+
+    def read(handle, buffer, size, count, overlap):
+        op = state["operation"]
+        assert handle == pair.server.value and buffer is op.buffer and overlap is op.overlapped
+        assert size == P.HEADER.size and count is None
+        state["sequence"].append("read-pending")
+        state["error"] = 997
+        return 0
+
+    def wait(handle, milliseconds):
+        op = state["operation"]
+        assert handle == op.event.value
+        state["waits"] += 1
+        if state["waits"] == 1:
+            assert milliseconds == 5000
+            state["sequence"].append("deadline-timeout")
+            return 258
+        assert state["waits"] == 2 and milliseconds == 1000
+        state["sequence"].append("exact-event-wait")
+        if completion_raises is not None:
+            raise completion_raises
+        return completion_wait
+
+    def cancel_call(handle, overlap):
+        op = state["operation"]
+        assert handle == pair.server.value and overlap is op.overlapped
+        state["sequence"].append("exact-cancel-request")
+        state["error"] = cancel_error
+        return cancel
+
+    def result_call(handle, overlap, count, wait_flag):
+        op = state["operation"]
+        assert handle == pair.server.value and overlap is op.overlapped and wait_flag == 0
+        assert state["waits"] == 2 and completion_wait == 0
+        state["result_queries"] += 1
+        state["sequence"].append("exact-result")
+        state["error"] = result_error
+        count.value = 0
+        return result
+
+    p.api.actions.update(ReadFile=read, WaitForSingleObject=wait,
+                         CancelIoEx=cancel_call, GetOverlappedResult=result_call)
+    original_close = p._close
+
+    def close(handle):
+        if handle is state["operation"].event:
+            state["sequence"].append("event-close")
+            if close_fails:
+                handle.unconfirmed = True
+                raise RuntimeError("synthetic event close refused")
+        original_close(handle)
+    p._close = close
+    return p, control, pair, read_set, worker, state
+
+
+def drive_terminal(rig, *, terminal=False, cancelled=False, terminal_error=None):
+    p, control, pair, read_set, worker, state = rig
+    error = refused(W.PipeRefusal, lambda: control.read_frame(pair, 15.0), "overlapped_completion_not_observed")
+    op = state["operation"]
+    assert op.submitted and op.unconfirmed and op.cancellation_attempted
+    assert pair.unconfirmed and worker.unconfirmed and read_set.unconfirmed
+    assert not worker.quiescent and not read_set.released and not pair.active
+    assert not read_set.members[0].closed and not pair.server.closed
+    assert state["stops"] == 1 and pair.forced_stop_attempted and pair.forced_process_stop_observed
+    assert p.events.count("CancelIoEx") == 1
+    assert op.complete is terminal and op.cancelled is cancelled and op.terminal_error == terminal_error
+    # Exercise ordinary production release's actual first refusal, not a fake
+    # assertion about release policy. It must not close the memory-only guard.
+    refused(K.KernelUnconfirmed, lambda: K.OwnedWin32Primitives.release_read_set(p, read_set))
+    assert not read_set.members[0].closed
+    refused(W.PipeRefusal, lambda: control.retire_endpoint(pair), "quiescence")
+    return op, error
+
+
+@case("terminal_broken_pipe_retires_buffer_without_cancel_or_release_credit")
+def terminal_broken_pipe():
+    rig = terminal_rig()
+    op, _ = drive_terminal(rig, terminal=True, terminal_error=109)
+    assert op.event.closed and op.buffer is None and rig[2].operations == []
+    assert rig[5]["sequence"] == ["read-pending", "deadline-timeout", "owned-stop",
+        "exact-cancel-request", "exact-event-wait", "exact-result", "event-close"]
+
+
+@case("terminal_broken_pipe_after_successful_cancel_request_is_not_cancelled")
+def terminal_broken_after_cancel():
+    rig = terminal_rig(cancel=1, cancel_error=0)
+    op, _ = drive_terminal(rig, terminal=True, terminal_error=109)
+    assert op.buffer is None and op.event.closed and rig[5]["result_queries"] == 1
+
+
+@case("terminal_aborted_operation_keeps_995_cancel_classification")
+def terminal_aborted():
+    rig = terminal_rig(result_error=995)
+    op, _ = drive_terminal(rig, terminal=True, cancelled=True, terminal_error=995)
+    assert op.buffer is None and op.event.closed
+
+
+@case("terminal_normal_completion_ignores_stale_last_error")
+def terminal_normal():
+    rig = terminal_rig(result=1, result_error=109)
+    op, _ = drive_terminal(rig, terminal=True)
+    assert op.buffer is None and op.event.closed and rig[2].operations == []
+
+
+@case("terminal_incomplete_996_retains_exact_operation")
+def terminal_incomplete():
+    rig = terminal_rig(result_error=996)
+    op, _ = drive_terminal(rig)
+    assert rig[2].operations == [op] and op.buffer is not None and not op.event.closed
+
+
+@case("terminal_invalid_handle_6_retains_exact_operation")
+def terminal_invalid_handle():
+    rig = terminal_rig(result_error=6)
+    op, _ = drive_terminal(rig)
+    assert rig[2].operations == [op] and op.buffer is not None and not op.event.closed
+
+
+@case("terminal_access_error_5_is_not_generalized_to_completion")
+def terminal_access_error():
+    rig = terminal_rig(result_error=5)
+    op, _ = drive_terminal(rig)
+    assert rig[2].operations == [op] and op.buffer is not None and not op.event.closed
+
+
+@case("terminal_unknown_error_retains_exact_operation")
+def terminal_unknown_error():
+    rig = terminal_rig(result_error=123456)
+    op, _ = drive_terminal(rig)
+    assert rig[2].operations == [op] and op.buffer is not None and not op.event.closed
+
+
+@case("terminal_event_timeout_never_queries_stale_109")
+def terminal_wait_timeout():
+    rig = terminal_rig(completion_wait=258, cancel_error=109, cancel=1)
+    op, _ = drive_terminal(rig)
+    assert rig[5]["result_queries"] == 0 and rig[2].operations == [op] and op.buffer is not None
+
+
+@case("terminal_event_wait_failed_never_queries_stale_109")
+def terminal_wait_failed():
+    rig = terminal_rig(completion_wait=0xFFFFFFFF, cancel_error=109, cancel=1)
+    op, _ = drive_terminal(rig)
+    assert rig[5]["result_queries"] == 0 and not op.event.closed and op.buffer is not None
+
+
+@case("terminal_cancel_request_error_refuses_before_event_query")
+def terminal_cancel_failed():
+    rig = terminal_rig(cancel_error=5)
+    op, _ = drive_terminal(rig)
+    assert rig[5]["waits"] == 1 and rig[5]["result_queries"] == 0
+    assert rig[2].operations == [op] and op.buffer is not None
+
+
+@case("terminal_cleanup_interruption_preserves_original_timeout")
+def terminal_cleanup_interrupt():
+    interruption = KeyboardInterrupt("synthetic cleanup interruption")
+    rig = terminal_rig(completion_raises=interruption)
+    op, error = drive_terminal(rig)
+    assert any("KeyboardInterrupt" in note for note in error.__notes__)
+    assert rig[5]["result_queries"] == 0 and op.buffer is not None and not op.event.closed
+
+
+@case("terminal_109_event_close_failure_keeps_buffer_owned")
+def terminal_event_close_failed():
+    rig = terminal_rig(close_fails=True)
+    op, _ = drive_terminal(rig, terminal=True, terminal_error=109)
+    assert op.event.unconfirmed and not op.event.closed and op.buffer is not None
+    assert rig[2].operations == [op] and rig[5]["result_queries"] == 1

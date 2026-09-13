@@ -1,0 +1,36 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\win32_private_pipe.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\win32_private_pipe.py"
+index df28963..19b7e1e 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\win32_private_pipe.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\win32_private_pipe.py"
+@@ -12,6 +12,7 @@ PIPE_REJECT_REMOTE_CLIENTS = 8
+ GENERIC_READ_WRITE = 0xC0000000
+ ERROR_IO_PENDING = 997
+ ERROR_OPERATION_ABORTED = 995
++ERROR_BROKEN_PIPE = 109
+ ERROR_NOT_FOUND = 1168
+ WAIT_OBJECT_0 = 0
+ IO_CHUNK = 16384
+@@ -61,6 +62,7 @@ class PendingIO:
+     cancelled: bool = False
+     unconfirmed: bool = False
+     cancellation_attempted: bool = False
++    terminal_error: int | None = None
+ 
+ 
+ @dataclass
+@@ -181,9 +183,13 @@ class PrivatePipeController:
+         count = ffi.c_uint32()
+         done = p.api.call("GetOverlappedResult", p._owned(operation.handle), ffi.byref(operation.overlapped), ffi.byref(count), 0)
+         error = ffi.get_last_error()
+-        if done or error == ERROR_OPERATION_ABORTED:
++        if done or error in (ERROR_OPERATION_ABORTED, ERROR_BROKEN_PIPE):
++            # A waited exact operation may finish with a broken-pipe failure
++            # after peer termination. That is terminal, not cancellation or
++            # successful I/O. Keep enclosing quarantine and the raised error.
+             operation.complete = True
+-            operation.cancelled = not bool(done)
++            operation.cancelled = not bool(done) and error == ERROR_OPERATION_ABORTED
++            operation.terminal_error = None if done else error
+             return True
+         return False
+ 

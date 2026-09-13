@@ -1,0 +1,13 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\dummy_bootstrap.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\dummy_bootstrap.py"
+index ddc476e..852512e 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\dummy_bootstrap.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\dummy_bootstrap.py"
+@@ -46,7 +46,7 @@ import warnings
+ PROCESS_ABORT = os._exit
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-EXPECTED_RUN = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-timeout01"
++EXPECTED_RUN = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-timeout02"
+ assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+ assert os.environ.get("IG_FORBIDDEN_LIVE") == FORBIDDEN
+ assert os.path.normcase(os.path.dirname(os.path.abspath(__file__))) == os.path.normcase(EXPECTED_RUN)

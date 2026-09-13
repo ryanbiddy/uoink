@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e7e014",
+  "wall_time_seconds": 0.2405482,
+  "exit_code": 0,
+  "original_token_count": 115,
+  "output": "[\r\n  {\r\n    \"Hash\": \"499A17E280F5F79DA31BE983B805DCC9EC4959C9CBD07364B9FC916D069E0BDD\",\r\n    \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-pipe-terminal67-qualification01\\\\ROOT-ADMISSION.json\"\r\n  },\r\n  {\r\n    \"Hash\": \"85D9EE0FB4AE3CA4CFE3CF4FAE921E9DECF94BDE172F461C321B895E8EB8B065\",\r\n    \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-pipe-terminal67-qualification01\\\\run_namespace01.ps1\"\r\n  }\r\n]\r\n"
+}

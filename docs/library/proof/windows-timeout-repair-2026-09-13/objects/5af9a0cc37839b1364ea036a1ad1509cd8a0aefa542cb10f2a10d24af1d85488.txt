@@ -1,0 +1,11 @@
+{
+  "controller_native_exit": 1,
+  "outer_exit": 1,
+  "inputs_unchanged": true,
+  "receipt_valid": false,
+  "receipt_error_type": null,
+  "stdout_bytes": 0,
+  "stderr_bytes": 0,
+  "model_calls": 0,
+  "scope": "Generated-file timeout/forced-stop observation; child record is pre-stall only, logical quarantine remains"
+}

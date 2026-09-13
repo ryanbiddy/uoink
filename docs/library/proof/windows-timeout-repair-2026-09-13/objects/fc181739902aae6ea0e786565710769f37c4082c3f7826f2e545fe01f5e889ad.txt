@@ -1,0 +1,5 @@
+# Unexecuted launcher corrections
+
+The first timeout launcher draft used an incorrect numeric value of 9 for QUARANTINED. Direct reading of the frozen `snapshot_lifecycle.py` enum shows it is the seventh auto value. Before any review admission or execution, the launcher now requires 7 and the explicit name `QUARANTINED`. The old draft is preserved under `before/run_timeout01-unexecuted-draft.ps1`. This was a new launcher mistake, not a product measurement or an acceptance-test change.
+
+The same edit records the admission hash before parsing and requires that initial hash in the existing control-copy check. This preserves the control identity used to admit the future run. No test or native attempt has run.

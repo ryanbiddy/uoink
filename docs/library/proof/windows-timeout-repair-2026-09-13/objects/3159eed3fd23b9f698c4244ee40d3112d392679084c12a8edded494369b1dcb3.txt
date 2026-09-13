@@ -1,0 +1,9 @@
+# Restore the sixth native source copy
+
+Before native timeout02, root's complete launcher review found that `$taskSourceNames` listed only five files. The bootstrap and source map both require six, including `win32_private_pipe.py`. The preparatory text replacement intended to remove the repaired pipe from the historical-path selection condition had also removed it from the copy list. A fresh native run would therefore fail before the missing pipe could be loaded. Native timeout02 has not executed.
+
+The correction adds `win32_private_pipe.py` back to the explicit six-file copy list. The path condition remains restricted to the three unchanged lifecycle/channel/Win32 files, so the repaired pipe is correctly selected from this proposal's root. Its map hash remains the reviewed repaired source. No bootstrap, product behavior, test or assertion changes.
+
+The faulty launcher, admission template, review pins and full original-to-new diff are preserved under `before/pre-membership-repair-*`. The original timeout01 launcher and its `before/` copy both remain SHA-256 `de53edfebe283802d081a168a595a1b2ed517d8f1795bdc77c33ed0c440125bb`. Both have all six source names and select the historical pipe, matching the failed timeout01's recorded source bindings. That run's evidence is unchanged.
+
+Root reports the author synthetic run at actual chunk 030e68, exit 0: 67 passed, 0 failed, 0 skipped in 0.01925509999273345 seconds. Those results measure the repaired pipe and fake controls; they do not validate this unexecuted native launcher's copy behavior. Raw synthetic results will be preserved separately in the documentary package. No new run or rerun is performed for this source correction.

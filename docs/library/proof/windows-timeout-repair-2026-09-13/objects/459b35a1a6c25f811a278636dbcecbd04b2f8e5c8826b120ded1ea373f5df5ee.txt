@@ -1,0 +1,36 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\qualify_namespace.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\synthetic\\qualify_namespace.py"
+index 639f30f..f851dc3 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\before\\qualify_namespace.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-dummy-worker-timeout-proposal02\\synthetic\\qualify_namespace.py"
+@@ -51,7 +51,7 @@ import types
+ assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+ assert os.environ.get("IG_FORBIDDEN_LIVE") == r"C:\Users\hello\AppData\Local\Uoink\index.db"
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-INPUTS = ('snapshot_lifecycle.py', 'owned_generation_protocol.py', 'pinned_buffer_namespace.py', 'win32_worker_connection.py', 'win32_private_pipe.py', 'contract_cases.py', 'qualify_namespace.py')
++INPUTS = ('snapshot_lifecycle.py', 'owned_generation_protocol.py', 'pinned_buffer_namespace.py', 'win32_worker_connection.py', 'win32_private_pipe.py', 'contract_cases.py', 'terminal_completion_cases.py', 'qualify_namespace.py')
+ READS = {os.path.normcase(os.path.join(HERE, name)) for name in INPUTS}
+ HEAVY = {"torch", "torchaudio", "torchvision", "torchcodec", "whisperx", "faster_whisper", "ctranslate2",
+          "transformers", "tokenizers", "pyannote", "onnxruntime", "numpy", "ctypes", "subprocess", "socket", "winreg"}
+@@ -129,10 +129,12 @@ for module_name in ('snapshot_lifecycle', 'owned_generation_protocol', 'pinned_b
+     sys.modules[module_name] = module
+     exec(compile(RAW[module_name + '.py'], module.__file__, 'exec'), module.__dict__)
+ exec(compile(RAW['contract_cases.py'], os.path.join(HERE, 'contract_cases.py'), 'exec'), globals())
++exec(compile(RAW['terminal_completion_cases.py'], os.path.join(HERE, 'terminal_completion_cases.py'), 'exec'), globals())
+ 
+ EXPECTED_CASES = ('channel_roundtrip_order_and_direction', 'channel_replay_revokes_receiver', 'channel_foreign_generation_refused', 'channel_tamper_refused_before_json', 'channel_wrong_direction_refused', 'channel_frame_length_bound', 'channel_authenticated_overflow_float_refused', 'channel_authenticated_oversized_integer_refused', 'channel_authenticated_string_bound', 'channel_authenticated_container_bound', 'channel_authenticated_node_bound', 'channel_authenticated_duplicate_key_refused', 'channel_authenticated_depth_refused', 'channel_string_braces_do_not_count_as_depth', 'channel_outbound_nonpassive_refused', 'channel_sequence_budget_refused', 'channel_reentrant_operation_refused', 'channel_explicit_revocation_blocks_both_directions', 'private_bootstrap_packet_exact_bound_and_roundtrip', 'worker_bootstrap_mints_distinct_local_identity', 'worker_factory_before_begin_refused', 'worker_repeated_bootstrap_refused', 'worker_wrong_begin_revokes_registry', 'worker_absent_runtime_binding_refused_before_constructor', 'worker_foreign_runtime_binding_refused_before_constructor', 'worker_runtime_binding_change_revokes_before_publication', 'worker_factory_reentrant_entry_refused', 'worker_factory_interruption_revokes_preserving_error', 'worker_revoke_during_build_refuses_publication', 'worker_factory_single_attempt_and_retirement', 'namespace_exact_bytes_and_fresh_loader_dictionary', 'namespace_unknown_child_cannot_expand_map', 'namespace_wrong_digest_retains_quarantine', 'namespace_short_file_refused', 'namespace_growth_one_extra_byte_refused', 'namespace_hardlink_identity_refused_before_read', 'namespace_payload_budget_refused_before_read', 'namespace_four_file_route_remains_explicit', 'namespace_released_or_quarantined_refuses_retained_view', 'namespace_interruption_preserves_exact_owner', 'native_loader_gate_assignment_cannot_activate', 'pipe_pair_connect_retires_completed_event', 'pipe_frames_roundtrip_and_bound_active_buffers', 'pipe_frame_reentrant_entry_refused', 'pipe_declared_length_refused_before_body_read', 'pipe_timeout_cancellation_unknown_retains_exact_buffer', 'pipe_interruption_preserves_original_and_owners', 'pipe_child_endpoint_mapping_and_parent_client_close', 'pipe_worker_adoption_clears_further_inheritance', 'pipe_worker_nonpipe_adoption_refused', 'pipe_deadline_refused_before_allocation', 'pipe_deadline_after_completed_chunk_quarantines_frame', 'pipe_overlapped_setup_failure_closes_recorded_event', 'pipe_quarantine_stops_exact_worker_without_release_credit')
++EXPECTED_CASES = EXPECTED_CASES + ('terminal_broken_pipe_retires_buffer_without_cancel_or_release_credit', 'terminal_broken_pipe_after_successful_cancel_request_is_not_cancelled', 'terminal_aborted_operation_keeps_995_cancel_classification', 'terminal_normal_completion_ignores_stale_last_error', 'terminal_incomplete_996_retains_exact_operation', 'terminal_invalid_handle_6_retains_exact_operation', 'terminal_access_error_5_is_not_generalized_to_completion', 'terminal_unknown_error_retains_exact_operation', 'terminal_event_timeout_never_queries_stale_109', 'terminal_event_wait_failed_never_queries_stale_109', 'terminal_cancel_request_error_refuses_before_event_query', 'terminal_cleanup_interruption_preserves_original_timeout', 'terminal_109_event_close_failure_keeps_buffer_owned',)
+ assert tuple(name for name, _ in CASES) == EXPECTED_CASES
+-assert len(CASES) == 54
++assert len(CASES) == 67
+ assert len({name for name, _ in CASES}) == len(CASES)
+ results = []
+ started = time.perf_counter()
+@@ -175,7 +177,7 @@ payload = json.dumps({"schema": "uoink.worker-namespace-synthetic.v1", "cases":
+                   "stdout_capture": "".join(CAPTURE_OUT.parts), "stderr_capture": "".join(CAPTURE_ERR.parts),
+                   "guard_valid": valid, "native_exit": exit_code, "count": len(results), "skipped": 0,
+                   "elapsed_seconds": elapsed, "expected_cases": EXPECTED_CASES,
+-                  "scope": "Generated-memory fake API seams only; no kernel, model, factory or native-loader qualification"}, indent=2)
++                  "scope": "Original 54 cases plus 13 terminal-completion controls; generated-memory fake API seams only; no kernel or model qualification"}, indent=2)
+ assert len(payload.encode("utf-8")) <= 131072
+ OUTPUT.write(payload + "\n")
+ OUTPUT.flush()

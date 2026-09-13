@@ -1,0 +1,365 @@
+"""Unexecuted generated-data worker flow; caller supplies reviewed bound APIs.
+
+No ctypes import, DLL load, process, filesystem or model operation at import.
+Only a separately reviewed exact dummy launcher may call these functions.
+"""
+import hashlib
+from owned_generation_protocol import GenerationBinding, GenerationChannel, ControllerHandshake
+from owned_generation_protocol import encode_private_bootstrap, decode_private_bootstrap
+from win32_worker_connection import KernelUnconfirmed, KernelUnavailable
+from win32_worker_connection import WAIT_OBJECT_0, WAIT_TIMEOUT, JOB_BASIC_ACCOUNTING_CLASS
+from snapshot_lifecycle import SnapshotLifecycle, OwnedRuntimeFactory, Phase
+from win32_private_pipe import PipeRefusal
+
+GENERATED_TEXT = "0123456789abcdef" * 2500
+GENERATED_SHA256 = hashlib.sha256(GENERATED_TEXT.encode("ascii")).hexdigest()
+MAX_WAIT_MS = 5000
+RESPONSE_TIMEOUT_SECONDS = 0.250
+CHILD_STALL_MS = 15000
+ARMED = {"generated_sha256": GENERATED_SHA256, "characters": 40000,
+         "timeout_case_armed": True}
+
+
+def declare_exit_call(api, kernel32):
+    ffi = api.ffi
+    function = kernel32.GetExitCodeProcess
+    function.restype = ffi.c_int32
+    function.argtypes = [ffi.c_void_p, ffi.POINTER(ffi.c_uint32)]
+    api.functions["GetExitCodeProcess"] = function
+
+
+def _assert(condition, reason):
+    if not condition:
+        raise KernelUnconfirmed(reason)
+
+
+def _remaining(clock):
+    # Pipe code independently verifies finite, positive, <=30-second deadlines.
+    return clock() + 10.0
+
+
+def _write_access_probe(primitives, generated_path, expected_locked):
+    # The fixed outer plan must bind this one newly generated path. Never take
+    # it from IPC, a model manifest, user input or an existing product path.
+    from win32_worker_connection import _absolute_local_path
+    _absolute_local_path(generated_path)
+    value = primitives.api.call("CreateFileW", generated_path, 0x40000000, 7, None, 3, 0x00200000, None)
+    error = primitives.api.ffi.get_last_error()
+    invalid = value is None or value == (1 << 64) - 1
+    if expected_locked:
+        if not invalid:
+            handle = primitives._retain(value, "dummy-unexpected-write-access")
+            primitives._close(handle)
+        _assert(invalid and error == 32, "generated_file_write_share_guard_not_observed")
+        return {"write_open_refused": True, "winerror": error}
+    _assert(not invalid, "generated_file_guard_not_released")
+    handle = primitives._retain(value, "dummy-postrelease-write-access")
+    primitives._close(handle)
+    return {"write_open_succeeded": True, "bytes_written": 0}
+
+
+def _observe_graceful_exit(primitives, worker):
+    _assert(any(item is worker for item in primitives.workers) and worker.assigned
+            and not worker.unconfirmed and not worker.shutdown_started, "exact_clean_dummy_worker_required")
+    worker.shutdown_started = True
+    try:
+        _assert(worker.creation_time == primitives._creation_time(worker.process), "dummy_process_identity_changed")
+        process = primitives._owned(worker.process)
+        _assert(primitives.api.call("WaitForSingleObject", process, MAX_WAIT_MS) == WAIT_OBJECT_0,
+                "dummy_process_exit_not_observed")
+        exit_code = primitives.api.ffi.c_uint32()
+        primitives.api.checked("GetExitCodeProcess", process, primitives.api.ffi.byref(exit_code))
+        _assert(exit_code.value == 0, "dummy_child_native_exit_nonzero")
+        accounting = primitives.api.structure("JOBOBJECT_BASIC_ACCOUNTING_INFORMATION")
+        returned = primitives.api.ffi.c_uint32()
+        primitives.api.checked("QueryInformationJobObject", primitives._owned(worker.job), JOB_BASIC_ACCOUNTING_CLASS,
+            primitives.api.ffi.byref(accounting), primitives.api.ffi.sizeof(accounting), primitives.api.ffi.byref(returned))
+        _assert(returned.value == primitives.api.ffi.sizeof(accounting) and accounting.active_processes == 0,
+                "dummy_owned_job_not_empty")
+        worker.quiescent = True
+        return {"child_native_exit": int(exit_code.value), "process_wait_observed": True, "job_active_processes": 0}
+    except BaseException:
+        worker.unconfirmed = True
+        worker.read_set.unconfirmed = True
+        raise
+
+
+class GeneratedLifecyclePort:
+    """One connected dummy run; no model operation methods are implemented.
+
+    Inputs must come from the future exact generated-only launcher. This class
+    does not turn a manifest, object permit or message into runtime authority.
+    It has no durable crash-recovery implementation and does not publish assets.
+    """
+
+    def __init__(self, primitives, pipes, expectations, executable, arguments,
+                 working_directory, environment, generation_hex, manifest_sha256,
+                 namespace_sha256, child_source_sha256, master_key, pipe_name_material):
+        _assert(type(expectations) is tuple and len(expectations) == 1, "one_generated_file_only")
+        self.primitives, self.pipes, self.expectations = primitives, pipes, expectations
+        self.executable, self.arguments, self.cwd, self.environment = executable, arguments, working_directory, environment
+        self.generation, self.manifest, self.namespace, self.source = generation_hex, manifest_sha256, namespace_sha256, child_source_sha256
+        self.master_key, self.pipe_material = master_key, pipe_name_material
+        self.lifecycle = SnapshotLifecycle(self)
+        self.profile = object()
+        self.key = self.read_set = self.worker = self.pair = self.channel = self.handshake = self.permit = None
+        self.exit_observation = None
+        self.observations = []
+        self.parent_guard_retirement = None
+        self.timeout_observation = None
+        self.generated_teardown = None
+
+    def acquire_read(self, key):
+        _assert(self.key is None and self.read_set is None, "single_generated_acquisition")
+        self.key = key
+        self.read_set = self.primitives.pin_exact_members(self.expectations)
+        return self.read_set
+
+    def _record(self, protection, permit):
+        record = self.lifecycle._records.get(self.key)
+        _assert(record is not None and record.protection is protection and record.permit is permit
+                and record.owner is not None and record.owner._manager is self.lifecycle,
+                "exact_lifecycle_record_and_permit_required")
+        return record
+
+    def start_owned_worker(self, protection, permit, profile):
+        record = self._record(protection, permit)
+        _assert(record.phase is Phase.NATIVE_RESERVED and profile is self.profile and self.worker is None,
+                "dummy_start_order_and_profile")
+        self.permit = permit
+        self.pair = self.pipes.create_pair(self.pipe_material, _remaining(self.pipes.clock))
+        self.pair.read_set = protection
+        try:
+            self.worker = self.pipes.attach_to_suspended_worker(self.pair, protection, self.executable,
+                self.arguments, self.cwd, self.environment)
+            binding = GenerationBinding(self.generation, self.manifest, self.namespace, self.source, self.worker.creation_time)
+            self.channel = GenerationChannel(binding, self.master_key, "controller")
+            self.handshake = ControllerHandshake(self.channel, record.owner, permit, self.primitives, self.worker)
+            self.primitives._resume_after_future_admission(self.worker)
+            self.pipes.write_bytes(self.pair, encode_private_bootstrap(binding, self.master_key), _remaining(self.pipes.clock))
+            self.pipes.write_bytes(self.pair, self.handshake.challenge(), _remaining(self.pipes.clock))
+            self.handshake.accept_ready(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))
+            return self.worker
+        except BaseException:
+            self.pipes._quarantine(self.pair)
+            raise
+
+    def probe_generated(self, worker, permit):
+        record = self._record(self.read_set, permit)
+        _assert(worker is self.worker and record.phase is Phase.NATIVE_RUNNING, "dummy_probe_owner")
+        self.pipes.write_bytes(self.pair, self.handshake.begin(), _remaining(self.pipes.clock))
+        self.pipes.write_bytes(self.pair, self.channel.encode("next", {"generated_text": GENERATED_TEXT}), _remaining(self.pipes.clock))
+        operation, payload = self.channel.decode(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))
+        _assert(operation == "done" and payload == ARMED, "dummy_timeout_case_not_armed")
+        _assert(self.primitives.api.call("WaitForSingleObject", self.primitives._owned(worker.process), 0) == WAIT_TIMEOUT,
+                "dummy_not_alive_before_response_deadline")
+        _assert(len(worker.child_read_handles) == len(self.read_set.members) == 1
+                and all(handle.closed for handle in worker.inherited_copies)
+                and all(not handle.closed and not handle.unconfirmed for handle in self.read_set.members),
+                "dummy_original_guard_must_remain_held")
+        self.observations.append(_write_access_probe(self.primitives, self.expectations[0][0], True))
+        started = self.pipes.clock()
+        try:
+            self.pipes.read_frame(self.pair, started + RESPONSE_TIMEOUT_SECONDS)
+        except PipeRefusal as error:
+            self.timeout_observation = {
+                "expected_operation_failed": True, "reason": str(error),
+                "error_type": type(error).__name__, "deadline_seconds": RESPONSE_TIMEOUT_SECONDS,
+                "observed_elapsed_seconds": self.pipes.clock() - started,
+                "armed_response_validated": True, "child_alive_before_wait": True,
+                "parent_originals_still_open": all(not h.closed and not h.unconfirmed for h in self.read_set.members),
+                "forced_stop_attempted": self.pair.forced_stop_attempted,
+                "forced_process_stop_observed": self.pair.forced_process_stop_observed,
+                "forced_stop_error_type": self.pair.forced_stop_error_type,
+                "pending_operations": self.pending_facts(),
+            }
+            # Preserve the actual exception and its cleanup notes. The caller
+            # must qualify its exact cause before treating it as this case.
+            raise
+        raise KernelUnconfirmed("missing_response_unexpectedly_completed")
+
+    def pending_facts(self):
+        return [{"submitted": op.submitted, "complete": op.complete,
+                 "cancelled": op.cancelled, "unconfirmed": op.unconfirmed,
+                 "cancellation_attempted": op.cancellation_attempted,
+                 "buffer_retained": op.buffer is not None,
+                 "event_present": op.event is not None,
+                 "event_closed": op.event.closed if op.event is not None else None}
+                for op in self.pair.operations]
+
+    def observe_forced_exit(self):
+        p, worker = self.primitives, self.worker
+        _assert(any(item is worker for item in p.workers) and worker is self.pair.worker
+                and worker.read_set is self.read_set and worker.assigned
+                and self.pair.forced_stop_attempted and self.pair.forced_process_stop_observed
+                and self.pair.forced_stop_error_type is None, "exact_forced_stop_not_observed")
+        _assert(worker.creation_time == p._creation_time(worker.process), "forced_process_identity_changed")
+        _assert(p.api.call("WaitForSingleObject", p._owned(worker.process), MAX_WAIT_MS) == WAIT_OBJECT_0,
+                "forced_process_exit_not_observed")
+        code, returned = p.api.ffi.c_uint32(), p.api.ffi.c_uint32()
+        p.api.checked("GetExitCodeProcess", p._owned(worker.process), p.api.ffi.byref(code))
+        _assert(code.value == 1, "forced_child_exit_not_one")
+        accounting = p.api.structure("JOBOBJECT_BASIC_ACCOUNTING_INFORMATION")
+        p.api.checked("QueryInformationJobObject", p._owned(worker.job), JOB_BASIC_ACCOUNTING_CLASS,
+            p.api.ffi.byref(accounting), p.api.ffi.sizeof(accounting), p.api.ffi.byref(returned))
+        _assert(returned.value == p.api.ffi.sizeof(accounting) and accounting.active_processes == 0,
+                "forced_job_not_empty")
+        self.exit_observation = {"child_native_exit": int(code.value), "process_wait_observed": True,
+                                 "job_active_processes": int(accounting.active_processes),
+                                 "retained_creation_identity_equal": True}
+        _assert(all(not h.closed and not h.unconfirmed for h in self.read_set.members),
+                "guard_closed_before_forced_exit_observation")
+        self.observations.append(_write_access_probe(p, self.expectations[0][0], True))
+
+    def teardown_generated_handles(self):
+        # Deliberately does not clear quarantine or call production release.
+        # This one disposable fixture's physical teardown is allowed only after
+        # all real process/job/I/O observations below have been established.
+        p, pair, worker = self.primitives, self.pair, self.worker
+        record = self._record(self.read_set, self.permit)
+        _assert(record.phase is Phase.QUARANTINED and record.owner._revoked
+                and record.owner._active == 0 and record.quarantine_persisted is False,
+                "failed_lifecycle_must_stay_quarantined")
+        _assert(self.exit_observation == {"child_native_exit": 1, "process_wait_observed": True,
+                "job_active_processes": 0, "retained_creation_identity_equal": True},
+                "generated_teardown_requires_exact_exit_observation")
+        _assert(pair.unconfirmed and worker.unconfirmed and self.read_set.unconfirmed
+                and not worker.quiescent and not self.read_set.released, "uncertainty_must_remain_latched")
+        _assert(not pair.active and not pair.operations, "pending_io_prevents_generated_teardown")
+        _assert(all(h.closed for h in worker.inherited_copies), "inheritable_copies_still_owned")
+        handles = (pair.client, pair.server, worker.thread, worker.process, worker.job) + tuple(self.read_set.members)
+        _assert(all(h is None or h.closed or (not h.unconfirmed and any(x is h for x in p.handles))
+                    for h in handles), "generated_teardown_handle_identity")
+        self.generated_teardown = {"attempted": True, "complete": False,
+            "pending_operations_before": 0, "native_exit_observed_before": True,
+            "empty_job_observed_before": True, "logical_read_set_released": False}
+        for handle in handles:
+            if handle is not None and not handle.closed:
+                p._close(handle)
+        _assert(all(h.closed for h in p.handles), "generated_handles_still_owned")
+        self.generated_teardown["complete"] = True
+        self.observations.append(_write_access_probe(p, self.expectations[0][0], False))
+
+    def close_and_join(self, worker, permit):
+        record = self._record(self.read_set, permit)
+        _assert(worker is self.worker and record.phase is Phase.NATIVE_RUNNING, "dummy_close_owner")
+        self.pipes.write_bytes(self.pair, self.channel.encode("cancel", {}), _remaining(self.pipes.clock))
+        operation, payload = self.channel.decode(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))
+        _assert(operation == "closed" and payload == {}, "dummy_close_response")
+        self.exit_observation = _observe_graceful_exit(self.primitives, worker)
+        self.channel.revoke()
+        return True
+
+    def confirm_quiescent(self, protection, worker, permit):
+        self._record(protection, permit)
+        _assert(protection is self.read_set and worker is self.worker and worker.read_set is protection,
+                "dummy_quiescence_owner")
+        # This exact record was created only by the immediately preceding
+        # retained-process wait/GetExitCode/empty-job queries, not a wire value.
+        return (self.exit_observation == {"child_native_exit": 0, "process_wait_observed": True, "job_active_processes": 0}
+                and worker.quiescent and not worker.unconfirmed and not self.pair.operations)
+
+    def release_read(self, protection):
+        _assert(protection is self.read_set and self.worker is not None and self.worker.quiescent,
+                "dummy_release_requires_observed_native_exit")
+        self.pipes.retire_endpoint(self.pair)
+        self.primitives.close_quiescent_worker_handles(self.worker)
+        return self.primitives.release_read_set(protection)
+
+    def quarantine(self, key, protection, permit, reason):
+        if protection is not None:
+            protection.unconfirmed = True
+        if self.channel is not None:
+            self.channel.revoke()
+        if self.pair is not None:
+            self.pipes._quarantine(self.pair)
+        # Local ownership/forced-stop attempt only. There is no durable recovery
+        # port here, so never report durable quarantine as successfully persisted.
+        return False
+
+
+def controller_flow(port):
+    _assert(type(port) is GeneratedLifecyclePort, "fixed_generated_lifecycle_port_required")
+    lease = port.lifecycle.read_lease(port.cwd, "generated-timeout-dummy", port.generation)
+    try:
+        with lease:
+            permit = lease.begin_native_session()
+            session = OwnedRuntimeFactory(port.lifecycle).open_owned_session(port.profile, permit)
+            session._call(port.probe_generated, permit.identity)
+    except PipeRefusal as error:
+        _assert(str(error) == "overlapped_completion_not_observed"
+                and port.timeout_observation is not None, "different_failure_is_not_expected_timeout")
+        _assert(lease._record.phase is Phase.QUARANTINED and session._active == 0
+                and session._revoked and lease._record.quarantine_persisted is False,
+                "timeout_lifecycle_not_quarantined")
+        port.timeout_observation["cleanup_notes"] = list(getattr(error, "__notes__", ()))
+        port.observe_forced_exit()
+        # Confirm ordinary release still refuses, before the separately named
+        # generated-fixture teardown. Refusal itself must not close a guard.
+        try:
+            port.primitives.release_read_set(port.read_set)
+        except KernelUnconfirmed:
+            port.timeout_observation["ordinary_release_refused"] = True
+        else:
+            raise KernelUnconfirmed("quarantined_ordinary_release_was_accepted")
+        port.teardown_generated_handles()
+        return failure_facts(port, qualified=True)
+    raise KernelUnconfirmed("timeout_case_did_not_raise")
+
+
+def failure_facts(port, qualified=False):
+    record = port.lifecycle._records.get(port.key)
+    return {"case": "generated_missing_response_forced_stop", "qualified": qualified,
+        "timeout": port.timeout_observation, "exit_observation": port.exit_observation,
+        "generated_teardown": port.generated_teardown,
+        "lifecycle_phase": record.phase.value if record is not None else None,
+        "lifecycle_phase_name": record.phase.name if record is not None else None,
+        "quarantine_persisted": record.quarantine_persisted if record is not None else None,
+        "read_set_released": port.read_set.released if port.read_set is not None else None,
+        "pipe_retired": port.pair.closed if port.pair is not None else None,
+        "pending_operations": port.pending_facts() if port.pair is not None else [],
+        "write_access_observations": port.observations,
+        "controller_handshake_begun": port.handshake._begun if port.handshake is not None else False,
+        "model_calls": 0}
+
+
+def child_flow(primitives, pipes, inherited_control_value, expected_child_source_sha256, record_pre_stall):
+    """Fixed dummy protocol, no registry/factory/model construction or dispatch."""
+    pair = pipes.adopt_inherited_client(inherited_control_value)
+    channel = None
+    try:
+        binding, key = decode_private_bootstrap(pipes.read_private_bootstrap(pair, _remaining(pipes.clock)))
+        _assert(binding.bootstrap_source_sha256 == expected_child_source_sha256, "fixed_dummy_source_binding")
+        # Trusted bootstrap provides its own fixed code hash. Neither the wire
+        # digest nor this comparison authenticates executable provenance alone.
+        current = primitives.api.call("GetCurrentProcess")
+        values = [primitives.api.structure("FILETIME") for _ in range(4)]
+        primitives.api.checked("GetProcessTimes", current, *(primitives.api.ffi.byref(value) for value in values))
+        creation = int(values[0].low) | int(values[0].high) << 32
+        _assert(creation == binding.process_creation_time, "dummy_child_creation_binding")
+        channel = GenerationChannel(binding, key, "worker")
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        expected = {"generation": binding.generation_hex, "namespace_sha256": binding.namespace_sha256}
+        _assert(operation == "challenge" and payload == expected, "dummy_challenge_binding")
+        pipes.write_bytes(pair, channel.encode("ready", expected), _remaining(pipes.clock))
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        _assert(operation == "begin" and payload == {"manifest_sha256": binding.manifest_sha256}, "dummy_begin_binding")
+        operation, payload = channel.decode(pipes.read_frame(pair, _remaining(pipes.clock)))
+        _assert(operation == "next" and payload == {"generated_text": GENERATED_TEXT}, "fixed_generated_probe_required")
+        stall_event = primitives._retain(primitives.api.call("CreateEventW", None, 1, 0, None), "dummy-stall-event")
+        # This callback records setup only. Termination prevents a final child
+        # record; the controller must independently obtain the exit code.
+        record_pre_stall({"stage": "armed_before_wait", "stall_ms": CHILD_STALL_MS,
+                          "generated_request_validated": True, "native_exit_observed": False})
+        pipes.write_bytes(pair, channel.encode("done", ARMED), _remaining(pipes.clock))
+        primitives.api.call("WaitForSingleObject", primitives._owned(stall_event), CHILD_STALL_MS)
+        # This event has no signaller. Any return means the intended forced
+        # termination did not occur; never convert it to a successful child.
+        primitives._close(stall_event)
+        raise KernelUnconfirmed("stall_returned_without_expected_forced_termination")
+    except BaseException:
+        pipes._quarantine(pair)
+        raise
+    finally:
+        if channel is not None:
+            channel.revoke()

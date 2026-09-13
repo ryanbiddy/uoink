@@ -1,0 +1,50 @@
+[
+  {
+    "name": "REPAIR-BRIEF.md",
+    "sha256": "49891734af2ffeaf30fd5855e1cd667f1e63ba526bd97cef545da1c910ca380c"
+  },
+  {
+    "name": "win32_private_pipe.py",
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "name": "pipe-repair.diff",
+    "sha256": "8ee5e6e812ceadcb6f600712195fa942e285ce9cb016b4806cd5d2fb25db4f12"
+  },
+  {
+    "name": "generated_worker_flow.py",
+    "sha256": "6f60a4ec1b6cee76f46b3d98207e7772839b777dbab28468907891f8abd88088"
+  },
+  {
+    "name": "dummy_bootstrap.py",
+    "sha256": "b8472e0903c04fce5c00f3dcb7b55d15ca130aebc9691ddb14999fea889116f6"
+  },
+  {
+    "name": "run_timeout02.ps1",
+    "sha256": "3bdb511a2f91e2caad2f522fafe7a0b887758dacaf76c5db52d06f26b45ae925"
+  },
+  {
+    "name": "SOURCE-INPUTS.json",
+    "sha256": "009624c4af18062c7d93424ddee1065f2903c7c74dab04aa0d483e0f1d7ac134"
+  },
+  {
+    "name": "synthetic\\terminal_completion_cases.py",
+    "sha256": "e8da1e50def6627ce88ef15dcf322664ecd0a0645127d50fd147bdd070ecd401"
+  },
+  {
+    "name": "synthetic\\qualify_namespace.py",
+    "sha256": "47d69ee52cf324933f4f56857dd2a9654c51e482960abebe13f14f2ad681969a"
+  },
+  {
+    "name": "synthetic\\run_namespace01.ps1",
+    "sha256": "7f741f71952e39fe7792f00c524bf24b950cc212795ee28a20eeb28ce7881c5a"
+  },
+  {
+    "name": "SYNTHETIC-PROTOCOL.md",
+    "sha256": "57db715b8ac7fe931d20da6c4de0bb746af9f930bbe8f1dd264c6778021b985d"
+  },
+  {
+    "name": "NATIVE-TIMEOUT02-PROTOCOL.md",
+    "sha256": "c5924bbfcfa66d35f2eaf6c7d83c6225501c2de4c3d9eff2b3a26408c188985f"
+  }
+]

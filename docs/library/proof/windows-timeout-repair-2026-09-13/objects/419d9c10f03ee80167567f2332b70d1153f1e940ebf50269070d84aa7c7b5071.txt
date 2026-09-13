@@ -1,0 +1,742 @@
+"""Proposed generated-memory contracts. No native API or candidate runs here yet."""
+P = sys.modules["owned_generation_protocol"]
+N = sys.modules["pinned_buffer_namespace"]
+K = sys.modules["win32_worker_connection"]
+W = sys.modules["win32_private_pipe"]
+CASES = []
+
+
+def case(name):
+    def register(function):
+        CASES.append((name, function))
+        return function
+    return register
+
+
+def refused(kind, function, reason=None):
+    try:
+        function()
+    except kind as error:
+        if reason is not None:
+            assert reason in str(error), (reason, str(error))
+        return error
+    raise AssertionError("Expected refusal: " + kind.__name__)
+
+
+def channels():
+    binding = P.GenerationBinding("1" * 64, "2" * 64, "3" * 64, "4" * 64, 123)
+    return P.GenerationChannel(binding, b"x" * 32, "controller"), P.GenerationChannel(binding, b"x" * 32, "worker")
+
+
+def signed_body(sender, body):
+    header = P.HEADER.pack(P.MAGIC, sender._send_direction, sender._send_sequence, len(body))
+    return header + body + hmac.digest(sender._key, sender._context + header + body, "sha256")
+
+
+@case("channel_roundtrip_order_and_direction")
+def channel_roundtrip():
+    a, b = channels()
+    for number in range(3):
+        assert b.decode(a.encode("next", {"number": number})) == ("next", {"number": number})
+        assert a.decode(b.encode("segment", {"number": number})) == ("segment", {"number": number})
+    assert a._send_sequence == b._receive_sequence == 3
+
+
+@case("channel_replay_revokes_receiver")
+def channel_replay():
+    a, b = channels()
+    frame = a.encode("next", {})
+    b.decode(frame)
+    refused(P.ProtocolRefusal, lambda: b.decode(frame), "wire_sequence")
+    refused(P.ProtocolRefusal, lambda: b.encode("error", {}), "revoked")
+
+
+@case("channel_foreign_generation_refused")
+def channel_foreign():
+    a, b = channels()
+    foreign = P.GenerationChannel(dataclasses.replace(b.binding, generation_hex="5" * 64), b"x" * 32, "worker")
+    refused(P.ProtocolRefusal, lambda: foreign.decode(a.encode("next", {})), "authentication")
+
+
+@case("channel_tamper_refused_before_json")
+def channel_tamper():
+    a, b = channels()
+    frame = a.encode("next", {})
+    damaged = frame[:P.HEADER.size] + b"!" + frame[P.HEADER.size + 1:]
+    refused(P.ProtocolRefusal, lambda: b.decode(damaged), "authentication")
+    assert b._receive_sequence == 0 and b._revoked
+
+
+@case("channel_wrong_direction_refused")
+def channel_direction():
+    a, _ = channels()
+    refused(P.ProtocolRefusal, lambda: a.decode(a.encode("next", {})), "direction")
+
+
+@case("channel_frame_length_bound")
+def channel_length():
+    a, b = channels()
+    refused(P.ProtocolRefusal, lambda: b.decode(a.encode("next", {}) + b"x"), "length")
+
+
+@case("channel_authenticated_overflow_float_refused")
+def channel_float():
+    a, b = channels()
+    body = b'{"op":"segment","payload":{"value":1e999}}'
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "float_bound")
+    assert b._revoked
+
+
+@case("channel_authenticated_oversized_integer_refused")
+def channel_integer():
+    a, b = channels()
+    body = b'{"op":"segment","payload":{"value":18446744073709551616}}'
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "integer_bound")
+
+
+@case("channel_authenticated_string_bound")
+def channel_string():
+    a, b = channels()
+    body = b'{"op":"segment","payload":{"value":"' + b"x" * 65537 + b'"}}'
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "string_bound")
+
+
+@case("channel_authenticated_container_bound")
+def channel_container():
+    a, b = channels()
+    body = b'{"op":"segment","payload":{"value":[' + b"0," * 2048 + b"0]}}"
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "array_bound")
+
+
+@case("channel_authenticated_node_bound")
+def channel_nodes():
+    a, b = channels()
+    body = json.dumps({"op": "segment", "payload": {"v": [[0] * 2000 for _ in range(5)]}}, separators=(",", ":")).encode()
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)))
+    assert b._receive_sequence == 0 and b._revoked
+
+
+@case("channel_authenticated_duplicate_key_refused")
+def channel_duplicate():
+    a, b = channels()
+    body = b'{"op":"next","payload":{"x":1,"x":2}}'
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "duplicate")
+
+
+@case("channel_authenticated_depth_refused")
+def channel_depth():
+    a, b = channels()
+    body = b'{"op":"next","payload":{"x":' + b"[" * 11 + b"0" + b"]" * 11 + b"}}"
+    refused(P.ProtocolRefusal, lambda: b.decode(signed_body(a, body)), "depth")
+
+
+@case("channel_string_braces_do_not_count_as_depth")
+def channel_escaped():
+    a, b = channels()
+    value = '{["\\' * 30
+    assert b.decode(a.encode("segment", {"value": value})) == ("segment", {"value": value})
+
+
+@case("channel_outbound_nonpassive_refused")
+def channel_nonpassive():
+    a, _ = channels()
+    refused(P.ProtocolRefusal, lambda: a.encode("segment", {"x": object()}), "nonpassive")
+    assert a._send_sequence == 0
+
+
+@case("channel_sequence_budget_refused")
+def channel_budget():
+    a, _ = channels()
+    a._send_sequence = P.MAX_FRAMES
+    refused(P.ProtocolRefusal, lambda: a.encode("next", {}), "sequence_limit")
+
+
+@case("channel_reentrant_operation_refused")
+def channel_reentrant():
+    a, _ = channels()
+    with a._operation():
+        refused(P.ProtocolRefusal, lambda: a.encode("next", {}), "already_active")
+    assert a._send_sequence == 0
+    assert a.encode("next", {})
+
+
+@case("channel_explicit_revocation_blocks_both_directions")
+def channel_revoke():
+    a, b = channels()
+    frame = b.encode("done", {})
+    a.revoke()
+    refused(P.ProtocolRefusal, lambda: a.encode("cancel", {}), "revoked")
+    refused(P.ProtocolRefusal, lambda: a.decode(frame), "revoked")
+    assert a._key is None
+
+
+@case("private_bootstrap_packet_exact_bound_and_roundtrip")
+def bootstrap_packet():
+    a, _ = channels()
+    packet = P.encode_private_bootstrap(a.binding, b"x" * 32)
+    assert len(packet) == P.BOOTSTRAP.size == 176
+    assert P.decode_private_bootstrap(packet) == (a.binding, b"x" * 32)
+    refused(P.ProtocolRefusal, lambda: P.decode_private_bootstrap(packet + b"x"), "bound")
+    refused(P.ProtocolRefusal, lambda: P.decode_private_bootstrap(b"!" + packet[1:]), "magic")
+
+
+class FakeRegistry:
+    def __init__(self, permit, factory_type):
+        assert type(permit) is object
+        self.permit, self.factory_type, self.active = permit, factory_type, True
+        self.issued = []
+
+    def assert_active(self):
+        if not self.active:
+            raise P.ProtocolRefusal("registry_revoked")
+
+    def _issue_for_bootstrap(self, permit, factory, state_binding, recipe):
+        assert permit is self.permit and type(factory) is self.factory_type
+        self.assert_active()
+        value = object()
+        self.issued.append((factory, value))
+        return value
+
+    def revoke_generation(self, permit):
+        assert permit is self.permit
+        self.active = False
+
+
+class FakeFactory:
+    actions = {}
+    events = []
+
+    def __init__(self, fixed, tensor, runtime):
+        self.runtime = runtime
+        self.product = object()
+        self._act("construct")
+
+    def _act(self, name):
+        self.events.append(name)
+        action = self.actions.get(name)
+        if isinstance(action, BaseException):
+            raise action
+        if action:
+            action()
+
+    def _bind_model_capability(self, capability):
+        self.capability = capability
+        self._act("bind")
+
+    def build_strict_owned(self, state):
+        self._act("build")
+        return self.product
+
+    def release_product(self, product):
+        assert product is self.product
+        self._act("release")
+
+
+def boot(start=True):
+    FakeFactory.actions, FakeFactory.events = {}, []
+    a, b = channels()
+    worker = P.WorkerBootstrap(b, FakeRegistry, FakeFactory)
+    frame = a.encode("challenge", {"generation": a.binding.generation_hex, "namespace_sha256": a.binding.namespace_sha256})
+    assert a.decode(worker.accept_challenge(frame))[0] == "ready"
+    if start:
+        worker.accept_begin(a.encode("begin", {"manifest_sha256": a.binding.manifest_sha256}))
+    runtime = types.SimpleNamespace(_RUNTIME=worker.registry)
+    return a, worker, runtime
+
+
+def build(worker, runtime):
+    return worker.build_factory_product(object(), object(), runtime, object(), object(), "a" * 64)
+
+
+@case("worker_bootstrap_mints_distinct_local_identity")
+def worker_local():
+    a, worker, runtime = boot()
+    _, other, _ = boot()
+    assert type(worker._permit) is object and worker._permit is worker.registry.permit
+    assert worker._permit is not other._permit and worker._permit != a.binding.generation_hex
+    assert build(worker, runtime) == {"built": True}
+    assert FakeFactory.events == ["construct", "bind", "build"]
+    assert worker.release_factory_product() == {"retired_by_factory": True}
+
+
+@case("worker_factory_before_begin_refused")
+def worker_early():
+    _, worker, runtime = boot(False)
+    refused(P.ProtocolRefusal, lambda: build(worker, runtime), "not_started")
+    assert FakeFactory.events == []
+
+
+@case("worker_repeated_bootstrap_refused")
+def worker_repeat():
+    a, worker, _ = boot()
+    refused(P.ProtocolRefusal, lambda: worker.accept_challenge(a.encode("challenge", {})), "single_use")
+
+
+@case("worker_wrong_begin_revokes_registry")
+def worker_begin():
+    a, worker, _ = boot(False)
+    refused(P.ProtocolRefusal, lambda: worker.accept_begin(a.encode("begin", {"manifest_sha256": "f" * 64})), "binding")
+    assert worker._closed and not worker.registry.active
+
+
+@case("worker_absent_runtime_binding_refused_before_constructor")
+def worker_absent():
+    _, worker, _ = boot()
+    refused(P.ProtocolRefusal, lambda: build(worker, types.SimpleNamespace()), "registry_binding_required")
+    assert FakeFactory.events == [] and not worker._factory_attempted
+
+
+@case("worker_foreign_runtime_binding_refused_before_constructor")
+def worker_foreign():
+    _, worker, _ = boot()
+    refused(P.ProtocolRefusal, lambda: build(worker, types.SimpleNamespace(_RUNTIME=object())), "registry_binding_required")
+    assert FakeFactory.events == []
+
+
+@case("worker_runtime_binding_change_revokes_before_publication")
+def worker_binding_changed():
+    _, worker, runtime = boot()
+    FakeFactory.actions["build"] = lambda: setattr(runtime, "_RUNTIME", object())
+    refused(P.ProtocolRefusal, lambda: build(worker, runtime), "binding_changed")
+    assert worker._closed and not worker.registry.active
+
+
+@case("worker_factory_reentrant_entry_refused")
+def worker_serial():
+    _, worker, runtime = boot()
+    def nested():
+        refused(P.ProtocolRefusal, lambda: build(worker, runtime), "already_active")
+        refused(P.ProtocolRefusal, worker.release_factory_product, "already_active")
+    FakeFactory.actions.update({name: nested for name in ("construct", "bind", "build", "release")})
+    assert build(worker, runtime) == {"built": True}
+    worker.release_factory_product()
+    assert FakeFactory.events == ["construct", "bind", "build", "release"]
+
+
+@case("worker_factory_interruption_revokes_preserving_error")
+def worker_interrupt():
+    _, worker, runtime = boot()
+    error = KeyboardInterrupt("synthetic interruption")
+    FakeFactory.actions["build"] = error
+    assert refused(KeyboardInterrupt, lambda: build(worker, runtime)) is error
+    assert worker._closed and not worker.registry.active and not worker._factory_active
+
+
+@case("worker_revoke_during_build_refuses_publication")
+def worker_midclose():
+    _, worker, runtime = boot()
+    FakeFactory.actions["build"] = worker.close_preserving
+    refused(P.ProtocolRefusal, lambda: build(worker, runtime), "revoked")
+    assert worker._closed
+
+
+@case("worker_factory_single_attempt_and_retirement")
+def worker_single():
+    _, worker, runtime = boot()
+    build(worker, runtime)
+    refused(P.ProtocolRefusal, lambda: build(worker, runtime), "factory_used")
+    worker.release_factory_product()
+    refused(P.ProtocolRefusal, worker.release_factory_product, "absent")
+
+
+class Scalar:
+    def __init__(self, value=0):
+        self.value = value
+
+
+class MemoryBuffer:
+    def __init__(self, value, size=None):
+        self.raw = bytes(value) if type(value) is bytes else b"\0" * value
+        if size is not None:
+            assert size == len(self.raw)
+
+
+class MemoryFFI:
+    c_uint32 = Scalar
+    c_int64 = Scalar
+    create_string_buffer = MemoryBuffer
+
+    @staticmethod
+    def byref(value):
+        return value
+
+    @staticmethod
+    def get_last_error():
+        return 997
+
+
+class MemoryAPI:
+    def __init__(self, owner):
+        self.ffi, self.owner = MemoryFFI(), owner
+        self.actions = {}
+        self.pending_counts = {}
+        self.inbound = b""
+        self.outbound = b""
+
+    def structure(self, name):
+        assert name == "OVERLAPPED"
+        return types.SimpleNamespace(event=None)
+
+    def checked(self, name, *args):
+        result = self.call(name, *args)
+        if not result:
+            raise W.PipeRefusal("fake_api_failure_" + name)
+        return result
+
+    def call(self, name, *args):
+        self.owner.events.append(name)
+        action = self.actions.get(name)
+        if isinstance(action, BaseException):
+            raise action
+        if callable(action):
+            return action(*args)
+        if action is not None:
+            return action
+        if name in ("CreateEventW", "CreateNamedPipeW", "CreateFileW"):
+            self.owner.next_value += 1
+            return self.owner.next_value
+        if name == "ConnectNamedPipe":
+            self.pending_counts[id(args[1])] = 0
+            return 0
+        if name == "WaitForSingleObject":
+            return 0
+        if name == "GetOverlappedResult":
+            args[2].value = self.pending_counts[id(args[1])]
+            return 1
+        if name in ("GetHandleInformation", "SetHandleInformation", "CancelIoEx"):
+            return 1
+        if name == "GetFileType":
+            return 3
+        if name == "SetFilePointerEx":
+            self.owner.positions[args[0]] = 0
+            args[2].value = 0
+            return 1
+        if name == "WriteFile":
+            handle, buffer, size, count, overlap = args
+            self.outbound += buffer.raw[:size]
+            self.pending_counts[id(overlap)] = size
+            return 1
+        if name == "ReadFile":
+            handle, buffer, size, count, overlap = args
+            if overlap is not None:
+                value, self.inbound = self.inbound[:size], self.inbound[size:]
+                self.pending_counts[id(overlap)] = len(value)
+            else:
+                at = self.owner.positions[handle]
+                value = self.owner.contents[handle][at:at + size]
+                self.owner.positions[handle] += len(value)
+                count.value = len(value)
+            buffer.raw = value + b"\0" * (size - len(value))
+            return 1
+        raise AssertionError("Unexpected fake API call: " + name)
+
+
+class MemoryPrimitives:
+    def __init__(self):
+        self.handles, self.read_sets, self.workers, self.events = [], [], [], []
+        self.contents, self.positions, self.identities = {}, {}, {}
+        self.next_value = 100
+        self.api = MemoryAPI(self)
+
+    def _retain(self, value, kind):
+        assert type(value) is int and value > 0
+        handle = K.HandleRecord(value, kind)
+        self.handles.append(handle)
+        return handle
+
+    def _owned(self, handle):
+        assert any(item is handle for item in self.handles) and not handle.closed and not handle.unconfirmed
+        return handle.value
+
+    def _close(self, handle):
+        self._owned(handle)
+        self.events.append("close-" + handle.kind)
+        handle.closed = True
+
+    def identity(self, handle):
+        self._owned(handle)
+        return self.identities[handle.value]
+
+    def create_suspended_worker(self, read_set, executable, arguments, cwd, environment, **options):
+        assert options == {"inherited_control_handles": (self.control,), "include_control_handle_argument": True}
+        worker = K.WorkerRecord(read_set=read_set, assigned=True, creation_time=123)
+        self.workers.append(worker)
+        read_set.worker_reserved = True
+        return worker
+
+
+def namespace(five=True):
+    primitives = MemoryPrimitives()
+    read_set = K.ReadSet()
+    primitives.read_sets.append(read_set)
+    assets = []
+    for index, name in enumerate(sorted(N.FIVE if five else N.FOUR)):
+        content = ("generated:" + name).encode()
+        handle = primitives._retain(index + 1, "read-member")
+        primitives.contents[handle.value] = content
+        primitives.identities[handle.value] = K.FileIdentity("synthetic:" + name, 1, bytes([index]) * 16, len(content), 1, False)
+        read_set.members.append(handle)
+        read_set.identities.append(primitives.identities[handle.value])
+        assets.append(N.BufferAsset(name, len(content), hashlib.sha256(content).hexdigest(), handle))
+    return primitives, read_set, tuple(assets)
+
+
+def materialize(rig):
+    p, r, assets = rig
+    return N.PinnedBufferNamespace(p, r, assets, sum(a.size for a in assets)).materialize()
+
+
+@case("namespace_exact_bytes_and_fresh_loader_dictionary")
+def namespace_success():
+    rig = namespace()
+    value = materialize(rig)
+    for asset in rig[2]:
+        assert value.lookup(asset.name) == rig[0].contents[asset.handle.value]
+    first = value.proposed_loader_arguments()
+    assert first["local_files_only"] is True and set(first["files"]) == N.FIVE
+    first["files"].pop("tokenizer.json")
+    assert "tokenizer.json" in value.proposed_loader_arguments()["files"]
+    def mutate_membership():
+        value._buffers["x"] = b"x"
+    refused(TypeError, mutate_membership)
+    assert type(value.lookup("model.bin")) is bytes
+
+
+@case("namespace_unknown_child_cannot_expand_map")
+def namespace_unknown():
+    rig = namespace()
+    value = materialize(rig)
+    rig[0].contents[999] = b"unlisted ambient child"
+    refused(N.NamespaceRefusal, lambda: value.lookup("ambient.json"), "unknown")
+    assert not rig[1].complete_namespace_protection
+
+
+@case("namespace_wrong_digest_retains_quarantine")
+def namespace_digest():
+    p, r, assets = namespace()
+    assets = (dataclasses.replace(assets[0], sha256="0" * 64),) + assets[1:]
+    refused(N.NamespaceRefusal, lambda: materialize((p, r, assets)), "digest")
+    assert r.unconfirmed and not any(h.closed for h in r.members)
+
+
+@case("namespace_short_file_refused")
+def namespace_short():
+    rig = namespace()
+    rig[0].contents[rig[2][0].handle.value] = b"x"
+    refused(N.NamespaceRefusal, lambda: materialize(rig), "digest")
+    assert rig[1].unconfirmed
+
+
+@case("namespace_growth_one_extra_byte_refused")
+def namespace_grows():
+    rig = namespace()
+    rig[0].contents[rig[2][0].handle.value] += b"x"
+    refused(N.NamespaceRefusal, lambda: materialize(rig), "grew")
+    assert rig[1].unconfirmed
+
+
+@case("namespace_hardlink_identity_refused_before_read")
+def namespace_links():
+    rig = namespace()
+    key = rig[2][0].handle.value
+    rig[0].identities[key] = dataclasses.replace(rig[0].identities[key], links=2)
+    refused(N.NamespaceRefusal, lambda: materialize(rig), "identity")
+    assert "ReadFile" not in rig[0].events
+
+
+@case("namespace_payload_budget_refused_before_read")
+def namespace_budget():
+    p, r, assets = namespace()
+    refused(N.NamespaceRefusal, lambda: N.PinnedBufferNamespace(p, r, assets, sum(a.size for a in assets) - 1), "payload_budget")
+    assert p.events == []
+
+
+@case("namespace_four_file_route_remains_explicit")
+def namespace_four():
+    value = materialize(namespace(False))
+    assert value.lookup("model.bin")
+    refused(N.NamespaceRefusal, value.proposed_loader_arguments, "four_file")
+
+
+@case("namespace_released_or_quarantined_refuses_retained_view")
+def namespace_lifetime():
+    rig = namespace()
+    value = materialize(rig)
+    rig[1].released = True
+    refused(N.NamespaceRefusal, lambda: value.lookup("model.bin"), "not_live")
+    refused(N.NamespaceRefusal, value.proposed_loader_arguments, "not_live")
+
+
+@case("namespace_interruption_preserves_exact_owner")
+def namespace_interrupt():
+    rig = namespace()
+    error = KeyboardInterrupt("generated read interrupted")
+    rig[0].api.actions["ReadFile"] = error
+    assert refused(KeyboardInterrupt, lambda: materialize(rig)) is error
+    assert rig[1].unconfirmed and not any(h.closed for h in rig[1].members)
+
+
+@case("native_loader_gate_assignment_cannot_activate")
+def namespace_closed():
+    value = materialize(namespace())
+    before = N.REAL_NATIVE_FILES_READER_BINDING
+    N.REAL_NATIVE_FILES_READER_BINDING = object()
+    try:
+        refused(N.NamespaceRefusal, value.activate_real_loader, "not_admitted")
+        refused(N.NamespaceRefusal, N.acquire_real_read_namespace, "unproved")
+    finally:
+        N.REAL_NATIVE_FILES_READER_BINDING = before
+
+
+def pipe():
+    p = MemoryPrimitives()
+    control = W.PrivatePipeController(p, lambda: 10.0)
+    pair = control.create_pair(b"n" * 32, 15.0)
+    return p, control, pair
+
+
+@case("pipe_pair_connect_retires_completed_event")
+def pipe_connect():
+    p, control, pair = pipe()
+    assert pair.operations == [] and not pair.unconfirmed
+    assert [h.kind for h in p.handles if h.closed] == ["ipc-event"]
+    assert not pair.server.closed and not pair.client.closed
+
+
+@case("pipe_frames_roundtrip_and_bound_active_buffers")
+def pipe_frames():
+    p, control, pair = pipe()
+    a, _ = channels()
+    frame = a.encode("segment", {"value": "x" * 40000})
+    control.write_bytes(pair, frame, 15.0)
+    assert p.api.outbound == frame and pair.operations == []
+    p.api.inbound = frame
+    assert control.read_frame(pair, 15.0) == frame
+    assert pair.operations == [] and not pair.active
+
+
+@case("pipe_frame_reentrant_entry_refused")
+def pipe_reentrant():
+    _, control, pair = pipe()
+    with control._frame_operation(pair):
+        refused(W.PipeRefusal, lambda: control.write_bytes(pair, b"x", 15.0), "unavailable")
+    assert not pair.active
+
+
+@case("pipe_declared_length_refused_before_body_read")
+def pipe_length():
+    p, control, pair = pipe()
+    p.api.inbound = P.HEADER.pack(P.MAGIC, 0, 0, P.MAX_BODY + 1) + b"unread"
+    refused(W.PipeRefusal, lambda: control.read_frame(pair, 15.0), "declared_length")
+    assert p.api.inbound == b"unread" and pair.unconfirmed
+
+
+@case("pipe_timeout_cancellation_unknown_retains_exact_buffer")
+def pipe_timeout():
+    p, control, pair = pipe()
+    p.api.actions["WaitForSingleObject"] = 258
+    refused(W.PipeRefusal, lambda: control.write_bytes(pair, b"generated", 15.0), "completion")
+    assert pair.unconfirmed and len(pair.operations) == 1
+    operation = pair.operations[0]
+    assert operation.buffer.raw == b"generated" and not operation.event.closed
+    assert operation.cancellation_attempted and not operation.complete
+    assert p.events.count("CancelIoEx") == 1
+    refused(W.PipeRefusal, lambda: control.retire_endpoint(pair), "unavailable")
+
+
+@case("pipe_interruption_preserves_original_and_owners")
+def pipe_interrupt():
+    p, control, pair = pipe()
+    error = KeyboardInterrupt("generated pipe interruption")
+    p.api.actions["WriteFile"] = error
+    p.api.actions["CancelIoEx"] = 0
+    assert refused(KeyboardInterrupt, lambda: control.write_bytes(pair, b"generated", 15.0)) is error
+    assert pair.unconfirmed and len(pair.operations) == 1
+
+
+@case("pipe_child_endpoint_mapping_and_parent_client_close")
+def pipe_attach():
+    p, control, pair = pipe()
+    read_set = K.ReadSet()
+    p.read_sets.append(read_set)
+    p.control = pair.client
+    worker = control.attach_to_suspended_worker(pair, read_set, "synthetic-exe", (), "synthetic-cwd", {})
+    assert pair.worker is worker and worker.read_set is read_set and pair.client.closed
+    assert not worker.resumed and not pair.server.closed
+    refused(W.PipeRefusal, lambda: control.retire_endpoint(pair), "quiescence")
+    worker.quiescent = True
+    control.retire_endpoint(pair)
+    assert pair.closed and pair.server.closed
+
+
+@case("pipe_worker_adoption_clears_further_inheritance")
+def pipe_adopt():
+    p = MemoryPrimitives()
+    control = W.PrivatePipeController(p, lambda: 10.0)
+    pair = control.adopt_inherited_client(42)
+    assert pair.role == "worker" and pair.server.value == 42
+    assert p.events == ["GetFileType", "GetHandleInformation", "SetHandleInformation", "GetHandleInformation"]
+    control.retire_endpoint(pair)
+    assert pair.closed
+
+
+@case("pipe_worker_nonpipe_adoption_refused")
+def pipe_bad_adopt():
+    p = MemoryPrimitives()
+    p.api.actions["GetFileType"] = 1
+    control = W.PrivatePipeController(p, lambda: 10.0)
+    refused(W.PipeRefusal, lambda: control.adopt_inherited_client(42), "not_pipe")
+    assert control.pairs[0].unconfirmed and not control.pairs[0].server.closed
+
+
+@case("pipe_deadline_refused_before_allocation")
+def pipe_deadline():
+    p = MemoryPrimitives()
+    control = W.PrivatePipeController(p, lambda: 10.0)
+    refused(W.PipeRefusal, lambda: control.create_pair(b"n" * 32, 100.0), "deadline")
+    assert p.events == [] and control.pairs == []
+
+
+@case("pipe_deadline_after_completed_chunk_quarantines_frame")
+def pipe_partial_deadline():
+    p, control, pair = pipe()
+    times = iter((10.0, 10.0, 16.0))
+    control.clock = lambda: next(times)
+    refused(W.PipeRefusal, lambda: control.write_bytes(pair, b"x" * 17000, 15.0), "deadline")
+    assert len(p.api.outbound) == W.IO_CHUNK and pair.operations == []
+    assert pair.unconfirmed and not pair.active
+    refused(W.PipeRefusal, lambda: control.write_bytes(pair, b"later", 15.0), "unavailable")
+
+
+@case("pipe_overlapped_setup_failure_closes_recorded_event")
+def pipe_partial_event():
+    p, control, pair = pipe()
+    error = KeyboardInterrupt("synthetic OVERLAPPED allocation interruption")
+    def interrupted(name):
+        raise error
+    p.api.structure = interrupted
+    assert refused(KeyboardInterrupt, lambda: control.write_bytes(pair, b"x", 15.0)) is error
+    assert pair.unconfirmed and pair.operations == []
+    assert all(h.closed for h in p.handles if h.kind == "ipc-event")
+    assert not pair.server.closed and not pair.client.closed
+
+
+@case("pipe_quarantine_stops_exact_worker_without_release_credit")
+def pipe_forced_stop():
+    p, control, pair = pipe()
+    read_set = K.ReadSet()
+    worker = K.WorkerRecord(read_set=read_set, assigned=True, creation_time=123)
+    p.workers.append(worker)
+    pair.worker, pair.read_set = worker, read_set
+    stopped = []
+    def stop(exact, timeout):
+        assert exact is worker and timeout == 5000
+        stopped.append(exact)
+        return True
+    p._stop_partial_worker = stop
+    p.api.actions["WaitForSingleObject"] = 258
+    refused(W.PipeRefusal, lambda: control.write_bytes(pair, b"generated", 15.0), "completion")
+    assert stopped == [worker] and pair.forced_stop_attempted and pair.forced_process_stop_observed
+    assert pair.unconfirmed and worker.unconfirmed and read_set.unconfirmed and not worker.quiescent
+    assert len(pair.operations) == 1 and not pair.operations[0].event.closed
+    refused(W.PipeRefusal, lambda: control.retire_endpoint(pair))

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "7b4907",
+  "wall_time_seconds": 0.1842915,
+  "exit_code": 0,
+  "original_token_count": 139,
+  "output": "{\"verified\": true, \"payload_count\": 117, \"logical_members\": 184, \"preserved_failed_native_attempts\": 1, \"qualified_generated_native_observations\": 1, \"author_synthetic\": [67, 0, 0], \"independent_synthetic\": [67, 0, 0], \"complete_case_rows_equal\": true, \"logical_quarantine_preserved\": true, \"tests_or_native_runs_executed_by_verifier\": 0, \"native_outcomes\": [{\"run\": \"01\", \"actual_exit\": 1, \"qualified\": false}, {\"run\": \"02\", \"actual_exit\": 0, \"qualified\": true}], \"manifest_sha256\": \"25ff14f8ee5b75a65caa3d711f8f22ee171dabd510454441a5b39f26797c895d\"}\r\n"
+}

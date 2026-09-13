@@ -1,0 +1,11 @@
+{
+  "schema": "uoink.documentary-copy-verification.v1",
+  "physical_payloads_checked": 116,
+  "logical_members": 184,
+  "distinct_objects": 108,
+  "logical_bytes": 1780288,
+  "exact_file_set": true,
+  "exact_copy_bytes": true,
+  "source_inventory_sha256": "596da114af68814af63a4ef9834d5c5c2badedde1765533529ada499b804bbef",
+  "tests_or_native_runs_executed": 0
+}

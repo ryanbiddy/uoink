@@ -1,0 +1,7 @@
+# Protect retained I/O at either endpoint
+
+Root reviewed the outer finalizer and identified the same lifetime condition on the child: its `read_frame` or `write_bytes` can fail with retained OVERLAPPED storage before the expected controller termination. The controller-only finalizer would not protect that case. The unexecuted draft, source map, false admission template and protocol are preserved under `before/pre-both-endpoints-*`.
+
+The only executable change removes the `ROLE == "controller"` restriction from the final guard. Either fixed endpoint now calls its retained `PROCESS_ABORT(1)` if any of its own pipe operations remain. This targets only the current Python process, never another PID or process handle. No kernel symbol or model/runtime scope is added.
+
+The controller's reporting label remains controller-specific. A child failure may leave only its pre-stall snapshot or the available outer evidence; it cannot be interpreted as a final child success or durable failure receipt. No attempt has run, and this change grants no execution admission.
