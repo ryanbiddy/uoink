@@ -1,0 +1,414 @@
+RUN PREFLIGHT — no worker has started yet
+Project:  uoink-library
+Mode:     work (isolated worktrees)
+Strategy: parallel
+Lead:     gemini
+Workers:
+  gemini  gemini-3.8-flash-high @ high effort
+Goal:
+Open docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-BRIEF-2026-09-13.md first and follow it exactly. Complete all three text-only source review groups and write the named report early. No subagents; no shell/tests/model/artifact access or network research. No live index or port 5179, no paid API, no commits/pushes. Source review only; website and marketing remain paused.
+
+APPROVED — starting workers now. Live events follow.
+
+system  status  parallel work run started with gemini
+system  preflight gemini=gemini-3.8-flash-high@high
+system  preflight frozen-base=0cc636b89e126c2213f02a5111bd9ec02081f7ec · verified-inputs=7
+gemini  status  parallel: preparing
+gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    grep_search
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    find_by_name
+gemini  tool    find_by_name
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    write_to_file
+gemini  tool    write_to_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  tool    view_file
+gemini  message # Gemini Runtime
+gemini  message  Orchestration Council R
+gemini  message eview I have completed the text-only source rev
+gemini  message iew for all three runtime orchestration groups i
+gemini  message n accordance
+gemini  message  with [GEMINI-RUNTIME-OR
+gemini  message CHESTRATION-COUNCIL-BRIEF-2026-09-13
+gemini  message .md](file:///C:/Users/hello/AppData/Local/AgentC
+gemini  message ontrolRoom/w
+gemini  message orktrees/uoink-library/0
+gemini  message 28ec7d7-34f/gemini/docs/library/GEMINI-RUNTIME-O
+gemini  message RCHESTRATION
+gemini  message -COUNCIL-BRIEF-2026-09-13.md) and written the fu
+gemini  message ll evaluatio
+gemini  message n report to [GEMINI-RUNTIME-ORCHESTRATION-COUNCI
+gemini  message L-REVIEW-202
+gemini  message 6-09-13.md](file:///C:/U
+gemini  message sers/hello/AppData/Local
+gemini  message /AgentControlRoom/worktrees/uoink-li
+gemini  message brary/028ec7d7-34f/gemin
+gemini  message i/docs/libra
+gemini  message ry/GEMINI-RUNTIME-ORCHES
+gemini  message TRATION-COUNCIL-REVIEW-2
+gemini  message 026-09-13.md). No shell commands, t
+gemini  message ests, subagents, or netw
+gemini  message ork tools were executed.
+gemini  message  The live Uoink index, port 5179, an
+gemini  message d real artifact binaries
+gemini  message  were not accessed. --- ### Summar
+gemini  message y of Council Verdicts 1
+gemini  message . **ASR Session Orchestration**: **A
+gemini  message ccept for its narrow scope** - **Source**: [`
+gemini  message asr_loading_adapter.py`](file:///C:/
+gemini  message Users/hello/AppData/Loca
+gemini  message l/AgentControlRoom/worktrees/uoink-library/028ec
+gemini  message 7d7-34f/gemini/docs/library/proof/as
+gemini  message r-owned-adapter-2026-09-13/author-history209/asr
+gemini  message -author03/ad
+gemini  message apter-preflight03/asr_lo
+gemini  message ading_adapter.py) (SHA-256: `0329434
+gemini  message 4c0806b98b6d861c17371c10
+gemini  message 38c76dc0b874b9f756bf0341
+gemini  message 87e849900`) 
+gemini  message  - **Contracts**: [`PO
+gemini  message RT-CONTRACTS.md`](file:///C:/Users/h
+gemini  message ello/AppData/Local/AgentControlRoom/
+gemini  message worktrees/uoink-library/
+gemini  message 028ec7d7-34f/gemini/docs/library/proof/asr-owned
+gemini  message -adapter-2026-09-13/auth
+gemini  message or-history209/asr-author03/adapter-p
+gemini  message reflight03/PORT-CONTRACT
+gemini  message S.md), [`CALL-SITE-SPLICES.md`](file
+gemini  message :///C:/Users/hello/AppDa
+gemini  message ta/Local/Age
+gemini  message ntControlRoom/worktrees/uoink-library/028ec7d7-3
+gemini  message 4f/gemini/docs/library/proof/asr-owned-adapter-2
+gemini  message 026-09-13/au
+gemini  message thor-history209/asr-author03/adapter-preflight03
+gemini  message /CALL-SITE-S
+gemini  message PLICES.md) - **Verdict Reference**: [ASTRA-AS
+gemini  message R-ADAPTER-VE
+gemini  message RDICT-2026-09-13.md](file:///C:/Users/hello/AppD
+gemini  message ata/Local/AgentControlRo
+gemini  message om/worktrees
+gemini  message /uoink-library/028ec7d7-
+gemini  message 34f/gemini/docs/library/ASTRA-ASR-AD
+gemini  message APTER-VERDICT-2026-
+gemini  message 09-13.md) - **Assessment**: Initi
+gemini  message al admission, explicit s
+gemini  message ingle-consent download handling (`co
+gemini  message nsent_given=True`), fres
+gemini  message h re-admissi
+gemini  message on under a renewed lease, constructor binding, l
+gemini  message azy generator consumptio
+gemini  message n inside con
+gemini  message text blocks, and lease quarantine on incomplete 
+gemini  message cleanup (`Na
+gemini  message tiveCleanupUnconfirmed`) operate within stated t
+gemini  message rusted-port assumptions.
+gemini  message  The histori
+gemini  message cal failed `native_exit=
+gemini  message null` receip
+gemini  message t remains preserved in t
+gemini  message he archive; 
+gemini  message new passing runs qualify the repaired capture bl
+gemini  message ock. Real services (`SNAPSHOT_LIFECYCLE`, `ACQUI
+gemini  message SITION_SERVI
+gemini  message CE`, `RUNTIME_FACTORY`) and 20 production model 
+gemini  message hashes remai
+gemini  message n absent. 2. **Plain-State Bridge**: **Accept f
+gemini  message or its narro
+gemini  message w scope** - **Source**: [`b3ff126f29942e7daaf
+gemini  message 51e463ca9f35c4c423b6c638
+gemini  message dbc38e5246946a8b7a6b2.txt`](file:///
+gemini  message C:/Users/hello/AppData/L
+gemini  message ocal/AgentCo
+gemini  message ntrolRoom/worktrees/uoin
+gemini  message k-library/028ec7d7-34f/gemini/docs/library/proof
+gemini  message /vad-native-state-bridge-2026-09-13/
+gemini  message objects/b3ff126f29942e7d
+gemini  message aaf51e463ca9f35c4c423b6c638dbc38e524
+gemini  message 6946a8b7a6b2.txt) (SHA-2
+gemini  message 56: `b3ff126
+gemini  message f29942e7daaf51e463ca9f35
+gemini  message c4c423b6c638dbc38e524694
+gemini  message 6a8b7a6b2`) - **Port Contract**:
+gemini  message  [`38a51bb9708302d2a29bc
+gemini  message 8d63bb6082934ee6b07abf72
+gemini  message 0d0052b8cb89
+gemini  message 7f82070.txt`](file:///C:/Users/hello/AppData/Loc
+gemini  message al/AgentControlRoom/work
+gemini  message trees/uoink-
+gemini  message library/028ec7d7-34f/gemini/docs/library/proof/v
+gemini  message ad-native-st
+gemini  message ate-bridge-2026-09-13/objects/38a51bb9708302d2a2
+gemini  message 9bc8d63bb6082934ee6b07abf720d0052b8cb897f
+gemini  message 82070.txt) - **Verdict Reference**:
+gemini  message  [ASTRA-VAD-STATE-BRIDGE-VERDICT-202
+gemini  message 6-09-13.md](file:///C:/Users/hello/AppData/Local
+gemini  message /AgentContro
+gemini  message lRoom/worktrees/uoink-li
+gemini  message brary/028ec7d7-3
+gemini  message 4f/gemini/docs/library/A
+gemini  message STRA-VAD-STATE-BRIDGE-VE
+gemini  message RDICT-2
+gemini  message 026-09-13.md) - **Assessment**: P
+gemini  message re-allocatio
+gemini  message n verification is enforc
+gemini  message ed
+gemini  message  before invoking any tensor port. Fi
+gemini  message xed 54-tensor schema and
+gemini  message  dense 5,891,996-byte bounds are str
+gemini  message ictly checked. Storage f
+gemini  message acts, pairwise non-overl
+gemini  message apping addre
+gemini  message ss checks, bounded 64 Ki
+gemini  message B chunk copies with immediate bitwis
+gemini  message e readback, and pre-factory revalida
+gemini  message tion are confirmed. Temp
+gemini  message orary tensors are releas
+gemini  message ed in reverse allocation order before product ha
+gemini  message ndoff, and f
+gemini  message ailure paths cleanly dispose of part
+gemini  message ial factory products und
+gemini  message er cooperative deadlines. Real PyTorch allocatio
+gemini  message ns and nativ
+gemini  message e C++ pointer layout rem
+gemini  message ain outside this boundary. 3. **Dormant Static 
+gemini  message Inspection Invocation**: **Accept fo
+gemini  message r its narrow scope** - **Sources**: - La
+gemini  message uncher: [`la
+gemini  message unch_d1.py`](file:///C:/
+gemini  message Users/hello/AppData/Local/AgentControlRoom/workt
+gemini  message rees/uoink-l
+gemini  message ibrary/028ec7d7-34f/gemi
+gemini  message ni/docs/library/proof/vad-d1-wrapper
+gemini  message -2026-09-13/preparation/
+gemini  message before/launch_d1.py) (SH
+gemini  message A-256: `bf865aff26515aa54e09ae046e53
+gemini  message e6c9fb5efb688ccec676b170e8313af851e4`) - Ch
+gemini  message ild: [`d1_ch
+gemini  message ild.py`](file:///C:/User
+gemini  message s/hello/AppData/Local/Ag
+gemini  message entControlRoom/worktrees/uoink-libra
+gemini  message ry/028ec7d7-34f/gemini/docs/library/
+gemini  message proof/vad-d1-wrapper-2026-09-13/prep
+gemini  message aration/before/d1_child.py) (SHA-256
+gemini  message : `577b1a22e
+gemini  message be5490ba28f5a56a46e5b3d3f5b85e077de3c1cafad6205a
+gemini  message eb29a90`) 
+gemini  message  - Repaired Wrapper: [`run-root.repaired.ps1`]
+gemini  message (file:///C:/Users/hello/
+gemini  message AppData/Loca
+gemini  message l/AgentControlRoom/worktrees/uoink-library/028ec
+gemini  message 7d7-34f/gemi
+gemini  message ni/docs/library/proof/vad-d1-wrapper-2026-09-13/
+gemini  message preparation/
+gemini  message run-root.repaired.ps1) (SHA-256: `11b56a5686d972
+gemini  message c4ed212de21f2f2a23b0062d
+gemini  message a616a762701bda3434831cdb63`
+gemini  message ) - **Verdict Referen
+gemini  message ce**:
+gemini  message  [ASTRA-D1-INVOCATION-RE
+gemini  message VIEW-2026-09-13.md](file
+gemini  message :///C:/Users/hello/AppData/Local/Age
+gemini  message ntControlRoo
+gemini  message m/worktrees/uoink-library/028ec7d7-34f/gemini/do
+gemini  message cs/library/A
+gemini  message STRA-D1-INVOCATION-REVIE
+gemini  message W-2026-09-13.md) - **Assessment**: Closed dec
+gemini  message ision pins (
+gemini  message `OWNER_DEC
+gemini  message ISION_SHA256 = None`) refuse uncondi
+gemini  message tionally with exit 3 pri
+gemini  message or to path i
+gemini  message nspection or helper launching. Isola
+gemini  message ted interpreter flags (`
+gemini  message -I -S -B`), path traversal checks, a
+gemini  message udit hooks (max 1 artifa
+gemini  message ct read, max 1 exclusive
+gemini  message  receipt write, conversi
+gemini  message on traps), s
+gemini  message ingle-child lifecycle, a
+gemini  message nd 60s parent execution bounds are m
+gemini  message aintained. The repaired 
+gemini  message PowerShell w
+gemini  message rapper disables native-error promotion (`$PSNati
+gemini  message veCommandUseErrorActionP
+gemini  message reference = $false`) and
+gemini  message  flushes the raw child exit code thr
+gemini  message ough an unbu
+gemini  message ffered .NET `FileStream`
+gemini  message  before reading logs. Re
+gemini  message al checkpoint weights were not acces
+gemini  message sed. Fixed host paths (`
+gemini  message PYTHON`, `CH
+gemini  message ECKOUT`, `FORBIDDEN`) remain configuration const
+gemini  message raints for a
+gemini  message ny future activation. -
+gemini  message -- ### Compact Handoff 
+gemini  message  - **Status**: Complete. All three t
+gemini  message ext-only source review g
+gemini  message roups reviewed; council review repor
+gemini  message t committed to disk in d
+gemini  message edicated worktree. - **W
+gemini  message ork Complete
+gemini  message d**: - Reviewed ASR lo
+gemini  message ading adapte
+gemini  message r orchestration, port contracts, and call-site s
+gemini  message plices. - 
+gemini  message Reviewed VAD plain-state bridge obje
+gemini  message ct, port contracts, and fake-allocat
+gemini  message ion boundaries. - Reviewed dormant
+gemini  message  D1 static inspection la
+gemini  message uncher, chil
+gemini  message d audit hooks, and repai
+gemini  message red PowerShe
+gemini  message ll execution wrapper. - Authored [docs/library
+gemini  message /GEMINI-RUNTIME-ORCHESTR
+gemini  message ATION-COUNCI
+gemini  message L-REVIEW-2026-09-13.md](
+gemini  message file:///C:/Users/hello/AppData/Local
+gemini  message /AgentControlRoom/worktr
+gemini  message ees/uoink-library/028ec7d7-34f/gemin
+gemini  message i/docs/library/GEMINI-RU
+gemini  message NTIME-ORCHESTRATION-COUN
+gemini  message CIL-REVIEW-2026-09-13.md
+gemini  message ). - **Evidence**: - Independent a
+gemini  message uthor and Astra test run
+gemini  message s: 58 ASR adapter cases passed, 61 V
+gemini  message AD bridge cases passed, and 12 D1 wr
+gemini  message apper cases (plus 4 cont
+gemini  message rols) passed with zero n
+gemini  message ative/outer 
+gemini  message failures. - Verified u
+gemini  message nconditional refusal on all dormant/unconfigured
+gemini  message  entry point
+gemini  message s (`RELEASE_AUTHORITY=No
+gemini  message ne`, `REAL_APPROVAL=None
+gemini  message `, `OWNER_DECISION_SHA256=None`, `bu
+gemini  message ild_real_vad()` uncondit
+gemini  message ional except
+gemini  message ion). - **Files Changed**: - `docs
+gemini  message /library/GEMINI-RUNTIME-
+gemini  message ORCHESTRATION-COUNCIL-RE
+gemini  message VIEW-2026-09
+gemini  message -13.md` (created) - **Op
+gemini  message en Questions**: 1. *Owned Runtime 
+gemini  message & Native Worker Protocol
+gemini  message *: When will the concrete out-of-pro
+gemini  message cess runtime worker and 
+gemini  message Windows snapshot handle 
+gemini  message exclusion be defined to 
+gemini  message prevent TOCTOU file tampering during native CTra
+gemini  message nslate2/PyTorch loading? 2. *Real ASR Model Manifest*: When will the 20 missing asset digests and the approved VAD model artifact be formally qualified to enable non-None `RELEASE_
+gemini  usage   208150 input / 37676 output / 24250 thinking tokens
+gemini  status  parallel: completed
+
+Run completed: 028ec7d7-34ff-44d6-af77-366c7294709c
+gemini: # Gemini Runtime Orchestration Council Review
+
+I have completed the text-only source review for all three runtime orchestration groups in accordance with [GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-BRIEF-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-BRIEF-2026-09-13.md) and written the full evaluation report to [GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-REVIEW-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-REVIEW-2026-09-13.md).
+
+No shell commands, tests, subagents, or network tools were executed. The live Uoink index, port 5179, and real artifact binaries were not accessed.
+
+---
+
+### Summary of Council Verdicts
+
+1. **ASR Session Orchestration**: **Accept for its narrow scope**
+   - **Source**: [`asr_loading_adapter.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/asr-owned-adapter-2026-09-13/author-history209/asr-author03/adapter-preflight03/asr_loading_adapter.py) (SHA-256: `03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900`)
+   - **Contracts**: [`PORT-CONTRACTS.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/asr-owned-adapter-2026-09-13/author-history209/asr-author03/adapter-preflight03/PORT-CONTRACTS.md), [`CALL-SITE-SPLICES.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/asr-owned-adapter-2026-09-13/author-history209/asr-author03/adapter-preflight03/CALL-SITE-SPLICES.md)
+   - **Verdict Reference**: [ASTRA-ASR-ADAPTER-VERDICT-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/ASTRA-ASR-ADAPTER-VERDICT-2026-09-13.md)
+   - **Assessment**: Initial admission, explicit single-consent download handling (`consent_given=True`), fresh re-admission under a renewed lease, constructor binding, lazy generator consumption inside context blocks, and lease quarantine on incomplete cleanup (`NativeCleanupUnconfirmed`) operate within stated trusted-port assumptions. The historical failed `native_exit=null` receipt remains preserved in the archive; new passing runs qualify the repaired capture block. Real services (`SNAPSHOT_LIFECYCLE`, `ACQUISITION_SERVICE`, `RUNTIME_FACTORY`) and 20 production model hashes remain absent.
+
+2. **Plain-State Bridge**: **Accept for its narrow scope**
+   - **Source**: [`b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/vad-native-state-bridge-2026-09-13/objects/b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2.txt) (SHA-256: `b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2`)
+   - **Port Contract**: [`38a51bb9708302d2a29bc8d63bb6082934ee6b07abf720d0052b8cb897f82070.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/vad-native-state-bridge-2026-09-13/objects/38a51bb9708302d2a29bc8d63bb6082934ee6b07abf720d0052b8cb897f82070.txt)
+   - **Verdict Reference**: [ASTRA-VAD-STATE-BRIDGE-VERDICT-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/ASTRA-VAD-STATE-BRIDGE-VERDICT-2026-09-13.md)
+   - **Assessment**: Pre-allocation verification is enforced before invoking any tensor port. Fixed 54-tensor schema and dense 5,891,996-byte bounds are strictly checked. Storage facts, pairwise non-overlapping address checks, bounded 64 KiB chunk copies with immediate bitwise readback, and pre-factory revalidation are confirmed. Temporary tensors are released in reverse allocation order before product handoff, and failure paths cleanly dispose of partial factory products under cooperative deadlines. Real PyTorch allocations and native C++ pointer layout remain outside this boundary.
+
+3. **Dormant Static Inspection Invocation**: **Accept for its narrow scope**
+   - **Sources**:
+     - Launcher: [`launch_d1.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/vad-d1-wrapper-2026-09-13/preparation/before/launch_d1.py) (SHA-256: `bf865aff26515aa54e09ae046e53e6c9fb5efb688ccec676b170e8313af851e4`)
+     - Child: [`d1_child.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/vad-d1-wrapper-2026-09-13/preparation/before/d1_child.py) (SHA-256: `577b1a22ebe5490ba28f5a56a46e5b3d3f5b85e077de3c1cafad6205aeb29a90`)
+     - Repaired Wrapper: [`run-root.repaired.ps1`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/proof/vad-d1-wrapper-2026-09-13/preparation/run-root.repaired.ps1) (SHA-256: `11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63`)
+   - **Verdict Reference**: [ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md)
+   - **Assessment**: Closed decision pins (`OWNER_DECISION_SHA256 = None`) refuse unconditionally with exit 3 prior to path inspection or helper launching. Isolated interpreter flags (`-I -S -B`), path traversal checks, audit hooks (max 1 artifact read, max 1 exclusive receipt write, conversion traps), single-child lifecycle, and 60s parent execution bounds are maintained. The repaired PowerShell wrapper disables native-error promotion (`$PSNativeCommandUseErrorActionPreference = $false`) and flushes the raw child exit code through an unbuffered .NET `FileStream` before reading logs. Real checkpoint weights were not accessed. Fixed host paths (`PYTHON`, `CHECKOUT`, `FORBIDDEN`) remain configuration constraints for any future activation.
+
+---
+
+### Compact Handoff
+
+- **Status**: Complete. All three text-only source review groups reviewed; council review report committed to disk in dedicated worktree.
+- **Work Completed**:
+  - Reviewed ASR loading adapter orchestration, port contracts, and call-site splices.
+  - Reviewed VAD plain-state bridge object, port contracts, and fake-allocation boundaries.
+  - Reviewed dormant D1 static inspection launcher, child audit hooks, and repaired PowerShell execution wrapper.
+  - Authored [docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-REVIEW-2026-09-13.md](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/028ec7d7-34f/gemini/docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-REVIEW-2026-09-13.md).
+- **Evidence**:
+  - Independent author and Astra test runs: 58 ASR adapter cases passed, 61 VAD bridge cases passed, and 12 D1 wrapper cases (plus 4 controls) passed with zero native/outer failures.
+  - Verified unconditional refusal on all dormant/unconfigured entry points (`RELEASE_AUTHORITY=None`, `REAL_APPROVAL=None`, `OWNER_DECISION_SHA256=None`, `build_real_vad()` unconditional exception).
+- **Files Changed**:
+  - `docs/library/GEMINI-RUNTIME-ORCHESTRATION-COUNCIL-REVIEW-2026-09-13.md` (created)
+- **Open Questions**:
+  1. *Owned Runtime & Native Worker Protocol*: When will the concrete out-of-process runtime worker and Windows snapshot handle exclusion be defined to prevent TOCTOU file tampering during native CTranslate2/PyTorch loading?
+  2. *Real ASR Model Manifest*: When will the 20 missing asset digests and the approved VAD model artifact be formally qualified to enable non-None `RELEASE_AUTHORITY`?
+  3. *D1 Activation Decision*: Will Ryan's owner decision pin be provided for static inspection of `pytorch_model.bin` in a subsequent lifecycle stage?
+

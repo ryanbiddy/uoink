@@ -1,0 +1,142 @@
+{
+  "schema": "uoink.runtime-orchestration-council-proof.v1",
+  "payload_count": 27,
+  "payload_bytes": 380698,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "ACTUAL-INTEGRATION-TOOL.json",
+      "bytes": 224,
+      "sha256": "6ff9b10eec6544d592534fd6c4a1e28e3782c0cde8f2fee21e28e8fc66098689"
+    },
+    {
+      "path": "agent-runs.json",
+      "bytes": 8528,
+      "sha256": "766c9b06ab23cba41805db043acd66ca3ab2a5c3e3cf75eb6e76bc459edfbb7f"
+    },
+    {
+      "path": "brief-transport.json",
+      "bytes": 247,
+      "sha256": "e4825e1246e196572a44477f1f6ca89c8fa9d9a3a6ecbb24cd4fbc02672c9cd1"
+    },
+    {
+      "path": "checkout-brief.md",
+      "bytes": 3958,
+      "sha256": "4b9461a8e8bdd8386b0dad2633650f390eacb39a39ce0718d53cacdf234d6067"
+    },
+    {
+      "path": "COLLECTION.json",
+      "bytes": 413,
+      "sha256": "a19d76f72945c308f13d7ada08abf5df92ef605e7aec1e722091f2f61c77184e"
+    },
+    {
+      "path": "collector.py",
+      "bytes": 4846,
+      "sha256": "e7e2d71fa4ef76963dc7ce746dfc28863aa86aabcdece4c2dbcf8deb8081c16a"
+    },
+    {
+      "path": "controller-exit.json",
+      "bytes": 197,
+      "sha256": "7a133f9f4eb081bc4ff295b0558cac707ac323c6f600a388c4ee0ef1b758f9c4"
+    },
+    {
+      "path": "controller-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "controller-stdout.log",
+      "bytes": 23715,
+      "sha256": "ba62ccf2c62486f88f99c26a38636b25471d72ba682fbba67d8faf1f9b26a0ba"
+    },
+    {
+      "path": "COPY-MANIFEST.json",
+      "bytes": 6968,
+      "sha256": "841ea36f77c1da482394652634fe2e1262f870ffb523d0e359a0d3f2dda5185f"
+    },
+    {
+      "path": "events.json",
+      "bytes": 205124,
+      "sha256": "1ed90baa1188588e0ff2b941b212004d7696d9066b428c3fef9a715579728876"
+    },
+    {
+      "path": "integration.json",
+      "bytes": 163,
+      "sha256": "4a1d38264fc3addc38265d5c250cb0ca3a25985fd493ca97e01b970332ae9276"
+    },
+    {
+      "path": "patch-exit.json",
+      "bytes": 156,
+      "sha256": "6077118a72ac3b2b2cc681c3f13aebc69ddc0c3f1ef7a2ff31e0e0c00afb2881"
+    },
+    {
+      "path": "run.json",
+      "bytes": 8844,
+      "sha256": "8e4d72b01ac8c0006983973faea96067ccfa76a38a23672850c690858bb88039"
+    },
+    {
+      "path": "source-01.txt",
+      "bytes": 10400,
+      "sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900"
+    },
+    {
+      "path": "source-02.txt",
+      "bytes": 6134,
+      "sha256": "a49980fdec7219d9e1f7b7c8550110c1d0f5278a467674361205e3c9da8e5a54"
+    },
+    {
+      "path": "source-03.txt",
+      "bytes": 6470,
+      "sha256": "44548ba86da4f8a5d1be868d47f65b01c227b80589f55b306504cd8e9f8aa3a4"
+    },
+    {
+      "path": "source-04.txt",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "source-05.txt",
+      "bytes": 5522,
+      "sha256": "38a51bb9708302d2a29bc8d63bb6082934ee6b07abf720d0052b8cb897f82070"
+    },
+    {
+      "path": "source-06.txt",
+      "bytes": 9925,
+      "sha256": "bf865aff26515aa54e09ae046e53e6c9fb5efb688ccec676b170e8313af851e4"
+    },
+    {
+      "path": "source-07.txt",
+      "bytes": 12135,
+      "sha256": "577b1a22ebe5490ba28f5a56a46e5b3d3f5b85e077de3c1cafad6205aeb29a90"
+    },
+    {
+      "path": "source-08.txt",
+      "bytes": 2087,
+      "sha256": "11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63"
+    },
+    {
+      "path": "source-bindings.json",
+      "bytes": 2427,
+      "sha256": "d3e64da455113d6fb390103057be0598fde75548bf493e6cdd99928ba4c3dbad"
+    },
+    {
+      "path": "worker-brief.md",
+      "bytes": 4013,
+      "sha256": "c53631f6612ac31c1926b9d9460cbe261b5e6d8a349896d92d11be3ab4c53bb6"
+    },
+    {
+      "path": "worker-report.md",
+      "bytes": 23159,
+      "sha256": "eeb2015b723d30a31c0c3b930465c3c2a788e6bc3b0c127bafc19d2e6b1021fd"
+    },
+    {
+      "path": "worker.patch",
+      "bytes": 23719,
+      "sha256": "fcd88cfc55419fdae1744e3d53ccf106df99900e8ac70701ede2b3f0146bb7bb"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "sources_verified": 8,
+  "events": 350,
+  "tool_messages": {
+    "view_file": 44,
+    "find_by_name": 12,
+    "grep_search": 10,
+    "write_to_file": 2
+  },
+  "report_sha256": "eeb2015b723d30a31c0c3b930465c3c2a788e6bc3b0c127bafc19d2e6b1021fd",
+  "patch_sha256": "fcd88cfc55419fdae1744e3d53ccf106df99900e8ac70701ede2b3f0146bb7bb",
+  "controller_exit": 0,
+  "new_tests_run": false,
+  "market_approval": false
+}
