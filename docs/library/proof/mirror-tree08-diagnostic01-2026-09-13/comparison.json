@@ -1,0 +1,357 @@
+{
+  "source": "9dd0cfbb8390290f85a19529a22e4f0dedc0d0af",
+  "changed_cases": {
+    "tests/test_phase4_av5m3_isolation.py::test_live_worker_lease_blocks_a_second_mirror": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a2_binding.py::test_witness_persistence_failure_is_not_swallowed": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a2_binding.py::test_unknown_temp_record_has_no_deletion_authority": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a2_binding.py::test_worker_unlink_preserves_same_byte_replacement": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a2_binding.py::test_newer_consent_authorizes_destination_change": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a3_identity.py::test_worker_replace_does_not_adopt_replaced_temp": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a3_identity.py::test_finally_cleanup_retains_intent_when_temp_name_changed_owners": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4a3_identity.py::test_recorded_cleanup_still_preserves_same_byte_replacement": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b2_lifetime.py::test_stalled_dest_lease_write_is_inside_cancellation": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b2_lifetime.py::test_late_intent_write_cannot_replace_newer_generation": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b2_lifetime.py::test_unknown_lease_liveness_refuses_destination": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b2_lifetime.py::test_lease_write_failure_after_startup_does_not_leak_child": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b2_lifetime.py::test_frozen_child_timeout_cannot_return_success": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b3_lifetime.py::test_late_atomic_local_cannot_finish_after_later_resync_owns_intent": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b3_lifetime.py::test_late_intent_unlink_cannot_finish_after_later_resync_owns_intent": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b3_lifetime.py::test_dead_bound_session_refuses_lease_write_before_destination": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b3_lifetime.py::test_real_child_stall_timeout_keeps_independent_user_edit": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b3_lifetime.py::test_parent_stub_timeout_is_a_separate_blocking_boundary": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b4_lifetime.py::test_late_parent_refuses_dead_session_and_does_not_adopt_later": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b4_lifetime.py::test_inflight_isolated_intent_put_cannot_finish_after_writer_death": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b4_lifetime.py::test_ready_identifies_actual_writer_process": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b4_lifetime.py::test_dest_mutex_does_not_block_on_parent_realpath": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b4_lifetime.py::test_live_worker_without_lease_is_not_forgotten": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_before_lease": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_after_lease": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_startup_failure_keeps_exclusion_until_child_death": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_helper_startup_failure_keeps_exclusion": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_competitor_blocked_before_and_after_lease_then_released_on_death": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_abandoned_flag_is_not_writer_death": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b5_lifetime.py::test_dest_aliases_share_exclusion_not_temp": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_junction_competitor_process_refuses_before_first_lease": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_same_process_foreign_thread_refuses_target_and_junction": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_unrelated_destination_serializes_on_shared_gate": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_helper_refuses_replacement_while_launching_or_live": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_same_thread_nonrecursion_uses_gate_identity": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_session_dest_token_independent_of_gate_key": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b6_lifetime.py::test_unknown_liveness_keeps_gate_proven_death_releases": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b7_lifetime.py::test_cancel_during_popen_handoff_retains_then_cleans_original_session": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b7_lifetime.py::test_launch_failure_after_cancel_releases_without_untracked_child": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b7_lifetime.py::test_originating_helper_succeeds_foreign_helper_refuses": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b7_lifetime.py::test_lease_helper_validates_dest_without_parent_realpath": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b_lifetime.py::test_child_boundary_timeout_confirms_death_and_keeps_user_edit": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b_lifetime.py::test_timed_out_parent_cannot_use_later_resync_session": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b_lifetime.py::test_second_process_with_different_temp_root_is_excluded": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_av5m4b_lifetime.py::test_corrupt_lease_does_not_grant_destination": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_aw12_termination_owner.py::test_concurrent_termination_does_not_close_a_job_twice": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_lifecycle_foreign_lease_review.py::test_dead_bound_context_still_blocks_an_actual_foreign_lease": {
+      "before": "passed",
+      "after": "failed"
+    },
+    "tests/test_phase4_lifecycle_plan_review.py::test_cancelled_origin_plan_cannot_start_a_later_lease_writer": {
+      "before": "passed",
+      "after": "failed"
+    }
+  },
+  "added_cases": {
+    "tests/test_installer_signing.py::test_inno_command_quotes_paths_and_uses_fixed_callback": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[http://timestamp.example.test]": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[https://user:secret@example.test]": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[https://example.test/?token=secret]": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[https://example.test/#fragment]": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[https://example.test/;exit]": "passed",
+    "tests/test_installer_signing.py::test_timestamp_configuration_rejects_unsafe_values[https://example.test/$(exit)]": "passed",
+    "tests/test_installer_signing.py::test_tool_path_cannot_be_relative_or_command_expansion[C:relative/signtool.exe]": "passed",
+    "tests/test_installer_signing.py::test_tool_path_cannot_be_relative_or_command_expansion[C:/bad&path/signtool.exe]": "passed",
+    "tests/test_installer_signing.py::test_tool_path_cannot_be_relative_or_command_expansion[C:/bad%path/signtool.exe]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[Valid-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-True-0]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[Valid-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB-True-1]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[NotTrusted-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-True-1]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[HashMismatch-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-True-1]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[NotSigned-None-False-1]": "passed",
+    "tests/test_installer_signing.py::test_signature_requires_trust_identity_and_timestamp[Valid-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-False-1]": "passed",
+    "tests/test_installer_signing.py::test_certificate_requires_private_key_validity_and_signing_eku[False-False-True]": "passed",
+    "tests/test_installer_signing.py::test_certificate_requires_private_key_validity_and_signing_eku[True-True-True]": "passed",
+    "tests/test_installer_signing.py::test_certificate_requires_private_key_validity_and_signing_eku[True-False-False]": "passed",
+    "tests/test_installer_signing.py::test_missing_certificate_stops_before_signing": "passed",
+    "tests/test_installer_signing.py::test_sign_then_verify_has_explicit_algorithms_and_certificate": "passed",
+    "tests/test_installer_signing.py::test_signtool_errors_and_warnings_are_not_success[1]": "passed",
+    "tests/test_installer_signing.py::test_signtool_errors_and_warnings_are_not_success[2]": "passed",
+    "tests/test_installer_signing.py::test_build_refuses_invalid_mode_before_staging[-ReleaseSigned -StageSourceOnly]": "passed",
+    "tests/test_installer_signing.py::test_build_refuses_invalid_mode_before_staging[-TimestampUrl https://timestamp.example.test]": "passed",
+    "tests/test_installer_signing.py::test_signing_files_parse_and_compiler_uses_fresh_uninstaller_cache": "passed",
+    "tests/test_nltk_local_wheel.py::test_wheel_file_not_found": "passed",
+    "tests/test_nltk_local_wheel.py::test_wheel_filename_unexpected": "passed",
+    "tests/test_nltk_local_wheel.py::test_wheel_size_mismatch_refused": "passed",
+    "tests/test_nltk_local_wheel.py::test_wheel_sha256_mismatch_refused": "passed",
+    "tests/test_nltk_local_wheel.py::test_no_expected_hash_override": "passed",
+    "tests/test_nltk_local_wheel.py::test_destination_reuse_refused": "passed",
+    "tests/test_nltk_local_wheel.py::test_destination_boundary_overlap_refused": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[out/../escape]": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[C:out_dir]": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[out_dir:stream]": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[CON]": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[NUL]": "passed",
+    "tests/test_nltk_local_wheel.py::test_unsafe_destination_refused[//share/out]": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_duplicate_member_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_path_traversal_member_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_device_member_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_symlink_member_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_missing_record_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_record_hash_mismatch_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_record_size_mismatch_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_member_missing_from_record_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_record_member_missing_from_archive_rejected": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_malformed_metadata_missing_version": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_malformed_metadata_wrong_name": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_malformed_wheel_metadata": "passed",
+    "tests/test_nltk_local_wheel.py::test_archive_malformed_version_file": "passed",
+    "tests/test_nltk_local_wheel.py::test_nltk_not_imported": "passed",
+    "tests/test_nltk_local_wheel.py::test_upstream_artifact_packaging_full_qualification": "passed",
+    "tests/test_nltk_local_wheel.py::test_deterministic_packaging_repeated_build": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_preexisting_destination": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_path_traversal_in_destination": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_destination_inside_source": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_source_inside_destination": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_receipt_outside_destination": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_tampered_patch": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_verifies_clean_original_and_exclusive_receipt": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_tampered_source": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_prepare_refuses_wrong_version": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_staging_source_original_bytes_unmodified": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_vendored_original_source_matches_recorded_hashes": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_transition_parser_train_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_transition_parser_train_inside_control": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_transition_parser_parse_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_transition_parser_parse_inside_control": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_averaged_perceptron_save_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_averaged_perceptron_save_inside_control": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_averaged_perceptron_load_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_averaged_perceptron_load_inside_control_mocked_boundary": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_perceptron_tagger_save_to_json_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_perceptron_tagger_save_to_json_inside_control": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_perceptron_tagger_constructor_lang_traversal_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_perceptron_tagger_save_lang_traversal_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_save_maxent_params_outside_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_save_maxent_params_inside_control_preserves_none_return": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_nested_traversal_escape_refusal": "passed",
+    "tests/test_nltk_pathsec_backport.py::test_symlink_escape_refusal_or_unprivileged_boundary": "skipped",
+    "tests/test_nltk_pathsec_backport.py::test_no_torch_or_inference_imported": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_tampered_patch_refused_before_destination_creation": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_no_expected_hash_override": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[C:receipt.json]": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[safe.json:stream]": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[NUL.json]": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[\\\\\\\\?\\\\C:\\\\receipt.json]": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_windows_receipt_aliases_refused_before_copy[../outside.json]": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_receipt_cannot_replace_copied_file": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_complete_copy_hashes_and_receipt_are_bound": "passed",
+    "tests/test_nltk_preparation_boundaries.py::test_ancestor_link_is_refused_before_leaf_probe": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[metadata]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[case]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[backslash]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[record]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[wheel_tag]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_ambiguous_archives_are_rejected[self_missing]": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_valid_synthetic_archive_is_readable": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_filesystem_probe_failure_is_not_swallowed": "passed",
+    "tests/test_nltk_wheel_boundaries.py::test_unrelated_caller_import_does_not_change_validation": "passed",
+    "tests/test_runtime_graph.py::test_target_env_and_pep508_marker_closure": "passed",
+    "tests/test_runtime_graph.py::test_wheel_tag_and_python_compatibility_rules": "passed",
+    "tests/test_runtime_graph.py::test_check_wheel_for_release_rejects_yanked_and_incompatible_and_invalid": "passed",
+    "tests/test_runtime_graph.py::test_manifest_adversarial_boundedness_and_integrity_checks": "passed",
+    "tests/test_runtime_graph.py::test_selection_validation_and_adversarial_rejections": "passed",
+    "tests/test_runtime_graph.py::test_exact_wheel_metadata_matching_and_requires_python_mismatch": "passed",
+    "tests/test_runtime_graph.py::test_extras_propagation_to_fixed_point_including_cycles": "passed",
+    "tests/test_runtime_graph.py::test_marker_evaluation_errors_and_direct_url_rejections": "passed",
+    "tests/test_runtime_graph.py::test_detects_conflicting_constraints_and_missing_packages": "passed",
+    "tests/test_runtime_graph.py::test_successful_synthetic_graph_closure": "passed",
+    "tests/test_runtime_graph.py::test_proof_directory_has_complete_evidence_for_all_140_packages": "passed",
+    "tests/test_runtime_graph.py::test_runtime_graph_on_installer_lock_truthfully_reports_status": "passed",
+    "tests/test_runtime_graph.py::test_proposed_upgrades_conflict_with_whisperx_constraints": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_lock_root_extra_changes_required_edges": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_duplicate_selection_key_is_rejected": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_duplicate_manifest_stops_dependent_reading": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[http://example.test/x.whl]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://user:secret@example.test/x.whl]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://example.test/x.whl#fragment]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_invalid_artifact_urls_do_not_qualify[https://exam\\nple.test/x.whl]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unbound_dist_info_metadata_is_not_exact_wheel_evidence": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_metadata_change_after_manifest_check_is_not_consumed": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_duplicate_singleton_metadata_is_rejected": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_integrity_bypass_stops_before_any_dependent_read": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unsafe_root_rejected_before_filesystem_probe[C:relative]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unsafe_root_rejected_before_filesystem_probe[C:\\\\proof:stream]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unsafe_root_rejected_before_filesystem_probe[C:\\\\NUL\\\\proof]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unsafe_root_rejected_before_filesystem_probe[\\\\\\\\?\\\\C:\\\\proof]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_unsafe_root_rejected_before_filesystem_probe[\\\\\\\\server\\\\share\\\\proof]": "passed",
+    "tests/test_runtime_graph_boundaries.py::test_target_override_cannot_mix_markers_and_wheel_tags": "passed",
+    "tests/test_signing_host_selection.py::test_callback_resolves_windows_powershell_from_both_shells[WindowsPowerShell]": "passed",
+    "tests/test_signing_host_selection.py::test_callback_resolves_windows_powershell_from_both_shells[pwsh]": "passed",
+    "tests/test_signing_host_selection.py::test_chain_refusal_precedes_any_signing_work[True]": "passed",
+    "tests/test_signing_host_selection.py::test_chain_refusal_precedes_any_signing_work[False]": "passed",
+    "tests/test_signing_receipts.py::test_attempt_preserves_old_bytes_and_revokes_current_success[failed]": "passed",
+    "tests/test_signing_receipts.py::test_attempt_preserves_old_bytes_and_revokes_current_success[unsigned]": "passed",
+    "tests/test_signing_receipts.py::test_final_verification_requires_complete_matching_callbacks[valid]": "passed",
+    "tests/test_signing_receipts.py::test_final_verification_requires_complete_matching_callbacks[missing]": "passed",
+    "tests/test_signing_receipts.py::test_final_verification_requires_complete_matching_callbacks[failed]": "passed",
+    "tests/test_signing_receipts.py::test_final_verification_requires_complete_matching_callbacks[changed]": "passed",
+    "tests/test_signing_receipts.py::test_final_verification_requires_complete_matching_callbacks[no_uninstaller]": "passed",
+    "tests/test_signing_receipts.py::test_callback_certificate_refusal_has_durable_error": "passed",
+    "tests/test_signing_receipts.py::test_receipt_writer_never_overwrites_an_exclusive_record": "passed",
+    "tests/test_signing_receipts.py::test_signtool_failure_retains_diagnostics_and_exit": "passed"
+  },
+  "mirror_git_blob": "3ebeb54b94655862a3444c9146e7c9e951574130",
+  "mirror_source_same_as_b8e44fb": true,
+  "cause_of_combined_failure": "not established"
+}

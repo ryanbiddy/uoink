@@ -1,0 +1,28 @@
+{
+  "source": "9dd0cfbb8390290f85a19529a22e4f0dedc0d0af",
+  "label": "ryan-final-partitioned-08",
+  "self_test": false,
+  "observer_pid": 36504,
+  "started_utc": "2026-09-13T09:38:23.650660+00:00",
+  "child_pid": 3928,
+  "child_exit": 1,
+  "status": "child_exited",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_partitioned_repaired_tree.py",
+    "--source",
+    "9dd0cfbb8390290f85a19529a22e4f0dedc0d0af",
+    "--label",
+    "ryan-final-partitioned-08"
+  ],
+  "fixture_files": 504,
+  "release_ready": false,
+  "instrument_sha256": "747a21f1b795795cdb877784b335b5d393073349d3c545873fbc65d0222e3e1b",
+  "heartbeat_utc": "2026-09-13T10:08:18.361316+00:00",
+  "finished_utc": "2026-09-13T10:08:18.357905+00:00",
+  "aggregate_summary_present": true,
+  "aggregate_summary_sha256": "8315a640f6903b0aef4e6b4948d970dd22d46eabbd7fbc06a541d7663753dd26"
+}

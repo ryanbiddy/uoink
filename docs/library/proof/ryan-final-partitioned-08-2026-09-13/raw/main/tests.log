@@ -1,0 +1,1436 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+....................................F................................... [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+........................................................................ [ 15%]
+........................................................................ [ 18%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 36%]
+........................................................................ [ 39%]
+........................................................................ [ 42%]
+........................................................................ [ 44%]
+........................................................................ [ 47%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+..........................................s............................. [ 68%]
+.........................................s.............................. [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 76%]
+.FFF...F.FFF..FFF..FFFFF..FFFFF.FFFFF.FFFFF.FFFFFFFFFFFFF..FFFF.FFF..... [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 87%]
+.....................s.................................................. [ 89%]
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 97%]
+...............................................................          [100%]
+================================== FAILURES ===================================
+____________ test_as7_c21_at6_receipt_records_process_exit_status _____________
+tests\library_work_astra\test_phase3_acceptance7.py:83: in test_as7_c21_at6_receipt_records_process_exit_status
+    assert exits and all(type(value) is int and value == 0 for value in exits.values()), (
+E   AssertionError: ('Retained AT6 receipt has no explicit successful process exit status', {})
+E   assert ({})
+________________ test_live_worker_lease_blocks_a_second_mirror ________________
+tests\test_phase4_av5m3_isolation.py:107: in test_live_worker_lease_blocks_a_second_mirror
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+_____________ test_recorded_temp_hash_does_not_delete_user_bytes ______________
+tests\test_phase4_av5m3_isolation.py:129: in test_recorded_temp_hash_does_not_delete_user_bytes
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_________________ test_failed_replace_retains_temp_generation _________________
+tests\test_phase4_av5m3_isolation.py:148: in test_failed_replace_retains_temp_generation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+______________ test_witness_persistence_failure_is_not_swallowed ______________
+tests\test_phase4_av5m4a2_binding.py:42: in test_witness_persistence_failure_is_not_swallowed
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_____________ test_unknown_temp_record_has_no_deletion_authority ______________
+tests\test_phase4_av5m4a2_binding.py:68: in test_unknown_temp_record_has_no_deletion_authority
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_____________ test_worker_unlink_preserves_same_byte_replacement ______________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4a2_binding.py:86: in test_worker_unlink_preserves_same_byte_replacement
+    session = mirror._VaultIoSession.start(str(root))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+______________ test_newer_consent_authorizes_destination_change _______________
+tests\test_phase4_av5m4a2_binding.py:111: in test_newer_consent_authorizes_destination_change
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+______________ test_worker_replace_does_not_adopt_replaced_temp _______________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4a3_identity.py:51: in test_worker_replace_does_not_adopt_replaced_temp
+    session = mirror._VaultIoSession.start(str(root))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+______ test_finally_cleanup_retains_intent_when_temp_name_changed_owners ______
+tests\test_phase4_av5m4a3_identity.py:79: in test_finally_cleanup_retains_intent_when_temp_name_changed_owners
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_________ test_recorded_cleanup_still_preserves_same_byte_replacement _________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4a3_identity.py:112: in test_recorded_cleanup_still_preserves_same_byte_replacement
+    session = mirror._VaultIoSession.start(str(root))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+____________ test_stalled_dest_lease_write_is_inside_cancellation _____________
+tests\test_phase4_av5m4b2_lifetime.py:57: in test_stalled_dest_lease_write_is_inside_cancellation
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+___________ test_late_intent_write_cannot_replace_newer_generation ____________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b2_lifetime.py:90: in test_late_intent_write_cannot_replace_newer_generation
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_______________ test_unknown_lease_liveness_refuses_destination _______________
+tests\test_phase4_av5m4b2_lifetime.py:117: in test_unknown_lease_liveness_refuses_destination
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_________ test_lease_write_failure_after_startup_does_not_leak_child __________
+tests\test_phase4_av5m4b2_lifetime.py:133: in test_lease_write_failure_after_startup_does_not_leak_child
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_______________ test_frozen_child_timeout_cannot_return_success _______________
+tests\test_phase4_av5m4b2_lifetime.py:158: in test_frozen_child_timeout_cannot_return_success
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_____ test_late_atomic_local_cannot_finish_after_later_resync_owns_intent _____
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b3_lifetime.py:55: in test_late_atomic_local_cannot_finish_after_later_resync_owns_intent
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+____ test_late_intent_unlink_cannot_finish_after_later_resync_owns_intent _____
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b3_lifetime.py:120: in test_late_intent_unlink_cannot_finish_after_later_resync_owns_intent
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_______ test_dead_bound_session_refuses_lease_write_before_destination ________
+tests\test_phase4_av5m4b3_lifetime.py:181: in test_dead_bound_session_refuses_lease_write_before_destination
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+__________ test_real_child_stall_timeout_keeps_independent_user_edit __________
+tests\test_phase4_av5m4b3_lifetime.py:201: in test_real_child_stall_timeout_keeps_independent_user_edit
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+__________ test_parent_stub_timeout_is_a_separate_blocking_boundary ___________
+tests\test_phase4_av5m4b3_lifetime.py:235: in test_parent_stub_timeout_is_a_separate_blocking_boundary
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+_______ test_late_parent_refuses_dead_session_and_does_not_adopt_later ________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b4_lifetime.py:38: in test_late_parent_refuses_dead_session_and_does_not_adopt_later
+    original = mirror._VaultIoSession.start(str(env.vault))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_____ test_inflight_isolated_intent_put_cannot_finish_after_writer_death ______
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b4_lifetime.py:72: in test_inflight_isolated_intent_put_cannot_finish_after_writer_death
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_________________ test_ready_identifies_actual_writer_process _________________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b4_lifetime.py:118: in test_ready_identifies_actual_writer_process
+    session = mirror._VaultIoSession.start(str(dest))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+______________ test_dest_mutex_does_not_block_on_parent_realpath ______________
+tests\test_phase4_av5m4b4_lifetime.py:146: in test_dest_mutex_does_not_block_on_parent_realpath
+    handle, mutex_key = mirror._win_acquire_dest_mutex(str(dest), 0.5)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1008: in _win_acquire_dest_mutex
+    handle, key, _abandoned = _win_acquire_dest_mutex_result(dest, timeout)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+_______________ test_live_worker_without_lease_is_not_forgotten _______________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b4_lifetime.py:154: in test_live_worker_without_lease_is_not_forgotten
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_____ test_destination_exclusion_survives_owning_thread_exit_before_lease _____
+tests\test_phase4_av5m4b5_lifetime.py:88: in test_destination_exclusion_survives_owning_thread_exit_before_lease
+    assert not thread.is_alive() and not errors, errors
+E   AssertionError: ['_LockTimeout()']
+E   assert (not False and not ['_LockTimeout()'])
+E    +  where False = is_alive()
+E    +    where is_alive = <Thread(Thread-970 (own), stopped 31256)>.is_alive
+_____ test_destination_exclusion_survives_owning_thread_exit_after_lease ______
+tests\test_phase4_av5m4b5_lifetime.py:127: in test_destination_exclusion_survives_owning_thread_exit_after_lease
+    assert not thread.is_alive() and not errors, errors
+E   AssertionError: ['_LockTimeout()']
+E   assert (not False and not ['_LockTimeout()'])
+E    +  where False = is_alive()
+E    +    where is_alive = <Thread(Thread-971 (own), stopped 15332)>.is_alive
+___________ test_startup_failure_keeps_exclusion_until_child_death ____________
+tests\test_phase4_av5m4b5_lifetime.py:171: in test_startup_failure_keeps_exclusion_until_child_death
+    assert not thread.is_alive() and sessions and errors
+E   assert (not False and [])
+E    +  where False = is_alive()
+E    +    where is_alive = <Thread(Thread-972 (own), stopped 28464)>.is_alive
+_________________ test_helper_startup_failure_keeps_exclusion _________________
+tests\test_phase4_av5m4b5_lifetime.py:211: in test_helper_startup_failure_keeps_exclusion
+    assert sessions and errors
+E   assert ([])
+____ test_competitor_blocked_before_and_after_lease_then_released_on_death ____
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b5_lifetime.py:232: in test_competitor_blocked_before_and_after_lease_then_released_on_death
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+___________________ test_abandoned_flag_is_not_writer_death ___________________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b5_lifetime.py:280: in test_abandoned_flag_is_not_writer_death
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_________________ test_dest_aliases_share_exclusion_not_temp __________________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b5_lifetime.py:308: in test_dest_aliases_share_exclusion_not_temp
+    session = mirror._VaultIoSession.start(str(dest))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_________ test_junction_competitor_process_refuses_before_first_lease _________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b6_lifetime.py:98: in test_junction_competitor_process_refuses_before_first_lease
+    first = mirror._VaultIoSession.start(original)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+________ test_same_process_foreign_thread_refuses_target_and_junction _________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b6_lifetime.py:136: in test_same_process_foreign_thread_refuses_target_and_junction
+    first = mirror._VaultIoSession.start(original)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+____________ test_unrelated_destination_serializes_on_shared_gate _____________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b6_lifetime.py:159: in test_unrelated_destination_serializes_on_shared_gate
+    first = mirror._VaultIoSession.start(str(dest_a))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+___________ test_helper_refuses_replacement_while_launching_or_live ___________
+tests\test_phase4_av5m4b6_lifetime.py:185: in test_helper_refuses_replacement_while_launching_or_live
+    with env.mirror._exclusive(timeout=2.0):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+library_mirror.py:4878: in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+______________ test_same_thread_nonrecursion_uses_gate_identity _______________
+tests\test_phase4_av5m4b6_lifetime.py:205: in test_same_thread_nonrecursion_uses_gate_identity
+    handle, key = mirror._win_acquire_dest_mutex(str(dest_a), 0.5)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1008: in _win_acquire_dest_mutex
+    handle, key, _abandoned = _win_acquire_dest_mutex_result(dest, timeout)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+_______________ test_session_dest_token_independent_of_gate_key _______________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b6_lifetime.py:224: in test_session_dest_token_independent_of_gate_key
+    session = mirror._VaultIoSession.start(dest)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+___________ test_unknown_liveness_keeps_gate_proven_death_releases ____________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b6_lifetime.py:243: in test_unknown_liveness_keeps_gate_proven_death_releases
+    session = mirror._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+____ test_cancel_during_popen_handoff_retains_then_cleans_original_session ____
+tests\test_phase4_av5m4b7_lifetime.py:70: in test_cancel_during_popen_handoff_retains_then_cleans_original_session
+    assert entered.wait(5)
+E   assert False
+E    +  where False = wait(5)
+E    +    where wait = <threading.Event at 0x1b3b821eb10: unset>.wait
+______ test_launch_failure_after_cancel_releases_without_untracked_child ______
+tests\test_phase4_av5m4b7_lifetime.py:183: in test_launch_failure_after_cancel_releases_without_untracked_child
+    assert entered.wait(5)
+E   assert False
+E    +  where False = wait(5)
+E    +    where wait = <threading.Event at 0x1b3b827be30: unset>.wait
+___________ test_originating_helper_succeeds_foreign_helper_refuses ___________
+tests\test_phase4_av5m4b7_lifetime.py:233: in test_originating_helper_succeeds_foreign_helper_refuses
+    env.mirror._start_vault_io(str(env.vault))
+library_mirror.py:4629: in _start_vault_io
+    with self._exclusive():
+         ^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+library_mirror.py:4878: in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+__________ test_lease_helper_validates_dest_without_parent_realpath ___________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_av5m4b7_lifetime.py:300: in test_lease_helper_validates_dest_without_parent_realpath
+    session = mirror._VaultIoSession.start(original)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+_______ test_child_boundary_timeout_confirms_death_and_keeps_user_edit ________
+tests\test_phase4_av5m4b_lifetime.py:231: in test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+____________ test_timed_out_parent_cannot_use_later_resync_session ____________
+tests\test_phase4_av5m4b_lifetime.py:270: in test_timed_out_parent_cannot_use_later_resync_session
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+__________ test_second_process_with_different_temp_root_is_excluded ___________
+tests\test_phase4_av5m4b_lifetime.py:300: in test_second_process_with_different_temp_root_is_excluded
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+________________ test_corrupt_lease_does_not_grant_destination ________________
+tests\test_phase4_av5m4b_lifetime.py:364: in test_corrupt_lease_does_not_grant_destination
+    export(env)
+tests\library_work_astra\test_phase4_aw_acceptance.py:65: in export
+    assert result["ok"], result
+E   AssertionError: {'ok': False, 'schema_version': 1, 'contract_version': 'phase4-v1-2026-09-08', 'error': {'code': 'destination_unavailable', 'message': 'The mirror destination is unavailable.', 'retryable': True, 'details': {}}, ...}
+E   assert False
+------------------------------ Captured log call ------------------------------
+ERROR    uoink.library_mirror:library_mirror.py:2241 mirror ledger update failed for capture
+Traceback (most recent call last):
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 2238, in on_committed_event
+    with self._exclusive(timeout=2.0):
+         ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+    owner.start_wait()
+    ~~~~~~~~~~~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+    raise self._error
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.dest, self.timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+library_mirror._LockTimeout
+___________ test_concurrent_termination_does_not_close_a_job_twice ____________
+library_mirror.py:1285: in _exclusion_for_dest
+    return _acquire_dest_exclusion(dest, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+
+The above exception was the direct cause of the following exception:
+tests\test_phase4_aw12_termination_owner.py:11: in test_concurrent_termination_does_not_close_a_job_twice
+    session = m._VaultIoSession.start(str(env.vault))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1550: in start
+    session = cls.prepare(dest)
+              ^^^^^^^^^^^^^^^^^
+library_mirror.py:1538: in prepare
+    owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1287: in _exclusion_for_dest
+    raise OSError("destination exclusion unavailable") from exc
+E   OSError: destination exclusion unavailable
+________ test_dead_bound_context_still_blocks_an_actual_foreign_lease _________
+tests\test_phase4_lifecycle_foreign_lease_review.py:8: in test_dead_bound_context_still_blocks_an_actual_foreign_lease
+    env.mirror._start_vault_io(str(env.vault))
+library_mirror.py:4629: in _start_vault_io
+    with self._exclusive():
+         ^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+library_mirror.py:4878: in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+________ test_cancelled_origin_plan_cannot_start_a_later_lease_writer _________
+tests\test_phase4_lifecycle_plan_review.py:9: in test_cancelled_origin_plan_cannot_start_a_later_lease_writer
+    env.mirror._start_vault_io(str(env.vault))
+library_mirror.py:4629: in _start_vault_io
+    with self._exclusive():
+         ^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+library_mirror.py:4878: in _exclusive
+    owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1240: in _acquire_dest_exclusion
+    owner.start_wait()
+library_mirror.py:1095: in start_wait
+    raise self._error
+library_mirror.py:1153: in _run
+    handle, key, abandoned = _win_acquire_dest_mutex_result(
+library_mirror.py:1027: in _win_acquire_dest_mutex_result
+    raise _LockTimeout()
+E   library_mirror._LockTimeout
+============================== warnings summary ===============================
+tests/library_work_astra/test_phase3_acceptance4.py: 1 warning
+tests/library_work_astra/test_phase3_publication.py: 1 warning
+tests/library_work_astra/test_phase3_repairs.py: 4 warnings
+tests/library_work_astra/test_phase6_bd2_acceptance.py: 8 warnings
+tests/library_work_astra/test_phase6_bd_acceptance.py: 4 warnings
+tests/security/test_security_findings.py: 4 warnings
+tests/test_phase0_podcast_repair.py: 4 warnings
+tests/test_phase6_bc2.py: 4 warnings
+tests/test_phase6_bc3f.py: 4 warnings
+tests/test_podcast_background_jobs.py: 16 warnings
+tests/test_podcast_corpus_bridge.py: 38 warnings
+tests/test_podcast_durability.py: 10 warnings
+tests/test_podcast_watch.py: 9 warnings
+tests/test_quiet_notifications.py: 1 warning
+tests/test_source_subscriptions_migration.py: 4 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py: 2 warnings
+tests/test_c03_durability.py: 4 warnings
+tests/test_corpus_contract_v1.py: 32 warnings
+tests/test_podcast_corpus_bridge.py: 4 warnings
+tests/test_taste_scoring.py: 3 warnings
+  E:\AI\projects\uoink\checkouts\Yoink-library\memory_layer.py:90: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_auto_uoink_poll.py::test_auto_uoink_poll
+tests/test_auto_uoink_poll.py::test_auto_uoink_does_not_burn_backlog_or_starve_plain_poll
+tests/test_auto_uoink_poll.py::test_taste_signal_cannot_override_consent_only_the_ledger_captures
+tests/test_discovery_route.py::test_discovery_route
+tests/test_source_subscriptions_migration.py::test_s02_global_flag_and_old_boolean_cannot_start_an_off_source
+  E:\AI\projects\uoink\checkouts\Yoink-library\mobile_playlists.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_nltk_local_wheel.py::test_archive_duplicate_member_rejected
+  C:\Python314\Lib\zipfile\__init__.py:1730: UserWarning: Duplicate name: 'nltk/VERSION'
+    return self._open_to_write(zinfo, force_zip64=force_zip64)
+
+tests/test_phase4_av5m4b5_lifetime.py::test_startup_failure_keeps_exclusion_until_child_death
+  C:\Users\hello\AppData\Roaming\Python\Python314\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-972 (own)
+  
+  Traceback (most recent call last):
+    File "C:\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+      self._context.run(self.run)
+      ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+    File "C:\Python314\Lib\threading.py", line 1024, in run
+      self._target(*self._args, **self._kwargs)
+      ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\test_phase4_av5m4b5_lifetime.py", line 162, in own
+      with env.mirror._exclusive(timeout=0.5):
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+    File "C:\Python314\Lib\contextlib.py", line 141, in __enter__
+      return next(self.gen)
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 4878, in _exclusive
+      owner = _acquire_dest_exclusion(dest, timeout, exclusive=True)
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1240, in _acquire_dest_exclusion
+      owner.start_wait()
+      ~~~~~~~~~~~~~~~~^^
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1095, in start_wait
+      raise self._error
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1153, in _run
+      handle, key, abandoned = _win_acquire_dest_mutex_result(
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          self.dest, self.timeout,
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "E:\AI\projects\uoink\checkouts\Yoink-library\library_mirror.py", line 1027, in _win_acquire_dest_mutex_result
+      raise _LockTimeout()
+  library_mirror._LockTimeout
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_restarted_job_reuses_a_completed_transcript
+tests/test_podcast_background_jobs.py::test_auto_transcription_publishes_and_toasts_after_corpus_commit
+tests/test_podcast_background_jobs.py::test_auto_publish_failure_preserves_completed_transcript_for_retry
+tests/test_podcast_durability.py::test_all_podcast_state_transitions_survive_close_reopen
+  E:\AI\projects\uoink\checkouts\Yoink-library\whisper_runner.py:108: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_dedupe
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+tests/test_screenshots_picker_v324.py::test_ahash
+  E:\AI\projects\uoink\checkouts\Yoink-library\server.py:9455: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    pixels = list(small.getdata())
+
+tests/test_workspaces_crud.py::test_crud_lifecycle
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_n_examples_clamped
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_log
+tests/test_workspaces_crud.py::test_critique_error_paths
+  E:\AI\projects\uoink\checkouts\Yoink-library\workspaces.py:40: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_mcpb_posix_build.py:16: POSIX build-script execution
+SKIPPED [1] tests\test_nltk_pathsec_backport.py:703: Symlink creation not permitted in this environment ([WinError 1314] A required privilege is not held by the client: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-08-main-0\\t628\\outside' -> 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-08-main-0\\t628\\sandbox\\link_to_outside'); boundary recorded: symlink escape testing requires symlink creation privileges.
+SKIPPED [1] tests\test_s6_suite_integration.py:405: symlink creation unavailable: [WinError 1314] A required privilege is not held by the client: 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-08-main-0\\t2215\\outside.mp4' -> 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ryan-final-partitioned-08-main-0\\t2215\\symlink-media\\video.mp4'
+FAILED tests/library_work_astra/test_phase3_acceptance7.py::test_as7_c21_at6_receipt_records_process_exit_status
+FAILED tests/test_phase4_av5m3_isolation.py::test_live_worker_lease_blocks_a_second_mirror
+FAILED tests/test_phase4_av5m3_isolation.py::test_recorded_temp_hash_does_not_delete_user_bytes
+FAILED tests/test_phase4_av5m3_isolation.py::test_failed_replace_retains_temp_generation
+FAILED tests/test_phase4_av5m4a2_binding.py::test_witness_persistence_failure_is_not_swallowed
+FAILED tests/test_phase4_av5m4a2_binding.py::test_unknown_temp_record_has_no_deletion_authority
+FAILED tests/test_phase4_av5m4a2_binding.py::test_worker_unlink_preserves_same_byte_replacement
+FAILED tests/test_phase4_av5m4a2_binding.py::test_newer_consent_authorizes_destination_change
+FAILED tests/test_phase4_av5m4a3_identity.py::test_worker_replace_does_not_adopt_replaced_temp
+FAILED tests/test_phase4_av5m4a3_identity.py::test_finally_cleanup_retains_intent_when_temp_name_changed_owners
+FAILED tests/test_phase4_av5m4a3_identity.py::test_recorded_cleanup_still_preserves_same_byte_replacement
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_stalled_dest_lease_write_is_inside_cancellation
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_late_intent_write_cannot_replace_newer_generation
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_unknown_lease_liveness_refuses_destination
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_lease_write_failure_after_startup_does_not_leak_child
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_frozen_child_timeout_cannot_return_success
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_late_atomic_local_cannot_finish_after_later_resync_owns_intent
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_late_intent_unlink_cannot_finish_after_later_resync_owns_intent
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_dead_bound_session_refuses_lease_write_before_destination
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_real_child_stall_timeout_keeps_independent_user_edit
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_parent_stub_timeout_is_a_separate_blocking_boundary
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_late_parent_refuses_dead_session_and_does_not_adopt_later
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_inflight_isolated_intent_put_cannot_finish_after_writer_death
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_ready_identifies_actual_writer_process
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_dest_mutex_does_not_block_on_parent_realpath
+FAILED tests/test_phase4_av5m4b4_lifetime.py::test_live_worker_without_lease_is_not_forgotten
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_before_lease
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_destination_exclusion_survives_owning_thread_exit_after_lease
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_startup_failure_keeps_exclusion_until_child_death
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_helper_startup_failure_keeps_exclusion
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_competitor_blocked_before_and_after_lease_then_released_on_death
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_abandoned_flag_is_not_writer_death
+FAILED tests/test_phase4_av5m4b5_lifetime.py::test_dest_aliases_share_exclusion_not_temp
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_junction_competitor_process_refuses_before_first_lease
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_same_process_foreign_thread_refuses_target_and_junction
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_unrelated_destination_serializes_on_shared_gate
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_helper_refuses_replacement_while_launching_or_live
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_same_thread_nonrecursion_uses_gate_identity
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_session_dest_token_independent_of_gate_key
+FAILED tests/test_phase4_av5m4b6_lifetime.py::test_unknown_liveness_keeps_gate_proven_death_releases
+FAILED tests/test_phase4_av5m4b7_lifetime.py::test_cancel_during_popen_handoff_retains_then_cleans_original_session
+FAILED tests/test_phase4_av5m4b7_lifetime.py::test_launch_failure_after_cancel_releases_without_untracked_child
+FAILED tests/test_phase4_av5m4b7_lifetime.py::test_originating_helper_succeeds_foreign_helper_refuses
+FAILED tests/test_phase4_av5m4b7_lifetime.py::test_lease_helper_validates_dest_without_parent_realpath
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_timed_out_parent_cannot_use_later_resync_session
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_second_process_with_different_temp_root_is_excluded
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_corrupt_lease_does_not_grant_destination
+FAILED tests/test_phase4_aw12_termination_owner.py::test_concurrent_termination_does_not_close_a_job_twice
+FAILED tests/test_phase4_lifecycle_foreign_lease_review.py::test_dead_bound_context_still_blocks_an_actual_foreign_lease
+FAILED tests/test_phase4_lifecycle_plan_review.py::test_cancelled_origin_plan_cannot_start_a_later_lease_writer
+51 failed, 2673 passed, 3 skipped, 2 deselected, 185 warnings in 1770.96s (0:29:30)

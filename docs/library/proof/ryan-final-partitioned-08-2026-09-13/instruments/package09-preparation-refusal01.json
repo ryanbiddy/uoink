@@ -1,0 +1,7 @@
+{
+  "result": "FAILED before build or measurement",
+  "reason": "The exact new-case allowlist omitted the accepted tests/test_nltk_preparation_boundaries.py (10 cases). Five observer drafts were written; no measurement, archive or build ran.",
+  "repair": "Add the omitted accepted regression file; resume only byte-identical existing drafts. Correct the signing receipt path to build/Uoink-Setup-3.8.0.exe.signature.json from New-UoinkBuildAttempt source.",
+  "original_sha256": "93679434241674e071faf3fe6e6fae9e40cd0dbe59fba72abc072cd2a7ba2be4",
+  "frozen_tests_changed": false
+}

@@ -1,0 +1,27 @@
+--- seal_partitioned_final_tree07.py
++++ seal_partitioned_final_tree08.py
+@@ -5,7 +5,7 @@
+ p=argparse.ArgumentParser();p.add_argument('--label',required=True);a=p.parse_args()
+ r=Path(__file__).resolve().parents[1];raw=r/'_scratch'/a.label
+ summary=json.loads((raw/'summary.json').read_text(encoding='utf8'))
+-out=r/'docs/library/proof/ryan-final-partitioned-07-2026-09-13';out.mkdir(exist_ok=False)
++out=r/'docs/library/proof/ryan-final-partitioned-08-2026-09-13';out.mkdir(exist_ok=False)
+ (out/'.gitattributes').write_text('* -text\n',encoding='utf8',newline='\n')
+ assert summary['complete_disjoint_union'] and summary['source']==subprocess.check_output(['git','rev-parse','HEAD'],cwd=r,text=True).strip()
+ assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=r,text=True).strip()
+@@ -20,8 +20,14 @@
+   if src.is_file() and src.suffix in ('.json','.xml','.log','.py'):copy(src,Path('raw')/run['name']/src.relative_to(folder))
+  if run['name']!='collection':
+   seconds[run['name']]=sum(float(suite.get('time','0')) for suite in ET.parse(folder/'tests.xml').getroot().iter('testsuite'))
+-for name in ('run_partitioned_repaired_tree.py','partition_receipt_plugin.py','integrator_verify.py','seal_partitioned_final_tree07.py','run_combined_candidate13.py','prepare_package09_instruments.py','prepare_package09_instruments02.py','package09-preparation-refusal01.json','seal_partitioned_final_tree07.py.diff'):
++for name in ('run_partitioned_repaired_tree.py','partition_receipt_plugin.py','integrator_verify.py','seal_partitioned_final_tree08.py','run_complete_candidate_durable.py','rebind_package09_instruments13.py','run_combined_candidate13.py','prepare_package09_instruments.py','prepare_package09_instruments02.py','package09-preparation-refusal01.json','seal_partitioned_final_tree07.py.diff'):
+  copy(r/'_scratch'/name,Path('instruments')/name)
++supervisor=r/'_scratch/ryan-final-partitioned-08-supervisor'
++state=json.loads((supervisor/'state.json').read_text(encoding='utf8'))
++assert state['source']==summary['source'] and state['status']=='finished' and state['child_exit'] in (0,1), state
++for folder in ('ryan-final-partitioned-08-supervisor','ryan-final-partitioned-08-launch','durable-tree-preflight01-supervisor','package09-unused-drafts-before-tree08'):
++ for src in (r/'_scratch'/folder).rglob('*'):
++  if src.is_file():copy(src,Path('durable-observer')/folder/src.relative_to(r/'_scratch'/folder))
+ for filename in ('membership.json','session.json'):
+  copy(r/'_scratch/partition-preflight-01/collection'/filename,Path('instrument-preflight')/filename)
+ for filename in ('results.json','tests.log','tests.xml'):

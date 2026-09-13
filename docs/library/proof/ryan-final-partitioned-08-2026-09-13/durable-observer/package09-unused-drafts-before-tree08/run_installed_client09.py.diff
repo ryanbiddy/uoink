@@ -1,0 +1,11 @@
+--- run_installed_client09.py
++++ run_installed_client09.py
+@@ -28,7 +28,7 @@
+ assert confirmation['confirmed_by'] == 'Ryan' and confirmation['extra_paid_usage_off'] is True
+ expected_package = json.loads((seal / 'package-manifest.json').read_text(encoding='utf8'))
+ assert sha(package) == expected_package['package_sha256']
+-assert expected_package['build_source'] == 'e53fe0e52131d7b210484b7c89850d1bcb31b9ee'
++assert expected_package['build_source'] == '9dd0cfbb8390290f85a19529a22e4f0dedc0d0af'
+ for name, row in json.loads((seal / 'SHA256.json').read_text(encoding='utf8'))['files'].items():
+     path = (seal / name).resolve(); assert path.is_relative_to(seal)
+     assert sha(path) == row['sha256'] and path.stat().st_size == row['bytes']

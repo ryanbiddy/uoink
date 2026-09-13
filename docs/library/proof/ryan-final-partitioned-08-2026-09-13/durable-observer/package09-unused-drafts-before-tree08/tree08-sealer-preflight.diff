@@ -1,0 +1,17 @@
+--- 
++++ 
+@@ -20,11 +20,12 @@
+   if src.is_file() and src.suffix in ('.json','.xml','.log','.py'):copy(src,Path('raw')/run['name']/src.relative_to(folder))
+  if run['name']!='collection':
+   seconds[run['name']]=sum(float(suite.get('time','0')) for suite in ET.parse(folder/'tests.xml').getroot().iter('testsuite'))
+-for name in ('run_partitioned_repaired_tree.py','partition_receipt_plugin.py','integrator_verify.py','seal_partitioned_final_tree08.py','run_complete_candidate_durable.py','rebind_package09_instruments13.py','run_combined_candidate13.py','prepare_package09_instruments.py','prepare_package09_instruments02.py','package09-preparation-refusal01.json','seal_partitioned_final_tree07.py.diff'):
++for name in ('run_partitioned_repaired_tree.py','partition_receipt_plugin.py','integrator_verify.py','seal_partitioned_final_tree08.py','run_complete_candidate_durable.py','rebind_package09_instruments13.py','fix_tree08_sealer_preflight.py','tree08-sealer-preflight.json','run_combined_candidate13.py','prepare_package09_instruments.py','prepare_package09_instruments02.py','package09-preparation-refusal01.json','seal_partitioned_final_tree07.py.diff'):
+  copy(r/'_scratch'/name,Path('instruments')/name)
+ supervisor=r/'_scratch/ryan-final-partitioned-08-supervisor'
+ state=json.loads((supervisor/'state.json').read_text(encoding='utf8'))
+-assert state['source']==summary['source'] and state['status']=='finished' and state['child_exit'] in (0,1), state
++assert state['source']==summary['source'] and state['status']=='child_exited' and state['child_exit'] in (0,1), state
++assert state['aggregate_summary_present'] is True and state['aggregate_summary_sha256']==hashlib.sha256((raw/'summary.json').read_bytes()).hexdigest()
+ for folder in ('ryan-final-partitioned-08-supervisor','ryan-final-partitioned-08-launch','durable-tree-preflight01-supervisor','package09-unused-drafts-before-tree08'):
+  for src in (r/'_scratch'/folder).rglob('*'):
+   if src.is_file():copy(src,Path('durable-observer')/folder/src.relative_to(r/'_scratch'/folder))

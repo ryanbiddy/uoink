@@ -1,0 +1,6 @@
+{"nodeid": "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end", "when": "setup", "outcome": "passed", "duration": 0.001180999999633059, "wasxfail": null}
+{"nodeid": "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end", "when": "call", "outcome": "passed", "duration": 4.132179199994425, "wasxfail": null}
+{"nodeid": "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end", "when": "teardown", "outcome": "passed", "duration": 0.0001517000055173412, "wasxfail": null}
+{"nodeid": "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs", "when": "setup", "outcome": "passed", "duration": 0.0009176000021398067, "wasxfail": null}
+{"nodeid": "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs", "when": "call", "outcome": "passed", "duration": 0.07672139999340288, "wasxfail": null}
+{"nodeid": "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs", "when": "teardown", "outcome": "passed", "duration": 0.00014150000060908496, "wasxfail": null}

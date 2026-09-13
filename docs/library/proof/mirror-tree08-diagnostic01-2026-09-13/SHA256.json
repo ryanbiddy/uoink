@@ -1,0 +1,37 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "comparison.json": {
+      "bytes": 24658,
+      "sha256": "1a537a83fd39a1854beafd496359a4fa1648034f528467be05e913df15b5b742"
+    },
+    "mirror-tree08-diagnostic01-state.jsonl": {
+      "bytes": 234287,
+      "sha256": "4afdd73dde972d50725783e4e613a8588ce302c8b2697be1d8f857302affd172"
+    },
+    "MIRROR-TREE08-INVESTIGATION-DRAFT.md": {
+      "bytes": 1803,
+      "sha256": "80b7360faa9841800497dd3709a68eee539f9c48de3d27dbe1fca584a48feaf7"
+    },
+    "mirror_gate_state_plugin.py": {
+      "bytes": 3271,
+      "sha256": "734dc641c00f764feb7b1b0bb751fe63fd0effbad0aa5f44f95170770367bf59"
+    },
+    "results.json": {
+      "bytes": 790,
+      "sha256": "f978377709d9625ea07afc94aaf16037a83c24e872d7f2b90b1fa420e9249bc6"
+    },
+    "tests.log": {
+      "bytes": 100,
+      "sha256": "c6a259c5411d566f45c0d996ca36ac03971efa92f4a059a993373a981540d495"
+    },
+    "tests.xml": {
+      "bytes": 1154,
+      "sha256": "033deae4a28e89cc4dab253031baa0747b9a77e19782304635f77ece09ff31a3"
+    }
+  }
+}
