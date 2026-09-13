@@ -98,7 +98,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root; its real basis remains undecided. Finish exact conversion protocol and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Repair reliability consent/readiness and model-setting copy under brief44e69fc; continue VAD/dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
+| Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -149,16 +149,24 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Current concrete product repair: read
-RELIABILITY-CONSENT-SETTINGS-REPAIR-BRIEF-2026-09-13.md (44e69fc) and
-RELIABILITY-CONSENT-GROK-CONTINUATION-BRIEF-2026-09-13.md. Ordinary confidence
-checks allow acquisition; a stale marker is treated as a ready cache; download
-size and turbo labels are misleading. Gemini d3d22723 is INCOMPLETE despite
-completed/exit0: a grep_search schema error was followed by empty SUCCESS,
-with a clean worktree and no report or tests. Preserve it. Continue via Grok's
-separate toolchain, then review and run the named focused union in both roots
-before integrating. No unguarded Python/server/model test launch. This product
-repair is independent of the reserved model migration decisions below.
+Reliability repair is accepted at e8d058f. Read
+ASTRA-RELIABILITY-CONSENT-VERDICT-2026-09-13.md and its 19-payload proof with
+563 archived members. Grok0851b440 plus two Astra source corrections pass
+all 53 focused cases and 13 subtests in each root; 36 Node children per run
+have valid exact-source guards. The valid baseline51/2, earlier guard-invalid
+attempts, original-default probe failure and all repairs remain preserved.
+No existing assertion changed. Gemini d3d22723 remains INCOMPLETE despite
+completed/exit0 and is not review acceptance. The source patch was integrated
+by raw diff/three-way apply; Git's EOL conversion was checked and exact tested
+worker bytes restored. A staging-only failure omitted ignored receipts.zip;
+force-adding its unchanged sealed bytes repaired that failure. All19 payloads
+match Git/disk. Continue the concrete D1 adapter, ASR trusted-manifest resolver
+and VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md. D1 author/root54-case
+synthetic checks pass; final proof review is next. ASR first73-case run fails
+64/9; a separate40-file generated-data diagnostic identifies cross-API Windows
+ctime differences. Prepare the exact identity repair without time tolerance,
+retain original failures, and qualify before integration. No actual model or
+artifact access, migration approval, full-tree or installed credit follows.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4299,3 +4307,29 @@ bounds and saved-buffer immutability are not proven. Applying orientation to
 other storages remains an explicit protocol assumption. No actual storage or
 version read occurred and REAL_PROFILE remains absent. Next is the exact
 owner-review protocol, alongside the active reliability product repair.
+
+### 2026-09-13 - Reliability consent and settings integrated
+
+Commit e8d058f accepts Grok0851b440 with Astra's two documented corrections.
+Worker rlw04 and checkout rlc04 each pass53 cases plus13 subtests, all raw
+exits0;36 Node children each have valid guards. All19 proof payloads match
+Git and disk, and563 ZIP members match their original source files. The valid
+51/2 baseline and earlier guard-invalid47/6 attempt remain failed. Node24.18
+startup required an own module property before the existing import closure;
+no new module allowance or UI assertion change was made. The observed hostname
+caller was jaraco.context through platform.system, correcting the earlier
+unobserved JUnit hypothesis. The raw patch applied cleanly with three-way apply.
+Seven CRLF-only files were restored to exact worker bytes before verification.
+The first Git/disk proof check failed because .gitignore:11 omitted receipts.zip;
+force-add that exact sealed file, never regenerate or relabel the first check.
+
+Read ASTRA-RELIABILITY-CONSENT-VERDICT-2026-09-13.md for the narrow source/test
+coverage and worker-report limitations. Current production source changed,
+so tree09 remains historical for the current candidate. No package or installed
+clearance was created; complete-tree rerun follows the remaining source work.
+D1 adapter now has54 synthetic passes in both author/root runs and awaits proof
+integration. ASR manifest admission remains64/9 failed: a40-file generated-data
+diagnostic shows differing path/handle ctime namespaces on nine files. A strict
+identity repair is being prepared without tolerance or loss of same-API checks.
+The actual plain-state reader is assigned under the new source-only brief.
+Website/marketing remain paused until council and integrator accept the product.

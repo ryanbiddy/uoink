@@ -9,6 +9,12 @@ from the previous complete run now pass. The missing historical AT6 child-exit
 record remains a failure. Model-loading security, actual publisher signing and
 verified Claude Desktop isolation are still open.
 
+Reliability consent and settings were repaired afterward at `e8d058f`.
+Ordinary checks require local files, a marker alone cannot make a model ready,
+and model size/Turbo labels are corrected. Both worker and checkout pass all
+53 focused cases plus 13 subtests. The complete tree above predates this change;
+these focused passes do not qualify a new package, native model or installation.
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks
