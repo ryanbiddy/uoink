@@ -1,0 +1,20 @@
+{
+  "scope": "generated-state-fake-factory-and-worker-registry-only",
+  "child_files": {
+    "plain_state_reader.py": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+    "state_bridge.py": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2",
+    "owned_cpu_tensor_port.py": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+    "model_binding_registry.py": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+    "owned_factory_port.py": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+    "owned_guard.py": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+    "fake_torch_support.py": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b",
+    "literal_parity.py": "fd00f3e32e4457bc4879abd1139a8408768c994b3114c994b4a670d837d18713",
+    "fixed-factory.proposal.txt": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b",
+    "owned-pyannote.reference.txt": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2",
+    "qualify_factory.py": "162b7a297b0a94ef579a3ba0590406417bd91b4882bd0747e70f9a4365ebf1c7",
+    "EXPECTED-CASES.json": "78192b7fc2bb281c7e163bbafd6ff0ee16f8d746ba7b278be562f163573fe4c2"
+  },
+  "pins_sha256": "bd7c9375e5c3e4678969a1746a99aab47109fa3ae47c1c998287d9dd9e19f2f1",
+  "native_approved": false,
+  "release_approved": false
+}

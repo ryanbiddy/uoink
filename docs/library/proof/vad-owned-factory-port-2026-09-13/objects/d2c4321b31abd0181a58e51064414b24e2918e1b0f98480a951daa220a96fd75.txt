@@ -1,0 +1,278 @@
+{
+  "audit_denials": [],
+  "cases": [
+    {
+      "name": "fixed_constructor_load_vad_literal_parity",
+      "status": "passed"
+    },
+    {
+      "name": "literal_parity_rejects_changed_stride",
+      "status": "passed"
+    },
+    {
+      "name": "literal_parity_rejects_assign_true",
+      "status": "passed"
+    },
+    {
+      "name": "actual_owned_constructor_body_and_arguments_match",
+      "status": "passed"
+    },
+    {
+      "name": "real_entries_refuse_without_argument_inspection",
+      "status": "passed"
+    },
+    {
+      "name": "complete_factory_has_live_exact_model_lease",
+      "status": "passed"
+    },
+    {
+      "name": "input_zeroing_preserves_model_values_and_active_lease",
+      "status": "passed"
+    },
+    {
+      "name": "release_revokes_before_retiring_product_owner",
+      "status": "passed"
+    },
+    {
+      "name": "repeated_product_release_only_confirms_retirement",
+      "status": "passed"
+    },
+    {
+      "name": "foreign_product_release_refused_without_revoking_real_product",
+      "status": "passed"
+    },
+    {
+      "name": "second_build_refused_without_revoking_first_product",
+      "status": "passed"
+    },
+    {
+      "name": "completed_record_contains_only_model_state_owners",
+      "status": "passed"
+    },
+    {
+      "name": "string_bootstrap_permit_refused",
+      "status": "passed"
+    },
+    {
+      "name": "passive_binding_cannot_replace_bootstrap_permit",
+      "status": "passed"
+    },
+    {
+      "name": "wrong_bootstrap_identity_refused",
+      "status": "passed"
+    },
+    {
+      "name": "capability_cannot_be_issued_twice",
+      "status": "passed"
+    },
+    {
+      "name": "changed_recipe_binding_refused",
+      "status": "passed"
+    },
+    {
+      "name": "malformed_state_digest_refused",
+      "status": "passed"
+    },
+    {
+      "name": "missing_state_row_refused",
+      "status": "passed"
+    },
+    {
+      "name": "bool_dimension_in_state_binding_refused",
+      "status": "passed"
+    },
+    {
+      "name": "forged_capability_object_not_registered",
+      "status": "passed"
+    },
+    {
+      "name": "capability_cannot_bind_foreign_factory",
+      "status": "passed"
+    },
+    {
+      "name": "swapped_owned_runtime_registry_refused_and_capability_revoked",
+      "status": "passed"
+    },
+    {
+      "name": "actual_owned_guard_rejects_unregistered_model_before_parent",
+      "status": "passed"
+    },
+    {
+      "name": "actual_owned_guard_rejects_token_before_parent",
+      "status": "passed"
+    },
+    {
+      "name": "wrong_verified_digest_rows_refuse_registration",
+      "status": "passed"
+    },
+    {
+      "name": "successful_registration_is_single_use",
+      "status": "passed"
+    },
+    {
+      "name": "foreign_model_same_class_refused_by_live_registry",
+      "status": "passed"
+    },
+    {
+      "name": "generation_revocation_rejects_retained_model_and_vad",
+      "status": "passed"
+    },
+    {
+      "name": "new_generation_does_not_accept_old_model_or_capability",
+      "status": "passed"
+    },
+    {
+      "name": "pre_build_dtype_failure_revokes_issued_capability",
+      "status": "passed"
+    },
+    {
+      "name": "pre_build_import_setting_failure_revokes_capability",
+      "status": "passed"
+    },
+    {
+      "name": "owner_creation_failure_revokes_capability",
+      "status": "passed"
+    },
+    {
+      "name": "invalid_input_key_refused_before_model_construction",
+      "status": "passed"
+    },
+    {
+      "name": "model_constructor_failure_revokes_capability",
+      "status": "passed"
+    },
+    {
+      "name": "model_build_failure_revokes_before_owner_retirement",
+      "status": "passed"
+    },
+    {
+      "name": "state_hook_refused_before_state_dict_call",
+      "status": "passed"
+    },
+    {
+      "name": "state_load_failure_revokes_capability",
+      "status": "passed"
+    },
+    {
+      "name": "model_value_change_refused_before_registration",
+      "status": "passed"
+    },
+    {
+      "name": "model_storage_alias_of_input_refused",
+      "status": "passed"
+    },
+    {
+      "name": "input_value_mutation_during_load_refused",
+      "status": "passed"
+    },
+    {
+      "name": "native_readback_wrong_length_refused",
+      "status": "passed"
+    },
+    {
+      "name": "native_model_storage_range_change_refused",
+      "status": "passed"
+    },
+    {
+      "name": "vad_constructor_failure_revokes_registered_model",
+      "status": "passed"
+    },
+    {
+      "name": "vad_instantiate_failure_revokes_registered_model",
+      "status": "passed"
+    },
+    {
+      "name": "vad_model_value_change_refused_by_final_verification",
+      "status": "passed"
+    },
+    {
+      "name": "generation_revoked_in_model_build_prevents_vad_publication",
+      "status": "passed"
+    },
+    {
+      "name": "generation_revoked_in_vad_constructor_prevents_publication",
+      "status": "passed"
+    },
+    {
+      "name": "generation_revoked_in_instantiate_prevents_publication",
+      "status": "passed"
+    },
+    {
+      "name": "deadline_after_model_build_revokes_capability",
+      "status": "passed"
+    },
+    {
+      "name": "deadline_after_instantiate_revokes_model_lease",
+      "status": "passed"
+    },
+    {
+      "name": "release_revocation_failure_retains_complete_owner",
+      "status": "passed"
+    },
+    {
+      "name": "failed_build_revocation_failure_retains_quarantined_owner",
+      "status": "passed"
+    },
+    {
+      "name": "cancellation_in_model_build_revokes_before_propagation",
+      "status": "passed"
+    },
+    {
+      "name": "failure_phase_does_not_copy_injected_error_message",
+      "status": "passed"
+    },
+    {
+      "name": "factory_registration_rejects_mismatched_bootstrap_digest_rows",
+      "status": "passed"
+    },
+    {
+      "name": "product_weak_reference_failure_revokes_before_publication",
+      "status": "passed"
+    },
+    {
+      "name": "generation_revocation_at_publication_boundary_refuses_transfer",
+      "status": "passed"
+    },
+    {
+      "name": "expired_retired_product_does_not_authorize_none",
+      "status": "passed"
+    }
+  ],
+  "elapsed_seconds": 25.158389599993825,
+  "failed": 0,
+  "guard_fields": {
+    "content_access_closed": true,
+    "environment_restored": true,
+    "implementation_helpers_intact": true,
+    "implementation_methods_intact": true,
+    "metadata_wrappers_intact": true,
+    "native_packages_absent": true,
+    "owned_runtime_closed_after_cases": true,
+    "reader_real_profile_closed": true,
+    "real_profile_attributes_absent": true,
+    "realpath_wrapper_intact": true
+  },
+  "guard_integrity": true,
+  "limitations": "Generated fake state only. Worker-local identity lifecycle, not real bootstrap/IPC, native cancellation/quiescence, model accuracy or OS reclamation.",
+  "native_qualified": false,
+  "passed": 59,
+  "qualification_exit": 0,
+  "release_approved": false,
+  "scope": "exact_factory_registry_and_owned_guard_with_fake_torch_only",
+  "skipped": 0,
+  "source_sha256": {
+    "EXPECTED-CASES.json": "78192b7fc2bb281c7e163bbafd6ff0ee16f8d746ba7b278be562f163573fe4c2",
+    "fake_torch_support.py": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b",
+    "fixed-factory.proposal.txt": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b",
+    "literal_parity.py": "fd00f3e32e4457bc4879abd1139a8408768c994b3114c994b4a670d837d18713",
+    "model_binding_registry.py": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+    "owned-pyannote.reference.txt": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2",
+    "owned_cpu_tensor_port.py": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+    "owned_factory_port.py": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+    "owned_guard.py": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+    "plain_state_reader.py": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+    "qualify_factory.py": "162b7a297b0a94ef579a3ba0590406417bd91b4882bd0747e70f9a4365ebf1c7",
+    "state_bridge.py": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  "startup_binding": true
+}

@@ -1,0 +1,5 @@
+# Final contract clarification — 2026-09-13
+
+Before qualification, preserve both earlier contract documents under `drafts/`. Update the integration steps to name the implemented registration lease, revocation-before-retirement order and quarantine on unconfirmed revocation. Replace a stale blanket statement about the separate controller proposal with the actual scope boundary: its author is preparing a handshake; this factory package does not implement or qualify that connection.
+
+These are source-aligned documentary corrections. Factory and registry bytes, captured references, prior synthetic results and the proposed version-bridge values remain unchanged. The first attempted textual patch matched no complete paragraph and was rejected without changing either target; the corrected patch changed only these documented passages.

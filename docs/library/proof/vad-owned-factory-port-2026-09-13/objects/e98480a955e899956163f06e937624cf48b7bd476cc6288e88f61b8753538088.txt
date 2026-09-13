@@ -1,0 +1,9 @@
+# Pre-execution harness review — 2026-09-13
+
+The first complete 55-case draft is preserved at `drafts/qualify_factory-before-preflight-review.py`, SHA-256 `1a7bdd0db205f9194655e04c614fffd1b938732b8236054590f3f2a69bb4a319`. It has not run. No factory, registry, prior qualification, or acceptance assertion is changed by this preparation.
+
+The swapped-runtime case originally expected `owned_runtime_registry_identity` directly from `build_strict_owned`. The reviewed transaction deliberately wraps a `ModelBindingRefusal` as `FactoryPortRefusal('factory_context')`, retaining the original exception as its cause. Correct the new case to assert that public phase and the exact underlying registry refusal, then retain its existing revocation and no-construction checks. This repairs a test expectation discovered by source review, not a failed measurement or product repair.
+
+Add three bounded cases before the first execution: mismatched bootstrap digest rows through the actual factory registration path; weak-reference failure after successful VAD construction but before publication; and generation revocation at the final publication boundary. They use generated fake state and reversible private seams. They do not claim native cancellation, process quiescence or allocator reclamation. Preserve final method/helper identities and every earlier case, except the documented expectation correction above.
+
+No run is admitted by this note. The complete final source, harness, literal membership, launcher and protocol must be reviewed and bound by the parent before the first synthetic execution.

@@ -1,0 +1,163 @@
+{
+  "scope": "prepared-generated-state-factory-registry-qualification",
+  "file_count": 31,
+  "files": [
+    {
+      "path": "BRIEF.md",
+      "bytes": 3377,
+      "sha256": "5e702d3eb8f5ed77a63ab6506526fb0a0385f235a1e8fb0b8eb6b72e2e6171f2"
+    },
+    {
+      "path": "CONTEXT-CLEANUP-REPAIR-BRIEF.md",
+      "bytes": 1546,
+      "sha256": "74b522e36f9538aae4c6e6f01cc5655e80a43725dfd9eceeb41b248dc9d190fc"
+    },
+    {
+      "path": "context/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "path": "context/owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "context/owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "path": "context/owned-pyannote.reference.txt",
+      "bytes": 8854,
+      "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2"
+    },
+    {
+      "path": "context/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "context/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "drafts/INTEGRATION-before-final-capability-clarification.md",
+      "bytes": 5496,
+      "sha256": "8541232f24ae44e0c379e84b47e7948dcbb9d5fe6d8699beca4c4ea910d4d045"
+    },
+    {
+      "path": "drafts/INTEGRATION-before-runtime-binding.md",
+      "bytes": 5526,
+      "sha256": "fcbc6fd623be9fa8c7836b58c46452908b741716b8515e3e531d5f68dec12f2d"
+    },
+    {
+      "path": "drafts/owned_factory_port-before-context-cleanup.py",
+      "bytes": 15075,
+      "sha256": "3a5b3264399f2be313b8ed3f4d3dcb584314c495ca8e2799714f3633f95a7b23"
+    },
+    {
+      "path": "drafts/owned_factory_port-before-expired-retirement-repair.py",
+      "bytes": 15192,
+      "sha256": "028a3c1ebd92e0ce7e4fefb5c37bd8d895496341d252b89acaa4b1281cfcbbcf"
+    },
+    {
+      "path": "drafts/owned_factory_port-before-runtime-binding.py",
+      "bytes": 13099,
+      "sha256": "71b846f5e7f7c513470af30c502641afb96435cff64af2f4f531a308122f6794"
+    },
+    {
+      "path": "drafts/qualify_factory-before-expired-retirement-repair.py",
+      "bytes": 39026,
+      "sha256": "378c8fd19677ee18ad2bcb32043d460ffc32d1bb15b85b4c561055da1a1e2f66"
+    },
+    {
+      "path": "drafts/qualify_factory-before-preflight-review.py",
+      "bytes": 36664,
+      "sha256": "1a7bdd0db205f9194655e04c614fffd1b938732b8236054590f3f2a69bb4a319"
+    },
+    {
+      "path": "drafts/WORKER-CAPABILITY-before-controller-status-clarification.md",
+      "bytes": 4355,
+      "sha256": "120f14a1fe4b6f861b197b5d34579bdfcbdf3e57b21f30af940f2023fed15bd2"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 3384,
+      "sha256": "78192b7fc2bb281c7e163bbafd6ff0ee16f8d746ba7b278be562f163573fe4c2"
+    },
+    {
+      "path": "EXPIRED-RETIREMENT-REPAIR-BRIEF.md",
+      "bytes": 1677,
+      "sha256": "5e6cb9bdab0df0e096573c19c5b5bf2fdde8cd93b23d092bf24bb8f42736906f"
+    },
+    {
+      "path": "fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "path": "FINAL-CONTRACT-CLARIFICATION.md",
+      "bytes": 841,
+      "sha256": "d300535e079140ec4cf4b0d678a344199b6a84b9e40d7a594ba29f06966eb40d"
+    },
+    {
+      "path": "INTEGRATION-AND-LIMITS.md",
+      "bytes": 5777,
+      "sha256": "4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932"
+    },
+    {
+      "path": "literal_parity.py",
+      "bytes": 3863,
+      "sha256": "fd00f3e32e4457bc4879abd1139a8408768c994b3114c994b4a670d837d18713"
+    },
+    {
+      "path": "model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "path": "owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "path": "PRE-EXECUTION-HARNESS-REVIEW.md",
+      "bytes": 1601,
+      "sha256": "e98480a955e899956163f06e937624cf48b7bd476cc6288e88f61b8753538088"
+    },
+    {
+      "path": "QUALIFICATION-PROPOSAL.md",
+      "bytes": 3586,
+      "sha256": "e4fa60b6987687427c1da2eae431b4ba020bf744fd8274a51b3a956b1582d532"
+    },
+    {
+      "path": "QUALIFICATION01-PROTOCOL.md",
+      "bytes": 4462,
+      "sha256": "fd87021e427c33490f00a1fa40919754f1c1f102811abe28c50d32f856b8f9ea"
+    },
+    {
+      "path": "qualify_factory.py",
+      "bytes": 39513,
+      "sha256": "162b7a297b0a94ef579a3ba0590406417bd91b4882bd0747e70f9a4365ebf1c7"
+    },
+    {
+      "path": "run_preflight01.ps1",
+      "bytes": 9499,
+      "sha256": "ddbe6629591703206604ebcb00c92383435e937fa9263d7dc2d873dc61171227"
+    },
+    {
+      "path": "RUNTIME-CAPABILITY-REPAIR-BRIEF.md",
+      "bytes": 2209,
+      "sha256": "6a538e35ccf0ed86cbc141b1d159f08f52d7e8cef023336e6340bb4373491e06"
+    },
+    {
+      "path": "WORKER-CAPABILITY-CONTRACT.md",
+      "bytes": 4419,
+      "sha256": "50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb"
+    }
+  ],
+  "native_approved": false,
+  "release_approved": false
+}

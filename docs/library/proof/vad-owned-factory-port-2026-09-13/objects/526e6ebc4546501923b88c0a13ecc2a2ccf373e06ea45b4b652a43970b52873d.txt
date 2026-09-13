@@ -1,0 +1,186 @@
+{
+  "scope": "post-run text and receipt verification only; no test rerun",
+  "ordered_case_membership_equal": true,
+  "case_count": 59,
+  "all_cases_passed": true,
+  "source_checks": [
+    {
+      "path": "BRIEF.md",
+      "unchanged": true
+    },
+    {
+      "path": "CONTEXT-CLEANUP-REPAIR-BRIEF.md",
+      "unchanged": true
+    },
+    {
+      "path": "context/fixed-factory.proposal.txt",
+      "unchanged": true
+    },
+    {
+      "path": "context/owned_cpu_tensor_port.py",
+      "unchanged": true
+    },
+    {
+      "path": "context/owned_guard.py",
+      "unchanged": true
+    },
+    {
+      "path": "context/owned-pyannote.reference.txt",
+      "unchanged": true
+    },
+    {
+      "path": "context/plain_state_reader.py",
+      "unchanged": true
+    },
+    {
+      "path": "context/state_bridge.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/INTEGRATION-before-final-capability-clarification.md",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/INTEGRATION-before-runtime-binding.md",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/owned_factory_port-before-context-cleanup.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/owned_factory_port-before-expired-retirement-repair.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/owned_factory_port-before-runtime-binding.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/qualify_factory-before-expired-retirement-repair.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/qualify_factory-before-preflight-review.py",
+      "unchanged": true
+    },
+    {
+      "path": "drafts/WORKER-CAPABILITY-before-controller-status-clarification.md",
+      "unchanged": true
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "unchanged": true
+    },
+    {
+      "path": "EXPIRED-RETIREMENT-REPAIR-BRIEF.md",
+      "unchanged": true
+    },
+    {
+      "path": "fake_torch_support.py",
+      "unchanged": true
+    },
+    {
+      "path": "FINAL-CONTRACT-CLARIFICATION.md",
+      "unchanged": true
+    },
+    {
+      "path": "INTEGRATION-AND-LIMITS.md",
+      "unchanged": true
+    },
+    {
+      "path": "literal_parity.py",
+      "unchanged": true
+    },
+    {
+      "path": "model_binding_registry.py",
+      "unchanged": true
+    },
+    {
+      "path": "owned_factory_port.py",
+      "unchanged": true
+    },
+    {
+      "path": "PRE-EXECUTION-HARNESS-REVIEW.md",
+      "unchanged": true
+    },
+    {
+      "path": "QUALIFICATION-PROPOSAL.md",
+      "unchanged": true
+    },
+    {
+      "path": "QUALIFICATION01-PROTOCOL.md",
+      "unchanged": true
+    },
+    {
+      "path": "qualify_factory.py",
+      "unchanged": true
+    },
+    {
+      "path": "run_preflight01.ps1",
+      "unchanged": true
+    },
+    {
+      "path": "RUNTIME-CAPABILITY-REPAIR-BRIEF.md",
+      "unchanged": true
+    },
+    {
+      "path": "WORKER-CAPABILITY-CONTRACT.md",
+      "unchanged": true
+    }
+  ],
+  "copy_checks": [
+    {
+      "name": "plain_state_reader.py",
+      "unchanged": true
+    },
+    {
+      "name": "state_bridge.py",
+      "unchanged": true
+    },
+    {
+      "name": "owned_cpu_tensor_port.py",
+      "unchanged": true
+    },
+    {
+      "name": "model_binding_registry.py",
+      "unchanged": true
+    },
+    {
+      "name": "owned_factory_port.py",
+      "unchanged": true
+    },
+    {
+      "name": "owned_guard.py",
+      "unchanged": true
+    },
+    {
+      "name": "fake_torch_support.py",
+      "unchanged": true
+    },
+    {
+      "name": "literal_parity.py",
+      "unchanged": true
+    },
+    {
+      "name": "fixed-factory.proposal.txt",
+      "unchanged": true
+    },
+    {
+      "name": "owned-pyannote.reference.txt",
+      "unchanged": true
+    },
+    {
+      "name": "qualify_factory.py",
+      "unchanged": true
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "unchanged": true
+    }
+  ],
+  "stderr_bytes": 0,
+  "stdout_sha256": "d2c4321b31abd0181a58e51064414b24e2918e1b0f98480a951daa220a96fd75",
+  "pins_sha256": "bd7c9375e5c3e4678969a1746a99aab47109fa3ae47c1c998287d9dd9e19f2f1",
+  "native_qualified": false
+}
