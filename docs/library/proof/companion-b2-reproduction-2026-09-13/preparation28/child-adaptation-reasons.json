@@ -1,0 +1,42 @@
+[
+  {
+    "reason": "Require the exact retained private interpreter version.",
+    "before": "(3, 14, 6)",
+    "after": "(3, 13, 15)"
+  },
+  {
+    "reason": "Assert private executable and exact two-path startup before later imports.",
+    "before": "import argparse\n",
+    "after": "# Inspect startup before further imports or any artifact access.\nEXPECTED_RUNTIME = \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/b2-stdlib313-runtime01\"\nnormalize = lambda value: value.replace(\"/\", \"\\\\\").rstrip(\"\\\\\").casefold()\nexpected_paths = {normalize(EXPECTED_RUNTIME), normalize(EXPECTED_RUNTIME + \"/python313.zip\")}\nif normalize(sys.executable) != normalize(EXPECTED_RUNTIME + \"/python.exe\") or len(sys.path) != 2 or {normalize(value) for value in sys.path} != expected_paths:\n    raise RuntimeError(\"Private executable and exactly two private stdlib paths required\")\n\nimport argparse\n"
+  },
+  {
+    "reason": "Fresh independent label; no first-run reuse.",
+    "before": "choices=(\"py314-01\",)",
+    "after": "choices=(\"py313-01\",)"
+  },
+  {
+    "reason": "Allow only private stdlib reads and the exact first output for comparison.",
+    "before": "stdlib_root = Path(r\"C:\\Python314\")",
+    "after": "stdlib_root = Path(EXPECTED_RUNTIME)\ncomparison = out.parent / \"b2-real-wheel-py314-01/artifact/faster_whisper-1.2.1+uoink.localassets1-py3-none-any.whl\""
+  },
+  {
+    "reason": "Add exact comparison wheel read without expanding write scope.",
+    "before": "(path == upstream or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))",
+    "after": "(path in (upstream, comparison) or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))"
+  },
+  {
+    "reason": "Reverify exact runtime and private configuration; require a different epoch before wheel read.",
+    "before": "    # First permitted read of the real captured wheel. Nothing above reads it.\n",
+    "after": "    # Verify copied runtime bytes before any wheel access; do not run original runtime.\n    plan_path = out / \"runtime-copy-plan.json\"\n    plan_bytes = builder.read_regular_file(plan_path, 256 * 1024)\n    if builder.digest(plan_bytes) != \"8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b\":\n        raise ValueError(\"Runtime plan identity mismatch\")\n    runtime_plan = json.loads(plan_bytes)\n    expected_runtime_names = {row[\"filename\"] for row in runtime_plan[\"files\"]} | {\"python313._pth\"}\n    names = []\n    for path in stdlib_root.iterdir():\n        names.append(path.name)\n        if len(names) > 34:\n            raise ValueError(\"Extra runtime entries\")\n    if len(names) != 34 or set(names) != expected_runtime_names:\n        raise ValueError(\"Runtime file set mismatch\")\n    for row in runtime_plan[\"files\"]:\n        data = builder.read_regular_file(stdlib_root / row[\"filename\"], row[\"bytes\"], row[\"bytes\"])\n        if builder.digest(data) != row[\"sha256\"]:\n            raise ValueError(\"Private runtime identity mismatch\")\n    if builder.read_regular_file(stdlib_root / \"python313._pth\", 16, 16) != b\"python313.zip\\n.\\n\":\n        raise ValueError(\"Private no-site configuration mismatch\")\n    receipt.update(private_runtime_verified=True, private_runtime_file_count=34,\n                   source_date_epoch=os.environ.get(\"SOURCE_DATE_EPOCH\"))\n    if os.environ.get(\"SOURCE_DATE_EPOCH\") != \"2000000000\":\n        raise ValueError(\"Different fixed ambient epoch required\")\n    # First permitted read of the real captured wheel. Nothing above reads it.\n"
+  },
+  {
+    "reason": "Require exact real first-output identity and byte equality.",
+    "before": "    receipt.update(status=\"BUILT_AND_BYTE_VERIFIED\", builder_sha256=builder.digest(builder_bytes),",
+    "after": "    # Byte comparison only. No model-member interpretation or package import.\n    reference = builder.read_regular_file(comparison, 1387859, 1387859)\n    if builder.digest(reference) != \"d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883\":\n        raise ValueError(\"First output identity mismatch\")\n    if blob != reference:\n        raise ValueError(\"Python 3.13 output differs from first output\")\n    receipt.update(status=\"BUILT_AND_BYTE_VERIFIED\", builder_sha256=builder.digest(builder_bytes),"
+  },
+  {
+    "reason": "Report reproduction only after successful real byte comparison.",
+    "before": "reproducibility_python313=\"PENDING_PRIVATE_RUNTIME_REVIEW\"",
+    "after": "reproducibility_python313=\"BYTE_IDENTICAL\", comparison_wheel_sha256=builder.digest(reference), comparison_wheel_bytes=len(reference)"
+  }
+]

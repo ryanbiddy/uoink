@@ -1,0 +1,236 @@
+{
+  "created_utc": "2026-09-13T14:22:39.0928040Z",
+  "payload_count": 46,
+  "payloads": [
+    {
+      "file": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "actual-copy01/copy-result.json",
+      "bytes": 5563,
+      "sha256": "e355630549b761970277982e16488c3bd72497849ade640f45e21925ec260520"
+    },
+    {
+      "file": "actual-copy01/outer-exit.json",
+      "bytes": 24,
+      "sha256": "9eda5d9ccd287850b87e89cb84a69cdaf36ac5652efb6bd20499e37fa7161dc1"
+    },
+    {
+      "file": "actual-py313-01/artifact/provenance.json",
+      "bytes": 9128,
+      "sha256": "750a0469de899dabd20e234ea7b1e130f53f0ca6681aa8399c653054bf44be31"
+    },
+    {
+      "file": "actual-py313-01/build-result.json",
+      "bytes": 2255,
+      "sha256": "9bae1281c3b1278e1bbf10884c22940b707056ec16a3bf6c0d01775c9817eb73"
+    },
+    {
+      "file": "actual-py313-01/console.log",
+      "bytes": 177,
+      "sha256": "48bc1959730722145d9855cc5c5d445272d0e31395f7eacb11d3b62c5d231ebf"
+    },
+    {
+      "file": "actual-py313-01/launch-plan.json",
+      "bytes": 750,
+      "sha256": "3125fe2f3c99498cf22a74c3a28f49fe4d8693968d20ec7f73faaa2f84fa1a83"
+    },
+    {
+      "file": "actual-py313-01/launch-result.json",
+      "bytes": 169,
+      "sha256": "37fb729a538974abbec78adddd9f3e42121d8e4a42c19a8aee814a2303f7d4ee"
+    },
+    {
+      "file": "actual-py313-01/outer-exit.json",
+      "bytes": 24,
+      "sha256": "9eda5d9ccd287850b87e89cb84a69cdaf36ac5652efb6bd20499e37fa7161dc1"
+    },
+    {
+      "file": "BRIEF.md",
+      "bytes": 1414,
+      "sha256": "24735e9589789367a0769d90435446c1bbbcc53340db0085266e2832b6d90ae5"
+    },
+    {
+      "file": "copy-bindings.json",
+      "bytes": 19854,
+      "sha256": "224f7ac9346a46dc63e66c20b407bdd2bd7c4331da7a63d2df9fcc36b170fcdf"
+    },
+    {
+      "file": "preparation28/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "file": "preparation28/BRIEF.md",
+      "bytes": 3179,
+      "sha256": "afacfaf4eee76a08971c831bed94820f86e79da99eb13facf98efe893afba554"
+    },
+    {
+      "file": "preparation28/build-guarded313.py",
+      "bytes": 11183,
+      "sha256": "616295bae49ab05844a57e88ad1b47cc5b612cb9094e275c1aabcedd991a788a"
+    },
+    {
+      "file": "preparation28/child-adaptation-reasons.json",
+      "bytes": 4655,
+      "sha256": "610e5b88c7db5540d1c095c52cf55df4524e22a78d8b5077d77249d34ebca498"
+    },
+    {
+      "file": "preparation28/copy-and-launch.py",
+      "bytes": 9411,
+      "sha256": "6fcf3a4476b3b4517b227bf213a875c88831aa5a03e7435704362b8bca36ed26"
+    },
+    {
+      "file": "preparation28/first-run/build-result.json",
+      "bytes": 1939,
+      "sha256": "2955705e8d3476c49f3b9dd2a1b2b792bdbb2c0d6f0e40d62f6137f43edafb60"
+    },
+    {
+      "file": "preparation28/first-run/launch-plan.json",
+      "bytes": 2594,
+      "sha256": "2b8ac1b8f76af22f0a96c3c21d0a3b39ac4d6a9aecd711cea9cc217305f4b0cd"
+    },
+    {
+      "file": "preparation28/first-run/launch-result.json",
+      "bytes": 140,
+      "sha256": "5ccdb59610099af090c891c3d5cf745ff5619759b887b8a61ee5fcd0f5e1e53f"
+    },
+    {
+      "file": "preparation28/first-run/ROOT-DECISION.md",
+      "bytes": 2166,
+      "sha256": "4ba9792b01c31d751652023213c6417d21bd9230f86018b148578651adb86ae0"
+    },
+    {
+      "file": "preparation28/guarded-child313.patch.txt",
+      "bytes": 6453,
+      "sha256": "faf6d58a61dcdb9690d1196aecf22ce4946fac9b0048f5401da4f8da0cf0e602"
+    },
+    {
+      "file": "preparation28/input-bindings.json",
+      "bytes": 3856,
+      "sha256": "33fec0db9e2fa7b7b67ac62e25f2f0c14470d8f2cce3e7868cee1a57f05a8c1a"
+    },
+    {
+      "file": "preparation28/inputs/build_faster_whisper_localassets_wheel.py",
+      "bytes": 16354,
+      "sha256": "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f"
+    },
+    {
+      "file": "preparation28/inputs/recipe/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "file": "preparation28/inputs/recipe/member-manifest.json",
+      "bytes": 5867,
+      "sha256": "2f1816cf0f521339d8b6709bfa27b0b6a7762582a61939f3ac901d65cdb26296"
+    },
+    {
+      "file": "preparation28/inputs/recipe/NOTICE.txt",
+      "bytes": 733,
+      "sha256": "f82a61fe4fa1dd443f24898c268282f96d1fb8a559c542ea1ab438ca2e34397e"
+    },
+    {
+      "file": "preparation28/inputs/recipe/patch.txt",
+      "bytes": 1377,
+      "sha256": "57451db2279d34c1e5c60f9a9d2c59b3b4a2a921607b53103533bb19a5d8e970"
+    },
+    {
+      "file": "preparation28/PREPARATION-RECEIPT.json",
+      "bytes": 1422,
+      "sha256": "bfc65c9cc71d7b6bcb669bccbfff954e7cdc31fce9184d25fd57488390499b32"
+    },
+    {
+      "file": "preparation28/preparation-repair01/attempt01.json",
+      "bytes": 382,
+      "sha256": "0787b7f34ee32dc07d9004a12175271d7af28e1038893c0d285ed0ce43a9e756"
+    },
+    {
+      "file": "preparation28/preparation-repair01/prepare-before.py.txt",
+      "bytes": 7486,
+      "sha256": "446ca6c850a5b08d4d13ea38a4dc352bf55db8c7b54febb875109d13d87dfa4a"
+    },
+    {
+      "file": "preparation28/preparation-repair01/quoting-repair.patch.txt",
+      "bytes": 1271,
+      "sha256": "21379712944b39c1f7dc6fccce56a70d2861aa67ce2a9a28007513a321c10225"
+    },
+    {
+      "file": "preparation28/preparation-repair01/REASON-AND-BRIEF.md",
+      "bytes": 895,
+      "sha256": "2f8fe62ee57a8fb34500240e1fcfe54337b220438e306d7577f13b5091ed727d"
+    },
+    {
+      "file": "preparation28/prepare-text-inputs.py",
+      "bytes": 7483,
+      "sha256": "d760b53ab63c9c9a206f21c077fd7e382fd40bdc44ba6e21fcf95359f771ad3c"
+    },
+    {
+      "file": "preparation28/prior-child/build-guarded314.py.txt",
+      "bytes": 8481,
+      "sha256": "3becaed597aa15f3b2fc5d5cc816aaf172d89cfa4165aed92d18e47fb56ccc73"
+    },
+    {
+      "file": "preparation28/prior-seals/first-preparation21-SHA256.json",
+      "bytes": 3469,
+      "sha256": "ebab6c9180c7c8f230e55b619d1cc469d7043f1a43e197a3a8abd126f7eb7484"
+    },
+    {
+      "file": "preparation28/python313-private-pth.txt",
+      "bytes": 16,
+      "sha256": "6132a387c961a643beab61b8b426cfd73c366c6f6ad2d5aadc5ccf225776b399"
+    },
+    {
+      "file": "preparation28/runtime-copy-plan.json",
+      "bytes": 6508,
+      "sha256": "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b"
+    },
+    {
+      "file": "preparation28/seal-preparation.py",
+      "bytes": 3263,
+      "sha256": "f0eb4a2d1860d249253bb374f9514691e11cab9228dc031daa6026bab20c9758"
+    },
+    {
+      "file": "preparation28/SHA256.json",
+      "bytes": 4627,
+      "sha256": "0b1cb98b296f34965d8bcebe8a67755bb5315df1a3663b479e282da630346f4c"
+    },
+    {
+      "file": "preparation28/VERDICT.md",
+      "bytes": 1557,
+      "sha256": "1b42d2ff2ed521f5613627c0e51882f5d16a53c9ed638bd8d81f2036bd8d4025"
+    },
+    {
+      "file": "references/first-build132-reference.json",
+      "bytes": 463,
+      "sha256": "d0db51805f17e362f802cc0bc4fa2823a37e1e15b3e071b1ba068b153024671b"
+    },
+    {
+      "file": "references/first-build132-SHA256.json",
+      "bytes": 24665,
+      "sha256": "a553c5264f19c08dd86d98fe56db4d9f19cee5bf471a8c1a79bf45f6c0cff9eb"
+    },
+    {
+      "file": "ROOT-DECISION.md",
+      "bytes": 1626,
+      "sha256": "cd123befa4db24f2fc4663a3d5d1060f89cc0cf0da589cff8a55fdd9731274d9"
+    },
+    {
+      "file": "seal-documentary.ps1",
+      "bytes": 10481,
+      "sha256": "06504a3cb0a3de49dfd5f43633d0b90f7db5732156a59a6a168642abf3ac0b1a"
+    },
+    {
+      "file": "VERDICT.md",
+      "bytes": 2755,
+      "sha256": "6ee14ada9d20c9e95eb082e3fd6e0d624e768f692a7d1658b2da0a94c03f98e9"
+    },
+    {
+      "file": "verification.json",
+      "bytes": 868,
+      "sha256": "ad9218c52631d91a345c08fdad08d418777e2828d6f60981de2b0ff7afa8c992"
+    }
+  ]
+}

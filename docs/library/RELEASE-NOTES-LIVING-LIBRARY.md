@@ -24,8 +24,9 @@ Source work after package 08 includes signing receipts at `0b3629d`, the
 accepted local NLTK wheel at `52d9f7d` and installer binding at `07084fe`,
 owner/process repairs at `ff67b84` and `747fb6b`, and the ASR cache-consent guard
 at `b96dbd0`. These changes are covered by the latest complete source tree.
-The proposed tokenizer derivative and fixed VAD loader remain separate
-preparation; they have not been installed. The last completed branch backup
+The tokenizer derivative now builds identically under Python 3.13 and 3.14;
+it remains uninstalled. The fixed VAD loader is still in preparation.
+The last completed branch backup
 is `19d51a8`; later commits are local until another authorized branch backup.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
@@ -143,11 +144,27 @@ passed/four failed. The Windows casing finding was rejected after a native
 Path equality probe disproved its premise. See [Astra's disposition](ASTRA-ASSET-COUNCIL-VERDICT-2026-09-13.md)
 and [the unapplied B2 scope](ASTRA-COMPANION-B2-PREPARATION-VERDICT-2026-09-13.md).
 
+The B2 builder passes 62 synthetic cases independently in both runs. Actual
+Python 3.13 and 3.14 builds produce the same 1,387,859-byte wheel, SHA256
+`d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883`.
+All 16 members and RECORD pass byte checks; the license and opaque ONNX asset
+are unchanged. The private Python 3.13 runtime uses verified no-site startup.
+No package or model was imported or installed. This qualifies packaging only;
+the optional Hub-argument compatibility repair is a separate pending proposal.
+See [the reproduction verdict](proof/companion-b2-reproduction-2026-09-13/VERDICT.md).
+
 Bounded static inspection of the packaged VAD checkpoint is archived at
 `01163e1`. Runs01/02 refused; reviewed runs03/04 completed without constructing
 objects or tensors. PyanNet literals alone do not establish configuration,
 provenance or compatibility. The fixed-loader draft remains unqualified.
 See [the static evidence verdict](ASTRA-VAD-STATIC-PREPARATION-VERDICT-2026-09-13.md).
+
+The later selected-root diagnostic at `ba8d2c8` preserves the strict cycle
+refusal and actual reader/outer exit 2. Its separately validated acyclic closure
+contains 1,069 nodes and 54 tensor argument descriptors, with recorded model
+configuration available as partial, untrusted metadata. Both synthetic runs
+pass 63 cases. No object, tensor or model was constructed; provenance and
+native compatibility remain open. See [the projection verdict](ASTRA-VAD-SELECTED-PROJECTION-VERDICT-2026-09-13.md).
 
 Package 08 contains Pillow 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
 The September 11 exact-version OSV observation of all 140 top-level pins retains

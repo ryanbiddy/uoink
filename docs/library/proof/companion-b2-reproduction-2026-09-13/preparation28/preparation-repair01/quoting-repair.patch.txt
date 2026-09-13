@@ -1,0 +1,16 @@
+--- attempt01/prepare-text-inputs.py
++++ attempt02/prepare-text-inputs.py
+@@ -39,10 +39,10 @@
+     changes.append({"reason": reason, "before": before, "after": after})
+ replace('(3, 14, 6)', '(3, 13, 15)', "Require the exact retained private interpreter version.")
+ replace('import argparse\n', '''# Inspect startup before further imports or any artifact access.
+-EXPECTED_RUNTIME = r"E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\b2-stdlib313-runtime01"
++EXPECTED_RUNTIME = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/b2-stdlib313-runtime01"
+ normalize = lambda value: value.replace("/", "\\\\").rstrip("\\\\").casefold()
+-expected_paths = {normalize(EXPECTED_RUNTIME), normalize(EXPECTED_RUNTIME + r"\python313.zip")}
+-if normalize(sys.executable) != normalize(EXPECTED_RUNTIME + r"\python.exe") or len(sys.path) != 2 or {normalize(value) for value in sys.path} != expected_paths:
++expected_paths = {normalize(EXPECTED_RUNTIME), normalize(EXPECTED_RUNTIME + "/python313.zip")}
++if normalize(sys.executable) != normalize(EXPECTED_RUNTIME + "/python.exe") or len(sys.path) != 2 or {normalize(value) for value in sys.path} != expected_paths:
+     raise RuntimeError("Private executable and exactly two private stdlib paths required")
+ 
+ import argparse

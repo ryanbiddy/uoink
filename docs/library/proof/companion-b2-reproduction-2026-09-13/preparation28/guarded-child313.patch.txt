@@ -1,0 +1,95 @@
+--- sealed21/build-guarded.py
++++ proposal/build-guarded313.py
+@@ -1,7 +1,14 @@
+ """Prepared stdlib-only ZIP transformation; no model package is imported."""
+ import sys
+-if tuple(sys.version_info[:3]) != (3, 14, 6) or not (sys.flags.isolated and sys.flags.no_site and sys.flags.dont_write_bytecode) or "site" in sys.modules:
++if tuple(sys.version_info[:3]) != (3, 13, 15) or not (sys.flags.isolated and sys.flags.no_site and sys.flags.dont_write_bytecode) or "site" in sys.modules:
+     raise RuntimeError("Unexpected interpreter or non-isolated startup")
++
++# Inspect startup before further imports or any artifact access.
++EXPECTED_RUNTIME = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/b2-stdlib313-runtime01"
++normalize = lambda value: value.replace("/", "\\").rstrip("\\").casefold()
++expected_paths = {normalize(EXPECTED_RUNTIME), normalize(EXPECTED_RUNTIME + "/python313.zip")}
++if normalize(sys.executable) != normalize(EXPECTED_RUNTIME + "/python.exe") or len(sys.path) != 2 or {normalize(value) for value in sys.path} != expected_paths:
++    raise RuntimeError("Private executable and exactly two private stdlib paths required")
+ 
+ import argparse
+ from datetime import datetime, timezone
+@@ -18,7 +25,7 @@
+ 
+ out = Path(__file__).absolute().parent
+ parser = argparse.ArgumentParser(description=__doc__)
+-parser.add_argument("label", choices=("py314-01",))
++parser.add_argument("label", choices=("py313-01",))
+ parser.add_argument("--execute-reviewed-build", action="store_true", required=True)
+ args = parser.parse_args()
+ run = out.parent / ("b2-real-wheel-" + args.label)
+@@ -40,7 +47,8 @@
+ finder = Finder()
+ sys.meta_path.insert(0, finder)
+ upstream = out.parent / "python313-graph-01/cache/http-v2/7/5/8/3/f/7583fef67084ddf87aa2564c995bb7778718a460ee10db0da2a67f4b.body"
+-stdlib_root = Path(r"C:\Python314")
++stdlib_root = Path(EXPECTED_RUNTIME)
++comparison = out.parent / "b2-real-wheel-py314-01/artifact/faster_whisper-1.2.1+uoink.localassets1-py3-none-any.whl"
+ def audit(event, values):
+     if event.startswith("socket.") or event in {"subprocess.Popen", "os.system", "os.exec", "os.spawn", "_winapi.CreateProcess", "ctypes.dlopen"}:
+         violations.append(event)
+@@ -51,7 +59,7 @@
+         mode = values[1] if event == "open" and len(values) > 1 else ""
+         flags = values[2] if event == "open" and len(values) > 2 else 0
+         writing = any(ch in (mode or "") for ch in "wax+") or bool((flags or 0) & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND))
+-        allowed = path.is_relative_to(run) if writing else (path == upstream or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))
++        allowed = path.is_relative_to(run) if writing else (path in (upstream, comparison) or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))
+         if "c:/users/hello/appdata/local/uoink/index.db" in normalized or normalized.endswith((".onnx", ".pt", ".pth", ".bin", ".safetensors")) or not allowed:
+             violations.append(event + ":forbidden-path")
+             raise PermissionError("Open outside scoped bytes refused")
+@@ -89,6 +97,30 @@
+     builder.check_no_links(out)
+     builder.check_no_links(run)
+     recipe = builder.load_recipe()
++    # Verify copied runtime bytes before any wheel access; do not run original runtime.
++    plan_path = out / "runtime-copy-plan.json"
++    plan_bytes = builder.read_regular_file(plan_path, 256 * 1024)
++    if builder.digest(plan_bytes) != "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b":
++        raise ValueError("Runtime plan identity mismatch")
++    runtime_plan = json.loads(plan_bytes)
++    expected_runtime_names = {row["filename"] for row in runtime_plan["files"]} | {"python313._pth"}
++    names = []
++    for path in stdlib_root.iterdir():
++        names.append(path.name)
++        if len(names) > 34:
++            raise ValueError("Extra runtime entries")
++    if len(names) != 34 or set(names) != expected_runtime_names:
++        raise ValueError("Runtime file set mismatch")
++    for row in runtime_plan["files"]:
++        data = builder.read_regular_file(stdlib_root / row["filename"], row["bytes"], row["bytes"])
++        if builder.digest(data) != row["sha256"]:
++            raise ValueError("Private runtime identity mismatch")
++    if builder.read_regular_file(stdlib_root / "python313._pth", 16, 16) != b"python313.zip\n.\n":
++        raise ValueError("Private no-site configuration mismatch")
++    receipt.update(private_runtime_verified=True, private_runtime_file_count=34,
++                   source_date_epoch=os.environ.get("SOURCE_DATE_EPOCH"))
++    if os.environ.get("SOURCE_DATE_EPOCH") != "2000000000":
++        raise ValueError("Different fixed ambient epoch required")
+     # First permitted read of the real captured wheel. Nothing above reads it.
+     receipt["actual_wheel_read_attempted"] = True
+     raw = builder.read_regular_file(upstream, builder.EXPECTED_WHEEL_SIZE, builder.EXPECTED_WHEEL_SIZE)
+@@ -120,10 +152,16 @@
+         if any(info.date_time != builder.ZIP_TIME or info.create_system != 3 or info.external_attr != 0o100644 << 16
+                or info.compress_type != zipfile.ZIP_STORED or info.extra or info.comment for info in infos):
+             raise ValueError("Output deterministic ZIP metadata mismatch")
++    # Byte comparison only. No model-member interpretation or package import.
++    reference = builder.read_regular_file(comparison, 1387859, 1387859)
++    if builder.digest(reference) != "d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883":
++        raise ValueError("First output identity mismatch")
++    if blob != reference:
++        raise ValueError("Python 3.13 output differs from first output")
+     receipt.update(status="BUILT_AND_BYTE_VERIFIED", builder_sha256=builder.digest(builder_bytes),
+         recipe_hashes=builder.RECIPE_HASHES, output=built["output"], member_count=len(members),
+         manifest_and_record_verified=True, opaque_asset_and_license_unchanged=True,
+-        opaque_asset_sha256=builder.digest(members[asset]), reproducibility_python313="PENDING_PRIVATE_RUNTIME_REVIEW")
++        opaque_asset_sha256=builder.digest(members[asset]), reproducibility_python313="BYTE_IDENTICAL", comparison_wheel_sha256=builder.digest(reference), comparison_wheel_bytes=len(reference))
+     code = 0
+ except Exception as exc:
+     receipt["failure"] = {"type": type(exc).__name__, "message": str(exc)}

@@ -1,0 +1,105 @@
+"""Copy only sealed source/recipe/receipt text; adapt the guarded child as text."""
+from datetime import datetime, timezone
+import difflib
+import hashlib
+import json
+from pathlib import Path
+
+out = Path(__file__).absolute().parent
+old = out.parent / "b2-real-wheel-preparation01"
+sha = lambda raw: hashlib.sha256(raw).hexdigest()
+manifest_raw = (old / "SHA256.json").read_bytes()
+assert sha(manifest_raw) == "ebab6c9180c7c8f230e55b619d1cc469d7043f1a43e197a3a8abd126f7eb7484"
+rows = {row["file"]: row for row in json.loads(manifest_raw)["payloads"]}
+bindings = []
+def write(name, raw):
+    target = out / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("xb") as stream:
+        stream.write(raw)
+def copy_original(name, target):
+    raw = (old / name).read_bytes()
+    row = rows[name]
+    assert len(raw) == row["bytes"] and sha(raw) == row["sha256"]
+    write(target, raw)
+    bindings.append({"source": str(old / name), "target": target, "bytes": len(raw), "sha256": sha(raw)})
+    return raw
+for name in ["inputs/build_faster_whisper_localassets_wheel.py", "inputs/recipe/B2.py.txt", "inputs/recipe/NOTICE.txt", "inputs/recipe/member-manifest.json", "inputs/recipe/patch.txt"]:
+    copy_original(name, name)
+copy_original("python313-runtime-copy-plan.json", "runtime-copy-plan.json")
+copy_original("python313-private-pth.txt", "python313-private-pth.txt")
+base = copy_original("build-guarded.py", "prior-child/build-guarded314.py.txt")
+write("prior-seals/first-preparation21-SHA256.json", manifest_raw)
+child = base.decode()
+changes = []
+def replace(before, after, reason):
+    global child
+    assert child.count(before) == 1, (reason, child.count(before))
+    child = child.replace(before, after)
+    changes.append({"reason": reason, "before": before, "after": after})
+replace('(3, 14, 6)', '(3, 13, 15)', "Require the exact retained private interpreter version.")
+replace('import argparse\n', '''# Inspect startup before further imports or any artifact access.
+EXPECTED_RUNTIME = "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/b2-stdlib313-runtime01"
+normalize = lambda value: value.replace("/", "\\\\").rstrip("\\\\").casefold()
+expected_paths = {normalize(EXPECTED_RUNTIME), normalize(EXPECTED_RUNTIME + "/python313.zip")}
+if normalize(sys.executable) != normalize(EXPECTED_RUNTIME + "/python.exe") or len(sys.path) != 2 or {normalize(value) for value in sys.path} != expected_paths:
+    raise RuntimeError("Private executable and exactly two private stdlib paths required")
+
+import argparse
+''', "Assert private executable and exact two-path startup before later imports.")
+replace('choices=("py314-01",)', 'choices=("py313-01",)', "Fresh independent label; no first-run reuse.")
+replace('stdlib_root = Path(r"C:\\Python314")', '''stdlib_root = Path(EXPECTED_RUNTIME)
+comparison = out.parent / "b2-real-wheel-py314-01/artifact/faster_whisper-1.2.1+uoink.localassets1-py3-none-any.whl"''', "Allow only private stdlib reads and the exact first output for comparison.")
+replace('(path == upstream or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))', '(path in (upstream, comparison) or any(path.is_relative_to(root) for root in (out, run, stdlib_root)))', "Add exact comparison wheel read without expanding write scope.")
+replace('    # First permitted read of the real captured wheel. Nothing above reads it.\n', '''    # Verify copied runtime bytes before any wheel access; do not run original runtime.
+    plan_path = out / "runtime-copy-plan.json"
+    plan_bytes = builder.read_regular_file(plan_path, 256 * 1024)
+    if builder.digest(plan_bytes) != "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b":
+        raise ValueError("Runtime plan identity mismatch")
+    runtime_plan = json.loads(plan_bytes)
+    expected_runtime_names = {row["filename"] for row in runtime_plan["files"]} | {"python313._pth"}
+    names = []
+    for path in stdlib_root.iterdir():
+        names.append(path.name)
+        if len(names) > 34:
+            raise ValueError("Extra runtime entries")
+    if len(names) != 34 or set(names) != expected_runtime_names:
+        raise ValueError("Runtime file set mismatch")
+    for row in runtime_plan["files"]:
+        data = builder.read_regular_file(stdlib_root / row["filename"], row["bytes"], row["bytes"])
+        if builder.digest(data) != row["sha256"]:
+            raise ValueError("Private runtime identity mismatch")
+    if builder.read_regular_file(stdlib_root / "python313._pth", 16, 16) != b"python313.zip\\n.\\n":
+        raise ValueError("Private no-site configuration mismatch")
+    receipt.update(private_runtime_verified=True, private_runtime_file_count=34,
+                   source_date_epoch=os.environ.get("SOURCE_DATE_EPOCH"))
+    if os.environ.get("SOURCE_DATE_EPOCH") != "2000000000":
+        raise ValueError("Different fixed ambient epoch required")
+    # First permitted read of the real captured wheel. Nothing above reads it.
+''', "Reverify exact runtime and private configuration; require a different epoch before wheel read.")
+replace('    receipt.update(status="BUILT_AND_BYTE_VERIFIED", builder_sha256=builder.digest(builder_bytes),', '''    # Byte comparison only. No model-member interpretation or package import.
+    reference = builder.read_regular_file(comparison, 1387859, 1387859)
+    if builder.digest(reference) != "d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883":
+        raise ValueError("First output identity mismatch")
+    if blob != reference:
+        raise ValueError("Python 3.13 output differs from first output")
+    receipt.update(status="BUILT_AND_BYTE_VERIFIED", builder_sha256=builder.digest(builder_bytes),''', "Require exact real first-output identity and byte equality.")
+replace('reproducibility_python313="PENDING_PRIVATE_RUNTIME_REVIEW"', 'reproducibility_python313="BYTE_IDENTICAL", comparison_wheel_sha256=builder.digest(reference), comparison_wheel_bytes=len(reference)', "Report reproduction only after successful real byte comparison.")
+write("build-guarded313.py", child.encode())
+write("guarded-child313.patch.txt", "".join(difflib.unified_diff(base.decode().splitlines(keepends=True), child.splitlines(keepends=True), fromfile="sealed21/build-guarded.py", tofile="proposal/build-guarded313.py")).encode())
+write("child-adaptation-reasons.json", (json.dumps(changes, indent=2) + "\n").encode())
+for source, target in [
+    (out.parent / "B2-REAL-WHEEL-ROOT-DECISION-2026-09-13.md", "first-run/ROOT-DECISION.md"),
+    (out.parent / "b2-real-wheel-py314-01/build-result.json", "first-run/build-result.json"),
+    (out.parent / "b2-real-wheel-py314-01/launch-result.json", "first-run/launch-result.json"),
+    (out.parent / "b2-real-wheel-py314-01/launch-plan.json", "first-run/launch-plan.json"),
+]:
+    # Named receipt text only. Never open artifact/*.whl or original binaries.
+    raw = source.read_bytes()
+    assert len(raw) <= 256 * 1024
+    write(target, raw)
+    bindings.append({"source": str(source), "target": target, "bytes": len(raw), "sha256": sha(raw)})
+write("input-bindings.json", (json.dumps({"created_utc": datetime.now(timezone.utc).isoformat(),
+    "bindings": bindings, "derived_child_sha256": sha(child.encode()), "runtime_copied_or_launched": False,
+    "wheel_accessed": False, "guarded_child_executed": False}, indent=2) + "\n").encode())
+print(json.dumps({"text_inputs_copied": len(bindings), "child_adaptations": len(changes), "runtime_or_wheel_accessed": False}))

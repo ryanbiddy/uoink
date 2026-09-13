@@ -1,0 +1,43 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "created_utc": "2026-09-13T14:12:42.810154+00:00",
+  "prior21_manifest_sha256": "ebab6c9180c7c8f230e55b619d1cc469d7043f1a43e197a3a8abd126f7eb7484",
+  "prior21_payloads_reverified": 21,
+  "static_ast_parses": [
+    {
+      "file": "build-guarded313.py",
+      "bytes": 11183,
+      "sha256": "616295bae49ab05844a57e88ad1b47cc5b612cb9094e275c1aabcedd991a788a"
+    },
+    {
+      "file": "copy-and-launch.py",
+      "bytes": 9411,
+      "sha256": "6fcf3a4476b3b4517b227bf213a875c88831aa5a03e7435704362b8bca36ed26"
+    },
+    {
+      "file": "inputs/build_faster_whisper_localassets_wheel.py",
+      "bytes": 16354,
+      "sha256": "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f"
+    },
+    {
+      "file": "prepare-text-inputs.py",
+      "bytes": 7483,
+      "sha256": "d760b53ab63c9c9a206f21c077fd7e382fd40bdc44ba6e21fcf95359f771ad3c"
+    },
+    {
+      "file": "seal-preparation.py",
+      "bytes": 3263,
+      "sha256": "f0eb4a2d1860d249253bb374f9514691e11cab9228dc031daa6026bab20c9758"
+    }
+  ],
+  "text_preparation_attempt01_exit": 1,
+  "text_preparation_attempt02_exit": 0,
+  "text_inputs_copied": 12,
+  "runtime_copy_invoked": false,
+  "runtime_launched": false,
+  "guarded_child_invoked": false,
+  "upstream_or_output_wheel_accessed": false,
+  "real_builds_run_here": 0,
+  "new_execution_qualification_cases": 0,
+  "builder_recipe_bytes_unchanged": true
+}

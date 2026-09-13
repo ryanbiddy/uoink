@@ -1,0 +1,17 @@
+{
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-stdlib313-runtime01\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01\\build-guarded313.py",
+    "py313-01",
+    "--execute-reviewed-build"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01",
+  "manifest_sha256": "0b1cb98b296f34965d8bcebe8a67755bb5315df1a3663b479e282da630346f4c",
+  "source_date_epoch": "2000000000",
+  "scrubbed_variable_names": [],
+  "runtime_plan_sha256": "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b",
+  "started_utc": "2026-09-13T14:16:13.382352+00:00"
+}
