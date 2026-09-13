@@ -1,0 +1,17 @@
+{
+  "scope": "Two separately admitted bounded invocations; no retry and no complete144 graph.",
+  "admitted_by": "/root",
+  "graph": {
+    "label": "qualification02",
+    "manifest": "7632b6f20ec9f4009fc78dc56aea8d5587dac1a0c8e316a79e57439ac875561c",
+    "guard": "8e01cfb06d60f8242fab23d6241eb20be098c0eca8a93c067732c35aa4ef050b",
+    "launcher": "fb1cf679d1dd1055c79dcc3346c4aa99d294c62cc3d3005983885adb49990057"
+  },
+  "nltk": {
+    "label": "read01",
+    "manifest": "3f570a81d22b348e58e000097c122d0c6caf18825366813302b1969390ca8b3e",
+    "reader": "461656af4bcad1fcdae8ba0b83185a0a4a39824e5eeb38ac57a0b1fca6e250f6",
+    "launcher": "577007d79ec11248290502faf1798ed01b82651c9b5c0eedb206c9e1aea200f0"
+  },
+  "message": "Astra admits two exact bounded commands after full initial source plus final deltas/launchers/protocol review. (A) graph qualification02 only, manifest7632b6f20ec9f4009fc78dc56aea8d5587dac1a0c8e316a79e57439ac875561c, guard8e01cfb06d60f8242fab23d6241eb20be098c0eca8a93c067732c35aa4ef050b, launcherfb1cf679d1dd1055c79dcc3346c4aa99d294c62cc3d3005983885adb49990057. Root read REPAIR02 and verified only exact11 metadata probe leaves; qualifier label-only delta, assertions unchanged. (B) exact NLTK read01, manifest3f570a81d22b348e58e000097c122d0c6caf18825366813302b1969390ca8b3e, reader461656af4bcad1fcdae8ba0b83185a0a4a39824e5eeb38ac57a0b1fca6e250f6, launcher577007d79ec11248290502faf1798ed01b82651c9b5c0eedb206c9e1aea200f0. Root read final diff, protocol and launcher. Record this admission in fresh separate scratch records before invocation, use observed pwsh with IG_FORBIDDEN_LIVE set, preserve exact actual tool objects and native outcomes. Execute each once, no retry. Then read results/guards and report. No144graph yet; if both valid prepare literal third NLTK branch and focused source tests, no execution before root review. All boundaries persist. Work in scratch only."
+}

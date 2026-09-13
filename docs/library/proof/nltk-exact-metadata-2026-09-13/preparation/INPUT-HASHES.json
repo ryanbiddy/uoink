@@ -1,0 +1,57 @@
+[
+  {
+    "path": "BRIEF.md",
+    "bytes": 1851,
+    "sha256": "1b80abd08c2e670c6c2d8a9b718007086ba3f855aafe4a9df6df1d68094cbf17"
+  },
+  {
+    "path": "drafts/read_metadata-source01.py",
+    "bytes": 15221,
+    "sha256": "955b597f4546c7af569b4c74c7ab0f1b88b1d296e7e2a7c383d599f0759f7c64"
+  },
+  {
+    "path": "inputs/builder-source.txt",
+    "bytes": 25377,
+    "sha256": "0f1d4116f5aa7b733e562f2d911ccedcedd69f7824fdf7462d343f6aa1ecfb34"
+  },
+  {
+    "path": "inputs/final-provenance.json",
+    "bytes": 2389,
+    "sha256": "a033900b7c76c745b0bb70716a9a5bd3b8e9a9d6d71b9234cead49cc3b07967d"
+  },
+  {
+    "path": "inputs/final-result.json",
+    "bytes": 793,
+    "sha256": "5c3b1c107b96a50b60f4630cd863807f71ef0a7a22306a8a7fa22d45e42a663f"
+  },
+  {
+    "path": "inputs/original-proof-SHA256.json",
+    "bytes": 13189,
+    "sha256": "3617f8c00ba5aa40e84f427ae766dba018cf37a5235ef651bca03231e9269463"
+  },
+  {
+    "path": "inputs/upstream-METADATA.txt",
+    "bytes": 3230,
+    "sha256": "78584b6194873a677ecc029634f2178e6b962fababd4188a0049d76e6b64ba1e"
+  },
+  {
+    "path": "PROTOCOL.md",
+    "bytes": 3042,
+    "sha256": "91f0c73852dc90155eedce930229e41e99317fc9413ddaf11f4c144cfcb7cca2"
+  },
+  {
+    "path": "read_metadata.py",
+    "bytes": 15612,
+    "sha256": "461656af4bcad1fcdae8ba0b83185a0a4a39824e5eeb38ac57a0b1fca6e250f6"
+  },
+  {
+    "path": "run_read01.ps1",
+    "bytes": 6040,
+    "sha256": "577007d79ec11248290502faf1798ed01b82651c9b5c0eedb206c9e1aea200f0"
+  },
+  {
+    "path": "SOURCE-MAP.json",
+    "bytes": 1285,
+    "sha256": "61f87323f3e56a42d57e0c1e05478a6bbe89413c907d7aaf4735d6383f2dde21"
+  }
+]

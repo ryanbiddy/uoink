@@ -1,0 +1,20 @@
+{
+  "scope": "Repaired stored wheel, independently inspected after both-root tests; no packaging utility or NLTK execution.",
+  "upstream_sha256": "ff9598a8e20518ee0d557745890cc4435b9578489e2dcbc69c4f81fa060caf7c",
+  "wheel_sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8",
+  "wheel_bytes": 6597605,
+  "members": 512,
+  "changed_members": [
+    "nltk-3.10.3+uoink.pathsec1.dist-info/METADATA",
+    "nltk/VERSION",
+    "nltk/classify/maxent.py",
+    "nltk/parse/transitionparser.py",
+    "nltk/tag/perceptron.py",
+    "nltk-3.10.3+uoink.pathsec1.dist-info/RECORD"
+  ],
+  "all_record_entries_verified": true,
+  "dependency_metadata_unchanged": true,
+  "all_other_payload_bytes_unchanged": true,
+  "model_imports": false,
+  "release_ready": false
+}

@@ -1,0 +1,342 @@
+{
+  "status": "PASS",
+  "exit": 0,
+  "artifact_verified_in_this_invocation": true,
+  "artifact_origin": "owned-built-wheel",
+  "public_local_release_record": false,
+  "artifact_url": null,
+  "wheel_member_imports": false,
+  "model_execution": false,
+  "runtime_accepted": false,
+  "metadata_bytes": 3245,
+  "metadata_sha256": "58ba0717917015b5fd7a2416d52d2ab7952eacfddcbe22797cbb566fba864234",
+  "fields": {
+    "name": "nltk",
+    "version": "3.10.3+uoink.pathsec1",
+    "requires_python": ">=3.10",
+    "requires_dist": [
+      "defusedxml",
+      "click",
+      "joblib",
+      "regex>=2021.8.3",
+      "tqdm",
+      "numpy; extra == \"machine-learning\"",
+      "python-crfsuite; extra == \"machine-learning\"",
+      "scikit-learn; extra == \"machine-learning\"",
+      "scipy; extra == \"machine-learning\"",
+      "matplotlib; extra == \"plot\"",
+      "pyparsing; extra == \"tgrep\"",
+      "twython; extra == \"twitter\"",
+      "requests; extra == \"corenlp\"",
+      "scipy; extra == \"all\"",
+      "pyparsing; extra == \"all\"",
+      "twython; extra == \"all\"",
+      "numpy; extra == \"all\"",
+      "requests; extra == \"all\"",
+      "python-crfsuite; extra == \"all\"",
+      "matplotlib; extra == \"all\"",
+      "scikit-learn; extra == \"all\""
+    ],
+    "provides_extra": [
+      "machine-learning",
+      "plot",
+      "tgrep",
+      "twitter",
+      "corenlp",
+      "all"
+    ]
+  },
+  "archive": {
+    "members": 512,
+    "record_rows": 512,
+    "record_bytes": 43111,
+    "record_sha256": "58520291b590a6d438e80c68370ab28f579c840da86e8af64583b5ed5d92b4de",
+    "selected_members_read": [
+      "nltk-3.10.3+uoink.pathsec1.dist-info/METADATA",
+      "nltk-3.10.3+uoink.pathsec1.dist-info/RECORD"
+    ],
+    "other_payload_record_hashes_recomputed": false,
+    "whole_file_hash_verified": true
+  },
+  "exact_version_only_transformation": true,
+  "artifact": {
+    "filename": "nltk-3.10.3+uoink.pathsec1-py3-none-any.whl",
+    "bytes": 6597605,
+    "sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8"
+  },
+  "reads": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-local-metadata-reader01\\inputs\\final-result.json",
+      "bytes": 793,
+      "sha256": "5c3b1c107b96a50b60f4630cd863807f71ef0a7a22306a8a7fa22d45e42a663f",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889259,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 793,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789329103076762100,
+        "st_birthtime_ns": 1789329103076762100
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889259,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 793,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789329103076762100,
+        "st_birthtime_ns": 1789329103076762100
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889259,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 793,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789283058573605900,
+        "st_birthtime_ns": 1789329103076762100
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889259,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 793,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789283058573605900,
+        "st_birthtime_ns": 1789329103076762100
+      }
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-local-metadata-reader01\\inputs\\final-provenance.json",
+      "bytes": 2389,
+      "sha256": "a033900b7c76c745b0bb70716a9a5bd3b8e9a9d6d71b9234cead49cc3b07967d",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889260,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2389,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789329103083775500,
+        "st_birthtime_ns": 1789329103083775500
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889260,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2389,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789329103083775500,
+        "st_birthtime_ns": 1789329103083775500
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889260,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2389,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789283058573605900,
+        "st_birthtime_ns": 1789329103083775500
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889260,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 2389,
+        "st_mtime_ns": 1789283058573605900,
+        "st_ctime_ns": 1789283058573605900,
+        "st_birthtime_ns": 1789329103083775500
+      }
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-local-metadata-reader01\\inputs\\original-proof-SHA256.json",
+      "bytes": 13189,
+      "sha256": "3617f8c00ba5aa40e84f427ae766dba018cf37a5235ef651bca03231e9269463",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889261,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 13189,
+        "st_mtime_ns": 1789283058956715200,
+        "st_ctime_ns": 1789329103088773400,
+        "st_birthtime_ns": 1789329103088773400
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889261,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 13189,
+        "st_mtime_ns": 1789283058956715200,
+        "st_ctime_ns": 1789329103088773400,
+        "st_birthtime_ns": 1789329103088773400
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889261,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 13189,
+        "st_mtime_ns": 1789283058956715200,
+        "st_ctime_ns": 1789283058956715200,
+        "st_birthtime_ns": 1789329103088773400
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889261,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 13189,
+        "st_mtime_ns": 1789283058956715200,
+        "st_ctime_ns": 1789283058956715200,
+        "st_birthtime_ns": 1789329103088773400
+      }
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-local-metadata-reader01\\inputs\\upstream-METADATA.txt",
+      "bytes": 3230,
+      "sha256": "78584b6194873a677ecc029634f2178e6b962fababd4188a0049d76e6b64ba1e",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889262,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 3230,
+        "st_mtime_ns": 1789281189320828600,
+        "st_ctime_ns": 1789329103092788200,
+        "st_birthtime_ns": 1789329103092788200
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889262,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 3230,
+        "st_mtime_ns": 1789281189320828600,
+        "st_ctime_ns": 1789329103092788200,
+        "st_birthtime_ns": 1789329103092788200
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889262,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 3230,
+        "st_mtime_ns": 1789281189320828600,
+        "st_ctime_ns": 1789281189320828600,
+        "st_birthtime_ns": 1789329103092788200
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889262,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 3230,
+        "st_mtime_ns": 1789281189320828600,
+        "st_ctime_ns": 1789281189320828600,
+        "st_birthtime_ns": 1789329103092788200
+      }
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-local-metadata-reader01\\inputs\\builder-source.txt",
+      "bytes": 25377,
+      "sha256": "0f1d4116f5aa7b733e562f2d911ccedcedd69f7824fdf7462d343f6aa1ecfb34",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889263,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 25377,
+        "st_mtime_ns": 1789283058657579000,
+        "st_ctime_ns": 1789329103094284900,
+        "st_birthtime_ns": 1789329103094284900
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889263,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 25377,
+        "st_mtime_ns": 1789283058657579000,
+        "st_ctime_ns": 1789329103094284900,
+        "st_birthtime_ns": 1789329103094284900
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889263,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 25377,
+        "st_mtime_ns": 1789283058657579000,
+        "st_ctime_ns": 1789283058657579000,
+        "st_birthtime_ns": 1789329103094284900
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978889263,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 25377,
+        "st_mtime_ns": 1789283058657579000,
+        "st_ctime_ns": 1789283058657579000,
+        "st_birthtime_ns": 1789329103094284900
+      }
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\nltk-local-wheel-2026-09-13\\final-artifact\\nltk-3.10.3+uoink.pathsec1-py3-none-any.whl",
+      "bytes": 6597605,
+      "sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8",
+      "path_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978730565,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 6597605,
+        "st_mtime_ns": 1789283058564567400,
+        "st_ctime_ns": 1789283058563064100,
+        "st_birthtime_ns": 1789283058563064100
+      },
+      "path_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978730565,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 6597605,
+        "st_mtime_ns": 1789283058564567400,
+        "st_ctime_ns": 1789283058563064100,
+        "st_birthtime_ns": 1789283058563064100
+      },
+      "handle_before": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978730565,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 6597605,
+        "st_mtime_ns": 1789283058564567400,
+        "st_ctime_ns": 1789283058564567400,
+        "st_birthtime_ns": 1789283058563064100
+      },
+      "handle_after": {
+        "st_dev": 5062249756973681925,
+        "st_ino": 281474978730565,
+        "st_mode": 33206,
+        "st_nlink": 1,
+        "st_size": 6597605,
+        "st_mtime_ns": 1789283058564567400,
+        "st_ctime_ns": 1789283058564567400,
+        "st_birthtime_ns": 1789283058563064100
+      }
+    }
+  ],
+  "guard_violations": [],
+  "elapsed_seconds": 0.021822099981363863,
+  "scope": "Exact local packaging METADATA receipt; no installation, graph acceptance or model qualification."
+}
