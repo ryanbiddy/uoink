@@ -1,0 +1,27 @@
+[
+  {
+    "path": "BRIEF.md",
+    "bytes": 1612,
+    "sha256": "d50ffd58592b97dfc4bceac09b7c230692118a96adf541d9ab3af465f880e988"
+  },
+  {
+    "path": "BUILD-PROTOCOL.md",
+    "bytes": 2208,
+    "sha256": "1def8130d2a1bc33dc1e0abcc7ff8cb75001ecd55ca70f3c08c7e9db93ee7fa9"
+  },
+  {
+    "path": "guarded_build.py",
+    "bytes": 7549,
+    "sha256": "736f9550aed7ae0177594c6337c26f3a518c884fb89919d3de9b799289952484"
+  },
+  {
+    "path": "run_build01.ps1",
+    "bytes": 9109,
+    "sha256": "a20259d9ed0f45fc0071d5b4c334eeac5c609db5b5244e85deefc63d91aa88ef"
+  },
+  {
+    "path": "runtime-copy-plan.json",
+    "bytes": 6508,
+    "sha256": "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b"
+  }
+]

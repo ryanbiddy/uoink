@@ -1,0 +1,18 @@
+{
+  "status": "DOCUMENTARY_VERIFIED",
+  "copied_payloads": 30,
+  "source_and_copy_hashes_verified": true,
+  "author_outer_exit": 0,
+  "author_native_phases": 2,
+  "root_outer_exit": 0,
+  "wheel_sha256": "0c23ec175b663eaafe9955ff93b1ccc6e93ed66a61665951baac5799a75c92d4",
+  "wheel_bytes": 134793,
+  "members": 22,
+  "record_rows": 22,
+  "wheel_bytes_copied": false,
+  "test_or_build_rerun": false,
+  "model_or_runtime_binary_read": false,
+  "prior217_manifest_preserved": true,
+  "historical_maps_preserved": true,
+  "finished_utc": "2026-09-13T19:20:33.1161193Z"
+}
