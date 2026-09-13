@@ -1,0 +1,82 @@
+{
+  "label": "wrapper-preflight01",
+  "executable": "C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+  "arguments": [
+    "-NoLogo",
+    "-NoProfile",
+    "-NonInteractive",
+    "-File",
+    "qualify_wrapper.ps1"
+  ],
+  "inputs": [
+    {
+      "name": "run-root.original.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\before\\run-root.ps1",
+      "sha256": "75b8058874a0389ccdd02f63815b1430b543967e5ad232904bbb86b7a0073a23"
+    },
+    {
+      "name": "run-root.repaired.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\run-root.repaired.ps1",
+      "sha256": "11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63"
+    },
+    {
+      "name": "inert_child.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\inert_child.py",
+      "sha256": "9ef273a19f466e07d73c1cb7e2d895256045813ed49e2dd2315176e3dbc7f07f"
+    },
+    {
+      "name": "call_wrapper.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\call_wrapper.ps1",
+      "sha256": "3165e20b0b8f836f37fac7175a3433adfbf0e740952e091dd389f02e32d5c1df"
+    },
+    {
+      "name": "qualify_wrapper.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\qualify_wrapper.ps1",
+      "sha256": "4aa3bc369618da8b668e68a13122673ff2fb70c32ecd183d3e2aa32ecf80e104"
+    },
+    {
+      "name": "REPAIR-BRIEF-2026-09-13.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\REPAIR-BRIEF-2026-09-13.md",
+      "sha256": "f0ee35c5094d77742db12ec0b932e6ef6024079d50852abf4cbcce0c0ddb4da0"
+    },
+    {
+      "name": "SOURCE-REVIEW-VERDICT.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\SOURCE-REVIEW-VERDICT.md",
+      "sha256": "4bfcee07a737c723e373897a579036c2b99263add25e6addd5b075e3e0a5f72d"
+    },
+    {
+      "name": "QUALIFICATION01-PROTOCOL.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\QUALIFICATION01-PROTOCOL.md",
+      "sha256": "af5457794acfe5e4b04f1ea9a355877d88857e59285f9aae276c2c5a3fbca99c"
+    },
+    {
+      "name": "PREQUALIFICATION-OUTCOME-REFINEMENT.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\PREQUALIFICATION-OUTCOME-REFINEMENT.md",
+      "sha256": "08ba0f8306903b860edbf81596c2e38ff6cb720b810aa365d98a832ac2d38200"
+    },
+    {
+      "name": "ORIGINAL-BINDINGS.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\ORIGINAL-BINDINGS.json",
+      "sha256": "802be20521c779897d68c08562c49118c95012d44fd7e7983d0d2ffe8dccf065"
+    },
+    {
+      "name": "wrapper-repair.patch.txt",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\wrapper-repair.patch.txt",
+      "sha256": "6df4cd491490e71ebf919fa8115d8ff99d0a30debf721b98e4a46a3dc97a6f5e"
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\run_preflight01.ps1",
+      "sha256": "d2aa72b5f661b3102c77284e3e69034e28e69e8eb48cb2dc832b43ecfbb81afe"
+    },
+    {
+      "name": "ROOT-ADMISSION.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\ROOT-ADMISSION.md",
+      "sha256": "cec181dd6806e77f416e2f323c0bdcd0c80f1ff68534ebf5dc9481350ed020b4"
+    }
+  ],
+  "startup_binding_set": true,
+  "planned_repair_cases": 12,
+  "planned_original_diagnostics": 4,
+  "actual_d1_invocation_authorized": false
+}

@@ -1,0 +1,29 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\before\\run-root.ps1" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\run-root.repaired.ps1"
+index bf621dc..79d74ab 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\before\\run-root.ps1"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-dormant-invocation-repair01\\run-root.repaired.ps1"
+@@ -1,4 +1,5 @@
+ $ErrorActionPreference = 'Stop'
++$PSNativeCommandUseErrorActionPreference = $false
+ $taskRoot = [System.IO.Path]::GetFullPath($PSScriptRoot)
+ $outerRoot = Join-Path $taskRoot 'outer-d1-real-01'
+ New-Item -ItemType Directory -Path $outerRoot -ErrorAction Stop | Out-Null
+@@ -14,6 +15,18 @@ $arguments = @('-I','-S','-B',(Join-Path $taskRoot 'launch_d1.py'))
+     Set-Content -LiteralPath (Join-Path $outerRoot 'command.json') -Encoding utf8
+ & 'C:\Python314\python.exe' @arguments 1> (Join-Path $outerRoot 'stdout.log') 2> (Join-Path $outerRoot 'stderr.log')
+ $rawExit = $LASTEXITCODE
++# Persist the observed native exit before JSON formatting or log postchecks.
++$rawExitBytes = [System.Text.Encoding]::ASCII.GetBytes(([string]$rawExit) + "`n")
++$rawExitStream = [System.IO.FileStream]::new(
++    (Join-Path $outerRoot 'raw-exit.txt'), [System.IO.FileMode]::CreateNew,
++    [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read, 4096,
++    [System.IO.FileOptions]::WriteThrough)
++try {
++    $rawExitStream.Write($rawExitBytes, 0, $rawExitBytes.Length)
++    $rawExitStream.Flush($true)
++} finally {
++    $rawExitStream.Dispose()
++}
+ [ordered]@{actual_outer_exit=$rawExit;finished_utc=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json |
+     Set-Content -LiteralPath (Join-Path $outerRoot 'actual-exit.json') -Encoding utf8
+ Get-Content -LiteralPath (Join-Path $outerRoot 'stdout.log')

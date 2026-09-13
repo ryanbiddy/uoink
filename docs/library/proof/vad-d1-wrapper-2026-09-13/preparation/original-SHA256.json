@@ -1,0 +1,143 @@
+{
+  "schema": "uoink.documentary-payload-manifest.v1",
+  "sealed_utc": "2026-09-13T17:36:12.2806355Z",
+  "status": "UNEXECUTED_WRAPPER_QUALIFICATION_PREPARATION",
+  "payload_count": 26,
+  "payload_bytes": 111334,
+  "planned_repair_cases": 12,
+  "planned_original_diagnostics": 4,
+  "owner_pins_activated": false,
+  "actual_d1_invoked": false,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "before/d1_child.py",
+      "bytes": 12135,
+      "sha256": "577b1a22ebe5490ba28f5a56a46e5b3d3f5b85e077de3c1cafad6205aeb29a90"
+    },
+    {
+      "path": "before/launch_d1.py",
+      "bytes": 9925,
+      "sha256": "bf865aff26515aa54e09ae046e53e6c9fb5efb688ccec676b170e8313af851e4"
+    },
+    {
+      "path": "before/PROTOCOL.md",
+      "bytes": 6672,
+      "sha256": "332bf36676c48ad31c345307a7694e829e81c660703b3b31c82dc1f896df805f"
+    },
+    {
+      "path": "before/run-root.ps1",
+      "bytes": 1497,
+      "sha256": "75b8058874a0389ccdd02f63815b1430b543967e5ad232904bbb86b7a0073a23"
+    },
+    {
+      "path": "before/SHA256.json",
+      "bytes": 5695,
+      "sha256": "1879f2b41dafed79ca2c9465023c49f734ee4cb0271ae993551b883f47f18ca7"
+    },
+    {
+      "path": "call_wrapper.ps1",
+      "bytes": 3266,
+      "sha256": "3165e20b0b8f836f37fac7175a3433adfbf0e740952e091dd389f02e32d5c1df"
+    },
+    {
+      "path": "drafts/QUALIFICATION01-PROTOCOL.before-immediate-outcome.md",
+      "bytes": 5201,
+      "sha256": "050c631c9a0c78aaf531ea5f5d9cfe4a5ed16c382d2eb801801fa9c4ee764220"
+    },
+    {
+      "path": "drafts/qualify_wrapper.before-immediate-outcome.ps1",
+      "bytes": 10701,
+      "sha256": "f233fac58bfc42721f62f458d683c3377dc22a5ac323ba172706b4126ac2cb56"
+    },
+    {
+      "path": "drafts/run_preflight01.before-qualifier-rebind.ps1",
+      "bytes": 6615,
+      "sha256": "6384ee531698dba0e7561af7d56cf589c28e02283c48a6c83b2b3c5428a3db8f"
+    },
+    {
+      "path": "drafts/seal_preparation.before-root-admission.ps1",
+      "bytes": 2924,
+      "sha256": "3a9062cdd1efc724ffc5e24bb6921c01809cd8db2c34ca0a731ddc6336d29d3a"
+    },
+    {
+      "path": "inert_child.py",
+      "bytes": 1116,
+      "sha256": "9ef273a19f466e07d73c1cb7e2d895256045813ed49e2dd2315176e3dbc7f07f"
+    },
+    {
+      "path": "ORIGINAL-BINDINGS.json",
+      "bytes": 1520,
+      "sha256": "802be20521c779897d68c08562c49118c95012d44fd7e7983d0d2ffe8dccf065"
+    },
+    {
+      "path": "PREQUALIFICATION-OUTCOME-REFINEMENT.md",
+      "bytes": 1083,
+      "sha256": "08ba0f8306903b860edbf81596c2e38ff6cb720b810aa365d98a832ac2d38200"
+    },
+    {
+      "path": "QUALIFICATION01-PROTOCOL.md",
+      "bytes": 5504,
+      "sha256": "af5457794acfe5e4b04f1ea9a355877d88857e59285f9aae276c2c5a3fbca99c"
+    },
+    {
+      "path": "qualifier-outcome-refinement.patch.txt",
+      "bytes": 4817,
+      "sha256": "fb1e0a7866d3f41a8dc49f9b9d426c72b77daf7f7f4f757a5834d86e6bcf39ec"
+    },
+    {
+      "path": "qualify_wrapper.ps1",
+      "bytes": 11606,
+      "sha256": "4aa3bc369618da8b668e68a13122673ff2fb70c32ecd183d3e2aa32ecf80e104"
+    },
+    {
+      "path": "REPAIR-BRIEF-2026-09-13.md",
+      "bytes": 2816,
+      "sha256": "f0ee35c5094d77742db12ec0b932e6ef6024079d50852abf4cbcce0c0ddb4da0"
+    },
+    {
+      "path": "ROOT-ADMISSION.md",
+      "bytes": 1938,
+      "sha256": "cec181dd6806e77f416e2f323c0bdcd0c80f1ff68534ebf5dc9481350ed020b4"
+    },
+    {
+      "path": "run_preflight01.ps1",
+      "bytes": 6731,
+      "sha256": "d2aa72b5f661b3102c77284e3e69034e28e69e8eb48cb2dc832b43ecfbb81afe"
+    },
+    {
+      "path": "run-root.repaired.ps1",
+      "bytes": 2087,
+      "sha256": "11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63"
+    },
+    {
+      "path": "seal_preparation.ps1",
+      "bytes": 3078,
+      "sha256": "4c6955f5154d8cc1bbfff2feb78d2ee7d596a201da65deefe8c19030ee41f188"
+    },
+    {
+      "path": "seal-preparation01-tool-result.json",
+      "bytes": 521,
+      "sha256": "41413df0a99add6b5d34ea92c369de549e4b5ae522905f151533f3798cfb1032"
+    },
+    {
+      "path": "SEALING-ADMISSION-REFINEMENT.md",
+      "bytes": 725,
+      "sha256": "a2b8058b385527c99f1620e3b282734e19459ee408dbc7a097a507f8fd27a605"
+    },
+    {
+      "path": "SOURCE-REVIEW-VERDICT.md",
+      "bytes": 1178,
+      "sha256": "4bfcee07a737c723e373897a579036c2b99263add25e6addd5b075e3e0a5f72d"
+    },
+    {
+      "path": "wrapper-repair.patch.txt",
+      "bytes": 1975,
+      "sha256": "6df4cd491490e71ebf919fa8115d8ff99d0a30debf721b98e4a46a3dc97a6f5e"
+    }
+  ]
+}

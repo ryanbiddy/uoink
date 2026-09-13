@@ -33,8 +33,16 @@ at `b96dbd0`. These changes are covered by the latest complete source tree.
 The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals; conversion and runtime qualification remain open.
-The last completed branch backup
-is `19d51a8`; later commits are local until another authorized branch backup.
+The last completed branch backup is `901964c`, verified on September 13;
+later documentary commits are local until another authorized branch backup.
+
+The ASR manifest resolver and plain-state reader now pass 87 and 82 synthetic
+cases respectively in both author and independent runs (`e6a2394`, `e826407`).
+Their real asset/runtime paths remain disabled. Gemini's three-component source
+review and Astra's qualified acceptance are archived at `a2e6e7c`; that review
+adds no native model or installation result. The same commit records the Torch
+source comparison and required pre-import controls. Real model conversion,
+owned runtime services and numerical qualification still need to be completed.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including

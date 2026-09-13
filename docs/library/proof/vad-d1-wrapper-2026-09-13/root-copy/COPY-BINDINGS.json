@@ -1,0 +1,74 @@
+[
+  {
+    "name": "before/run-root.ps1",
+    "source_sha256": "75b8058874a0389ccdd02f63815b1430b543967e5ad232904bbb86b7a0073a23",
+    "copy_sha256": "75b8058874a0389ccdd02f63815b1430b543967e5ad232904bbb86b7a0073a23",
+    "only_change": null
+  },
+  {
+    "name": "run-root.repaired.ps1",
+    "source_sha256": "11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63",
+    "copy_sha256": "11b56a5686d972c4ed212de21f2f2a23b0062da616a762701bda3434831cdb63",
+    "only_change": null
+  },
+  {
+    "name": "inert_child.py",
+    "source_sha256": "9ef273a19f466e07d73c1cb7e2d895256045813ed49e2dd2315176e3dbc7f07f",
+    "copy_sha256": "9ef273a19f466e07d73c1cb7e2d895256045813ed49e2dd2315176e3dbc7f07f",
+    "only_change": null
+  },
+  {
+    "name": "call_wrapper.ps1",
+    "source_sha256": "3165e20b0b8f836f37fac7175a3433adfbf0e740952e091dd389f02e32d5c1df",
+    "copy_sha256": "3165e20b0b8f836f37fac7175a3433adfbf0e740952e091dd389f02e32d5c1df",
+    "only_change": null
+  },
+  {
+    "name": "qualify_wrapper.ps1",
+    "source_sha256": "4aa3bc369618da8b668e68a13122673ff2fb70c32ecd183d3e2aa32ecf80e104",
+    "copy_sha256": "4aa3bc369618da8b668e68a13122673ff2fb70c32ecd183d3e2aa32ecf80e104",
+    "only_change": null
+  },
+  {
+    "name": "run_preflight01.ps1",
+    "source_sha256": "d2aa72b5f661b3102c77284e3e69034e28e69e8eb48cb2dc832b43ecfbb81afe",
+    "copy_sha256": "d70833c44ba1cbe5b482d8b59924f223b5a18c6fdf869892e8bbedea4d6e74a5",
+    "only_change": "fixed root proposal path"
+  },
+  {
+    "name": "QUALIFICATION01-PROTOCOL.md",
+    "source_sha256": "af5457794acfe5e4b04f1ea9a355877d88857e59285f9aae276c2c5a3fbca99c",
+    "copy_sha256": "af5457794acfe5e4b04f1ea9a355877d88857e59285f9aae276c2c5a3fbca99c",
+    "only_change": null
+  },
+  {
+    "name": "REPAIR-BRIEF-2026-09-13.md",
+    "source_sha256": "f0ee35c5094d77742db12ec0b932e6ef6024079d50852abf4cbcce0c0ddb4da0",
+    "copy_sha256": "f0ee35c5094d77742db12ec0b932e6ef6024079d50852abf4cbcce0c0ddb4da0",
+    "only_change": null
+  },
+  {
+    "name": "SOURCE-REVIEW-VERDICT.md",
+    "source_sha256": "4bfcee07a737c723e373897a579036c2b99263add25e6addd5b075e3e0a5f72d",
+    "copy_sha256": "4bfcee07a737c723e373897a579036c2b99263add25e6addd5b075e3e0a5f72d",
+    "only_change": null
+  },
+  {
+    "name": "PREQUALIFICATION-OUTCOME-REFINEMENT.md",
+    "source_sha256": "08ba0f8306903b860edbf81596c2e38ff6cb720b810aa365d98a832ac2d38200",
+    "copy_sha256": "08ba0f8306903b860edbf81596c2e38ff6cb720b810aa365d98a832ac2d38200",
+    "only_change": null
+  },
+  {
+    "name": "ORIGINAL-BINDINGS.json",
+    "source_sha256": "802be20521c779897d68c08562c49118c95012d44fd7e7983d0d2ffe8dccf065",
+    "copy_sha256": "802be20521c779897d68c08562c49118c95012d44fd7e7983d0d2ffe8dccf065",
+    "only_change": null
+  },
+  {
+    "name": "wrapper-repair.patch.txt",
+    "source_sha256": "6df4cd491490e71ebf919fa8115d8ff99d0a30debf721b98e4a46a3dc97a6f5e",
+    "copy_sha256": "6df4cd491490e71ebf919fa8115d8ff99d0a30debf721b98e4a46a3dc97a6f5e",
+    "only_change": null
+  }
+]

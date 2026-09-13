@@ -1,0 +1,15 @@
+{
+  "author_repaired_passed": 12,
+  "root_repaired_passed": 12,
+  "each_original_diagnostic_count": 4,
+  "ordered_case_records_equal": true,
+  "each_input_count": 13,
+  "root_copy_bindings_verified": 12,
+  "all_qualification_native_outer_exits": 0,
+  "test_or_d1_program_executed_by_verifier": false,
+  "comparison_method": "direct decoded ordered case-array equality and per-case raw exit checks; no program rerun",
+  "author_elapsed_seconds": 5.7517623,
+  "root_elapsed_seconds": 5.657456,
+  "preparation_original_manifest_sha256": "f0e7b975f089ab176b9db97a234e6cc2d42ae717594d454f35223aebfc2d0e93",
+  "author_original_manifest_sha256": "5fe7c83b25895b7fd43a021b04c7ed129e0d468fccd63dfd36676a2d26468c84"
+}

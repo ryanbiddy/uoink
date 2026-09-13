@@ -1,0 +1,130 @@
+[
+  {
+    "name": "repaired-false-0",
+    "kind": "repaired",
+    "code": 0,
+    "inherited": "false",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-false-1",
+    "kind": "repaired",
+    "code": 1,
+    "inherited": "false",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-false-2",
+    "kind": "repaired",
+    "code": 2,
+    "inherited": "false",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-false-3",
+    "kind": "repaired",
+    "code": 3,
+    "inherited": "false",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-true-0",
+    "kind": "repaired",
+    "code": 0,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-true-1",
+    "kind": "repaired",
+    "code": 1,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-true-2",
+    "kind": "repaired",
+    "code": 2,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-true-3",
+    "kind": "repaired",
+    "code": 3,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-postcheck-0",
+    "kind": "repaired",
+    "code": 0,
+    "inherited": "true",
+    "postcheck": "true",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-postcheck-1",
+    "kind": "repaired",
+    "code": 1,
+    "inherited": "true",
+    "postcheck": "true",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-postcheck-2",
+    "kind": "repaired",
+    "code": 2,
+    "inherited": "true",
+    "postcheck": "true",
+    "diagnostic": false
+  },
+  {
+    "name": "repaired-postcheck-3",
+    "kind": "repaired",
+    "code": 3,
+    "inherited": "true",
+    "postcheck": "true",
+    "diagnostic": false
+  },
+  {
+    "name": "original-true-0",
+    "kind": "original",
+    "code": 0,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": true
+  },
+  {
+    "name": "original-true-1",
+    "kind": "original",
+    "code": 1,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": true
+  },
+  {
+    "name": "original-true-2",
+    "kind": "original",
+    "code": 2,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": true
+  },
+  {
+    "name": "original-true-3",
+    "kind": "original",
+    "code": 3,
+    "inherited": "true",
+    "postcheck": "false",
+    "diagnostic": true
+  }
+]

@@ -1,0 +1,5 @@
+2026-09-13. Root's pre-execution review found the same ordering weakness inside the new qualifier: it captured the owned caller's exit, wrote both process logs, and only then wrote actual-process-exit.json. A failing log write could skip that process receipt. No qualifier or fixture has run.
+
+Preserve qualifier f233fac58bfc42721f62f458d683c3377dc22a5ac323ba172706b4126ac2cb56 under drafts/qualify_wrapper.before-immediate-outcome.ps1, together with its unexecuted launcher/protocol. Move the outcome receipt into the process try/catch/finally boundary. Write it with exclusive creation, WriteThrough and Flush(true) immediately after the exit/start/timeout outcome is known, before reading captured streams, writing logs or making case assertions. Retain a separate stream-read error if one occurs after the process receipt; do not overwrite the observed native outcome.
+
+The wrapper, caller, inert child and all twelve repair/four diagnostic assertions remain unchanged. This is a prequalification instrument refinement with no measured failure, repaired pass or rerun to report.
