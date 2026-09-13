@@ -99,6 +99,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader qualified at e826407 with 82 synthetic passes in each root and 187 sealed payloads; original setup and75/1 failures retained. Real reader authority remains absent. Finish runtime adapter, D1 invocation and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
+| Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -196,13 +197,17 @@ Gemini council c5c89d60 completed its three-component source review at a2e6e7c.
 Read ASTRA-SAFE-LOADER-COUNCIL-VERDICT-2026-09-13.md before the unchanged worker
 report. All 38 proof payloads match Git/disk. No new tests ran in that review;
 87 resolver, 82 reader and 54 D1 cases per root remain their prior results.
-Continue the new ASR adapter and D1 invocation qualification proposals after
-repairing the independently found receipt gaps: persist raw native exits before
-throwing postchecks, and suppress inherited PowerShell native-exit escalation.
-Keep the unexecuted original proposals and their review findings. Qualify these
-repairs with inert children before admitting their generated/fake-port runs.
-The actual D1 gates stay None. Implement the tensor bridge with owned allocation
-and copying; native construction and the real ASR lifecycle remain unfinished.
+The D1 runner repair and full dormant source review are integrated at f0602f8.
+Read ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md. Both 12-case runs pass, with four
+original-wrapper controls recorded separately. All 102 proof payloads match
+Git/disk. Actual D1 gates remain None. The ASR instrument's first check failed:
+native_exit was null after local LASTEXITCODE shadowing. Four fresh inert scope
+observations confirm explicit global capture on PowerShell 7.6.5; the original
+failed receipt remains unchanged. Finish the reviewed two-wrapper/four-guard
+repair subset, then admit the unchanged 58 ASR cases only if it qualifies.
+The tensor bridge's author run passes 61 generated/fake-port cases; independent
+repeat and integration follow. Native construction, the real ASR lifecycle and
+the owned WhisperX derivative remain implementation work.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -842,12 +847,13 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 ## Blockers for Ryan
 
 - D1 is now a concrete optional static inspection decision: read
+  ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md (f0602f8) and the earlier
   ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md (381985c). The reviewed adapter
   would inspect one hash-bound existing17,719,103-byte checkpoint snapshot,
   interpreting only the two500-byte buffers and two version bytes. It uses
   the fixed eight-ULP consistency basis, with no pickle evaluation, model,
-  conversion or network. Both54-case synthetic runs pass; actual inspection
-  remains disabled. Accepting a consistent orientation would not authenticate
+  conversion or network. Both 54-case adapter and 12-case repaired-wrapper
+  runs pass; the actual invocation remains disabled. Accepting a consistent orientation would not authenticate
   the writer or approve the separate D2 conversion and D4 runtime decisions.
 - Actual release signing requires Ryan's publisher certificate and timestamp
   service selection. The implementation is now 0b3629d; it has no successful
@@ -4482,3 +4488,25 @@ are still implementation work, not completed migration claims.
 
 Production is unchanged at e8d058f. Website and marketing remain paused until
 the finished product receives council and integrator release approval.
+
+### 2026-09-13 - Dormant runner qualified; ASR native capture failure reproduced
+
+D1 wrapper repair is integrated at f0602f8. Author and independent Astra runs
+each pass 12 cases, with four separate original controls. The 102-payload seal
+accounts for 460 source files and verifies 370 stored ZIP members. Astra's
+documentary verifier and Git/disk verification pass. Actual checkpoint access
+is still disabled; the complete reviewed invocation is ready for the D1 decision.
+
+The first ASR wrapper instrument failed because its recorded native exit was
+null. Stop that sequence: no actual ASR cases ran and its planned later checks
+did not execute. A separately briefed four-observation diagnostic reproduces
+local LASTEXITCODE shadowing in script and function scopes; explicit global
+capture records integer 1 in both. Diagnostic dd7aab exits 0 in 0.3136295 s.
+The two-wrapper/four-guard repair subset is running under its fresh label.
+The root's initial preparation verification also refused the wrong scratch
+path (2d8c38); a manifest-based preflight passes (d5669f). Neither was an ASR
+behavior run. Preserve those failures and the scoped repair reasons.
+
+The bridge author has 61 passing synthetic cases, zero failures/skips, valid
+guards and all exits zero. Independent repeat follows; no native port ran.
+Production remains e8d058f. Website and marketing remain paused.
