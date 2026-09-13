@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Note d2caac5 and saved-media 60d203f repairs confirmed in installed native Uoink at `49e2b31` | Eleven original images; save/search/read works. Two CLI sessions each match 20/20 pairs; native prompts pass separately. Raw P4 15/0/1/5/2 stays partial | Desktop citation/brief/chapter acceptance needs verified isolated environment; X remains blocked |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | Gemini reviews at a6b9cf0/43b42bc; NLTK source backport prepared at 4aec8ff | NLTK 37 pass / zero fail / one skip in each root, 62 sealed payloads. It is not yet packaged. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Package/qualify NLTK; finish graph review. Runtime migration/model qualification retain the Ryan gates below |
+| Security | NLTK source prepared at 4aec8ff; captured graph checker accepted at 5e46f2f | NLTK 37/0/1 in each root. Graph 36/0/0 in each root; both dependency selections still fail. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Gemini is preparing the local NLTK wheel; review/integrate it, update build/pins/notices and qualify. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -155,19 +155,22 @@ is complete but is not this goal's completion. Current queue:
    focused passes. Five invalid worker probes are archived, not accepted tests.
    Receipt01's four failures and four worker setup-error attempts remain in the
    77-payload seal. Inno wiring04 is a direct refusal, not successful signing.
-2. Runtime graph repair 6c96f0a3 has 18 independent passes and preserves all 306
-   original evidence files exactly. It still drops root extras, accepts duplicate
-   JSON keys and accepts an empty-host URL; path/fallback gaps also remain.
-   Gemini 85ce8600 returned completed/exit zero but produced no deliverables;
-   retain INCOMPLETE. Astra's takeover brief assigns local repair in the preserved
-   6c96f0a3 worktree. The corrected checker has 30 focused passes; finish negative
-   baseline, raw outputs, reviewed integration and checkout qualification.
+2. Captured graph repair is accepted at 5e46f2f after 36 focused passes in each
+   root. Eighteen boundary cases on the archived checker yield 13 failures and
+   five passes. All 306 original capture files are unchanged; their old manifest
+   covers 304. The new 72-payload seal also binds all 318 capture/review files;
+   390 payloads match Git and disk. Current selection exits 1 with two wheel-only
+   failures; proposal exits 1 with five conflicts, two missing targets and three
+   wheel failures. No binary/runtime security clearance follows from metadata.
+   Gemini 85ce8600 stays INCOMPLETE despite its completed/zero status. Read the
+   revised RUNTIME-GRAPH-01 and RUNTIME-GRAPH-BOUNDARY-REVIEW documents.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
    before the retained worker reports. Hash-override, path/receipt and test
    isolation gaps were corrected; original proposals are archived. Final result
    is 37 pass / zero fail / one Windows symlink-permission skip in both roots.
-   Build a labelled local wheel with verified RECORD/hash and provenance, update
-   installer lock/build/notices, and qualify it. Preserve pristine upstream NLTK
+   Gemini local-wheel preparation is dispatched under NLTK-LOCAL-WHEEL-BRIEF.
+   Review its labelled wheel, verified RECORD/hash and provenance, then update
+   installer lock/build/notices and qualify it. Preserve pristine upstream NLTK
    and pass UOINK_NLTK_BASE_SOURCE to later source tests when staging is patched.
 4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
@@ -628,6 +631,29 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-12 23:35 PDT - Graph boundary repair accepted; packaging dispatched
+
+5e46f2f integrates the repaired graph checker using a raw 123,505,080-byte diff
+and git apply --3way. Its compressed patch is retained in the 72-payload seal.
+The exact same 36 tests pass in worker 7.70 seconds and checkout 6.52 seconds.
+Earlier 14/18/30-case passes and the new archived-checker 13-fail/five-pass
+observation remain unchanged. Frozen tests since 7109182 have no modifications.
+
+The corrected checker reads only captured metadata, binds parsed bytes to their
+hashes and rejects malformed evidence/selection paths, duplicate fields, dropped
+root extras and mixed target environments. It establishes neither binary
+authenticity nor protection against every concurrent same-user filesystem race.
+Current capture: 283 active edges and two source-only wheel failures. Earlier
+upgrade proposal: 275 edges, five conflicts, two missing targets and three wheel
+failures, including yanked Transformers 5.10.0. The older broad impossibility
+claims and omissions are corrected, not erased from the archived reports.
+
+NLTK-LOCAL-WHEEL-BRIEF dispatches bounded Gemini preparation via Control Room.
+Only the exact captured 1,798,643-byte upstream software wheel may be retrieved;
+its fixed SHA256 is required before parsing. The worker may not change build,
+pins, staging, accepted tests or model scope. Its output needs independent
+review and both-root tests. Package 08 and its installed receipts remain unchanged.
 
 ### 2026-09-12 - NLTK source repair accepted; graph worker completion corrected
 
