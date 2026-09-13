@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader vpr02 remains failed at75/1; prepare a source nesting-limit repair without changing its assertions. Finish compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader qualified at e826407 with 82 synthetic passes in each root and 187 sealed payloads; original setup and75/1 failures retained. Real reader authority remains absent. Finish runtime adapter, D1 invocation and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -170,12 +170,20 @@ Windows identity diagnostic remain preserved. The repair keeps complete path
 and handle records separately, with strict birthtime across Windows APIs and
 no time tolerance. REAL_APPROVAL remainsNone; twenty asset hashes and the real
 lifecycle/native handoff remain open. Continue the production adapter proposal.
-Plain-state vpr01 failed before cases on its codec setup; its narrowly repaired
-vpr02 runs all76 cases and remains75 passed/1 failed. Repair excessive JSON
-nesting in reader source, keep assertions unchanged, review before a fresh run.
-The Torch2.13 public-source collector has40 author synthetic passes; root review
-and repetition precede any bounded public-text retrieval. No actual model or
-artifact access, migration approval, full-tree or installed credit follows.
+Plain-state reader is qualified as an inert proposal at e826407: author/root
+both82/0, same membership and generated bytes,187 payloads matching Git/disk.
+Original vpr01 setup failure and valid75/1 vpr02 failure remain preserved. The
+source now bounds JSON depth before parsing; all76 original assertions remain.
+Prepare D1's exact dormant invocation and the real tensor bridge without actual
+artifact access. The ASR production adapter's ports and call-site splices are
+being qualified separately; they are not a completed installed migration.
+Torch2.13 collector author/root each40/0. Resolve01 and sources01 completed:
+2 then21 HTTP200 responses,6257 then1050728 body bytes, all exits0. Exact tag
+commit/ref cf30153c4c131c8164ee7798e5022d810682e2cb;19 fixed files collected.
+Complete the source comparison and preserve its narrow limits. Torch backend
+entrypoint autoload is enabled by default: require TORCH_DEVICE_BACKEND_AUTOLOAD=0
+before future imports and review visible torch._native separately. No actual
+model, migration approval, full-tree or installed credit follows.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4392,3 +4400,32 @@ run. Actual TLS, DNS, paths and source retrieval are still unqualified. Root is
 reviewing the concrete next invocation. Production remains e8d058f, full tree09
 remains historical and failed, and no package, install, model, website or
 marketing work is accepted by these synthetic results.
+
+### 2026-09-13 - Plain-state reader qualified and branch backup verified
+
+e826407 archives the repaired reader and both 82-case passing runs. Author
+0.744954s and root 0.739920s, all actual exits zero, identical case/results and
+fixture identity, valid guards and unchanged inputs. All 187 proof payloads
+match Git/disk; six prior seals and 179 original copies were independently
+verified. The original setup failure and valid 75/1 run stay failed. The source
+repair adds a depth-three bound before parsing; all 76 original assertions stay
+unchanged. Read ASTRA-VAD-PLAIN-STATE-READER-VERDICT-2026-09-13.md. Real purpose
+still refuses unconditionally; no actual artifact or native tensor was loaded.
+
+The separately authorized branch backup completed at 901964c. The local branch
+was not checked out elsewhere and advanced by fast-forward from 19d51a8. Git
+Credential Manager required choosing the existing ryanbiddy account; routine
+sign-in authorization covered that selection. Actual push exit was zero, and
+fresh local/remote reads verified exact equality at
+901964c6d1791e1d88d6e5174e3e6c03b0a4bb75. External receipt:
+build/Uoink-Living-Library-branch-backup-2026-09-13.json, 761 bytes, SHA-256
+4f075199ee531c48a87c62036f83887185d11ffe80663e3e2efde5a98f8c4fd8.
+Later documentary commits are newer than that backup. No main merge,
+candidate-branch push, package publication or website/marketing work occurred.
+
+Official Torch2.13 public text now binds the exact cf30153c commit. The fixed
+factory comparison is underway; the visible backend plugin autoload requires
+an explicit pre-import disable setting. Collection and synthetic checks do not
+qualify imports, DLLs, model behavior or the proposed dependency migration.
+Production remains e8d058f; a complete committed tree and new package/installation
+receipts follow the remaining source and runtime work.
