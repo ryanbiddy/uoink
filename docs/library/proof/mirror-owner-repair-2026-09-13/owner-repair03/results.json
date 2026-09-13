@@ -1,0 +1,25 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_mirror_owner_admission.py",
+      "_scratch/test_mirror_owner_admission_diagnostic.py",
+      "--runxfail",
+      "--basetemp=E:\\AI\\projects\\uoink\\worktrees\\mirror-owner-admission-repair\\_scratch\\owner-repair03-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\worktrees\\mirror-owner-admission-repair\\_scratch\\owner-repair03\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\worktrees\\mirror-owner-admission-repair\\_scratch\\owner-repair03\\tests.log"
+  }
+]

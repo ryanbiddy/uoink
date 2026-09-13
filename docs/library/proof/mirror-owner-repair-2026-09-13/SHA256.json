@@ -1,0 +1,197 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "accepted-source/library_mirror.py": {
+      "bytes": 205332,
+      "sha256": "83fd37895cc6bf4670ea4b85a6fdb3a3f0631d9b041b6192f737d13c89479584"
+    },
+    "accepted-source/tests/test_mirror_owner_admission.py": {
+      "bytes": 7435,
+      "sha256": "bca33c3dcb9c31433a3da09fd059efb7745b0daca65273f47fc54d3d11d516d1"
+    },
+    "ASTRA-MIRROR-OWNER-REPAIR-VERDICT-2026-09-13.md": {
+      "bytes": 2272,
+      "sha256": "e74b8bfc8b82ba455930ca89c05c9b1cdfb7473ee76172a06e21476b49d795a8"
+    },
+    "instruments-and-drafts/integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "instruments-and-drafts/library_mirror.owner-repair01.py": {
+      "bytes": 205124,
+      "sha256": "bc58c78024b3ba0d6ae00f1b4c62b0d4a5e8defc0c076f56fc12c6be4f2bafdd"
+    },
+    "instruments-and-drafts/MIRROR-OWNER-REPAIR02-REVIEW.md": {
+      "bytes": 1343,
+      "sha256": "e9838dacc4997096850321428e68a62a09f0c328ca2b6ca54269f2191186e960"
+    },
+    "instruments-and-drafts/mirror-owner-reviewed.diff": {
+      "bytes": 12774,
+      "sha256": "aa0f8c0855652a473535f63780d0253bb2fa8c34caa0b6a94c49d6f5a9cb9787"
+    },
+    "instruments-and-drafts/owner-repair01-launch-refusal.md": {
+      "bytes": 734,
+      "sha256": "84fe6dcf8e1c3d5d3da868bff218087c785ab32e9f811ec0839507b30c11e918"
+    },
+    "instruments-and-drafts/run_mirror_owner_verification.ps1": {
+      "bytes": 1912,
+      "sha256": "d306eb5d2b3a35eb60c3761ef8e0a905403fe4c543db0ce47ffd5973aa97dffd"
+    },
+    "instruments-and-drafts/seal_mirror_owner_repair.py": {
+      "bytes": 3318,
+      "sha256": "3aae9539bae35c2bc811c88d56db3de23a17aeee7934155af1986dc205fd6191"
+    },
+    "instruments-and-drafts/test_mirror_owner_admission.owner-repair01.py": {
+      "bytes": 6036,
+      "sha256": "6c926156c8a629400788a6cc906bd32c334d8deb4df268c43ce35312ea1733c1"
+    },
+    "instruments-and-drafts/test_mirror_owner_admission.owner-repair02.py": {
+      "bytes": 7076,
+      "sha256": "f0daf2833205a5c8567ec26788bac5033edd4e85d4da3d1945a23b9652b93f16"
+    },
+    "owner-checkout01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-checkout01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-checkout01/results.json": {
+      "bytes": 785,
+      "sha256": "f4342bb73b57118cba90ec693a15ae6042eea391ea03e36ec15f85741e86684d"
+    },
+    "owner-checkout01/tests.log": {
+      "bytes": 101,
+      "sha256": "f02e8e90cd319b9823f4b1b86ce969efedad01892fb2688f31fdab523ee0b42f"
+    },
+    "owner-checkout01/tests.xml": {
+      "bytes": 1902,
+      "sha256": "0b7bc7d1c27ebc4cf74a1e3b87b1f7f5dba5566bd88c2d5b21e0f653a967655d"
+    },
+    "owner-checkout01-original-events.json": {
+      "bytes": 396,
+      "sha256": "72421ba0cb130d85fdb3ff198e7e8b33b3c9a4565caa7ae284c2676b2af24862"
+    },
+    "owner-phase4-checkout01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-phase4-checkout01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-phase4-checkout01/results.json": {
+      "bytes": 2409,
+      "sha256": "3600c7173376bffe9ee0c1b42a5f34e1f89e80ebdf376cedd2c68bcfdce6a477"
+    },
+    "owner-phase4-checkout01/tests.log": {
+      "bytes": 276,
+      "sha256": "185d639ef956cf985201bb32b11c0ab761d49e15aa9c7269b781fe5e3ab3b203"
+    },
+    "owner-phase4-checkout01/tests.xml": {
+      "bytes": 27033,
+      "sha256": "6b05e253d0751b1666bb8fe1bcc53340dc08c067933715ddc295a114c36e21a6"
+    },
+    "owner-phase4-worker01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-phase4-worker01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-phase4-worker01/results.json": {
+      "bytes": 2451,
+      "sha256": "ac8035b67bfeb24acf41db513dca9e923df6dd15ca85f607e3aa571b17bbbe7d"
+    },
+    "owner-phase4-worker01/tests.log": {
+      "bytes": 276,
+      "sha256": "5d14d4da261a02b33378678b17ed7a222562d2cfeae803fd45616b900d7851fd"
+    },
+    "owner-phase4-worker01/tests.xml": {
+      "bytes": 27033,
+      "sha256": "d8eda357c93892784d420778a43948b88f096a22bcbf99c9c1d20091108b7c2d"
+    },
+    "owner-repair01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-repair01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-repair01/results.json": {
+      "bytes": 827,
+      "sha256": "ae94f2c6b8c2b878b0588082d21dd2077daa661b60f014e7643e8413a2fec5bf"
+    },
+    "owner-repair01/tests.log": {
+      "bytes": 101,
+      "sha256": "ec1e194cc1797cb3d78f427fb2fe76f5c15f5c52c9d0ef7e151623bbd0d19fad"
+    },
+    "owner-repair01/tests.xml": {
+      "bytes": 1767,
+      "sha256": "67d1796b99e64ccfff451148dea498a6f85dc78a9efdd5db5822671e258bf43f"
+    },
+    "owner-repair01-original-events.json": {
+      "bytes": 396,
+      "sha256": "2c102ffa46011e157df731cabd3058044ac274f4522b3ebd006bf86ec513bd94"
+    },
+    "owner-repair02/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-repair02/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-repair02/results.json": {
+      "bytes": 827,
+      "sha256": "d6f17801a6e1e4bd0b576e24c18da2db474aca90248f60c58a913d0a943ea52e"
+    },
+    "owner-repair02/tests.log": {
+      "bytes": 101,
+      "sha256": "ebed2a1f0762a928e4cf66c894c50262fb2076711bc7a223650957537de2912e"
+    },
+    "owner-repair02/tests.xml": {
+      "bytes": 1902,
+      "sha256": "dcff285df1ad915ed0cfbdc254757c61a82c916311a609e08165e011d555591d"
+    },
+    "owner-repair02-original-events.json": {
+      "bytes": 396,
+      "sha256": "795e8abe6298a20c8a6159ededb1af5ef08c686e8a12b2b807a6ada7903618d2"
+    },
+    "owner-repair03/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "owner-repair03/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "owner-repair03/results.json": {
+      "bytes": 827,
+      "sha256": "01573f38138a437d52512eba4e1466634008a1ddf5288e40114e927424c3a17d"
+    },
+    "owner-repair03/tests.log": {
+      "bytes": 101,
+      "sha256": "952cf91b20a45f953dc7412d1b8800de2ae397cc120681007df3d77bfad5e86c"
+    },
+    "owner-repair03/tests.xml": {
+      "bytes": 1902,
+      "sha256": "c93a2f611849b431eb5cb83a6131cd091677bf3f34e66947105bcf8b1c52ff9a"
+    },
+    "owner-repair03-original-events.json": {
+      "bytes": 394,
+      "sha256": "5d8f547d063e489bc57b6b01a9a9ed52a23fe848a6ac6fb87d7869d5114e9314"
+    },
+    "summary.json": {
+      "bytes": 435,
+      "sha256": "44c13394de31376c1d64ce816002b34295ff2c317ffee0d1c19350458d39a38b"
+    }
+  }
+}

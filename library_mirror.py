@@ -1101,6 +1101,13 @@ class _DestExclusionOwner:
         with _dest_hold_guard:
             self._exclusive_holds += 1
 
+    def reserve(self) -> None:
+        """Keep an acquired owner alive until prepare attaches its session."""
+        with _dest_hold_guard:
+            if not self.held or self._stop.is_set() or self._done.is_set():
+                raise OSError("destination exclusion unavailable")
+            self._exclusive_holds += 1
+
     def drop_exclusive(self) -> None:
         with _dest_hold_guard:
             if self._exclusive_holds > 0:
@@ -1108,14 +1115,16 @@ class _DestExclusionOwner:
 
     def attach(self, session: "_VaultIoSession") -> None:
         with _dest_hold_guard:
+            if not self.held or self._stop.is_set() or self._done.is_set():
+                raise OSError("destination exclusion unavailable")
             self.sessions.add(session)
-        session._exclusion_owner = self
+            session._exclusion_owner = self
 
     def detach(self, session: "_VaultIoSession") -> None:
         with _dest_hold_guard:
             self.sessions.discard(session)
-        if getattr(session, "_exclusion_owner", None) is self:
-            session._exclusion_owner = None
+            if getattr(session, "_exclusion_owner", None) is self:
+                session._exclusion_owner = None
 
     def needed(self) -> bool:
         with _dest_hold_guard:
@@ -1131,18 +1140,31 @@ class _DestExclusionOwner:
 
     def release_if_unneeded(self) -> None:
         with _dest_hold_guard:
-            attached = list(self.sessions)
+            if self._exclusive_holds > 0:
+                return
+            attached = set(self.sessions)
         stale = [
             session for session in attached
             if not session.physically_alive() and not _session_launch_open(session)
         ]
-        for session in stale:
-            self.detach(session)
-        if not self.needed():
-            self.release()
+        with _dest_hold_guard:
+            # A reservation or attachment made during the liveness queries
+            # invalidates this sweep. Commit stop under the same guard used by
+            # reserve/attach, then wait outside it so the owner can exit.
+            if self._exclusive_holds > 0 or self.sessions != attached:
+                return
+            for session in stale:
+                self.sessions.discard(session)
+                if getattr(session, "_exclusion_owner", None) is self:
+                    session._exclusion_owner = None
+            if self.sessions:
+                return
+            self._stop.set()
+        self._done.wait(max(0.2, _WORKER_TERMINATE_S))
 
     def release(self) -> None:
-        self._stop.set()
+        with _dest_hold_guard:
+            self._stop.set()
         self._done.wait(max(0.2, _WORKER_TERMINATE_S))
 
     def _run(self) -> None:
@@ -1271,7 +1293,7 @@ def _owner_blocks_replacement(
 
 
 def _exclusion_for_dest(dest: str, timeout: float) -> _DestExclusionOwner:
-    """Acquire admission, or reuse the owner of this admitted operation.
+    """Reserve admission until prepare attaches or refuses its session.
 
     Foreign threads and helper callers without ``_EXCL_CTX`` wait on the
     kernel gate. They must not adopt a process-global owner. Same-thread
@@ -1280,9 +1302,10 @@ def _exclusion_for_dest(dest: str, timeout: float) -> _DestExclusionOwner:
     """
     ctx_owner = _ctx_owner_for_gate(dest)
     if ctx_owner is not None:
+        ctx_owner.reserve()
         return ctx_owner
     try:
-        return _acquire_dest_exclusion(dest, timeout)
+        return _acquire_dest_exclusion(dest, timeout, exclusive=True)
     except _LockTimeout as exc:
         raise OSError("destination exclusion unavailable") from exc
 
@@ -1536,13 +1559,22 @@ class _VaultIoSession:
         session.dest = dest
         session.token = secrets.token_hex(16)
         owner = _exclusion_for_dest(dest, _WORKER_STARTUP_S)
-        if _owner_blocks_replacement(owner, session):
-            raise OSError("vault io worker still live")
-        session._launching = True
-        session._origin_thread_id = threading.get_ident()
-        session._origin_thread = threading.current_thread()
-        owner.attach(session)
-        _retain_session(session)
+        try:
+            if _owner_blocks_replacement(owner, session):
+                raise OSError("vault io worker still live")
+            session._launching = True
+            session._origin_thread_id = threading.get_ident()
+            session._origin_thread = threading.current_thread()
+            owner.attach(session)
+            _retain_session(session)
+        except BaseException:
+            session._launching = False
+            owner.detach(session)
+            _drop_retained_session(session)
+            raise
+        finally:
+            owner.drop_exclusive()
+            owner.release_if_unneeded()
         return session
 
     @classmethod
