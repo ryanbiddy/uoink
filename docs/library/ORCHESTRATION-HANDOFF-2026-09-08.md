@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Tree08 retains 50 mirror failures; two bounded product repairs are in progress | Owner handoff race reproduced and sealed at 92c0fde. Draft repair has 184 Phase 4 passes in its worktree. Gemini process-authority diagnosis reviewed at bd7fe7b | Integrate/retest owner repair, then repair process authority under the named briefs. Tree08 cause remains unproved; preserve Desktop and X limits |
+| 4 | Owner admission repair accepted at ff67b84; process-authority repair remains active | Original race retained at 92c0fde. Repaired owner has 12 focused and 184 Phase 4 passes in each root, with 11 new regressions. Gemini diagnosis reviewed at bd7fe7b | Review c1008e0b process-authority patch, qualify both roots and combined tree. Tree08 cause remains unproved; preserve Desktop and X limits |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree08 at 9dd0cfb is sealed at `44e01ee`; package08 remains held | 2,675 passed / 51 failed / 3 skipped; all 2,729 cases accounted for. Fifty mirror failures plus the historical AT6 gap. The 147 added cases have 146 passes / one skip | Diagnose and repair mirror failures, then qualify a fresh committed tree and package09. Website/marketing paused |
+| Integration | Complete tree08 at 9dd0cfb remains failed; owner repair ff67b84 has focused verification | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. New owner repair: 12 focused and 184 Phase 4 passes in each root; no new complete-tree result | Finish process-authority repair c1008e0b, qualify combined source, then package09. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -188,10 +188,13 @@ is complete but is not this goal's completion. Current queue:
    Gemini diagnostic 213914a5 is now reviewed at bd7fe7b: six observations in
    both roots reproduce defects, not product passes. The report's unsupported
    retention claim and missing early probe drafts are explicit in Astra's
-   verdict. Dispatch MIRROR-PROCESS-AUTHORITY-REPAIR-BRIEF-2026-09-13.md for a
-   concrete Gemini patch and inert tests only. Astra's separate owner-admission
-   repair has 12 focused and 184 Phase 4 passes in its worktree; integrate its
-   raw diff, rerun both suites in the checkout and seal the reviewed drafts.
+   verdict. Process repair c1008e0b runs from 4b949e2 under
+   MIRROR-PROCESS-AUTHORITY-REPAIR-BRIEF-2026-09-13.md: Gemini owns a concrete
+   patch and inert tests only. Owner admission is accepted at ff67b84 after raw
+   diff/three-way integration and 12 focused plus 184 Phase 4 passes in each
+   root. Its 48-payload seal preserves all drafts and observations. Read
+   ASTRA-MIRROR-OWNER-REPAIR-VERDICT-2026-09-13.md. Merge the later process patch
+   with the accepted owner changes; do not overwrite either repair.
    No competing real-mirror runs. Do not build or blindly repeat the full tree.
    Tree07's interrupted evidence remains at 784fb73. Preserve all original tests,
    guards and failed measurements. Integrate a reviewed product repair, verify
@@ -664,6 +667,24 @@ reuse that isolated namespace by reference and never copy ordinary secrets.
 Any new product defect remains repair work rather than a Ryan blocker.
 
 ## Integrator log
+
+### 2026-09-13 - Owner reservation accepted; process repair c1008e0b active
+
+Owner repair ff67b84 adds eleven regressions and preserves admission from
+acquisition through attachment. The final focused set has twelve passes in
+each root, including the unchanged original diagnostic. All 184 prescribed
+Phase 4/new-owner cases pass: worker 118.28 s, checkout 126.38 s. No existing
+test or fixture changed. The raw worker diff applied cleanly with git apply
+--3way. The 48-payload seal includes the initial draft, static review correction,
+thread-exception test correction, every run and the accepted source.
+
+Gemini process-authority repair c1008e0b is active from 4b949e2 in Control Room.
+It may change only process identity/adoption/liveness and PID-based actions plus
+new synthetic tests; no real process manipulation or mirror suites. Astra owns
+real Phase 4 verification. A passive observer is being prepared in scratch to
+retain raw owner/session state during the next complete tree without querying
+or mutating process liveness. It has no acceptance credit before verification.
+The original tree08 remains failed, and no package09 build has started.
 
 ### 2026-09-13 - Combined failure retained; owner and process authority repairs
 
