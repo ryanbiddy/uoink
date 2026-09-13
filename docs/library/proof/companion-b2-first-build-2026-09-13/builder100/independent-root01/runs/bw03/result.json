@@ -1,0 +1,278 @@
+{
+  "label": "bw03",
+  "tests_run": 62,
+  "passed": 62,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "observations": [
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_advertised_member_size_refused_before_decompression",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_advertised_total_size_refused_before_decompression",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_archive_comment_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_archive_size_bound",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_complete_record_covers_placeholder_asset",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_encryption_flag_refused_before_decompression",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_absolute_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_ads_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_backslash_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_case_collision_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_comment_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_device_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_dot_component_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_empty_component_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_extra_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_fifo_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_parent_traversal_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_reparse_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_signature_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_symlink_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_trailing_dot_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_member_unexpected_root_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_duplicate_name_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_duplicate_tag_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_license_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_purelib_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_python_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_metadata_wrong_version_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_columns_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_duplicate_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_ghost_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_hash_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_missing_member_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_missing_self_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_nonempty_self_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_record_size_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_unknown_compression_refused_before_decompression",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.ArchiveContracts.test_valid_synthetic_archive_roundtrips",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_fixed_real_manifest_refuses_synthetic_asset",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_manifest_detects_output_tampering",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_only_approved_member_content_changes",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_recipe_tampering_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_source_tampering_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_synthetic_output_is_deterministic_and_parameters_fixed",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.TransformContracts.test_version_source_tampering_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_destination_overlap_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_destination_reuse_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_fresh_destination_accepted",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_growing_input_uses_only_cap_plus_one_and_refuses",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_hash_override_argument_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_opened_identity_drift_refused_before_read",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_oversized_input_refused_before_open",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_ads_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_device_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_drive_relative_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_parent_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_trailing_space_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_path_unc_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_reparse_ancestor_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_wrong_filename_refused",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_wrong_hash_refused_without_output",
+      "status": "passed"
+    },
+    {
+      "id": "synthetic_wheel_contracts.PathAndIdentityContracts.test_wrong_size_refused_without_output",
+      "status": "passed"
+    }
+  ],
+  "source_sha256": "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f",
+  "protocol_sha256": "4850a083264e305871b81a9ae5a16390b63950ce9b9efca630c7aa89fd153417",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "flags": {
+    "isolated": 1,
+    "no_site": 1,
+    "dont_write_bytecode": 1
+  },
+  "guard": {
+    "preloaded_heavy": [],
+    "postloaded_heavy": [],
+    "violations": [],
+    "finder_installed_at_finish": true,
+    "valid": true
+  },
+  "actual_upstream_wheel_or_model_opened": false,
+  "actual_wheel_built": false,
+  "scope": "Synthetic ZIP/member/path inputs only, with opaque placeholder asset bytes; no package/model execution.",
+  "finished_utc": "2026-09-13T13:46:47.409651+00:00"
+}

@@ -1,0 +1,66 @@
+{
+  "bindings": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\build_faster_whisper_localassets_wheel.py",
+      "target": "inputs\\build_faster_whisper_localassets_wheel.py",
+      "bytes": 16354,
+      "sha256": "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\B2.py.txt",
+      "target": "inputs\\recipe\\B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\NOTICE.txt",
+      "target": "inputs\\recipe\\NOTICE.txt",
+      "bytes": 733,
+      "sha256": "f82a61fe4fa1dd443f24898c268282f96d1fb8a559c542ea1ab438ca2e34397e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\member-manifest.json",
+      "target": "inputs\\recipe\\member-manifest.json",
+      "bytes": 5867,
+      "sha256": "2f1816cf0f521339d8b6709bfa27b0b6a7762582a61939f3ac901d65cdb26296"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\patch.txt",
+      "target": "inputs\\recipe\\patch.txt",
+      "bytes": 1377,
+      "sha256": "57451db2279d34c1e5c60f9a9d2c59b3b4a2a921607b53103533bb19a5d8e970"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\SHA256.json",
+      "target": "historical\\builder63-SHA256.json",
+      "bytes": 10685,
+      "sha256": "ac31912d51a4a6b38c8e028e65bd005e9fedcd7125d51f219ca51973b834fc8f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder-combined01\\SHA256.json",
+      "target": "historical\\builder-combined100-SHA256.json",
+      "bytes": 18186,
+      "sha256": "063159c7b97b1f871947a2916c48cfdb7ea6c93246815719115789335fc57963"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\nltk-wheel-stored-build01\\results.json",
+      "target": "historical\\nltk-results.json",
+      "bytes": 2253,
+      "sha256": "67709904efff84261047c24d2ec10d556919474831daffaa6cac14c83ddd505c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\version.stdout",
+      "target": "historical\\graph313-version.stdout",
+      "bytes": 119,
+      "sha256": "d417bfb920534e668d3876455a1c79565eb56d6ca743f612a5dfed9e8c5caf9f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\python313-graph-01\\python\\python313._pth",
+      "target": "historical\\graph313-original-pth.txt",
+      "bytes": 79,
+      "sha256": "6f230f01e18429c383477763de66951745acda9c70aa5885eba4c4f0fb0fbb62"
+    }
+  ],
+  "actual_wheel_accessed": false,
+  "runtime_copied_or_executed": false
+}

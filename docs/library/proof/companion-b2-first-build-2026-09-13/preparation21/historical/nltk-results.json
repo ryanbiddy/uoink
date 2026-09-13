@@ -1,0 +1,42 @@
+[
+  {
+    "label": "py314",
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import runpy,sys\ndef guard(event,args):\n    if event.startswith('socket.') or event=='subprocess.Popen': raise PermissionError('Offline wheel preparation')\nsys.addaudithook(guard)\npath=sys.argv.pop(1)\nrunpy.run_path(path,run_name='__main__')\n",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\scripts\\build_nltk_pathsec_wheel.py",
+      "--wheel",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\upstream\\nltk-3.10.3-py3-none-any.whl",
+      "--out-dir",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\astra-stored-py314-01"
+    ],
+    "exit": 0,
+    "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\astra-stored-py314-01",
+    "sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8",
+    "bytes": 6597605
+  },
+  {
+    "label": "py313",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import runpy,sys\ndef guard(event,args):\n    if event.startswith('socket.') or event=='subprocess.Popen': raise PermissionError('Offline wheel preparation')\nsys.addaudithook(guard)\npath=sys.argv.pop(1)\nrunpy.run_path(path,run_name='__main__')\n",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\scripts\\build_nltk_pathsec_wheel.py",
+      "--wheel",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\upstream\\nltk-3.10.3-py3-none-any.whl",
+      "--out-dir",
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\astra-stored-py313-01"
+    ],
+    "exit": 0,
+    "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\wheel-integrator13\\_scratch\\astra-stored-py313-01",
+    "sha256": "969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8",
+    "bytes": 6597605
+  }
+]

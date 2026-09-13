@@ -1,0 +1,42 @@
+--- a/bw01-before-fixture-repair/tests.py.txt
++++ b/tests-synthetic.py
+@@ -54,6 +54,25 @@
+             start = index + 4
+     return bytes(data)
+ 
++def raw_filename_change(blob, before, after):
++    """Preserve forbidden names that ZipInfo normalizes on Windows."""
++    assert len(before) == len(after)
++    data = bytearray(blob)
++    changes = 0
++    for marker, length_offset, name_offset in ((b"PK\x03\x04", 26, 30), (b"PK\x01\x02", 28, 46)):
++        start = 0
++        while True:
++            index = data.find(marker, start)
++            if index < 0:
++                break
++            length = struct.unpack_from("<H", data, index + length_offset)[0]
++            if data[index + name_offset:index + name_offset + length] == before:
++                data[index + name_offset:index + name_offset + length] = after
++                changes += 1
++            start = index + 4
++    assert changes == 2
++    return bytes(data)
++
+ class ArchiveContracts(unittest.TestCase):
+     def setUp(self):
+         self.members = synthetic_members()
+@@ -95,8 +114,11 @@
+     def test(self):
+         data = self.members.pop("faster_whisper/audio.py")
+         self.members[replacement] = data
+-        with self.assertRaises(ValueError):
+-            builder.validate_archive(synthetic_zip(self.members))
++        blob = synthetic_zip(self.members)
++        if "\\" in replacement:
++            blob = raw_filename_change(blob, replacement.replace("\\", "/").encode(), replacement.encode())
++        with self.assertRaises(ValueError):
++            builder.validate_archive(blob)
+     return test
+ 
+ for label, replacement in {
