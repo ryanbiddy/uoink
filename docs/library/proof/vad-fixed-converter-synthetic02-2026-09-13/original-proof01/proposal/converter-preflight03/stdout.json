@@ -1,0 +1,351 @@
+{
+  "scope": "generated synthetic archive conversion only; no real artifact or model execution",
+  "passed": 82,
+  "failed": 0,
+  "cases": [
+    {
+      "case": "full_54_tensor_roundtrip_and_32_shared_views",
+      "passed": true
+    },
+    {
+      "case": "deterministic_header_and_data",
+      "passed": true
+    },
+    {
+      "case": "finite_ieee_edge_bits_preserved",
+      "passed": true
+    },
+    {
+      "case": "malicious_pickle_bytes_never_interpreted",
+      "passed": true
+    },
+    {
+      "case": "unselected_nonfinite_bytes_are_opaque_crc_only",
+      "passed": true
+    },
+    {
+      "case": "signed_descriptor32",
+      "passed": true
+    },
+    {
+      "case": "unsigned_descriptor32",
+      "passed": true
+    },
+    {
+      "case": "signed_descriptor64",
+      "passed": true
+    },
+    {
+      "case": "unsigned_descriptor64",
+      "passed": true
+    },
+    {
+      "case": "zip64_end_record",
+      "passed": true
+    },
+    {
+      "case": "zip64_local_sizes",
+      "passed": true
+    },
+    {
+      "case": "zip64_central_sizes_offsets",
+      "passed": true
+    },
+    {
+      "case": "zip64_local_descriptor64",
+      "passed": true
+    },
+    {
+      "case": "narrow_stored_version_zero",
+      "passed": true
+    },
+    {
+      "case": "alignment_extra_Z_padding",
+      "passed": true
+    },
+    {
+      "case": "mutable_input_refused",
+      "passed": true
+    },
+    {
+      "case": "hash_mismatch_precedes_zip_parser",
+      "passed": true
+    },
+    {
+      "case": "profile_wrong_size",
+      "passed": true
+    },
+    {
+      "case": "profile_big_endian_refused",
+      "passed": true
+    },
+    {
+      "case": "profile_unknown_encoding_refused",
+      "passed": true
+    },
+    {
+      "case": "profile_missing_version_refused",
+      "passed": true
+    },
+    {
+      "case": "profile_wrong_version_refused",
+      "passed": true
+    },
+    {
+      "case": "profile_bad_evidence_digest",
+      "passed": true
+    },
+    {
+      "case": "profile_real_unregistered_refused",
+      "passed": true
+    },
+    {
+      "case": "synthetic_cannot_authorize_original_digest",
+      "passed": true
+    },
+    {
+      "case": "profile_escaping_name_refused",
+      "passed": true
+    },
+    {
+      "case": "profile_duplicate_name_refused",
+      "passed": true
+    },
+    {
+      "case": "real_file_guard_precedes_path_operations",
+      "passed": true
+    },
+    {
+      "case": "fixed_plan_digest_rejects_changed_shape_or_key",
+      "passed": true
+    },
+    {
+      "case": "plan_duplicate_tensor_key",
+      "passed": true
+    },
+    {
+      "case": "plan_bool_shape_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_nonrowmajor_stride_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_negative_offset_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_range_outside_storage_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_overlapping_shared_views_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_unknown_storage_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_missing_buffer_entry_refused",
+      "passed": true
+    },
+    {
+      "case": "plan_storage_length_mismatch",
+      "passed": true
+    },
+    {
+      "case": "selected_payload_crc_mismatch",
+      "passed": true
+    },
+    {
+      "case": "opaque_pickle_payload_crc_mismatch",
+      "passed": true
+    },
+    {
+      "case": "central_unsupported_compression",
+      "passed": true
+    },
+    {
+      "case": "central_encrypted_flag",
+      "passed": true
+    },
+    {
+      "case": "central_unsupported_version",
+      "passed": true
+    },
+    {
+      "case": "central_huge_storage_size",
+      "passed": true
+    },
+    {
+      "case": "central_bad_local_offset",
+      "passed": true
+    },
+    {
+      "case": "central_symbolic_link_mode",
+      "passed": true
+    },
+    {
+      "case": "local_crc_mismatch",
+      "passed": true
+    },
+    {
+      "case": "local_size_mismatch",
+      "passed": true
+    },
+    {
+      "case": "local_version_mismatch",
+      "passed": true
+    },
+    {
+      "case": "local_name_mismatch",
+      "passed": true
+    },
+    {
+      "case": "overlapping_members_with_recomputed_crc_refused",
+      "passed": true
+    },
+    {
+      "case": "duplicate_zip_member_refused",
+      "passed": true
+    },
+    {
+      "case": "unlisted_zip_member_refused",
+      "passed": true
+    },
+    {
+      "case": "zip_escape_name",
+      "passed": true
+    },
+    {
+      "case": "zip_ads_name",
+      "passed": true
+    },
+    {
+      "case": "zip_backslash_name",
+      "passed": true
+    },
+    {
+      "case": "zip_absolute_name",
+      "passed": true
+    },
+    {
+      "case": "zip_nul_name",
+      "passed": true
+    },
+    {
+      "case": "fixed_storage_length_refused_after_valid_crc",
+      "passed": true
+    },
+    {
+      "case": "positive_infinity",
+      "passed": true
+    },
+    {
+      "case": "negative_infinity",
+      "passed": true
+    },
+    {
+      "case": "quiet_nan",
+      "passed": true
+    },
+    {
+      "case": "signalling_nan",
+      "passed": true
+    },
+    {
+      "case": "descriptor_crc_mismatch",
+      "passed": true
+    },
+    {
+      "case": "descriptor_extent_mismatch",
+      "passed": true
+    },
+    {
+      "case": "unreferenced_gap_refused",
+      "passed": true
+    },
+    {
+      "case": "nonZ_alignment_extra_refused",
+      "passed": true
+    },
+    {
+      "case": "zip_trailing_bytes_refused",
+      "passed": true
+    },
+    {
+      "case": "zip_member_count_bound_refused",
+      "passed": true
+    },
+    {
+      "case": "zip_directory_byte_bound_refused",
+      "passed": true
+    },
+    {
+      "case": "input_byte_limit",
+      "passed": true
+    },
+    {
+      "case": "output_header_limit",
+      "passed": true
+    },
+    {
+      "case": "output_total_limit",
+      "passed": true
+    },
+    {
+      "case": "deadline_after_output_hash_refuses_result",
+      "passed": true
+    },
+    {
+      "case": "inert_path_valid",
+      "passed": true
+    },
+    {
+      "case": "inert_path_ancestor_reparse",
+      "passed": true
+    },
+    {
+      "case": "inert_path_root_reparse",
+      "passed": true
+    },
+    {
+      "case": "inert_path_leaf_symlink",
+      "passed": true
+    },
+    {
+      "case": "inert_path_ancestor_file",
+      "passed": true
+    },
+    {
+      "case": "inert_path_missing_parent",
+      "passed": true
+    },
+    {
+      "case": "zip_boundary_functions_match_reviewed_source_ast",
+      "passed": true
+    },
+    {
+      "case": "converter_imports_and_real_profile_static_guard",
+      "passed": true
+    }
+  ],
+  "elapsed_seconds": 2.147786,
+  "startup_binding": true,
+  "isolated_no_site_no_bytecode": true,
+  "input_hashes": {
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "reviewed_zip_reader.txt": "67e9edd6c3f6845a8dd3fd21b0b471793b57db0222c56379c0dfce9fcf07c9e5",
+    "qualify_converter.py": "11f9addddf9b349c4ee249c000cc60c4986b989de2e11ec990ba940d6b7949a9"
+  },
+  "input_hashes_unchanged": true,
+  "unexpected_audit_events": [],
+  "original_artifact_read": false,
+  "model_or_tensor_constructed": false,
+  "real_profile_accepted": false,
+  "qualification_exit": 0
+}

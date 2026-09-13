@@ -1,0 +1,11 @@
+# Fixed converter source review before synthetic qualification
+
+2026-09-13. Reviewed the full converter and ZIP boundary source, fixed plan and brief without importing or executing them. All 54 plan rows were independently reconciled to the safe metadata mapping. The two extracted ZIP boundary functions match the retained tail-reader source text after trailing-whitespace normalization.
+
+One actionable defect was identified in the dormant real-file wrapper: contained_unlinked checked the supplied root and descendants but omitted ancestors above that root. A pre-existing junction above the output directory could bypass its claimed path restriction. The author preserved the earlier source and documented the repair before qualification. Current source checks every ancestor from the volume anchor, rejects reparse/symlink components and non-directory ancestors, and permits a missing path only at a fresh output leaf. Mocked-lstat qualification is still pending. Quiescent private directories remain a precondition; this is not a race-proof Windows handle check.
+
+The reviewed source hashes are converter `b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b`, zip_bounds.py `bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6`, and fixed-plan.json `37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf`.
+
+No additional actionable ZIP/profile, finite-bit, range or output-header defect was found in this source pass. The fixed hash precedes ZIP interpretation; complete local/central records, physical spans, descriptors, member inventory and CRCs are checked. Selected storage words reject exponent-all-ones encodings while preserving finite bits. Fixed dense ranges feed sorted F32 entries with contiguous data offsets and bounded padded JSON. The original archive digest cannot pass a synthetic profile; REAL_PROFILE remains None and the real file function refuses before any path or file access. Wrapper timing is explicitly cooperative and checked before reporting success.
+
+This is a source preflight for generated synthetic-byte qualification only. No synthetic result has yet been reviewed, and no real artifact, conversion, byte order, version, native format reader, model import or runtime behavior is accepted.

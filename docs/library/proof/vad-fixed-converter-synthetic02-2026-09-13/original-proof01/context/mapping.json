@@ -1,0 +1,8017 @@
+{
+  "status": "receipt_only_static_mapping_not_loader_approval",
+  "input_receipt": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-symbolic-adapter-proposal01\\results\\symbolic-projection01.json",
+    "sha256": "60b0078f3367bf80b8ed526d681850c47b0caae09f4fbd8da3de0883f927247d",
+    "bytes": 190182
+  },
+  "original_artifact_status": "refused",
+  "original_artifact_reason": "Reference cycle refused",
+  "original_reader_exit": 2,
+  "artifact_claims_from_receipt": {
+    "allowlisted_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\installer\\staging\\python\\Lib\\site-packages\\whisperx\\assets\\pytorch_model.bin",
+    "bytes": 17719103,
+    "sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea"
+  },
+  "projection_status": "partial_untrusted_selected_root_projection",
+  "selected_roots": [
+    {
+      "key": "state_dict",
+      "value_ref": 10
+    },
+    {
+      "key": "hyper_parameters",
+      "value_ref": 3022
+    },
+    {
+      "key": "pyannote.audio",
+      "value_ref": 3052
+    }
+  ],
+  "selected_nodes": 1069,
+  "selected_examined_edges": 1344,
+  "state_dict_record": {
+    "id": 10,
+    "kind": "reduce",
+    "target_ref": 8,
+    "arguments_ref": 9,
+    "operations": [
+      {
+        "opcode": "SETITEMS",
+        "entries": [
+          [
+            11,
+            29
+          ],
+          [
+            30,
+            45
+          ],
+          [
+            46,
+            63
+          ],
+          [
+            64,
+            81
+          ],
+          [
+            82,
+            97
+          ],
+          [
+            98,
+            115
+          ],
+          [
+            116,
+            135
+          ],
+          [
+            136,
+            151
+          ],
+          [
+            152,
+            171
+          ],
+          [
+            172,
+            187
+          ],
+          [
+            188,
+            203
+          ],
+          [
+            204,
+            219
+          ],
+          [
+            220,
+            235
+          ],
+          [
+            236,
+            251
+          ],
+          [
+            252,
+            267
+          ],
+          [
+            268,
+            283
+          ],
+          [
+            284,
+            301
+          ],
+          [
+            302,
+            318
+          ],
+          [
+            319,
+            333
+          ],
+          [
+            334,
+            348
+          ],
+          [
+            349,
+            365
+          ],
+          [
+            366,
+            382
+          ],
+          [
+            383,
+            397
+          ],
+          [
+            398,
+            412
+          ],
+          [
+            413,
+            429
+          ],
+          [
+            430,
+            446
+          ],
+          [
+            447,
+            461
+          ],
+          [
+            462,
+            476
+          ],
+          [
+            477,
+            493
+          ],
+          [
+            494,
+            510
+          ],
+          [
+            511,
+            525
+          ],
+          [
+            526,
+            540
+          ],
+          [
+            541,
+            557
+          ],
+          [
+            558,
+            574
+          ],
+          [
+            575,
+            589
+          ],
+          [
+            590,
+            604
+          ],
+          [
+            605,
+            621
+          ],
+          [
+            622,
+            638
+          ],
+          [
+            639,
+            653
+          ],
+          [
+            654,
+            668
+          ],
+          [
+            669,
+            685
+          ],
+          [
+            686,
+            702
+          ],
+          [
+            703,
+            717
+          ],
+          [
+            718,
+            732
+          ],
+          [
+            733,
+            749
+          ],
+          [
+            750,
+            766
+          ],
+          [
+            767,
+            781
+          ],
+          [
+            782,
+            796
+          ],
+          [
+            797,
+            814
+          ],
+          [
+            815,
+            830
+          ],
+          [
+            831,
+            848
+          ],
+          [
+            849,
+            864
+          ],
+          [
+            865,
+            882
+          ],
+          [
+            883,
+            898
+          ]
+        ]
+      },
+      {
+        "opcode": "BUILD",
+        "state_ref": 899
+      }
+    ]
+  },
+  "state_dict_target_record": {
+    "id": 8,
+    "kind": "global",
+    "literal": "collections OrderedDict"
+  },
+  "state_dict_arguments_record": {
+    "id": 9,
+    "kind": "tuple",
+    "items": []
+  },
+  "state_metadata_records": [
+    {
+      "id": 899,
+      "kind": "dict",
+      "entries": [
+        [
+          900,
+          902
+        ]
+      ]
+    },
+    {
+      "id": 900,
+      "kind": "str",
+      "value": "_metadata"
+    },
+    {
+      "id": 901,
+      "kind": "tuple",
+      "items": []
+    },
+    {
+      "id": 902,
+      "kind": "reduce",
+      "target_ref": 8,
+      "arguments_ref": 901,
+      "operations": [
+        {
+          "opcode": "SETITEMS",
+          "entries": [
+            [
+              903,
+              904
+            ],
+            [
+              907,
+              908
+            ],
+            [
+              910,
+              911
+            ],
+            [
+              913,
+              914
+            ],
+            [
+              916,
+              917
+            ],
+            [
+              919,
+              920
+            ],
+            [
+              922,
+              923
+            ],
+            [
+              925,
+              926
+            ],
+            [
+              928,
+              929
+            ],
+            [
+              931,
+              932
+            ],
+            [
+              934,
+              935
+            ],
+            [
+              937,
+              938
+            ],
+            [
+              940,
+              941
+            ],
+            [
+              943,
+              944
+            ],
+            [
+              946,
+              947
+            ],
+            [
+              949,
+              950
+            ],
+            [
+              952,
+              953
+            ],
+            [
+              955,
+              956
+            ],
+            [
+              958,
+              959
+            ],
+            [
+              961,
+              962
+            ],
+            [
+              964,
+              965
+            ],
+            [
+              967,
+              968
+            ],
+            [
+              970,
+              971
+            ],
+            [
+              973,
+              974
+            ],
+            [
+              976,
+              977
+            ],
+            [
+              979,
+              980
+            ],
+            [
+              982,
+              983
+            ],
+            [
+              985,
+              986
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": 903,
+      "kind": "str",
+      "value": ""
+    },
+    {
+      "id": 904,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          906
+        ]
+      ]
+    },
+    {
+      "id": 905,
+      "kind": "str",
+      "value": "version"
+    },
+    {
+      "id": 906,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 907,
+      "kind": "str",
+      "value": "sincnet"
+    },
+    {
+      "id": 908,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          909
+        ]
+      ]
+    },
+    {
+      "id": 909,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 910,
+      "kind": "str",
+      "value": "sincnet.wav_norm1d"
+    },
+    {
+      "id": 911,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          912
+        ]
+      ]
+    },
+    {
+      "id": 912,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 913,
+      "kind": "str",
+      "value": "sincnet.conv1d"
+    },
+    {
+      "id": 914,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          915
+        ]
+      ]
+    },
+    {
+      "id": 915,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 916,
+      "kind": "str",
+      "value": "sincnet.conv1d.0"
+    },
+    {
+      "id": 917,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          918
+        ]
+      ]
+    },
+    {
+      "id": 918,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 919,
+      "kind": "str",
+      "value": "sincnet.conv1d.0.filterbank"
+    },
+    {
+      "id": 920,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          921
+        ]
+      ]
+    },
+    {
+      "id": 921,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 922,
+      "kind": "str",
+      "value": "sincnet.conv1d.1"
+    },
+    {
+      "id": 923,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          924
+        ]
+      ]
+    },
+    {
+      "id": 924,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 925,
+      "kind": "str",
+      "value": "sincnet.conv1d.2"
+    },
+    {
+      "id": 926,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          927
+        ]
+      ]
+    },
+    {
+      "id": 927,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 928,
+      "kind": "str",
+      "value": "sincnet.pool1d"
+    },
+    {
+      "id": 929,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          930
+        ]
+      ]
+    },
+    {
+      "id": 930,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 931,
+      "kind": "str",
+      "value": "sincnet.pool1d.0"
+    },
+    {
+      "id": 932,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          933
+        ]
+      ]
+    },
+    {
+      "id": 933,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 934,
+      "kind": "str",
+      "value": "sincnet.pool1d.1"
+    },
+    {
+      "id": 935,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          936
+        ]
+      ]
+    },
+    {
+      "id": 936,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 937,
+      "kind": "str",
+      "value": "sincnet.pool1d.2"
+    },
+    {
+      "id": 938,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          939
+        ]
+      ]
+    },
+    {
+      "id": 939,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 940,
+      "kind": "str",
+      "value": "sincnet.norm1d"
+    },
+    {
+      "id": 941,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          942
+        ]
+      ]
+    },
+    {
+      "id": 942,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 943,
+      "kind": "str",
+      "value": "sincnet.norm1d.0"
+    },
+    {
+      "id": 944,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          945
+        ]
+      ]
+    },
+    {
+      "id": 945,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 946,
+      "kind": "str",
+      "value": "sincnet.norm1d.1"
+    },
+    {
+      "id": 947,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          948
+        ]
+      ]
+    },
+    {
+      "id": 948,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 949,
+      "kind": "str",
+      "value": "sincnet.norm1d.2"
+    },
+    {
+      "id": 950,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          951
+        ]
+      ]
+    },
+    {
+      "id": 951,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 952,
+      "kind": "str",
+      "value": "lstm"
+    },
+    {
+      "id": 953,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          954
+        ]
+      ]
+    },
+    {
+      "id": 954,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 955,
+      "kind": "str",
+      "value": "linear"
+    },
+    {
+      "id": 956,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          957
+        ]
+      ]
+    },
+    {
+      "id": 957,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 958,
+      "kind": "str",
+      "value": "linear.0"
+    },
+    {
+      "id": 959,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          960
+        ]
+      ]
+    },
+    {
+      "id": 960,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 961,
+      "kind": "str",
+      "value": "linear.1"
+    },
+    {
+      "id": 962,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          963
+        ]
+      ]
+    },
+    {
+      "id": 963,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 964,
+      "kind": "str",
+      "value": "classifier"
+    },
+    {
+      "id": 965,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          966
+        ]
+      ]
+    },
+    {
+      "id": 966,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 967,
+      "kind": "str",
+      "value": "activation"
+    },
+    {
+      "id": 968,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          969
+        ]
+      ]
+    },
+    {
+      "id": 969,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 970,
+      "kind": "str",
+      "value": "validation_metric"
+    },
+    {
+      "id": 971,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          972
+        ]
+      ]
+    },
+    {
+      "id": 972,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 973,
+      "kind": "str",
+      "value": "validation_metric.OptimalDiarizationErrorRate"
+    },
+    {
+      "id": 974,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          975
+        ]
+      ]
+    },
+    {
+      "id": 975,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 976,
+      "kind": "str",
+      "value": "validation_metric.OptimalDiarizationErrorRateThreshold"
+    },
+    {
+      "id": 977,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          978
+        ]
+      ]
+    },
+    {
+      "id": 978,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 979,
+      "kind": "str",
+      "value": "validation_metric.OptimalSpeakerConfusionRate"
+    },
+    {
+      "id": 980,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          981
+        ]
+      ]
+    },
+    {
+      "id": 981,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 982,
+      "kind": "str",
+      "value": "validation_metric.OptimalMissedDetectionRate"
+    },
+    {
+      "id": 983,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          984
+        ]
+      ]
+    },
+    {
+      "id": 984,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 985,
+      "kind": "str",
+      "value": "validation_metric.OptimalFalseAlarmRate"
+    },
+    {
+      "id": 986,
+      "kind": "dict",
+      "entries": [
+        [
+          905,
+          987
+        ]
+      ]
+    },
+    {
+      "id": 987,
+      "kind": "int",
+      "value": 1
+    }
+  ],
+  "recorded_config_metadata_nodes": [
+    {
+      "id": 3022,
+      "kind": "dict",
+      "entries": [
+        [
+          3023,
+          3024
+        ],
+        [
+          3025,
+          3026
+        ],
+        [
+          3027,
+          3028
+        ],
+        [
+          3033,
+          3034
+        ],
+        [
+          3047,
+          3048
+        ]
+      ]
+    },
+    {
+      "id": 3023,
+      "kind": "str",
+      "value": "sample_rate"
+    },
+    {
+      "id": 3024,
+      "kind": "int",
+      "value": 16000
+    },
+    {
+      "id": 3025,
+      "kind": "str",
+      "value": "num_channels"
+    },
+    {
+      "id": 3026,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 3027,
+      "kind": "str",
+      "value": "sincnet"
+    },
+    {
+      "id": 3028,
+      "kind": "dict",
+      "entries": [
+        [
+          3029,
+          3030
+        ],
+        [
+          3031,
+          3032
+        ]
+      ]
+    },
+    {
+      "id": 3029,
+      "kind": "str",
+      "value": "stride"
+    },
+    {
+      "id": 3030,
+      "kind": "int",
+      "value": 10
+    },
+    {
+      "id": 3031,
+      "kind": "str",
+      "value": "sample_rate"
+    },
+    {
+      "id": 3032,
+      "kind": "int",
+      "value": 16000
+    },
+    {
+      "id": 3033,
+      "kind": "str",
+      "value": "lstm"
+    },
+    {
+      "id": 3034,
+      "kind": "dict",
+      "entries": [
+        [
+          3035,
+          3036
+        ],
+        [
+          3037,
+          3038
+        ],
+        [
+          3039,
+          3040
+        ],
+        [
+          3041,
+          3042
+        ],
+        [
+          3043,
+          3044
+        ],
+        [
+          3045,
+          3046
+        ]
+      ]
+    },
+    {
+      "id": 3035,
+      "kind": "str",
+      "value": "hidden_size"
+    },
+    {
+      "id": 3036,
+      "kind": "int",
+      "value": 128
+    },
+    {
+      "id": 3037,
+      "kind": "str",
+      "value": "num_layers"
+    },
+    {
+      "id": 3038,
+      "kind": "int",
+      "value": 4
+    },
+    {
+      "id": 3039,
+      "kind": "str",
+      "value": "bidirectional"
+    },
+    {
+      "id": 3040,
+      "kind": "bool",
+      "value": true
+    },
+    {
+      "id": 3041,
+      "kind": "str",
+      "value": "monolithic"
+    },
+    {
+      "id": 3042,
+      "kind": "bool",
+      "value": true
+    },
+    {
+      "id": 3043,
+      "kind": "str",
+      "value": "dropout"
+    },
+    {
+      "id": 3044,
+      "kind": "float",
+      "value": 0.5
+    },
+    {
+      "id": 3045,
+      "kind": "str",
+      "value": "batch_first"
+    },
+    {
+      "id": 3046,
+      "kind": "bool",
+      "value": true
+    },
+    {
+      "id": 3047,
+      "kind": "str",
+      "value": "linear"
+    },
+    {
+      "id": 3048,
+      "kind": "dict",
+      "entries": [
+        [
+          3035,
+          3049
+        ],
+        [
+          3037,
+          3050
+        ]
+      ]
+    },
+    {
+      "id": 3049,
+      "kind": "int",
+      "value": 128
+    },
+    {
+      "id": 3050,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 3051,
+      "kind": "str",
+      "value": "pyannote.audio"
+    },
+    {
+      "id": 3052,
+      "kind": "dict",
+      "entries": [
+        [
+          3053,
+          3054
+        ],
+        [
+          3061,
+          3062
+        ],
+        [
+          3067,
+          3070
+        ],
+        [
+          3083,
+          3086
+        ]
+      ]
+    },
+    {
+      "id": 3053,
+      "kind": "str",
+      "value": "versions"
+    },
+    {
+      "id": 3054,
+      "kind": "dict",
+      "entries": [
+        [
+          3055,
+          3059
+        ],
+        [
+          3051,
+          3060
+        ]
+      ]
+    },
+    {
+      "id": 3055,
+      "kind": "str",
+      "value": "torch"
+    },
+    {
+      "id": 3056,
+      "kind": "global",
+      "literal": "torch.torch_version TorchVersion"
+    },
+    {
+      "id": 3057,
+      "kind": "str",
+      "value": "1.10.0+cu102"
+    },
+    {
+      "id": 3058,
+      "kind": "tuple",
+      "items": [
+        3057
+      ]
+    },
+    {
+      "id": 3059,
+      "kind": "newobj",
+      "target_ref": 3056,
+      "arguments_ref": 3058,
+      "operations": []
+    },
+    {
+      "id": 3060,
+      "kind": "str",
+      "value": "0.0.1"
+    },
+    {
+      "id": 3061,
+      "kind": "str",
+      "value": "architecture"
+    },
+    {
+      "id": 3062,
+      "kind": "dict",
+      "entries": [
+        [
+          3063,
+          3064
+        ],
+        [
+          3065,
+          3066
+        ]
+      ]
+    },
+    {
+      "id": 3063,
+      "kind": "str",
+      "value": "module"
+    },
+    {
+      "id": 3064,
+      "kind": "str",
+      "value": "pyannote.audio.models.segmentation.PyanNet"
+    },
+    {
+      "id": 3065,
+      "kind": "str",
+      "value": "class"
+    },
+    {
+      "id": 3066,
+      "kind": "str",
+      "value": "PyanNet"
+    },
+    {
+      "id": 3067,
+      "kind": "str",
+      "value": "introspection"
+    },
+    {
+      "id": 3068,
+      "kind": "global",
+      "literal": "pyannote.audio.core.model Introspection"
+    },
+    {
+      "id": 3069,
+      "kind": "tuple",
+      "items": []
+    },
+    {
+      "id": 3070,
+      "kind": "newobj",
+      "target_ref": 3068,
+      "arguments_ref": 3069,
+      "operations": [
+        {
+          "opcode": "BUILD",
+          "state_ref": 3071
+        }
+      ]
+    },
+    {
+      "id": 3071,
+      "kind": "dict",
+      "entries": [
+        [
+          3072,
+          3073
+        ],
+        [
+          3074,
+          3075
+        ],
+        [
+          3076,
+          3077
+        ],
+        [
+          3078,
+          3079
+        ],
+        [
+          3080,
+          3081
+        ],
+        [
+          3023,
+          3082
+        ]
+      ]
+    },
+    {
+      "id": 3072,
+      "kind": "str",
+      "value": "min_num_samples"
+    },
+    {
+      "id": 3073,
+      "kind": "int",
+      "value": 1261
+    },
+    {
+      "id": 3074,
+      "kind": "str",
+      "value": "min_num_frames"
+    },
+    {
+      "id": 3075,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 3076,
+      "kind": "str",
+      "value": "inc_num_samples"
+    },
+    {
+      "id": 3077,
+      "kind": "int",
+      "value": 270
+    },
+    {
+      "id": 3078,
+      "kind": "str",
+      "value": "inc_num_frames"
+    },
+    {
+      "id": 3079,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 3080,
+      "kind": "str",
+      "value": "dimension"
+    },
+    {
+      "id": 3081,
+      "kind": "int",
+      "value": 3
+    },
+    {
+      "id": 3082,
+      "kind": "int",
+      "value": 16000
+    },
+    {
+      "id": 3083,
+      "kind": "str",
+      "value": "specifications"
+    },
+    {
+      "id": 3084,
+      "kind": "global",
+      "literal": "pyannote.audio.core.task Specifications"
+    },
+    {
+      "id": 3085,
+      "kind": "tuple",
+      "items": []
+    },
+    {
+      "id": 3086,
+      "kind": "newobj",
+      "target_ref": 3084,
+      "arguments_ref": 3085,
+      "operations": [
+        {
+          "opcode": "BUILD",
+          "state_ref": 3087
+        }
+      ]
+    },
+    {
+      "id": 3087,
+      "kind": "dict",
+      "entries": [
+        [
+          3088,
+          3092
+        ],
+        [
+          3093,
+          3097
+        ],
+        [
+          3098,
+          3099
+        ],
+        [
+          3100,
+          3103
+        ],
+        [
+          3104,
+          3105
+        ],
+        [
+          3109,
+          3110
+        ]
+      ]
+    },
+    {
+      "id": 3088,
+      "kind": "str",
+      "value": "problem"
+    },
+    {
+      "id": 3089,
+      "kind": "global",
+      "literal": "pyannote.audio.core.task Problem"
+    },
+    {
+      "id": 3090,
+      "kind": "int",
+      "value": 2
+    },
+    {
+      "id": 3091,
+      "kind": "tuple",
+      "items": [
+        3090
+      ]
+    },
+    {
+      "id": 3092,
+      "kind": "reduce",
+      "target_ref": 3089,
+      "arguments_ref": 3091,
+      "operations": []
+    },
+    {
+      "id": 3093,
+      "kind": "str",
+      "value": "resolution"
+    },
+    {
+      "id": 3094,
+      "kind": "global",
+      "literal": "pyannote.audio.core.task Resolution"
+    },
+    {
+      "id": 3095,
+      "kind": "int",
+      "value": 1
+    },
+    {
+      "id": 3096,
+      "kind": "tuple",
+      "items": [
+        3095
+      ]
+    },
+    {
+      "id": 3097,
+      "kind": "reduce",
+      "target_ref": 3094,
+      "arguments_ref": 3096,
+      "operations": []
+    },
+    {
+      "id": 3098,
+      "kind": "str",
+      "value": "duration"
+    },
+    {
+      "id": 3099,
+      "kind": "float",
+      "value": 5.0
+    },
+    {
+      "id": 3100,
+      "kind": "str",
+      "value": "warm_up"
+    },
+    {
+      "id": 3101,
+      "kind": "float",
+      "value": 0.0
+    },
+    {
+      "id": 3102,
+      "kind": "float",
+      "value": 0.0
+    },
+    {
+      "id": 3103,
+      "kind": "tuple",
+      "items": [
+        3101,
+        3102
+      ]
+    },
+    {
+      "id": 3104,
+      "kind": "str",
+      "value": "classes"
+    },
+    {
+      "id": 3105,
+      "kind": "list",
+      "items": [
+        3106,
+        3107,
+        3108
+      ]
+    },
+    {
+      "id": 3106,
+      "kind": "str",
+      "value": "speaker#1"
+    },
+    {
+      "id": 3107,
+      "kind": "str",
+      "value": "speaker#2"
+    },
+    {
+      "id": 3108,
+      "kind": "str",
+      "value": "speaker#3"
+    },
+    {
+      "id": 3109,
+      "kind": "str",
+      "value": "permutation_invariant"
+    },
+    {
+      "id": 3110,
+      "kind": "bool",
+      "value": true
+    }
+  ],
+  "tensor_rows": [
+    {
+      "key_ref": 11,
+      "key": "sincnet.wav_norm1d.weight",
+      "reducer_ref": 29,
+      "raw_descriptor": {
+        "node_ref": 29,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 28,
+        "argument_refs": {
+          "storage": 19,
+          "storage_offset": 20,
+          "size": 22,
+          "stride": 24,
+          "requires_grad": 25,
+          "backward_hooks": 27
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 29,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 28,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 19,
+          "kind": "persistent_id",
+          "operand_ref": 18
+        },
+        "operand_record": {
+          "id": 18,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            15,
+            16,
+            17
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 15,
+        "key_literal": "0",
+        "location_ref": 16,
+        "location_literal": "cuda:0",
+        "elements_ref": 17,
+        "elements_literal": 1
+      },
+      "size": {
+        "ref": 22,
+        "item_refs": [
+          21
+        ],
+        "values": [
+          1
+        ]
+      },
+      "stride": {
+        "ref": 24,
+        "item_refs": [
+          23
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 20,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 25,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 27,
+        "record": {
+          "id": 27,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 26,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 26,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 1,
+        "exclusive_max_element": 1,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/0",
+        "compressed_bytes": 4,
+        "uncompressed_bytes": 4,
+        "compression": 0,
+        "crc32": "c02e38c6"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 30,
+      "key": "sincnet.wav_norm1d.bias",
+      "reducer_ref": 45,
+      "raw_descriptor": {
+        "node_ref": 45,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 44,
+        "argument_refs": {
+          "storage": 35,
+          "storage_offset": 36,
+          "size": 38,
+          "stride": 40,
+          "requires_grad": 41,
+          "backward_hooks": 43
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 45,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 44,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 35,
+          "kind": "persistent_id",
+          "operand_ref": 34
+        },
+        "operand_record": {
+          "id": 34,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            31,
+            32,
+            33
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 31,
+        "key_literal": "1",
+        "location_ref": 32,
+        "location_literal": "cuda:0",
+        "elements_ref": 33,
+        "elements_literal": 1
+      },
+      "size": {
+        "ref": 38,
+        "item_refs": [
+          37
+        ],
+        "values": [
+          1
+        ]
+      },
+      "stride": {
+        "ref": 40,
+        "item_refs": [
+          39
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 36,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 41,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 43,
+        "record": {
+          "id": 43,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 42,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 42,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 1,
+        "exclusive_max_element": 1,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/1",
+        "compressed_bytes": 4,
+        "uncompressed_bytes": 4,
+        "compression": 0,
+        "crc32": "402e35f8"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 46,
+      "key": "sincnet.conv1d.0.filterbank.low_hz_",
+      "reducer_ref": 63,
+      "raw_descriptor": {
+        "node_ref": 63,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 62,
+        "argument_refs": {
+          "storage": 51,
+          "storage_offset": 52,
+          "size": 55,
+          "stride": 58,
+          "requires_grad": 59,
+          "backward_hooks": 61
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 63,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 62,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 51,
+          "kind": "persistent_id",
+          "operand_ref": 50
+        },
+        "operand_record": {
+          "id": 50,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            47,
+            48,
+            49
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 47,
+        "key_literal": "2",
+        "location_ref": 48,
+        "location_literal": "cuda:0",
+        "elements_ref": 49,
+        "elements_literal": 40
+      },
+      "size": {
+        "ref": 55,
+        "item_refs": [
+          53,
+          54
+        ],
+        "values": [
+          40,
+          1
+        ]
+      },
+      "stride": {
+        "ref": 58,
+        "item_refs": [
+          56,
+          57
+        ],
+        "values": [
+          1,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 52,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 59,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 61,
+        "record": {
+          "id": 61,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 60,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 60,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 40,
+        "exclusive_max_element": 40,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/2",
+        "compressed_bytes": 160,
+        "uncompressed_bytes": 160,
+        "compression": 0,
+        "crc32": "b0a120fb"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 64,
+      "key": "sincnet.conv1d.0.filterbank.band_hz_",
+      "reducer_ref": 81,
+      "raw_descriptor": {
+        "node_ref": 81,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 80,
+        "argument_refs": {
+          "storage": 69,
+          "storage_offset": 70,
+          "size": 73,
+          "stride": 76,
+          "requires_grad": 77,
+          "backward_hooks": 79
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 81,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 80,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 69,
+          "kind": "persistent_id",
+          "operand_ref": 68
+        },
+        "operand_record": {
+          "id": 68,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            65,
+            66,
+            67
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 65,
+        "key_literal": "3",
+        "location_ref": 66,
+        "location_literal": "cuda:0",
+        "elements_ref": 67,
+        "elements_literal": 40
+      },
+      "size": {
+        "ref": 73,
+        "item_refs": [
+          71,
+          72
+        ],
+        "values": [
+          40,
+          1
+        ]
+      },
+      "stride": {
+        "ref": 76,
+        "item_refs": [
+          74,
+          75
+        ],
+        "values": [
+          1,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 70,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 77,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 79,
+        "record": {
+          "id": 79,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 78,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 78,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 40,
+        "exclusive_max_element": 40,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/3",
+        "compressed_bytes": 160,
+        "uncompressed_bytes": 160,
+        "compression": 0,
+        "crc32": "53c4f8b7"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 82,
+      "key": "sincnet.conv1d.0.filterbank.window_",
+      "reducer_ref": 97,
+      "raw_descriptor": {
+        "node_ref": 97,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 96,
+        "argument_refs": {
+          "storage": 87,
+          "storage_offset": 88,
+          "size": 90,
+          "stride": 92,
+          "requires_grad": 93,
+          "backward_hooks": 95
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 97,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 96,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 87,
+          "kind": "persistent_id",
+          "operand_ref": 86
+        },
+        "operand_record": {
+          "id": 86,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            83,
+            84,
+            85
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 83,
+        "key_literal": "4",
+        "location_ref": 84,
+        "location_literal": "cuda:0",
+        "elements_ref": 85,
+        "elements_literal": 125
+      },
+      "size": {
+        "ref": 90,
+        "item_refs": [
+          89
+        ],
+        "values": [
+          125
+        ]
+      },
+      "stride": {
+        "ref": 92,
+        "item_refs": [
+          91
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 88,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 93,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 95,
+        "record": {
+          "id": 95,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 94,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 94,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 125,
+        "exclusive_max_element": 125,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/4",
+        "compressed_bytes": 500,
+        "uncompressed_bytes": 500,
+        "compression": 0,
+        "crc32": "cc4d75aa"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 98,
+      "key": "sincnet.conv1d.0.filterbank.n_",
+      "reducer_ref": 115,
+      "raw_descriptor": {
+        "node_ref": 115,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 114,
+        "argument_refs": {
+          "storage": 103,
+          "storage_offset": 104,
+          "size": 107,
+          "stride": 110,
+          "requires_grad": 111,
+          "backward_hooks": 113
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 115,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 114,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 103,
+          "kind": "persistent_id",
+          "operand_ref": 102
+        },
+        "operand_record": {
+          "id": 102,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            99,
+            100,
+            101
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 99,
+        "key_literal": "5",
+        "location_ref": 100,
+        "location_literal": "cuda:0",
+        "elements_ref": 101,
+        "elements_literal": 125
+      },
+      "size": {
+        "ref": 107,
+        "item_refs": [
+          105,
+          106
+        ],
+        "values": [
+          1,
+          125
+        ]
+      },
+      "stride": {
+        "ref": 110,
+        "item_refs": [
+          108,
+          109
+        ],
+        "values": [
+          125,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 104,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 111,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 113,
+        "record": {
+          "id": 113,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 112,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 112,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 125,
+        "exclusive_max_element": 125,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/5",
+        "compressed_bytes": 500,
+        "uncompressed_bytes": 500,
+        "compression": 0,
+        "crc32": "6c5b49a5"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 116,
+      "key": "sincnet.conv1d.1.weight",
+      "reducer_ref": 135,
+      "raw_descriptor": {
+        "node_ref": 135,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 134,
+        "argument_refs": {
+          "storage": 121,
+          "storage_offset": 122,
+          "size": 126,
+          "stride": 130,
+          "requires_grad": 131,
+          "backward_hooks": 133
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 135,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 134,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 121,
+          "kind": "persistent_id",
+          "operand_ref": 120
+        },
+        "operand_record": {
+          "id": 120,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            117,
+            118,
+            119
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 117,
+        "key_literal": "6",
+        "location_ref": 118,
+        "location_literal": "cuda:0",
+        "elements_ref": 119,
+        "elements_literal": 24000
+      },
+      "size": {
+        "ref": 126,
+        "item_refs": [
+          123,
+          124,
+          125
+        ],
+        "values": [
+          60,
+          80,
+          5
+        ]
+      },
+      "stride": {
+        "ref": 130,
+        "item_refs": [
+          127,
+          128,
+          129
+        ],
+        "values": [
+          400,
+          5,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 122,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 131,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 133,
+        "record": {
+          "id": 133,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 132,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 132,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 24000,
+        "exclusive_max_element": 24000,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/6",
+        "compressed_bytes": 96000,
+        "uncompressed_bytes": 96000,
+        "compression": 0,
+        "crc32": "4e17fc0e"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 136,
+      "key": "sincnet.conv1d.1.bias",
+      "reducer_ref": 151,
+      "raw_descriptor": {
+        "node_ref": 151,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 150,
+        "argument_refs": {
+          "storage": 141,
+          "storage_offset": 142,
+          "size": 144,
+          "stride": 146,
+          "requires_grad": 147,
+          "backward_hooks": 149
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 151,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 150,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 141,
+          "kind": "persistent_id",
+          "operand_ref": 140
+        },
+        "operand_record": {
+          "id": 140,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            137,
+            138,
+            139
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 137,
+        "key_literal": "7",
+        "location_ref": 138,
+        "location_literal": "cuda:0",
+        "elements_ref": 139,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 144,
+        "item_refs": [
+          143
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 146,
+        "item_refs": [
+          145
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 142,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 147,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 149,
+        "record": {
+          "id": 149,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 148,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 148,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/7",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "08bd5e90"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 152,
+      "key": "sincnet.conv1d.2.weight",
+      "reducer_ref": 171,
+      "raw_descriptor": {
+        "node_ref": 171,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 170,
+        "argument_refs": {
+          "storage": 157,
+          "storage_offset": 158,
+          "size": 162,
+          "stride": 166,
+          "requires_grad": 167,
+          "backward_hooks": 169
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 171,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 170,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 157,
+          "kind": "persistent_id",
+          "operand_ref": 156
+        },
+        "operand_record": {
+          "id": 156,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            153,
+            154,
+            155
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 153,
+        "key_literal": "8",
+        "location_ref": 154,
+        "location_literal": "cuda:0",
+        "elements_ref": 155,
+        "elements_literal": 18000
+      },
+      "size": {
+        "ref": 162,
+        "item_refs": [
+          159,
+          160,
+          161
+        ],
+        "values": [
+          60,
+          60,
+          5
+        ]
+      },
+      "stride": {
+        "ref": 166,
+        "item_refs": [
+          163,
+          164,
+          165
+        ],
+        "values": [
+          300,
+          5,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 158,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 167,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 169,
+        "record": {
+          "id": 169,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 168,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 168,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 18000,
+        "exclusive_max_element": 18000,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/8",
+        "compressed_bytes": 72000,
+        "uncompressed_bytes": 72000,
+        "compression": 0,
+        "crc32": "d894709f"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 172,
+      "key": "sincnet.conv1d.2.bias",
+      "reducer_ref": 187,
+      "raw_descriptor": {
+        "node_ref": 187,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 186,
+        "argument_refs": {
+          "storage": 177,
+          "storage_offset": 178,
+          "size": 180,
+          "stride": 182,
+          "requires_grad": 183,
+          "backward_hooks": 185
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 187,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 186,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 177,
+          "kind": "persistent_id",
+          "operand_ref": 176
+        },
+        "operand_record": {
+          "id": 176,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            173,
+            174,
+            175
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 173,
+        "key_literal": "9",
+        "location_ref": 174,
+        "location_literal": "cuda:0",
+        "elements_ref": 175,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 180,
+        "item_refs": [
+          179
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 182,
+        "item_refs": [
+          181
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 178,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 183,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 185,
+        "record": {
+          "id": 185,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 184,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 184,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/9",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "670ab6d5"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 188,
+      "key": "sincnet.norm1d.0.weight",
+      "reducer_ref": 203,
+      "raw_descriptor": {
+        "node_ref": 203,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 202,
+        "argument_refs": {
+          "storage": 193,
+          "storage_offset": 194,
+          "size": 196,
+          "stride": 198,
+          "requires_grad": 199,
+          "backward_hooks": 201
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 203,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 202,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 193,
+          "kind": "persistent_id",
+          "operand_ref": 192
+        },
+        "operand_record": {
+          "id": 192,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            189,
+            190,
+            191
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 189,
+        "key_literal": "10",
+        "location_ref": 190,
+        "location_literal": "cuda:0",
+        "elements_ref": 191,
+        "elements_literal": 80
+      },
+      "size": {
+        "ref": 196,
+        "item_refs": [
+          195
+        ],
+        "values": [
+          80
+        ]
+      },
+      "stride": {
+        "ref": 198,
+        "item_refs": [
+          197
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 194,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 199,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 201,
+        "record": {
+          "id": 201,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 200,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 200,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 80,
+        "exclusive_max_element": 80,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/10",
+        "compressed_bytes": 320,
+        "uncompressed_bytes": 320,
+        "compression": 0,
+        "crc32": "47050acf"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 204,
+      "key": "sincnet.norm1d.0.bias",
+      "reducer_ref": 219,
+      "raw_descriptor": {
+        "node_ref": 219,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 218,
+        "argument_refs": {
+          "storage": 209,
+          "storage_offset": 210,
+          "size": 212,
+          "stride": 214,
+          "requires_grad": 215,
+          "backward_hooks": 217
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 219,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 218,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 209,
+          "kind": "persistent_id",
+          "operand_ref": 208
+        },
+        "operand_record": {
+          "id": 208,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            205,
+            206,
+            207
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 205,
+        "key_literal": "11",
+        "location_ref": 206,
+        "location_literal": "cuda:0",
+        "elements_ref": 207,
+        "elements_literal": 80
+      },
+      "size": {
+        "ref": 212,
+        "item_refs": [
+          211
+        ],
+        "values": [
+          80
+        ]
+      },
+      "stride": {
+        "ref": 214,
+        "item_refs": [
+          213
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 210,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 215,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 217,
+        "record": {
+          "id": 217,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 216,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 216,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 80,
+        "exclusive_max_element": 80,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/11",
+        "compressed_bytes": 320,
+        "uncompressed_bytes": 320,
+        "compression": 0,
+        "crc32": "703c8d90"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 220,
+      "key": "sincnet.norm1d.1.weight",
+      "reducer_ref": 235,
+      "raw_descriptor": {
+        "node_ref": 235,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 234,
+        "argument_refs": {
+          "storage": 225,
+          "storage_offset": 226,
+          "size": 228,
+          "stride": 230,
+          "requires_grad": 231,
+          "backward_hooks": 233
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 235,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 234,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 225,
+          "kind": "persistent_id",
+          "operand_ref": 224
+        },
+        "operand_record": {
+          "id": 224,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            221,
+            222,
+            223
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 221,
+        "key_literal": "12",
+        "location_ref": 222,
+        "location_literal": "cuda:0",
+        "elements_ref": 223,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 228,
+        "item_refs": [
+          227
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 230,
+        "item_refs": [
+          229
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 226,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 231,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 233,
+        "record": {
+          "id": 233,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 232,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 232,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/12",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "d9c9966e"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 236,
+      "key": "sincnet.norm1d.1.bias",
+      "reducer_ref": 251,
+      "raw_descriptor": {
+        "node_ref": 251,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 250,
+        "argument_refs": {
+          "storage": 241,
+          "storage_offset": 242,
+          "size": 244,
+          "stride": 246,
+          "requires_grad": 247,
+          "backward_hooks": 249
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 251,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 250,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 241,
+          "kind": "persistent_id",
+          "operand_ref": 240
+        },
+        "operand_record": {
+          "id": 240,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            237,
+            238,
+            239
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 237,
+        "key_literal": "13",
+        "location_ref": 238,
+        "location_literal": "cuda:0",
+        "elements_ref": 239,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 244,
+        "item_refs": [
+          243
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 246,
+        "item_refs": [
+          245
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 242,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 247,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 249,
+        "record": {
+          "id": 249,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 248,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 248,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/13",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "5bf44ddb"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 252,
+      "key": "sincnet.norm1d.2.weight",
+      "reducer_ref": 267,
+      "raw_descriptor": {
+        "node_ref": 267,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 266,
+        "argument_refs": {
+          "storage": 257,
+          "storage_offset": 258,
+          "size": 260,
+          "stride": 262,
+          "requires_grad": 263,
+          "backward_hooks": 265
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 267,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 266,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 257,
+          "kind": "persistent_id",
+          "operand_ref": 256
+        },
+        "operand_record": {
+          "id": 256,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            253,
+            254,
+            255
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 253,
+        "key_literal": "14",
+        "location_ref": 254,
+        "location_literal": "cuda:0",
+        "elements_ref": 255,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 260,
+        "item_refs": [
+          259
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 262,
+        "item_refs": [
+          261
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 258,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 263,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 265,
+        "record": {
+          "id": 265,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 264,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 264,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/14",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "c7191dd7"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 268,
+      "key": "sincnet.norm1d.2.bias",
+      "reducer_ref": 283,
+      "raw_descriptor": {
+        "node_ref": 283,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 282,
+        "argument_refs": {
+          "storage": 273,
+          "storage_offset": 274,
+          "size": 276,
+          "stride": 278,
+          "requires_grad": 279,
+          "backward_hooks": 281
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 283,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 282,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 273,
+          "kind": "persistent_id",
+          "operand_ref": 272
+        },
+        "operand_record": {
+          "id": 272,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            269,
+            270,
+            271
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 269,
+        "key_literal": "15",
+        "location_ref": 270,
+        "location_literal": "cuda:0",
+        "elements_ref": 271,
+        "elements_literal": 60
+      },
+      "size": {
+        "ref": 276,
+        "item_refs": [
+          275
+        ],
+        "values": [
+          60
+        ]
+      },
+      "stride": {
+        "ref": 278,
+        "item_refs": [
+          277
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 274,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 279,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 281,
+        "record": {
+          "id": 281,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 280,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 280,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 60,
+        "exclusive_max_element": 60,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/15",
+        "compressed_bytes": 240,
+        "uncompressed_bytes": 240,
+        "compression": 0,
+        "crc32": "4f3d4715"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 284,
+      "key": "lstm.weight_ih_l0",
+      "reducer_ref": 301,
+      "raw_descriptor": {
+        "node_ref": 301,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 300,
+        "argument_refs": {
+          "storage": 289,
+          "storage_offset": 290,
+          "size": 293,
+          "stride": 296,
+          "requires_grad": 297,
+          "backward_hooks": 299
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 301,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 300,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 289,
+          "kind": "persistent_id",
+          "operand_ref": 288
+        },
+        "operand_record": {
+          "id": 288,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            286,
+            287
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 286,
+        "location_literal": "cuda:0",
+        "elements_ref": 287,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 293,
+        "item_refs": [
+          291,
+          292
+        ],
+        "values": [
+          512,
+          60
+        ]
+      },
+      "stride": {
+        "ref": 296,
+        "item_refs": [
+          294,
+          295
+        ],
+        "values": [
+          60,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 290,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 297,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 299,
+        "record": {
+          "id": 299,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 298,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 298,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 30720,
+        "exclusive_max_element": 30720,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 302,
+      "key": "lstm.weight_hh_l0",
+      "reducer_ref": 318,
+      "raw_descriptor": {
+        "node_ref": 318,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 317,
+        "argument_refs": {
+          "storage": 306,
+          "storage_offset": 307,
+          "size": 310,
+          "stride": 313,
+          "requires_grad": 314,
+          "backward_hooks": 316
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 318,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 317,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 306,
+          "kind": "persistent_id",
+          "operand_ref": 305
+        },
+        "operand_record": {
+          "id": 305,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            303,
+            304
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 303,
+        "location_literal": "cuda:0",
+        "elements_ref": 304,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 310,
+        "item_refs": [
+          308,
+          309
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 313,
+        "item_refs": [
+          311,
+          312
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 307,
+        "value": 30720
+      },
+      "requires_grad": {
+        "ref": 314,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 316,
+        "record": {
+          "id": 316,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 315,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 315,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 96256,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 319,
+      "key": "lstm.bias_ih_l0",
+      "reducer_ref": 333,
+      "raw_descriptor": {
+        "node_ref": 333,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 332,
+        "argument_refs": {
+          "storage": 323,
+          "storage_offset": 324,
+          "size": 326,
+          "stride": 328,
+          "requires_grad": 329,
+          "backward_hooks": 331
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 333,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 332,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 323,
+          "kind": "persistent_id",
+          "operand_ref": 322
+        },
+        "operand_record": {
+          "id": 322,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            320,
+            321
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 320,
+        "location_literal": "cuda:0",
+        "elements_ref": 321,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 326,
+        "item_refs": [
+          325
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 328,
+        "item_refs": [
+          327
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 324,
+        "value": 1372160
+      },
+      "requires_grad": {
+        "ref": 329,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 331,
+        "record": {
+          "id": 331,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 330,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 330,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1372672,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 334,
+      "key": "lstm.bias_hh_l0",
+      "reducer_ref": 348,
+      "raw_descriptor": {
+        "node_ref": 348,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 347,
+        "argument_refs": {
+          "storage": 338,
+          "storage_offset": 339,
+          "size": 341,
+          "stride": 343,
+          "requires_grad": 344,
+          "backward_hooks": 346
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 348,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 347,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 338,
+          "kind": "persistent_id",
+          "operand_ref": 337
+        },
+        "operand_record": {
+          "id": 337,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            335,
+            336
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 335,
+        "location_literal": "cuda:0",
+        "elements_ref": 336,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 341,
+        "item_refs": [
+          340
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 343,
+        "item_refs": [
+          342
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 339,
+        "value": 1372672
+      },
+      "requires_grad": {
+        "ref": 344,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 346,
+        "record": {
+          "id": 346,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 345,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 345,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1373184,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 349,
+      "key": "lstm.weight_ih_l0_reverse",
+      "reducer_ref": 365,
+      "raw_descriptor": {
+        "node_ref": 365,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 364,
+        "argument_refs": {
+          "storage": 353,
+          "storage_offset": 354,
+          "size": 357,
+          "stride": 360,
+          "requires_grad": 361,
+          "backward_hooks": 363
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 365,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 364,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 353,
+          "kind": "persistent_id",
+          "operand_ref": 352
+        },
+        "operand_record": {
+          "id": 352,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            350,
+            351
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 350,
+        "location_literal": "cuda:0",
+        "elements_ref": 351,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 357,
+        "item_refs": [
+          355,
+          356
+        ],
+        "values": [
+          512,
+          60
+        ]
+      },
+      "stride": {
+        "ref": 360,
+        "item_refs": [
+          358,
+          359
+        ],
+        "values": [
+          60,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 354,
+        "value": 96256
+      },
+      "requires_grad": {
+        "ref": 361,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 363,
+        "record": {
+          "id": 363,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 362,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 362,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 30720,
+        "exclusive_max_element": 126976,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 366,
+      "key": "lstm.weight_hh_l0_reverse",
+      "reducer_ref": 382,
+      "raw_descriptor": {
+        "node_ref": 382,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 381,
+        "argument_refs": {
+          "storage": 370,
+          "storage_offset": 371,
+          "size": 374,
+          "stride": 377,
+          "requires_grad": 378,
+          "backward_hooks": 380
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 382,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 381,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 370,
+          "kind": "persistent_id",
+          "operand_ref": 369
+        },
+        "operand_record": {
+          "id": 369,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            367,
+            368
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 367,
+        "location_literal": "cuda:0",
+        "elements_ref": 368,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 374,
+        "item_refs": [
+          372,
+          373
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 377,
+        "item_refs": [
+          375,
+          376
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 371,
+        "value": 126976
+      },
+      "requires_grad": {
+        "ref": 378,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 380,
+        "record": {
+          "id": 380,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 379,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 379,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 192512,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 383,
+      "key": "lstm.bias_ih_l0_reverse",
+      "reducer_ref": 397,
+      "raw_descriptor": {
+        "node_ref": 397,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 396,
+        "argument_refs": {
+          "storage": 387,
+          "storage_offset": 388,
+          "size": 390,
+          "stride": 392,
+          "requires_grad": 393,
+          "backward_hooks": 395
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 397,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 396,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 387,
+          "kind": "persistent_id",
+          "operand_ref": 386
+        },
+        "operand_record": {
+          "id": 386,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            384,
+            385
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 384,
+        "location_literal": "cuda:0",
+        "elements_ref": 385,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 390,
+        "item_refs": [
+          389
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 392,
+        "item_refs": [
+          391
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 388,
+        "value": 1373184
+      },
+      "requires_grad": {
+        "ref": 393,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 395,
+        "record": {
+          "id": 395,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 394,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 394,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1373696,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 398,
+      "key": "lstm.bias_hh_l0_reverse",
+      "reducer_ref": 412,
+      "raw_descriptor": {
+        "node_ref": 412,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 411,
+        "argument_refs": {
+          "storage": 402,
+          "storage_offset": 403,
+          "size": 405,
+          "stride": 407,
+          "requires_grad": 408,
+          "backward_hooks": 410
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 412,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 411,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 402,
+          "kind": "persistent_id",
+          "operand_ref": 401
+        },
+        "operand_record": {
+          "id": 401,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            399,
+            400
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 399,
+        "location_literal": "cuda:0",
+        "elements_ref": 400,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 405,
+        "item_refs": [
+          404
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 407,
+        "item_refs": [
+          406
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 403,
+        "value": 1373696
+      },
+      "requires_grad": {
+        "ref": 408,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 410,
+        "record": {
+          "id": 410,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 409,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 409,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1374208,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 413,
+      "key": "lstm.weight_ih_l1",
+      "reducer_ref": 429,
+      "raw_descriptor": {
+        "node_ref": 429,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 428,
+        "argument_refs": {
+          "storage": 417,
+          "storage_offset": 418,
+          "size": 421,
+          "stride": 424,
+          "requires_grad": 425,
+          "backward_hooks": 427
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 429,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 428,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 417,
+          "kind": "persistent_id",
+          "operand_ref": 416
+        },
+        "operand_record": {
+          "id": 416,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            414,
+            415
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 414,
+        "location_literal": "cuda:0",
+        "elements_ref": 415,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 421,
+        "item_refs": [
+          419,
+          420
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 424,
+        "item_refs": [
+          422,
+          423
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 418,
+        "value": 192512
+      },
+      "requires_grad": {
+        "ref": 425,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 427,
+        "record": {
+          "id": 427,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 426,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 426,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 323584,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 430,
+      "key": "lstm.weight_hh_l1",
+      "reducer_ref": 446,
+      "raw_descriptor": {
+        "node_ref": 446,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 445,
+        "argument_refs": {
+          "storage": 434,
+          "storage_offset": 435,
+          "size": 438,
+          "stride": 441,
+          "requires_grad": 442,
+          "backward_hooks": 444
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 446,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 445,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 434,
+          "kind": "persistent_id",
+          "operand_ref": 433
+        },
+        "operand_record": {
+          "id": 433,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            431,
+            432
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 431,
+        "location_literal": "cuda:0",
+        "elements_ref": 432,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 438,
+        "item_refs": [
+          436,
+          437
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 441,
+        "item_refs": [
+          439,
+          440
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 435,
+        "value": 323584
+      },
+      "requires_grad": {
+        "ref": 442,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 444,
+        "record": {
+          "id": 444,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 443,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 443,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 389120,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 447,
+      "key": "lstm.bias_ih_l1",
+      "reducer_ref": 461,
+      "raw_descriptor": {
+        "node_ref": 461,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 460,
+        "argument_refs": {
+          "storage": 451,
+          "storage_offset": 452,
+          "size": 454,
+          "stride": 456,
+          "requires_grad": 457,
+          "backward_hooks": 459
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 461,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 460,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 451,
+          "kind": "persistent_id",
+          "operand_ref": 450
+        },
+        "operand_record": {
+          "id": 450,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            448,
+            449
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 448,
+        "location_literal": "cuda:0",
+        "elements_ref": 449,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 454,
+        "item_refs": [
+          453
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 456,
+        "item_refs": [
+          455
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 452,
+        "value": 1374208
+      },
+      "requires_grad": {
+        "ref": 457,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 459,
+        "record": {
+          "id": 459,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 458,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 458,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1374720,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 462,
+      "key": "lstm.bias_hh_l1",
+      "reducer_ref": 476,
+      "raw_descriptor": {
+        "node_ref": 476,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 475,
+        "argument_refs": {
+          "storage": 466,
+          "storage_offset": 467,
+          "size": 469,
+          "stride": 471,
+          "requires_grad": 472,
+          "backward_hooks": 474
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 476,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 475,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 466,
+          "kind": "persistent_id",
+          "operand_ref": 465
+        },
+        "operand_record": {
+          "id": 465,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            463,
+            464
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 463,
+        "location_literal": "cuda:0",
+        "elements_ref": 464,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 469,
+        "item_refs": [
+          468
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 471,
+        "item_refs": [
+          470
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 467,
+        "value": 1374720
+      },
+      "requires_grad": {
+        "ref": 472,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 474,
+        "record": {
+          "id": 474,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 473,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 473,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1375232,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 477,
+      "key": "lstm.weight_ih_l1_reverse",
+      "reducer_ref": 493,
+      "raw_descriptor": {
+        "node_ref": 493,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 492,
+        "argument_refs": {
+          "storage": 481,
+          "storage_offset": 482,
+          "size": 485,
+          "stride": 488,
+          "requires_grad": 489,
+          "backward_hooks": 491
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 493,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 492,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 481,
+          "kind": "persistent_id",
+          "operand_ref": 480
+        },
+        "operand_record": {
+          "id": 480,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            478,
+            479
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 478,
+        "location_literal": "cuda:0",
+        "elements_ref": 479,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 485,
+        "item_refs": [
+          483,
+          484
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 488,
+        "item_refs": [
+          486,
+          487
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 482,
+        "value": 389120
+      },
+      "requires_grad": {
+        "ref": 489,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 491,
+        "record": {
+          "id": 491,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 490,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 490,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 520192,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 494,
+      "key": "lstm.weight_hh_l1_reverse",
+      "reducer_ref": 510,
+      "raw_descriptor": {
+        "node_ref": 510,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 509,
+        "argument_refs": {
+          "storage": 498,
+          "storage_offset": 499,
+          "size": 502,
+          "stride": 505,
+          "requires_grad": 506,
+          "backward_hooks": 508
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 510,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 509,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 498,
+          "kind": "persistent_id",
+          "operand_ref": 497
+        },
+        "operand_record": {
+          "id": 497,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            495,
+            496
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 495,
+        "location_literal": "cuda:0",
+        "elements_ref": 496,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 502,
+        "item_refs": [
+          500,
+          501
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 505,
+        "item_refs": [
+          503,
+          504
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 499,
+        "value": 520192
+      },
+      "requires_grad": {
+        "ref": 506,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 508,
+        "record": {
+          "id": 508,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 507,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 507,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 585728,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 511,
+      "key": "lstm.bias_ih_l1_reverse",
+      "reducer_ref": 525,
+      "raw_descriptor": {
+        "node_ref": 525,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 524,
+        "argument_refs": {
+          "storage": 515,
+          "storage_offset": 516,
+          "size": 518,
+          "stride": 520,
+          "requires_grad": 521,
+          "backward_hooks": 523
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 525,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 524,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 515,
+          "kind": "persistent_id",
+          "operand_ref": 514
+        },
+        "operand_record": {
+          "id": 514,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            512,
+            513
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 512,
+        "location_literal": "cuda:0",
+        "elements_ref": 513,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 518,
+        "item_refs": [
+          517
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 520,
+        "item_refs": [
+          519
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 516,
+        "value": 1375232
+      },
+      "requires_grad": {
+        "ref": 521,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 523,
+        "record": {
+          "id": 523,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 522,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 522,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1375744,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 526,
+      "key": "lstm.bias_hh_l1_reverse",
+      "reducer_ref": 540,
+      "raw_descriptor": {
+        "node_ref": 540,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 539,
+        "argument_refs": {
+          "storage": 530,
+          "storage_offset": 531,
+          "size": 533,
+          "stride": 535,
+          "requires_grad": 536,
+          "backward_hooks": 538
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 540,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 539,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 530,
+          "kind": "persistent_id",
+          "operand_ref": 529
+        },
+        "operand_record": {
+          "id": 529,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            527,
+            528
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 527,
+        "location_literal": "cuda:0",
+        "elements_ref": 528,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 533,
+        "item_refs": [
+          532
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 535,
+        "item_refs": [
+          534
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 531,
+        "value": 1375744
+      },
+      "requires_grad": {
+        "ref": 536,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 538,
+        "record": {
+          "id": 538,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 537,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 537,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1376256,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 541,
+      "key": "lstm.weight_ih_l2",
+      "reducer_ref": 557,
+      "raw_descriptor": {
+        "node_ref": 557,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 556,
+        "argument_refs": {
+          "storage": 545,
+          "storage_offset": 546,
+          "size": 549,
+          "stride": 552,
+          "requires_grad": 553,
+          "backward_hooks": 555
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 557,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 556,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 545,
+          "kind": "persistent_id",
+          "operand_ref": 544
+        },
+        "operand_record": {
+          "id": 544,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            542,
+            543
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 542,
+        "location_literal": "cuda:0",
+        "elements_ref": 543,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 549,
+        "item_refs": [
+          547,
+          548
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 552,
+        "item_refs": [
+          550,
+          551
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 546,
+        "value": 585728
+      },
+      "requires_grad": {
+        "ref": 553,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 555,
+        "record": {
+          "id": 555,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 554,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 554,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 716800,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 558,
+      "key": "lstm.weight_hh_l2",
+      "reducer_ref": 574,
+      "raw_descriptor": {
+        "node_ref": 574,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 573,
+        "argument_refs": {
+          "storage": 562,
+          "storage_offset": 563,
+          "size": 566,
+          "stride": 569,
+          "requires_grad": 570,
+          "backward_hooks": 572
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 574,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 573,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 562,
+          "kind": "persistent_id",
+          "operand_ref": 561
+        },
+        "operand_record": {
+          "id": 561,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            559,
+            560
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 559,
+        "location_literal": "cuda:0",
+        "elements_ref": 560,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 566,
+        "item_refs": [
+          564,
+          565
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 569,
+        "item_refs": [
+          567,
+          568
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 563,
+        "value": 716800
+      },
+      "requires_grad": {
+        "ref": 570,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 572,
+        "record": {
+          "id": 572,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 571,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 571,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 782336,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 575,
+      "key": "lstm.bias_ih_l2",
+      "reducer_ref": 589,
+      "raw_descriptor": {
+        "node_ref": 589,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 588,
+        "argument_refs": {
+          "storage": 579,
+          "storage_offset": 580,
+          "size": 582,
+          "stride": 584,
+          "requires_grad": 585,
+          "backward_hooks": 587
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 589,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 588,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 579,
+          "kind": "persistent_id",
+          "operand_ref": 578
+        },
+        "operand_record": {
+          "id": 578,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            576,
+            577
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 576,
+        "location_literal": "cuda:0",
+        "elements_ref": 577,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 582,
+        "item_refs": [
+          581
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 584,
+        "item_refs": [
+          583
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 580,
+        "value": 1376256
+      },
+      "requires_grad": {
+        "ref": 585,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 587,
+        "record": {
+          "id": 587,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 586,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 586,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1376768,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 590,
+      "key": "lstm.bias_hh_l2",
+      "reducer_ref": 604,
+      "raw_descriptor": {
+        "node_ref": 604,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 603,
+        "argument_refs": {
+          "storage": 594,
+          "storage_offset": 595,
+          "size": 597,
+          "stride": 599,
+          "requires_grad": 600,
+          "backward_hooks": 602
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 604,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 603,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 594,
+          "kind": "persistent_id",
+          "operand_ref": 593
+        },
+        "operand_record": {
+          "id": 593,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            591,
+            592
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 591,
+        "location_literal": "cuda:0",
+        "elements_ref": 592,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 597,
+        "item_refs": [
+          596
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 599,
+        "item_refs": [
+          598
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 595,
+        "value": 1376768
+      },
+      "requires_grad": {
+        "ref": 600,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 602,
+        "record": {
+          "id": 602,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 601,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 601,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1377280,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 605,
+      "key": "lstm.weight_ih_l2_reverse",
+      "reducer_ref": 621,
+      "raw_descriptor": {
+        "node_ref": 621,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 620,
+        "argument_refs": {
+          "storage": 609,
+          "storage_offset": 610,
+          "size": 613,
+          "stride": 616,
+          "requires_grad": 617,
+          "backward_hooks": 619
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 621,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 620,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 609,
+          "kind": "persistent_id",
+          "operand_ref": 608
+        },
+        "operand_record": {
+          "id": 608,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            606,
+            607
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 606,
+        "location_literal": "cuda:0",
+        "elements_ref": 607,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 613,
+        "item_refs": [
+          611,
+          612
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 616,
+        "item_refs": [
+          614,
+          615
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 610,
+        "value": 782336
+      },
+      "requires_grad": {
+        "ref": 617,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 619,
+        "record": {
+          "id": 619,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 618,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 618,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 913408,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 622,
+      "key": "lstm.weight_hh_l2_reverse",
+      "reducer_ref": 638,
+      "raw_descriptor": {
+        "node_ref": 638,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 637,
+        "argument_refs": {
+          "storage": 626,
+          "storage_offset": 627,
+          "size": 630,
+          "stride": 633,
+          "requires_grad": 634,
+          "backward_hooks": 636
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 638,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 637,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 626,
+          "kind": "persistent_id",
+          "operand_ref": 625
+        },
+        "operand_record": {
+          "id": 625,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            623,
+            624
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 623,
+        "location_literal": "cuda:0",
+        "elements_ref": 624,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 630,
+        "item_refs": [
+          628,
+          629
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 633,
+        "item_refs": [
+          631,
+          632
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 627,
+        "value": 913408
+      },
+      "requires_grad": {
+        "ref": 634,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 636,
+        "record": {
+          "id": 636,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 635,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 635,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 978944,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 639,
+      "key": "lstm.bias_ih_l2_reverse",
+      "reducer_ref": 653,
+      "raw_descriptor": {
+        "node_ref": 653,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 652,
+        "argument_refs": {
+          "storage": 643,
+          "storage_offset": 644,
+          "size": 646,
+          "stride": 648,
+          "requires_grad": 649,
+          "backward_hooks": 651
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 653,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 652,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 643,
+          "kind": "persistent_id",
+          "operand_ref": 642
+        },
+        "operand_record": {
+          "id": 642,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            640,
+            641
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 640,
+        "location_literal": "cuda:0",
+        "elements_ref": 641,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 646,
+        "item_refs": [
+          645
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 648,
+        "item_refs": [
+          647
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 644,
+        "value": 1377280
+      },
+      "requires_grad": {
+        "ref": 649,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 651,
+        "record": {
+          "id": 651,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 650,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 650,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1377792,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 654,
+      "key": "lstm.bias_hh_l2_reverse",
+      "reducer_ref": 668,
+      "raw_descriptor": {
+        "node_ref": 668,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 667,
+        "argument_refs": {
+          "storage": 658,
+          "storage_offset": 659,
+          "size": 661,
+          "stride": 663,
+          "requires_grad": 664,
+          "backward_hooks": 666
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 668,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 667,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 658,
+          "kind": "persistent_id",
+          "operand_ref": 657
+        },
+        "operand_record": {
+          "id": 657,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            655,
+            656
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 655,
+        "location_literal": "cuda:0",
+        "elements_ref": 656,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 661,
+        "item_refs": [
+          660
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 663,
+        "item_refs": [
+          662
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 659,
+        "value": 1377792
+      },
+      "requires_grad": {
+        "ref": 664,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 666,
+        "record": {
+          "id": 666,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 665,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 665,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1378304,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 669,
+      "key": "lstm.weight_ih_l3",
+      "reducer_ref": 685,
+      "raw_descriptor": {
+        "node_ref": 685,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 684,
+        "argument_refs": {
+          "storage": 673,
+          "storage_offset": 674,
+          "size": 677,
+          "stride": 680,
+          "requires_grad": 681,
+          "backward_hooks": 683
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 685,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 684,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 673,
+          "kind": "persistent_id",
+          "operand_ref": 672
+        },
+        "operand_record": {
+          "id": 672,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            670,
+            671
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 670,
+        "location_literal": "cuda:0",
+        "elements_ref": 671,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 677,
+        "item_refs": [
+          675,
+          676
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 680,
+        "item_refs": [
+          678,
+          679
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 674,
+        "value": 978944
+      },
+      "requires_grad": {
+        "ref": 681,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 683,
+        "record": {
+          "id": 683,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 682,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 682,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 1110016,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 686,
+      "key": "lstm.weight_hh_l3",
+      "reducer_ref": 702,
+      "raw_descriptor": {
+        "node_ref": 702,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 701,
+        "argument_refs": {
+          "storage": 690,
+          "storage_offset": 691,
+          "size": 694,
+          "stride": 697,
+          "requires_grad": 698,
+          "backward_hooks": 700
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 702,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 701,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 690,
+          "kind": "persistent_id",
+          "operand_ref": 689
+        },
+        "operand_record": {
+          "id": 689,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            687,
+            688
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 687,
+        "location_literal": "cuda:0",
+        "elements_ref": 688,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 694,
+        "item_refs": [
+          692,
+          693
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 697,
+        "item_refs": [
+          695,
+          696
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 691,
+        "value": 1110016
+      },
+      "requires_grad": {
+        "ref": 698,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 700,
+        "record": {
+          "id": 700,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 699,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 699,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 1175552,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 703,
+      "key": "lstm.bias_ih_l3",
+      "reducer_ref": 717,
+      "raw_descriptor": {
+        "node_ref": 717,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 716,
+        "argument_refs": {
+          "storage": 707,
+          "storage_offset": 708,
+          "size": 710,
+          "stride": 712,
+          "requires_grad": 713,
+          "backward_hooks": 715
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 717,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 716,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 707,
+          "kind": "persistent_id",
+          "operand_ref": 706
+        },
+        "operand_record": {
+          "id": 706,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            704,
+            705
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 704,
+        "location_literal": "cuda:0",
+        "elements_ref": 705,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 710,
+        "item_refs": [
+          709
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 712,
+        "item_refs": [
+          711
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 708,
+        "value": 1378304
+      },
+      "requires_grad": {
+        "ref": 713,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 715,
+        "record": {
+          "id": 715,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 714,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 714,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1378816,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 718,
+      "key": "lstm.bias_hh_l3",
+      "reducer_ref": 732,
+      "raw_descriptor": {
+        "node_ref": 732,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 731,
+        "argument_refs": {
+          "storage": 722,
+          "storage_offset": 723,
+          "size": 725,
+          "stride": 727,
+          "requires_grad": 728,
+          "backward_hooks": 730
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 732,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 731,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 722,
+          "kind": "persistent_id",
+          "operand_ref": 721
+        },
+        "operand_record": {
+          "id": 721,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            719,
+            720
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 719,
+        "location_literal": "cuda:0",
+        "elements_ref": 720,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 725,
+        "item_refs": [
+          724
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 727,
+        "item_refs": [
+          726
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 723,
+        "value": 1378816
+      },
+      "requires_grad": {
+        "ref": 728,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 730,
+        "record": {
+          "id": 730,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 729,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 729,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1379328,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 733,
+      "key": "lstm.weight_ih_l3_reverse",
+      "reducer_ref": 749,
+      "raw_descriptor": {
+        "node_ref": 749,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 748,
+        "argument_refs": {
+          "storage": 737,
+          "storage_offset": 738,
+          "size": 741,
+          "stride": 744,
+          "requires_grad": 745,
+          "backward_hooks": 747
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 749,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 748,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 737,
+          "kind": "persistent_id",
+          "operand_ref": 736
+        },
+        "operand_record": {
+          "id": 736,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            734,
+            735
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 734,
+        "location_literal": "cuda:0",
+        "elements_ref": 735,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 741,
+        "item_refs": [
+          739,
+          740
+        ],
+        "values": [
+          512,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 744,
+        "item_refs": [
+          742,
+          743
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 738,
+        "value": 1175552
+      },
+      "requires_grad": {
+        "ref": 745,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 747,
+        "record": {
+          "id": 747,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 746,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 746,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 131072,
+        "exclusive_max_element": 1306624,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 750,
+      "key": "lstm.weight_hh_l3_reverse",
+      "reducer_ref": 766,
+      "raw_descriptor": {
+        "node_ref": 766,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 765,
+        "argument_refs": {
+          "storage": 754,
+          "storage_offset": 755,
+          "size": 758,
+          "stride": 761,
+          "requires_grad": 762,
+          "backward_hooks": 764
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 766,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 765,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 754,
+          "kind": "persistent_id",
+          "operand_ref": 753
+        },
+        "operand_record": {
+          "id": 753,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            751,
+            752
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 751,
+        "location_literal": "cuda:0",
+        "elements_ref": 752,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 758,
+        "item_refs": [
+          756,
+          757
+        ],
+        "values": [
+          512,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 761,
+        "item_refs": [
+          759,
+          760
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 755,
+        "value": 1306624
+      },
+      "requires_grad": {
+        "ref": 762,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 764,
+        "record": {
+          "id": 764,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 763,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 763,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 65536,
+        "exclusive_max_element": 1372160,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 767,
+      "key": "lstm.bias_ih_l3_reverse",
+      "reducer_ref": 781,
+      "raw_descriptor": {
+        "node_ref": 781,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 780,
+        "argument_refs": {
+          "storage": 771,
+          "storage_offset": 772,
+          "size": 774,
+          "stride": 776,
+          "requires_grad": 777,
+          "backward_hooks": 779
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 781,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 780,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 771,
+          "kind": "persistent_id",
+          "operand_ref": 770
+        },
+        "operand_record": {
+          "id": 770,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            768,
+            769
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 768,
+        "location_literal": "cuda:0",
+        "elements_ref": 769,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 774,
+        "item_refs": [
+          773
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 776,
+        "item_refs": [
+          775
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 772,
+        "value": 1379328
+      },
+      "requires_grad": {
+        "ref": 777,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 779,
+        "record": {
+          "id": 779,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 778,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 778,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1379840,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 782,
+      "key": "lstm.bias_hh_l3_reverse",
+      "reducer_ref": 796,
+      "raw_descriptor": {
+        "node_ref": 796,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 795,
+        "argument_refs": {
+          "storage": 786,
+          "storage_offset": 787,
+          "size": 789,
+          "stride": 791,
+          "requires_grad": 792,
+          "backward_hooks": 794
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 796,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 795,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 786,
+          "kind": "persistent_id",
+          "operand_ref": 785
+        },
+        "operand_record": {
+          "id": 785,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            285,
+            783,
+            784
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 285,
+        "key_literal": "16",
+        "location_ref": 783,
+        "location_literal": "cuda:0",
+        "elements_ref": 784,
+        "elements_literal": 1380352
+      },
+      "size": {
+        "ref": 789,
+        "item_refs": [
+          788
+        ],
+        "values": [
+          512
+        ]
+      },
+      "stride": {
+        "ref": 791,
+        "item_refs": [
+          790
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 787,
+        "value": 1379840
+      },
+      "requires_grad": {
+        "ref": 792,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 794,
+        "record": {
+          "id": 794,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 793,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 793,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 512,
+        "exclusive_max_element": 1380352,
+        "shape_product_equals_declared_storage_elements": false,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/16",
+        "compressed_bytes": 5521408,
+        "uncompressed_bytes": 5521408,
+        "compression": 0,
+        "crc32": "d798f46c"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 797,
+      "key": "linear.0.weight",
+      "reducer_ref": 814,
+      "raw_descriptor": {
+        "node_ref": 814,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 813,
+        "argument_refs": {
+          "storage": 802,
+          "storage_offset": 803,
+          "size": 806,
+          "stride": 809,
+          "requires_grad": 810,
+          "backward_hooks": 812
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 814,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 813,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 802,
+          "kind": "persistent_id",
+          "operand_ref": 801
+        },
+        "operand_record": {
+          "id": 801,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            798,
+            799,
+            800
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 798,
+        "key_literal": "17",
+        "location_ref": 799,
+        "location_literal": "cuda:0",
+        "elements_ref": 800,
+        "elements_literal": 32768
+      },
+      "size": {
+        "ref": 806,
+        "item_refs": [
+          804,
+          805
+        ],
+        "values": [
+          128,
+          256
+        ]
+      },
+      "stride": {
+        "ref": 809,
+        "item_refs": [
+          807,
+          808
+        ],
+        "values": [
+          256,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 803,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 810,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 812,
+        "record": {
+          "id": 812,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 811,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 811,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 32768,
+        "exclusive_max_element": 32768,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/17",
+        "compressed_bytes": 131072,
+        "uncompressed_bytes": 131072,
+        "compression": 0,
+        "crc32": "88d55e57"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 815,
+      "key": "linear.0.bias",
+      "reducer_ref": 830,
+      "raw_descriptor": {
+        "node_ref": 830,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 829,
+        "argument_refs": {
+          "storage": 820,
+          "storage_offset": 821,
+          "size": 823,
+          "stride": 825,
+          "requires_grad": 826,
+          "backward_hooks": 828
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 830,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 829,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 820,
+          "kind": "persistent_id",
+          "operand_ref": 819
+        },
+        "operand_record": {
+          "id": 819,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            816,
+            817,
+            818
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 816,
+        "key_literal": "18",
+        "location_ref": 817,
+        "location_literal": "cuda:0",
+        "elements_ref": 818,
+        "elements_literal": 128
+      },
+      "size": {
+        "ref": 823,
+        "item_refs": [
+          822
+        ],
+        "values": [
+          128
+        ]
+      },
+      "stride": {
+        "ref": 825,
+        "item_refs": [
+          824
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 821,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 826,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 828,
+        "record": {
+          "id": 828,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 827,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 827,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 128,
+        "exclusive_max_element": 128,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/18",
+        "compressed_bytes": 512,
+        "uncompressed_bytes": 512,
+        "compression": 0,
+        "crc32": "c23a8238"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 831,
+      "key": "linear.1.weight",
+      "reducer_ref": 848,
+      "raw_descriptor": {
+        "node_ref": 848,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 847,
+        "argument_refs": {
+          "storage": 836,
+          "storage_offset": 837,
+          "size": 840,
+          "stride": 843,
+          "requires_grad": 844,
+          "backward_hooks": 846
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 848,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 847,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 836,
+          "kind": "persistent_id",
+          "operand_ref": 835
+        },
+        "operand_record": {
+          "id": 835,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            832,
+            833,
+            834
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 832,
+        "key_literal": "19",
+        "location_ref": 833,
+        "location_literal": "cuda:0",
+        "elements_ref": 834,
+        "elements_literal": 16384
+      },
+      "size": {
+        "ref": 840,
+        "item_refs": [
+          838,
+          839
+        ],
+        "values": [
+          128,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 843,
+        "item_refs": [
+          841,
+          842
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 837,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 844,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 846,
+        "record": {
+          "id": 846,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 845,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 845,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 16384,
+        "exclusive_max_element": 16384,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/19",
+        "compressed_bytes": 65536,
+        "uncompressed_bytes": 65536,
+        "compression": 0,
+        "crc32": "504e3a3b"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 849,
+      "key": "linear.1.bias",
+      "reducer_ref": 864,
+      "raw_descriptor": {
+        "node_ref": 864,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 863,
+        "argument_refs": {
+          "storage": 854,
+          "storage_offset": 855,
+          "size": 857,
+          "stride": 859,
+          "requires_grad": 860,
+          "backward_hooks": 862
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 864,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 863,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 854,
+          "kind": "persistent_id",
+          "operand_ref": 853
+        },
+        "operand_record": {
+          "id": 853,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            850,
+            851,
+            852
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 850,
+        "key_literal": "20",
+        "location_ref": 851,
+        "location_literal": "cuda:0",
+        "elements_ref": 852,
+        "elements_literal": 128
+      },
+      "size": {
+        "ref": 857,
+        "item_refs": [
+          856
+        ],
+        "values": [
+          128
+        ]
+      },
+      "stride": {
+        "ref": 859,
+        "item_refs": [
+          858
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 855,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 860,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 862,
+        "record": {
+          "id": 862,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 861,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 861,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 128,
+        "exclusive_max_element": 128,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/20",
+        "compressed_bytes": 512,
+        "uncompressed_bytes": 512,
+        "compression": 0,
+        "crc32": "0902aa73"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 865,
+      "key": "classifier.weight",
+      "reducer_ref": 882,
+      "raw_descriptor": {
+        "node_ref": 882,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 881,
+        "argument_refs": {
+          "storage": 870,
+          "storage_offset": 871,
+          "size": 874,
+          "stride": 877,
+          "requires_grad": 878,
+          "backward_hooks": 880
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 882,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 881,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 870,
+          "kind": "persistent_id",
+          "operand_ref": 869
+        },
+        "operand_record": {
+          "id": 869,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            866,
+            867,
+            868
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 866,
+        "key_literal": "21",
+        "location_ref": 867,
+        "location_literal": "cuda:0",
+        "elements_ref": 868,
+        "elements_literal": 384
+      },
+      "size": {
+        "ref": 874,
+        "item_refs": [
+          872,
+          873
+        ],
+        "values": [
+          3,
+          128
+        ]
+      },
+      "stride": {
+        "ref": 877,
+        "item_refs": [
+          875,
+          876
+        ],
+        "values": [
+          128,
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 871,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 878,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 880,
+        "record": {
+          "id": 880,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 879,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 879,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 384,
+        "exclusive_max_element": 384,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/21",
+        "compressed_bytes": 1536,
+        "uncompressed_bytes": 1536,
+        "compression": 0,
+        "crc32": "ccc1f781"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    },
+    {
+      "key_ref": 883,
+      "key": "classifier.bias",
+      "reducer_ref": 898,
+      "raw_descriptor": {
+        "node_ref": 898,
+        "kind": "symbolic_tensor_reducer_arguments",
+        "target_literal": "torch._utils _rebuild_tensor_v2",
+        "arguments_ref": 897,
+        "argument_refs": {
+          "storage": 888,
+          "storage_offset": 889,
+          "size": 891,
+          "stride": 893,
+          "requires_grad": 894,
+          "backward_hooks": 896
+        },
+        "metadata_argument_present": false,
+        "tensor_constructed": false,
+        "shape_or_storage_validated": false
+      },
+      "reducer_record": {
+        "id": 898,
+        "kind": "reduce",
+        "target_ref": 12,
+        "arguments_ref": 897,
+        "operations": []
+      },
+      "storage": {
+        "persistent_record": {
+          "id": 888,
+          "kind": "persistent_id",
+          "operand_ref": 887
+        },
+        "operand_record": {
+          "id": 887,
+          "kind": "tuple",
+          "items": [
+            13,
+            14,
+            884,
+            885,
+            886
+          ]
+        },
+        "tag_ref": 13,
+        "tag_literal": "storage",
+        "type_ref": 14,
+        "type_global_literal": "torch FloatStorage",
+        "key_ref": 884,
+        "key_literal": "22",
+        "location_ref": 885,
+        "location_literal": "cuda:0",
+        "elements_ref": 886,
+        "elements_literal": 3
+      },
+      "size": {
+        "ref": 891,
+        "item_refs": [
+          890
+        ],
+        "values": [
+          3
+        ]
+      },
+      "stride": {
+        "ref": 893,
+        "item_refs": [
+          892
+        ],
+        "values": [
+          1
+        ]
+      },
+      "storage_offset": {
+        "ref": 889,
+        "value": 0
+      },
+      "requires_grad": {
+        "ref": 894,
+        "value": false
+      },
+      "backward_hooks": {
+        "ref": 896,
+        "record": {
+          "id": 896,
+          "kind": "reduce",
+          "target_ref": 8,
+          "arguments_ref": 895,
+          "operations": []
+        },
+        "arguments_record": {
+          "id": 895,
+          "kind": "tuple",
+          "items": []
+        }
+      },
+      "metadata_argument_present": false,
+      "declaration_arithmetic_only": {
+        "shape_product": 3,
+        "exclusive_max_element": 3,
+        "shape_product_equals_declared_storage_elements": true,
+        "extent_within_declared_storage": true,
+        "stride_equals_row_major_product": true
+      },
+      "candidate_member_name_association_not_storage_resolution": {
+        "name": "archive/data/22",
+        "compressed_bytes": 12,
+        "uncompressed_bytes": 12,
+        "compression": 0,
+        "crc32": "29f38da5"
+      },
+      "candidate_member_bytes_equal_declared_elements_times_four": true,
+      "storage_bytes_read_or_validated": false
+    }
+  ],
+  "tensor_row_count": 54,
+  "summary_of_declarations_only": {
+    "storage_type_literals": [
+      "torch FloatStorage"
+    ],
+    "location_literals": [
+      "cuda:0"
+    ],
+    "distinct_storage_key_literals": 23,
+    "sum_shape_products": 1472999,
+    "sum_candidate_member_advertised_bytes": 177055644,
+    "all_offsets_zero": false,
+    "all_requires_grad_false": true,
+    "all_declaration_arithmetic_checks_true": false,
+    "all_candidate_bytes_equal_elements_times_four": true,
+    "alias_semantics_resolved": false,
+    "dtype_or_byte_order_validated": false
+  },
+  "retained_source_bindings_sha256": "8dbd83213bceac5012bc342e001826902ce3a88fd420fa64f8f8d9a65366fa9c",
+  "retained_source_hashes_rechecked": [
+    {
+      "key": "LOCK",
+      "saved_file": "source/requirements-installer-lock.txt",
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+    },
+    {
+      "key": "WXASR",
+      "saved_file": "source/whisperx/asr.py",
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    {
+      "key": "WXVAD",
+      "saved_file": "source/whisperx/vads/pyannote.py",
+      "bytes": 9880,
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003"
+    },
+    {
+      "key": "MODEL",
+      "saved_file": "source/pyannote/audio/core/model.py",
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3"
+    },
+    {
+      "key": "TASK",
+      "saved_file": "source/pyannote/audio/core/task.py",
+      "bytes": 32399,
+      "sha256": "e2b0cc845a1234fe2f211ba2a0084c3e9be43fbdb82e41e6ca775f4746bbe444"
+    },
+    {
+      "key": "PYANNET",
+      "saved_file": "source/pyannote/audio/models/segmentation/PyanNet.py",
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af"
+    },
+    {
+      "key": "SINCNET",
+      "saved_file": "source/pyannote/audio/models/blocks/sincnet.py",
+      "bytes": 5702,
+      "sha256": "3f151a2482c3f8c266b1efd9bdcab297238c52b4792a7265261f2da063e5dade"
+    },
+    {
+      "key": "GETTER",
+      "saved_file": "source/pyannote/audio/pipelines/utils/getter.py",
+      "bytes": 9339,
+      "sha256": "42bc13a1ba61a7a297e311c0f881f2e5abb8cff6dad219ed7ea654752480eab5"
+    },
+    {
+      "key": "INFERENCE",
+      "saved_file": "source/pyannote/audio/core/inference.py",
+      "bytes": 25120,
+      "sha256": "c29f525c93a1a5c6bd0a9475ae4fb8c73ce9b48cf9735301302eb99886ad7d41"
+    },
+    {
+      "key": "SINC_FB",
+      "saved_file": "source/asteroid_filterbanks/param_sinc_fb.py",
+      "bytes": 5191,
+      "sha256": "2df0d1e6f109985c00efcc60970ebceff6a9665c3e65ebae73ea4848e48d8eae"
+    }
+  ],
+  "models_or_tensors_constructed": false,
+  "checkpoint_opened": false,
+  "note": "Final reference graph and tagged operations only. No historical argument snapshots, evaluated BUILD state, inferred defaults, artifact provenance or numerical qualification."
+}

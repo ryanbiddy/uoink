@@ -1,0 +1,9 @@
+{
+  "payload_count": 75,
+  "manifest_sha256": "f2993a14b2fb47737b77e1d5444a664cdd52b15631a20400a5c21e06d70b3b30",
+  "verified_payloads": 75,
+  "author_passed": 82,
+  "root_passed": 82,
+  "failed": 0,
+  "real_profile_accepted": false
+}

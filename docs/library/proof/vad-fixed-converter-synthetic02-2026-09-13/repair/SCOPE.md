@@ -1,0 +1,3 @@
+The enclosed original proof01 was rejected for incomplete manifest coverage: its trailing VERIFICATION.json was absent from 75 manifest records. Both that file and the original manifest are now ordinary payloads in this outer proof. Their original bytes and the original 82/0 author and 82/0 root receipts remain unchanged.
+
+The outer SHA256.json is the only self-excluded file. Its records cover all other files, with exact set, byte-count and SHA-256 verification. No additional receipt is written inside this directory after that manifest. This is a documentary packaging repair, not a rerun or a change in product acceptance, converter source, real profile or runtime status.
