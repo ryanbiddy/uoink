@@ -1,0 +1,46 @@
+{
+  "started_utc": "2026-09-13T12:03:19.556677+00:00",
+  "command": [
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\integrator_verify.py",
+    "--root",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a",
+    "--label",
+    "agw02",
+    "tests/test_whisper_cache_consent.py",
+    "tests/test_phase6_evaluation.py",
+    "tests/test_podcast_background_jobs.py",
+    "tests/test_podcast_watch.py",
+    "tests/test_podcast_workflow_truth.py",
+    "tests/test_library_adapters.py",
+    "tests/test_packaged_decoder_loader.py",
+    "tests/test_installer_dependency_lock.py",
+    "-p",
+    "_scratch.agw_heavy_import_guard"
+  ],
+  "command_sha256": "ee87b279fd1e9f07d1d6f869e6046c507709aa3ca13f98e48d194ac33c995c9f",
+  "cwd": "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a",
+  "input_hashes": {
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\_scratch\\run_agw_guarded.py": "693b9bfe898270432b042eb7f497ce995f9037ed81e8dc0e8f4ed45c91a61376",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\integrator_verify.py": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\_scratch\\agw_heavy_import_guard.py": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\whisper_runner.py": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_whisper_cache_consent.py": "5a8f90dae1f4d711b8f3beab888afb15f8cbfd8611c632fae897288b5455c448",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_phase6_evaluation.py": "89866a8eca73853b6211e8174a7a490ca4535bea5344122ea023701df205ff0a",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_podcast_background_jobs.py": "c9915bdb8e5523f7867e49e7cfd02db2bc5d72c10617dc5624bff7b2545b2c2d",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_podcast_watch.py": "674b8eafb100746b6ca0ef7771aa38593894684c1e8452ef7b19786cb2fb4b02",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_podcast_workflow_truth.py": "e71472253f30a23ce405296deba28ed4a415c87b79530363cfe5ad8a336dcd6d",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_library_adapters.py": "1500612bab64a4611060e4ad6f604c3b05897efdbb66164101e39dfc0f9ab4be",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_packaged_decoder_loader.py": "5c0f3e5c6906c1b1b286f016272c3acfcf95cfaa961dbf8d757355ca4f102a2e",
+    "E:\\AI\\projects\\uoink\\worktrees\\asset-guard-a\\tests\\test_installer_dependency_lock.py": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+  },
+  "scrubbed_variable_names": [],
+  "forbidden_live_string": "C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db",
+  "offline_flags": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1"
+  },
+  "profile": "Real existing suites; explicit heavy-import blocker; no native/model credit."
+}

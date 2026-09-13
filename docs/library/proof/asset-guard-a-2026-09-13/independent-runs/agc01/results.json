@@ -1,0 +1,33 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/test_whisper_cache_consent.py",
+      "tests/test_phase6_evaluation.py",
+      "tests/test_podcast_background_jobs.py",
+      "tests/test_podcast_watch.py",
+      "tests/test_podcast_workflow_truth.py",
+      "tests/test_library_adapters.py",
+      "tests/test_packaged_decoder_loader.py",
+      "tests/test_installer_dependency_lock.py",
+      "--runxfail",
+      "-p",
+      "_scratch.agw_heavy_import_guard",
+      "--basetemp=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agc01-0",
+      "--junitxml=E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agc01\\tests.xml"
+    ],
+    "exit": 0,
+    "log": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agc01\\tests.log"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "base": "4067de31e0ab3f0d1c1377b60c8a3db1fa6c76ed",
+  "runs": [
+    {
+      "label": "agw01",
+      "passed": 11,
+      "subtests_passed": 13,
+      "junit_entries": 24,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "blocked_import_attempts": [],
+      "exit": 0
+    },
+    {
+      "label": "agw02",
+      "passed": 144,
+      "subtests_passed": 13,
+      "junit_entries": 157,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "blocked_import_attempts": [
+        "whisperx",
+        "whisperx"
+      ],
+      "exit": 0
+    }
+  ],
+  "original_proposal_payloads_unchanged": 24,
+  "existing_tests_changed": false,
+  "native_model_credit": false,
+  "frozen_utc": "2026-09-13T12:06:07.334357+00:00"
+}

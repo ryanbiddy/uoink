@@ -1,0 +1,32 @@
+{
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-asset-guard-proposal01\\tests-proposed.py.txt",
+  "source_sha256": "7f56696c56b71d6a44bbf542f1e7857655e53492c5779fc3b4db17e2992c2061",
+  "target": "tests/test_whisper_cache_consent.py",
+  "target_sha256": "5a8f90dae1f4d711b8f3beab888afb15f8cbfd8611c632fae897288b5455c448",
+  "unchanged_ast_test_methods": [
+    "test_readiness_does_not_create_a_cache",
+    "test_arbitrary_file_does_not_authorize_download",
+    "test_each_missing_required_file_refuses_before_factory",
+    "test_empty_tokenizer_is_not_ready",
+    "test_all_six_current_model_options_reuse_cache_without_download",
+    "test_consent_resolves_then_passes_local_snapshot_to_factory",
+    "test_bad_download_result_refuses_before_factory",
+    "test_unknown_or_path_shaped_reference_is_not_ready",
+    "test_snapshot_change_during_device_selection_refuses_before_factory",
+    "test_resolved_blob_inside_repo_is_allowed_but_outside_file_is_not",
+    "test_damaged_runtime_does_not_start_a_consented_download"
+  ],
+  "entire_product_class_ast_unchanged": true,
+  "helper_asts_unchanged": [
+    "blocked",
+    "runner_functions"
+  ],
+  "setup_changes": [
+    "RUNNER_SOURCE is the worktree file derived from the new test path; no CLI selection.",
+    "Removed FW_SOURCE, companion constructor helper/class and CLI execution block.",
+    "Kept only imports used by ProductGuardContracts and its two helpers.",
+    "Added a synthetic-scope module docstring; no assertion body changed."
+  ],
+  "sealed_proposal_payloads_verified": 24,
+  "source_executed_during_extraction": false
+}

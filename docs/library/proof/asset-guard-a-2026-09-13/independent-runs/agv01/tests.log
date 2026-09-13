@@ -1,0 +1,19 @@
+........................................................... [ 40%]
+........................................................................ [ 90%]
+.............                                                            [100%]
+============================== warnings summary ===============================
+tests/test_podcast_background_jobs.py: 16 warnings
+tests/test_podcast_watch.py: 9 warnings
+  E:\AI\projects\uoink\worktrees\asset-guard-a\podcasts.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_transcription_queue_is_single_worker_and_progress_is_durable
+tests/test_podcast_background_jobs.py::test_restarted_job_reuses_a_completed_transcript
+tests/test_podcast_background_jobs.py::test_auto_transcription_publishes_and_toasts_after_corpus_commit
+tests/test_podcast_background_jobs.py::test_auto_publish_failure_preserves_completed_transcript_for_retry
+  E:\AI\projects\uoink\worktrees\asset-guard-a\whisper_runner.py:109: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+144 passed, 30 warnings, 13 subtests passed in 9.97s
